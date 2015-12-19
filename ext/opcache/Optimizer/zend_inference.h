@@ -67,7 +67,7 @@
 
 
 #define DEFINE_SSA_OP_HAS_RANGE(opN) \
-	static zend_always_inline long _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline->opN, ssa->rt_constants); \
@@ -83,7 +83,7 @@
 	}
 
 #define DEFINE_SSA_OP_MIN_RANGE(opN) \
-	static zend_always_inline long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline->opN, ssa->rt_constants); \
@@ -103,11 +103,11 @@
 		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
 			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.min; \
 		} \
-		return LONG_MIN; \
+		return ZEND_LONG_MIN; \
 	}
 
 #define DEFINE_SSA_OP_MAX_RANGE(opN) \
-	static zend_always_inline long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline->opN, ssa->rt_constants); \
@@ -127,7 +127,7 @@
 		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
 			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.max; \
 		} \
-		return LONG_MAX; \
+		return ZEND_LONG_MAX; \
 	}
 
 #define DEFINE_SSA_OP_RANGE_UNDERFLOW(opN) \
@@ -267,7 +267,7 @@ int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const 
 uint32_t zend_array_element_type(uint32_t t1, int write, int insert);
 
 int  zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp);
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, long min, long max, zend_bool overflow);
+void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow);
 int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 void zend_inference_check_recursive_dependencies(zend_op_array *op_array);

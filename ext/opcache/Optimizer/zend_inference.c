@@ -259,11 +259,11 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 /* }}} */
 
 /* From "Hacker's Delight" */
-unsigned long minOR(unsigned long a, unsigned long b, unsigned long c, unsigned long d)
+zend_ulong minOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
-	unsigned long m, temp;
+	zend_ulong m, temp;
 
-	m = 1L << (sizeof(unsigned long) * 8 - 1);
+	m = 1L << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (~a & c & m) {
 			temp = (a | m) & -m;
@@ -283,11 +283,11 @@ unsigned long minOR(unsigned long a, unsigned long b, unsigned long c, unsigned 
 	return a | c;
 }
 
-unsigned long maxOR(unsigned long a, unsigned long b, unsigned long c, unsigned long d)
+zend_ulong maxOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
-	unsigned long m, temp;
+	zend_ulong m, temp;
 
-	m = 1L << (sizeof(unsigned long) * 8 - 1);
+	m = 1L << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (b & d & m) {
 			temp = (b - m) | (m - 1);
@@ -306,11 +306,11 @@ unsigned long maxOR(unsigned long a, unsigned long b, unsigned long c, unsigned 
 	return b | d;
 }
 
-unsigned long minAND(unsigned long a, unsigned long b, unsigned long c, unsigned long d)
+zend_ulong minAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
-	unsigned long m, temp;
+	zend_ulong m, temp;
 
-	m = 1L << (sizeof(unsigned long) * 8 - 1);
+	m = 1L << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (~a & ~c & m) {
 			temp = (a | m) & -m;
@@ -329,11 +329,11 @@ unsigned long minAND(unsigned long a, unsigned long b, unsigned long c, unsigned
 	return a & c;
 }
 
-unsigned long maxAND(unsigned long a, unsigned long b, unsigned long c, unsigned long d)
+zend_ulong maxAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
-	unsigned long m, temp;
+	zend_ulong m, temp;
 
-	m = 1L << (sizeof(unsigned long) * 8 - 1);
+	m = 1L << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (b & ~d & m) {
 			temp = (b | ~m) | (m - 1);
@@ -353,12 +353,12 @@ unsigned long maxAND(unsigned long a, unsigned long b, unsigned long c, unsigned
 	return b & d;
 }
 
-unsigned long minXOR(unsigned long a, unsigned long b, unsigned long c, unsigned long d)
+zend_ulong minXOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	return minAND(a, b, ~d, ~c) | minAND(~b, ~a, c, d);
 }
 
-unsigned long maxXOR(unsigned long a, unsigned long b, unsigned long c, unsigned long d)
+zend_ulong maxXOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	return maxOR(0, maxAND(a, b, ~d, ~c), 0, maxAND(~b, ~a, c, d));
 }
@@ -376,7 +376,7 @@ c: - - + + 1 1 0 0 => 1 1 - min/max
 e: - - - + 1 1 1 0 => 1 1 - a/-1
 f  - - - - 1 1 1 1 => 1 1 - min/max
 */
-static void zend_ssa_range_or(long a, long b, long c, long d, zend_ssa_range *tmp)
+static void zend_ssa_range_or(zend_long a, zend_long b, zend_long c, zend_long d, zend_ssa_range *tmp)
 {
 	int x = ((a < 0) ? 8 : 0) |
 	        ((b < 0) ? 4 : 0) |
@@ -424,7 +424,7 @@ c: - - + + 1 1 0 0 => 1 1 - min/max
 e: - - - + 1 1 1 0 => 1 0 ? min(a,b,c,-1)/max(a,b,0,d)
 f  - - - - 1 1 1 1 => 1 1 - min/max
 */
-static void zend_ssa_range_and(long a, long b, long c, long d, zend_ssa_range *tmp)
+static void zend_ssa_range_and(zend_long a, zend_long b, zend_long c, zend_long d, zend_ssa_range *tmp)
 {
 	int x = ((a < 0) ? 8 : 0) |
 	        ((b < 0) ? 4 : 0) |
@@ -465,15 +465,15 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 {
 	uint32_t line;
 	zend_op *opline;
-	long op1_min, op2_min, op1_max, op2_max, t1, t2, t3, t4;
+	zend_long op1_min, op2_min, op1_max, op2_max, t1, t2, t3, t4;
 
 	if (ssa->vars[var].definition_phi) {
 		zend_ssa_phi *p = ssa->vars[var].definition_phi;
 		int i;
 
 		tmp->underflow = 0;
-		tmp->min = LONG_MAX;
-		tmp->max = LONG_MIN;
+		tmp->min = ZEND_LONG_MAX;
+		tmp->max = ZEND_LONG_MIN;
 		tmp->overflow = 0;
 		if (p->pi >= 0) {
 			if (p->constraint.negative) {
@@ -484,8 +484,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->overflow = ssa->var_info[p->sources[0]].range.overflow;
 				} else if (narrowing) {
 					tmp->underflow = 1;
-					tmp->min = LONG_MIN;
-					tmp->max = LONG_MAX;
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
 					tmp->overflow = 1;
 				}
 #ifdef NEG_RANGE
@@ -557,7 +557,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 #endif
 				} else {
 					tmp->underflow = 1;
-					tmp->min = LONG_MIN;
+					tmp->min = ZEND_LONG_MIN;
 				}
 				if (p->constraint.max_ssa_var < 0) {
 					tmp->max = p->constraint.range.max;
@@ -568,7 +568,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->overflow = ssa->var_info[p->constraint.max_ssa_var].range.overflow;
 #endif
 				} else {
-					tmp->max = LONG_MAX;
+					tmp->max = ZEND_LONG_MAX;
 					tmp->overflow = 1;
 				}
 			}
@@ -582,8 +582,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->overflow |= ssa->var_info[p->sources[i]].range.overflow;
 				} else if (narrowing) {
 					tmp->underflow = 1;
-					tmp->min = LONG_MIN;
-					tmp->max = LONG_MAX;
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
 					tmp->overflow = 1;
 				}
 			}
@@ -621,13 +621,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_UNDERFLOW() ||
 					    (op1_min < 0 && op2_min < 0 && tmp->min >= 0)) {
 						tmp->underflow = 1;
-						tmp->min = LONG_MIN;
+						tmp->min = ZEND_LONG_MIN;
 					}
 					if (OP1_RANGE_OVERFLOW() ||
 					    OP2_RANGE_OVERFLOW() ||
 						(op1_max > 0 && op2_max > 0 && tmp->max <= 0)) {
 						tmp->overflow = 1;
-						tmp->max = LONG_MAX;
+						tmp->max = ZEND_LONG_MAX;
 					}
 					return 1;
 				}
@@ -646,13 +646,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_OVERFLOW() ||
 					    (op1_min < 0 && op2_max > 0 && tmp->min >= 0)) {
 						tmp->underflow = 1;
-						tmp->min = LONG_MIN;
+						tmp->min = ZEND_LONG_MIN;
 					}
 					if (OP1_RANGE_OVERFLOW() ||
 					    OP2_RANGE_UNDERFLOW() ||
 						(op1_max > 0 && op2_min < 0 && tmp->max <= 0)) {
 						tmp->overflow = 1;
-						tmp->max = LONG_MAX;
+						tmp->max = ZEND_LONG_MAX;
 					}
 					return 1;
 				}
@@ -680,8 +680,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    (double)t4 != (double)op1_max * (double)op2_max) {
 						tmp->underflow = 1;
 						tmp->overflow = 1;
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
 						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
@@ -709,14 +709,14 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW()  ||
 					    OP2_RANGE_OVERFLOW()  ||
-					    t1 != (long)((double)op1_min / (double)op2_min) ||
-					    t2 != (long)((double)op1_min / (double)op2_max) ||
-					    t3 != (long)((double)op1_max / (double)op2_min) ||
-					    t4 != (long)((double)op1_max / (double)op2_max)) {
+					    t1 != (zend_long)((double)op1_min / (double)op2_min) ||
+					    t2 != (zend_long)((double)op1_min / (double)op2_max) ||
+					    t3 != (zend_long)((double)op1_max / (double)op2_min) ||
+					    t4 != (zend_long)((double)op1_max / (double)op2_max)) {
 						tmp->underflow = 1;
 						tmp->overflow = 1;
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
 						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
@@ -732,8 +732,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW()  ||
 					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						op1_min = OP1_MIN_RANGE();
 						op2_min = OP2_MIN_RANGE();
@@ -760,8 +760,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW() ||
 					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						op1_min = OP1_MIN_RANGE();
 						op2_min = OP2_MIN_RANGE();
@@ -785,8 +785,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW() ||
 					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						op1_min = OP1_MIN_RANGE();
 						op2_min = OP2_MIN_RANGE();
@@ -810,8 +810,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW() ||
 					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						op1_min = OP1_MIN_RANGE();
 						op2_min = OP2_MIN_RANGE();
@@ -830,8 +830,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					    OP2_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW() ||
 					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						op1_min = OP1_MIN_RANGE();
 						op2_min = OP2_MIN_RANGE();
@@ -849,8 +849,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				if (OP1_HAS_RANGE()) {
 					if (OP1_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW()) {
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 					} else {
 						op1_min = OP1_MIN_RANGE();
 						op1_max = OP1_MAX_RANGE();
@@ -885,8 +885,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						tmp->max = OP1_MAX_RANGE();
 						return 1;
 					} else {
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 						return 1;
 					}
 				}
@@ -1069,12 +1069,12 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
 					tmp->overflow = OP1_RANGE_OVERFLOW();
-					if (tmp->max < LONG_MAX) {
+					if (tmp->max < ZEND_LONG_MAX) {
 						tmp->max++;
 					} else {
 						tmp->overflow = 1;
 					}
-					if (tmp->min < LONG_MAX && !tmp->underflow) {
+					if (tmp->min < ZEND_LONG_MAX && !tmp->underflow) {
 						tmp->min++;
 					}
 					return 1;
@@ -1088,12 +1088,12 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
 					tmp->overflow = OP1_RANGE_OVERFLOW();
-					if (tmp->min > LONG_MIN) {
+					if (tmp->min > ZEND_LONG_MIN) {
 						tmp->min--;
 					} else {
 						tmp->underflow = 1;
 					}
-					if (tmp->max > LONG_MIN && !tmp->overflow) {
+					if (tmp->max > ZEND_LONG_MIN && !tmp->overflow) {
 						tmp->max--;
 					}
 					return 1;
@@ -1110,12 +1110,12 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					if (ssa->ops[line].result_def == var) {
 						return 1;
 					}
-					if (tmp->max < LONG_MAX) {
+					if (tmp->max < ZEND_LONG_MAX) {
 						tmp->max++;
 					} else {
 						tmp->overflow = 1;
 					}
-					if (tmp->min < LONG_MAX && !tmp->underflow) {
+					if (tmp->min < ZEND_LONG_MAX && !tmp->underflow) {
 						tmp->min++;
 					}
 					return 1;
@@ -1132,12 +1132,12 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					if (ssa->ops[line].result_def == var) {
 						return 1;
 					}
-					if (tmp->min > LONG_MIN) {
+					if (tmp->min > ZEND_LONG_MIN) {
 						tmp->min--;
 					} else {
 						tmp->underflow = 1;
 					}
-					if (tmp->max > LONG_MIN && !tmp->overflow) {
+					if (tmp->max > ZEND_LONG_MIN && !tmp->overflow) {
 						tmp->max--;
 					}
 					return 1;
@@ -1196,13 +1196,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_UNDERFLOW() ||
 						    (op1_min < 0 && op2_min < 0 && tmp->min >= 0)) {
 							tmp->underflow = 1;
-							tmp->min = LONG_MIN;
+							tmp->min = ZEND_LONG_MIN;
 						}
 						if (OP1_RANGE_OVERFLOW() ||
 						    OP2_RANGE_OVERFLOW() ||
 						    (op1_max > 0 && op2_max > 0 && tmp->max <= 0)) {
 							tmp->overflow = 1;
-							tmp->max = LONG_MAX;
+							tmp->max = ZEND_LONG_MAX;
 						}
 						return 1;
 					}
@@ -1234,13 +1234,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_OVERFLOW()  ||
 						    (op1_min < 0 && op2_max > 0 && tmp->min >= 0)) {
 							tmp->underflow = 1;
-							tmp->min = LONG_MIN;
+							tmp->min = ZEND_LONG_MIN;
 						}
 						if (OP1_RANGE_OVERFLOW()  ||
 						    OP2_RANGE_UNDERFLOW() ||
 							(op1_max > 0 && op2_min < 0 && tmp->max <= 0)) {
 							tmp->overflow = 1;
-							tmp->max = LONG_MAX;
+							tmp->max = ZEND_LONG_MAX;
 						}
 						return 1;
 					}
@@ -1281,8 +1281,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 							(double)t4 != (double)op1_min * (double)op2_min) {
 							tmp->underflow = 1;
 							tmp->overflow = 1;
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else {
 							tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
 							tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
@@ -1323,14 +1323,14 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_UNDERFLOW() ||
 						    OP1_RANGE_OVERFLOW()  ||
 						    OP2_RANGE_OVERFLOW()  ||
-						    t1 != (long)((double)op1_min / (double)op2_min) ||
-						    t2 != (long)((double)op1_min / (double)op2_max) ||
-						    t3 != (long)((double)op1_max / (double)op2_min) ||
-						    t4 != (long)((double)op1_max / (double)op2_max)) {
+						    t1 != (zend_long)((double)op1_min / (double)op2_min) ||
+						    t2 != (zend_long)((double)op1_min / (double)op2_max) ||
+						    t3 != (zend_long)((double)op1_max / (double)op2_min) ||
+						    t4 != (zend_long)((double)op1_max / (double)op2_max)) {
 							tmp->underflow = 1;
 							tmp->overflow = 1;
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else {
 							tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
 							tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
@@ -1359,8 +1359,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_UNDERFLOW() ||
 						    OP1_RANGE_OVERFLOW()  ||
 						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else {
 							op1_min = OP1_MIN_RANGE();
 							op2_min = OP2_MIN_RANGE();
@@ -1401,8 +1401,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_UNDERFLOW() ||
 						    OP1_RANGE_OVERFLOW() ||
 						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else {
 							op1_min = OP1_MIN_RANGE();
 							op2_min = OP2_MIN_RANGE();
@@ -1439,8 +1439,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_UNDERFLOW() ||
 						    OP1_RANGE_OVERFLOW() ||
 						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else {
 							op1_min = OP1_MIN_RANGE();
 							op2_min = OP2_MIN_RANGE();
@@ -1477,8 +1477,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_UNDERFLOW() ||
 						    OP1_RANGE_OVERFLOW() ||
 						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else {
 							op1_min = OP1_MIN_RANGE();
 							op2_min = OP2_MIN_RANGE();
@@ -1510,8 +1510,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						    OP2_RANGE_UNDERFLOW() ||
 						    OP1_RANGE_OVERFLOW() ||
 						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else {
 							op1_min = OP1_MIN_RANGE();
 							op2_min = OP2_MIN_RANGE();
@@ -1569,8 +1569,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				    opline->op1.num <= op_array->num_args) {
 					if (op_array->arg_info[opline->op1.num-1].type_hint == IS_LONG) {
 						tmp->underflow = 0;
-						tmp->min = LONG_MIN;
-						tmp->max = LONG_MAX;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
 						tmp->overflow = 0;
 						return 1;
 					} else if (op_array->arg_info[opline->op1.num-1].type_hint == _IS_BOOL) {
@@ -1613,8 +1613,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						tmp->max = 0;
 						tmp->overflow = 0;
 						if (type & MAY_BE_LONG) {
-							tmp->min = LONG_MIN;
-							tmp->max = LONG_MAX;
+							tmp->min = ZEND_LONG_MIN;
+							tmp->max = ZEND_LONG_MAX;
 						} else if (type & MAY_BE_TRUE) {
 							if (!(type & (MAY_BE_NULL|MAY_BE_FALSE))) {
 								tmp->min = 1;
@@ -1634,13 +1634,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 	return 0;
 }
 
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, long min, long max, zend_bool overflow)
+void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow)
 {
 	if (underflow) {
-		min = LONG_MIN;
+		min = ZEND_LONG_MIN;
 	}
 	if (overflow) {
-		max = LONG_MAX;
+		max = ZEND_LONG_MAX;
 	}
 	ssa->var_info[var].has_range = 1;
 	ssa->var_info[var].range.underflow = underflow;
@@ -1661,13 +1661,13 @@ int zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r)
 		    var_info->range.underflow ||
 		    r->min < var_info->range.min) {
 			r->underflow = 1;
-			r->min = LONG_MIN;
+			r->min = ZEND_LONG_MIN;
 		}
 		if (r->overflow ||
 		    var_info->range.overflow ||
 		    r->max > var_info->range.max) {
 			r->overflow = 1;
-			r->max = LONG_MAX;
+			r->max = ZEND_LONG_MAX;
 		}
 		if (var_info->range.min == r->min &&
 		    var_info->range.max == r->max &&
@@ -1711,10 +1711,10 @@ int zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r
 			r->max = var_info->range.max;
 		}
 		if (r->underflow) {
-			r->min = LONG_MIN;
+			r->min = ZEND_LONG_MIN;
 		}
 		if (r->overflow) {
-			r->max = LONG_MAX;
+			r->max = ZEND_LONG_MAX;
 		}
 		if (var_info->range.min == r->min &&
 		    var_info->range.max == r->max &&
@@ -1915,7 +1915,7 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			if (zend_inference_calc_range(op_array, ssa, j, 0, 1, &tmp)) {
 				zend_inference_init_range(op_array, ssa, j, tmp.underflow, tmp.min, tmp.max, tmp.overflow);
 			} else {
-				zend_inference_init_range(op_array, ssa, j, 1, LONG_MIN, LONG_MAX, 1);
+				zend_inference_init_range(op_array, ssa, j, 1, ZEND_LONG_MIN, ZEND_LONG_MAX, 1);
 			}
 		} else {
 			/* Find SCC entry points */
@@ -1948,7 +1948,7 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			/* Add all SCC entry variables into worklist for narrowing */
 			for (j = scc_var[scc]; j >= 0; j = next_scc_var[j]) {
 				if (!ssa->var_info[j].has_range) {
-					zend_inference_init_range(op_array, ssa, j, 1, LONG_MIN, LONG_MAX, 1);
+					zend_inference_init_range(op_array, ssa, j, 1, ZEND_LONG_MIN, ZEND_LONG_MAX, 1);
 				}
 				zend_bitset_incl(worklist, j);
 			}
@@ -2769,10 +2769,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				if (!ssa_var_info[ssa_ops[i].op1_use].has_range ||
 				    (opline->opcode == ZEND_PRE_DEC &&
 				     (ssa_var_info[ssa_ops[i].op1_use].range.underflow ||
-				      ssa_var_info[ssa_ops[i].op1_use].range.min == LONG_MIN)) ||
+				      ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MIN)) ||
 				     (opline->opcode == ZEND_PRE_INC &&
 				      (ssa_var_info[ssa_ops[i].op1_use].range.overflow ||
-				       ssa_var_info[ssa_ops[i].op1_use].range.min == LONG_MAX))) {
+				       ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MAX))) {
 					/* may overflow */
 					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
 				} else {
@@ -2817,10 +2817,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				if (!ssa_var_info[ssa_ops[i].op1_use].has_range ||
 				     (opline->opcode == ZEND_PRE_DEC &&
 				      (ssa_var_info[ssa_ops[i].op1_use].range.underflow ||
-				       ssa_var_info[ssa_ops[i].op1_use].range.min == LONG_MIN)) ||
+				       ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MIN)) ||
 				      (opline->opcode == ZEND_PRE_INC &&
 				       (ssa_var_info[ssa_ops[i].op1_use].range.overflow ||
-				        ssa_var_info[ssa_ops[i].op1_use].range.min == LONG_MAX))) {
+				        ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MAX))) {
 					/* may overflow */
 					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
 				} else {
@@ -3943,13 +3943,13 @@ void zend_func_return_info(const zend_op_array   *op_array,
 							/* union */
 							if (info->ssa.var_info[info->ssa.ops[opline - op_array->opcodes].op1_use].range.underflow) {
 								tmp_range.underflow = 1;
-								tmp_range.min = LONG_MIN;
+								tmp_range.min = ZEND_LONG_MIN;
 							} else {
 								tmp_range.min = MIN(tmp_range.min, info->ssa.var_info[info->ssa.ops[opline - op_array->opcodes].op1_use].range.min);
 							}
 							if (info->ssa.var_info[info->ssa.ops[opline - op_array->opcodes].op1_use].range.overflow) {
 								tmp_range.overflow = 1;
-								tmp_range.max = LONG_MAX;
+								tmp_range.max = ZEND_LONG_MAX;
 							} else {
 								tmp_range.max = MAX(tmp_range.max, info->ssa.var_info[info->ssa.ops[opline - op_array->opcodes].op1_use].range.max);
 							}
@@ -3957,8 +3957,8 @@ void zend_func_return_info(const zend_op_array   *op_array,
 					} else if (!widening) {
 						tmp_has_range = 1;
 						tmp_range.underflow = 1;
-						tmp_range.min = LONG_MIN;
-						tmp_range.max = LONG_MAX;
+						tmp_range.min = ZEND_LONG_MIN;
+						tmp_range.max = ZEND_LONG_MAX;
 						tmp_range.overflow = 1;
 					}
 				} else {
