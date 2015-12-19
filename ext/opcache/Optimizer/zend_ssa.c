@@ -96,12 +96,14 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 		} else if (op->opcode == ZEND_ADD) {
 			if (op->op1_type == IS_CV &&
 				op->op2_type == IS_CONST &&
-				Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
+				Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG &&
+				Z_LVAL_P(CRT_CONSTANT(op->op2)) != LONG_MIN) {
 				*adjustment = -Z_LVAL_P(CRT_CONSTANT(op->op2));
 				return EX_VAR_TO_NUM(op->op1.var);
 			} else if (op->op2_type == IS_CV &&
 					   op->op1_type == IS_CONST &&
-					   Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG) {
+					   Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG &&
+					   Z_LVAL_P(CRT_CONSTANT(op->op1)) != LONG_MIN) {
 				*adjustment = -Z_LVAL_P(CRT_CONSTANT(op->op1));
 				return EX_VAR_TO_NUM(op->op2.var);
 			}
