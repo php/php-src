@@ -2383,7 +2383,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			const zend_op *old_opline = EX(opline);
 			zend_throw_exception_internal(NULL);
-			if (RETURN_VALUE_USED(old_opline)) {
+			if (old_opline->opcode != ZEND_HANDLE_EXCEPTION && RETURN_VALUE_USED(old_opline)) {
 				zval_ptr_dtor(EX_VAR(old_opline->result.var));
 			}
 			HANDLE_EXCEPTION_LEAVE();
@@ -5854,8 +5854,9 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (OP1_TYPE == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);

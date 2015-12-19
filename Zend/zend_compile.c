@@ -5806,12 +5806,9 @@ static inline void zend_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op
 
 static inline void zend_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
 {
-	binary_op_type fn = kind == ZEND_AST_UNARY_PLUS
-		? add_function : sub_function;
-
 	zval left;
-	ZVAL_LONG(&left, 0);
-	fn(result, &left, op);
+	ZVAL_LONG(&left, (kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
+	mul_function(result, &left, op);
 }
 /* }}} */
 
@@ -6001,7 +5998,8 @@ void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
-	znode zero_node, expr_node;
+	znode expr_node;
+	znode lefthand_node;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_UNARY_PLUS || ast->kind == ZEND_AST_UNARY_MINUS);
 
@@ -6014,11 +6012,9 @@ void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zero_node.op_type = IS_CONST;
-	ZVAL_LONG(&zero_node.u.constant, 0);
-
-	zend_emit_op_tmp(result, ast->kind == ZEND_AST_UNARY_PLUS ? ZEND_ADD : ZEND_SUB,
-		&zero_node, &expr_node);
+	lefthand_node.op_type = IS_CONST;
+	ZVAL_LONG(&lefthand_node.u.constant, (ast->kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
+	zend_emit_op_tmp(result, ZEND_MUL, &lefthand_node, &expr_node);
 }
 /* }}} */
 
