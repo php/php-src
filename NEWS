@@ -19,6 +19,16 @@ PHP                                                                        NEWS
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
   . Fixed bug #71086 (Invalid numeric literal parse error within
     highlight_string() function). (Nikita)
+  . Fixed bug #71154 (Incorrect HT iterator invalidation causes iterator reuse).
+    (Nikita)
+  . Fixed bug #52355 (Negating zero does not produce negative zero). (Andrea)
+  . Fixed bug #66179 (var_export() exports float as integer). (Andrea)
+  . Fixed bug #70804 (Unary add on negative zero produces positive zero).
+    (Andrea)
+
+. CURL:
+  . Fixed bug #71144 (Sementation fault when using cURL with ZTS).
+    (Michael Maroszek, Laruence)
 
 - DBA:
   . Fixed key leak with invalid resource. (Laruence)
@@ -27,12 +37,15 @@ PHP                                                                        NEWS
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
 - FTP:
-  . Implement FR #55651 (Option to ignore the returned FTP PASV address).
+  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
 
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
+
+- Opcache:
+  . Fixed bug #71127 (Define in auto_prepend_file is overwrite). (Laruence)
 
 - Readline:
   . Fixed bug #71094 (readline_completion_function corrupts static array on
@@ -44,13 +57,13 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #71077 (ReflectionMethod for ArrayObject constructor returns
     wrong number of parameters). (Laruence)
-
+  . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
+    arrays). (Nikita)
 
 17 Dec 2015, PHP 7.0.1
 
 - Core:
-  . Fixed bug #70831 (Compile fails on system with 160 CPUs).
-    (Daniel Axtens)
+  . Fixed bug #70831 (Compile fails on system with 160 CPUs). (Daniel Axtens)
   . Fixed bug #71006 (symbol referencing errors on Sparc/Solaris). (Dmitry)
   . Fixed bug #70997 (When using parentClass:: instead of parent::, static
     context changed). (Dmitry)
@@ -63,8 +76,8 @@ PHP                                                                        NEWS
   . Fixed bug #70944 (try{ } finally{} can create infinite chains of
     exceptions). (Laruence)
   . Fixed bug #70931 (Two errors messages are in conflict). (dams, Laruence)
-  . Fixed bug #70904 (yield from incorrectly marks valid generator as finished).
-    (Bob)
+  . Fixed bug #70904 (yield from incorrectly marks valid generator as
+    finished). (Bob)
   . Fixed bug #70899 (buildconf failure in extensions). (Bob, Reeze)
   . Fixed bug #61751 (SAPI build problem on AIX: Undefined symbol:
     php_register_internal_extensions). (Lior Kaplan)
@@ -92,8 +105,8 @@ PHP                                                                        NEWS
     connection flag. (Andrey)
 
 - OCI8:
-  . Fixed LOB implementation size_t/zend_long mismatch reported
-    by gcov. (Senthil)
+  . Fixed LOB implementation size_t/zend_long mismatch reported by gcov.
+    (Senthil)
 
 - Opcache:
   . Fixed bug #71024 (Unable to use PHP 7.0 x64 side-by-side with PHP 5.6 x32
