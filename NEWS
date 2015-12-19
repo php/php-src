@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Jan 2016 PHP 7.0.2
 
 - Core:
+  . Fixed bug #71163 (Segmentation Fault: cleanup_unfinished_calls). (Laruence)
   . Fixed bug #71109 (ZEND_MOD_CONFLICTS("xdebug") doesn't work). (Laruence)
   . Fixed bug #71105 (Format String Vulnerability in Class Name Error Message).
     (andrew at jmpesp dot org)

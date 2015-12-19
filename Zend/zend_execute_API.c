@@ -937,7 +937,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	zend_class_entry *ce = NULL;
 	zval args[1];
 	zval local_retval;
-	int retval;
 	zend_string *lc_name;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
@@ -1033,7 +1032,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	fcall_cache.object = NULL;
 
 	zend_exception_save();
-	retval = zend_call_function(&fcall_info, &fcall_cache);
+	if ((zend_call_function(&fcall_info, &fcall_cache) == SUCCESS) && !EG(exception)) {
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+	}
 	zend_exception_restore();
 
 	zval_ptr_dtor(&args[0]);
@@ -1043,9 +1044,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 
 	zval_ptr_dtor(&local_retval);
 
-	if (retval == SUCCESS) {
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-	}
 	if (!key) {
 		zend_string_release(lc_name);
 	}
