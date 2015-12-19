@@ -24,7 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #70804 (Unary add on negative zero produces positive zero).
     (Andrea)
 
-. CURL:
+- CURL:
   . Fixed bug #71144 (Sementation fault when using cURL with ZTS).
     (Michael Maroszek, Laruence)
 
