@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #52355 (Negating zero does not produce negative zero). (Andrea)
   . Fixed bug #66179 (var_export() exports float as integer). (Andrea)
+  . Fixed bug #70804 (Unary add on negative zero produces positive zero).
+    (Andrea)
 
 . CURL:
   . Fixed bug #71144 (Sementation fault when using cURL with ZTS).
