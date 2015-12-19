@@ -72,6 +72,52 @@ static int add_pi(zend_arena **arena, const zend_op_array *op_array, zend_dfg *d
 }
 /* }}} */
 
+/* We can interpret $a + 5 == 0 as $a = 0 - 5, i.e. shift the adjustment to the other operand.
+ * This negated adjustment is what is written into the "adjustment" parameter. */
+static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_flags, zend_op *opline, uint32_t var_num, long *adjustment)
+{
+	zend_op *op = opline;
+	while (op != op_array->opcodes) {
+		op--;
+		if (op->result_type != IS_TMP_VAR || op->result.var != var_num) {
+			continue;
+		}
+
+		if (op->opcode == ZEND_POST_DEC) {
+			if (op->op1_type == IS_CV) {
+				*adjustment = -1;
+				return EX_VAR_TO_NUM(op->op1.var);
+			}
+		} else if (op->opcode == ZEND_POST_INC) {
+			if (op->op1_type == IS_CV) {
+				*adjustment = 1;
+				return EX_VAR_TO_NUM(op->op1.var);
+			}
+		} else if (op->opcode == ZEND_ADD) {
+			if (op->op1_type == IS_CV &&
+				op->op2_type == IS_CONST &&
+				Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
+				*adjustment = -Z_LVAL_P(CRT_CONSTANT(op->op2));
+				return EX_VAR_TO_NUM(op->op1.var);
+			} else if (op->op2_type == IS_CV &&
+					   op->op1_type == IS_CONST &&
+					   Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG) {
+				*adjustment = -Z_LVAL_P(CRT_CONSTANT(op->op1));
+				return EX_VAR_TO_NUM(op->op2.var);
+			}
+		} else if (op->opcode == ZEND_SUB) {
+			if (op->op1_type == IS_CV &&
+				op->op2_type == IS_CONST &&
+				Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
+				*adjustment = Z_LVAL_P(CRT_CONSTANT(op->op2));
+				return EX_VAR_TO_NUM(op->op1.var);
+			}
+		}
+		break;
+	}
+	return -1;
+}
+
 static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
@@ -542,87 +588,15 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			if ((opline-1)->op1_type == IS_CV) {
 				var1 = EX_VAR_TO_NUM((opline-1)->op1.var);
 			} else if ((opline-1)->op1_type == IS_TMP_VAR) {
-				zend_op *op = opline;
-				while (op != op_array->opcodes) {
-					op--;
-					if (op->result_type == IS_TMP_VAR &&
-					    op->result.var == (opline-1)->op1.var) {
-					    if (op->opcode == ZEND_POST_DEC) {
-							if (op->op1_type == IS_CV) {
-								var1 = EX_VAR_TO_NUM(op->op1.var);
-								val2--;
-							}
-					    } else if (op->opcode == ZEND_POST_INC) {
-							if (op->op1_type == IS_CV) {
-								var1 = EX_VAR_TO_NUM(op->op1.var);
-								val2++;
-							}
-					    } else if (op->opcode == ZEND_ADD) {
-							if (op->op1_type == IS_CV &&
-							    op->op2_type == IS_CONST &&
-							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-								var1 = EX_VAR_TO_NUM(op->op1.var);
-								val2 -= Z_LVAL_P(CRT_CONSTANT(op->op2));
-							} else if (op->op2_type == IS_CV &&
-							           op->op1_type == IS_CONST &&
-							    Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG) {
-								var1 = EX_VAR_TO_NUM(op->op2.var);
-								val2 -= Z_LVAL_P(CRT_CONSTANT(op->op1));
-							}
-					    } else if (op->opcode == ZEND_SUB) {
-							if (op->op1_type == IS_CV &&
-							    op->op2_type == IS_CONST &&
-							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-								var1 = EX_VAR_TO_NUM(op->op1.var);
-								val2 += Z_LVAL_P(CRT_CONSTANT(op->op2));
-							}
-					    }
-					    break;
-					}
-				}
+				var1 = find_adjusted_tmp_var(
+					op_array, build_flags, opline, (opline-1)->op1.var, &val2);
 			}
 
 			if ((opline-1)->op2_type == IS_CV) {
 				var2 = EX_VAR_TO_NUM((opline-1)->op2.var);
 			} else if ((opline-1)->op2_type == IS_TMP_VAR) {
-				zend_op *op = opline;
-				while (op != op_array->opcodes) {
-					op--;
-					if (op->result_type == IS_TMP_VAR &&
-					    op->result.var == (opline-1)->op2.var) {
-					    if (op->opcode == ZEND_POST_DEC) {
-							if (op->op1_type == IS_CV) {
-								var2 = EX_VAR_TO_NUM(op->op1.var);
-								val1--;
-							}
-					    } else if (op->opcode == ZEND_POST_INC) {
-							if (op->op1_type == IS_CV) {
-								var2 = EX_VAR_TO_NUM(op->op1.var);
-								val1++;
-							}
-					    } else if (op->opcode == ZEND_ADD) {
-							if (op->op1_type == IS_CV &&
-							    op->op2_type == IS_CONST &&
-							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-								var2 = EX_VAR_TO_NUM(op->op1.var);
-								val1 -= Z_LVAL_P(CRT_CONSTANT(op->op2));
-							} else if (op->op2_type == IS_CV &&
-							           op->op1_type == IS_CONST &&
-							    Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG) {
-								var2 = EX_VAR_TO_NUM(op->op2.var);
-								val1 -= Z_LVAL_P(CRT_CONSTANT(op->op1));
-							}
-					    } else if (op->opcode == ZEND_SUB) {
-							if (op->op1_type == IS_CV &&
-							    op->op2_type == IS_CONST &&
-							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-								var2 = EX_VAR_TO_NUM(op->op1.var);
-								val1 += Z_LVAL_P(CRT_CONSTANT(op->op2));
-							}
-					    }
-					    break;
-					}
-				}
+				var2 = find_adjusted_tmp_var(
+					op_array, build_flags, opline, (opline-1)->op2.var, &val1);
 			}
 
 			if (var1 >= 0 && var2 >= 0) {
