@@ -656,7 +656,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 					val2 += 0;
 				} else if ((opline-1)->op2_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_TRUE) {
-					val2 += 12;
+					val2 += 1;
 				} else {
 					var1 = -1;
 				}
