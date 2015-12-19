@@ -71,6 +71,8 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+- SQLite3:
+  . Upgraed bundled SQLite lib to 3.9.2
 
 ========================================
 10. New Global Constants
