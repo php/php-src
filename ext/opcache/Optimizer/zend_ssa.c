@@ -516,31 +516,13 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		 */
 		switch (opline->opcode) {
 			case ZEND_JMPZ:
-				if (ssa->cfg.blocks[ssa->cfg.blocks[j].successors[0]].start == OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes) {
-					bf = ssa->cfg.blocks[j].successors[0];
-					bt = ssa->cfg.blocks[j].successors[1];
-				} else {
-					bt = ssa->cfg.blocks[j].successors[0];
-					bf = ssa->cfg.blocks[j].successors[1];
-				}
+			case ZEND_JMPZNZ:
+				bf = ssa->cfg.blocks[j].successors[0];
+				bt = ssa->cfg.blocks[j].successors[1];
 				break;
 			case ZEND_JMPNZ:
-				if (ssa->cfg.blocks[ssa->cfg.blocks[j].successors[0]].start == OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes) {
-					bt = ssa->cfg.blocks[j].successors[0];
-					bf = ssa->cfg.blocks[j].successors[1];
-				} else {
-					bf = ssa->cfg.blocks[j].successors[0];
-					bt = ssa->cfg.blocks[j].successors[1];
-				}
-				break;
-		    case ZEND_JMPZNZ:
-				if (ssa->cfg.blocks[ssa->cfg.blocks[j].successors[0]].start == OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes) {
-					bf = ssa->cfg.blocks[j].successors[0];
-					bt = ssa->cfg.blocks[j].successors[1];
-				} else {
-					bt = ssa->cfg.blocks[j].successors[0];
-					bf = ssa->cfg.blocks[j].successors[1];
-				}
+				bt = ssa->cfg.blocks[j].successors[0];
+				bf = ssa->cfg.blocks[j].successors[1];
 				break;
 			default:
 				continue;
