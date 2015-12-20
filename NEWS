@@ -24,7 +24,7 @@ PHP                                                                        NEWS
   . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
 
 - SQLite3:
-  . Implemented FR #71159 (Upgraed bundled SQLite lib to 3.9.2). (Laruence)
+  . Implemented FR #71159 (Upgraded bundled SQLite lib to 3.9.2). (Laruence)
 
 - Standard:
   . Fixed bug #71100 (long2ip() doesn't accept integers in strict mode).
