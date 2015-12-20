@@ -648,8 +648,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			}
 		}
-	} else if (ZEND_VM_EXT_VAR == (flags & ZEND_VM_EXT_MASK)) {
-		fprintf(stderr, " V%u", EX_VAR_TO_NUM(opline->extended_value));
 	}
 	if (opline->result_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));

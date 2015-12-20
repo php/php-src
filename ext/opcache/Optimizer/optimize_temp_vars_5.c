@@ -156,18 +156,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 			ZEND_OP2(opline).var = NUM_VAR(map_T[currT] + offset);
 		}
 
-		if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
-		    opline->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
-            opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-			currT = VAR_NUM(opline->extended_value) - offset;
-			if (!zend_bitset_in(valid_T, currT)) {
-				GET_AVAILABLE_T();
-				map_T[currT] = i;
-				zend_bitset_incl(valid_T, currT);
-			}
-			opline->extended_value = NUM_VAR(map_T[currT] + offset);
-		}
-
 		/* Allocate OP_DATA->op2 after "operands", but before "result" */
 		if (opline->opcode == ZEND_ASSIGN_DIM &&
 		    (opline + 1)->opcode == ZEND_OP_DATA &&

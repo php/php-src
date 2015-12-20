@@ -59,7 +59,6 @@
 #define ZEND_VM_EXT_REF          0x00100000
 #define ZEND_VM_EXT_MASK         0xff000000
 #define ZEND_VM_EXT_NUM          0x01000000
-#define ZEND_VM_EXT_VAR          0x02000000
 #define ZEND_VM_EXT_JMP_ADDR     0x03000000
 #define ZEND_VM_EXT_DIM_OBJ      0x04000000
 #define ZEND_VM_EXT_CLASS_FETCH  0x05000000
