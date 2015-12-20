@@ -120,6 +120,15 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 	return -1;
 }
 
+static inline zend_bool add_will_overflow(zend_long a, zend_long b) {
+	return (b > 0 && a > ZEND_LONG_MAX - b)
+		|| (b < 0 && a < ZEND_LONG_MIN - b);
+}
+static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
+	return (b > 0 && a < ZEND_LONG_MIN + b)
+		|| (b < 0 && a > ZEND_LONG_MAX + b);
+}
+
 static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
@@ -602,32 +611,49 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			}
 
 			if (var1 >= 0 && var2 >= 0) {
-				int tmp = val1;
-				val1 -= val2;
-				val2 -= tmp;
+				if (!sub_will_overflow(val1, val2) && !sub_will_overflow(val2, val1)) {
+					zend_long tmp = val1;
+					val1 -= val2;
+					val2 -= tmp;
+				} else {
+					var1 = -1;
+					var2 = -1;
+				}
 			} else if (var1 >= 0 && var2 < 0) {
+				zend_long add_val2 = 0;
 				if ((opline-1)->op2_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_LONG) {
-					val2 += Z_LVAL_P(CRT_CONSTANT((opline-1)->op2));
+					add_val2 = Z_LVAL_P(CRT_CONSTANT((opline-1)->op2));
 				} else if ((opline-1)->op2_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_FALSE) {
-					val2 += 0;
+					add_val2 = 0;
 				} else if ((opline-1)->op2_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_TRUE) {
-					val2 += 1;
+					add_val2 = 1;
+				} else {
+					var1 = -1;
+				}
+				if (!add_will_overflow(val2, add_val2)) {
+					val2 += add_val2;
 				} else {
 					var1 = -1;
 				}
 			} else if (var1 < 0 && var2 >= 0) {
+				zend_long add_val1 = 0;
 				if ((opline-1)->op1_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op1)) == IS_LONG) {
-					val1 += Z_LVAL_P(CRT_CONSTANT((opline-1)->op1));
+					add_val1 = Z_LVAL_P(CRT_CONSTANT((opline-1)->op1));
 				} else if ((opline-1)->op1_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op1)) == IS_FALSE) {
-					val1 += 0;
+					add_val1 = 0;
 				} else if ((opline-1)->op1_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op1)) == IS_TRUE) {
-					val1 += 1;
+					add_val1 = 1;
+				} else {
+					var2 = -1;
+				}
+				if (!add_will_overflow(val1, add_val1)) {
+					val1 += add_val1;
 				} else {
 					var2 = -1;
 				}
