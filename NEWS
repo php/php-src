@@ -45,6 +45,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #71127 (Define in auto_prepend_file is overwrite). (Laruence)
 
+- PCRE:
+  . Fixed bug #71178 (preg_replace with arrays creates [0] in replace array
+    if not already set). (Laruence)
+
 - Readline:
   . Fixed bug #71094 (readline_completion_function corrupts static array on
     second TAB). (Nikita)
