@@ -128,10 +128,6 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
 	}
-	if (info & MAY_BE_DEF) {
-		if (first) first = 0; else fprintf(stderr, ", ");
-		fprintf(stderr, "def");
-	}
 	if (info & MAY_BE_REF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "ref");

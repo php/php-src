@@ -60,8 +60,7 @@
 
 #define MAY_BE_IN_REG               (1<<25) /* value allocated in CPU register */
 
-//TODO: remome MAY_BE_DEF, MAY_BE_RC1, MAY_BE_RCN???
-#define MAY_BE_DEF                  (1<<26)
+//TODO: remome MAY_BE_RC1, MAY_BE_RCN???
 #define MAY_BE_RC1                  (1<<27) /* may be non-reference with refcount == 1 */
 #define MAY_BE_RCN                  (1<<28) /* may be non-reference with refcount > 1  */
 
@@ -195,7 +194,7 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 		return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(zv);
-		uint32_t tmp = MAY_BE_ARRAY | MAY_BE_DEF | MAY_BE_RC1;
+		uint32_t tmp = MAY_BE_ARRAY | MAY_BE_RC1;
 
 		zend_string *str;
 		zval *val;
@@ -209,7 +208,7 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 		} ZEND_HASH_FOREACH_END();
 		return tmp;
 	} else {
-		return (1 << Z_TYPE_P(zv)) | MAY_BE_DEF | MAY_BE_RC1;
+		return (1 << Z_TYPE_P(zv)) | MAY_BE_RC1;
 	}
 }
 
@@ -218,7 +217,7 @@ static zend_always_inline uint32_t get_ssa_var_info(const zend_ssa *ssa, int ssa
 	if (ssa->var_info && ssa_var_num >= 0) {
 		return ssa->var_info[ssa_var_num].type;
 	} else {
-		return MAY_BE_DEF | MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ERROR;
+		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ERROR;
 	}
 }
 
