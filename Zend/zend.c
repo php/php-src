@@ -448,11 +448,7 @@ static void zend_init_call_trampoline_op(void) /* {{{ */
 
 static void auto_global_dtor(zval *zv) /* {{{ */
 {
-	zend_auto_global *ag = Z_PTR_P(zv);
-
-	zend_string_release(ag->name);
-
-	free(ag);
+	free(Z_PTR_P(zv));
 }
 /* }}} */
 
@@ -471,7 +467,7 @@ static void auto_global_copy_ctor(zval *zv) /* {{{ */
 	zend_auto_global *old_ag = (zend_auto_global *) Z_PTR_P(zv);
 	zend_auto_global *new_ag = pemalloc(sizeof(zend_auto_global), 1);
 
-	new_ag->name = zend_string_dup(old_ag->name, 1);
+	new_ag->name = old_ag->name;
 	new_ag->auto_global_callback = old_ag->auto_global_callback;
 	new_ag->jit = old_ag->jit;
 
