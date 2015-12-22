@@ -2492,6 +2492,7 @@ PHP_FUNCTION(substr_replace)
 	if (Z_TYPE_P(str) != IS_ARRAY) {
 		if (Z_TYPE_P(from) != IS_ARRAY) {
 			zend_string *repl_str;
+			zend_bool repl_release = 0;
 			f = Z_LVAL_P(from);
 
 			/* if "from" position is negative, count start position from the end
@@ -2533,6 +2534,7 @@ PHP_FUNCTION(substr_replace)
 				}
 				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
 					repl_str = zval_get_string(tmp_repl);
+					repl_release = 1;
 				} else {
 					repl_str = STR_EMPTY_ALLOC();
 				}
@@ -2548,7 +2550,9 @@ PHP_FUNCTION(substr_replace)
 			}
 			memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
 			ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
-			zend_string_release(repl_str);
+			if (repl_release) {
+				zend_string_release(repl_str);
+			}
 			RETURN_NEW_STR(result);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
