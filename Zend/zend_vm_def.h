@@ -806,7 +806,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|UNU
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 			FREE_OP2();
 			FREE_OP(free_op_data1);
 			FREE_OP1_VAR_PTR();
@@ -847,7 +847,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_helper, VAR|CV, CONST|TMPVAR|CV, binary_op_
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1132,7 +1132,7 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1213,7 +1213,7 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1280,7 +1280,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -1326,7 +1326,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -1372,7 +1372,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -1411,7 +1411,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -2221,7 +2221,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2377,7 +2377,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	value_ptr = GET_OP2_ZVAL_PTR_PTR(BP_VAR_W);
 
 	if (OP2_TYPE == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 		FREE_UNFETCHED_OP1();
 		HANDLE_EXCEPTION();
 	}
@@ -2405,7 +2405,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 		FREE_OP2_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
