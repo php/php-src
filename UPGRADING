@@ -55,6 +55,7 @@ PHP 7.1 UPGRADE NOTES
 - pg_fetch_all() accepts 2nd optional result type parameter like
   pg_fetch_row().
 - pg_select() accepts 4th optional result type parameter like pg_fetch_row().
+- parse_url() is more restrictive now and supports RFC3986.
 
 ========================================
 6. New Functions

@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     (Laruence)
   . Implemented FR #55716 (Add an option to pass a custom stream context to
     get_headers()). (Ferenc)
+  . Additional validation for parse_url() for login/pass components).
+    (Ilia) (Julien)
   . Implemented FR #69359 (Provide a way to fetch the current environment
     variables). (Ferenc)
 
