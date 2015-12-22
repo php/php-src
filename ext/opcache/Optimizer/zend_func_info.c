@@ -1239,7 +1239,9 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 		if (call_info->callee_func->type == ZEND_INTERNAL_FUNCTION) {
 			ret |= FUNC_MAY_WARN;
 		}
-		if (call_info->callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		if (call_info->callee_func->common.fn_flags & ZEND_ACC_GENERATOR) {
+			ret = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
+		} else  if (call_info->callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			ret |= MAY_BE_REF;
 		} else {
 			ret |= MAY_BE_RC1 | MAY_BE_RCN;

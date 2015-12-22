@@ -189,12 +189,12 @@ DEFINE_SSA_OP_RANGE_OVERFLOW(op2)
 
 static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 	if (Z_TYPE_P(zv) == IS_CONSTANT) {
-		return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
+		return MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 	} else if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
-		return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
+		return MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(zv);
-		uint32_t tmp = MAY_BE_ARRAY | MAY_BE_RC1;
+		uint32_t tmp = MAY_BE_ARRAY | MAY_BE_RC1 | MAY_BE_RCN;
 
 		zend_string *str;
 		zval *val;
@@ -208,7 +208,7 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 		} ZEND_HASH_FOREACH_END();
 		return tmp;
 	} else {
-		return (1 << Z_TYPE_P(zv)) | MAY_BE_RC1;
+		return (1 << Z_TYPE_P(zv)) | MAY_BE_RC1 | MAY_BE_RCN;
 	}
 }
 
