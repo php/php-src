@@ -3968,12 +3968,12 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		/* For each entry in the search array, get the entry */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
-			ZVAL_DEREF(search_entry);
-			convert_to_string(search_entry);
-			if (Z_STRLEN_P(search_entry) == 0) {
+			zend_string *search_str = zval_get_string(search_entry);
+			if (ZSTR_LEN(search_str) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
 					replace_idx++;
 				}
+				zend_string_release(search_str);
 				continue;
 			}
 
@@ -4003,11 +4003,11 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}
 			}
 
-			if (Z_STRLEN_P(search_entry) == 1) {
+			if (ZSTR_LEN(search_str) == 1) {
 				zend_long old_replace_count = replace_count;
 
 				tmp_result = php_char_to_str_ex(Z_STR_P(result),
-								Z_STRVAL_P(search_entry)[0],
+								ZSTR_VAL(search_str)[0],
 								replace_value,
 								replace_len,
 								case_sensitivity,
@@ -4016,10 +4016,10 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 					zend_string_release(lc_subject_str);
 					lc_subject_str = NULL;
 				}
-			} else if (Z_STRLEN_P(search_entry) > 1) {
+			} else if (ZSTR_LEN(search_str) > 1) {
 				if (case_sensitivity) {
 					tmp_result = php_str_to_str_ex(Z_STR_P(result),
-							Z_STRVAL_P(search_entry), Z_STRLEN_P(search_entry),
+							ZSTR_VAL(search_str), ZSTR_LEN(search_str),
 							replace_value, replace_len, &replace_count);
 				} else {
 					zend_long old_replace_count = replace_count;
@@ -4028,13 +4028,15 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 						lc_subject_str = php_string_tolower(Z_STR_P(result));
 					}
 					tmp_result = php_str_to_str_i_ex(Z_STR_P(result), ZSTR_VAL(lc_subject_str),
-							Z_STR_P(search_entry), replace_value, replace_len, &replace_count);
+							search_str, replace_value, replace_len, &replace_count);
 					if (replace_count != old_replace_count) {
 						zend_string_release(lc_subject_str);
 						lc_subject_str = NULL;
 					}
 				}				
 			}
+
+			zend_string_release(search_str);
 
 			if (replace_entry_str) {
 				zend_string_release(replace_entry_str);
@@ -4055,6 +4057,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			zend_string_release(lc_subject_str);
 		}
 	} else {
+		ZEND_ASSERT(Z_TYPE_P(search) == IS_STRING);
 		if (Z_STRLEN_P(search) == 1) {
 			ZVAL_STR(result,
 				php_char_to_str_ex(subject_str,
