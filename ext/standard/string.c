@@ -2495,8 +2495,7 @@ PHP_FUNCTION(substr_replace)
 
 	if (Z_TYPE_P(str) != IS_ARRAY) {
 		if (Z_TYPE_P(from) != IS_ARRAY) {
-			size_t repl_len = 0;
-
+			zend_string *repl_str;
 			f = Z_LVAL_P(from);
 
 			/* if "from" position is negative, count start position from the end
@@ -2537,21 +2536,23 @@ PHP_FUNCTION(substr_replace)
 					repl_idx++;
 				}
 				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
-					convert_to_string_ex(tmp_repl);
-					repl_len = Z_STRLEN_P(tmp_repl);
+					repl_str = zval_get_string(tmp_repl);
+				} else {
+					repl_str = STR_EMPTY_ALLOC();
 				}
 			} else {
-				repl_len = Z_STRLEN_P(repl);
+				repl_str = Z_STR_P(repl);
 			}
 
-			result = zend_string_alloc(Z_STRLEN_P(str) - l + repl_len, 0);
+			result = zend_string_alloc(Z_STRLEN_P(str) - l + ZSTR_LEN(repl_str), 0);
 
 			memcpy(ZSTR_VAL(result), Z_STRVAL_P(str), f);
-			if (repl_len) {
-				memcpy((ZSTR_VAL(result) + f), (Z_TYPE_P(repl) == IS_ARRAY ? Z_STRVAL_P(tmp_repl) : Z_STRVAL_P(repl)), repl_len);
+			if (ZSTR_LEN(repl_str)) {
+				memcpy((ZSTR_VAL(result) + f), ZSTR_VAL(repl_str), ZSTR_LEN(repl_str));
 			}
-			memcpy((ZSTR_VAL(result) + f + repl_len), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
+			memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
 			ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
+			zend_string_release(repl_str);
 			RETURN_NEW_STR(result);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
