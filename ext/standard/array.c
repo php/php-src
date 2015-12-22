@@ -2208,28 +2208,39 @@ double_str:
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else {
-		zend_long low, high, lstep, __calc_size;
+		int err_range = 0;
+		zend_long low, high;
+		/* lstep is a ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
+		zend_ulong __calc_size, lstep;
 long_str:
 		low = zval_get_long(zlow);
 		high = zval_get_long(zhigh);
-		lstep = (zend_long) step;
+
+		if (step <= 0) {
+			err = 1;
+			goto err;
+		}
+
+		lstep = step;
+
+		if ((low == ZEND_LONG_MIN && high == ZEND_LONG_MAX)
+			|| (low == ZEND_LONG_MAX && high == ZEND_LONG_MIN)) {
+			err_range = 1;
+			goto err_range;
+		}
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
-			/* overflow may occur if high = ZEND_LONG_MIN and low = 0 */
-			if ((high != ZEND_LONG_MIN && low != 0) && (low - high < lstep || lstep <= 0)) {
+			if (low - high < lstep) {
 				err = 1;
 				goto err;
 			}
 
 			__calc_size = ((low - high) / lstep) + 1;
 
-			if ((low == ZEND_LONG_MAX && high < 1) /* overflow check */
-				|| (high == ZEND_LONG_MIN && low > -2) /* overflow check */
-				|| __calc_size > HT_MAX_SIZE /* the array size is too big */
-			) {
-				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", high, low);
-				RETURN_FALSE;
+			if (__calc_size > HT_MAX_SIZE) {
+				err_range = 1;
+				goto err_range;
 			}
 
 			array_init_size(return_value, (uint32_t)__calc_size);
@@ -2240,38 +2251,37 @@ long_str:
 					Z_LVAL(tmp) = low;
 					ZEND_HASH_FILL_ADD(&tmp);
 					/* safety check from overflow */
-					/* for something like range(PHP_INT_MIN + 513, PHP_INT_MIN) */
-					if (low == ZEND_LONG_MIN) {
+					/* e.g. range(PHP_INT_MIN + 513, PHP_INT_MIN) */
+					/* e.g. range(0, PHP_INT_MIN, PHP_INT_MIN) */
+					if (low == ZEND_LONG_MIN || (lstep > ZEND_LONG_MAX && low < 0)) {
 						break;
 					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			/* overflow may occur if low = ZEND_LONG_MIN and high = 0 */
-			if ((low != ZEND_LONG_MIN && high != 0) && (high - low < lstep || lstep <= 0)) {
+			if (high - low < lstep) {
 				err = 1;
 				goto err;
 			}
 
 			__calc_size = ((high - low) / lstep) + 1;
 
-			if ((high == ZEND_LONG_MAX && low < 1) /* overflow check */
-				|| (low == ZEND_LONG_MIN && high > -2) /* overflow check */
-				|| __calc_size > HT_MAX_SIZE /* the array size is too big */
-			) {
-				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", low, high);
-				RETURN_FALSE;
+			if (__calc_size > HT_MAX_SIZE) {
+				err_range = 1;
+				goto err_range;
 			}
 
 			array_init_size(return_value, (uint32_t)__calc_size);
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low <= high; low += lstep) {
 					Z_LVAL(tmp) = low;
 					ZEND_HASH_FILL_ADD(&tmp);
 					/* safety check from overflow */
-					/* for something like range(PHP_INT_MAX - 512, PHP_INT_MAX) */
-					if (low == ZEND_LONG_MAX) {
+					/* e.g. range(PHP_INT_MAX - 512, PHP_INT_MAX) */
+					/* e.g. range(PHP_INT_MIN, 1, PHP_INT_MIN) */
+					if (low == ZEND_LONG_MAX || (lstep > ZEND_LONG_MAX && low > -1)) {
 						break;
 					}
 				}
@@ -2280,6 +2290,12 @@ long_str:
 			array_init(return_value);
 			Z_LVAL(tmp) = low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		}
+
+err_range:
+		if (err_range) {
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", low > high ? high : low, low > high ? low : high);
+			RETURN_FALSE;
 		}
 	}
 err:
