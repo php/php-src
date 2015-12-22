@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     array to strings). (Laruence)
   . Fixed bug #71188 (str_replace converts integers in original $search array
     to strings). (Laruence)
+  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
 ?? Jan 2016 PHP 7.0.2
 
