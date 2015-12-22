@@ -3246,7 +3246,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
-			if (opline->op1_type == IS_CV) {
+			if (opline->op1_type == IS_CV && ssa_ops[i].op1_def >= 0) {
 				if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
 					tmp = (MAY_BE_REF | t1) & ~(MAY_BE_UNDEF|MAY_BE_RC1|MAY_BE_RCN);
 					if (t1 & MAY_BE_UNDEF) {
@@ -3320,7 +3320,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 //			break;
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
-			if (ssa_ops[i].op1_def) {
+			if (ssa_ops[i].op1_def >= 0) {
 				tmp = t1;
 				if (t1 & MAY_BE_RCN) {
 					tmp |= MAY_BE_RC1;
