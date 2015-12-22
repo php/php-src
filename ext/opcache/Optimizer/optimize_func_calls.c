@@ -154,6 +154,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				/* break intentionally missing */
 			case ZEND_SEND_VAL:
 				if (!had_fcall && opline->op1_type == IS_TMP_VAR) {
+					int i, result = -1, src = -1;
 					zend_op *orig = opline;
 					while (--orig >= op_array->opcodes) {
 						if (orig->op1.var == opline->op1.var && orig->op1_type == IS_TMP_VAR) {
@@ -166,7 +167,25 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							orig->result.var = opline->result.var;
 						}
 					}
-					opline->opcode = ZEND_NOP;
+					for (i = 0; i < op_array->last_live_range; i++) {
+						if ((op_array->live_range[i].var & ZEND_LIVE_MASK) == opline->op1.var) {
+							src = i;
+						}
+						if ((op_array->live_range[i].var & ZEND_LIVE_MASK) == opline->result.var) {
+							result = i;
+						}
+					}
+					if (!src && !result) {
+						/* we're done, the temporary is immediately followed by the fcall executing opcode */
+					} else if (src && result) {
+						op_array->live_range[result].start = op_array->live_range[src].start;
+						zend_optimizer_remove_live_range(op_array, opline->op1.var);
+					} else if (src) {
+						op_array->live_range[src].end++;
+					} else if (result) {
+						op_array->live_range[result].start--;
+					}
+					MAKE_NOP(opline);
 				}
 				break;
 			case ZEND_SEND_VAR_EX:
