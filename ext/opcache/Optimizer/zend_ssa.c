@@ -129,7 +129,7 @@ static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
 		|| (b < 0 && a > ZEND_LONG_MAX + b);
 }
 
-static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *var, int n) /* {{{ */
+static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks = ssa->blocks;
@@ -230,7 +230,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *va
 						ssa_vars_count++;
 						//NEW_SSA_VAR(opline->op1.var)
 					}
-					if (opline->op2_type == IS_CV) {
+					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
 						ssa_ops[k].op2_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
 						ssa_vars_count++;
@@ -268,7 +268,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *va
 						ssa_vars_count++;
 						//NEW_SSA_VAR(opline->op1.var)
 					}
-					if (next->op1_type == IS_CV) {
+					if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
 						ssa_ops[k + 1].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
 						ssa_vars_count++;
@@ -418,7 +418,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *va
 	j = blocks[n].children;
 	while (j >= 0) {
 		// FIXME: Tail call optimization?
-		if (zend_ssa_rename(op_array, ssa, var, j) != SUCCESS)
+		if (zend_ssa_rename(op_array, build_flags, ssa, var, j) != SUCCESS)
 			return FAILURE;
 		j = blocks[j].next_child;
 	}
@@ -863,7 +863,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		var[j] = j;
 	}
 	ssa->vars_count = op_array->last_var;
-	if (zend_ssa_rename(op_array, ssa, var, 0) != SUCCESS) {
+	if (zend_ssa_rename(op_array, build_flags, ssa, var, 0) != SUCCESS) {
 failure:
 		free_alloca(var, var_use_heap);
 		free_alloca(dfg.tmp, dfg_use_heap);

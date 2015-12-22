@@ -2924,7 +2924,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
-			if ((opline+1)->op1_type == IS_CV) {
+			if ((opline+1)->op1_type == IS_CV && ssa_ops[i+1].op1_def >= 0) {
 				opline++;
 				i++;
 				tmp = OP1_INFO();
@@ -2974,7 +2974,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		case ZEND_ASSIGN:
-			if (opline->op2_type == IS_CV) {
+			if (opline->op2_type == IS_CV && ssa_ops[i].op2_def >= 0) {
 				tmp = t2;
 				if (tmp & (MAY_BE_ANY | MAY_BE_REF)) {
 					if (tmp & MAY_BE_RC1) {
