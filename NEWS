@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
 
+- Standard:
+  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+    
 17 Dec 2015, PHP 5.6.17
 
 - Core:
