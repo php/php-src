@@ -12,7 +12,7 @@ var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));
 ?>
 --EXPECTF--
-array(15) {
+array(16) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -157,8 +157,11 @@ serial:AE:C5:56:CC:72:37:50:A2
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
   }
+  ["criticalExtensions"]=>
+  array(0) {
+  }
 }
-array(15) {
+array(16) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -302,5 +305,8 @@ serial:AE:C5:56:CC:72:37:50:A2
 "
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
+  }
+  ["criticalExtensions"]=>
+  array(0) {
   }
 }

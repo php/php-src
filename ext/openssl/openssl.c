@@ -1975,7 +1975,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	int i, sig_nid;
 	zend_bool useshortnames = 1;
 	char * tmpstr;
-	zval subitem;
+	zval subitem, critical_extensions;
 	X509_EXTENSION *extension;
 	char *extname;
 	BIO  *bio_out;
@@ -2055,14 +2055,15 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_zval(return_value, "purposes", &subitem);
 
 	array_init(&subitem);
-
+	array_init(&critical_extensions);
 
 	for (i = 0; i < X509_get_ext_count(cert); i++) {
-		int nid;
+		int nid, critical;
 		extension = X509_get_ext(cert, i);
 		nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
+		critical = X509_EXTENSION_get_critical(extension);
 		if (nid != NID_undef) {
-			extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+			extname = (char *)OBJ_nid2sn(nid);
 		} else {
 			OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1);
 			extname = buf;
@@ -2087,9 +2088,13 @@ PHP_FUNCTION(openssl_x509_parse)
 		} else {
 			add_assoc_asn1_string(&subitem, extname, X509_EXTENSION_get_data(extension));
 		}
+		if (critical) {
+			add_next_index_string(&critical_extensions, extname);
+		}
 		BIO_free(bio_out);
 	}
 	add_assoc_zval(return_value, "extensions", &subitem);
+	add_assoc_zval(return_value, "criticalExtensions", &critical_extensions);
 
 	if (certresource == NULL && cert) {
 		X509_free(cert);
