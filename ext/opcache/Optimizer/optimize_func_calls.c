@@ -45,7 +45,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	int call = 0;
 	void *checkpoint;
 	optimizer_call_info *call_stack;
-	zend_bool had_fcall;
+	zend_bool had_fcall = 0;
 
 	if (op_array->last < 2) {
 		return;
@@ -159,7 +159,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						if (orig->op1.var == opline->op1.var && orig->op1_type == IS_TMP_VAR) {
 							orig->op1.var = opline->result.var;
 						}
-						if (orig->op2.var == opline->op2.var && orig->op2_type == IS_TMP_VAR) {
+						if (orig->op2.var == opline->op1.var && orig->op2_type == IS_TMP_VAR) {
 							orig->op2.var = opline->result.var;
 						}
 						if (orig->result.var == opline->op1.var && orig->result_type == IS_TMP_VAR) {

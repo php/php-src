@@ -1171,11 +1171,7 @@ zend_module_entry litespeed_module_entry = {
 static int add_associate_array( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
 {
-    add_assoc_string_ex( (zval *)arg, (char *)pKey, keyLen+1, (char *)pValue
-#if PHP_MAJOR_VERSION < 7
-            , 1
-#endif
-    );
+    add_assoc_string_ex((zval *)arg, (char *)pKey, keyLen, (char *)pValue);
     return 1;
 }
 
@@ -1229,11 +1225,7 @@ PHP_FUNCTION(litespeed_response_headers)
                 headerBuf[len] = 0;
                 if ( len ) {
                     while( isspace(*++p));
-                    add_assoc_string_ex(return_value, headerBuf, len+1, p
-#if PHP_MAJOR_VERSION < 7
-                                        , 1
-#endif
-                    );
+                    add_assoc_string_ex(return_value, headerBuf, len, p);
                 }
             }
         }

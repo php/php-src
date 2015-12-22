@@ -91,11 +91,6 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 			if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
 				opline->result.var += sizeof(zval);
 			}
-			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
-			    opline->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
-			    opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-				opline->extended_value += sizeof(zval);
-			}
 			opline++;
 		}
 	}

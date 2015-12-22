@@ -93,6 +93,7 @@ typedef struct _zend_cfg {
 #define ZEND_CFG_STACKLESS             (1<<30)
 #define ZEND_SSA_DEBUG_LIVENESS        (1<<29)
 #define ZEND_SSA_DEBUG_PHI_PLACEMENT   (1<<28)
+#define ZEND_SSA_RC_INFERENCE          (1<<27)
 
 #define CRT_CONSTANT_EX(op_array, node, rt_constants) \
 	((rt_constants) ? \

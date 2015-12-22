@@ -88,7 +88,7 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_REF"         => 1<<20,
 	"ZEND_VM_EXT_MASK"        => 0xff000000,
 	"ZEND_VM_EXT_NUM"         => 0x01000000,
-	"ZEND_VM_EXT_VAR"         => 0x02000000,
+    // unused 0x2000000
 	"ZEND_VM_EXT_JMP_ADDR"    => 0x03000000,
 	"ZEND_VM_EXT_DIM_OBJ"     => 0x04000000,
 	"ZEND_VM_EXT_CLASS_FETCH" => 0x05000000,
@@ -125,7 +125,6 @@ $vm_op_decode = array(
 
 $vm_ext_decode = array(
 	"NUM"                  => ZEND_VM_EXT_NUM,
-	"VAR"                  => ZEND_VM_EXT_VAR,
 	"JMP_ADDR"             => ZEND_VM_EXT_JMP_ADDR,
 	"DIM_OBJ"              => ZEND_VM_EXT_DIM_OBJ,
 	"CLASS_FETCH"          => ZEND_VM_EXT_CLASS_FETCH,

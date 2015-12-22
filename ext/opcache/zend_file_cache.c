@@ -392,8 +392,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					SERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
@@ -411,6 +409,8 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_ASSERT_CHECK:
 					SERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					/* relative extended_value don't have to be changed */
@@ -969,8 +969,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					UNSERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
@@ -988,6 +986,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_ASSERT_CHECK:
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					/* relative extended_value don't have to be changed */

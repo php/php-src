@@ -657,9 +657,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FAST_RET:
 				zend_resolve_finally_ret(op_array, opline - op_array->opcodes);
 				break;
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				break;
 			case ZEND_BRK:
 			case ZEND_CONT:
 				{
@@ -681,12 +678,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
-			case ZEND_DECLARE_ANON_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				break;
-			case ZEND_CATCH:
-				/* absolute index to relative offset */
-				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				break;
 			case ZEND_JMPZNZ:
 				/* absolute index to relative offset */
@@ -709,8 +701,12 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
+			case ZEND_CATCH:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
+				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:
@@ -753,9 +749,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		} else if (opline->result_type == IS_ARG) {
 			opline->result_type = IS_VAR;
 			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + op_array->T + opline->result.var);
-		}
-		if ((zend_get_opcode_flags(opline->opcode) & ZEND_VM_EXT_MASK) == ZEND_VM_EXT_VAR) {
-			opline->extended_value = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->extended_value);
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;

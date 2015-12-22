@@ -848,8 +848,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		switch (opline->opcode) {
 			case ZEND_FAST_CALL:
 			case ZEND_JMP:
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op1, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_JMPZNZ:
@@ -872,6 +870,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
 				}
 				break;
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
@@ -1492,7 +1492,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	}
 
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	bitset_len = zend_bitset_len(op_array->last_var + op_array->T + op_array->last_arg);
+	bitset_len = zend_bitset_len(op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg);
 	defined_here = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 
 	zend_bitset_clear(defined_here, bitset_len);
@@ -1769,7 +1769,6 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	}
 
 	if (op_array->last_var || op_array->T || op_array->num_args || op_array->last_arg) {
-		int i;
 		bitset_len = zend_bitset_len(op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg);
 		Tsource = zend_arena_calloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg, sizeof(zend_op *));
 		same_t = zend_arena_alloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg);

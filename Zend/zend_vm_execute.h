@@ -705,65 +705,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_SPEC_HANDLER(ZEN
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->extended_value)), 0);
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *zce, *orig_zce;
-
-	SAVE_OPLINE();
-	if ((zce = zend_hash_find(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op2)))) == NULL ||
-	    ((orig_zce = zend_hash_find(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op1)))) != NULL &&
-	     Z_CE_P(zce) != Z_CE_P(orig_zce))) {
-		do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->extended_value)), 0);
-	}
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry *ce;
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op2)));
+	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op1)));
 	Z_CE_P(EX_VAR(opline->result.var)) = ce;
 	ZEND_ASSERT(ce != NULL);
 
 	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
 	}
 
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
 		zend_verify_abstract_class(ce);
 	}
-	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_class_entry *ce;
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op2)));
-	Z_CE_P(EX_VAR(opline->result.var)) = ce;
-	ZEND_ASSERT(ce != NULL);
-
-	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
-	}
-
-	zend_do_inheritance(ce, Z_CE_P(EX_VAR(opline->extended_value)));
 	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -1616,6 +1575,49 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_INTERFACE_SPEC_CONST_HANDL
 	}
 	zend_do_implement_interface(ce, iface);
 
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_INHERITED_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->op2.var)), 0);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *zce, *orig_zce;
+
+	SAVE_OPLINE();
+	if ((zce = zend_hash_find(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op1)))) == NULL ||
+	    ((orig_zce = zend_hash_find(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op1)+1))) != NULL &&
+	     Z_CE_P(zce) != Z_CE_P(orig_zce))) {
+		do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->op2.var)), 0);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_class_entry *ce;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op1)));
+	Z_CE_P(EX_VAR(opline->result.var)) = ce;
+	ZEND_ASSERT(ce != NULL);
+
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
+
+	zend_do_inheritance(ce, Z_CE_P(EX_VAR(opline->op2.var)));
+	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -3097,8 +3099,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_CONST == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
@@ -11773,8 +11776,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_TMP_VAR == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
@@ -15628,7 +15632,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_HANDLER(ZEND_
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -15674,7 +15678,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_HANDLER(ZEND_
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -15720,7 +15724,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -15759,7 +15763,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -16276,8 +16280,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_VAR == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
@@ -16599,8 +16604,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 
 	ZVAL_DEREF(array);
 	if (EXPECTED(Z_TYPE_P(array) == IS_ARRAY)) {
+		pos = zend_hash_iterator_pos_ex(Z_FE_ITER_P(EX_VAR(opline->op1.var)), array);
 		fe_ht = Z_ARRVAL_P(array);
-		pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);
 		p = fe_ht->arData + pos;
 		while (1) {
 			if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
@@ -17163,7 +17168,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -17203,7 +17208,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_V
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -17487,7 +17492,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = EX_CONSTANT(opline->op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -17567,7 +17572,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = EX_CONSTANT(opline->op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -17962,7 +17967,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_HAND
 	property_name = EX_CONSTANT(opline->op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 
 		HANDLE_EXCEPTION();
 	}
@@ -19308,7 +19313,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	value_ptr = _get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		HANDLE_EXCEPTION();
 	}
@@ -19336,7 +19341,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 		HANDLE_EXCEPTION();
 	}
@@ -19541,7 +19546,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -20626,7 +20631,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -20666,7 +20671,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_V
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -20950,7 +20955,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -21030,7 +21035,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -21425,7 +21430,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_HANDLER
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 
 		HANDLE_EXCEPTION();
 	}
@@ -21581,7 +21586,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		HANDLE_EXCEPTION();
 	}
@@ -21609,7 +21614,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 	if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -22287,7 +22292,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 			zval_ptr_dtor_nogc(free_op2);
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -22328,7 +22333,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_V
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -22613,7 +22618,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -22694,7 +22699,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -23091,7 +23096,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_HAN
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -23885,7 +23890,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 
@@ -24173,7 +24178,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = EX_CONSTANT(opline->op2);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -24253,7 +24258,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = EX_CONSTANT(opline->op2);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -24611,7 +24616,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_H
 	property_name = EX_CONSTANT(opline->op2);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 
 		HANDLE_EXCEPTION();
 	}
@@ -25855,7 +25860,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 
@@ -26595,7 +26600,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 
@@ -26883,7 +26888,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -26963,7 +26968,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -27321,7 +27326,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_HAND
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 
 		HANDLE_EXCEPTION();
 	}
@@ -28222,7 +28227,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 			zval_ptr_dtor_nogc(free_op2);
 			FREE_OP(free_op_data1);
 
@@ -28511,7 +28516,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -28592,7 +28597,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -28953,7 +28958,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -29657,7 +29662,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_CV_HANDLER(ZEND_O
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -29702,7 +29707,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_CV_HANDLER(ZEND_O
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -29747,7 +29752,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -29785,7 +29790,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -30652,8 +30657,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_CV == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
@@ -31835,7 +31841,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 
@@ -31875,7 +31881,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_C
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -32159,7 +32165,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = EX_CONSTANT(opline->op2);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -32239,7 +32245,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = EX_CONSTANT(opline->op2);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -32917,7 +32923,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_HANDL
 	property_name = EX_CONSTANT(opline->op2);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 
 		HANDLE_EXCEPTION();
 	}
@@ -34867,7 +34873,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 	value_ptr = _get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -34895,7 +34901,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 		HANDLE_EXCEPTION();
 	}
@@ -35290,7 +35296,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 
@@ -37288,7 +37294,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 			FREE_OP(free_op_data1);
 
@@ -37328,7 +37334,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_C
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -37612,7 +37618,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -37692,7 +37698,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -38187,7 +38193,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_HANDLER(
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 
 		HANDLE_EXCEPTION();
 	}
@@ -38343,7 +38349,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -38371,7 +38377,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 	if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(NULL, "Cannot create references to/from string offsets");
 
 		HANDLE_EXCEPTION();
 	}
@@ -39942,7 +39948,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 			zval_ptr_dtor_nogc(free_op2);
 			FREE_OP(free_op_data1);
 
@@ -39983,7 +39989,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_C
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -40268,7 +40274,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -40349,7 +40355,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -40847,7 +40853,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_HAND
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
+		zend_throw_error(NULL, "Cannot use string offset as an object");
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
@@ -50329,31 +50335,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_DECLARE_CLASS_SPEC_HANDLER,
   	ZEND_DECLARE_CLASS_SPEC_HANDLER,
   	ZEND_DECLARE_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
   	ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
   	ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
@@ -50454,31 +50460,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
-  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_VERIFY_ABSTRACT_CLASS_SPEC_HANDLER,
   	ZEND_VERIFY_ABSTRACT_CLASS_SPEC_HANDLER,
   	ZEND_VERIFY_ABSTRACT_CLASS_SPEC_HANDLER,
@@ -51129,31 +51135,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_DECLARE_ANON_CLASS_SPEC_HANDLER,
   	ZEND_DECLARE_ANON_CLASS_SPEC_HANDLER,
   	ZEND_DECLARE_ANON_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
-  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_DECLARE_ANON_INHERITED_CLASS_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_FETCH_STATIC_PROP_R_SPEC_CONST_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_FETCH_STATIC_PROP_R_SPEC_CONST_VAR_HANDLER,

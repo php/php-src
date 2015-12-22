@@ -133,10 +133,6 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
 	}
-	if (info & MAY_BE_DEF) {
-		if (first) first = 0; else fprintf(stderr, ", ");
-		fprintf(stderr, "def");
-	}
 	if (info & MAY_BE_REF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "ref");
@@ -653,8 +649,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			}
 		}
-	} else if (ZEND_VM_EXT_VAR == (flags & ZEND_VM_EXT_MASK)) {
-		fprintf(stderr, " V%u", EX_VAR_TO_NUM(opline->extended_value));
 	}
 	if (opline->result_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
@@ -1015,7 +1009,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		if (op_array->last_live_range) {
 			fprintf(stderr, "LIVE RANGES:\n");
 			for (i = 0; i < op_array->last_live_range; i++) {
-				fprintf(stderr, "        %u: L%u - L%u\n",
+				fprintf(stderr, "        %u: L%u - L%u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
 					op_array->live_range[i].start,
 					op_array->live_range[i].end);
