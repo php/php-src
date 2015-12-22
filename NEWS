@@ -2,7 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.3
 
-
+- Standard:
+  . Fixed bug #71190 (substr_replace converts integers in original $search
+    array to strings). (Laruence)
+  . Fixed bug #71188 (str_replace converts integers in original $search array
+    to strings). (Laruence)
 
 ?? Jan 2016 PHP 7.0.2
 
@@ -65,12 +69,6 @@ PHP                                                                        NEWS
     wrong number of parameters). (Laruence)
   . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
     arrays). (Nikita)
-
-- Standard:
-  . Fixed bug #71190 (substr_replace converts integers in original $search
-    array to strings). (Laruence)
-  . Fixed bug #71188 (str_replace converts integers in original $search array
-    to strings). (Laruence)
 
 17 Dec 2015, PHP 7.0.1
 
