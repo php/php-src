@@ -91,6 +91,11 @@ static void zend_dump_class_fetch_type(uint32_t fetch_type)
 void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num)
 {
 	if (var_type == IS_CV && var_num < op_array->last_var) {
+		if (var_num < 0) {
+			var_num = - ZEND_CALL_FRAME_SLOT - var_num - 1;
+		} else {
+			var_num += op_array->num_args;
+		}
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
 	} else if (var_type == IS_VAR) {
 		fprintf(stderr, "V%d", var_num);
@@ -855,7 +860,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	if (func_info && func_info->num_args >= 0) {
 		fprintf(stderr, "/%d", func_info->num_args);
 	}
-	fprintf(stderr, ", vars=%d, tmps=%d", op_array->last_var, op_array->T);
+	fprintf(stderr, ", vars=%d, tmps=%d, fcalls=%d", op_array->last_var, op_array->T, op_array->last_arg);
 	if (ssa) {
 		fprintf(stderr, ", ssa_vars=%d", ssa->vars_count);
 	}
@@ -967,6 +972,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 						break;
 					case ZEND_LIVE_ROPE:
 						fprintf(stderr, "(rope)\n");
+						break;
+					case ZEND_LIVE_EXECUTE_DATA:
+						fprintf(stderr, "(execute_data)\n");
 						break;
 				}
 			}
@@ -1115,7 +1123,7 @@ static void zend_dump_var_set(const zend_op_array *op_array, const char *name, z
 	uint32_t i;
 
 	fprintf(stderr, "    ; %s = {", name);
-	for (i = 0; i < op_array->last_var + op_array->T; i++) {
+	for (i = 0; i < op_array->last_var + op_array->T + op_array->last_arg; i++) {
 		if (zend_bitset_in(set, i)) {
 			if (first) {
 				first = 0;

@@ -144,7 +144,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 
 		/* Constant Propagation: strip X = QM_ASSIGN(const) */
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR)) &&
-		    opline->opcode != ZEND_FREE) {
+		    (zend_get_opcode_flags(opline->opcode) & ZEND_VM_OP1_CONST)) {
 			src = VAR_SOURCE(opline->op1);
 			if (src &&
 			    src->opcode == ZEND_QM_ASSIGN &&
@@ -164,7 +164,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 		}
 
 		/* Constant Propagation: strip X = QM_ASSIGN(const) */
-		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
+		if ((opline->op2_type & (IS_TMP_VAR|IS_VAR)) &&
+		    (zend_get_opcode_flags(opline->opcode) & ZEND_VM_OP2_CONST)) {
 			src = VAR_SOURCE(opline->op2);
 			if (src &&
 			    src->opcode == ZEND_QM_ASSIGN &&
@@ -1296,7 +1297,7 @@ next_target:
 			if (1) {
 				zend_op *target, *target_end;
 				zend_basic_block *target_block;
-				int var_num = op_array->num_args + op_array->last_var + op_array->T;
+				int var_num = op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg;
 
 				if (var_num <= 0) {
    					return;
@@ -1491,7 +1492,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	}
 
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
+	bitset_len = zend_bitset_len(op_array->last_var + op_array->T + op_array->last_arg);
 	defined_here = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 
 	zend_bitset_clear(defined_here, bitset_len);
@@ -1627,7 +1628,8 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 					zend_bitset_excl(usage, VAR_NUM(opline->result.var));
 				}
 			} else if (opline->result_type == IS_TMP_VAR) {
-				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
+				/* do not optimize temporary targets inside fcall/arg range away */
+				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var)) && VAR_NUM(opline->result.var) < op_array->num_args + op_array->last_var + op_array->T) {
 					switch (opline->opcode) {
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
@@ -1766,10 +1768,11 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "before block pass", &cfg);
 	}
 
-	if (op_array->last_var || op_array->T || op_array->num_args) {
-		bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
-		Tsource = zend_arena_calloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T, sizeof(zend_op *));
-		same_t = zend_arena_alloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T);
+	if (op_array->last_var || op_array->T || op_array->num_args || op_array->last_arg) {
+		int i;
+		bitset_len = zend_bitset_len(op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg);
+		Tsource = zend_arena_calloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg, sizeof(zend_op *));
+		same_t = zend_arena_alloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg);
 		usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 	} else {
 		bitset_len = 0;
@@ -1793,7 +1796,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (!(b->flags & ZEND_BB_FOLLOW) ||
 			    (b->flags & ZEND_BB_TARGET)) {
 				/* Skip continuation of "extended" BB */
-				memset(Tsource, 0, (op_array->num_args + op_array->last_var + op_array->T) * sizeof(zend_op *));
+				memset(Tsource, 0, (op_array->num_args + op_array->last_var + op_array->T + op_array->last_arg) * sizeof(zend_op *));
 			}
 			zend_optimize_block(b, op_array, usage, &cfg, Tsource);
 		}

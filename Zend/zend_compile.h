@@ -134,7 +134,7 @@ typedef union _zend_parser_stack_elem {
 void zend_compile_top_stmt(zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
-void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
+void zend_compile_var(znode *node, zend_ast *ast, uint64_t type);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
@@ -178,6 +178,7 @@ typedef struct _zend_try_catch_element {
 #define ZEND_LIVE_SILENCE      2
 #define ZEND_LIVE_ROPE         3
 #define ZEND_LIVE_EXECUTE_DATA 4
+#define ZEND_LIVE_ARG          5
 #define ZEND_LIVE_MASK         7
 
 typedef struct _zend_live_range {
@@ -198,6 +199,7 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
+	uint32_t   current_arg;
 } zend_oparray_context;
 
 /* method flags (types) */
@@ -374,6 +376,7 @@ struct _zend_op_array {
 
 	int last_var;
 	uint32_t T;
+	uint32_t last_arg;
 	zend_string **vars;
 
 	int last_live_range;
@@ -690,6 +693,8 @@ struct _zend_execute_data {
 #define IS_CV		(1<<4)	/* Compiled variable */
 
 #define EXT_TYPE_UNUSED	(1<<5)
+
+#define IS_ARG          (1<<6)  /* to be used only during compilation */
 
 #include "zend_globals.h"
 
