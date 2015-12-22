@@ -62,6 +62,10 @@ PHP                                                                        NEWS
   . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
     arrays). (Nikita)
 
+- Standard:
+  . Fixed #71188 (str_replace converts integers in original $search array to
+    strings). (Laruence)
+
 17 Dec 2015, PHP 7.0.1
 
 - Core:
