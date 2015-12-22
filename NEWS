@@ -117,7 +117,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fixed bug #71020 (Use after free in Collator::sortWithSortKeys).
-    (emmanuel dot law at gmail dot com, Laruence)
+    (CVE-2015-8616) (emmanuel dot law at gmail dot com, Laruence)
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
