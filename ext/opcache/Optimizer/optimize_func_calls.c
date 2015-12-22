@@ -45,6 +45,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	int call = 0;
 	void *checkpoint;
 	optimizer_call_info *call_stack;
+	zend_bool had_fcall;
 
 	if (op_array->last < 2) {
 		return;
@@ -80,6 +81,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_DO_FCALL_BY_NAME:
 			case ZEND_DO_UNPACK_FCALL:
 				call--;
+				had_fcall = call != 0; /* we must not replace ZEND_SEND_VAL after a DO_FCALL inside nested calls */
 				if (call_stack[call].func && call_stack[call].opline) {
 					zend_op *fcall = call_stack[call].opline;
 
@@ -139,13 +141,32 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				break;
 			case ZEND_SEND_VAL_EX:
-				if (call_stack[call - 1].func) {
-					if (ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
-						/* We won't convert it into_DO_FCALL to emit error at run-time */
-						call_stack[call - 1].opline = NULL;
-					} else {
-						opline->opcode = ZEND_SEND_VAL;
+				if (!call_stack[call - 1].func) {
+					break;
+				}
+				if (ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
+					/* We won't convert it into_DO_FCALL to emit error at run-time */
+					call_stack[call - 1].opline = NULL;
+					break;
+				}
+
+				opline->opcode = ZEND_SEND_VAL;
+				/* break intentionally missing */
+			case ZEND_SEND_VAL:
+				if (!had_fcall && opline->op1_type == IS_TMP_VAR) {
+					zend_op *orig = opline;
+					while (--orig >= op_array->opcodes) {
+						if (orig->op1.var == opline->op1.var && orig->op1_type == IS_TMP_VAR) {
+							orig->op1.var = opline->result.var;
+						}
+						if (orig->op2.var == opline->op2.var && orig->op2_type == IS_TMP_VAR) {
+							orig->op2.var = opline->result.var;
+						}
+						if (orig->result.var == opline->op1.var && orig->result_type == IS_TMP_VAR) {
+							orig->result.var = opline->result.var;
+						}
 					}
+					opline->opcode = ZEND_NOP;
 				}
 				break;
 			case ZEND_SEND_VAR_EX:
