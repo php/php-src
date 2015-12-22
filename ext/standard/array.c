@@ -2067,6 +2067,16 @@ PHP_FUNCTION(array_fill_keys)
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
 	} while (0)
 
+#define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
+		__calc_size = (end - start) / lstep; \
+		if (__calc_size >= HT_MAX_SIZE) { \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", start, end); \
+			RETURN_FALSE; \
+		} \
+		array_init_size(return_value, (uint32_t)(__calc_size + 1)); \
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
+	} while (0)
+
 /* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
@@ -2208,7 +2218,6 @@ double_str:
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else {
-		int err_range = 0;
 		zend_long low, high;
 		/* lstep is a ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
 		zend_ulong __calc_size, lstep;
@@ -2223,12 +2232,6 @@ long_str:
 
 		lstep = step;
 
-		if ((low == ZEND_LONG_MIN && high == ZEND_LONG_MAX)
-			|| (low == ZEND_LONG_MAX && high == ZEND_LONG_MIN)) {
-			err_range = 1;
-			goto err_range;
-		}
-
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
 			if (low - high < lstep) {
@@ -2236,15 +2239,7 @@ long_str:
 				goto err;
 			}
 
-			__calc_size = ((low - high) / lstep) + 1;
-
-			if (__calc_size > HT_MAX_SIZE) {
-				err_range = 1;
-				goto err_range;
-			}
-
-			array_init_size(return_value, (uint32_t)__calc_size);
-			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			RANGE_CHECK_LONG_INIT_ARRAY(high, low);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low >= high; low -= lstep) {
@@ -2264,15 +2259,7 @@ long_str:
 				goto err;
 			}
 
-			__calc_size = ((high - low) / lstep) + 1;
-
-			if (__calc_size > HT_MAX_SIZE) {
-				err_range = 1;
-				goto err_range;
-			}
-
-			array_init_size(return_value, (uint32_t)__calc_size);
-			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			RANGE_CHECK_LONG_INIT_ARRAY(low, high);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low <= high; low += lstep) {
@@ -2291,12 +2278,6 @@ long_str:
 			Z_LVAL(tmp) = low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
-
-err_range:
-		if (err_range) {
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", low > high ? high : low, low > high ? low : high);
-			RETURN_FALSE;
-		}
 	}
 err:
 	if (err) {
@@ -2307,6 +2288,7 @@ err:
 /* }}} */
 
 #undef RANGE_CHECK_INIT_ARRAY
+#undef RANGE_CHECK_LONG_INIT_ARRAY
 
 static void php_array_data_shuffle(zval *array) /* {{{ */
 {
