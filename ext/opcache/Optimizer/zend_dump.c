@@ -570,6 +570,9 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
+			} else if (ssa->ops[opline - op_array->opcodes].op1_def < 0) {
+				fprintf(stderr, " ");
+				zend_dump_var(op_array, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
 			}
 		} else {
 			fprintf(stderr, " ");
@@ -615,6 +618,9 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
+			} else if (ssa->ops[opline - op_array->opcodes].op2_def < 0) {
+				fprintf(stderr, " ");
+				zend_dump_var(op_array, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
 			}
 		} else {
 			fprintf(stderr, " ");
