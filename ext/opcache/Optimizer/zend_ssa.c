@@ -495,7 +495,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				zend_bitset_copy(tmp, gen + (j * set_size), set_size);
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
-					while (i != blocks[j].idom) {
+					while (i != -1 && i != blocks[j].idom) {
 						zend_bitset_union_with_intersection(tmp, tmp, gen + (i * set_size), in + (j * set_size), set_size);
 						i = blocks[i].idom;
 					}
@@ -530,7 +530,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			} else {
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
-					while (i != blocks[j].idom) {
+					while (i != -1 && i != blocks[j].idom) {
 						zend_bitset_union_with_intersection(tmp, tmp, gen + (i * set_size), in + (j * set_size), set_size);
 						i = blocks[i].idom;
 					}
@@ -802,7 +802,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			} else {
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
-					while (i != blocks[j].idom) {
+					while (i != -1 && i != blocks[j].idom) {
 						zend_ssa_phi *p = ssa_blocks[i].phis;
 						while (p) {
 							if (p) {
