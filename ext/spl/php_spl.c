@@ -417,11 +417,17 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 
 	if (SPL_G(autoload_functions)) {
+		HashPosition pos;
+		zend_ulong num_idx;
 		int l_autoload_running = SPL_G(autoload_running);
 		SPL_G(autoload_running) = 1;
 		lc_name = zend_string_alloc(Z_STRLEN_P(class_name), 0);
 		zend_str_tolower_copy(ZSTR_VAL(lc_name), Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
-		ZEND_HASH_FOREACH_STR_KEY_PTR(SPL_G(autoload_functions), func_name, alfi) {
+		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
+		while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {
+			if ((alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &pos)) == NULL) {
+				continue;
+			}
 			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
 			zend_exception_save();
 			if (retval) {
@@ -431,7 +437,8 @@ PHP_FUNCTION(spl_autoload_call)
 			if (zend_hash_exists(EG(class_table), lc_name)) {
 				break;
 			}
-		} ZEND_HASH_FOREACH_END();
+			zend_hash_move_forward_ex(SPL_G(autoload_functions), &pos);
+		}
 		zend_exception_restore();
 		zend_string_free(lc_name);
 		SPL_G(autoload_running) = l_autoload_running;
