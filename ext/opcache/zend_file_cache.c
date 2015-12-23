@@ -446,13 +446,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			}
 		}
 
-		if (op_array->vars) {
+		if (op_array->vars || op_array->num_args) {
 			zend_string **p, **end;
 
 			SERIALIZE_PTR(op_array->vars);
 			p = op_array->vars;
 			UNSERIALIZE_PTR(p);
-			end = p + op_array->last_var;
+			end = p + op_array->last_var + op_array->num_args;
 			while (p < end) {
 				if (!IS_SERIALIZED(*p)) {
 					SERIALIZE_STR(*p);
@@ -1020,12 +1020,12 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			}
 		}
 
-		if (op_array->vars) {
+		if (op_array->vars || op_array->num_args) {
 			zend_string **p, **end;
 
 			UNSERIALIZE_PTR(op_array->vars);
 			p = op_array->vars;
-			end = p + op_array->last_var;
+			end = p + op_array->last_var + op_array->num_args;
 			while (p < end) {
 				if (!IS_UNSERIALIZED(*p)) {
 					UNSERIALIZE_STR(*p);

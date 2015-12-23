@@ -411,37 +411,37 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
 
-	convert_to_string_ex(&args[format_offset]);
+	convert_to_string_ex(&args[-format_offset]);
 	if (use_array) {
-		int i = 1;
+		int i = -1;
 		zval *zv;
 		zval *array;
 
-		z_format = &args[format_offset];
-		array = &args[1 + format_offset];
+		z_format = &args[-format_offset];
+		array = &args[-1 - format_offset];
 		if (Z_TYPE_P(array) != IS_ARRAY) {
 			convert_to_array(array);
 		}
 
 		argc = 1 + zend_hash_num_elements(Z_ARRVAL_P(array));
-		newargs = (zval *)safe_emalloc(argc, sizeof(zval), 0);
+		newargs = ((zval *)safe_emalloc(argc, sizeof(zval), 0)) + argc - 1;
 		ZVAL_COPY_VALUE(&newargs[0], z_format);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), zv) {
 			ZVAL_COPY_VALUE(&newargs[i], zv);
-			i++;
+			--i;
 		} ZEND_HASH_FOREACH_END();
 		args = newargs;
 		format_offset = 0;
 	}
 
-	format = Z_STRVAL(args[format_offset]);
-	format_len = Z_STRLEN(args[format_offset]);
+	format = Z_STRVAL(args[-format_offset]);
+	format_len = Z_STRLEN(args[-format_offset]);
 	result = zend_string_alloc(size, 0);
 
 	currarg = 1;
 
-	while (inpos < Z_STRLEN(args[format_offset])) {
+	while (inpos < Z_STRLEN(args[-format_offset])) {
 		int expprec = 0;
 		zval *tmp;
 
@@ -472,7 +472,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 					if (argnum <= 0) {
 						efree(result);
 						if (newargs) {
-							efree(newargs);
+							efree(newargs - argc + 1);
 						}
 						php_error_docref(NULL, E_WARNING, "Argument number must be greater than zero");
 						return NULL;
@@ -515,7 +515,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 					if ((width = php_sprintf_getnumber(format, &inpos)) < 0) {
 						efree(result);
 						if (newargs) {
-							efree(newargs);
+							efree(newargs - argc + 1);
 						}
 						php_error_docref(NULL, E_WARNING, "Width must be greater than zero and less than %d", INT_MAX);
 						return NULL;
@@ -534,7 +534,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 						if ((precision = php_sprintf_getnumber(format, &inpos)) < 0) {
 							efree(result);
 							if (newargs) {
-								efree(newargs);
+								efree(newargs - argc + 1);
 							}
 							php_error_docref(NULL, E_WARNING, "Precision must be greater than zero and less than %d", INT_MAX);
 							return NULL;
@@ -556,7 +556,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 			if (argnum >= argc) {
 				efree(result);
 				if (newargs) {
-					efree(newargs);
+					efree(newargs - argc + 1);
 				}
 				php_error_docref(NULL, E_WARNING, "Too few arguments");
 				return NULL;
@@ -567,7 +567,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 			}
 			PRINTF_DEBUG(("sprintf: format character='%c'\n", format[inpos]));
 			/* now we expect to find a type specifier */
-			tmp = &args[argnum];
+			tmp = &args[-argnum];
 			switch (format[inpos]) {
 				case 's': {
 					zend_string *str = zval_get_string(tmp);
@@ -653,7 +653,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 	}
 
 	if (newargs) {
-		efree(newargs);
+		efree(newargs - argc + 1);
 	}
 
 	/* possibly, we have to make sure we have room for the terminating null? */

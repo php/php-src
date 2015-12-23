@@ -438,10 +438,9 @@ ZEND_FUNCTION(func_num_args)
    Get the $arg_num'th argument that was passed to the function */
 ZEND_FUNCTION(func_get_arg)
 {
-	uint32_t arg_count, first_extra_arg;
 	zval *arg;
 	zend_long requested_offset;
-	zend_execute_data *ex;
+	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &requested_offset) == FAILURE) {
 		return;
@@ -458,19 +457,12 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	arg_count = ZEND_CALL_NUM_ARGS(ex);
-
-	if (requested_offset >= arg_count) {
+	if (requested_offset >= ZEND_CALL_NUM_ARGS(ex)) {
 		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 
-	first_extra_arg = ex->func->op_array.num_args;
-	if (requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
-		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
-	} else {
-		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
-	}
+	arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	if (EXPECTED(!Z_ISUNDEF_P(arg))) {
 		ZVAL_DEREF(arg);
 		ZVAL_COPY(return_value, arg);
@@ -483,8 +475,7 @@ ZEND_FUNCTION(func_get_arg)
 ZEND_FUNCTION(func_get_args)
 {
 	zval *p, *q;
-	uint32_t arg_count, first_extra_arg;
-	uint32_t i, n;
+	uint32_t arg_count, i, n;
 	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
@@ -496,29 +487,12 @@ ZEND_FUNCTION(func_get_args)
 
 	array_init_size(return_value, arg_count);
 	if (arg_count) {
-		first_extra_arg = ex->func->op_array.num_args;
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			i = 0;
 			n = 0;
 			p = ZEND_CALL_ARG(ex, 1);
-			if (arg_count > first_extra_arg) {
-				while (i < first_extra_arg) {
-					q = p;
-					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
-						ZVAL_DEREF(q);
-						if (Z_OPT_REFCOUNTED_P(q)) { 
-							Z_ADDREF_P(q);
-						}
-						n++;
-					}
-					ZEND_HASH_FILL_ADD(q);
-					p++;
-					i++;
-				}
-				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
-			}
-			while (i < arg_count) {
+			do {
 				q = p;
 				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
 					ZVAL_DEREF(q);
@@ -528,9 +502,9 @@ ZEND_FUNCTION(func_get_args)
 					n++;
 				}
 				ZEND_HASH_FILL_ADD(q);
-				p++;
+				p--;
 				i++;
-			}
+			} while (i < arg_count);
 		} ZEND_HASH_FILL_END();
 		Z_ARRVAL_P(return_value)->nNumOfElements = n;
 	}
@@ -2243,25 +2217,6 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
-			if (call->func->type == ZEND_USER_FUNCTION) {
-				uint32_t first_extra_arg = call->func->op_array.num_args;
-
-				if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
-					while (i < first_extra_arg) {
-						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
-							if (Z_OPT_REFCOUNTED_P(p)) {
-								Z_ADDREF_P(p);
-							}
-							n++;
-						}
-						ZEND_HASH_FILL_ADD(p);
-						p++;
-						i++;
-					}
-					p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
-				}
-			}
-
 			while (i < num_args) {
 				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 					if (Z_OPT_REFCOUNTED_P(p)) {
@@ -2270,7 +2225,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					n++;
 				}
 				ZEND_HASH_FILL_ADD(p);
-				p++;
+				p--;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();

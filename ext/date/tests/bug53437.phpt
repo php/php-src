@@ -23,7 +23,7 @@ foreach($dpu as $dt) {
 }
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 Original:
 2010-01-01 00:00:00
 2010-01-02 00:00:00
@@ -31,7 +31,7 @@ Original:
 
 object(DatePeriod)#1 (6) {
   ["start"]=>
-  object(DateTime)#2 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2010-01-01 00:00:00.000000"
     ["timezone_type"]=>

@@ -118,6 +118,7 @@ END_EXTERN_C()
 #define ZEND_ASSIGN                           38
 #define ZEND_ASSIGN_REF                       39
 #define ZEND_ECHO                             40
+#define ZEND_DO_UNPACK_FCALL                  41
 #define ZEND_JMP                              42
 #define ZEND_JMPZ                             43
 #define ZEND_JMPNZ                            44
@@ -191,7 +192,6 @@ END_EXTERN_C()
 #define ZEND_SEND_VAL_EX                     116
 #define ZEND_SEND_VAR                        117
 #define ZEND_INIT_USER_CALL                  118
-#define ZEND_SEND_ARRAY                      119
 #define ZEND_SEND_USER                       120
 #define ZEND_STRLEN                          121
 #define ZEND_DEFINED                         122

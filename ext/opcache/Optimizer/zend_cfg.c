@@ -278,6 +278,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_DO_FCALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_DO_UNPACK_FCALL:
 				flags |= ZEND_FUNC_HAS_CALLS;
 				if (build_flags & ZEND_CFG_STACKLESS) {
 					BB_START(i + 1);

@@ -42,7 +42,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 
 	switch (type) {
 		case IS_CV: {
-			zend_string *var = ops->vars[EX_VAR_TO_NUM(op->var)];
+			zend_string *var = RT_CV_DEF_OF(ops, EX_VAR_TO_NUM(op->var));
 			spprintf(&decode, 0, "$%.*s%c",
 				ZSTR_LEN(var) <= 19 ? (int) ZSTR_LEN(var) : 18,
 				ZSTR_VAL(var), ZSTR_LEN(var) <= 19 ? 0 : '+');
@@ -115,6 +115,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	case ZEND_JMPNZ_EX:
 	case ZEND_JMP_SET:
 	case ZEND_ASSERT_CHECK:
+	case ZEND_NEW:
 		spprintf(&decode[2], 0, "J%td", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
 		break;
 
@@ -123,16 +124,6 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 		if (op->extended_value != 0) {
 			spprintf(&decode[2], 0, "%" PRIu32, op->op2.num);
 		}
-		break;
-
-	case ZEND_SEND_VAL:
-	case ZEND_SEND_VAL_EX:
-	case ZEND_SEND_VAR:
-	case ZEND_SEND_VAR_NO_REF:
-	case ZEND_SEND_REF:
-	case ZEND_SEND_VAR_EX:
-	case ZEND_SEND_USER:
-		spprintf(&decode[2], 0, "%" PRIu32, op->op2.num);
 		break;
 
 	default:

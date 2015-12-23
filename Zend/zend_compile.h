@@ -134,7 +134,7 @@ typedef union _zend_parser_stack_elem {
 void zend_compile_top_stmt(zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
-void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
+void zend_compile_var(znode *node, zend_ast *ast, uint64_t type);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
@@ -173,11 +173,13 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_end;
 } zend_try_catch_element;
 
-#define ZEND_LIVE_TMPVAR  0
-#define ZEND_LIVE_LOOP    1
-#define ZEND_LIVE_SILENCE 2
-#define ZEND_LIVE_ROPE    3
-#define ZEND_LIVE_MASK    3
+#define ZEND_LIVE_TMPVAR       0
+#define ZEND_LIVE_LOOP         1
+#define ZEND_LIVE_SILENCE      2
+#define ZEND_LIVE_ROPE         3
+#define ZEND_LIVE_EXECUTE_DATA 4
+#define ZEND_LIVE_ARG          5
+#define ZEND_LIVE_MASK         7
 
 typedef struct _zend_live_range {
 	uint32_t var; /* low bits are used for variable type (ZEND_LIVE_* macros) */
@@ -197,6 +199,7 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
+	uint32_t   current_arg;
 } zend_oparray_context;
 
 /* method flags (types) */
@@ -361,6 +364,7 @@ struct _zend_op_array {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
+	uint32_t stack_size;
 	/* END of common elements */
 
 	uint32_t *refcount;
@@ -372,6 +376,7 @@ struct _zend_op_array {
 
 	int last_var;
 	uint32_t T;
+	uint32_t last_arg;
 	zend_string **vars;
 
 	int last_live_range;
@@ -412,6 +417,7 @@ typedef struct _zend_internal_function {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_internal_arg_info *arg_info;
+	uint32_t stack_size;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -434,6 +440,7 @@ union _zend_function {
 		uint32_t num_args;
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;
+		uint32_t stack_size;
 	} common;
 
 	zend_op_array op_array;
@@ -449,11 +456,10 @@ typedef enum _zend_call_kind {
 
 struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
-	zend_execute_data   *call;             /* current call                   */
 	zval                *return_value;
 	zend_function       *func;             /* executed funcrion              */
-	zval                 This;             /* this + call_info + num_args    */
 	zend_class_entry    *called_scope;
+	zval                 This;             /* this + call_info + num_args    */
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
 #if ZEND_EX_USE_RUN_TIME_CACHE
@@ -509,7 +515,7 @@ struct _zend_execute_data {
 	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
 
 #define ZEND_CALL_ARG(call, n) \
-	ZEND_CALL_VAR_NUM(call, ((int)(n)) - 1)
+	(((zval*)(call)) - ((int)(n)))
 
 #define EX(element) 			((execute_data)->element)
 
@@ -533,8 +539,11 @@ struct _zend_execute_data {
 
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
+#define EX_ARG(n)			ZEND_CALL_ARG(execute_data, n)
 
 #define EX_VAR_TO_NUM(n)		((uint32_t)(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0)))
+#define RT_CV_DEF_OF(op_array, i)	((op_array)->vars[0 > (int32_t) (i) ? - ZEND_CALL_FRAME_SLOT - i - 1 : i + (op_array)->num_args])
+#define CV_DEF_OF(i)			RT_CV_DEF_OF(&EX(func)->op_array, i)
 
 #define ZEND_OPLINE_TO_OFFSET(opline, target) \
 	((char*)(target) - (char*)(opline))
@@ -685,6 +694,8 @@ struct _zend_execute_data {
 
 #define EXT_TYPE_UNUSED	(1<<5)
 
+#define IS_ARG          (1<<6)  /* to be used only during compilation */
+
 #include "zend_globals.h"
 
 BEGIN_EXTERN_C()
@@ -820,6 +831,9 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 /* END: OPCODES */
 
+/* reserved slots for RECV_INIT vars */
+#define ZEND_RESERVED_RECV_SLOTS 5
+
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
@@ -909,10 +923,13 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_MEMBER_FUNC_CALL   (1<<0)
 
-#define ZEND_ARG_SEND_BY_REF (1<<0)
-#define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
-#define ZEND_ARG_SEND_FUNCTION (1<<2)
-#define ZEND_ARG_SEND_SILENT   (1<<3)
+#define ZEND_ARG_SEND_BY_REF         0x10000000
+#define ZEND_ARG_COMPILE_TIME_BOUND  0x20000000
+#define ZEND_ARG_SEND_FUNCTION       0x40000000
+#define ZEND_ARG_SEND_SILENT         0x80000000
+#define ZEND_ARG_IS_UNPACKED         0x40000000
+#define ZEND_ARG_IS_CUFA             0x80000000
+#define ZEND_ARG_SEND_MASK           0x0fffffff
 
 #define ZEND_SEND_BY_VAL     0
 #define ZEND_SEND_BY_REF     1

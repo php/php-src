@@ -84,6 +84,7 @@ static const zend_internal_function zend_pass_function = {
 	0,                      /* num_args          */
 	0,                      /* required_num_args */
 	NULL,                   /* arg_info          */
+	ZEND_CALL_FRAME_SLOT * ZEND_MM_ALIGNED_SIZE(sizeof(zval *)), /* stack_size */
 	ZEND_FN(pass),          /* handler           */
 	NULL                    /* module            */
 };
@@ -121,8 +122,6 @@ static const zend_internal_function zend_pass_function = {
 
 /* End of zend_execute_locks.h */
 
-#define CV_DEF_OF(i) (EX(func)->op_array.vars[i])
-
 #define CTOR_CALL_BIT    0x1
 #define CTOR_USED_BIT    0x2
 
@@ -150,7 +149,6 @@ static const zend_internal_function zend_pass_function = {
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);
 
-	page->top = ZEND_VM_STACK_ELEMENTS(page);
 	page->end = (zval*)((char*)page + size);
 	page->prev = prev;
 	return page;
@@ -159,8 +157,6 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 ZEND_API void zend_vm_stack_init(void)
 {
 	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE(0 /* main stack */), NULL);
-	EG(vm_stack)->top++;
-	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
 }
 
@@ -178,18 +174,13 @@ ZEND_API void zend_vm_stack_destroy(void)
 ZEND_API void* zend_vm_stack_extend(size_t size)
 {
 	zend_vm_stack stack;
-	void *ptr;
 
-	stack = EG(vm_stack);
-	stack->top = EG(vm_stack_top);
 	EG(vm_stack) = stack = zend_vm_stack_new_page(
 		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE(0)) ?
 			ZEND_VM_STACK_PAGE_SIZE(0) : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(0, size),
-		stack);
-	ptr = stack->top;
-	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
+		EG(vm_stack));
 	EG(vm_stack_end) = stack->end;
-	return ptr;
+	return ZEND_VM_STACK_ELEMENTS(stack);
 }
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
@@ -605,6 +596,22 @@ static inline int make_real_object(zval *object)
 	return 1;
 }
 
+/* necessary to not confuse symtable rebuilds and backtrace fetches before all the args are set */
+static void zend_undef_unpassed_args(zend_execute_data *execute_data)
+{
+	if (ZEND_USER_CODE(EX(func)->type)) {
+		uint32_t passed_args = EX_NUM_ARGS(), args = EX(func)->op_array.num_args;;
+		if (passed_args < args) {
+			zval *arg = ZEND_CALL_ARG(execute_data, passed_args);
+			zval *end = ZEND_CALL_ARG(execute_data, args);
+			do {
+				--arg;
+				ZVAL_UNDEF(arg);
+			} while (arg != end);
+		}
+	}
+}
+
 static char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce)
 {
 	zend_string *key;
@@ -633,6 +640,8 @@ static ZEND_COLD void zend_verify_arg_error(const zend_function *zf, uint32_t ar
 	const char *fname = ZSTR_VAL(zf->common.function_name);
 	const char *fsep;
 	const char *fclass;
+
+	zend_undef_unpassed_args(EG(current_execute_data));
 
 	if (zf->common.scope) {
 		fsep =  "::";
@@ -901,6 +910,8 @@ static ZEND_COLD void zend_verify_missing_arg(zend_execute_data *execute_data, u
 		const char *space = EX(func)->common.scope ? "::" : "";
 		const char *func_name = EX(func)->common.function_name ? ZSTR_VAL(EX(func)->common.function_name) : "main";
 		zend_execute_data *ptr = EX(prev_execute_data);
+
+		zend_undef_unpassed_args(EG(current_execute_data));
 
 		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 			zend_error(E_WARNING, "Missing argument %u for %s%s%s(), called in %s on line %d and defined", arg_num, class_name, space, func_name, ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
@@ -2023,6 +2034,110 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	}
 }
 
+static zend_always_inline zend_bool zend_check_abstract_or_deprecated(zend_function *fbc) {
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
+			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			return 1;
+		}
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+				fbc->common.scope ? "::" : "",
+				ZSTR_VAL(fbc->common.function_name));
+			return UNEXPECTED(EG(exception) != NULL);
+		}
+	}
+	return 0;
+}
+
+static zend_always_inline void unpack_iterator_to_array(zend_object_iterator *iter, HashTable *ht, zend_execute_data *execute_data, uint32_t arg_num)
+{
+	zval *arg;
+
+	if (iter->funcs->rewind) {
+		iter->funcs->rewind(iter);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			goto unpack_iter_dtor;
+		}
+	}
+
+	while (iter->funcs->valid(iter) == SUCCESS) {
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			goto unpack_iter_dtor;
+		}
+
+		arg = iter->funcs->get_current_data(iter);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			goto unpack_iter_dtor;
+		}
+
+		if (iter->funcs->get_current_key) {
+			zval key;
+			iter->funcs->get_current_key(iter, &key);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				goto unpack_iter_dtor;
+			}
+
+			if (Z_TYPE(key) == IS_STRING) {
+				zend_throw_error(NULL,
+					"Cannot unpack Traversable with string keys");
+					zend_string_release(Z_STR(key));
+					goto unpack_iter_dtor;
+			}
+
+			zval_dtor(&key);
+		}
+
+		if (ARG_MUST_BE_SENT_BY_REF(EX(func), arg_num)) {
+			zend_error(
+				E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
+				" by unpacking a Traversable, passing by-value instead", arg_num,
+				EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+				EX(func)->common.scope ? "::" : "",
+				ZSTR_VAL(EX(func)->common.function_name)
+			);
+		}
+
+		if (Z_ISREF_P(arg)) {
+			ZVAL_DUP(arg, Z_REFVAL_P(arg));
+		} else {
+			Z_TRY_ADDREF_P(arg);
+		}
+
+		zend_hash_next_index_insert(ht, arg);
+		arg_num++;
+
+		iter->funcs->move_forward(iter);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			goto unpack_iter_dtor;
+		}
+	}
+
+unpack_iter_dtor:
+	zend_iterator_dtor(iter);
+}
+
+static zend_always_inline void unpack_array_separate(zval *args, HashTable **ht, zend_execute_data *execute_data, uint32_t arg_num, zend_uchar op_type)
+{
+	if (op_type != IS_CONST && op_type != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
+		uint32_t i, elements = zend_hash_num_elements(*ht);
+		int separate = 0;
+
+		/* check if any of arguments are going to be passed by reference */
+		for (i = 0; i < elements; i++) {
+			if (ARG_SHOULD_BE_SENT_BY_REF(EX(func), arg_num + i)) {
+				separate = 1;
+				break;
+			}
+		}
+		if (separate) {
+			zval_copy_ctor(args);
+			*ht = Z_ARRVAL_P(args);
+		}
+	}
+}
+
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()													\
@@ -2116,18 +2231,20 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
  * ==================
  *
  *                             +========================================+
+ *                             | ARG[N+1] (extra_args)                  |
+ *                             | ...                                    |
+ *  EX_PARAM_NUM(num_args) --> | VAR[-op_array->num_args-ZCFS] = ARG[N] |
+ *                             | ...                                    |
+ *  EX_PARAM_NUM(1) ---------> | VAR[-1-ZEND_CALL_FRAME_SLOT] = ARG[1]  |
+ *                             +----------------------------------------+
  * EG(current_execute_data) -> | zend_execute_data                      |
  *                             +----------------------------------------+
- *     EX_CV_NUM(0) ---------> | VAR[0] = ARG[1]                        |
+ *  EX_VAR_NUM(0) -----------> | VAR[0] = CV[0]                         |
  *                             | ...                                    |
- *                             | VAR[op_array->num_args-1] = ARG[N]     |
- *                             | ...                                    |
- *                             | VAR[op_array->last_var-1]              |
+ *                             | VAR[op_array->last_var-1] = CV[N]      |
  *                             | VAR[op_array->last_var] = TMP[0]       |
  *                             | ...                                    |
  *                             | VAR[op_array->last_var+op_array->T-1]  |
- *                             | ARG[N+1] (extra_args)                  |
- *                             | ...                                    |
  *                             +----------------------------------------+
  */
 
@@ -2137,48 +2254,35 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
 	EX(opline) = op_array->opcodes;
-	EX(call) = NULL;
 	EX(return_value) = return_value;
 
 	/* Handle arguments */
 	first_extra_arg = op_array->num_args;
 	num_args = EX_NUM_ARGS();
 	if (UNEXPECTED(num_args > first_extra_arg)) {
-		zval *end, *src, *dst;
-		uint32_t type_flags = 0;
-
+/* ???		uint32_t type_flags = 0;
+		zval *end, *src;
+*/
 		if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 			EX(opline) += first_extra_arg;
 		}
 
-		/* move extra args into separate array after all CV and TMP vars */
-		end = EX_VAR_NUM(first_extra_arg - 1);
-		src = end + (num_args - first_extra_arg);
-		dst = src + (op_array->last_var + op_array->T - first_extra_arg);
-		if (EXPECTED(src != dst)) {
-			do {
-				type_flags |= Z_TYPE_INFO_P(src);
-				ZVAL_COPY_VALUE(dst, src);
-				ZVAL_UNDEF(src);
-				src--;
-				dst--;
-			} while (src != end);
-		} else {
-			do {
-				type_flags |= Z_TYPE_INFO_P(src);
-				src--;
-			} while (src != end);
-		}
+/* ???		src = EX_PARAM_NUM(first_extra_arg);
+		end = EX_PARAM_NUM(num_args);
+		do {
+			type_flags |= Z_TYPE_INFO_P(src);
+		} while (src-- != end);
 		ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
+*/
 	} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 		EX(opline) += num_args;
 	}
 
 	/* Initialize CV variables (skip arguments) */
-	if (EXPECTED((int)num_args < op_array->last_var)) {
-		zval *var = EX_VAR_NUM(num_args);
+	if (EXPECTED(op_array->last_var)) {
+		zval *var = EX_VAR_NUM(0);
 		zval *end = EX_VAR_NUM(op_array->last_var);
 
 		do {
@@ -2209,7 +2313,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
 	EX(opline) = op_array->opcodes;
-	EX(call) = NULL;
 	EX(return_value) = return_value;
 
 	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
@@ -2238,7 +2341,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
 	EX(opline) = op_array->opcodes;
-	EX(call) = NULL;
 	EX(return_value) = return_value;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
@@ -2257,41 +2359,29 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		first_extra_arg = op_array->num_args;
 		num_args = EX_NUM_ARGS();
 		if (UNEXPECTED(num_args > first_extra_arg)) {
-			zval *end, *src, *dst;
+/* ???			zval *end, *src;
 			uint32_t type_flags = 0;
-
+*/
 			if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 				/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 				EX(opline) += first_extra_arg;
 			}
 
-			/* move extra args into separate array after all CV and TMP vars */
-			end = EX_VAR_NUM(first_extra_arg - 1);
-			src = end + (num_args - first_extra_arg);
-			dst = src + (op_array->last_var + op_array->T - first_extra_arg);
-			if (EXPECTED(src != dst)) {
-				do {
-					type_flags |= Z_TYPE_INFO_P(src);
-					ZVAL_COPY_VALUE(dst, src);
-					ZVAL_UNDEF(src);
-					src--;
-					dst--;
-				} while (src != end);
-			} else {
-				do {
-					type_flags |= Z_TYPE_INFO_P(src);
-					src--;
-				} while (src != end);
-			}
+/* ???			src = EX_PARAM_NUM(first_extra_arg);
+			end = EX_PARAM_NUM(num_args);
+			do {
+				type_flags |= Z_TYPE_INFO_P(src);
+			} while (src-- != end);
 			ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
+*/
 		} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 			EX(opline) += num_args;
 		}
 
 		/* Initialize CV variables (skip arguments) */
-		if (EXPECTED((int)num_args < op_array->last_var)) {
-			zval *var = EX_VAR_NUM(num_args);
+		if (EXPECTED(op_array->last_var)) {
+			zval *var = EX_VAR_NUM(0);
 			zval *end = EX_VAR_NUM(op_array->last_var);
 
 			do {
@@ -2335,7 +2425,8 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	 */
 	zend_execute_data *execute_data;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
+	uint32_t arg_offset = MAX(num_args, op_array->num_args);
+	size_t stack_size = op_array->stack_size + (arg_offset * sizeof(zval));
 	uint32_t call_info;
 
 	EG(vm_stack) = zend_vm_stack_new_page(
@@ -2343,32 +2434,31 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 			ZEND_VM_STACK_PAGE_SIZE(1) :
 			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(1, stack_size),
 		NULL);
-	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
+	execute_data = (zend_execute_data *) (ZEND_VM_STACK_ELEMENTS(EG(vm_stack)) + arg_offset);
 
 	call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
 	if (Z_OBJ(call->This)) {
 		call_info |= ZEND_CALL_RELEASE_THIS;
 	}
-	execute_data = zend_vm_stack_push_call_frame(
+	zend_init_call_frame(execute_data,
 		call_info,
 		(zend_function*)op_array,
 		num_args,
 		call->called_scope,
 		Z_OBJ(call->This));
 	EX(prev_execute_data) = NULL;
-	EX_NUM_ARGS() = num_args;
 
 	/* copy arguments */
 	if (num_args > 0) {
 		zval *arg_src = ZEND_CALL_ARG(call, 1);
 		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
-		zval *end = arg_src + num_args;
+		zval *end = arg_src - num_args;
 
 		do {
 			ZVAL_COPY_VALUE(arg_dst, arg_src);
-			arg_src++;
-			arg_dst++;
+			arg_src--;
+			arg_dst--;
 		} while (arg_src != end);
 	}
 
@@ -2394,13 +2484,14 @@ static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(const zend_op 
 }
 /* }}} */
 
+/* This function must be called *at most once* per call frame to avoid leaking */
 static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
 {
 	zend_execute_data *new_call;
-	int used_stack = (EG(vm_stack_top) - (zval*)call) + additional_args;
+	int total_args = MAX(call->func->op_array.num_args, passed_args + additional_args);
 
 	/* copy call frame into new stack segment */
-	new_call = zend_vm_stack_extend(used_stack * sizeof(zval));
+	new_call = (zend_execute_data *) (((zval *) zend_vm_stack_extend(zend_vm_calc_used_stack(total_args, call->func))) + total_args);
 	*new_call = *call;
 	ZEND_SET_CALL_INFO(new_call, ZEND_CALL_INFO(new_call) | ZEND_CALL_ALLOCATED);
 
@@ -2409,33 +2500,25 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 		zval *dst = ZEND_CALL_ARG(new_call, 1);
 		do {
 			ZVAL_COPY_VALUE(dst, src);
-			passed_args--;
-			src++;
-			dst++;
-		} while (passed_args);
-	}
-
-	/* delete old call_frame from previous stack segment */
-	EG(vm_stack)->prev->top = (zval*)call;
-
-	/* delete previous stack segment if it becames empty */
-	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMENTS(EG(vm_stack)->prev))) {
-		zend_vm_stack r = EG(vm_stack)->prev;
-
-		EG(vm_stack)->prev = r->prev;
-		efree(r);
+			src--;
+			dst--;
+		} while (--passed_args);
 	}
 
 	return new_call;
 }
 /* }}} */
 
-static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data **call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
+/* Same as for zend_vm_stack_copy_call_frame(), at most one call per call frame */
+static zend_always_inline zend_execute_data *zend_vm_stack_extend_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
 {
-	if (EXPECTED((uint32_t)(EG(vm_stack_end) - EG(vm_stack_top)) > additional_args)) {
-		EG(vm_stack_top) += additional_args;
+	uint32_t stack_size = zend_vm_calc_used_stack(additional_args, call->func);
+	if (EXPECTED(((intptr_t) EG(vm_stack_end)) - ((intptr_t) call) > stack_size)) {
+		zval *src = ((zval *) call) - passed_args;
+		memmove(src + additional_args, src, sizeof(zval) * (passed_args + ZEND_CALL_FRAME_SLOT));
+		return (zend_execute_data *) (((zval *) call) + additional_args);
 	} else {
-		*call = zend_vm_stack_copy_call_frame(*call, passed_args, additional_args);
+		return zend_vm_stack_copy_call_frame(call, passed_args, additional_args);
 	}
 }
 /* }}} */
@@ -2450,129 +2533,32 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 }
 /* }}} */
 
-static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t op_num) /* {{{ */
+static zend_always_inline void cleanup_this_object_call(zend_execute_data *execute_data, zend_bool check_ctor_call) /* {{{ */
 {
-	if (UNEXPECTED(EX(call))) {
-		zend_execute_data *call = EX(call);
-		zend_op *opline = EX(func)->op_array.opcodes + op_num;
-		int level;
-		int do_exit;
-		
-		if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
-			opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-			opline->opcode == ZEND_INIT_DYNAMIC_CALL ||
-			opline->opcode == ZEND_INIT_METHOD_CALL ||
-			opline->opcode == ZEND_INIT_STATIC_METHOD_CALL)) {
-			ZEND_ASSERT(op_num);
-			opline--;
+	if (UNEXPECTED(EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS)) {
+		zend_object *object = Z_OBJ(EX(This));
+		if (check_ctor_call && (EX_CALL_INFO() & ZEND_CALL_CTOR)) {
+			if (!(EX_CALL_INFO() & ZEND_CALL_CTOR_RESULT_UNUSED)) {
+				GC_REFCOUNT(object)--;
+			}
+			if (GC_REFCOUNT(object) == 1) {
+				zend_object_store_ctor_failed(object);
+			}
 		}
+		OBJ_RELEASE(object);
+	}
+}
+/* }}} */
 
-		do {
-			/* If the exception was thrown during a function call there might be
-			 * arguments pushed to the stack that have to be dtor'ed. */
+static void cleanup_uncalled_execute_data(zend_execute_data *execute_data) /* {{{ */
+{
+	cleanup_this_object_call(execute_data, 1);
 
-			/* find the number of actually passed arguments */
-			level = 0;
-			do_exit = 0;
-			do {
-				switch (opline->opcode) {
-					case ZEND_DO_FCALL:
-					case ZEND_DO_ICALL:
-					case ZEND_DO_UCALL:
-					case ZEND_DO_FCALL_BY_NAME:
-						level++;
-						break;
-					case ZEND_INIT_FCALL:
-					case ZEND_INIT_FCALL_BY_NAME:
-					case ZEND_INIT_NS_FCALL_BY_NAME:
-					case ZEND_INIT_DYNAMIC_CALL:
-					case ZEND_INIT_USER_CALL:
-					case ZEND_INIT_METHOD_CALL:
-					case ZEND_INIT_STATIC_METHOD_CALL:
-					case ZEND_NEW:
-						if (level == 0) {
-							ZEND_CALL_NUM_ARGS(call) = 0;
-							do_exit = 1;
-						}
-						level--;
-						break;
-					case ZEND_SEND_VAL:
-					case ZEND_SEND_VAL_EX:
-					case ZEND_SEND_VAR:
-					case ZEND_SEND_VAR_EX:
-					case ZEND_SEND_REF:
-					case ZEND_SEND_VAR_NO_REF:
-					case ZEND_SEND_USER:
-						if (level == 0) {
-							ZEND_CALL_NUM_ARGS(call) = opline->op2.num;
-							do_exit = 1;
-						}
-						break;
-					case ZEND_SEND_ARRAY:
-					case ZEND_SEND_UNPACK:
-						if (level == 0) {
-							do_exit = 1;
-						}
-						break;
-				}
-				if (!do_exit) {
-					opline--;
-				}
-			} while (!do_exit);
-			if (call->prev_execute_data) {
-				/* skip current call region */
-				level = 0;
-				do_exit = 0;
-				do {
-					switch (opline->opcode) {
-						case ZEND_DO_FCALL:
-						case ZEND_DO_ICALL:
-						case ZEND_DO_UCALL:
-						case ZEND_DO_FCALL_BY_NAME:
-							level++;
-							break;
-						case ZEND_INIT_FCALL:
-						case ZEND_INIT_FCALL_BY_NAME:
-						case ZEND_INIT_NS_FCALL_BY_NAME:
-						case ZEND_INIT_DYNAMIC_CALL:
-						case ZEND_INIT_USER_CALL:
-						case ZEND_INIT_METHOD_CALL:
-						case ZEND_INIT_STATIC_METHOD_CALL:
-						case ZEND_NEW:
-							if (level == 0) {
-								do_exit = 1;
-							}
-							level--;
-							break;
-					}
-					opline--;
-				} while (!do_exit);
-			}
-
-			zend_vm_stack_free_args(EX(call));
-
-			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-				if (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR) {
-					if (!(ZEND_CALL_INFO(call) & ZEND_CALL_CTOR_RESULT_UNUSED)) {
-						GC_REFCOUNT(Z_OBJ(call->This))--;
-					}
-					if (GC_REFCOUNT(Z_OBJ(call->This)) == 1) {
-						zend_object_store_ctor_failed(Z_OBJ(call->This));
-					}
-				}
-				OBJ_RELEASE(Z_OBJ(call->This));
-			}
-			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
-				zend_object_release((zend_object *) call->func->common.prototype);
-			} else if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-				zend_string_release(call->func->common.function_name);
-				zend_free_trampoline(call->func);
-			}
-
-			EX(call) = call->prev_execute_data;
-			zend_vm_stack_free_call_frame(call);
-			call = EX(call);
-		} while (call);
+	if (EX(func)->common.fn_flags & ZEND_ACC_CLOSURE) {
+		zend_object_release((zend_object *) EX(func)->common.prototype);
+	} else if (EX(func)->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+		zend_string_release(EX(func)->common.function_name);
+		zend_free_trampoline(EX(func));
 	}
 }
 /* }}} */
@@ -2615,6 +2601,8 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 							zend_string_release(rope[j]);
 						} while (j--);
 					}
+				} else if (kind == ZEND_LIVE_EXECUTE_DATA) {
+					cleanup_uncalled_execute_data((zend_execute_data *) var);
 				} else if (kind == ZEND_LIVE_SILENCE) {
 					/* restore previous error_reporting value */
 					if (!EG(error_reporting) && Z_LVAL_P(var) != 0) {
@@ -2628,7 +2616,6 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 /* }}} */
 
 void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
-	cleanup_unfinished_calls(execute_data, op_num);
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 

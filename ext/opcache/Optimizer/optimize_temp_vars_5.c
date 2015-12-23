@@ -43,6 +43,7 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 {
 	int T = op_array->T;
 	int offset = op_array->last_var;
+	uint32_t last_T = NUM_VAR(T + offset);
 	uint32_t bitset_len;
 	zend_bitset taken_T;	/* T index in use */
 	zend_op **start_of_T;	/* opline where T is first used */
@@ -51,7 +52,7 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 	zend_op *opline, *end;
 	int currT;
 	int i;
-	int max = -1;
+	int max = -1, max_diff;
 	int var_to_free = -1;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
@@ -59,14 +60,14 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 	taken_T = (zend_bitset) zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 	start_of_T = (zend_op **) zend_arena_alloc(&ctx->arena, T * sizeof(zend_op *));
 	valid_T = (zend_bitset) zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
-	map_T = (int *) zend_arena_alloc(&ctx->arena, T * sizeof(int));
+	map_T = (int *) zend_arena_alloc(&ctx->arena, (T + op_array->last_arg) * sizeof(int));
 
     end = op_array->opcodes;
     opline = &op_array->opcodes[op_array->last - 1];
 
     /* Find T definition points */
     while (opline >= end) {
-        if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
+        if ((ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) && ZEND_RESULT(opline).var < last_T) {
 			start_of_T[VAR_NUM(ZEND_RESULT(opline).var) - offset] = opline;
 		}
 		opline--;
@@ -79,7 +80,7 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
     opline = &op_array->opcodes[op_array->last - 1];
 
     while (opline >= end) {
-		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
+		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) && opline->op1.var < last_T) {
 			currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
 			if (opline->opcode == ZEND_ROPE_END) {
 				int num = (((opline->extended_value + 1) * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
@@ -140,13 +141,12 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 		}
 
 		/* Skip OP_DATA */
-		if (opline->opcode == ZEND_OP_DATA &&
-		    (opline-1)->opcode == ZEND_ASSIGN_DIM) {
+		if (opline->opcode == ZEND_OP_DATA && (opline-1)->opcode == ZEND_ASSIGN_DIM) {
 		    opline--;
 		    continue;
 		}
 
-		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
+		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) && opline->op2.var < last_T) {
 			currT = VAR_NUM(ZEND_OP2(opline).var) - offset;
 			if (!zend_bitset_in(valid_T, currT)) {
 				GET_AVAILABLE_T();
@@ -169,7 +169,7 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 			var_to_free = i;
 		}
 
-		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
+		if ((ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) && opline->result.var < last_T) {
 			currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
 			if (zend_bitset_in(valid_T, currT)) {
 				if (start_of_T[currT] == opline) {
@@ -212,6 +212,23 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 		opline--;
 	}
 
+	max_diff = op_array->T - max - 1;
+
+	for (opline = &op_array->opcodes[op_array->last - 1]; opline >= end; opline--) {
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && opline->op1.var >= last_T) {
+			map_T[VAR_NUM(opline->op1.var) - offset] = VAR_NUM(opline->op1.var) - offset - max_diff;
+			opline->op1.var -= max_diff * sizeof(zval);
+		}
+		if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) && opline->op2.var >= last_T) {
+			map_T[VAR_NUM(opline->op2.var) - offset] = VAR_NUM(opline->op2.var) - offset - max_diff;
+			opline->op2.var -= max_diff * sizeof(zval);
+		}
+		if ((opline->result_type & (IS_VAR|IS_TMP_VAR)) && opline->result.var >= last_T) {
+			map_T[VAR_NUM(opline->result.var) - offset] = VAR_NUM(opline->result.var) - offset - max_diff;
+			opline->result.var -= max_diff * sizeof(zval);
+		}
+	}
+
 	if (op_array->live_range) {
 		for (i = 0; i < op_array->last_live_range; i++) {
 			op_array->live_range[i].var =
@@ -221,5 +238,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 	}
 
 	zend_arena_release(&ctx->arena, checkpoint);
-	op_array->T = max + 1;
+	op_array->stack_size -= max_diff * sizeof(zval);
+	op_array->T -= max_diff;
 }

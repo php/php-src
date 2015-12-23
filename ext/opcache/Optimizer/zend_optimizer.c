@@ -63,19 +63,19 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 	int i = 0;
 	zend_ulong hash_value = zend_string_hash_val(name);
 
-	while (i < op_array->last_var) {
+	while (i < op_array->last_var + op_array->num_args) {
 		if (op_array->vars[i] == name ||
 		    (ZSTR_H(op_array->vars[i]) == hash_value &&
 		     ZSTR_LEN(op_array->vars[i]) == ZSTR_LEN(name) &&
 		     memcmp(ZSTR_VAL(op_array->vars[i]), ZSTR_VAL(name), ZSTR_LEN(name)) == 0)) {
-			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+			return (int)(zend_intptr_t)(i >= op_array->num_args ? ZEND_CALL_VAR_NUM(NULL, i - op_array->num_args) : ZEND_CALL_ARG(NULL, i + 1));
 		}
 		i++;
 	}
 	i = op_array->last_var;
 	op_array->last_var++;
-	op_array->vars = erealloc(op_array->vars, op_array->last_var * sizeof(zend_string*));
-	op_array->vars[i] = zend_string_dup(name, 0);
+	op_array->vars = erealloc(op_array->vars, (op_array->last_var + op_array->num_args) * sizeof(zend_string*));
+	op_array->vars[op_array->num_args + i] = zend_string_dup(name, 0);
 
 	/* all IS_TMP_VAR and IS_VAR variable numbers have to be adjusted */
 	{
@@ -690,20 +690,23 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_function *func;
-	zend_op *opline, *end;
+	zend_op *opline, *start;
 
-	opline = op_array->opcodes;
-	end = opline + op_array->last;
-	while (opline < end) {
-		if (opline->opcode == ZEND_INIT_FCALL) {
+	start = op_array->opcodes;
+	opline = start + op_array->last;
+	while (--opline >= start) {
+		if (opline->opcode == ZEND_DO_UCALL) {
+			zend_op *tmp = opline;
+			do {
+				--tmp;
+			} while (tmp->opcode != ZEND_INIT_FCALL || tmp->result.var != opline->op1.var);
 			func = zend_hash_find_ptr(
 				&ctx->script->function_table,
-				Z_STR_P(RT_CONSTANT(op_array, opline->op2)));
+				Z_STR_P(RT_CONSTANT(op_array, tmp->op2)));
 			if (func) {
-				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, func);
+				opline->op2.num = zend_vm_calc_used_stack(0, func);
 			}
 		}
-		opline++;
 	}
 }
 

@@ -641,7 +641,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval *b_vars, BIND_BUF *buf, /* {{{ */
 
 	for (i = 0; i < sqlda->sqld; ++i) { /* bound vars */
 
-		zval *b_var = &b_vars[i];
+		zval *b_var = &b_vars[-i];
 		XSQLVAR *var = &sqlda->sqlvar[i];
 
 		var->sqlind = &buf[i].sqlind;
@@ -872,7 +872,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	RESET_ERRMSG;
 
 	for (i = 0; i < argc; ++i) {
-		SEPARATE_ZVAL(&args[i]);
+		SEPARATE_ZVAL(&args[-i]);
 	}
 
 	switch (ib_query->statement_type) {
@@ -1175,7 +1175,7 @@ PHP_FUNCTION(ibase_query)
 		}
 
 		if (FAILURE == _php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &result, &ib_query,
-				&bind_args[bind_i])) {
+				&bind_args[-bind_i])) {
 			break;
 		}
 

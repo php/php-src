@@ -694,6 +694,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
 	zend_class_entry *orig_scope;
+	zend_bool reverse = 0;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -728,11 +729,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	           EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL &&
 	           EG(current_execute_data)->opline->opcode != ZEND_DO_ICALL &&
 	           EG(current_execute_data)->opline->opcode != ZEND_DO_UCALL &&
+	           EG(current_execute_data)->opline->opcode != ZEND_DO_UNPACK_FCALL &&
 	           EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL_BY_NAME) {
 		/* Insert fake frame in case of include or magic calls */
 		dummy_execute_data = *EG(current_execute_data);
 		dummy_execute_data.prev_execute_data = EG(current_execute_data);
-		dummy_execute_data.call = NULL;
 		dummy_execute_data.opline = NULL;
 		dummy_execute_data.func = NULL;
 		EG(current_execute_data) = &dummy_execute_data;
@@ -769,9 +770,20 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		zend_string_release(callable_name);
 	}
 
+	reverse = (fci->param_count & 0x80000000) != 0;
+	if (reverse) {
+		fci->param_count = -fci->param_count;
+	}
 	func = fci_cache->function_handler;
-	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
-		func, fci->param_count, fci_cache->called_scope, fci_cache->object);
+	if (EG(current_execute_data) == &dummy_execute_data) {
+		EG(current_execute_data) = EG(current_execute_data)->prev_execute_data;
+		call = zend_push_top_call_frame(ZEND_CALL_TOP_FUNCTION,
+			func, fci->param_count, fci_cache->called_scope, fci_cache->object);
+		EG(current_execute_data) = &dummy_execute_data;
+	} else {
+		call = zend_push_top_call_frame(ZEND_CALL_TOP_FUNCTION,
+			func, fci->param_count, fci_cache->called_scope, fci_cache->object);
+	}
 	calling_scope = fci_cache->calling_scope;
 	fci->object = fci_cache->object;
 	if (fci->object &&
@@ -796,20 +808,18 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		}
 	}
 
-	for (i=0; i<fci->param_count; i++) {
+	for (i = 0; i < fci->param_count; i++) {
 		zval *param;
-		zval *arg = &fci->params[i];
+		zval *arg = &fci->params[(int32_t) (reverse ? -i : i)];
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(func, i + 1)) {
 			if (UNEXPECTED(!Z_ISREF_P(arg))) {
 				if (fci->no_separation &&
 					!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					if (i) {
-						/* hack to clean up the stack */
-						ZEND_CALL_NUM_ARGS(call) = i;
-						zend_vm_stack_free_args(call);
+						zend_free_args_internal(call, i);
 					}
-					zend_vm_stack_free_call_frame(call);
+					zend_vm_stack_free_call_frame(ZEND_CALL_INFO(call));
 
 					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 						i+1,
@@ -862,6 +872,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_generator_create_zval(call, &func->op_array, fci->retval);
 		}
 		if (call_via_handler) {
+			/* we can't check for ZEND_CALL_ALLOCATED as ZEND_CALL_TRAMPOLINE may have altered the location of execute_data! */
+			zend_execute_data *prev = EG(current_execute_data);
+			if (prev == &dummy_execute_data) {
+				prev = dummy_execute_data.prev_execute_data;
+			}
+			ZEND_SET_CALL_INFO(call, (void *) prev > (void *) EG(vm_stack_end) || (void *) prev < (void *) EG(vm_stack) ? ZEND_CALL_ALLOCATED : 0);
+
 			/* We must re-initialize function again */
 			fci_cache->initialized = 0;
 		}
@@ -881,7 +898,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_execute_internal(call, fci->retval);
 		}
 		EG(current_execute_data) = call->prev_execute_data;
-		zend_vm_stack_free_args(call);
+		zend_free_args_internal(call, ZEND_CALL_NUM_ARGS(call));
 
 		/*  We shouldn't fix bad extensions here,
 			because it can break proper ones (Bug #34045)
@@ -911,7 +928,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
 		}
 
-		zend_vm_stack_free_args(call);
+		zend_free_args_internal(call, ZEND_CALL_NUM_ARGS(call));
 
 		if (func->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
 			zend_string_release(func->common.function_name);
@@ -925,7 +942,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	EG(scope) = orig_scope;
-	zend_vm_stack_free_call_frame(call);
+	zend_vm_stack_free_call_frame(ZEND_CALL_INFO(call));
 
 	if (EG(current_execute_data) == &dummy_execute_data) {
 		EG(current_execute_data) = dummy_execute_data.prev_execute_data;
@@ -1469,44 +1486,55 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 {
 	zend_execute_data *ex;
 	zend_array *symbol_table;
+	zend_string **str;
+	uint32_t cvs;
 
 	/* Search for last called user function */
 	ex = EG(current_execute_data);
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->common.type))) {
 		ex = ex->prev_execute_data;
 	}
-	if (!ex) {
+	if (UNEXPECTED(!ex)) {
 		return NULL;
 	}
 	if (ex->symbol_table) {
 		return ex->symbol_table;
 	}
 
-	if (EG(symtable_cache_ptr) >= EG(symtable_cache)) {
+	cvs = ex->func->op_array.last_var + ex->func->op_array.num_args;
+	if (EXPECTED(EG(symtable_cache_ptr) >= EG(symtable_cache))) {
 		/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 		symbol_table = ex->symbol_table = *(EG(symtable_cache_ptr)--);
-		if (!ex->func->op_array.last_var) {
+		if (UNEXPECTED(cvs == 0)) {
 			return symbol_table;
 		}
-		zend_hash_extend(symbol_table, ex->func->op_array.last_var, 0);
+		zend_hash_extend(symbol_table, cvs, 0);
 	} else {
 		symbol_table = ex->symbol_table = emalloc(sizeof(zend_array));
-		zend_hash_init(symbol_table, ex->func->op_array.last_var, NULL, ZVAL_PTR_DTOR, 0);
-		if (!ex->func->op_array.last_var) {
+		zend_hash_init(symbol_table, cvs, NULL, ZVAL_PTR_DTOR, 0);
+		if (UNEXPECTED(cvs == 0)) {
 			return symbol_table;
 		}
 		zend_hash_real_init(symbol_table, 0);
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
+
+	str = ex->func->op_array.vars;
+
+	if (EXPECTED(ex->func->op_array.num_args)) {
+		zend_string **end = str + ex->func->op_array.num_args;
+		zval *var = ZEND_CALL_ARG(ex, 1);
+
+		do {
+			_zend_hash_append_ind(symbol_table, *(str++), var--);
+		} while (str != end);
+	}
 	if (EXPECTED(ex->func->op_array.last_var)) {
-		zend_string **str = ex->func->op_array.vars;
 		zend_string **end = str + ex->func->op_array.last_var;
 		zval *var = ZEND_CALL_VAR_NUM(ex, 0);
 
 		do {
-			_zend_hash_append_ind(symbol_table, *str, var);
-			str++;
-			var++;
+			_zend_hash_append_ind(symbol_table, *(str++), var++);
 		} while (str != end);
 	}
 	return symbol_table;
@@ -1517,11 +1545,35 @@ ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	HashTable *ht = execute_data->symbol_table;
+	zend_string **str = op_array->vars;
 
 	/* copy real values from symbol table into CV slots and create
 	   INDIRECT references to CV in symbol table  */
+	if (UNEXPECTED(op_array->num_args)) {
+		zend_string **end = str + op_array->num_args;
+		zval *var = ZEND_CALL_ARG(execute_data, 1);
+
+		do {
+			zval *zv = zend_hash_find(ht, *str);
+
+			if (zv) {
+				if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zval *val = Z_INDIRECT_P(zv);
+
+					ZVAL_COPY_VALUE(var, val);
+				} else {
+					ZVAL_COPY_VALUE(var, zv);
+				}
+			} else {
+				ZVAL_UNDEF(var);
+				zv = zend_hash_add_new(ht, *str, var);
+			}
+			ZVAL_INDIRECT(zv, var);
+			str++;
+			var--;
+		} while (str != end);
+	}
 	if (EXPECTED(op_array->last_var)) {
-		zend_string **str = op_array->vars;
 		zend_string **end = str + op_array->last_var;
 		zval *var = EX_VAR_NUM(0);
 

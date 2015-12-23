@@ -802,8 +802,6 @@ PHPDBG_COMMAND(ev) /* {{{ */
 
 	PHPDBG_OUTPUT_BACKUP();
 
-	original_stack->top = EG(vm_stack_top);
-
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
 		phpdbg_try_access {
 			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table), 0, phpdbg_output_ev_variable, 0);
@@ -845,7 +843,6 @@ PHPDBG_COMMAND(ev) /* {{{ */
 		}
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
-		EG(vm_stack_top) = original_stack->top;
 		EG(vm_stack_end) = original_stack->end;
 		EG(vm_stack) = original_stack;
 		EG(exit_status) = 0;
@@ -1621,10 +1618,11 @@ next:
 		PHPDBG_G(last_line) = execute_data->opline->lineno;
 
 		/* stupid hack to make zend_do_fcall_common_helper return ZEND_VM_ENTER() instead of recursively calling zend_execute() and eventually segfaulting */
-		if ((execute_data->opline->opcode == ZEND_DO_FCALL ||
-		     execute_data->opline->opcode == ZEND_DO_UCALL ||
-		     execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME) &&
-		     execute_data->call->func->type == ZEND_USER_FUNCTION) {
+		if ((EX(opline)->opcode == ZEND_DO_FCALL ||
+		     EX(opline)->opcode == ZEND_DO_UCALL ||
+		     EX(opline)->opcode == ZEND_DO_UNPACK_FCALL ||
+		     EX(opline)->opcode == ZEND_DO_FCALL_BY_NAME) &&
+		     ((zend_execute_data *) EX_VAR(EX(opline->op1.var)))->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
 		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		

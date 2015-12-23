@@ -66,6 +66,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->vars = NULL;
 
 	op_array->T = 0;
+	op_array->last_arg = 0;
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename();
@@ -383,7 +384,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
 
 	if (op_array->vars) {
-		i = op_array->last_var;
+		i = op_array->last_var + op_array->num_args;
 		while (i > 0) {
 			i--;
 			zend_string_release(op_array->vars[i]);
@@ -616,8 +617,9 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	}
 
 	if (CG(context).vars_size != op_array->last_var) {
-		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
-		CG(context).vars_size = op_array->last_var;
+		uint32_t negative_vars = op_array->num_args + ((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0);
+		CG(context).vars_size = op_array->last_var + negative_vars;
+		op_array->vars = (zend_string **) erealloc(op_array->vars, sizeof(zend_string *) * CG(context).vars_size);
 	}
 	if (CG(context).opcodes_size != op_array->last) {
 		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
@@ -627,6 +629,22 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
+
+	if (op_array->live_range) {
+		uint32_t i;
+		for (i = 0; i < op_array->last_live_range; i++) {
+			uint32_t off = op_array->last_var;
+			uint32_t type = op_array->live_range[i].var & ZEND_LIVE_MASK;
+			if (type == ZEND_LIVE_EXECUTE_DATA) {
+				off = op_array->T + op_array->last_var;
+			} else if (type == ZEND_LIVE_ARG) {
+				off = op_array->T + op_array->last_var;
+				type = ZEND_LIVE_TMPVAR; // same handling
+			}
+			op_array->live_range[i].var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, off + (op_array->live_range[i].var / sizeof(zval))) | type;
+		}
+	}
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -672,7 +690,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
-			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
@@ -707,34 +724,37 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+			case ZEND_NEW:
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				break;
 		}
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
+		} else if (opline->op1_type == IS_ARG) {
+			opline->op1_type = IS_TMP_VAR;
+			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + op_array->T + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
+		} else if (opline->op2_type == IS_ARG) {
+			opline->op2_type = IS_TMP_VAR;
+			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + op_array->T + opline->op2.var);
 		}
 		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
+		} else if (opline->result_type == IS_ARG) {
+			opline->result_type = IS_VAR;
+			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + op_array->T + opline->result.var);
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
 
-	if (op_array->live_range) {
-		uint32_t i;
-
-		for (i = 0; i < op_array->last_live_range; i++) {
-			op_array->live_range[i].var =
-				(uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + (op_array->live_range[i].var / sizeof(zval))) |
-				(op_array->live_range[i].var & ZEND_LIVE_MASK);
-		}
-	}
-
+	op_array->stack_size = (uint32_t)(zend_intptr_t)(((zval *) NULL) + (ZEND_CALL_FRAME_SLOT + op_array->last_arg + op_array->T + op_array->last_var));
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 	return 0;
 }

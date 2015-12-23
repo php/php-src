@@ -622,8 +622,8 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	 * If any variables are passed, make sure they are all passed by reference
 	 */
 	if (numVars) {
-		for (i = varStart;i < argCount;i++){
-			if ( ! Z_ISREF(args[ i ] ) ) {
+		for (i = varStart; i < argCount; i++){
+			if (!Z_ISREF(args[-i])) {
 				php_error_docref(NULL, E_WARNING, "Parameter %d must be passed by reference", i);
 				scan_set_error_return(numVars, return_value);
 				return SCAN_ERROR_VAR_PASSED_BYVAL;
@@ -741,7 +741,7 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
+						current = Z_REFVAL(args[-objIndex++]);
 						zval_ptr_dtor(current);
 						ZVAL_LONG(current, (zend_long)(string - baseString) );
 					} else {
@@ -860,7 +860,7 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
+						current = Z_REFVAL(args[-objIndex++]);
 						zval_ptr_dtor(current);
 						ZVAL_STRINGL(current, string, end-string);
 					} else {
@@ -901,7 +901,7 @@ literal:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
+						current = Z_REFVAL(args[-objIndex++]);
 						zval_ptr_dtor(current);
 						ZVAL_STRINGL(current, string, end-string);
 					} else {
@@ -922,7 +922,7 @@ literal:
 						char __buf[2];
 						__buf[0] = sch;
 						__buf[1] = '\0';;
-						current = args[objIndex++];
+						current = args[-objIndex++];
 						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1);
 					} else {
@@ -1055,7 +1055,7 @@ addToInt:
 							break;
 						} else if (numVars) {
 						  /* change passed value type to string */
-							current = Z_REFVAL(args[objIndex++]);
+							current = Z_REFVAL(args[-objIndex++]);
 							zval_ptr_dtor(current);
 							ZVAL_STRING(current, buf);
 						} else {
@@ -1065,7 +1065,7 @@ addToInt:
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {
-							current = Z_REFVAL(args[objIndex++]);
+							current = Z_REFVAL(args[-objIndex++]);
 							zval_ptr_dtor(current);
 							ZVAL_LONG(current, value);
 						} else {
@@ -1170,7 +1170,7 @@ addToFloat:
 					if (numVars && objIndex >= argCount) {
 						break;
 					} else if (numVars) {
-						current = Z_REFVAL(args[objIndex++]);
+						current = Z_REFVAL(args[-objIndex++]);
 						zval_ptr_dtor(current);
 						ZVAL_DOUBLE(current, dvalue);
 					} else {

@@ -767,7 +767,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 	if (_optional) { \
 		if (UNEXPECTED(_i >_num_args)) break; \
 	} \
-	_real_arg++; \
+	_real_arg--; \
 	_arg = _real_arg; \
 	ZVAL_DEREF(_arg); \
 	if (separate) { \
@@ -1004,7 +1004,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 			ZEND_ASSERT(_i <= _min_num_args || _optional==1); \
 			ZEND_ASSERT(_i >  _min_num_args || _optional==0); \
 			if (_optional && UNEXPECTED(_i >_num_args)) break; \
-			_real_arg++; \
+			_real_arg--; \
 			zend_parse_arg_zval(_real_arg, &dest, check_null); \
 		}
 
@@ -1023,10 +1023,10 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 #define Z_PARAM_VARIADIC_EX(spec, dest, dest_num, post_varargs) do { \
 		int _num_varargs = _num_args - _i - (post_varargs); \
 		if (EXPECTED(_num_varargs > 0)) { \
-			dest = _real_arg + 1; \
+			dest = _real_arg - 1; \
 			dest_num = _num_varargs; \
 			_i += _num_varargs; \
-			_real_arg += _num_varargs; \
+			_real_arg -= _num_varargs; \
 		} else { \
 			dest = NULL; \
 			dest_num = 0; \

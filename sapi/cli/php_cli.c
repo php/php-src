@@ -1059,7 +1059,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				{
 					zend_class_entry *pce = NULL;
 					zval arg, ref;
-					zend_execute_data execute_data;
+					zend_function func;
+					func.type = ZEND_INTERNAL_FUNCTION;
+					func.common.stack_size = ZEND_CALL_FRAME_SLOT * sizeof(zval);
 
 					switch (behavior) {
 						default:
@@ -1085,8 +1087,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					ZVAL_STRING(&arg, reflection_what);
 					object_init_ex(&ref, pce);
 
-					memset(&execute_data, 0, sizeof(zend_execute_data));
-					EG(current_execute_data) = &execute_data;
+					EG(current_execute_data) = zend_push_top_call_frame(ZEND_CALL_TOP, &func, 0, NULL, NULL);
+					EG(current_execute_data)->prev_execute_data = NULL;
 					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, &arg);
 
 					if (EG(exception)) {

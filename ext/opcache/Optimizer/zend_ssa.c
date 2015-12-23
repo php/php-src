@@ -143,8 +143,8 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 
 	// FIXME: Can we optimize this copying out in some cases?
 	if (blocks[n].next_child >= 0) {
-		tmp = do_alloca(sizeof(int) * (op_array->last_var + op_array->T), use_heap);
-		memcpy(tmp, var, sizeof(int) * (op_array->last_var + op_array->T));
+		tmp = do_alloca(sizeof(int) * (op_array->last_var + op_array->T + op_array->last_arg), use_heap);
+		memcpy(tmp, var, sizeof(int) * (op_array->last_var + op_array->T + op_array->last_arg));
 		var = tmp;
 	}
 
@@ -461,7 +461,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	ssa->blocks = ssa_blocks;
 
 	/* Compute Variable Liveness */
-	dfg.vars = op_array->last_var + op_array->T;
+	dfg.vars = op_array->last_var + op_array->T + op_array->last_arg;
 	dfg.size = set_size = zend_bitset_len(dfg.vars);
 	dfg.tmp = do_alloca((set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1), dfg_use_heap);
 	memset(dfg.tmp, 0, (set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1));
@@ -509,7 +509,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	} while (changed);
 
 	/* SSA construction, Step 2: Phi placement based on Dominance Frontiers */
-	var = do_alloca(sizeof(int) * (op_array->last_var + op_array->T), var_use_heap);
+	var = do_alloca(sizeof(int) * (op_array->last_var + op_array->T + op_array->last_arg), var_use_heap);
 	if (!var) {
 		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
@@ -538,7 +538,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			}
 
 			if (!zend_bitset_empty(tmp, set_size)) {
-				i = op_array->last_var + op_array->T;
+				i = op_array->last_var + op_array->T + op_array->last_arg;
 				while (i > 0) {
 					i--;
 					if (zend_bitset_in(tmp, i)) {
@@ -823,7 +823,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			}
 
 			if (!zend_bitset_empty(tmp, set_size)) {
-				i = op_array->last_var + op_array->T;
+				i = op_array->last_var + op_array->T + op_array->last_arg;
 				while (i > 0) {
 					i--;
 					if (zend_bitset_in(tmp, i)) {
@@ -866,7 +866,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	/* SSA construction, Step 3: Renaming */
 	ssa->ops = zend_arena_calloc(arena, op_array->last, sizeof(zend_ssa_op));
 	memset(ssa->ops, 0xff, op_array->last * sizeof(zend_ssa_op));
-	memset(var, 0xff, (op_array->last_var + op_array->T) * sizeof(int));
+	memset(var, 0xff, (op_array->last_var + op_array->T + op_array->last_arg) * sizeof(int));
 	/* Create uninitialized SSA variables for each CV */
 	for (j = 0; j < op_array->last_var; j++) {
 		var[j] = j;

@@ -28,7 +28,7 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 		return;
 	}
 
-	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_CODE,
+	execute_data = zend_push_top_call_frame(ZEND_CALL_TOP_CODE,
 		(zend_function*)op_array, 0, zend_get_called_scope(EG(current_execute_data)), zend_get_this_object(EG(current_execute_data)));
 	if (EG(current_execute_data)) {
 		execute_data->symbol_table = zend_rebuild_symbol_table();
@@ -38,7 +38,7 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_execute_data(execute_data, op_array, return_value);
 	zend_{%EXECUTOR_NAME%}_ex(execute_data);
-	zend_vm_stack_free_call_frame(execute_data);
+	zend_vm_stack_free_call_frame(ZEND_CALL_INFO(execute_data));
 }
 
 {%EXTERNAL_EXECUTOR%}

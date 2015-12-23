@@ -201,7 +201,7 @@ PHP_FUNCTION(var_dump)
 		return;
 	}
 
-	for (i = 0; i < argc; i++) {
+	for (i = 0; i > -argc; i--) {
 		php_var_dump(&args[i], 1);
 	}
 }
@@ -365,7 +365,7 @@ PHP_FUNCTION(debug_zval_dump)
 		return;
 	}
 
-	for (i = 0; i < argc; i++) {
+	for (i = 0; i > -argc; --i) {
 		php_debug_zval_dump(&args[i], 1);
 	}
 }

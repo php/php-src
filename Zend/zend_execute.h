@@ -137,7 +137,6 @@ ZEND_API int zval_update_constant_ex(zval *pp, zend_bool inline_change, zend_cla
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {
-	zval *top;
 	zval *end;
 	zend_vm_stack prev;
 };
@@ -156,8 +155,8 @@ struct _zend_vm_stack {
  * The following "#if ZEND_DEBUG" eliminates it.
  */
 #if ZEND_DEBUG
-# define ZEND_ASSERT_VM_STACK(stack) ZEND_ASSERT(stack->top > (zval *) stack && stack->end > (zval *) stack && stack->top <= stack->end)
-# define ZEND_ASSERT_VM_STACK_GLOBAL ZEND_ASSERT(EG(vm_stack_top) > (zval *) EG(vm_stack) && EG(vm_stack_end) > (zval *) EG(vm_stack) && EG(vm_stack_top) <= EG(vm_stack_end))
+# define ZEND_ASSERT_VM_STACK(stack) ZEND_ASSERT(stack->end > (zval *) stack)
+# define ZEND_ASSERT_VM_STACK_GLOBAL ZEND_ASSERT(EG(vm_stack_end) > (zval *) EG(vm_stack))
 #else
 # define ZEND_ASSERT_VM_STACK(stack)
 # define ZEND_ASSERT_VM_STACK_GLOBAL
@@ -167,117 +166,121 @@ ZEND_API void zend_vm_stack_init(void);
 ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
+static zend_always_inline void zend_init_call_frame(zend_execute_data *execute_data, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
 {
-	zend_execute_data *call = (zend_execute_data*)EG(vm_stack_top);
-
-	ZEND_ASSERT_VM_STACK_GLOBAL;
-
-	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
-		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
-		ZEND_SET_CALL_INFO(call, call_info | ZEND_CALL_ALLOCATED);
-	} else {
-		EG(vm_stack_top) = (zval*)((char*)call + used_stack);
-		ZEND_SET_CALL_INFO(call, call_info);
-	}
-
-	ZEND_ASSERT_VM_STACK_GLOBAL;
-
-	call->func = func;
-	Z_OBJ(call->This) = object;
-	ZEND_CALL_NUM_ARGS(call) = num_args;
-	call->called_scope = called_scope;
-	return call;
+	ZEND_SET_CALL_INFO(execute_data, call_info);
+	EX(func) = func;
+	Z_OBJ(EX(This)) = object;
+	EX_NUM_ARGS() = num_args;
+	EX(called_scope) = called_scope;
 }
 
 static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, zend_function *func)
 {
-	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
+	return func->common.stack_size + (num_args * sizeof(zval));
+}
 
-	if (EXPECTED(ZEND_USER_CODE(func->type))) {
-		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
+/* to be used only when the exact number of args is already known at init time */
+static zend_always_inline zend_execute_data *zend_push_call_frame(zend_execute_data *execute_data, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object) {
+	size_t stack_size = zend_vm_calc_used_stack(0, func);
+	uint32_t total_args;
+
+	if (EXPECTED(((uintptr_t) execute_data) + stack_size < (uintptr_t) EG(vm_stack_end))) {
+		zend_init_call_frame(execute_data, call_info, func, num_args, called_scope, object);
+		return execute_data;
 	}
-	return used_stack * sizeof(zval);
+
+	if (ZEND_USER_CODE(func->type) && num_args < func->op_array.num_args) {
+		total_args = func->op_array.num_args;
+	} else {
+		total_args = num_args;
+	}
+
+	execute_data = (zend_execute_data *) (((zval *) zend_vm_stack_extend(stack_size + total_args * sizeof(zval *))) + total_args);
+
+	zend_init_call_frame(execute_data, call_info | ZEND_CALL_ALLOCATED, func, num_args, called_scope, object);
+	return execute_data;
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
-{
-	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);
+static zend_always_inline zend_execute_data *zend_push_top_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object) {
+	zend_execute_data *execute_data = EG(current_execute_data);
+	uint32_t passed_args = num_args;
 
-	return zend_vm_stack_push_call_frame_ex(used_stack, call_info,
-		func, num_args, called_scope, object);
+	if (UNEXPECTED(func->type == ZEND_USER_FUNCTION && num_args < func->op_array.num_args)) {
+		num_args = func->op_array.num_args;
+	}
+
+	if (EXPECTED(execute_data)) {
+		execute_data = (zend_execute_data *) (((char *) execute_data) + zend_vm_calc_used_stack(num_args, EX(func)));
+	} else {
+		execute_data = (zend_execute_data *) (ZEND_VM_STACK_ELEMENTS(EG(vm_stack)) + num_args);
+	}
+
+	return zend_push_call_frame(execute_data, call_info, func, passed_args, called_scope, object);
 }
 
-static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_info, zend_execute_data *call)
+/* internal calls *and* cleanup of not yet called user funcs */
+static zend_always_inline void zend_free_args_internal(zend_execute_data *call, uint32_t num_args)
 {
-	if (UNEXPECTED(call_info & ZEND_CALL_FREE_EXTRA_ARGS)) {
-		zval *end = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
- 		zval *p = end + (ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args);
+	if (EXPECTED(num_args > 0)) {
+		zval *p = ZEND_CALL_ARG(call, 0);
+		zval *end = p - num_args;
+
 		do {
 			p--;
 			if (Z_REFCOUNTED_P(p)) {
 				if (!Z_DELREF_P(p)) {
 					zend_refcounted *r = Z_COUNTED_P(p);
-					ZVAL_NULL(p);
+					ZVAL_NULL(p); /* TODO: check if still necessary??? */
+					zval_dtor_func_for_ptr(r);
+				}
+			}
+		} while (p != end);
+	}
+}
+
+static zend_always_inline void zend_free_args_user(zend_execute_data *call)
+{
+	uint32_t passed_args = ZEND_CALL_NUM_ARGS(call);
+	uint32_t num_args = call->func->op_array.num_args;
+	/* Usually we don't push more args than available, but often less (default parameter values) */
+	if (UNEXPECTED(num_args < passed_args)) {
+		num_args = passed_args;
+	}
+
+	if (EXPECTED(num_args > 0)) {
+		zval *p = ZEND_CALL_ARG(call, 0);
+		zval *end = p - num_args;
+
+		do {
+			p--;
+			if (Z_REFCOUNTED_P(p)) {
+				if (!Z_DELREF_P(p)) {
+					zend_refcounted *r = Z_COUNTED_P(p);
+					ZVAL_NULL(p); /* TODO: check if still necessary??? */
 					zval_dtor_func_for_ptr(r);
 				} else {
 					GC_ZVAL_CHECK_POSSIBLE_ROOT(p);
 				}
 			}
 		} while (p != end);
- 	}
-}
-
-static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *call)
-{
-	zend_vm_stack_free_extra_args_ex(ZEND_CALL_INFO(call), call);
-}
-
-static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
-{
-	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-
-	if (EXPECTED(num_args > 0)) {
-		zval *end = ZEND_CALL_ARG(call, 1);
-		zval *p = end + num_args;
-
-		do {
-			p--;
-			if (Z_REFCOUNTED_P(p)) {
-				if (!Z_DELREF_P(p)) {
-					zend_refcounted *r = Z_COUNTED_P(p);
-					ZVAL_NULL(p);
-					zval_dtor_func_for_ptr(r);
-				}
-			}
-		} while (p != end);
 	}
 }
 
-static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_info, zend_execute_data *call)
+static zend_always_inline void zend_vm_stack_free_call_frame(uint32_t call_info)
 {
-	ZEND_ASSERT_VM_STACK_GLOBAL;
-
 	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
-		zend_vm_stack p = EG(vm_stack);
+		ZEND_ASSERT_VM_STACK_GLOBAL;
 
+		zend_vm_stack p = EG(vm_stack);
 		zend_vm_stack prev = p->prev;
 
-		EG(vm_stack_top) = prev->top;
 		EG(vm_stack_end) = prev->end;
 		EG(vm_stack) = prev;
 		efree(p);
 
-	} else {
-		EG(vm_stack_top) = (zval*)call;
+		ZEND_ASSERT_VM_STACK_GLOBAL;
 	}
-
-	ZEND_ASSERT_VM_STACK_GLOBAL;
-}
-
-static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *call)
-{
-	zend_vm_stack_free_call_frame_ex(ZEND_CALL_INFO(call), call);
 }
 
 /* services */

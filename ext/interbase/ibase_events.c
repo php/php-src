@@ -156,8 +156,8 @@ PHP_FUNCTION(ibase_wait_event)
 	}
 
 	for (; i < ZEND_NUM_ARGS(); ++i) {
-		convert_to_string_ex(&args[i]);
-		events[event_count++] = Z_STRVAL(args[i]);
+		convert_to_string_ex(&args[-i]);
+		events[event_count++] = Z_STRVAL(args[-i]);
 	}
 
 	/* fills the required data structure with information about the events */

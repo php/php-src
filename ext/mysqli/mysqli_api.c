@@ -556,7 +556,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 		stmt->result.var_cnt = var_cnt;
 		stmt->result.vars = safe_emalloc((var_cnt), sizeof(zval), 0);
 		for (i = 0; i < var_cnt; i++) {
-			ZVAL_COPY(&stmt->result.vars[i], &args[i]);
+			ZVAL_COPY(&stmt->result.vars[i], &args[-i]);
 		}
 	}
 	efree(bind);
@@ -567,11 +567,11 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 static int
 mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 {
-	unsigned int i;
+	int i;
 	MYSQLND_RESULT_BIND *params = mysqlnd_stmt_alloc_result_bind(stmt->stmt);
 	if (params) {
 		for (i = 0; i < argc; i++) {
-			ZVAL_COPY_VALUE(&params[i].zv, &args[i]);
+			ZVAL_COPY_VALUE(&params[i].zv, &args[-i]);
 		}
 		return mysqlnd_stmt_bind_result(stmt->stmt, params);
 	}

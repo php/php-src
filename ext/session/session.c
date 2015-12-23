@@ -1942,7 +1942,7 @@ static PHP_FUNCTION(session_set_save_handler)
 
 	/* At this point argc can only be between 6 and PS_NUM_APIS */
 	for (i = 0; i < argc; i++) {
-		if (!zend_is_callable(&args[i], 0, &name)) {
+		if (!zend_is_callable(&args[-i], 0, &name)) {
 			php_error_docref(NULL, E_WARNING, "Argument %d is not a valid callback", i+1);
 			zend_string_release(name);
 			RETURN_FALSE;
@@ -1962,7 +1962,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
 		}
-		ZVAL_COPY(&PS(mod_user_names).names[i], &args[i]);
+		ZVAL_COPY(&PS(mod_user_names).names[i], &args[-i]);
 	}
 
 	RETURN_TRUE;

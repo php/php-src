@@ -3598,7 +3598,7 @@ PHP_FUNCTION(mb_convert_variables)
 			n = 0;
 			while (n < argc || stack_level > 0) {
 				if (stack_level <= 0) {
-					var = &args[n++];
+					var = &args[-n++];
 					ZVAL_DEREF(var);
 					SEPARATE_ZVAL_NOREF(var);
 					if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
@@ -3685,7 +3685,7 @@ detect_end:
 		n = 0;
 		while (n < argc || stack_level > 0) {
 			if (stack_level <= 0) {
-				var = &args[n++];
+				var = &args[-n++];
 				ZVAL_DEREF(var);
 				SEPARATE_ZVAL_NOREF(var);
 				if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
