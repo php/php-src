@@ -720,13 +720,6 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an object");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
-
 	do {
 		value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 
@@ -779,12 +772,6 @@ ZEND_VM_HELPER(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|UNU
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		FREE_UNFETCHED_OP2();
-		HANDLE_EXCEPTION();
-	}
 
 	dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
@@ -804,14 +791,6 @@ ZEND_VM_HELPER(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|UNU
 		value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
 		var_ptr = Z_INDIRECT(rv);
-
-		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
-			FREE_OP2();
-			FREE_OP(free_op_data1);
-			FREE_OP1_VAR_PTR();
-			HANDLE_EXCEPTION();
-		}
 
 		if (UNEXPECTED(var_ptr == &EG(error_zval))) {
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -845,12 +824,6 @@ ZEND_VM_HELPER(zend_binary_assign_op_helper, VAR|CV, CONST|TMPVAR|CV, binary_op_
 	SAVE_OPLINE();
 	value = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
-
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use assign-op operators with string offsets");
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1131,12 +1104,6 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
-
 	do {
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 			ZVAL_DEREF(object);
@@ -1212,12 +1179,6 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
-
 	do {
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 			ZVAL_DEREF(object);
@@ -1278,12 +1239,6 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 
 	var_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
-		HANDLE_EXCEPTION();
-	}
-
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1323,12 +1278,6 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	zval *var_ptr;
 
 	var_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
-
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
-		HANDLE_EXCEPTION();
-	}
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
@@ -1370,12 +1319,6 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 
 	var_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
-		HANDLE_EXCEPTION();
-	}
-
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		fast_long_increment_function(var_ptr);
@@ -1408,12 +1351,6 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	zval *var_ptr;
 
 	var_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
-
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot increment/decrement string offsets");
-		HANDLE_EXCEPTION();
-	}
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
@@ -1764,10 +1701,6 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
 	SAVE_OPLINE();
 	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -1786,10 +1719,6 @@ ZEND_VM_HANDLER(87, ZEND_FETCH_DIM_RW, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
 	SAVE_OPLINE();
 	container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -1829,11 +1758,6 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUS
 			HANDLE_EXCEPTION();
         }
 		container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-			zend_throw_error(NULL, "Cannot use string offset as an array");
-			FREE_UNFETCHED_OP2();
-			HANDLE_EXCEPTION();
-		}
 		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
 		if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var), 1);
@@ -1864,11 +1788,6 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMPVAR|CV)
 	SAVE_OPLINE();
 	container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_UNSET);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
-		FREE_UNFETCHED_OP2();
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -1967,11 +1886,6 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an object");
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	FREE_OP2();
@@ -1995,11 +1909,6 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an object");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2110,11 +2019,6 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 			FREE_OP1_VAR_PTR();
 			HANDLE_EXCEPTION();
 		}
-		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-			zend_throw_error(NULL, "Cannot use string offset as an object");
-			FREE_OP2();
-			HANDLE_EXCEPTION();
-		}
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		FREE_OP2();
 		if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -2144,11 +2048,6 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an object");
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -2220,11 +2119,6 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 
 	property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an object");
-		FREE_OP2();
-		HANDLE_EXCEPTION();
-	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, OP1_TYPE, property_name, OP2_TYPE, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
@@ -2244,13 +2138,6 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
 
 	SAVE_OPLINE();
 	object_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot use string offset as an array");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		FREE_UNFETCHED_OP2();
-		HANDLE_EXCEPTION();
-	}
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 ZEND_VM_C_LABEL(try_assign_dim_array):
@@ -2376,11 +2263,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	SAVE_OPLINE();
 	value_ptr = GET_OP2_ZVAL_PTR_PTR(BP_VAR_W);
 
-	if (OP2_TYPE == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets");
-		FREE_UNFETCHED_OP1();
-		HANDLE_EXCEPTION();
-	}
 	if (OP1_TYPE == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
@@ -2404,11 +2286,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	}
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
-		zend_throw_error(NULL, "Cannot create references to/from string offsets");
-		FREE_OP2_VAR_PTR();
-		HANDLE_EXCEPTION();
-	}
 	if ((OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) ||
 	    (OP2_TYPE == IS_VAR && UNEXPECTED(value_ptr == &EG(error_zval)))) {
 		variable_ptr = &EG(uninitialized_zval);
@@ -4103,11 +3980,6 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC)
 
 		retval_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
-		if (OP1_TYPE == IS_VAR && UNEXPECTED(retval_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot return string offsets by reference");
-			HANDLE_EXCEPTION();
-		}
-
 		if (OP1_TYPE == IS_VAR) {
 			if (retval_ptr == &EG(uninitialized_zval) ||
 			    (opline->extended_value == ZEND_RETURNS_FUNCTION &&
@@ -4401,13 +4273,6 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, NUM)
 
 	SAVE_OPLINE();
 	varptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
-
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == NULL)) {
-		zend_throw_error(NULL, "Only variables can be passed by reference");
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		ZVAL_UNDEF(arg);
-		HANDLE_EXCEPTION();
-	}
 
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == &EG(error_zval))) {
@@ -5255,11 +5120,6 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
-		if (OP1_TYPE == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
-			zend_throw_error(NULL, "Cannot create references to/from string offsets");
-			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
-			HANDLE_EXCEPTION();
-		}
 		ZVAL_MAKE_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
 		FREE_OP1_VAR_PTR();
@@ -5735,11 +5595,6 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot unset string offsets");
-		FREE_UNFETCHED_OP2();
-		HANDLE_EXCEPTION();
-	}
 	offset = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	do {
@@ -5829,11 +5684,6 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP2();
-		HANDLE_EXCEPTION();
-	}
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_throw_error(NULL, "Cannot unset string offsets");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -7508,12 +7358,6 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				}
 			} else {
 				zval *value_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
-
-				if (OP1_TYPE == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-					zend_throw_error(NULL, "Cannot yield string offsets by reference");
-					FREE_UNFETCHED_OP2();
-					HANDLE_EXCEPTION();
-				}
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
