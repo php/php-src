@@ -390,7 +390,15 @@ PHP_FUNCTION(round)
 	}
 
 	if (ZEND_NUM_ARGS() >= 2) {
-		places = (int) precision;
+#if SIZEOF_LONG > SIZEOF_INT
+		if (precision >= 0) {
+			places = precision > INT_MAX ? INT_MAX : (int)precision;
+		} else {
+			places = precision <= INT_MIN ? INT_MIN+1 : (int)precision;
+		}
+#else
+		places = precision;
+#endif
 	}
 	convert_scalar_to_number_ex(value);
 
