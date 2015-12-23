@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Added support for new HTTP 451 code. (Julien)
 
 - SPL:
+  . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
+    (Laruence)
   . Fixed bug #71202 (Autoload function registered by another not activated
     immediately). (Laruence)
 
