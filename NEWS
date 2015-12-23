@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 5.6.18
 
 - Core:
+  . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
   . Added support for new HTTP 451 code. (Julien)
 
