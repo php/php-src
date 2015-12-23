@@ -246,6 +246,7 @@ static php_cli_server_http_response_status_code_pair status_map[] = {
 	{ 428, "Precondition Required" },
 	{ 429, "Too Many Requests" },
 	{ 431, "Request Header Fields Too Large" },
+	{ 451, "Unavailable For Legal Reasons"},
 	{ 500, "Internal Server Error" },
 	{ 501, "Not Implemented" },
 	{ 502, "Bad Gateway" },
