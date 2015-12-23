@@ -390,7 +390,7 @@ PHP_FUNCTION(round)
 	}
 
 	if (ZEND_NUM_ARGS() >= 2) {
-#if SIZEOF_LONG > SIZEOF_INT
+#if SIZEOF_ZEND_LONG > SIZEOF_INT
 		if (precision >= 0) {
 			places = precision > INT_MAX ? INT_MAX : (int)precision;
 		} else {
