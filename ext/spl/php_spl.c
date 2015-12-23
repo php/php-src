@@ -659,10 +659,14 @@ PHP_FUNCTION(spl_autoload_unregister)
 	if (SPL_G(autoload_functions)) {
 		if (ZSTR_LEN(lc_name) == sizeof("spl_autoload_call") - 1 && !strcmp(ZSTR_VAL(lc_name), "spl_autoload_call")) {
 			/* remove all */
-			zend_hash_destroy(SPL_G(autoload_functions));
-			FREE_HASHTABLE(SPL_G(autoload_functions));
-			SPL_G(autoload_functions) = NULL;
-			EG(autoload_func) = NULL;
+			if (!SPL_G(autoload_running)) {
+				zend_hash_destroy(SPL_G(autoload_functions));
+				FREE_HASHTABLE(SPL_G(autoload_functions));
+				SPL_G(autoload_functions) = NULL;
+				EG(autoload_func) = NULL;
+			} else {
+				zend_hash_clean(SPL_G(autoload_functions));
+			}
 			success = SUCCESS;
 		} else {
 			/* remove specific */
