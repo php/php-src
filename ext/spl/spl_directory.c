@@ -315,7 +315,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 } /* }}} */
 
 /* {{{ spl_filesystem_object_clone */
-/* Local zend_object_value creation (on stack)
+/* Local zend_object creation (on stack)
    Load the 'other' object
    Create a new empty object (See spl_filesystem_object_new_ex)
    Open the directory
