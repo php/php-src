@@ -158,6 +158,12 @@ typedef struct _php_stream_wrapper_ops {
 	int (*stream_rmdir)(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 	/* Metadata handling */
 	int (*stream_metadata)(php_stream_wrapper *wrapper, const char *url, int options, void *value, php_stream_context *context);
+
+	/* This operation was introduced in PHP 7.2 (PHP_API_VERSION >= 20160731) */
+	/* Asks whether an URL is cacheable and the key to use */
+	/* Note: Returned string must be zend_string_release()d by the caller */
+	zend_string *(*stream_cache_key)(php_stream_wrapper *wrapper, zend_string *url,
+		int options, php_stream_context *context);
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
@@ -373,6 +379,9 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam);
 #define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue))
+
+PHPAPI zend_string *_php_stream_cache_key(zend_string *path, int options, php_stream_context *context);
+#define php_stream_cache_key(path, options, context)	_php_stream_cache_key((path), (options), (context))
 
 #define php_stream_set_chunk_size(stream, size) _php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL)
 

@@ -71,6 +71,7 @@ PHP_FUNCTION(fnmatch);
 PHP_NAMED_FUNCTION(php_if_ftruncate);
 PHP_NAMED_FUNCTION(php_if_fstat);
 PHP_FUNCTION(sys_get_temp_dir);
+PHP_FUNCTION(file_cache_key);
 
 PHP_MINIT_FUNCTION(user_streams);
 

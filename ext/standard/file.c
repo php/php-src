@@ -2519,6 +2519,29 @@ PHP_FUNCTION(sys_get_temp_dir)
 }
 /* }}} */
 
+/* {{{ proto bool file_cache_key(string filename [, int options [, resource context]])
+   Determine if a path can be cached and the key to use */
+PHP_FUNCTION(file_cache_key)
+{
+	zend_string *filename;
+	zend_long options = 0;
+	zval *zcontext = NULL;
+	zend_string *ret;
+
+	/* Parse arguments */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lr!", &filename
+		, &options, &zcontext) == FAILURE) {
+		return;
+	}
+
+	ret = php_stream_cache_key(filename, options, php_stream_context_from_zval(zcontext, 0));
+	if (ret) {
+		RETVAL_STR(ret);
+	}
+	/* Default: return null */
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

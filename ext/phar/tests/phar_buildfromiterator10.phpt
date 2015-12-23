@@ -29,13 +29,15 @@ unlink(dirname(__FILE__) . '/buildfromiterator10.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-array(35) {
+array(36) {
   ["phar_ctx_001.phpt"]=>
   string(%d) "%sphar_ctx_001.phpt"
   ["phar_get_supported_signatures_001.phpt"]=>
   string(%d) "%sphar_get_supported_signatures_001.phpt"
   ["phar_get_supported_signatures_002.phpt"]=>
   string(%d) "%sphar_get_supported_signatures_002.phpt"
+  ["phar_is_cacheable_001.phpt"]=>
+  string(%d) "%sphar_is_cacheable_001.phpt"
   ["phar_oo_001.phpt"]=>
   string(%d) "%sphar_oo_001.phpt"
   ["phar_oo_002.phpt"]=>

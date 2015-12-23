@@ -1412,6 +1412,12 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 	return 1;
 }
 
+static zend_string *php_plain_files_cache_key(php_stream_wrapper *wrapper, zend_string *url, int option, php_stream_context *context)
+{
+	/* Plain files are always cacheable*/
+	zend_string_addref(url);
+	return url;
+}
 
 static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_stream_opener,
@@ -1424,7 +1430,8 @@ static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_rename,
 	php_plain_files_mkdir,
 	php_plain_files_rmdir,
-	php_plain_files_metadata
+	php_plain_files_metadata,
+	php_plain_files_cache_key
 };
 
 PHPAPI php_stream_wrapper php_plain_files_wrapper = {

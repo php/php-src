@@ -90,6 +90,7 @@ PHP 7.2 UPGRADE NOTES
 ========================================
 2. New Features
 ========================================
+  . Added cache_key() streams operation.
 
 - Core:
   . It is now possible to remove argument type annotations when overriding an

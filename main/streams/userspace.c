@@ -52,6 +52,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context);
 static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context);
+static zend_string *user_wrapper_cache_key(php_stream_wrapper *wrapper, zend_string *url, int option, php_stream_context *context);
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 
@@ -66,7 +67,8 @@ static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_rename,
 	user_wrapper_mkdir,
 	user_wrapper_rmdir,
-	user_wrapper_metadata
+	user_wrapper_metadata,
+	user_wrapper_cache_key
 };
 
 
@@ -148,6 +150,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_SET_OPTION	"stream_set_option"
 #define USERSTREAM_TRUNCATE	"stream_truncate"
 #define USERSTREAM_METADATA	"stream_metadata"
+#define USERSTREAM_CACHE_KEY	"stream_cache_key"
 
 /* {{{ class should have methods like these:
 
@@ -279,6 +282,11 @@ typedef struct _php_userstream_data php_userstream_data_t;
 		return true / false;
 	}
 
+ 	function stream_cache_key(string $path, int $options)
+	{
+		return string or null;
+	}
+
 	}}} **/
 
 static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object)
@@ -362,7 +370,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		return NULL;
 	}
 
-	/* call it's stream_open method - set up params first */
+	/* call its stream_open method - set up params first */
 	ZVAL_STRING(&args[0], filename);
 	ZVAL_STRING(&args[1], mode);
 	ZVAL_LONG(&args[2], options);
@@ -444,7 +452,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 		return NULL;
 	}
 
-	/* call it's dir_open method - set up params first */
+	/* call its dir_open method - set up params first */
 	ZVAL_STRING(&args[0], filename);
 	ZVAL_LONG(&args[1], options);
 
@@ -1359,7 +1367,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 		return ret;
 	}
 
-	/* call it's stat_url method - set up params first */
+	/* call its stat_url method - set up params first */
 	ZVAL_STRING(&args[0], url);
 	ZVAL_LONG(&args[1], flags);
 
@@ -1393,6 +1401,73 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 	return ret;
 
+}
+static zend_string *user_wrapper_cache_key(php_stream_wrapper *wrapper, zend_string *url, int flags, php_stream_context *context)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	zval zfuncname, zretval, *zp;
+	zval args[2];
+	int call_result;
+	zval object;
+	zend_string *ret;
+	const char *p1;
+	size_t prefix_len;
+
+	/* create an instance of our class */
+	user_stream_create_object(uwrap, context, &object);
+	if (Z_TYPE(object) == IS_UNDEF) {
+		return 0;
+	}
+
+	/* call its cache_key method - set up params first */
+	ZVAL_STR(&args[0], url);
+	ZVAL_LONG(&args[1], flags);
+
+	ZVAL_STRING(&zfuncname, USERSTREAM_CACHE_KEY);
+
+	call_result = call_user_function_ex(NULL,
+			&object,
+			&zfuncname,
+			&zretval,
+			2, args,
+			0, NULL	);
+
+	if (call_result == SUCCESS) {
+		if (Z_TYPE(zretval) == IS_NULL) {
+			ret = NULL;	/* Not cacheable */
+		} else {
+			zp = &zretval;
+			ZVAL_DEREF(zp);
+			convert_to_string(zp); /* Convert returned key to string */
+			ret = Z_STR_P(zp);
+			
+			/* Check that url and key have the same '<scheme>://' prefix */
+			if (url != ret) {
+				p1=php_memnstr(ZSTR_VAL(url), "://", sizeof("://") - 1
+					, ZSTR_VAL(url) + ZSTR_LEN(url));
+				prefix_len=0;
+				if (p1) {
+					prefix_len=p1-ZSTR_VAL(url)+3; /* Prefix length */
+				}
+				if ((!p1) || (prefix_len > ZSTR_LEN(ret)) || strncmp(ZSTR_VAL(ret), ZSTR_VAL(url), prefix_len)) {
+					php_error_docref(NULL, E_ERROR, "cache_key: Key (%s) should start with same prefix as URL (%s)",
+						ZSTR_VAL(ret), ZSTR_VAL(url));
+					zend_string_release(ret);
+					ret = NULL; /* Discard key */
+				}
+			}
+		}
+	} else {
+		/* No error if method is not implemented. URL is just not cacheable. */
+		ret = NULL;
+	}
+
+	/* clean up */
+	zval_ptr_dtor(&object);
+	/* Don't cleanup zretval */
+	zval_ptr_dtor(&zfuncname);
+
+	return ret;
 }
 
 static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t count)

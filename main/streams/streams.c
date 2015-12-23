@@ -2320,6 +2320,54 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 }
 /* }}} */
 
+/* {{{ php_stream_cache_key
+ */
+/* Note: If not NULL, the returned zend_string must be released by the caller */
+
+PHPAPI zend_string *_php_stream_cache_key(zend_string *path, int options, php_stream_context *context)
+{
+	php_stream_wrapper *wrapper = NULL;
+	zend_string *ret = NULL;
+
+	if (!path) {
+		return NULL;
+	}
+
+	wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(path), NULL, options);
+
+	if (wrapper && wrapper->wops->stream_cache_key) {
+		ret = wrapper->wops->stream_cache_key(wrapper,
+				path, options, context);
+		if (ret) {
+			if (ZSTR_LEN(ret) == 0) {
+				/* Discard empty key as not cacheable */
+				zend_string_release(ret);
+				ret = NULL;
+			} else {
+#ifdef PHP_DEBUG
+				if (path != ret) {
+					/* Check that returned key starts with the same '<protocol>://' */
+					/* prefix as input path */
+					const char *p1;
+					size_t n;
+
+					p1=php_memnstr(ZSTR_VAL(path), "://", sizeof("://") - 1
+						, ZSTR_VAL(path) + ZSTR_LEN(path));
+					if (p1) { /* Ignore non-protocol-prefixed strings */
+						n=p1-ZSTR_VAL(path)+3; /* Prefix length */
+						ZEND_ASSERT((n <= ZSTR_LEN(ret))
+							&& (!strncmp(ZSTR_VAL(ret), ZSTR_VAL(path), n)));
+					}
+				}
+#endif
+			}
+		}
+	}
+
+	return ret;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

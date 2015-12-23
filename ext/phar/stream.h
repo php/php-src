@@ -28,6 +28,7 @@ static php_stream* phar_wrapper_open_url(php_stream_wrapper *wrapper, const char
 static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context);
 static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
+static zend_string *phar_wrapper_cache_key(php_stream_wrapper *wrapper, zend_string *url, int options, php_stream_context *context);
 
 /* file/stream handlers */
 static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count);
