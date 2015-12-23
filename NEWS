@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
 
+- SPL:
+  . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
+    (Laruence)
+
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
     
