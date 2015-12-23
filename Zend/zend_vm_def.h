@@ -6021,7 +6021,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY, JMP_ADDR)
 			break;
 		}
 		Z_FE_POS_P(array) = pos + 1;
-		if (opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 			if (!p->key) {
 				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 			} else {
@@ -6065,7 +6065,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY, JMP_ADDR)
 				pos++;
 				p++;
 			}
-			if (opline->result_type == IS_TMP_VAR) {
+			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 				} else if (ZSTR_VAL(p->key)[0]) {
@@ -6118,7 +6118,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY, JMP_ADDR)
 				/* failure in get_current_data */
 				ZEND_VM_C_GOTO(fe_fetch_r_exit);
 			}
-			if (opline->result_type == IS_TMP_VAR) {
+			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
@@ -6195,7 +6195,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 			}
 			break;
 		}
-		if (opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 			if (!p->key) {
 				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 			} else {
@@ -6253,7 +6253,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 				pos++;
 				p++;
 			}
-			if (opline->result_type == IS_TMP_VAR) {
+			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 				} else if (ZSTR_VAL(p->key)[0]) {
@@ -6306,7 +6306,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 				/* failure in get_current_data */
 				ZEND_VM_C_GOTO(fe_fetch_w_exit);
 			}
-			if (opline->result_type == IS_TMP_VAR) {
+			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
