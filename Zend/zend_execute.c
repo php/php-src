@@ -94,13 +94,10 @@ static const zend_internal_function zend_pass_function = {
 #define READY_TO_DESTROY(zv) \
 	(UNEXPECTED(zv) && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
-#define EXTRACT_ZVAL_PTR(zv, check_null) do {		\
+#define EXTRACT_ZVAL_PTR(zv) do {		\
 	zval *__zv = (zv);								\
 	if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {	\
-		if (!(check_null) ||						\
-		    EXPECTED(Z_INDIRECT_P(__zv))) {			\
-			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	\
-		}											\
+		ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	    \
 	}												\
 } while (0)
 
