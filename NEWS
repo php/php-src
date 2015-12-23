@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.3
 
+- Core:
+  . Added support for new HTTP 451 code. (Julien)
+
 - Standard:
   . Fixed bug #71190 (substr_replace converts integers in original $search
     array to strings). (Laruence)
