@@ -727,6 +727,25 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 	}
 }
 
+static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
+{
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+
+	if (func_info) {
+		zend_call_info *call_info =func_info->callee_info;
+
+		while (call_info) {
+			zend_op *opline = call_info->caller_init_opline;
+
+			if (opline && call_info->callee_func) {
+				ZEND_ASSERT(opline->opcode == ZEND_INIT_FCALL);
+				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, call_info->callee_func);
+			}
+			call_info = call_info->next_callee;
+		}
+	}
+}
+
 int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
 	uint idx, j;
@@ -777,19 +796,28 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 	    (ZEND_OPTIMIZER_PASS_7 & optimization_level) &&
 	    zend_build_call_graph(&ctx.arena, script, ZEND_RT_CONSTANTS, &call_graph) == SUCCESS) {
 		/* Optimize using call-graph */
-		uint32_t i;
+		void *checkpoint = zend_arena_checkpoint(ctx.arena);
+		int i;
 		zend_func_info *func_info;
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			zend_revert_pass_two(call_graph.op_arrays[i]);
-			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
-			if (func_info) {
-				func_info->ssa.rt_constants = 0;
-			}
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
-			optimize_dfa(call_graph.op_arrays[i], &ctx);
+			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (func_info) {
+				zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa, &func_info->flags);
+			}
+		}
+
+		//TODO: perform inner-script inference???
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (func_info) {
+				zend_dfa_optimize_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa);
+			}
 		}
 
 		if (debug_level & ZEND_DUMP_AFTER_PASS_7) {
@@ -798,11 +826,19 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 			}
 		}
 
+		if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				zend_adjust_fcall_stack_size_graph(call_graph.op_arrays[i]);
+			}
+		}
+
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			zend_redo_pass_two(call_graph.op_arrays[i]);
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 		}
-	}
+
+		zend_arena_release(&ctx.arena, checkpoint);
+	} else
 #endif
 
 	if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {

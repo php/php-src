@@ -3897,7 +3897,7 @@ void zend_func_return_info(const zend_op_array   *op_array,
 				}
 
 				if (opline->op1_type == IS_CONST) {
-					if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) == IS_NULL) {
+					if (Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants)) == IS_NULL) {
 						if (tmp_has_range < 0) {
 							tmp_has_range = 1;
 							tmp_range.underflow = 0;
@@ -3912,7 +3912,7 @@ void zend_func_return_info(const zend_op_array   *op_array,
 								tmp_range.max = MAX(tmp_range.max, 0);
 							}
 						}
-					} else if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) == IS_FALSE) {
+					} else if (Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants)) == IS_FALSE) {
 						if (tmp_has_range < 0) {
 							tmp_has_range = 1;
 							tmp_range.underflow = 0;
@@ -3927,7 +3927,7 @@ void zend_func_return_info(const zend_op_array   *op_array,
 								tmp_range.max = MAX(tmp_range.max, 0);
 							}
 						}
-					} else if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) == IS_TRUE) {
+					} else if (Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants)) == IS_TRUE) {
 						if (tmp_has_range < 0) {
 							tmp_has_range = 1;
 							tmp_range.underflow = 0;
@@ -3942,19 +3942,19 @@ void zend_func_return_info(const zend_op_array   *op_array,
 								tmp_range.max = MAX(tmp_range.max, 1);
 							}
 						}
-					} else if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) == IS_LONG) {
+					} else if (Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants)) == IS_LONG) {
 						if (tmp_has_range < 0) {
 							tmp_has_range = 1;
 							tmp_range.underflow = 0;
-							tmp_range.min = Z_LVAL_P(RT_CONSTANT(op_array, opline->op1));
-							tmp_range.max = Z_LVAL_P(RT_CONSTANT(op_array, opline->op1));
+							tmp_range.min = Z_LVAL_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants));
+							tmp_range.max = Z_LVAL_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants));
 							tmp_range.overflow = 0;
 						} else if (tmp_has_range) {
 							if (!tmp_range.underflow) {
-								tmp_range.min = MIN(tmp_range.min, Z_LVAL_P(RT_CONSTANT(op_array, opline->op1)));
+								tmp_range.min = MIN(tmp_range.min, Z_LVAL_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants)));
 							}
 							if (!tmp_range.overflow) {
-								tmp_range.max = MAX(tmp_range.max, Z_LVAL_P(RT_CONSTANT(op_array, opline->op1)));
+								tmp_range.max = MAX(tmp_range.max, Z_LVAL_P(CRT_CONSTANT_EX(op_array, opline->op1, info->ssa.rt_constants)));
 							}
 						}
 					} else {
