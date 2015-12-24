@@ -2057,11 +2057,11 @@ PHP_FUNCTION(array_fill_keys)
 
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		double __calc_size = ((start - end) / step) + 1; \
-		if (fabs(__calc_size) >= (double)HT_MAX_SIZE) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", start > end ? end : start, start > end ? start : end); \
+		if (__calc_size >= (double)HT_MAX_SIZE) { \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
 			RETURN_FALSE; \
 		} \
-		size = (uint32_t)fabs(__calc_size); \
+		size = (uint32_t)__calc_size; \
 		array_init_size(return_value, size); \
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
 	} while (0)
