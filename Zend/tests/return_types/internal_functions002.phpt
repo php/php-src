@@ -1,5 +1,5 @@
 --TEST--
-Return type hinting for internal functions 2
+Return type for internal functions 2
 
 --SKIPIF--
 <?php

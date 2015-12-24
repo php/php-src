@@ -4712,7 +4712,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 	zend_arg_info *arg_infos;
 	
 	if (return_type_ast) {
-		/* Use op_array->arg_info[-1] for return type hinting */
+		/* Use op_array->arg_info[-1] for return type */
 		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
 		arg_infos->name = NULL;
 		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
@@ -4825,31 +4825,31 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 						&& !Z_CONSTANT(default_node.u.constant)
 					) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with array type hint can only be an array or NULL");
+							"with array type can only be an array or NULL");
 					}
 				} else if (arg_info->type_hint == IS_CALLABLE && default_ast) {
 					if (!has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with callable type hint can only be NULL");
+							"with callable type can only be NULL");
 					}
 				}
 			} else {
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 					if (arg_info->class_name) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with a class type hint can only be NULL");
+							"with a class type can only be NULL");
 					} else switch (arg_info->type_hint) {
 						case IS_DOUBLE:
 							if (Z_TYPE(default_node.u.constant) != IS_DOUBLE && Z_TYPE(default_node.u.constant) != IS_LONG) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-									"with a float type hint can only be float, integer, or NULL");
+									"with a float type can only be float, integer, or NULL");
 							}
 							break;
 							
 						default:
 							if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-									"with a %s type hint can only be %s or NULL",
+									"with a %s type can only be %s or NULL",
 									zend_get_type_by_const(arg_info->type_hint), zend_get_type_by_const(arg_info->type_hint));
 							}
 							break;
