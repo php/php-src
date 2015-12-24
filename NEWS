@@ -2,6 +2,16 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.3
 
+- Core:
+  . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
+  . Added support for new HTTP 451 code. (Julien)
+
+- SPL:
+  . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
+    (Laruence)
+  . Fixed bug #71202 (Autoload function registered by another not activated
+    immediately). (Laruence)
+
 - Standard:
   . Fixed bug #71190 (substr_replace converts integers in original $search
     array to strings). (Laruence)
@@ -108,7 +118,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fixed bug #71020 (Use after free in Collator::sortWithSortKeys).
-    (emmanuel dot law at gmail dot com, Laruence)
+    (CVE-2015-8616) (emmanuel dot law at gmail dot com, Laruence)
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
@@ -129,6 +139,9 @@ PHP                                                                        NEWS
   . Fixed bug #70977 (Segmentation fault with opcache.huge_code_pages=1).
     (Laruence)
 
+- PDO_Firebird:
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
+
 - Phpdbg:
   . Fixed stderr being written to stdout. (Bob)
 
@@ -137,6 +150,10 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #70982 (setStaticPropertyValue behaviors inconsistently with
     5.6). (Laruence)
+
+- Soap:
+  . Fixed bug #70993 (Array key references break argument processing).
+    (Laruence)
 
 - SPL:
   . Fixed bug #71028 (Undefined index with ArrayIterator). (Laruence)
@@ -153,13 +170,6 @@ PHP                                                                        NEWS
 
 - Streams/Socket:
   . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
-
-- Soap:
-  . Fixed bug #70993 (Array key references break argument processing).
-    (Laruence)
-
-- PDO_Firebird:
-  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
 
 03 Dec 2015, PHP 7.0.0
 
