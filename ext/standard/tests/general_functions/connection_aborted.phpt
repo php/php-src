@@ -7,4 +7,4 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 var_dump(connection_aborted());
 ?>
 --EXPECTF--
-int(%i)
+int(0)

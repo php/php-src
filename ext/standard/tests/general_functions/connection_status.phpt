@@ -4,7 +4,7 @@ int connection_status ( void );
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --FILE--
 <?php
-var_dump(connection_status());
+var_dump(connection_status() == CONNECTION_NORMAL);
 ?>
 --EXPECTF--
-int(%i)
+bool(true)
