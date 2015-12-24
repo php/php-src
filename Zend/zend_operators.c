@@ -658,11 +658,34 @@ try_again:
 		case IS_ARRAY:
 			{
 				HashTable *ht = Z_ARR_P(op);
-				if (Z_IMMUTABLE_P(op)) {
-					/* TODO: try not to duplicate immutable arrays as well ??? */
-					ht = zend_array_dup(ht);
+				HashTable *obj_ht = emalloc(sizeof(HashTable));
+				zend_ulong num_key;
+				zend_string *str_key;
+				zval *zv;
+
+				/* PHP arrays have string and integer keys, but object
+				 * property tables can only have string keys, and will
+				 * automatically coerce integers to strings when looking up
+				 * values. Thus, we need to create a new table with any integer
+				 * keys converted into strings, lest those values be
+				 * inaccessible.
+				 */
+				zend_hash_init(obj_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+
+				ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+					if (!str_key) {
+						str_key = zend_long_to_str(num_key);
+						zend_string_delref(str_key);
+					}
+					Z_TRY_ADDREF_P(zv);
+					zend_hash_add_new(obj_ht, str_key, zv);
+				} ZEND_HASH_FOREACH_END();
+
+				if (!Z_IMMUTABLE_P(op)) {
+					zval_ptr_dtor(op);
 				}
-				object_and_properties_init(op, zend_standard_class_def, ht);
+
+				object_and_properties_init(op, zend_standard_class_def, obj_ht);
 				break;
 			}
 		case IS_OBJECT:

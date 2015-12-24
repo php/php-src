@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Added support for new HTTP 451 code. (Julien)
   . Fixed bug #66173 (Object/Array cast loses numeric property/element
     accessibility). (Andrea)
+  . Fixed bug #71208 (Array/Object cast loses numeric property/element
+    accessibility). (Andrea)
 
 - SPL:
   . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
