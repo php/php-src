@@ -2073,7 +2073,8 @@ PHP_FUNCTION(array_fill_keys)
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", start, end); \
 			RETURN_FALSE; \
 		} \
-		array_init_size(return_value, (uint32_t)(__calc_size + 1)); \
+		size = (uint32_t)(__calc_size + 1); \
+		array_init_size(return_value, size); \
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
 	} while (0)
 
@@ -2221,6 +2222,7 @@ double_str:
 		zend_long low, high;
 		/* lstep is a ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
 		zend_ulong __calc_size, lstep;
+		uint32_t i, size;
 long_str:
 		low = zval_get_long(zlow);
 		high = zval_get_long(zhigh);
@@ -2242,15 +2244,9 @@ long_str:
 			RANGE_CHECK_LONG_INIT_ARRAY(high, low);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low >= high; low -= lstep) {
-					Z_LVAL(tmp) = low;
+				for (i = 0; i < size; ++i) {
+					Z_LVAL(tmp) = low - (i * lstep);
 					ZEND_HASH_FILL_ADD(&tmp);
-					/* safety check from overflow */
-					/* e.g. range(PHP_INT_MIN + 513, PHP_INT_MIN) */
-					/* e.g. range(0, PHP_INT_MIN, PHP_INT_MIN) */
-					if (low == ZEND_LONG_MIN || (lstep > ZEND_LONG_MAX && low < 0)) {
-						break;
-					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
@@ -2262,15 +2258,9 @@ long_str:
 			RANGE_CHECK_LONG_INIT_ARRAY(low, high);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low <= high; low += lstep) {
-					Z_LVAL(tmp) = low;
+				for (i = 0; i < size; ++i) {
+					Z_LVAL(tmp) = low + (i * lstep);
 					ZEND_HASH_FILL_ADD(&tmp);
-					/* safety check from overflow */
-					/* e.g. range(PHP_INT_MAX - 512, PHP_INT_MAX) */
-					/* e.g. range(PHP_INT_MIN, 1, PHP_INT_MIN) */
-					if (low == ZEND_LONG_MAX || (lstep > ZEND_LONG_MAX && low > -1)) {
-						break;
-					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
