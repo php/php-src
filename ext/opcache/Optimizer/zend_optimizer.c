@@ -28,7 +28,12 @@
 #include "zend_vm.h"
 #include "zend_cfg.h"
 #include "zend_func_info.h"
+#include "zend_call_graph.h"
 #include "zend_dump.h"
+
+#ifndef HAVE_DFA_PASS
+# define HAVE_DFA_PASS 0
+#endif
 
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
@@ -606,15 +611,18 @@ static void zend_optimize(zend_op_array      *op_array,
 		}
 	}
 
+#if HAVE_DFA_PASS
 	/* pass 6:
 	 * - DFA optimization
 	 */
-	if (ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) {
+	if ((ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) &&
+	    !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
 		optimize_dfa(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_6) {
 			zend_dump_op_array(op_array, 0, "after pass 6", NULL);
 		}
 	}
+#endif
 
 	/* pass 9:
 	 * - Optimize temp variables usage
@@ -651,12 +659,10 @@ static void zend_optimize(zend_op_array      *op_array,
 	}
 }
 
-static void zend_optimize_op_array(zend_op_array      *op_array,
-                                   zend_optimizer_ctx *ctx)
+static void zend_revert_pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
 
-	/* Revert pass_two() */
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -668,11 +674,12 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 		}
 		opline++;
 	}
+}
 
-	/* Do actual optimizations */
-	zend_optimize(op_array, ctx);
+static void zend_redo_pass_two(zend_op_array *op_array)
+{
+	zend_op *opline, *end;
 
-	/* Redo pass_two() */
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -685,6 +692,19 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
+}
+
+static void zend_optimize_op_array(zend_op_array      *op_array,
+                                   zend_optimizer_ctx *ctx)
+{
+	/* Revert pass_two() */
+	zend_revert_pass_two(op_array);
+
+	/* Do actual optimizations */
+	zend_optimize(op_array, ctx);
+
+	/* Redo pass_two() */
+	zend_redo_pass_two(op_array);
 }
 
 static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer_ctx *ctx)
@@ -714,6 +734,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 	zend_class_entry *ce;
 	zend_op_array *op_array;
 	zend_optimizer_ctx ctx;
+	zend_call_graph call_graph;
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
@@ -750,6 +771,39 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 			}
 		}
 	}
+
+#if HAVE_DFA_PASS
+	if ((ZEND_OPTIMIZER_PASS_6 & optimization_level) &&
+	    (ZEND_OPTIMIZER_PASS_7 & optimization_level) &&
+	    zend_build_call_graph(&ctx.arena, script, ZEND_RT_CONSTANTS, &call_graph) == SUCCESS) {
+		/* Optimize using call-graph */
+		uint32_t i;
+		zend_func_info *func_info;
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			zend_revert_pass_two(call_graph.op_arrays[i]);
+			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (func_info) {
+				func_info->ssa.rt_constants = 0;
+			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			optimize_dfa(call_graph.op_arrays[i], &ctx);
+		}
+
+		if (debug_level & ZEND_DUMP_AFTER_PASS_7) {
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 7", NULL);
+			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			zend_redo_pass_two(call_graph.op_arrays[i]);
+			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+		}
+	}
+#endif
 
 	if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
 		zend_adjust_fcall_stack_size(&script->main_op_array, &ctx);

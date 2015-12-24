@@ -30,20 +30,12 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
-#ifndef HAVE_DFA_PASS
-# define HAVE_DFA_PASS 0
-#endif
-
 void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	void *checkpoint;
 	uint32_t build_flags;
 	uint32_t flags = 0;
 	zend_ssa ssa;
-
-#if !HAVE_DFA_PASS
-	return;
-#endif
 
     /* Build SSA */
 	memset(&ssa, 0, sizeof(ssa));
