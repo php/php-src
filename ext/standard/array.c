@@ -2067,9 +2067,9 @@ PHP_FUNCTION(array_fill_keys)
 	} while (0)
 
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
-		double __calc_size = (end - start) / lstep; \
+		double __calc_size = (start - end) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", start, end); \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", end, start); \
 			RETURN_FALSE; \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
@@ -2241,7 +2241,7 @@ long_str:
 				goto err;
 			}
 
-			RANGE_CHECK_LONG_INIT_ARRAY(high, low);
+			RANGE_CHECK_LONG_INIT_ARRAY(low, high);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
@@ -2255,7 +2255,7 @@ long_str:
 				goto err;
 			}
 
-			RANGE_CHECK_LONG_INIT_ARRAY(low, high);
+			RANGE_CHECK_LONG_INIT_ARRAY(high, low);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
