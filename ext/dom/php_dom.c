@@ -1100,7 +1100,7 @@ zend_object *dom_objects_new(zend_class_entry *class_type)
 /* }}} */
 
 #if defined(LIBXML_XPATH_ENABLED)
-/* {{{ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type) */
+/* {{{ zend_object dom_xpath_objects_new(zend_class_entry *class_type) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {
 	dom_xpath_object *intern = ecalloc(1, sizeof(dom_xpath_object) + zend_object_properties_size(class_type));
