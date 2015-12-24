@@ -2055,7 +2055,7 @@ PHP_FUNCTION(array_fill_keys)
 }
 /* }}} */
 
-#define RANGE_CHECK_INIT_ARRAY(start, end) do { \
+#define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		__calc_size = ((start - end) / step) + 1; \
 		if (fabs(__calc_size) >= (double)HT_MAX_SIZE) { \
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", start > end ? end : start, start > end ? start : end); \
@@ -2192,7 +2192,7 @@ double_str:
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(low, high);
+			RANGE_CHECK_DOUBLE_INIT_ARRAY(low, high);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
@@ -2206,7 +2206,7 @@ double_str:
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(high, low);
+			RANGE_CHECK_DOUBLE_INIT_ARRAY(high, low);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
@@ -2278,7 +2278,7 @@ err:
 }
 /* }}} */
 
-#undef RANGE_CHECK_INIT_ARRAY
+#undef RANGE_CHECK_DOUBLE_INIT_ARRAY
 #undef RANGE_CHECK_LONG_INIT_ARRAY
 
 static void php_array_data_shuffle(zval *array) /* {{{ */
