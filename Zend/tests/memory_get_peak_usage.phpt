@@ -2,6 +2,8 @@
 int memory_get_peak_usage ([ bool $real_usage = false ] );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
+--INI--
+memory_limit=-1
 --FILE--
 <?php
 var_dump($a = memory_get_peak_usage());
