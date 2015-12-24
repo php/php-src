@@ -1701,7 +1701,7 @@ try_again:
 	return offset;
 }
 
-static zend_never_inline void zend_wrong_string_offset(void)
+static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 {
 	const char *msg = NULL;
 	const zend_op *opline = EG(current_execute_data)->opline;
