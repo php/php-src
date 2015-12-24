@@ -2057,7 +2057,7 @@ PHP_FUNCTION(array_fill_keys)
 
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		double __calc_size = ((start - end) / step) + 1; \
-		if (__calc_size > (double)HT_MAX_SIZE) { \
+		if (__calc_size >= (double)HT_MAX_SIZE) { \
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
 			RETURN_FALSE; \
 		} \
@@ -2068,7 +2068,7 @@ PHP_FUNCTION(array_fill_keys)
 
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
 		zend_ulong __calc_size = (start - end) / lstep; \
-		if (__calc_size >= HT_MAX_SIZE) { \
+		if (__calc_size >= HT_MAX_SIZE - 1) { \
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", end, start); \
 			RETURN_FALSE; \
 		} \
