@@ -2056,7 +2056,7 @@ PHP_FUNCTION(array_fill_keys)
 /* }}} */
 
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
-		__calc_size = ((start - end) / step) + 1; \
+		double __calc_size = ((start - end) / step) + 1; \
 		if (fabs(__calc_size) >= (double)HT_MAX_SIZE) { \
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", start > end ? end : start, start > end ? start : end); \
 			RETURN_FALSE; \
@@ -2067,7 +2067,7 @@ PHP_FUNCTION(array_fill_keys)
 	} while (0)
 
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
-		__calc_size = (end - start) / lstep; \
+		double __calc_size = (end - start) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE) { \
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", start, end); \
 			RETURN_FALSE; \
@@ -2173,9 +2173,8 @@ PHP_FUNCTION(range)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
-		double low, high, __calc_size;
-		zend_long i;
-		uint32_t size;
+		double low, high;
+		uint32_t i, size;
 double_str:
 		low = zval_get_double(zlow);
 		high = zval_get_double(zhigh);
@@ -2222,7 +2221,7 @@ double_str:
 	} else {
 		zend_long low, high;
 		/* lstep is a ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
-		zend_ulong __calc_size, lstep;
+		zend_ulong lstep;
 		uint32_t i, size;
 long_str:
 		low = zval_get_long(zlow);
