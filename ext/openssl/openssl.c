@@ -4927,7 +4927,7 @@ PHP_FUNCTION(openssl_seal)
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
 	if (!iv && iv_len > 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+		php_error_docref(NULL, E_WARNING,
 				"Cipher algorithm requires an IV to be supplied as a sixth parameter");
 		RETURN_FALSE;
 	}
