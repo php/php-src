@@ -5418,7 +5418,7 @@ PHP_FUNCTION(openssl_encrypt)
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 1) == FAILURE) {
 		RETVAL_FALSE;
-	} else if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	} else if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
 			ZSTR_VAL(outbuf)[outlen] = '\0';
@@ -5521,7 +5521,7 @@ PHP_FUNCTION(openssl_decrypt)
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 0) == FAILURE) {
 		RETVAL_FALSE;
-	} else if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	} else if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
 		outlen += i;
 		ZSTR_VAL(outbuf)[outlen] = '\0';
 		ZSTR_LEN(outbuf) = outlen;
