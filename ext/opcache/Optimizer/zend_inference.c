@@ -3299,9 +3299,13 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		case ZEND_UNSET_VAR:
-			if (opline->extended_value & ZEND_QUICK_SET) {
-				UPDATE_SSA_TYPE((MAY_BE_UNDEF|MAY_BE_RCN), ssa_ops[i].op1_def);
+			ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
+			tmp = MAY_BE_UNDEF|MAY_BE_RCN;
+			if (!op_array->function_name) {
+				/* In global scope, we know nothing */
+				tmp |= MAY_BE_REF;
 			}
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			break;
 		case ZEND_UNSET_DIM:
 		case ZEND_UNSET_OBJ:

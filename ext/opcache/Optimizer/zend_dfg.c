@@ -106,6 +106,9 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 						}
 						DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
 						break;
+					case ZEND_UNSET_VAR:
+						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
+						/* break missing intentionally */
 					case ZEND_ASSIGN_ADD:
 					case ZEND_ASSIGN_SUB:
 					case ZEND_ASSIGN_MUL:
