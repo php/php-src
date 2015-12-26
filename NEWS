@@ -94,7 +94,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #71105 (Format String Vulnerability in Class Name Error Message).
-    (andrew at jmpesp dot org)
+    (CVE-2015-8617) (andrew at jmpesp dot org)
   . Fixed bug #70831 (Compile fails on system with 160 CPUs). (Daniel Axtens)
   . Fixed bug #71006 (symbol referencing errors on Sparc/Solaris). (Dmitry)
   . Fixed bug #70997 (When using parentClass:: instead of parent::, static
