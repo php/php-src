@@ -1947,6 +1947,10 @@ ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table = zend_rebuild_symbol_table();
 
+	if (UNEXPECTED(symbol_table == NULL)) {
+		return;
+	}
+
 	RETURN_ARR(zend_array_dup(symbol_table));
 }
 /* }}} */

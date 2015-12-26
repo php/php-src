@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.3
 
 - Core:
+  . Fixed bug #71221 (Null pointer deref (segfault) in get_defined_vars via
+    ob_start). (hugh at allthethings dot co dot nz)
   . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Added support for new HTTP 451 code. (Julien)
 
