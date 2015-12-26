@@ -1976,6 +1976,10 @@ PHP_FUNCTION(compact)
 
 	symbol_table = zend_rebuild_symbol_table();
 
+	if (UNEXPECTED(symbol_table == NULL)) {
+		return;
+	}
+
 	/* compact() is probably most used with a single array of var_names
 	   or multiple string names, rather than a combination of both.
 	   So quickly guess a minimum result size based on that */
