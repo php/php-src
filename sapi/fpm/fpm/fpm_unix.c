@@ -239,6 +239,10 @@ int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *pa
 			return -1;
 		}
 	}
+	if (0 > chmod(path, wp->socket_mode)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to chmod() the socket '%s'", wp->config->name, wp->config->listen_address);
+			return -1;
+	}	
 	return 0;
 }
 /* }}} */
