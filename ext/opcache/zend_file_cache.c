@@ -21,6 +21,7 @@
 #include "zend_compile.h"
 #include "zend_vm.h"
 #include "zend_interfaces.h"
+#include "zend_enum.h"
 
 #include "php.h"
 
@@ -265,6 +266,16 @@ static void zend_file_cache_serialize_hash(HashTable                *ht,
 	}
 }
 
+static uint32_t zend_file_cache_serialize_enum_class(uint32_t handle) {
+	zval _zv, *zv;
+	if ((zv = zend_hash_index_find(&ZCG(enums), handle)) == NULL) {
+		zv = &_zv;
+		ZVAL_LONG(zv, zend_hash_num_elements(&ZCG(enums)));
+		zend_hash_index_add(&ZCG(enums), handle, zv);
+	}
+	return (uint32_t) Z_LVAL_P(zv);
+}
+
 static zend_ast *zend_file_cache_serialize_ast(zend_ast                 *ast,
                                                zend_persistent_script   *script,
                                                zend_file_cache_metainfo *info,
@@ -340,6 +351,9 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 					ast->ast = zend_file_cache_serialize_ast(ast->ast, script, info, buf);
 				}
 			}
+			break;
+		case IS_ENUM:
+			Z_ENUM_CLASS_P(zv) = zend_file_cache_serialize_enum_class(Z_ENUM_CLASS_P(zv));
 			break;
 	}
 }
@@ -567,6 +581,16 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 			p++;
 		}
 	}
+
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_enum_entry *ee = (zend_enum_entry *) ce;
+		int i;
+		for (i = 0; i < zend_hash_num_elements(&ce->constants_table); i++) {
+			SERIALIZE_STR(ee->handle_map[i]);
+		}
+		ee->enum_handle = zend_file_cache_serialize_enum_class(ee->enum_handle);
+	}
+
 	zend_file_cache_serialize_hash(&ce->constants_table, script, info, buf, zend_file_cache_serialize_class_constant);
 	SERIALIZE_STR(ce->info.user.filename);
 	SERIALIZE_STR(ce->info.user.doc_comment);
@@ -680,6 +704,8 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 
 	memcpy(buf, script->mem, script->size);
 
+	zend_hash_init(&ZCG(enums), 32, NULL, NULL, 0);
+
 	new_script = (zend_persistent_script*)((char*)buf + info->script_offset);
 	SERIALIZE_STR(new_script->script.filename);
 
@@ -689,6 +715,8 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 
 	SERIALIZE_PTR(new_script->arena_mem);
 	new_script->mem = NULL;
+
+	zend_hash_destroy(&ZCG(enums));
 }
 
 static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
@@ -922,6 +950,14 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 				}
 			}
 			break;
+		case IS_ENUM:
+			if (script->corrupted) {
+				Z_ENUM_CLASS_P(zv) += ZCSG(enum_handle);
+			} else {
+				Z_ENUM_CLASS_P(zv) += CG(enum_handle);
+			}
+			break;
+
 	}
 }
 
@@ -1138,6 +1174,21 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, ZVAL_PTR_DTOR);
 
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_enum_entry *ee = (zend_enum_entry *) ce;
+		int i;
+		if (script->corrupted) {
+			ee->enum_handle += ZCSG(enum_handle);
+			zend_hash_num_elements(&CG(enums))++;
+		} else {
+			ee->enum_handle += CG(enum_handle);
+			zend_hash_index_add_ptr(&CG(enums), ee->enum_handle, ce);
+		}
+		for (i = 0; i < zend_hash_num_elements(&ce->constants_table); i++) {
+			UNSERIALIZE_STR(ee->handle_map[i]);
+		}
+	}
+
 	if (ce->trait_aliases) {
 		zend_trait_alias **p, *q;
 
@@ -1232,6 +1283,8 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 static void zend_file_cache_unserialize(zend_persistent_script  *script,
                                         void                    *buf)
 {
+	uint32_t elements = zend_hash_num_elements(&CG(enums));
+
 	script->mem = buf;
 
 	UNSERIALIZE_STR(script->script.filename);
@@ -1241,6 +1294,13 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	zend_file_cache_unserialize_hash(&script->script.function_table,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
+
+	if (script->corrupted) {
+		ZCSG(enum_handle) += zend_hash_num_elements(&CG(enums)) - elements;
+		zend_hash_num_elements(&CG(enums)) = elements;
+	} else {
+		CG(enum_handle) += zend_hash_num_elements(&CG(enums)) - elements;
+	}
 
 	UNSERIALIZE_PTR(script->arena_mem);
 }

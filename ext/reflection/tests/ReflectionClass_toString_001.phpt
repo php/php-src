@@ -34,7 +34,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [52] {
+  - Methods [53] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -232,6 +232,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method isTrait ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isEnum ] {
 
       - Parameters [0] {
       }

@@ -31,6 +31,7 @@
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
+#include "zend_enum.h"
 
 #define COMMON (is_ref ? "&" : "")
 /* }}} */
@@ -168,6 +169,9 @@ again:
 			}
 			PUTS("}\n");
 			Z_OBJ_DEC_APPLY_COUNT_P(struc);
+			break;
+		case IS_ENUM:
+			php_printf("%senum(%s::%s)\n", COMMON, ZSTR_VAL(zend_enum_ce(struc)->name), ZSTR_VAL(zend_enum_name(struc)));
 			break;
 		case IS_RESOURCE: {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
@@ -333,6 +337,9 @@ again:
 			php_printf("%*c", level - 1, ' ');
 		}
 		PUTS("}\n");
+		break;
+	case IS_ENUM:
+		php_printf("%senum(%s::%s)\n", COMMON, ZSTR_VAL(zend_enum_ce(struc)->name), ZSTR_VAL(zend_enum_name(struc)));
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
@@ -537,6 +544,13 @@ again:
 			smart_str_appendl(buf, "))", 2);
 
 			break;
+
+		case IS_ENUM:
+			smart_str_appends(buf, ZSTR_VAL(zend_enum_ce(struc)->name));
+			smart_str_appendl(buf, "::", 2);
+			smart_str_appends(buf, ZSTR_VAL(zend_enum_name(struc)));
+			break;
+
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
@@ -947,6 +961,20 @@ again:
 				} ZEND_HASH_FOREACH_END();
 			}
 			smart_str_appendc(buf, '}');
+			return;
+		}
+		case IS_ENUM: {
+			zend_class_entry *ce = zend_enum_ce(struc);
+			zend_string *name = zend_enum_name(struc);
+			smart_str_appendl(buf, "E:", 2);
+			smart_str_append_unsigned(buf, ZSTR_LEN(ce->name));
+			smart_str_appendl(buf, ":\"", 2);
+			smart_str_appends(buf, ZSTR_VAL(ce->name));
+			smart_str_appendl(buf, "\":", 2);
+			smart_str_append_unsigned(buf, ZSTR_LEN(name));
+			smart_str_appendl(buf, ":\"", 2);
+			smart_str_appends(buf, ZSTR_VAL(name));
+			smart_str_appendl(buf, "\";", 2);
 			return;
 		}
 		case IS_REFERENCE:

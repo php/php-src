@@ -42,6 +42,7 @@
 #include "zend_generators.h"
 #include "zend_extensions.h"
 #include "zend_builtin_functions.h"
+#include "zend_enum.h"
 
 #define reflection_update_property(object, name, value) do { \
 		zval member; \
@@ -4801,6 +4802,14 @@ ZEND_METHOD(reflection_class, isTrait)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::isEnum()
+   Returns whether this is an enum */
+ZEND_METHOD(reflection_class, isEnum)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_ENUM);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionClass::isFinal()
    Returns whether this class is final */
 ZEND_METHOD(reflection_class, isFinal)
@@ -4937,6 +4946,11 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 
 	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ZSTR_VAL(ce->name));
+		return;
+	}
+
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "An instance of an enum %s cannot be created", ZSTR_VAL(ce->name));
 		return;
 	}
 
@@ -6326,6 +6340,22 @@ ZEND_METHOD(reflection_zend_extension, getCopyright)
 }
 /* }}} */
 
+/* {{{ proto array reflect_enum(enum enum)
+       Returns an enum's class and value name */
+ZEND_FUNCTION(reflect_enum)
+{
+	zval *e;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "e", &e) == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	add_next_index_str(return_value, zend_string_copy(zend_enum_ce(e)->name));
+	add_next_index_str(return_value, zend_string_copy(zend_enum_name(e)));
+}
+/* }}} */
+
 /* {{{ method tables */
 static const zend_function_entry reflection_exception_functions[] = {
 	PHP_FE_END
@@ -6593,6 +6623,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getTraitNames, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getTraitAliases, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isEnum, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
@@ -6795,7 +6826,12 @@ static const zend_function_entry reflection_zend_extension_functions[] = {
 };
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflect_enum, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, enum, IS_ENUM, 0)
+ZEND_END_ARG_INFO()
+
 const zend_function_entry reflection_ext_functions[] = { /* {{{ */
+	PHP_FE(reflect_enum, arginfo_reflect_enum)
 	PHP_FE_END
 }; /* }}} */
 

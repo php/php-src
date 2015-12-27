@@ -189,6 +189,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_CLASS      "class (T_CLASS)"
 %token T_TRAIT      "trait (T_TRAIT)"
 %token T_INTERFACE  "interface (T_INTERFACE)"
+%token T_ENUM       "enum (T_ENUM)"
 %token T_EXTENDS    "extends (T_EXTENDS)"
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
 %token T_OBJECT_OPERATOR "-> (T_OBJECT_OPERATOR)"
@@ -226,8 +227,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_ERROR
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
-%type <ast> class_declaration_statement trait_declaration_statement
+%type <ast> class_declaration_statement trait_declaration_statement enum_declaration_statement
 %type <ast> interface_declaration_statement interface_extends_list
+%type <ast> enum_element_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <ast> unprefixed_use_declarations const_decl inner_statement
@@ -251,7 +253,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list array_pair_list non_empty_array_pair_list
 %type <ast> assignment_list isset_variable type return_type
-%type <ast> identifier
+%type <ast> identifier identifier_list
 
 %type <num> returns_ref function is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
@@ -271,7 +273,7 @@ reserved_non_modifiers:
 	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
-	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
+	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS | T_ENUM
 	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_HALT_COMPILER
 ;
 
@@ -310,6 +312,7 @@ top_statement:
 	|	function_declaration_statement		{ $$ = $1; }
 	|	class_declaration_statement			{ $$ = $1; }
 	|	trait_declaration_statement			{ $$ = $1; }
+	|	enum_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
@@ -406,6 +409,7 @@ inner_statement:
 	|	function_declaration_statement 		{ $$ = $1; }
 	|	class_declaration_statement 		{ $$ = $1; }
 	|	trait_declaration_statement			{ $$ = $1; }
+	|	enum_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = NULL; zend_error_noreturn(E_COMPILE_ERROR,
@@ -518,6 +522,17 @@ interface_declaration_statement:
 		T_INTERFACE { $<num>$ = CG(zend_lineno); }
 		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL); }
+;
+
+enum_declaration_statement:
+		T_ENUM { $<num>$ = CG(zend_lineno); }
+		T_STRING backup_doc_comment '{' enum_element_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ENUM | ZEND_ACC_FINAL, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL); }
+;
+
+enum_element_list:
+		identifier_list { $$ = $1; }
+	|	identifier_list ',' { $$ = $1; }
 ;
 
 extends_from:
@@ -714,6 +729,11 @@ class_statement:
 name_list:
 		name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
 	|	name_list ',' name { $$ = zend_ast_list_add($1, $3); }
+;
+
+identifier_list:
+		identifier { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+	|	identifier_list ',' identifier { $$ = zend_ast_list_add($1, $3); }
 ;
 
 trait_adaptations:

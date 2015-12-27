@@ -860,6 +860,172 @@ object ":" uiv ":" ["]	{
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }
 
+"E:" uiv ":" ["] {
+	size_t len, len2, len3, maxlen;
+	char *str;
+	zend_string *class_name;
+	zend_class_entry *ce;
+	zend_class_constant *c;
+
+	zval user_func;
+	zval retval;
+	zval args[1];
+
+	if (!var_hash) return 0;
+
+	len2 = len = parse_uiv(start + 2);
+	maxlen = max - YYCURSOR;
+	if (maxlen < len + 3 || len == 0) {
+		*p = start + 2;
+		return 0;
+	}
+
+	str = (char*)YYCURSOR;
+
+	YYCURSOR += len;
+
+	if (*(YYCURSOR) != '"') {
+		*p = YYCURSOR;
+		return 0;
+	}
+	if (*(YYCURSOR+1) != ':') {
+		*p = YYCURSOR+1;
+		return 0;
+	}
+
+	len3 = strspn(str, "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377\\");
+	if (len3 != len)
+	{
+		*p = YYCURSOR + len3 - len;
+		return 0;
+	}
+
+	class_name = zend_string_init(str, len, 0);
+
+	/* Try to find class directly */
+	BG(serialize_lock)++;
+	ce = zend_lookup_class(class_name);
+	if (ce) {
+		BG(serialize_lock)--;
+		zend_string_release(class_name);
+		if (EG(exception)) {
+			return 0;
+		}
+	} else {
+		BG(serialize_lock)--;
+
+		if (EG(exception)) {
+			zend_string_release(class_name);
+			return 0;
+		}
+
+		/* Check for unserialize callback */
+		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
+			zend_string_release(class_name);
+			return 0;
+		}
+
+		/* Call unserialize callback */
+		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
+
+		ZVAL_STR_COPY(&args[0], class_name);
+		BG(serialize_lock)++;
+		if (call_user_function_ex(CG(function_table), NULL, &user_func, &retval, 1, args, 0, NULL) != SUCCESS) {
+			BG(serialize_lock)--;
+			if (EG(exception)) {
+				zend_string_release(class_name);
+				zval_ptr_dtor(&user_func);
+				zval_ptr_dtor(&args[0]);
+				return 0;
+			}
+			php_error_docref(NULL, E_WARNING, "defined (%s) but not found", Z_STRVAL(user_func));
+			zval_ptr_dtor(&user_func);
+			zval_ptr_dtor(&args[0]);
+			return 0;
+		}
+		BG(serialize_lock)--;
+		zval_ptr_dtor(&retval);
+		zval_ptr_dtor(&user_func);
+		zval_ptr_dtor(&args[0]);
+
+		if (EG(exception)) {
+			zend_string_release(class_name);
+			return 0;
+		}
+
+		/* The callback function may have defined the class */
+		if ((ce = zend_lookup_class(class_name)) == NULL) {
+			php_error_docref(NULL, E_WARNING, "Function %s() hasn't defined the class it was called for", Z_STRVAL(user_func));
+			zend_string_release(class_name);
+			return 0;
+		}
+
+		zend_string_release(class_name);
+	}
+
+	if ((ce->ce_flags & ZEND_ACC_ENUM) == 0) {
+		*p = YYCURSOR;
+		return 0;
+	}
+
+	if (*(YYCURSOR) != '"') {
+		*p = YYCURSOR;
+		return 0;
+	}
+	if (*(YYCURSOR+1) != ':') {
+		*p = YYCURSOR+1;
+		return 0;
+	}
+
+	YYCURSOR += 2;
+	for (len2 = 0; YYCURSOR + len2 < max; len2++) {
+		if (*(YYCURSOR + len2) < '0' || *(YYCURSOR + len2) > '9') {
+			break;
+		}
+	}
+
+	len = parse_uiv(YYCURSOR);
+	YYCURSOR += len2;
+
+	if (*(YYCURSOR) != ':') {
+		*p = YYCURSOR+1;
+		return 0;
+	}
+	if (*(YYCURSOR+1) != '"') {
+		*p = YYCURSOR+1;
+		return 0;
+	}
+
+	YYCURSOR += 2;
+
+	str = (char*)YYCURSOR;
+
+	YYCURSOR += len;
+
+	len3 = strspn(str, "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377\\");
+	if (len3 != len)
+	{
+		*p = YYCURSOR + len3 - len;
+		return 0;
+	}
+
+	if ((c = zend_hash_str_find_ptr(&ce->constants_table, str, len)) == NULL) {
+		*p = YYCURSOR + len3 - len;
+		return 0;
+	}
+
+	if (*(YYCURSOR) != '"') {
+		*p = YYCURSOR;
+		return 0;
+	}
+
+	ZVAL_COPY_VALUE(rval, &c->value);
+
+	*p = YYCURSOR += 2;
+
+	return 1;
+}
+
 "}" {
 	/* this is the case where we have less data than planned */
 	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");

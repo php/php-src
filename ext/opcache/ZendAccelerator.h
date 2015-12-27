@@ -231,6 +231,7 @@ typedef struct _zend_accel_globals {
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
 	char                    system_id[32];
 	HashTable               xlat_table;
+	HashTable               enums; /* used to map enum handles in file serialization */
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	void                   *arena_mem;
@@ -272,6 +273,8 @@ typedef struct _zend_accel_shared_globals {
 	char           *interned_strings_end;
 	char           *interned_strings_saved_top;
 	HashTable       interned_strings;
+
+	uint32_t enum_handle; /* shared enum handle counter */
 } zend_accel_shared_globals;
 
 extern zend_bool accel_startup_ok;

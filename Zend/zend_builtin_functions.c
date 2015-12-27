@@ -847,6 +847,7 @@ repeat:
 		case IS_FALSE:
 		case IS_TRUE:
 		case IS_NULL:
+		case IS_ENUM:
 			break;
 		case IS_RESOURCE:
 			ZVAL_COPY(&val_free, val);

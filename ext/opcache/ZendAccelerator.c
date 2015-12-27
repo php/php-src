@@ -1968,6 +1968,7 @@ static void zend_reset_cache_vars(void)
 	ZSMMG(wasted_shared_memory) = 0;
 	ZCSG(restart_pending) = 0;
 	ZCSG(force_restart_time) = 0;
+	ZCSG(enum_handle) = 0x80000000;
 }
 
 static void accel_reset_pcre_cache(void)

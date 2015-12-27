@@ -30,7 +30,6 @@
 #include "zend_variables.h"
 #include "zend_execute.h"
 
-
 BEGIN_EXTERN_C()
 
 typedef struct _zend_function_entry {
@@ -667,6 +666,8 @@ END_EXTERN_C()
 
 /* Fast parameter parsing API */
 
+#include "zend_enum.h"
+
 /* This API should be used only for really often used functions.
  * (Keep the original parsing code and wrap usage with #ifndef FAST_ZPP)
  */
@@ -683,6 +684,7 @@ END_EXTERN_C()
 	_(Z_EXPECTED_RESOURCE,	"resource") \
 	_(Z_EXPECTED_PATH,		"a valid path") \
 	_(Z_EXPECTED_OBJECT,	"object") \
+	_(Z_EXPECTED_ENUM,		"enum") \
 	_(Z_EXPECTED_DOUBLE,	"float")
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
@@ -933,6 +935,36 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 
 #define Z_PARAM_OBJECT_OF_CLASS(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 0, 0)
+
+/* old "e" */
+#define Z_PARAM_ENUM_EX(dest, check_null, separate) \
+		Z_PARAM_PROLOGUE(separate); \
+		if (UNEXPECTED(!zend_parse_arg_enum(_arg, &dest, NULL, check_null))) { \
+			_expected_type = Z_EXPECTED_ENUM; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_ENUM(dest) \
+	Z_PARAM_ENUM_EX(dest, 0, 0)
+
+/* old "E" */
+#define Z_PARAM_ENUM_OF_CLASS_EX(dest, _ce, check_null, separate) \
+		Z_PARAM_PROLOGUE(separate); \
+		if (UNEXPECTED(!zend_parse_arg_enum(_arg, &dest, _ce, check_null))) { \
+			if (_ce) { \
+				_error = ZSTR_VAL((_ce)->name); \
+				error_code = ZPP_ERROR_WRONG_CLASS; \
+				break; \
+			} else { \
+				_expected_type = Z_EXPECTED_ENUM; \
+				error_code = ZPP_ERROR_WRONG_ARG; \
+				break; \
+			} \
+		}
+
+#define Z_PARAM_ENUM_OF_CLASS(dest, _ce) \
+	Z_PARAM_ENUM_OF_CLASS_EX(dest, _ce, 0, 0)
 
 /* old "p" */
 #define Z_PARAM_PATH_EX(dest, dest_len, check_null, separate) \
@@ -1192,6 +1224,19 @@ static zend_always_inline int zend_parse_arg_object(zval *arg, zval **dest, zend
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
 	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce) != 0))) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_enum(zval *arg, zval **dest, zend_class_entry *ce, int check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_ENUM) &&
+	    (!ce || EXPECTED(instanceof_function(zend_enum_ce(arg), ce) != 0))) {
 		*dest = arg;
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;

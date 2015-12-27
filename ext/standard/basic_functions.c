@@ -2552,6 +2552,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_is_object, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_is_enum, 0)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_is_numeric, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -3060,6 +3064,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_string,														arginfo_is_string)
 	PHP_FE(is_array,														arginfo_is_array)
 	PHP_FE(is_object,														arginfo_is_object)
+	PHP_FE(is_enum,															arginfo_is_enum)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
 

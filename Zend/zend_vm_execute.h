@@ -32189,7 +32189,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_CV_CONST_HANDL
 	expr = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
 
 try_instanceof:
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT || Z_TYPE_P(expr) == IS_ENUM) {
 		zend_class_entry *ce;
 
 		if (IS_CONST == IS_CONST) {
@@ -32213,7 +32213,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_TYPE_P(expr) == IS_ENUM ? zend_enum_ce(expr) : Z_OBJCE_P(expr), ce);
 	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -33058,7 +33058,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_CV_VAR_HANDLER
 	expr = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
 
 try_instanceof:
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT || Z_TYPE_P(expr) == IS_ENUM) {
 		zend_class_entry *ce;
 
 		if (IS_VAR == IS_CONST) {
@@ -33082,7 +33082,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_TYPE_P(expr) == IS_ENUM ? zend_enum_ce(expr) : Z_OBJCE_P(expr), ce);
 	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -34414,7 +34414,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_CV_UNUSED_HAND
 	expr = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
 
 try_instanceof:
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT || Z_TYPE_P(expr) == IS_ENUM) {
 		zend_class_entry *ce;
 
 		if (IS_UNUSED == IS_CONST) {
@@ -34438,7 +34438,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_TYPE_P(expr) == IS_ENUM ? zend_enum_ce(expr) : Z_OBJCE_P(expr), ce);
 	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -41544,7 +41544,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_CONST_H
 	expr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 try_instanceof:
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT || Z_TYPE_P(expr) == IS_ENUM) {
 		zend_class_entry *ce;
 
 		if (IS_CONST == IS_CONST) {
@@ -41568,7 +41568,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_TYPE_P(expr) == IS_ENUM ? zend_enum_ce(expr) : Z_OBJCE_P(expr), ce);
 	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -41878,7 +41878,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_VAR_HAN
 	expr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 try_instanceof:
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT || Z_TYPE_P(expr) == IS_ENUM) {
 		zend_class_entry *ce;
 
 		if (IS_VAR == IS_CONST) {
@@ -41902,7 +41902,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_TYPE_P(expr) == IS_ENUM ? zend_enum_ce(expr) : Z_OBJCE_P(expr), ce);
 	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -42455,7 +42455,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_UNUSED_
 	expr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 try_instanceof:
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT || Z_TYPE_P(expr) == IS_ENUM) {
 		zend_class_entry *ce;
 
 		if (IS_UNUSED == IS_CONST) {
@@ -42479,7 +42479,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_TYPE_P(expr) == IS_ENUM ? zend_enum_ce(expr) : Z_OBJCE_P(expr), ce);
 	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;

@@ -1433,6 +1433,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_LIST);
 }
 
+<ST_IN_SCRIPTING>"enum" {
+	RETURN_TOKEN(T_ENUM);
+}
+
 <ST_IN_SCRIPTING>"array" {
 	RETURN_TOKEN(T_ARRAY);
 }

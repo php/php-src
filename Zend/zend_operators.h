@@ -287,6 +287,7 @@ static zend_always_inline int i_zend_is_true(zval *op)
 again:
 	switch (Z_TYPE_P(op)) {
 		case IS_TRUE:
+		case IS_ENUM:
 			result = 1;
 			break;
 		case IS_LONG:

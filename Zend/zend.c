@@ -504,6 +504,9 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	zend_interned_empty_string_init(&compiler_globals->empty_string);
 
 	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
+
+	zend_hash_init_ex(&compiler_globals->enums, 32, NULL, NULL, 0, 0);
+	compiler_globals->enum_handle = 0;
 }
 /* }}} */
 
@@ -521,6 +524,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		zend_hash_destroy(compiler_globals->auto_globals);
 		free(compiler_globals->auto_globals);
 	}
+	zend_hash_destroy(&compiler_globals->enums);
 	if (compiler_globals->static_members_table) {
 		free(compiler_globals->static_members_table);
 	}
@@ -737,6 +741,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&EG(windows_version_info));
 #endif
+
+	zend_hash_init_ex(&compiler_globals.enums, 32, NULL, NULL, 1, 0);
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -863,6 +869,8 @@ void zend_shutdown(void) /* {{{ */
 	GLOBAL_CLASS_TABLE = NULL;
 	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
 	GLOBAL_CONSTANTS_TABLE = NULL;
+#else
+	zend_hash_destroy(&CG(enums));
 #endif
 	zend_destroy_rsrc_list_dtors();
 

@@ -29,6 +29,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
+#include "zend_enum.h"
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
@@ -513,6 +514,12 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_appends(str, "Object(");
 			smart_str_appends(str, ZSTR_VAL(Z_OBJCE_P(arg)->name));
 			smart_str_appends(str, "), ");
+			break;
+		case IS_ENUM:
+			smart_str_appends(str, ZSTR_VAL(zend_enum_ce(arg)->name));
+			smart_str_appends(str, "::");
+			smart_str_appends(str, ZSTR_VAL(zend_enum_name(arg)));
+			smart_str_appends(str, ", ");
 			break;
 	}
 }
