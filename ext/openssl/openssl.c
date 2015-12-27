@@ -1172,6 +1172,12 @@ PHP_MINIT_FUNCTION(openssl)
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_algorithms();
 
+#if !defined(OPENSSL_NO_AES) && defined(EVP_CIPH_CCM_MODE) && OPENSSL_VERSION_NUMBER < 0x100020000
+	EVP_add_cipher(EVP_aes_128_ccm());
+	EVP_add_cipher(EVP_aes_192_ccm());
+	EVP_add_cipher(EVP_aes_256_ccm());
+#endif
+
 	SSL_load_error_strings();
 
 	/* register a resource id number with OpenSSL so that we can map SSL -> stream structures in
