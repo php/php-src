@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     Out of Bounds). (emmanuel dot law at gmail dot com).
 
 - WDDX:
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
+    (taoguangchen at icloud dot com)
   . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
     Vulnerability). (taoguangchen at icloud dot com)
 
