@@ -516,9 +516,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				case ZEND_FETCH_GLOBAL_LOCK:
 					fprintf(stderr, " (global+lock)");
 					break;
-				case ZEND_FETCH_LEXICAL:
-					fprintf(stderr, " (lexical)");
-					break;
 			}
 		}
 		if (ZEND_VM_EXT_ISSET & flags) {
