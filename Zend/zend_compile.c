@@ -4908,6 +4908,10 @@ void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
 		}
 
+		if (zend_is_auto_global(name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use auto-global as lexical variable");
+		}
+
 		ZVAL_NULL(&zv);
 		Z_CONST_FLAGS(zv) = by_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
 
