@@ -21,6 +21,7 @@
 /* $Id$ */
 
 #include "zend.h"
+#include "zend_exceptions.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
 
@@ -475,14 +476,34 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
  * against MAX_COLLISIONS is only performed if *no* matching bucket is found,
  * as that corresponds to insert operations (as opposed to updates).
  *
+ * We use different limits for error and exception collision maximums,
+ * so that on a prepared array with exactly 1000 collisions,
+ * inserting a next index won't blow up immediately with a fatal.
+ *
  * An important caveat of the implementation is that collisions will *not*
  * be counted for add_new operations. find+add_new operations should be replaced
  * with add_or_return operations.
  */
-#define HT_MAX_COLLISIONS 1000
+#define HT_MAX_ERROR_COLLISIONS 1100
+#define HT_MAX_EXCEPTION_COLLISIONS 1000
+
+static zend_always_inline zend_bool zend_hash_check_collisions(int num_collisions, int flags)
+{
+	if ((flags & HASH_CHECK_COLLISION_ERROR) && UNEXPECTED(num_collisions > HT_MAX_ERROR_COLLISIONS)) {
+		zend_error_noreturn(E_ERROR, "Too many collisions in array");
+		return 1;
+	} else if ((flags & HASH_CHECK_COLLISION_EXCEPTION) && UNEXPECTED(num_collisions > HT_MAX_EXCEPTION_COLLISIONS)) {
+		if (!EG(exception)) {
+			zend_throw_error(zend_ce_hash_collision_error, "Too many collisions in array");
+		}
+		return 1;
+	}
+
+	return 0;
+}
 
 static zend_always_inline Bucket *zend_hash_find_bucket(
-		const HashTable *ht, zend_string *key, zend_bool for_insert)
+		const HashTable *ht, zend_string *key, int flags)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -507,14 +528,11 @@ static zend_always_inline Bucket *zend_hash_find_bucket(
 		idx = Z_NEXT(p->val);
 		num_collisions++;
 	}
-	if (for_insert && UNEXPECTED(num_collisions > HT_MAX_COLLISIONS)) {
-		zend_error_noreturn(E_ERROR, "Too many collisions in hashtable");
-	}
-	return NULL;
+	return (void *)(intptr_t) zend_hash_check_collisions(num_collisions, flags);
 }
 
 static zend_always_inline Bucket *zend_hash_str_find_bucket(
-		const HashTable *ht, const char *str, size_t len, zend_ulong h, zend_bool for_insert)
+		const HashTable *ht, const char *str, size_t len, zend_ulong h, int flags)
 {
 	uint32_t nIndex;
 	uint32_t idx;
@@ -536,14 +554,11 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(
 		idx = Z_NEXT(p->val);
 		num_collisions++;
 	}
-	if (for_insert && UNEXPECTED(num_collisions > HT_MAX_COLLISIONS)) {
-		zend_error_noreturn(E_ERROR, "Too many collisions in hashtable");
-	}
-	return NULL;
+	return (void *)(intptr_t) zend_hash_check_collisions(num_collisions, flags);
 }
 
 static zend_always_inline Bucket *zend_hash_index_find_bucket(
-		const HashTable *ht, zend_ulong h, zend_bool for_insert)
+		const HashTable *ht, zend_ulong h, int flags)
 {
 	uint32_t nIndex;
 	uint32_t idx;
@@ -562,10 +577,7 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(
 		idx = Z_NEXT(p->val);
 		num_collisions++;
 	}
-	if (for_insert && UNEXPECTED(num_collisions > HT_MAX_COLLISIONS)) {
-		zend_error_noreturn(E_ERROR, "Too many collisions in hashtable");
-	}
-	return NULL;
+	return (void *)(intptr_t) zend_hash_check_collisions(num_collisions, flags);
 }
 
 static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
@@ -584,10 +596,17 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
 	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_find_bucket(ht, key, 1);
+		p = zend_hash_find_bucket(ht, key, flag);
 
 		if (p) {
 			zval *data;
+
+			if ((flag & HASH_CHECK_COLLISION_EXCEPTION) && UNEXPECTED(p == (void *) 0x1)) {
+				if (ht->pDestructor) {
+					ht->pDestructor(pData);
+				}
+				return &EG(error_zval);
+			}
 
 			if (flag & HASH_ADD) {
 				if (!(flag & HASH_UPDATE_INDIRECT)) {
@@ -652,12 +671,12 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_update(HashTable *ht, zend_string
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_update(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
@@ -667,12 +686,22 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind(HashTable *ht, zend_string *k
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_return(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_OR_RETURN ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_OR_RETURN | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_update_exception(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind_exception(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const char *str, size_t len, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
@@ -686,7 +715,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const c
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -694,7 +723,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *st
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -702,7 +731,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind(HashTable *ht, const char
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -710,8 +739,24 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add(HashTable *ht, const char *str, 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_new(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_delref(key);
+	return ret;
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_exception(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
+{
+	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+	zend_string_release(key);
+	return ret;
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind_exception(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
+{
+	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+	zend_string_release(key);
 	return ret;
 }
 
@@ -814,10 +859,16 @@ add_to_packed:
 convert_to_hash:
 		zend_hash_packed_to_hash(ht);
 	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_index_find_bucket(ht, h, 1);
+		p = zend_hash_index_find_bucket(ht, h, flag);
 		if (p) {
 			if (flag & HASH_ADD) {
 				return NULL;
+			}
+			if ((flag & HASH_CHECK_COLLISION_EXCEPTION) && UNEXPECTED(p == (void *) 0x1)) {
+				if (ht->pDestructor) {
+					ht->pDestructor(pData);
+				}
+				return &EG(error_zval);
 			}
 			if (flag & HASH_ADD_OR_RETURN) {
 				return &p->val;
@@ -864,22 +915,22 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_update(HashTable *ht, zend_
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_new(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD | HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD | HASH_ADD_NEW | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_return(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD_OR_RETURN ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD_OR_RETURN | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
@@ -890,6 +941,11 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert(HashTable *ht, zval *p
 ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_update_exception(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
 }
 
 static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)

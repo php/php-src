@@ -80,7 +80,7 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *
 	enc->to_zval = sdl_guess_convert_zval;
 
 	if (enc_ptr == NULL) {
-		zend_hash_update_ptr(sdl->encoders, nscat.s, enc);
+		zend_hash_update_ptr_exception(sdl->encoders, nscat.s, enc);
 	}
 	smart_str_free(&nscat);
 	return enc;
@@ -701,8 +701,10 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 				cur_type->restrictions->enumeration = emalloc(sizeof(HashTable));
 				zend_hash_init(cur_type->restrictions->enumeration, 0, NULL, delete_restriction_var_char, 0);
 			}
-			if (zend_hash_str_add_ptr(cur_type->restrictions->enumeration, enumval->value, strlen(enumval->value), enumval) == NULL) {
+			if (zend_hash_str_find(cur_type->restrictions->enumeration, enumval->value, strlen(enumval->value))) {
 				delete_restriction_var_char_int(enumval);
+			} else {
+				zend_hash_str_update_ptr_exception(cur_type->restrictions->enumeration, enumval->value, strlen(enumval->value), enumval);
 			}
 		} else {
 			break;
@@ -1124,8 +1126,10 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 				sdl->groups = emalloc(sizeof(HashTable));
 				zend_hash_init(sdl->groups, 0, NULL, delete_type, 0);
 			}
-			if (zend_hash_add_ptr(sdl->groups, key.s, newType) == NULL) {
+			if (zend_hash_find(sdl->groups, key.s)) {
 				soap_error1(E_ERROR, "Parsing Schema: group '%s' already defined", ZSTR_VAL(key.s));
+			} else {
+				zend_hash_update_ptr_exception(sdl->groups, key.s, newType);
 			}
 
 			cur_type = newType;
@@ -1794,8 +1798,10 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			addHash = cur_type->attributes;
 		}
 
-		if (zend_hash_add_ptr(addHash, key.s, newAttr) == NULL) {
+		if (zend_hash_find(addHash, key.s)) {
 			soap_error1(E_ERROR, "Parsing Schema: attribute '%s' already defined", ZSTR_VAL(key.s));
+		} else {
+			zend_hash_update_ptr_exception(addHash, key.s, newAttr);
 		}
 		smart_str_free(&key);
 	} else{
@@ -1978,8 +1984,10 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_appends(&key, newType->name);
 			smart_str_0(&key);
 
-			if (zend_hash_add_ptr(ctx->attributeGroups, key.s, newType) == NULL) {
+			if (zend_hash_find(ctx->attributeGroups, key.s)) {
 				soap_error1(E_ERROR, "Parsing Schema: attributeGroup '%s' already defined", ZSTR_VAL(key.s));
+			} else {
+				zend_hash_update_ptr_exception(ctx->attributeGroups, key.s, newType);
 			}
 			cur_type = newType;
 			smart_str_free(&key);
@@ -2162,7 +2170,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 							}
 
 							zend_hash_get_current_key(tmp->attributes, &_key, NULL);
-							zend_hash_add_ptr(ht, _key, newAttr);
+							zend_hash_update_ptr_exception(ht, _key, newAttr);
 
 							zend_hash_move_forward(tmp->attributes);
 						} else {

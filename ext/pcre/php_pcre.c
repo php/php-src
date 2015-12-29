@@ -621,7 +621,7 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset,
 
 	if (name) {
 		Z_ADDREF(match_pair);
-		zend_hash_str_update(Z_ARRVAL_P(result), name, strlen(name), &match_pair);
+		zend_hash_str_update_exception(Z_ARRVAL_P(result), name, strlen(name), &match_pair);
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair);
 }
@@ -849,12 +849,15 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 								}
 							} else {
 								for (i = 0; i < count; i++) {
+									zval zv;
+									ZVAL_STRINGL(&zv, (char *) stringlist[i], offsets[(i<<1)+1] - offsets[i<<1]);
 									if (subpat_names[i]) {
-										add_assoc_stringl(&result_set, subpat_names[i], (char *)stringlist[i],
-															   offsets[(i<<1)+1] - offsets[i<<1]);
+										zend_string *name = zend_string_init(subpat_names[i], strlen(subpat_names[i]), 0);
+										Z_ADDREF(zv);
+										zend_hash_update_exception(Z_ARRVAL(result_set), name, &zv);
+										zend_string_release(name);
 									}
-									add_next_index_stringl(&result_set, (char *)stringlist[i],
-														   offsets[(i<<1)+1] - offsets[i<<1]);
+									zend_hash_next_index_insert(Z_ARRVAL(result_set), &zv);
 								}
 							}
 						} else {
@@ -888,12 +891,15 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							}
 						} else {
 							for (i = 0; i < count; i++) {
+								zval zv;
+								ZVAL_STRINGL(&zv, (char *) stringlist[i], offsets[(i<<1)+1] - offsets[i<<1]);
 								if (subpat_names[i]) {
-									add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
-													  offsets[(i<<1)+1] - offsets[i<<1]);
+									zend_string *name = zend_string_init(subpat_names[i], strlen(subpat_names[i]), 0);
+									Z_ADDREF(zv);
+									zend_hash_update_exception(Z_ARRVAL_P(subpats), name, &zv);
+									zend_string_release(name);
 								}
-								add_next_index_stringl(subpats, (char *)stringlist[i],
-													   offsets[(i<<1)+1] - offsets[i<<1]);
+								zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &zv);
 							}
 						}
 					} else {
@@ -950,9 +956,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		if (subpat_names) {
 			for (i = 0; i < num_subpats; i++) {
 				if (subpat_names[i]) {
-					zend_hash_str_update(Z_ARRVAL_P(subpats), subpat_names[i],
-									 strlen(subpat_names[i]), &match_sets[i]);
+					zend_string *name = zend_string_init(subpat_names[i], strlen(subpat_names[i]), 0);
 					Z_ADDREF(match_sets[i]);
+					zend_hash_update_exception(Z_ARRVAL_P(subpats), name, &match_sets[i]);
+					zend_string_release(name);
 				}
 				zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &match_sets[i]);
 			}
@@ -1053,10 +1060,15 @@ static zend_string *preg_do_repl_func(zval *function, char *subject, int *offset
 	array_init_size(&args[0], count + (mark ? 1 : 0));
 	if (subpat_names) {
 		for (i = 0; i < count; i++) {
+			zval zv;
+			ZVAL_STRINGL(&zv, &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1]);
 			if (subpat_names[i]) {
-				add_assoc_stringl(&args[0], subpat_names[i], &subject[offsets[i<<1]] , offsets[(i<<1)+1] - offsets[i<<1]);
+				zend_string *name = zend_string_init(subpat_names[i], strlen(subpat_names[i]), 0);
+				Z_ADDREF(zv);
+				zend_hash_update_exception(Z_ARRVAL(args[0]), name, &zv);
+				zend_string_release(name);
 			}
-			add_next_index_stringl(&args[0], &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1]);
+			zend_hash_next_index_insert(Z_ARRVAL(args[0]), &zv);
 		}
 	} else {
 		for (i = 0; i < count; i++) {

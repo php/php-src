@@ -5814,11 +5814,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -7069,6 +7069,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				ZVAL_NULL(retval);
 			}
+		} else if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+			goto fetch_this;
 		}
 	} else {
 		retval = zend_hash_find(target_symbol_table, name);
@@ -7097,6 +7099,7 @@ fetch_this:
 						}
 						break;
 					case BP_VAR_RW:
+					case BP_VAR_W:
 						zend_throw_error(NULL, "Cannot re-assign $this");
 						break;
 					case BP_VAR_UNSET:
@@ -7664,11 +7667,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -9716,11 +9719,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -11624,11 +11627,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -13606,11 +13609,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -14302,11 +14305,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -14831,11 +14834,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -15356,11 +15359,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -19954,11 +19957,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -21827,11 +21830,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -24721,11 +24724,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -27559,11 +27562,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -39684,11 +39687,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -41760,6 +41763,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				ZVAL_NULL(retval);
 			}
+		} else if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+			goto fetch_this;
 		}
 	} else {
 		retval = zend_hash_find(target_symbol_table, name);
@@ -41788,6 +41793,7 @@ fetch_this:
 						}
 						break;
 					case BP_VAR_RW:
+					case BP_VAR_W:
 						zend_throw_error(NULL, "Cannot re-assign $this");
 						break;
 					case BP_VAR_UNSET:
@@ -42599,11 +42605,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -46688,11 +46694,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -50648,11 +50654,11 @@ add_again:
 				}
 			}
 str_index:
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 num_index:
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -53586,6 +53592,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				ZVAL_NULL(retval);
 			}
+		} else if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+			goto fetch_this;
 		}
 	} else {
 		retval = zend_hash_find(target_symbol_table, name);
@@ -53614,6 +53622,7 @@ fetch_this:
 						}
 						break;
 					case BP_VAR_RW:
+					case BP_VAR_W:
 						zend_throw_error(NULL, "Cannot re-assign $this");
 						break;
 					case BP_VAR_UNSET:

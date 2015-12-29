@@ -186,7 +186,7 @@ PHPAPI void php_add_session_var(zend_string *name) /* {{{ */
 PHPAPI zval* php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		return zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, state_val);
+		return zend_hash_update_exception(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, state_val);
 	}
 	return NULL;
 }

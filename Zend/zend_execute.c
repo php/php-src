@@ -1557,10 +1557,7 @@ num_undef:
 				break;
 			case BP_VAR_RW:
 				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-				break;
-			case BP_VAR_W:
-				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+				retval = zend_hash_index_update_exception(ht, hval, &EG(uninitialized_zval));
 				break;
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
@@ -1615,7 +1612,7 @@ str_index:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
-					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
+					retval = zend_hash_update_exception(ht, offset_key, &EG(uninitialized_zval));
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}

@@ -1535,6 +1535,8 @@ ZEND_VM_HELPER(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED, int type)
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				ZVAL_NULL(retval);
 			}
+		} else if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+			ZEND_VM_C_GOTO(fetch_this);
 		}
 	} else {
 		retval = zend_hash_find(target_symbol_table, name);
@@ -1563,6 +1565,7 @@ ZEND_VM_C_LABEL(fetch_this):
 						}
 						break;
 					case BP_VAR_RW:
+					case BP_VAR_W:
 						zend_throw_error(NULL, "Cannot re-assign $this");
 						break;
 					case BP_VAR_UNSET:
@@ -5280,11 +5283,11 @@ ZEND_VM_C_LABEL(add_again):
 				}
 			}
 ZEND_VM_C_LABEL(str_index):
-			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_hash_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 			hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index):
-			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+			zend_hash_index_update_exception(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			ZEND_VM_C_GOTO(add_again);

@@ -343,9 +343,9 @@ fetch_dim_string:
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
 				case BP_VAR_W: {
-				    zval value;
+					zval value;
 					ZVAL_NULL(&value);
-				    retval = zend_symtable_update(ht, offset_key, &value);
+					retval = zend_symtable_update_exception(ht, offset_key, &value);
 				}
 			}
 		}
@@ -377,10 +377,10 @@ num_index:
 				case BP_VAR_RW:
 					zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, index);
 				case BP_VAR_W: {
-				    zval value;
+					zval value;
 					ZVAL_UNDEF(&value);
-					retval = zend_hash_index_update(ht, index, &value);
-			   }
+					retval = zend_hash_index_update_exception(ht, index, &value);
+				}
 			}
 		}
 		return retval;
@@ -487,7 +487,7 @@ try_again:
 	switch (Z_TYPE_P(offset)) {
 		case IS_STRING:
 			ht = spl_array_get_hash_table(intern);
-			zend_symtable_update_ind(ht, Z_STR_P(offset), value);
+			zend_symtable_update_ind_exception(ht, Z_STR_P(offset), value);
 			return;
 		case IS_DOUBLE:
 			index = (zend_long)Z_DVAL_P(offset);
@@ -505,7 +505,7 @@ try_again:
 			index = Z_LVAL_P(offset);
 num_index:
 			ht = spl_array_get_hash_table(intern);
-			zend_hash_index_update(ht, index, value);
+			zend_hash_index_update_exception(ht, index, value);
 			return;
 		case IS_NULL:
 			ht = spl_array_get_hash_table(intern);

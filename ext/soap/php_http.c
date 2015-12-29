@@ -1009,7 +1009,7 @@ try_again:
 				add_index_string(&zcookie, 2, phpurl->host);
 			}
 
-			zend_symtable_update(Z_ARRVAL_P(cookies), name.s, &zcookie);
+			zend_symtable_update_exception(Z_ARRVAL_P(cookies), name.s, &zcookie);
 			smart_str_free(&name);
 		}
 
@@ -1155,6 +1155,7 @@ try_again:
 			ZVAL_UNDEF(&digest);
 			s = auth + sizeof("Digest")-1;
 			while (*s != '\0') {
+				zval zv;
 				char *name, *val;
 				while (*s == ' ') ++s;
 				name = s;
@@ -1184,7 +1185,8 @@ try_again:
 					if (Z_TYPE(digest) == IS_UNDEF) {
 						array_init(&digest);
 					}
-					add_assoc_string(&digest, name, val);
+					ZVAL_STRING(&zv, val);
+					zend_hash_str_update_exception(Z_ARRVAL(digest), name, strlen(name), &zv);
 				}
 			}
 

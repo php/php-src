@@ -2376,7 +2376,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 						if (section_index==SECTION_COMMENT) {
 							add_index_string(&tmpi, idx++, val);
 						} else {
-							add_assoc_string(&tmpi, name, val);
+							zval zv;
+							ZVAL_STRING(&zv, val);
+							zend_hash_str_update_exception(Z_ARRVAL(tmpi), name, strlen(name), &zv);
 						}
 						break;
 

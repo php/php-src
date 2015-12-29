@@ -841,7 +841,7 @@ retry:
 								}
 							}
 							if (found) {
-								add_assoc_zval(return_value, objid_query->vars[count].oid, &snmpval);
+								zend_hash_str_update_exception(Z_ARRVAL_P(return_value), objid_query->vars[count].oid, strlen(objid_query->vars[count].oid), &snmpval);
 							} else {
 								snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 								php_error_docref(NULL, E_WARNING, "Could not find original OID name for '%s'", buf2);
@@ -858,10 +858,10 @@ retry:
 								}
 								buf2[strlen(buf2) - 1] = '\0'; /* remove trailing '.' */
 							}
-							add_assoc_zval(return_value, buf2, &snmpval);
+							zend_hash_str_update_exception(Z_ARRVAL_P(return_value), buf2, strlen(buf2), &snmpval);
 						} else {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
-							add_assoc_zval(return_value, buf2, &snmpval);
+							zend_hash_str_update_exception(Z_ARRVAL_P(return_value), buf2, strlen(buf2), &snmpval);
 						}
 					} else {
 						ZVAL_COPY_VALUE(return_value, &snmpval);

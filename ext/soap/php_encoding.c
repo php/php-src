@@ -1239,7 +1239,7 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node)
 				/* Convert into array */
 				array_init(&arr);
 				if (name) {
-					add_assoc_zval(&arr, name, any);
+					zend_hash_str_update_exception(Z_ARRVAL(arr), name, strlen(name), any);
 				} else {
 					add_next_index_zval(&arr, any);
 				}
@@ -1268,7 +1268,7 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node)
 				if (name) {
 					/* Convert into array */
 					array_init(&arr);
-					add_assoc_zval(&arr, name, &val);
+					zend_hash_str_update_exception(Z_ARRVAL(arr), name, strlen(name), &val);
 					any = &arr;
 					name = NULL;
 				} else {
@@ -1287,7 +1287,7 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node)
 						}
 						add_next_index_zval(el, &val);
 					} else {
-						add_assoc_zval(any, name, &val);
+						zend_hash_str_update_exception(Z_ARRVAL_P(any), name, strlen(name), &val);
 					}
 				} else {
 					add_next_index_zval(any, &val);
@@ -2743,9 +2743,9 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			master_to_zval(&value, NULL, xmlValue);
 
 			if (Z_TYPE(key) == IS_STRING) {
-				zend_symtable_update(Z_ARRVAL_P(ret), Z_STR(key), &value);
+				zend_symtable_update_exception(Z_ARRVAL_P(ret), Z_STR(key), &value);
 			} else if (Z_TYPE(key) == IS_LONG) {
-				zend_hash_index_update(Z_ARRVAL_P(ret), Z_LVAL(key), &value);
+				zend_hash_index_update_exception(Z_ARRVAL_P(ret), Z_LVAL(key), &value);
 			} else {
 				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowd as keys");
 			}

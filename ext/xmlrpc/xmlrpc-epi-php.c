@@ -342,9 +342,9 @@ static void add_zval(zval* list, const char* id, zval* val)
 			int id_len = strlen(id);
 			if (!(id_len > 1 && id[0] == '0') && is_numeric_string((char *)id, id_len, NULL, NULL, 0) == IS_LONG) {
 				long index = strtol(id, NULL, 0);
-				zend_hash_index_update(Z_ARRVAL_P(list), index, val);
+				zend_hash_index_update_exception(Z_ARRVAL_P(list), index, val);
 			} else {
-				zend_hash_str_update(Z_ARRVAL_P(list), (char*)id, strlen(id), val);
+				zend_hash_str_update_exception(Z_ARRVAL_P(list), (char*)id, strlen(id), val);
 			}
 		} else {
 			zend_hash_next_index_insert(Z_ARRVAL_P(list), val);
@@ -1278,7 +1278,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 	if (Z_TYPE_P(value) == IS_STRING) {
 		if (newtype == xmlrpc_base64 || newtype == xmlrpc_datetime) {
 			const char* typestr = xmlrpc_type_as_str(newtype, xmlrpc_vector_none);
-			zval type;
+			zval type, *result;
 
 			ZVAL_STRING(&type, typestr);
 
@@ -1292,7 +1292,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 						ZVAL_LONG(&ztimestamp, timestamp);
 
 						convert_to_object(value);
-						if (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type)) {
+						if ((result = zend_hash_str_update_exception(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type)) && result != &EG(error_zval)) {
 							bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR) - 1, &ztimestamp) != NULL)? SUCCESS : FAILURE;
 						}
 					} else {
@@ -1304,7 +1304,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 				}
 			} else {
 				convert_to_object(value);
-				bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type) != NULL)? SUCCESS : FAILURE;
+				bSuccess = ((result = zend_hash_str_update_exception(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type)) && result != &EG(error_zval)) ? SUCCESS : FAILURE;
 			}
 		}
 	}

@@ -192,9 +192,9 @@ spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *int
 		ZVAL_NULL(&element.inf);
 	}
 	if (key.key) {
-		pelement = zend_hash_update_mem(&intern->storage, key.key, &element, sizeof(spl_SplObjectStorageElement));
+		pelement = zend_hash_update_mem_exception(&intern->storage, key.key, &element, sizeof(spl_SplObjectStorageElement));
 	} else {
-		pelement = zend_hash_index_update_mem(&intern->storage, key.h, &element, sizeof(spl_SplObjectStorageElement));
+		pelement = zend_hash_index_update_mem_exception(&intern->storage, key.h, &element, sizeof(spl_SplObjectStorageElement));
 	}
 	spl_object_storage_free_hash(intern, &key);
 	return pelement;
@@ -309,7 +309,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 		Z_ARRVAL_P(&tmp)->pDestructor = NULL;
 		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &element->obj);
 		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
-		zend_hash_update(Z_ARRVAL(storage), md5str, &tmp);
+		zend_hash_update_exception(Z_ARRVAL(storage), md5str, &tmp);
 		zend_string_release(md5str);
 	} ZEND_HASH_FOREACH_END();
 
@@ -833,11 +833,13 @@ SPL_METHOD(SplObjectStorage, unserialize)
 			}
 		}
 		element = spl_object_storage_attach(intern, getThis(), &entry, Z_ISUNDEF(inf)?NULL:&inf);
-		var_replace(&var_hash, &entry, &element->obj);
-		var_replace(&var_hash, &inf, &element->inf);
+		if (element) {
+			var_replace(&var_hash, &entry, &element->obj);
+			var_replace(&var_hash, &inf, &element->inf);
+		}
 		zval_ptr_dtor(&entry);
-		ZVAL_UNDEF(&entry);
 		zval_ptr_dtor(&inf);
+		ZVAL_UNDEF(&entry);
 		ZVAL_UNDEF(&inf);
 	}
 
@@ -1153,10 +1155,10 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 		if (intern->flags & MIT_KEYS_ASSOC) {
 			switch (Z_TYPE(element->inf)) {
 				case IS_LONG:
-					add_index_zval(return_value, Z_LVAL(element->inf), &retval);
+					zend_hash_index_update_exception(Z_ARRVAL_P(return_value), Z_LVAL(element->inf), &retval);
 					break;
 				case IS_STRING:
-					zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(element->inf), &retval);
+					zend_symtable_update_exception(Z_ARRVAL_P(return_value), Z_STR(element->inf), &retval);
 					break;
 				default:
 					zval_ptr_dtor(&retval);

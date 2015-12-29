@@ -10,7 +10,9 @@ for ($i = 0, $j = 0; $i < $s; $i++, $j += $s) {
 }
 $j = '{' . implode(', ', $a) . '}';
 var_dump(json_decode($j, true));
+var_dump(json_last_error() == JSON_ERROR_COLLISIONS);
 
 ?>
 --EXPECTF--
-Fatal error: Too many collisions in hashtable in %s on line %d
+NULL
+bool(true)
