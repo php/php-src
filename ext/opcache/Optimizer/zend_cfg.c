@@ -372,24 +372,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
-			case ZEND_DECLARE_LAMBDA_FUNCTION: {
-//???					zend_op_array *lambda_op_array;
-//???
-//???					zv = CRT_CONSTANT(opline->op1);
-//???					if (ctx->main_script &&
-//???					    (lambda_op_array = zend_hash_find_ptr(&ctx->main_script->function_table, Z_STR_P(zv))) != NULL) {
-//???						if (lambda_op_array->type == ZEND_USER_FUNCTION &&
-//???						    lambda_op_array->static_variables) {
-//???							// FIXME: Really we should try to perform alias
-//???							// analysis on variables used by the closure
-//???							info->flags |= ZEND_FUNC_TOO_DYNAMIC;
-//???						}
-//???					} else {
-//???						// FIXME: how to find the lambda function?
-						flags |= ZEND_FUNC_TOO_DYNAMIC;
-//???					}
-				}
-				break;
 			case ZEND_UNSET_VAR:
 				if (!(opline->extended_value & ZEND_QUICK_SET)) {
 					flags |= ZEND_FUNC_TOO_DYNAMIC;
