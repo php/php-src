@@ -280,7 +280,7 @@ PHPAPI size_t php_write(void *buf, size_t size);
 PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
 		2);
 PHPAPI int php_get_module_initialized(void);
-PHPAPI ZEND_COLD void php_log_err(char *log_message);
+PHPAPI ZEND_COLD void php_log_err(char *log_message, int syslog_type_int);
 int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 int cfgparse(void);
 END_EXTERN_C()
