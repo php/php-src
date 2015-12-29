@@ -2162,7 +2162,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 {
 	const int angle_rounded = (int)floor(angle * 100);
 
-	if (bgcolor < 0 || bgcolor >= gdMaxColors) {
+	if (bgcolor < 0 || (!src->trueColor && bgcolor >= gdMaxColors)) {
 		return NULL;
 	}
 
