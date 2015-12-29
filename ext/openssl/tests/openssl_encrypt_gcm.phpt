@@ -26,3 +26,18 @@ foreach ($tests as $idx => $test) {
 TEST 0
 bool(true)
 bool(true)
+TEST 1
+bool(true)
+bool(true)
+TEST 2
+bool(true)
+bool(true)
+TEST 3
+bool(true)
+bool(true)
+TEST 4
+bool(true)
+bool(true)
+TEST 5
+bool(true)
+bool(true)
