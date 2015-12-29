@@ -430,12 +430,18 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php_info_print_table_start();
 
-	if (ZCG(enabled) && accel_startup_ok && (ZCG(counted) || ZCSG(accelerator_enabled))) {
+	if (ZCG(enabled) && accel_startup_ok &&
+#ifdef HAVE_OPCACHE_FILE_CACHE
+		((ZCG(counted) || ZCSG(accelerator_enabled)) || ZCG(accel_directives).file_cache_only)
+#else
+		(ZCG(counted) || ZCSG(accelerator_enabled))
+#endif
+	) {
 		php_info_print_table_row(2, "Opcode Caching", "Up and Running");
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
 	}
-	if (ZCG(enabled) && accel_startup_ok && ZCSG(accelerator_enabled) && ZCG(accel_directives).optimization_level) {
+	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).optimization_level) {
 		php_info_print_table_row(2, "Optimization", "Enabled");
 	} else {
 		php_info_print_table_row(2, "Optimization", "Disabled");
