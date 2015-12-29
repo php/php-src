@@ -3062,6 +3062,20 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].op1_def);
 			}
 			break;
+		case ZEND_BIND_LEXICAL:
+			if (ssa_ops[i].op2_def >= 0) {
+				tmp = t2 | MAY_BE_RC1 | MAY_BE_RCN;
+				if (opline->extended_value) {
+					tmp |= MAY_BE_REF;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
+				if ((t2 & MAY_BE_OBJECT) && ssa_var_info[ssa_ops[i].op2_use].ce) {
+					UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_ops[i].op2_use].ce, ssa_var_info[ssa_ops[i].op2_use].is_instanceof, ssa_ops[i].op2_def);
+				} else {
+					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].op2_def);
+				}
+			}
+			break;
 		case ZEND_SEND_VAR_EX:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_REF:

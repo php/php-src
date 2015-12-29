@@ -892,7 +892,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_LOCAL			0x10000000
 #define ZEND_FETCH_STATIC			0x20000000
 #define ZEND_FETCH_GLOBAL_LOCK		0x40000000
-#define ZEND_FETCH_LEXICAL			0x50000000
 
 #define ZEND_FETCH_TYPE_MASK		0x70000000
 

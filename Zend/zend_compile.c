@@ -2055,7 +2055,8 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 			       opline->opcode == ZEND_ROPE_END ||
 			       opline->opcode == ZEND_END_SILENCE ||
 			       opline->opcode == ZEND_FETCH_LIST ||
-			       opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
+			       opline->opcode == ZEND_VERIFY_RETURN_TYPE ||
+			       opline->opcode == ZEND_BIND_LEXICAL) {
 			/* these opcodes are handled separately */
 		} else {
 			zend_find_live_range(opline, opline->op1_type, opline->op1.var);
@@ -4893,6 +4894,33 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(uses_ast);
+	uint32_t i;
+
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *var_name_ast = list->child[i];
+		zend_string *var_name = zend_ast_get_str(var_name_ast);
+		zend_bool by_ref = var_name_ast->attr;
+		zend_op *opline;
+
+		if (zend_string_equals_literal(var_name, "this")) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
+		}
+
+		if (zend_is_auto_global(var_name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use auto-global as lexical variable");
+		}
+
+		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
+		opline->op2_type = IS_CV;
+		opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(var_name));
+		opline->extended_value = by_ref;
+	}
+}
+/* }}} */
+
 void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -4900,21 +4928,10 @@ void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
-		zend_string *name = zend_ast_get_str(var_ast);
 		zend_bool by_ref = var_ast->attr;
+
 		zval zv;
-
-		if (zend_string_equals_literal(name, "this")) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
-		}
-
-		if (zend_is_auto_global(name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use auto-global as lexical variable");
-		}
-
 		ZVAL_NULL(&zv);
-		Z_CONST_FLAGS(zv) = by_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
-
 		zend_compile_static_var_common(var_ast, &zv, by_ref);
 	}
 }
@@ -5166,6 +5183,9 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
 		zend_begin_func_decl(result, op_array, decl);
+		if (uses_ast) {
+			zend_compile_closure_binding(result, uses_ast);
+		}
 	}
 
 	CG(active_op_array) = op_array;

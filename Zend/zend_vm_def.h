@@ -7997,4 +7997,35 @@ ZEND_VM_C_LABEL(call_trampoline_end):
 	ZEND_VM_LEAVE();
 }
 
+ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *closure, *var;
+	zend_string *var_name;
+
+	closure = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	if (opline->extended_value) {
+		/* By-ref binding */
+		var = GET_OP2_ZVAL_PTR(BP_VAR_W);
+		ZVAL_MAKE_REF(var);
+		Z_ADDREF_P(var);
+	} else {
+		var = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+		if (UNEXPECTED(Z_ISUNDEF_P(var))) {
+			SAVE_OPLINE();
+			var = GET_OP2_UNDEF_CV(var, BP_VAR_R);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+		}
+		ZVAL_DEREF(var);
+		Z_TRY_ADDREF_P(var);
+	}
+
+	var_name = CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var));
+	zend_closure_bind_var(closure, var_name, var);
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);

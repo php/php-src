@@ -99,6 +99,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FE_RESET_RW:
 					case ZEND_ADD_ARRAY_ELEMENT:
 					case ZEND_INIT_ARRAY:
+					case ZEND_BIND_LEXICAL:
 						if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var))) {
 							// FIXME: include into "use" to ...?
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
