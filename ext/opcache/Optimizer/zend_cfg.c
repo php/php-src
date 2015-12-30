@@ -287,32 +287,29 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				flags |= ZEND_FUNC_HAS_CALLS;
 				break;
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
 				zv = CRT_CONSTANT(opline->op2);
+				if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+					/* The third literal is the lowercased unqualified name */
+					zv += 2;
+				}
 				if ((fn = zend_hash_find_ptr(EG(function_table), Z_STR_P(zv))) != NULL) {
 					if (fn->type == ZEND_INTERNAL_FUNCTION) {
-						if (Z_STRLEN_P(zv) == sizeof("extract")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "extract", sizeof("extract")-1) == 0) {
+						if (zend_string_equals_literal(Z_STR_P(zv), "extract")) {
 							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("compact")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "compact", sizeof("compact")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "compact")) {
 							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("parse_str")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "parse_str", sizeof("parse_str")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "parse_str")) {
 							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("mb_parse_str")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "mb_parse_str", sizeof("mb_parse_str")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "mb_parse_str")) {
 							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("get_defined_vars")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "get_defined_vars", sizeof("get_defined_vars")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "get_defined_vars")) {
 							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("func_num_args")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "func_num_args", sizeof("func_num_args")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_num_args")) {
 							flags |= ZEND_FUNC_VARARG;
-						} else if (Z_STRLEN_P(zv) == sizeof("func_get_arg")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "func_get_arg", sizeof("func_get_arg")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_get_arg")) {
 							flags |= ZEND_FUNC_VARARG;
-						} else if (Z_STRLEN_P(zv) == sizeof("func_get_args")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "func_get_args", sizeof("func_get_args")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_get_args")) {
 							flags |= ZEND_FUNC_VARARG;
 						}
 					}
