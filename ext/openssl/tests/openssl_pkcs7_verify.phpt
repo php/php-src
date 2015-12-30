@@ -1,7 +1,7 @@
 --TEST--
 mixed openssl_pkcs7_verify ( string $filename , int $flags [, string $outfilename [, array $cainfo [, string $extracerts [, string $content ]]]] );
 --CREDITS--
-marcosptf - <marcosptf@yahoo.com.br>
+marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) print "skip";
