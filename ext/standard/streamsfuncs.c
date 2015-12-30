@@ -885,7 +885,6 @@ static int parse_context_options(php_stream_context *context, zval *options)
 		if (Z_TYPE_P(wval) == IS_ARRAY) {
 		    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
 				if (okey) {
-					ZVAL_DEREF(oval);
 					php_stream_context_set_option(context, ZSTR_VAL(wkey), ZSTR_VAL(okey), oval);
 				}
 			} ZEND_HASH_FOREACH_END();

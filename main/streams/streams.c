@@ -2244,9 +2244,8 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 			return FAILURE;
 		}
 	}
-	if (Z_REFCOUNTED_P(optionvalue)) {
-		Z_ADDREF_P(optionvalue);
-	}
+	ZVAL_DEREF(optionvalue);
+	Z_TRY_ADDREF_P(optionvalue);
 	return zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue) ? SUCCESS : FAILURE;
 }
 /* }}} */
