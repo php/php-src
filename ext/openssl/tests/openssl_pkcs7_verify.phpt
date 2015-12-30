@@ -236,3 +236,10 @@ string(%d) ""
 string(%d) ""
 string(%d) ""
 string(%d) ""
+string(%d) ""
+
+Warning: openssl_pkcs7_verify() expects parameter %d to be array, null given in %s on line %d
+string(%d) ""
+string(%d) ""
+string(%d) ""
+string(%d) ""
