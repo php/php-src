@@ -21,8 +21,10 @@ foreach ($tests as $idx => $test) {
 	var_dump($test['tag'] === $tag);
 }
 
+echo "ERROR: IV\n";
+var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, $tag, ''));
 ?>
---EXPECT--
+--EXPECTF--
 TEST 0
 bool(true)
 bool(true)
@@ -41,3 +43,7 @@ bool(true)
 TEST 5
 bool(true)
 bool(true)
+ERROR: IV
+
+Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s on line %d
+bool(false)

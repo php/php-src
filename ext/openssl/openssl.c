@@ -5315,7 +5315,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	}
 
 	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
-	if (enc && *piv_len == 0 && max_iv_len > 0) {
+	if (enc && *piv_len == 0 && max_iv_len > 0 && !mode->is_aead) {
 		php_error_docref(NULL, E_WARNING,
 				"Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
 	}
