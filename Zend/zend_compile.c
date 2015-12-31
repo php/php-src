@@ -4184,6 +4184,8 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		/* Pop FAST_CALL from unwind stack */
 		zend_stack_del_top(&CG(loop_var_stack));
 
+		CG(zend_lineno) = finally_ast->lineno;
+
 		opline = zend_emit_op(NULL, ZEND_FAST_CALL, NULL, NULL);
 		opline->op1.num = try_catch_offset;
 		opline->result_type = IS_TMP_VAR;
