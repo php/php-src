@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
     reference to CURLFile). (Laruence)
+
+- LDAP:
+  . Fixed bug #71249 (ldap_mod_replace/ldap_mod_add store value as string
+    "Array"). (Laruence)
   
 - SPL:
   . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
