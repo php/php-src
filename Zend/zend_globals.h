@@ -136,7 +136,6 @@ struct _zend_compiler_globals {
 
 struct _zend_executor_globals {
 	zval uninitialized_zval;
-	zval error_zval;
 
 	/* symbol table cache */
 	zend_array *symtable_cache[SYMTABLE_CACHE_SIZE];

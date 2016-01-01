@@ -94,12 +94,22 @@ static const zend_internal_function zend_pass_function = {
 #define READY_TO_DESTROY(zv) \
 	(UNEXPECTED(zv) && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
-#define EXTRACT_ZVAL_PTR(zv) do {		\
-	zval *__zv = (zv);								\
-	if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {	\
-		ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	    \
-	}												\
+#define EXTRACT_ZVAL_PTR(zv) do {                    \
+	zval *__zv = (zv);                               \
+	if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {   \
+		ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));         \
+	}                                                \
 } while (0)
+
+#define HANDLE_ERROR_ZVAL(var) do {                  \
+	const zend_op *jmp_addr;                         \
+	if (UNEXPECTED(EG(exception))) {                 \
+		HANDLE_EXCEPTION();                          \
+	}                                                \
+	jmp_addr = zend_handle_error_zval(var);          \
+	ZEND_VM_SET_OPCODE(jmp_addr);                    \
+	ZEND_VM_CONTINUE();                              \
+} while (0);
 
 #define FREE_OP(should_free) \
 	if (should_free) { \
@@ -1106,13 +1116,6 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 
 	if (object_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		do {
-			if (object_op_type == IS_VAR && UNEXPECTED(object == &EG(error_zval))) {
-				if (retval) {
- 					ZVAL_NULL(retval);
-				}
-				FREE_OP(free_value);
-				return;
-			}
 			if (Z_ISREF_P(object)) {
 				object = Z_REFVAL_P(object);
 				if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -1657,8 +1660,7 @@ str_index:
 				goto try_again;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
-				retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
-					&EG(error_zval) : &EG(uninitialized_zval);
+				retval = (type == BP_VAR_W || type == BP_VAR_RW) ? NULL : &EG(uninitialized_zval);
 		}
 	}
 	return retval;
@@ -1699,6 +1701,78 @@ try_again:
 	}
 
 	return offset;
+}
+
+static zend_never_inline ZEND_COLD const zend_op *zend_handle_error_zval(uint32_t var)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = EX(opline);
+	const zend_op *end = EX(func)->op_array.opcodes + EX(func)->op_array.last;
+	while (opline++ < end) {
+		if ((opline->op1_type == IS_VAR && opline->op1.var == var) ||
+			(opline->op2_type == IS_VAR && opline->op2.var == var)) {
+			switch (opline->opcode) {
+				case ZEND_FETCH_DIM_W:
+				case ZEND_FETCH_DIM_RW:
+				case ZEND_FETCH_DIM_UNSET:
+				case ZEND_FETCH_DIM_FUNC_ARG:
+				case ZEND_FETCH_OBJ_W:
+				case ZEND_FETCH_OBJ_RW:
+				case ZEND_FETCH_OBJ_UNSET:
+				case ZEND_FETCH_OBJ_FUNC_ARG:
+					return zend_handle_error_zval(opline->result.var);
+				case ZEND_FE_RESET_RW:
+					zend_error(E_WARNING, "Invalid argument supplied for foreach()");
+					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+					opline = OP_JMP_ADDR(opline, opline->op2);
+					break;
+				case ZEND_ASSIGN_OBJ:
+					zend_error(E_WARNING, "Creating default object from empty value");
+				case ZEND_ASSIGN_DIM:
+					if (RETURN_VALUE_USED(opline)) {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
+					opline++;
+					ZEND_ASSERT(opline->opcode == ZEND_OP_DATA);
+					if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+						zval_ptr_dtor(EX_VAR(opline->op1.var));
+					}
+					opline++;
+					break;
+				case ZEND_SEND_REF: {
+						zval *arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+						ZVAL_NEW_REF(arg, &EG(uninitialized_zval));
+					}
+					opline++;
+					break;
+				case ZEND_ASSIGN_ADD:
+				case ZEND_ASSIGN_SUB:
+				case ZEND_ASSIGN_MUL:
+				case ZEND_ASSIGN_DIV:
+				case ZEND_ASSIGN_MOD:
+				case ZEND_ASSIGN_SL:
+				case ZEND_ASSIGN_SR:
+				case ZEND_ASSIGN_CONCAT:
+				case ZEND_ASSIGN_BW_OR:
+				case ZEND_ASSIGN_BW_AND:
+				case ZEND_ASSIGN_BW_XOR:
+				case ZEND_ASSIGN:
+				case ZEND_ASSIGN_REF:
+				case ZEND_PRE_INC:
+				case ZEND_PRE_DEC:
+				case ZEND_POST_INC:
+				case ZEND_POST_DEC:
+					if (RETURN_VALUE_USED(opline)) {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
+					opline++;
+				break;
+			}
+			return opline;
+		}
+	}
+	zend_error_noreturn(E_ERROR, "Can not be reached");
 }
 
 static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
@@ -1832,7 +1906,6 @@ static zend_always_inline zend_long zend_fetch_string_offset(zval *container, zv
 static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container, zval *dim, int dim_type, int type)
 {
     zval *retval;
-
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 try_array:
 		SEPARATE_ARRAY(container);
@@ -1841,7 +1914,7 @@ fetch_from_array:
 			retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(retval == NULL)) {
 				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-				retval = &EG(error_zval);
+				retval = NULL;
 			}
 		} else {
 			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
@@ -1869,17 +1942,19 @@ convert_to_array:
 			zend_check_string_offset(dim, type);
 			zend_wrong_string_offset();
 		}
-		ZVAL_INDIRECT(result, &EG(error_zval));
+		ZVAL_INDIRECT(result, NULL);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_throw_error(NULL, "Cannot use object as array");
-			retval = &EG(error_zval);
+			retval = NULL;
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
 			if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
 				zend_class_entry *ce = Z_OBJCE_P(container);
 
+				/* make Z_INDIRECT_P(result) not NULL */
+				Z_PTR_P(result) = (void *)1;
 				ZVAL_NULL(result);
 				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
 			} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
@@ -1906,13 +1981,11 @@ convert_to_array:
 					ZVAL_INDIRECT(result, retval);
 				}
 			} else {
-				ZVAL_INDIRECT(result, &EG(error_zval));
+				ZVAL_INDIRECT(result, NULL);
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-		if (UNEXPECTED(container == &EG(error_zval))) {
-			ZVAL_INDIRECT(result, &EG(error_zval));
-		} else if (type != BP_VAR_UNSET) {
+		if (type != BP_VAR_UNSET) {
 			goto convert_to_array;
 		} else {
 			/* for read-mode only */
@@ -1924,7 +1997,7 @@ convert_to_array:
 			ZVAL_NULL(result);
 		} else {
 			zend_error(E_WARNING, "Cannot use a scalar value as an array");
-			ZVAL_INDIRECT(result, &EG(error_zval));
+			ZVAL_INDIRECT(result, NULL);
 		}
 	}
 }
@@ -2051,13 +2124,8 @@ ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *
 
 static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type)
 {
-    if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+	if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
-			if (container_op_type == IS_VAR && UNEXPECTED(container == &EG(error_zval))) {
-				ZVAL_INDIRECT(result, &EG(error_zval));
-				return;
-			}
-
 			if (Z_ISREF_P(container)) {
 				container = Z_REFVAL_P(container);
 				if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -2073,7 +2141,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				object_init(container);
 			} else {
 				zend_error(E_WARNING, "Attempt to modify property of non-object");
-				ZVAL_INDIRECT(result, &EG(error_zval));
+				ZVAL_INDIRECT(result, NULL);
 				return;
 			}
 		} while (0);
@@ -2116,7 +2184,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				}
 			} else {
 				zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
-				ZVAL_INDIRECT(result, &EG(error_zval));
+				ZVAL_INDIRECT(result, NULL);
 			}
 		} else {
 			ZVAL_INDIRECT(result, ptr);
@@ -2130,7 +2198,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		}
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
-		ZVAL_INDIRECT(result, &EG(error_zval));
+		ZVAL_INDIRECT(result, NULL);
 	}
 }
 
