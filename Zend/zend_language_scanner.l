@@ -1620,6 +1620,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	int len = yyleng - 2, contains_underscores, i;
 	char *end, *bin = yytext + 2;
 
+	/* Skip any leading 0s */
+	while (*bin == '0' || *bin == '_') {
+		++bin;
+		--len;
+	}
+
 	for (i = 0; i < len && bin[i] != '_'; ++i);
 
 	contains_underscores = i != len;
@@ -1629,19 +1635,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		STRIP_UNDERSCORES(bin, len)
 	}
 
-	/* Skip any leading 0s */
-	while (*bin == '0') {
-		++bin;
-		--len;
-	}
-
 	if (len < SIZEOF_ZEND_LONG * 8) {
 		if (len == 0) {
 			ZVAL_LONG(zendlval, 0);
 		} else {
 			errno = 0;
 			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, &end, 2));
-			ZEND_ASSERT(!errno && end == yytext + yyleng);
+			ZEND_ASSERT(!errno && end == bin + len);
 		}
 		if (contains_underscores) {
 			efree(bin);
@@ -1650,7 +1650,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-		ZEND_ASSERT(end == yytext + yyleng);
+		ZEND_ASSERT(end == bin + len);
 		if (contains_underscores) {
 			efree(bin);
 		}
@@ -1734,6 +1734,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	int len = yyleng - 2, contains_underscores, i;
 	char *end, *hex = yytext + 2;
 
+	/* Skip any leading 0s */
+	while (*hex == '0' || *hex == '_') {
+		++hex;
+		--len;
+	}
+
 	for (i = 0; i < len && hex[i] != '_'; ++i);
 
 	contains_underscores = i != len;
@@ -1741,12 +1747,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (contains_underscores) {
 		hex = estrndup(hex, len);
 		STRIP_UNDERSCORES(hex, len)
-	}
-
-	/* Skip any leading 0s */
-	while (*hex == '0') {
-		hex++;
-		len--;
 	}
 
 	if (len < SIZEOF_ZEND_LONG * 2 || (len == SIZEOF_ZEND_LONG * 2 && *hex <= '7')) {
