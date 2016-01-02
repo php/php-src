@@ -21,8 +21,11 @@ foreach ($tests as $idx => $test) {
 	var_dump($test['tag'] === $tag);
 }
 
-echo "ERROR: IV\n";
+// Empty IV error
 var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, $tag, ''));
+
+// Failing to retrieve tag (max is 16 bytes)
+var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 32), $tag, '', 20));
 ?>
 --EXPECTF--
 TEST 0
@@ -43,7 +46,9 @@ bool(true)
 TEST 5
 bool(true)
 bool(true)
-ERROR: IV
 
 Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s on line %d
 bool(false)
+
+Warning: openssl_encrypt(): Retrieving verification tag failed in %s on line %d
+string(8) "S6+N0w=="
