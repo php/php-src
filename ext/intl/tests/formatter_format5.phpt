@@ -4,7 +4,6 @@ numfmt_format() icu >= 54.1 && icu < 56.1
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '56.1') >=  0) die('skip for ICU < 56.1'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '56.1') >=  0) die('skip for ICU < 56.1'); ?>
 --FILE--
 <?php
 
