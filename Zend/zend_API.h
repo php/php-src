@@ -202,6 +202,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__call = handle_fcall;					\
 		class_container.__callstatic = NULL;					\
 		class_container.__tostring = NULL;						\
+		class_container.__toint = NULL;							\
 		class_container.__get = handle_propget;					\
 		class_container.__set = handle_propset;					\
 		class_container.__unset = handle_propunset;				\

@@ -123,6 +123,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->__tostring)) {
 		ce->__tostring = ce->parent->__tostring;
 	}
+	if (EXPECTED(!ce->__toint)) {
+		ce->__toint = ce->parent->__toint;
+	}
 	if (EXPECTED(!ce->clone)) {
 		ce->clone = ce->parent->clone;
 	}
@@ -1053,6 +1056,8 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->__callstatic = fe;
 	} else if (!strncmp(ZSTR_VAL(mname), ZEND_TOSTRING_FUNC_NAME, ZSTR_LEN(mname))) {
 		ce->__tostring = fe;
+	} else if (!strncmp(ZSTR_VAL(mname), ZEND_TOINT_FUNC_NAME, ZSTR_LEN(mname))) {
+		ce->__toint = fe;
 	} else if (!strncmp(ZSTR_VAL(mname), ZEND_DEBUGINFO_FUNC_NAME, ZSTR_LEN(mname))) {
 		ce->__debugInfo = fe;
 	} else if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {

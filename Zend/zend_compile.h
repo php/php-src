@@ -970,6 +970,7 @@ END_EXTERN_C()
 #define ZEND_CALL_FUNC_NAME         "__call"
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
+#define ZEND_TOINT_FUNC_NAME        "__toint"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 #define ZEND_INVOKE_FUNC_NAME       "__invoke"
 #define ZEND_DEBUGINFO_FUNC_NAME    "__debuginfo"
