@@ -1031,6 +1031,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_QM_ASSIGN:
+		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 			if (ssa->ops[line].result_def == var) {
 				if (OP1_HAS_RANGE()) {
@@ -2350,6 +2351,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
 		case ZEND_QM_ASSIGN:
+		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 			tmp = t1 & ~(MAY_BE_UNDEF|MAY_BE_REF);
 			if (t1 & MAY_BE_UNDEF) {
@@ -3420,10 +3422,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 //		case ZEND_CATCH:
-// TODO: ???
-//			break;
-//		case ZEND_JMP_SET:
-//		case ZEND_COALESCE:
 // TODO: ???
 //			break;
 		case ZEND_FETCH_DIM_R:
