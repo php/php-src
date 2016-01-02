@@ -2323,6 +2323,31 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 }
 /* }}} */
 
+/* {{{ php_stream_is_cacheable
+ */
+PHPAPI int _php_stream_is_cacheable(const char *path, int options, php_stream_context *context)
+{
+	php_stream_wrapper *wrapper = NULL;
+	int ret;
+
+	if (!path || !*path) {
+		return 0;
+	}
+
+	wrapper = php_stream_locate_url_wrapper(path, NULL, options);
+
+	if (wrapper && wrapper->wops->stream_is_cacheable) {
+		ret = wrapper->wops->stream_is_cacheable(wrapper,
+				path, options, context);
+
+	} else {
+		ret = 0;
+	}
+
+	return ret;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

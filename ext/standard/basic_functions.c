@@ -1219,6 +1219,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_sys_get_temp_dir, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_is_cacheable, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 /* {{{ filestat.c */
 ZEND_BEGIN_ARG_INFO(arginfo_disk_total_space, 0)
@@ -3371,6 +3378,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(output_reset_rewrite_vars,										arginfo_output_reset_rewrite_vars)
 
 	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
+	PHP_FE(file_is_cacheable,												arginfo_file_is_cacheable)
 
 	PHP_FE_END
 };

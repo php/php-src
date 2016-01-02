@@ -2,6 +2,7 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 
 0. Wiki Examples
 1. Internal API changes
+  q. New streams operations
 
 2. Build system changes
   a. Unix build system changes
@@ -20,6 +21,27 @@ changes. See: https://wiki.php.net/phpng-upgrading
 ========================
 1. Internal API changes
 ========================
+
+  q. New streams operation
+  
+     is_cacheable()
+
+     An element named 'stream_is_cacheable' is added after 'stream_metadata' in the
+     php_stream_wrapper_ops structure. This is an optional pointer to a function
+     able to determine if a given URI is cacheable or not. This function receives
+     an URI, an options bitfield, and an optional context. It returns a value
+     different of 0 if the URI is cacheable. If the 'stream_is_cacheable' element
+     is null, every URI for this wrapper are considered as non-cacheable.
+     A new C function named	php_stream_is_cacheable(const char *path, int options, php_stream_context *context)
+     is defined. It determines the right wrapper from the path it receives and
+     forwards the request to the corresponding stream_is_cacheable() function,
+     if it exists. If the stream_is_cacheable() element is not defined, 0 is
+     returned.
+     Userspace stream wrappers can define a method named is_cacheable(path [,options]).
+     This method determines if the input path is cacheable and returns true or
+     false. If the method is not defined, every path for this wrapper are non-cacheable.
+     For completeness, a new PHP function named file_is_cacheable(path [, options [, context]])
+     is defined. It allows to determine from a PHP script whether a path is cacheable.
 
 ========================
 2. Build system changes

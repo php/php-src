@@ -158,6 +158,9 @@ typedef struct _php_stream_wrapper_ops {
 	int (*stream_rmdir)(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 	/* Metadata handling */
 	int (*stream_metadata)(php_stream_wrapper *wrapper, const char *url, int options, void *value, php_stream_context *context);
+	/* Asks whether a path is cacheable */
+	int (*stream_is_cacheable)(php_stream_wrapper *wrapper, const char *url,
+		int options, php_stream_context *context);
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
@@ -373,6 +376,9 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam);
 #define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue))
+
+PHPAPI int _php_stream_is_cacheable(const char *path, int options, php_stream_context *context);
+#define php_stream_is_cacheable(path, options, context)	_php_stream_is_cacheable((path), (options), (context))
 
 #define php_stream_set_chunk_size(stream, size) _php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL)
 
