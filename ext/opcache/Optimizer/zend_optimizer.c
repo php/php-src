@@ -773,9 +773,9 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 			} else if (op_array->type == ZEND_USER_FUNCTION) {
 				zend_op_array *orig_op_array;
 				if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, name)) != NULL) {
-					HashTable *ht = op_array->static_variables;
+					zval *static_vars = op_array->static_variables;
 					*op_array = *orig_op_array;
-					op_array->static_variables = ht;
+					op_array->static_variables = static_vars;
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -845,9 +845,9 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 				} else if (op_array->type == ZEND_USER_FUNCTION) {
 					zend_op_array *orig_op_array;
 					if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, name)) != NULL) {
-						HashTable *ht = op_array->static_variables;
+						zval *static_vars = op_array->static_variables;
 						*op_array = *orig_op_array;
-						op_array->static_variables = ht;
+						op_array->static_variables = static_vars;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();

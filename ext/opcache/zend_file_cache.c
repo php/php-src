@@ -350,12 +350,16 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
                                                void                     *buf)
 {
 	if (op_array->static_variables && !IS_SERIALIZED(op_array->static_variables)) {
-		HashTable *ht;
+		zval *p, *end;
 
 		SERIALIZE_PTR(op_array->static_variables);
-		ht = op_array->static_variables;
-		UNSERIALIZE_PTR(ht);
-		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
+		p = op_array->static_variables;
+		UNSERIALIZE_PTR(p);
+		end = p + op_array->last_static_var;
+		while (p < end) {
+			zend_file_cache_serialize_zval(p, script, info, buf);
+			p++;
+		}
 	}
 
 	if (op_array->literals && !IS_SERIALIZED(op_array->literals)) {
@@ -441,6 +445,21 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				}
 				if (!IS_SERIALIZED(p->class_name)) {
 					SERIALIZE_STR(p->class_name);
+				}
+				p++;
+			}
+		}
+
+		if (op_array->static_vars) {
+			zend_string **p, **end;
+
+			SERIALIZE_PTR(op_array->static_vars);
+			p = op_array->static_vars;
+			UNSERIALIZE_PTR(p);
+			end = p + op_array->last_static_var;
+			while (p < end) {
+				if (!IS_SERIALIZED(*p)) {
+					SERIALIZE_STR(*p);
 				}
 				p++;
 			}
@@ -930,12 +949,15 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
                                                  void                    *buf)
 {
 	if (op_array->static_variables && !IS_UNSERIALIZED(op_array->static_variables)) {
-		HashTable *ht;
+		zval *p, *end;
 
 		UNSERIALIZE_PTR(op_array->static_variables);
-		ht = op_array->static_variables;
-		zend_file_cache_unserialize_hash(ht,
-				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
+		p = op_array->static_variables;
+		end = p + op_array->last_static_var;
+		while (p < end) {
+			zend_file_cache_unserialize_zval(p, script, buf);
+			p++;
+		}
 	}
 
 	if (op_array->literals && !IS_UNSERIALIZED(op_array->literals)) {
@@ -1015,6 +1037,20 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				}
 				if (!IS_UNSERIALIZED(p->class_name)) {
 					UNSERIALIZE_STR(p->class_name);
+				}
+				p++;
+			}
+		}
+
+		if (op_array->static_vars) {
+			zend_string **p, **end;
+
+			UNSERIALIZE_PTR(op_array->static_vars);
+			p = op_array->static_vars;
+			end = p + op_array->last_static_var;
+			while (p < end) {
+				if (!IS_UNSERIALIZED(*p)) {
+					UNSERIALIZE_STR(*p);
 				}
 				p++;
 			}

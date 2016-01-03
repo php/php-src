@@ -189,6 +189,7 @@ typedef struct _zend_live_range {
 typedef struct _zend_oparray_context {
 	uint32_t   opcodes_size;
 	int        vars_size;
+	int        static_vars_size;
 	int        literals_size;
 	int        backpatch_count;
 	int        in_finally;
@@ -380,7 +381,9 @@ struct _zend_op_array {
 	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */
-	HashTable *static_variables;
+	zend_string **static_vars;
+	zval *static_variables;
+	int last_static_var;
 
 	zend_string *filename;
 	uint32_t line_start;
@@ -890,7 +893,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 /* global/local fetches */
 #define ZEND_FETCH_GLOBAL			0x00000000
 #define ZEND_FETCH_LOCAL			0x10000000
-#define ZEND_FETCH_STATIC			0x20000000
 #define ZEND_FETCH_GLOBAL_LOCK		0x40000000
 
 #define ZEND_FETCH_TYPE_MASK		0x70000000

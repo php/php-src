@@ -1608,6 +1608,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_PRE_DEC:
 						case ZEND_ASSIGN:
 						case ZEND_ASSIGN_REF:
+						case ZEND_FETCH_STATIC:
 						case ZEND_DO_FCALL:
 						case ZEND_DO_ICALL:
 						case ZEND_DO_UCALL:

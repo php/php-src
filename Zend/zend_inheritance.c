@@ -78,11 +78,20 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			/* reuse the same op_array structure */
 			return func;
 		}
-		if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(func->op_array.static_variables)++;
-		}
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_function, func, sizeof(zend_op_array));
+		if (func->op_array.static_variables) {
+			int i = func->op_array.last_static_var;
+			if (func->op_array.fn_flags & ZEND_ACC_CLOSURE) {
+				new_function->op_array.static_variables = emalloc(sizeof(zval) * (func->op_array.last_static_var + 1));
+			} else {
+				new_function->op_array.static_variables = emalloc(sizeof(zval) * func->op_array.last_static_var);
+			}
+			while (i > 0) {
+				i--;
+				ZVAL_COPY(&new_function->op_array.static_variables[i], &func->op_array.static_variables[i]);
+			}
+		}
 	}
 	return new_function;
 }

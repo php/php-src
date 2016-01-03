@@ -93,9 +93,9 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	case ZEND_RECV:
 	case ZEND_RECV_INIT:
 	case ZEND_RECV_VARIADIC:
+	case ZEND_FETCH_STATIC:
 		spprintf(&decode[1], 0, "%" PRIu32, op->op1.num);
 		break;
-
 	default:
 		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type);
 		break;
@@ -143,6 +143,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	/* RESULT */
 	switch (op->opcode) {
 	case ZEND_CATCH:
+	case ZEND_BIND_LEXICAL:
 		spprintf(&decode[3], 0, "%" PRIu32, op->result.num);
 		break;
 	default:

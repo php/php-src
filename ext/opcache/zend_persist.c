@@ -467,18 +467,14 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	if (op_array->static_variables) {
-		HashTable *stored = zend_shared_alloc_get_xlat_entry(op_array->static_variables);
-
-		if (stored) {
-			op_array->static_variables = stored;
+		int i;
+		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			zend_accel_store(op_array->static_variables, sizeof(zval) * (op_array->last_static_var + 1));
 		} else {
-			zend_hash_persist(op_array->static_variables, zend_persist_zval_static);
-			zend_accel_store(op_array->static_variables, sizeof(HashTable));
-			/* make immutable array */
-			GC_REFCOUNT(op_array->static_variables) = 2;
-			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
-			op_array->static_variables->u.flags |= HASH_FLAG_STATIC_KEYS;
-			op_array->static_variables->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
+			zend_accel_store(op_array->static_variables, sizeof(zval) * op_array->last_static_var);
+		}
+		for (i = 0; i < op_array->last_static_var; i++) {
+			zend_persist_zval_static(&op_array->static_variables[i]);
 		}
 	}
 
@@ -643,6 +639,20 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 	if (op_array->try_catch_array) {
 		zend_accel_store(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
+	}
+
+	if (op_array->static_vars) {
+		if (already_stored) {
+			persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->static_vars);
+			ZEND_ASSERT(persist_ptr != NULL);
+			op_array->static_vars = (zend_string**)persist_ptr;
+		} else {
+			int i;
+			zend_accel_store(op_array->static_vars, sizeof(zend_string*) * op_array->last_static_var);
+			for (i = 0; i < op_array->last_static_var; i++) {
+				zend_accel_store_interned_string(op_array->static_vars[i]);
+			}
+		}
 	}
 
 	if (op_array->vars) {

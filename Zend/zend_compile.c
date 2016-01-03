@@ -230,6 +230,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	*prev_context = CG(context);
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
+	CG(context).static_vars_size = 0;
 	CG(context).literals_size = 0;
 	CG(context).backpatch_count = 0;
 	CG(context).in_finally = 0;
@@ -413,8 +414,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name) /* {{{ */{
 		}
 		i++;
 	}
-	i = op_array->last_var;
-	op_array->last_var++;
+	i = op_array->last_var++;
 	if (op_array->last_var > CG(context).vars_size) {
 		CG(context).vars_size += 16; /* FIXME */
 		op_array->vars = erealloc(op_array->vars, CG(context).vars_size * sizeof(zend_string*));
@@ -1025,8 +1025,12 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 			(*op_array->refcount)++;
 		}
 		if (op_array->static_variables) {
-			if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(op_array->static_variables)++;
+			zval *static_vars = op_array->static_variables;
+			int i = op_array->last_static_var;
+			op_array->static_variables = emalloc(op_array->last_static_var * (sizeof(zval)));
+			while (i > 0) {
+				i--;
+				ZVAL_COPY(&op_array->static_variables[i], &static_vars[i]);
 			}
 		}
 		op_array->run_time_cache = NULL;
@@ -3719,39 +3723,53 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static uint32_t zend_lookup_static_var(zend_op_array *op_array, zend_string *name) /* {{{ */ {
+	int i = 0;
+	zend_ulong hash_value = zend_string_hash_val(name);
+
+	while (i < op_array->last_static_var) {
+		if (ZSTR_VAL(op_array->static_vars[i]) == ZSTR_VAL(name) ||
+		    (ZSTR_H(op_array->static_vars[i]) == hash_value &&
+		     ZSTR_LEN(op_array->static_vars[i]) == ZSTR_LEN(name) &&
+		     memcmp(ZSTR_VAL(op_array->static_vars[i]), ZSTR_VAL(name), ZSTR_LEN(name)) == 0)) {
+			zend_string_release(name);
+			return i;
+		}
+		i++;
+	}
+	i = op_array->last_static_var++;
+	if (op_array->last_static_var > CG(context).static_vars_size) {
+		CG(context).static_vars_size += 8;
+		op_array->static_vars = erealloc(op_array->static_vars, CG(context).static_vars_size * sizeof(zend_string*));
+		op_array->static_variables = erealloc(op_array->static_variables, CG(context).static_vars_size * sizeof(zval));
+	}
+	op_array->static_vars[i] = zend_new_interned_string(name);
+	return i;
+}
+/* }}} */
+
 static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_bool by_ref) /* {{{ */
 {
-	znode var_node, result;
 	zend_op *opline;
+	uint32_t var_num;
+	zend_string *var_name = zend_ast_get_str(var_ast);
 
-	zend_compile_expr(&var_node, var_ast);
-
-	if (!CG(active_op_array)->static_variables) {
-		if (CG(active_op_array)->scope) {
-			CG(active_op_array)->scope->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
-		}
-		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
-		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
+	if (zend_string_equals_literal(var_name, "this")) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
 	}
 
-	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {
-		if (!(GC_FLAGS(CG(active_op_array)->static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(CG(active_op_array)->static_variables)--;
-		}
-		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
+	if (zend_is_auto_global(var_name)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use auto-global as lexical variable");
 	}
-	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
 
-	opline = zend_emit_op(&result, by_ref ? ZEND_FETCH_W : ZEND_FETCH_R, &var_node, NULL);
-	opline->extended_value = ZEND_FETCH_STATIC;
+	var_num = zend_lookup_static_var(CG(active_op_array), zend_string_copy(var_name));
+	ZVAL_COPY_VALUE(&CG(active_op_array)->static_variables[var_num], value);
 
-	if (by_ref) {
-		zend_ast *fetch_ast = zend_ast_create(ZEND_AST_VAR, var_ast);
-		zend_emit_assign_ref_znode(fetch_ast, &result);
-	} else {
-		zend_ast *fetch_ast = zend_ast_create(ZEND_AST_VAR, var_ast);
-		zend_emit_assign_znode(fetch_ast, &result);
-	}
+	opline = zend_emit_op(NULL, ZEND_FETCH_STATIC, NULL, NULL);
+	opline->op1_type = IS_CV;
+	opline->op1.num = lookup_cv(CG(active_op_array), zend_string_copy(var_name));
+	opline->op2.num = var_num;
+	opline->extended_value = by_ref;
 }
 /* }}} */
 
@@ -4896,7 +4914,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* {{{ */
+static void zend_compile_closure_binding(zend_op_array *op_array, znode *closure, zend_ast *uses_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(uses_ast);
 	uint32_t i;
@@ -4917,7 +4935,8 @@ static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* 
 
 		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
 		opline->op2_type = IS_CV;
-		opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(var_name));
+		opline->op2.num = lookup_cv(CG(active_op_array), zend_string_copy(var_name));
+		opline->result.var = op_array->last_static_var++;
 		opline->extended_value = by_ref;
 	}
 }
@@ -5186,7 +5205,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	} else {
 		zend_begin_func_decl(result, op_array, decl);
 		if (uses_ast) {
-			zend_compile_closure_binding(result, uses_ast);
+			zend_compile_closure_binding(op_array, result, uses_ast);
 		}
 	}
 
@@ -5209,8 +5228,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_params(params_ast, return_type_ast);
 	if (uses_ast) {
+		/* the order must be the same as zend_compile_closure_binding */
+		op_array->last_static_var = 0;
 		zend_compile_closure_uses(uses_ast);
 	}
+
 	zend_compile_stmt(stmt_ast);
 
 	if (is_method) {
