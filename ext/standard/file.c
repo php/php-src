@@ -577,7 +577,6 @@ PHP_FUNCTION(file_put_contents)
 	php_stream_context *context = NULL;
 	php_stream *srcstream = NULL;
 	char mode[3] = "wb";
-	char ret_ok = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
 		return;
@@ -622,7 +621,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_RESOURCE: {
 			size_t len;
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
-				ret_ok = 0;
+				numbytes = -1;
 			} else {
 				if (len > ZEND_LONG_MAX) {
 					php_error_docref(NULL, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
@@ -661,8 +660,8 @@ PHP_FUNCTION(file_put_contents)
 						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
 						if (bytes_written != ZSTR_LEN(str)) {
 							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
-							ret_ok = 0;
 							zend_string_release(str);
+							numbytes = -1;
 							break;
 						}
 					}
@@ -686,12 +685,12 @@ PHP_FUNCTION(file_put_contents)
 				}
 			}
 		default:
-			ret_ok = 0;
+			numbytes = -1;
 			break;
 	}
 	php_stream_close(stream);
 
-	if (!ret_ok) {
+	if (numbytes < 0) {
 		RETURN_FALSE;
 	}
 
