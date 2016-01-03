@@ -5364,11 +5364,13 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 	if ((!enc || data_len > 0) &&
 			!EVP_CipherUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(*poutbuf),
 					&i, (unsigned char *)data, (int)data_len)) {
+		/* we don't show warning when we fail but if we ever do, then it should look like this:
 		if (mode->is_single_run_aead && !enc) {
 			php_error_docref(NULL, E_WARNING, "Tag verifycation failed");
 		} else {
 			php_error_docref(NULL, E_WARNING, enc ? "Encryption failed" : "Decryption failed");
 		}
+		*/
 		zend_string_release(*poutbuf);
 		return FAILURE;
 	}
