@@ -399,9 +399,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 	}
 	if (op_array->arg_info) {
-		int32_t num_args = op_array->num_args;
+		uint32_t num_args = op_array->num_args;
 		zend_arg_info *arg_info = op_array->arg_info;
-		int32_t i;
 
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info--;
