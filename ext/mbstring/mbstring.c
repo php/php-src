@@ -3053,7 +3053,7 @@ PHP_FUNCTION(mb_strwidth)
 PHP_FUNCTION(mb_strimwidth)
 {
 	char *str, *trimmarker = NULL, *encoding = NULL;
-	zend_long from, width;
+	zend_long from, width, swidth;
 	size_t str_len, trimmarker_len, encoding_len;
 	mbfl_string string, result, marker, *ret;
 
@@ -3081,13 +3081,25 @@ PHP_FUNCTION(mb_strimwidth)
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 
+	if ((from < 0) || (width < 0)) {
+		swidth = mbfl_strwidth(&string);
+	}
+
+	if (from < 0) {
+		from += swidth;
+	}
+		
 	if (from < 0 || (size_t)from > str_len) {
 		php_error_docref(NULL, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;
 	}
 
 	if (width < 0) {
-		php_error_docref(NULL, E_WARNING, "Width is negative value");
+		width = swidth + width - from;
+	}
+
+	if (width < 0) {
+		php_error_docref(NULL, E_WARNING, "Width is out of range");
 		RETURN_FALSE;
 	}
 
