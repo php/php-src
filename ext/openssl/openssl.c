@@ -400,7 +400,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, iv)
-	ZEND_ARG_INFO(1, tag)
+	ZEND_ARG_INFO(0, tag)
 	ZEND_ARG_INFO(0, aad)
 ZEND_END_ARG_INFO()
 
