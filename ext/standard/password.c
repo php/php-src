@@ -355,48 +355,55 @@ PHP_FUNCTION(password_hash)
 		char *buffer;
 		int buffer_len_int = 0;
 		size_t buffer_len;
+		zval cast_option_buffer = zval_used_for_init;
 		switch (Z_TYPE_PP(option_buffer)) {
 			case IS_STRING:
-				buffer = estrndup(Z_STRVAL_PP(option_buffer), Z_STRLEN_PP(option_buffer));
+				buffer         = Z_STRVAL_PP(option_buffer);
 				buffer_len_int = Z_STRLEN_PP(option_buffer);
 				break;
 			case IS_LONG:
 			case IS_DOUBLE:
-			case IS_OBJECT: {
-				zval cast_option_buffer;
+			case IS_OBJECT:
 				MAKE_COPY_ZVAL(option_buffer, &cast_option_buffer);
 				convert_to_string(&cast_option_buffer);
 				if (Z_TYPE(cast_option_buffer) == IS_STRING) {
-					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRLEN(cast_option_buffer));
+					buffer         = Z_STRVAL(cast_option_buffer);
 					buffer_len_int = Z_STRLEN(cast_option_buffer);
-					zval_dtor(&cast_option_buffer);
 					break;
 				}
-				zval_dtor(&cast_option_buffer);
-			}
 			case IS_BOOL:
 			case IS_NULL:
 			case IS_RESOURCE:
 			case IS_ARRAY:
 			default:
+				if (Z_TYPE(cast_option_buffer) != IS_NULL) {
+					zval_dtor(&cast_option_buffer);
+				}
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Non-string salt parameter supplied");
 				RETURN_NULL();
 		}
 		if (buffer_len_int < 0) {
-			efree(buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long");
+			if (Z_TYPE(cast_option_buffer) != IS_NULL) {
+				zval_dtor(&cast_option_buffer);
+			}
+			RETURN_NULL();
 		}
 		buffer_len = (size_t) buffer_len_int;
 		if (buffer_len < required_salt_len) {
-			efree(buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu expecting %lu", (unsigned long) buffer_len, (unsigned long) required_salt_len);
+			if (Z_TYPE(cast_option_buffer) != IS_NULL) {
+				zval_dtor(&cast_option_buffer);
+			}
 			RETURN_NULL();
 		} else if (php_password_salt_is_alphabet(buffer, buffer_len) == FAILURE) {
 			salt = safe_emalloc(required_salt_len, 1, 1);
 			if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
-				efree(buffer);
 				efree(salt);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu", (unsigned long) buffer_len);
+				if (Z_TYPE(cast_option_buffer) != IS_NULL) {
+					zval_dtor(&cast_option_buffer);
+				}
 				RETURN_NULL();
 			}
 			salt_len = required_salt_len;
@@ -405,7 +412,9 @@ PHP_FUNCTION(password_hash)
 			memcpy(salt, buffer, (int) required_salt_len);
 			salt_len = required_salt_len;
 		}
-		efree(buffer);
+		if (Z_TYPE(cast_option_buffer) != IS_NULL) {
+			zval_dtor(&cast_option_buffer);
+		}
 	} else {
 		salt = safe_emalloc(required_salt_len, 1, 1);
 		if (php_password_make_salt(required_salt_len, salt TSRMLS_CC) == FAILURE) {
