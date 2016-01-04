@@ -2387,7 +2387,7 @@ static STACK_OF(X509) * php_array_to_X509_sk(zval * zcerts) /* {{{ */
 		sk_X509_push(sk, cert);
 	}
 
-	clean_exit:
+clean_exit:
 	return sk;
 }
 /* }}} */
