@@ -298,6 +298,10 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 	ZVAL_UNDEF(&retval);
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
+		if (Z_TYPE(retval) != IS_ARRAY) {
+			zval_dtor(&retval);
+			return FAILURE;
+		}
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
 			if (key == NULL) {
 				key = zend_long_to_str(idx);
