@@ -368,43 +368,40 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 /* {{{ pdo_mysql_set_attribute */
 static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
+	zend_long lval = zval_get_long(val);
+	zend_bool bval = lval? 1 : 0;
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("attr=%l", attr);
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
-			convert_to_boolean(val);
 			/* ignore if the new value equals the old one */
-			if (dbh->auto_commit ^ (Z_TYPE_P(val) == IS_TRUE)) {
-				dbh->auto_commit = (Z_TYPE_P(val) == IS_TRUE);
+			if (dbh->auto_commit ^ bval) {
+				dbh->auto_commit = bval;
 				mysql_handle_autocommit(dbh);
 			}
 			PDO_DBG_RETURN(1);
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
-			convert_to_boolean(val);
 			/* ignore if the new value equals the old one */
-			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = (Z_TYPE_P(val) == IS_TRUE);
+			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
 			PDO_DBG_RETURN(1);
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
-			convert_to_boolean(val);
 			/* ignore if the new value equals the old one */
-			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = (Z_TYPE_P(val) == IS_TRUE);
+			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = bval;
 			PDO_DBG_RETURN(1);
 		case PDO_ATTR_FETCH_TABLE_NAMES:
-			convert_to_boolean(val);
-			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = (Z_TYPE_P(val) == IS_TRUE);
+			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = bval;
 			PDO_DBG_RETURN(1);
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-			convert_to_long(val);
-			if (Z_LVAL_P(val) < 0) {
+			if (lval < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
  				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
 				PDO_DBG_INF_FMT("Adjusting invalid buffer size to =%l", ((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size);
 			} else {
-				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = Z_LVAL_P(val);
+				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = lval;
 			}
 			PDO_DBG_RETURN(1);
 			break;
