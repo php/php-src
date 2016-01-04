@@ -39,6 +39,7 @@ struct st_mysqlnd_allocator_methods
 	void *	(*m_calloc)(unsigned int nmemb, size_t size MYSQLND_MEM_D);
 	void *	(*m_realloc)(void *ptr, size_t new_size MYSQLND_MEM_D);
 	void	(*m_free)(void *ptr MYSQLND_MEM_D);
+	char *	(*m_pememdup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
 	char *	(*m_pestrndup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
 	char *	(*m_pestrdup)(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
 	int		(*m_sprintf)(char **pbuf, size_t max_len, const char *format, ...);
@@ -47,24 +48,6 @@ struct st_mysqlnd_allocator_methods
 };
 
 PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
-
-PHPAPI void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void		_mysqlnd_efree(void *ptr MYSQLND_MEM_D);
-PHPAPI void		_mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_malloc(size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);
-PHPAPI void		_mysqlnd_free(void *ptr MYSQLND_MEM_D);
-PHPAPI char *	_mysqlnd_pestrndup(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI char *	_mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI int		_mysqlnd_sprintf(char **pbuf, size_t max_len, const char *format, ...);
-PHPAPI void		_mysqlnd_sprintf_free(char * p);
-PHPAPI int		_mysqlnd_vsprintf(char **pbuf, size_t max_len, const char *format, va_list ap);
 
 #define mnd_emalloc(size)				mysqlnd_allocator.m_emalloc((size) MYSQLND_MEM_C)
 #define mnd_pemalloc(size, pers)		mysqlnd_allocator.m_pemalloc((size), (pers) MYSQLND_MEM_C)
@@ -83,6 +66,22 @@ PHPAPI int		_mysqlnd_vsprintf(char **pbuf, size_t max_len, const char *format, v
 #define mnd_sprintf(p, mx_len, fmt,...) mysqlnd_allocator.m_sprintf((p), (mx_len), (fmt), __VA_ARGS__)
 #define mnd_vsprintf(p, mx_len, fmt,ap) mysqlnd_allocator.m_vsprintf((p), (mx_len), (fmt), (ap))
 #define mnd_sprintf_free(p)				mysqlnd_allocator.m_sprintf_free((p))
+
+static inline MYSQLND_STRING mnd_dup_cstring(const MYSQLND_CSTRING str, const zend_bool persistent)
+{
+	const MYSQLND_STRING ret = {(char*) mnd_pemalloc(str.l, persistent) + 1, str.l};
+	if (ret.s) {
+		memcpy(ret.s, str.s, str.l);
+		ret.s[str.l] = '\0';
+	}
+	return ret;
+}
+
+static inline MYSQLND_CSTRING mnd_str2c(const MYSQLND_STRING str)
+{
+	const MYSQLND_CSTRING ret = {str.s, str.l};
+	return ret;
+}
 
 #endif /* MYSQLND_ALLOC_H */
 

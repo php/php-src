@@ -38,6 +38,7 @@ static const char mysqlnd_malloc_name[]		= "_mysqlnd_malloc";
 static const char mysqlnd_calloc_name[]		= "_mysqlnd_calloc";
 static const char mysqlnd_realloc_name[]	= "_mysqlnd_realloc";
 static const char mysqlnd_free_name[]		= "_mysqlnd_free";
+static const char mysqlnd_pememdup_name[]	= "_mysqlnd_pememdup";
 static const char mysqlnd_pestrndup_name[]	= "_mysqlnd_pestrndup";
 static const char mysqlnd_pestrdup_name[]	= "_mysqlnd_pestrdup";
 
@@ -73,7 +74,7 @@ PHPAPI const char * mysqlnd_debug_std_no_trace_funcs[] =
 #define FAKE_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) + sizeof(size_t)) : (p))
 
 /* {{{ _mysqlnd_emalloc */
-void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
+static void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -113,7 +114,7 @@ void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_pemalloc */
-void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
+static void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -156,7 +157,7 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_ecalloc */
-void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+static void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -197,7 +198,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_pecalloc */
-void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
+static void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -239,7 +240,7 @@ void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent M
 
 
 /* {{{ _mysqlnd_erealloc */
-void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
+static void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -280,7 +281,7 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_perealloc */
-void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D)
+static void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -324,7 +325,7 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 
 
 /* {{{ _mysqlnd_efree */
-void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
+static void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 {
 	size_t free_amount = 0;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -355,7 +356,7 @@ void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_pefree */
-void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
+static void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
 {
 	size_t free_amount = 0;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -387,7 +388,7 @@ void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_malloc */
-void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
+static void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -426,7 +427,7 @@ void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_calloc */
-void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+static void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -465,7 +466,7 @@ void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_realloc */
-void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
+static void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -507,7 +508,7 @@ void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_free */
-void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
+static void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 {
 	size_t free_amount = 0;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -536,13 +537,40 @@ void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 }
 /* }}} */
 
-#define SMART_STR_START_SIZE 2048
-#define SMART_STR_PREALLOC 512
-#include "zend_smart_str.h"
+
+/* {{{ _mysqlnd_pememdup */
+static char * _mysqlnd_pememdup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
+{
+	char * ret;
+	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
+	TRACE_ALLOC_ENTER(mysqlnd_pememdup_name);
+
+#if PHP_DEBUG
+	{
+		char * fn = strrchr(__zend_orig_filename, PHP_DIR_SEPARATOR);
+		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_orig_filename, __zend_orig_lineno);
+	}
+#endif
+	TRACE_ALLOC_INF_FMT("ptr=%p", ptr);
+
+	ret = (persistent) ? __zend_malloc(REAL_SIZE(length + 1)) : _emalloc(REAL_SIZE(length + 1) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	{
+		char * dest = (char *) FAKE_PTR(ret);
+		memcpy(dest, ptr, length);
+	}
+
+	if (collect_memory_statistics) {
+		*(size_t *) ret = length;
+		MYSQLND_INC_GLOBAL_STATISTIC(persistent? STAT_MEM_DUP_COUNT : STAT_MEM_EDUP_COUNT);
+	}
+
+	TRACE_ALLOC_RETURN(FAKE_PTR(ret));
+}
+/* }}} */
 
 
 /* {{{ _mysqlnd_pestrndup */
-char * _mysqlnd_pestrndup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
+static char * _mysqlnd_pestrndup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
 {
 	char * ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -577,8 +605,13 @@ char * _mysqlnd_pestrndup(const char * const ptr, size_t length, zend_bool persi
 /* }}} */
 
 
+#define SMART_STR_START_SIZE 2048
+#define SMART_STR_PREALLOC 512
+#include "zend_smart_str.h"
+
+
 /* {{{ _mysqlnd_pestrdup */
-char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D)
+static char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D)
 {
 	char * ret;
 	smart_str tmp_str = {0, 0};
@@ -611,7 +644,7 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 
 
 /* {{{ _mysqlnd_sprintf */
-PHPAPI int _mysqlnd_sprintf(char ** pbuf, size_t max_len, const char *format, ...)
+static int _mysqlnd_sprintf(char ** pbuf, size_t max_len, const char *format, ...)
 {
 	int len;
 	va_list ap;
@@ -624,14 +657,14 @@ PHPAPI int _mysqlnd_sprintf(char ** pbuf, size_t max_len, const char *format, ..
 
 
 /* {{{ _mysqlnd_sprintf_free */
-PHPAPI void _mysqlnd_sprintf_free(char * p)
+static void _mysqlnd_sprintf_free(char * p)
 {
 	efree(p);
 }
 /* }}} */
 
 /* {{{ _mysqlnd_vsprintf */
-PHPAPI int _mysqlnd_vsprintf(char ** pbuf, size_t max_len, const char * format, va_list ap)
+static int _mysqlnd_vsprintf(char ** pbuf, size_t max_len, const char * format, va_list ap)
 {
 	return vspprintf(pbuf, max_len, format, ap);
 }
@@ -738,6 +771,18 @@ static void mysqlnd_zend_mm_free(void * ptr MYSQLND_MEM_D)
 /* }}} */
 
 
+/* {{{ mysqlnd_zend_mm_pememdup */
+static char * mysqlnd_zend_mm_pememdup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
+{
+	char * dest = pemalloc(length, persistent);
+	if (dest) {
+		memcpy(dest, ptr, length);
+	}
+	return dest;
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_zend_mm_pestrndup */
 static char * mysqlnd_zend_mm_pestrndup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
 {
@@ -771,6 +816,7 @@ PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator =
 	_mysqlnd_calloc,
 	_mysqlnd_realloc,
 	_mysqlnd_free,
+	_mysqlnd_pememdup,
 	_mysqlnd_pestrndup,
 	_mysqlnd_pestrdup,
 	_mysqlnd_sprintf,
@@ -789,9 +835,10 @@ PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator =
 	mysqlnd_zend_mm_calloc,
 	mysqlnd_zend_mm_realloc,
 	mysqlnd_zend_mm_free,
+	mysqlnd_zend_mm_pememdup,
 	mysqlnd_zend_mm_pestrndup,
-	mysqlnd_zend_mm_pestrdup
-	sprintf,
+	mysqlnd_zend_mm_pestrdup,
+	vsprintf,
 	mysqlnd_zend_mm_efree,
 #endif
 };
