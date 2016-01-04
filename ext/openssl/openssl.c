@@ -5354,6 +5354,11 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 {
 	int i = 0;
 
+	if (mode->is_single_run_aead && !EVP_EncryptUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
+		php_error_docref(NULL, E_WARNING, "Setting of data length failed");
+		return FAILURE;
+	}
+
 	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (unsigned char *)aad, (int)aad_len)) {
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;
