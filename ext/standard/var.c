@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -460,6 +460,13 @@ again:
 		case IS_DOUBLE:
 			tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_P(struc));
 			smart_str_appendl(buf, tmp_str, tmp_len);
+			/* Without a decimal point, PHP treats a number literal as an int.
+			 * This check even works for scientific notation, because the
+			 * mantissa always contains a decimal point.
+			 */
+			if (NULL == strchr(tmp_str, '.')) {
+				smart_str_appendl(buf, ".0", 2);
+			}
 			efree(tmp_str);
 			break;
 		case IS_STRING:

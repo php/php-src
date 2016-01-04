@@ -1,11 +1,47 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2016 PHP 7.0.3
+
+- Core:
+  . Fixed bug #71221 (Null pointer deref (segfault) in get_defined_vars via
+    ob_start). (hugh at allthethings dot co dot nz)
+  . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
+  . Added support for new HTTP 451 code. (Julien)
+
+- CURL:
+  . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
+    reference to CURLFile). (Laruence)
+
+- LDAP:
+  . Fixed bug #71249 (ldap_mod_replace/ldap_mod_add store value as string
+    "Array"). (Laruence)
+  
+- SPL:
+  . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
+    (Laruence)
+  . Fixed bug #71202 (Autoload function registered by another not activated
+    immediately). (Laruence)
+
+- Standard:
+  . Fixed bug #71264 (file_put_contents() returns unexpected value when 
+    filesystem runs full). (Laruence)
+  . Fixed bug #71245 (file_get_contents() ignores "header" context option if
+    it's a reference). (Laruence)
+  . Fixed bug #71220 (Null pointer deref (segfault) in compact via ob_start).
+    (hugh at allthethings dot co dot nz)
+  . Fixed bug #71190 (substr_replace converts integers in original $search
+    array to strings). (Laruence)
+  . Fixed bug #71188 (str_replace converts integers in original $search array
+    to strings). (Laruence)
+  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+
 ?? Jan 2016 PHP 7.0.2
 
 - Core:
+  . Fixed bug #71165 (-DGC_BENCH=1 doesn't work on PHP7).
+    (y dot uchiyama dot 1015 at gmail dot com)
+  . Fixed bug #71163 (Segmentation Fault: cleanup_unfinished_calls). (Laruence)
   . Fixed bug #71109 (ZEND_MOD_CONFLICTS("xdebug") doesn't work). (Laruence)
-  . Fixed bug #71105 (Format String Vulnerability in Class Name Error Message).
-    (andrew at jmpesp dot org)
   . Fixed bug #71092 (Segmentation fault with return type hinting). (Laruence)
   . Fixed bug memleak in header_register_callback. (Laruence)
   . Fixed bug #71067 (Local object in class method stays in memory for each
@@ -16,6 +52,16 @@ PHP                                                                        NEWS
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
   . Fixed bug #71086 (Invalid numeric literal parse error within
     highlight_string() function). (Nikita)
+  . Fixed bug #71154 (Incorrect HT iterator invalidation causes iterator reuse).
+    (Nikita)
+  . Fixed bug #52355 (Negating zero does not produce negative zero). (Andrea)
+  . Fixed bug #66179 (var_export() exports float as integer). (Andrea)
+  . Fixed bug #70804 (Unary add on negative zero produces positive zero).
+    (Andrea)
+
+- CURL:
+  . Fixed bug #71144 (Sementation fault when using cURL with ZTS).
+    (Michael Maroszek, Laruence)
 
 - DBA:
   . Fixed key leak with invalid resource. (Laruence)
@@ -23,24 +69,40 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
+- FTP:
+  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
+    (abrender at elitehosts dot com)
+
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
+
+- Opcache:
+  . Fixed bug #71127 (Define in auto_prepend_file is overwrite). (Laruence)
+
+- PCRE:
+  . Fixed bug #71178 (preg_replace with arrays creates [0] in replace array
+    if not already set). (Laruence)
 
 - Readline:
   . Fixed bug #71094 (readline_completion_function corrupts static array on
     second TAB). (Nikita)
 
+- Session:
+  . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
+
 - SPL:
   . Fixed bug #71077 (ReflectionMethod for ArrayObject constructor returns
     wrong number of parameters). (Laruence)
-
+  . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
+    arrays). (Nikita)
 
 17 Dec 2015, PHP 7.0.1
 
 - Core:
-  . Fixed bug #70831 (Compile fails on system with 160 CPUs).
-    (Daniel Axtens)
+  . Fixed bug #71105 (Format String Vulnerability in Class Name Error Message).
+    (CVE-2015-8617) (andrew at jmpesp dot org)
+  . Fixed bug #70831 (Compile fails on system with 160 CPUs). (Daniel Axtens)
   . Fixed bug #71006 (symbol referencing errors on Sparc/Solaris). (Dmitry)
   . Fixed bug #70997 (When using parentClass:: instead of parent::, static
     context changed). (Dmitry)
@@ -53,8 +115,8 @@ PHP                                                                        NEWS
   . Fixed bug #70944 (try{ } finally{} can create infinite chains of
     exceptions). (Laruence)
   . Fixed bug #70931 (Two errors messages are in conflict). (dams, Laruence)
-  . Fixed bug #70904 (yield from incorrectly marks valid generator as finished).
-    (Bob)
+  . Fixed bug #70904 (yield from incorrectly marks valid generator as
+    finished). (Bob)
   . Fixed bug #70899 (buildconf failure in extensions). (Bob, Reeze)
   . Fixed bug #61751 (SAPI build problem on AIX: Undefined symbol:
     php_register_internal_extensions). (Lior Kaplan)
@@ -72,7 +134,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fixed bug #71020 (Use after free in Collator::sortWithSortKeys).
-    (emmanuel dot law at gmail dot com, Laruence)
+    (CVE-2015-8616) (emmanuel dot law at gmail dot com, Laruence)
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
@@ -82,8 +144,8 @@ PHP                                                                        NEWS
     connection flag. (Andrey)
 
 - OCI8:
-  . Fixed LOB implementation size_t/zend_long mismatch reported
-    by gcov. (Senthil)
+  . Fixed LOB implementation size_t/zend_long mismatch reported by gcov.
+    (Senthil)
 
 - Opcache:
   . Fixed bug #71024 (Unable to use PHP 7.0 x64 side-by-side with PHP 5.6 x32
@@ -93,6 +155,9 @@ PHP                                                                        NEWS
   . Fixed bug #70977 (Segmentation fault with opcache.huge_code_pages=1).
     (Laruence)
 
+- PDO_Firebird:
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
+
 - Phpdbg:
   . Fixed stderr being written to stdout. (Bob)
 
@@ -101,6 +166,10 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #70982 (setStaticPropertyValue behaviors inconsistently with
     5.6). (Laruence)
+
+- Soap:
+  . Fixed bug #70993 (Array key references break argument processing).
+    (Laruence)
 
 - SPL:
   . Fixed bug #71028 (Undefined index with ArrayIterator). (Laruence)
@@ -117,13 +186,6 @@ PHP                                                                        NEWS
 
 - Streams/Socket:
   . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
-
-- Soap:
-  . Fixed bug #70993 (Array key references break argument processing).
-    (Laruence)
-
-- PDO_Firebird:
-  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
 
 03 Dec 2015, PHP 7.0.0
 

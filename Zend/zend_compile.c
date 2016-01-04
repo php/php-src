@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -4184,6 +4184,8 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		/* Pop FAST_CALL from unwind stack */
 		zend_stack_del_top(&CG(loop_var_stack));
 
+		CG(zend_lineno) = finally_ast->lineno;
+
 		opline = zend_emit_op(NULL, ZEND_FAST_CALL, NULL, NULL);
 		opline->op1.num = try_catch_offset;
 		opline->result_type = IS_TMP_VAR;
@@ -4416,7 +4418,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 	zend_arg_info *arg_infos;
 	
 	if (return_type_ast) {
-		/* Use op_array->arg_info[-1] for return type hinting */
+		/* Use op_array->arg_info[-1] for return type */
 		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
 		arg_infos->name = NULL;
 		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
@@ -4525,31 +4527,31 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 						&& !Z_CONSTANT(default_node.u.constant)
 					) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with array type hint can only be an array or NULL");
+							"with array type can only be an array or NULL");
 					}
 				} else if (arg_info->type_hint == IS_CALLABLE && default_ast) {
 					if (!has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with callable type hint can only be NULL");
+							"with callable type can only be NULL");
 					}
 				}
 			} else {
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 					if (arg_info->class_name) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with a class type hint can only be NULL");
+							"with a class type can only be NULL");
 					} else switch (arg_info->type_hint) {
 						case IS_DOUBLE:
 							if (Z_TYPE(default_node.u.constant) != IS_DOUBLE && Z_TYPE(default_node.u.constant) != IS_LONG) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-									"with a float type hint can only be float, integer, or NULL");
+									"with a float type can only be float, integer, or NULL");
 							}
 							break;
 							
 						default:
 							if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-									"with a %s type hint can only be %s or NULL",
+									"with a %s type can only be %s or NULL",
 									zend_get_type_by_const(arg_info->type_hint), zend_get_type_by_const(arg_info->type_hint));
 							}
 							break;
@@ -5806,12 +5808,9 @@ static inline void zend_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op
 
 static inline void zend_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
 {
-	binary_op_type fn = kind == ZEND_AST_UNARY_PLUS
-		? add_function : sub_function;
-
 	zval left;
-	ZVAL_LONG(&left, 0);
-	fn(result, &left, op);
+	ZVAL_LONG(&left, (kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
+	mul_function(result, &left, op);
 }
 /* }}} */
 
@@ -6001,7 +6000,8 @@ void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
-	znode zero_node, expr_node;
+	znode expr_node;
+	znode lefthand_node;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_UNARY_PLUS || ast->kind == ZEND_AST_UNARY_MINUS);
 
@@ -6014,11 +6014,9 @@ void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zero_node.op_type = IS_CONST;
-	ZVAL_LONG(&zero_node.u.constant, 0);
-
-	zend_emit_op_tmp(result, ast->kind == ZEND_AST_UNARY_PLUS ? ZEND_ADD : ZEND_SUB,
-		&zero_node, &expr_node);
+	lefthand_node.op_type = IS_CONST;
+	ZVAL_LONG(&lefthand_node.u.constant, (ast->kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
+	zend_emit_op_tmp(result, ZEND_MUL, &lefthand_node, &expr_node);
 }
 /* }}} */
 

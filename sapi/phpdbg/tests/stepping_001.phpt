@@ -32,22 +32,24 @@ prompt> [L10 %s ECHO                    "ok"                                    
  00011: } finally {
  00012: 	echo " ... ok";
 prompt> ok
-[L10 %s FAST_CALL               J8                                        ~%d                   %s]
-[L12 %s ECHO                    " ... ok"                                                      %s]
+[L11 %s FAST_CALL               J8                                        ~%d                   %s]
+>00011: } finally {
+ 00012: 	echo " ... ok";
+ 00013: }
+prompt> [L12 %s ECHO                    " ... ok"                                                      %s]
 >00012: 	echo " ... ok";
  00013: }
  00014: 
 prompt>  ... ok
 [L12 %s FAST_RET                ~%d                                                             %s]
-[L10 %s JMP                     J10                                                            %s]
->00010: 	echo "ok";
- 00011: } finally {
+[L11 %s JMP                     J10                                                            %s]
+>00011: } finally {
  00012: 	echo " ... ok";
+ 00013: }
 prompt> [L12 %s RETURN                  1                                                              %s]
 >00012: 	echo " ... ok";
  00013: }
  00014: 
-prompt> [Script ended normally]
 prompt> 
 --FILE--
 <?php

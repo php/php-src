@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -261,7 +261,7 @@ typedef struct _zend_try_catch_element {
 /* class has magic methods __get/__set/__unset/__isset that use guards */
 #define ZEND_ACC_USE_GUARDS				0x1000000
 
-/* function has arguments with type hinting */
+/* function has typed arguments */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
 /* op_array has finally blocks */
@@ -270,7 +270,7 @@ typedef struct _zend_try_catch_element {
 /* internal function is allocated at arena */
 #define ZEND_ACC_ARENA_ALLOCATED		0x20000000
 
-/* Function has a return type hint (or class has such non-private function) */
+/* Function has a return type (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
 /* op_array uses strict mode types */
@@ -319,7 +319,7 @@ typedef struct _zend_arg_info {
 /* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
- * It's also used for return type hinting.
+ * It's also used for the return type.
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
