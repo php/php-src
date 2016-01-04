@@ -1,4 +1,4 @@
-.TH PHAR 1 "2013" "The PHP Group" "User Commands"
+.TH PHAR 1 "2016" "The PHP Group" "User Commands"
 .SH NAME
 phar, phar.phar \- PHAR (PHP archive) command line tool
 .SH SYNOPSIS
