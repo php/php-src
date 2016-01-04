@@ -261,7 +261,7 @@ PHP_FUNCTION(password_verify)
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
-	char *hash_format, *hash, *salt, *password;
+	char hash_format[8], *hash, *salt, *password;
 	zend_long algo = 0;
 	size_t password_len = 0;
 	int hash_len;
@@ -289,7 +289,6 @@ PHP_FUNCTION(password_hash)
 			}
 
 			required_salt_len = 22;
-			hash_format = emalloc(8);
 			sprintf(hash_format, "$2y$%02ld$", (long) cost);
 			hash_format_len = 7;
 		}
@@ -301,33 +300,25 @@ PHP_FUNCTION(password_hash)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, "salt", sizeof("salt")-1)) != NULL) {
-		char *buffer;
-		size_t buffer_len = 0;
+		zend_string *buffer;
 
 		php_error_docref(NULL, E_DEPRECATED, "Use of the 'salt' option to password_hash is deprecated");
 
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING:
-				buffer = estrndup(Z_STRVAL_P(option_buffer), Z_STRLEN_P(option_buffer));
-				buffer_len = Z_STRLEN_P(option_buffer);
+				buffer = zend_string_copy(Z_STR_P(option_buffer));
 				break;
 			case IS_LONG:
 			case IS_DOUBLE:
 			case IS_OBJECT:
-			{
-				zend_string *tmp = zval_get_string(option_buffer);
-				buffer = estrndup(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-				buffer_len = ZSTR_LEN(tmp);
-				zend_string_release(tmp);
+				buffer = zval_get_string(option_buffer);
 				break;
-			}
 			case IS_FALSE:
 			case IS_TRUE:
 			case IS_NULL:
 			case IS_RESOURCE:
 			case IS_ARRAY:
 			default:
-				efree(hash_format);
 				php_error_docref(NULL, E_WARNING, "Non-string salt parameter supplied");
 				RETURN_NULL();
 		}
@@ -335,36 +326,31 @@ PHP_FUNCTION(password_hash)
 		/* XXX all the crypt related APIs work with int for string length.
 			That should be revised for size_t and then we maybe don't require
 			the > INT_MAX check. */
-		if (buffer_len > INT_MAX) {
-			efree(hash_format);
-			efree(buffer);
+		if (ZSTR_LEN(buffer) > INT_MAX) {
 			php_error_docref(NULL, E_WARNING, "Supplied salt is too long");
 			RETURN_NULL();
-		} else if (buffer_len < required_salt_len) {
-			efree(hash_format);
-			efree(buffer);
-			php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd expecting %zd", buffer_len, required_salt_len);
+		} else if (ZSTR_LEN(buffer) < required_salt_len) {
+			php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd expecting %zd", ZSTR_LEN(buffer), required_salt_len);
+			zend_string_release(buffer);
 			RETURN_NULL();
-		} else if (php_password_salt_is_alphabet(buffer, buffer_len) == FAILURE) {
+		} else if (php_password_salt_is_alphabet(ZSTR_VAL(buffer), ZSTR_LEN(buffer)) == FAILURE) {
 			salt = safe_emalloc(required_salt_len, 1, 1);
-			if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
-				efree(hash_format);
-				efree(buffer);
+			if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), required_salt_len, salt) == FAILURE) {
 				efree(salt);
-				php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd", buffer_len);
+				php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd", ZSTR_LEN(buffer));
+				zend_string_release(buffer);
 				RETURN_NULL();
 			}
 			salt_len = required_salt_len;
 		} else {
 			salt = safe_emalloc(required_salt_len, 1, 1);
-			memcpy(salt, buffer, required_salt_len);
+			memcpy(salt, ZSTR_VAL(buffer), required_salt_len);
 			salt_len = required_salt_len;
 		}
-		efree(buffer);
+		zend_string_release(buffer);
 	} else {
 		salt = safe_emalloc(required_salt_len, 1, 1);
 		if (php_password_make_salt(required_salt_len, salt) == FAILURE) {
-			efree(hash_format);
 			efree(salt);
 			RETURN_FALSE;
 		}
@@ -377,7 +363,6 @@ PHP_FUNCTION(password_hash)
 	sprintf(hash, "%s%s", hash_format, salt);
 	hash[hash_format_len + salt_len] = 0;
 
-	efree(hash_format);
 	efree(salt);
 
 	/* This cast is safe, since both values are defined here in code and cannot overflow */
