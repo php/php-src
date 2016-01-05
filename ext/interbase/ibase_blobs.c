@@ -296,7 +296,7 @@ PHP_FUNCTION(ibase_blob_add)
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &blob_arg, &string_arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &blob_arg, &string_arg)) {
 		return;
 	}
 
