@@ -5483,7 +5483,7 @@ PHP_FUNCTION(openssl_decrypt)
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
-	int i, outlen;
+	int outlen, i = 0;
 	zend_string *outbuf;
 	zend_string *base64_str = NULL;
 	zend_bool free_iv = 0, free_password = 0;
@@ -5534,7 +5534,8 @@ PHP_FUNCTION(openssl_decrypt)
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 0) == FAILURE) {
 		RETVAL_FALSE;
-	} else if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
+	} else if (mode.is_single_run_aead ||
+			EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + outlen, &i)) {
 		outlen += i;
 		ZSTR_VAL(outbuf)[outlen] = '\0';
 		ZSTR_LEN(outbuf) = outlen;
