@@ -22,7 +22,7 @@
 
 PHPAPI extern const char * mysqlnd_debug_std_no_trace_funcs[];
 
-#define MYSQLND_MEM_D	ZEND_FILE_LINE_ORIG_DC
+#define MYSQLND_MEM_D	ZEND_FILE_LINE_DC
 #define MYSQLND_MEM_C	ZEND_FILE_LINE_CC
 
 struct st_mysqlnd_allocator_methods
