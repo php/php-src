@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     ob_start). (hugh at allthethings dot co dot nz)
   . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Added support for new HTTP 451 code. (Julien)
+  . Fixed Bug #71275 (Bad method called on cloning an object having a trait).
+    (Bob)
 
 - CURL:
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
