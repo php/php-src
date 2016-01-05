@@ -724,7 +724,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	if (PG(html_errors)) {
 		replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, NULL);
 		/* Retry with substituting invalid chars on fail. */
-		if (!replace_buffer) {
+		if (!replace_buffer || ZSTR_LEN(replace_buffer) < 1) {
 			replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, NULL);
 		}
 
