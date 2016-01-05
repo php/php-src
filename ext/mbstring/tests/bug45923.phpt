@@ -73,17 +73,11 @@ bool(false)
 Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 > Offset: -1
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 > Offset: -3
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+int(8)
 > Offset: -6
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+int(8)
 > Offset: -20
 
 Warning: mb_strpos(): Offset not contained in string in %s on line %d
@@ -133,17 +127,11 @@ bool(false)
 Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 > Offset: -1
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 > Offset: -3
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+int(8)
 > Offset: -6
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+int(8)
 > Offset: -20
 
 Warning: mb_stripos(): Offset not contained in string in %s on line %d
