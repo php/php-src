@@ -2262,7 +2262,7 @@ PHP_FUNCTION(mb_strlen)
 PHP_FUNCTION(mb_strpos)
 {
 	int n, reverse = 0;
-	zend_long offset = 0;
+	zend_long offset = 0, slen;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	size_t enc_name_len, haystack_len, needle_len;
@@ -2297,7 +2297,11 @@ PHP_FUNCTION(mb_strpos)
 		}
 	}
 
-	if (offset < 0 || offset > mbfl_strlen(&haystack)) {
+	slen = mbfl_strlen(&haystack);
+	if (offset < 0) {
+		offset += slen;
+	}
+	if (offset < 0 || offset > slen) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -4877,6 +4881,9 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
  					break;
  				}
  			} else {
+				if (offset < 0) {
+					offset += (long)haystack_char_len;
+				}
  				if (offset < 0 || offset > haystack_char_len) {
  					php_error_docref(NULL, E_WARNING, "Offset not contained in string");
  					break;
