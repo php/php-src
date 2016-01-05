@@ -723,9 +723,20 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	if (PG(html_errors)) {
 		replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, NULL);
+		/* Retry with substituting invalid chars on fail. */
+		if (!replace_buffer || ZSTR_LEN(replace_buffer) < 1) {
+			replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, NULL);
+		}
+
 		efree(buffer);
-		buffer = ZSTR_VAL(replace_buffer);
-		buffer_len = (int)ZSTR_LEN(replace_buffer);
+
+		if (replace_buffer) {
+			buffer = ZSTR_VAL(replace_buffer);
+			buffer_len = (int)ZSTR_LEN(replace_buffer);
+		} else {
+			buffer = "";
+			buffer_len = 0;
+		}
 	}
 
 	/* which function caused the problem if any at all */
@@ -878,7 +889,9 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	if (replace_buffer) {
 		zend_string_free(replace_buffer);
 	} else {
-		efree(buffer);
+		if (buffer_len > 0) {
+			efree(buffer);
+		}
 	}
 
 	php_error(type, "%s", message);
