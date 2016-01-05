@@ -1028,34 +1028,34 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (!strncmp(ZSTR_VAL(mname), ZEND_CLONE_FUNC_NAME, ZSTR_LEN(mname))) {
+	if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CONSTRUCTOR_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_DESTRUCTOR_FUNC_NAME,  ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 		ce->destructor = fe; fe->common.fn_flags |= ZEND_ACC_DTOR;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_GET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_GET_FUNC_NAME)) {
 		ce->__get = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_SET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_SET_FUNC_NAME)) {
 		ce->__set = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CALL_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CALL_FUNC_NAME)) {
 		ce->__call = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_UNSET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_UNSET_FUNC_NAME)) {
 		ce->__unset = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_ISSET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_ISSET_FUNC_NAME)) {
 		ce->__isset = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CALLSTATIC_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CALLSTATIC_FUNC_NAME)) {
 		ce->__callstatic = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_TOSTRING_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_TOSTRING_FUNC_NAME)) {
 		ce->__tostring = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_DEBUGINFO_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fe;
 	} else if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
 		zend_string *lowercase_name = zend_string_tolower(ce->name);
