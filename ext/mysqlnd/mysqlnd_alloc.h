@@ -69,7 +69,7 @@ PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
 
 static inline MYSQLND_STRING mnd_dup_cstring(const MYSQLND_CSTRING str, const zend_bool persistent)
 {
-	const MYSQLND_STRING ret = {(char*) mnd_pemalloc(str.l, persistent) + 1, str.l};
+	const MYSQLND_STRING ret = {(char*) mnd_pemalloc(str.l + 1, persistent), str.l};
 	if (ret.s) {
 		memcpy(ret.s, str.s, str.l);
 		ret.s[str.l] = '\0';
