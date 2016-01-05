@@ -38,6 +38,13 @@ PHP                                                                        NEWS
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
 
+- FPM:
+  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
+
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com).
+
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
@@ -61,6 +68,16 @@ PHP                                                                        NEWS
     wrong number of parameters). (Laruence)
   . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
     arrays). (Nikita)
+
+- WDDX:
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
+    (taoguangchen at icloud dot com)
+  . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
+    Vulnerability). (taoguangchen at icloud dot com)
+
+- XMLRPC
+  . Fixed bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker).
+    (Julien)
 
 17 Dec 2015, PHP 7.0.1
 
