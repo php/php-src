@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     immediately). (Laruence)
 
 - Standard:
+  . Fixed bug #71287 (Error message contains hexadecimal instead of decimal
+    number). (Laruence)
   . Fixed bug #71264 (file_put_contents() returns unexpected value when 
     filesystem runs full). (Laruence)
   . Fixed bug #71245 (file_get_contents() ignores "header" context option if
