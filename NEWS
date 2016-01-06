@@ -7,9 +7,16 @@ PHP                                                                        NEWS
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
   . Added support for new HTTP 451 code. (Julien)
 
+- FPM:
+  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
+
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
+
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com).
 
 - Opcache:
   . Fixed bug #71127 (Define in auto_prepend_file is overwrite). (Laruence)
@@ -25,6 +32,16 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+
+- WDDX:
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
+    (taoguangchen at icloud dot com)
+  . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
+    Vulnerability). (taoguangchen at icloud dot com)
+
+- XMLRPC:
+  . Fixed bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker()).
+    (Julien)
     
 17 Dec 2015, PHP 5.6.17
 
