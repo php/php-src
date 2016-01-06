@@ -110,6 +110,10 @@ PHP                                                                        NEWS
   . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
     arrays). (Nikita)
 
+- Standard:
+  . Fixed bug #71270 (Heap BufferOver Flow in escapeshell functions).
+    (emmanuel dot law at gmail dot com)
+
 - WDDX:
   . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
     (taoguangchen at icloud dot com)
