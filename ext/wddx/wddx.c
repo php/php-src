@@ -298,6 +298,10 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 	ZVAL_UNDEF(&retval);
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
+		if (Z_TYPE(retval) != IS_ARRAY) {
+			zval_dtor(&retval);
+			return FAILURE;
+		}
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
 			if (key == NULL) {
 				key = zend_long_to_str(idx);
@@ -908,7 +912,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
-						Z_TYPE(ent1->data) == IS_STRING && Z_STRLEN(ent1->data)) {
+						Z_TYPE(ent1->data) == IS_STRING && Z_STRLEN(ent1->data) && ent2->type == ST_STRUCT) {
 						zend_bool incomplete_class = 0;
 
 						zend_str_tolower(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
