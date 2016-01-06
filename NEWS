@@ -41,7 +41,7 @@ PHP                                                                        NEWS
     to strings). (Laruence)
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
-?? Jan 2016 PHP 7.0.2
+07 Jan 2016 PHP 7.0.2
 
 - Core:
   . Fixed bug #71165 (-DGC_BENCH=1 doesn't work on PHP7).
