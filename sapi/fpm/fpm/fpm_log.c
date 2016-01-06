@@ -448,6 +448,11 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 				b += len2;
 				len += len2;
 			}
+			if (len >= FPM_LOG_BUFFER) {
+				zlog(ZLOG_NOTICE, "the log buffer is full (%d). The access log request has been truncated.", FPM_LOG_BUFFER);
+				len = FPM_LOG_BUFFER;
+				break;
+			}
 			continue;
 		}
 
