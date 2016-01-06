@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     ob_start). (hugh at allthethings dot co dot nz)
   . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Added support for new HTTP 451 code. (Julien)
+  . Fixed Bug #71275 (Bad method called on cloning an object having a trait).
+    (Bob)
+  . Fixed bug #71273 (A wrong ext directory setup in php.ini leads to crash).
+    (Anatol)
 
 - CURL:
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
@@ -71,6 +75,13 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com).
+
+- FPM:
+  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
+
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
@@ -98,6 +109,16 @@ PHP                                                                        NEWS
     wrong number of parameters). (Laruence)
   . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
     arrays). (Nikita)
+
+- WDDX:
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
+    (taoguangchen at icloud dot com)
+  . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
+    Vulnerability). (taoguangchen at icloud dot com)
+
+- XMLRPC
+  . Fixed bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker).
+    (Julien)
 
 17 Dec 2015, PHP 7.0.1
 
