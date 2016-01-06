@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 #include "zend_highlight.h"
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
+#include "zend_exceptions.h"
 
 ZEND_API void zend_html_putc(char c)
 {
@@ -168,6 +169,9 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	}
 	zend_printf("</span>\n");
 	zend_printf("</code>");
+
+	/* Discard parse errors thrown during tokenization */
+	zend_clear_exception();
 }
 
 ZEND_API void zend_strip(void)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,18 +76,18 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + UNLEN + 4];
+	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 
 	GetUserName(uname, &unsize);
-	snprintf(newname, sizeof(newname) - 1, "%s@%s", name, uname);
+	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, ZCG(system_id));
 	return newname;
 }
 
 static char *get_mmap_base_file(void)
 {
-	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
+	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 	int l;
@@ -95,7 +95,7 @@ static char *get_mmap_base_file(void)
 	GetTempPath(MAXPATHLEN, windir);
 	GetUserName(uname, &unsize);
 	l = strlen(windir);
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname);
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
 	return windir;
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -114,14 +114,21 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 				/* convert Ti = JMPZ_EX(Ti, L) to JMPZ(Ti, L) */
-				if (0 && /* FIXME: temporary disable unsafe pattern */
-				    ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
+#if 0
+				/* Disabled unsafe pattern: in conjunction with
+				 * ZEND_VM_SMART_BRANCH() this may improperly eliminate
+				 * assignment to Ti.
+				 */
+				if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 				    ZEND_RESULT_TYPE(opline) == IS_TMP_VAR &&
 				    ZEND_OP1(opline).var == ZEND_RESULT(opline).var) {
 					opline->opcode -= 3;
+					SET_UNUSED(opline->result);
+				} else
+#endif
 				/* convert Ti = JMPZ_EX(C, L) => Ti = QM_ASSIGN(C)
 				   in case we know it wouldn't jump */
-				} else if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 					if (opline->opcode == ZEND_JMPZ_EX) {
 						should_jmp = !should_jmp;

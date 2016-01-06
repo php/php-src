@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -318,7 +318,8 @@ typedef enum_func_status	(*func_mysqlnd_vio__connect)(MYSQLND_VIO * const vio, c
 typedef void				(*func_mysqlnd_vio__close_stream)(MYSQLND_VIO * const vio, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef php_stream *		(*func_mysqlnd_vio__open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef php_stream *		(*func_mysqlnd_vio__get_stream)(const MYSQLND_VIO * const vio);
-typedef php_stream *		(*func_mysqlnd_vio__set_stream)(MYSQLND_VIO * const vio, php_stream * vio_stream);
+typedef enum_func_status	(*func_mysqlnd_vio__set_stream)(MYSQLND_VIO * const vio, php_stream * vio_stream);
+typedef zend_bool			(*func_mysqlnd_vio__has_valid_stream)(const MYSQLND_VIO * const vio);
 typedef func_mysqlnd_vio__open_stream (*func_mysqlnd_vio__get_open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, MYSQLND_ERROR_INFO * const error_info);
 
 typedef enum_func_status	(*func_mysqlnd_vio__set_client_option)(MYSQLND_VIO * const vio, enum_mysqlnd_client_option option, const char * const value);
@@ -346,6 +347,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio)
 
 	func_mysqlnd_vio__get_stream get_stream;
 	func_mysqlnd_vio__set_stream set_stream;
+	func_mysqlnd_vio__has_valid_stream has_valid_stream;
 	func_mysqlnd_vio__get_open_stream get_open_stream;
 
 	func_mysqlnd_vio__set_client_option set_client_option;

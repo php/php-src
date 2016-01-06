@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1947,6 +1947,10 @@ ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table = zend_rebuild_symbol_table();
 
+	if (UNEXPECTED(symbol_table == NULL)) {
+		return;
+	}
+
 	RETURN_ARR(zend_array_dup(symbol_table));
 }
 /* }}} */
@@ -2028,14 +2032,14 @@ ZEND_FUNCTION(zend_test_func)
 {
 	zval *arg1, *arg2;
 
-	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
+	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
 
 ZEND_FUNCTION(zend_test_func2)
 {
 	zval *arg1, *arg2;
 
-	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
+	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
 
 

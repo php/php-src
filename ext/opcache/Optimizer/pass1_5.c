@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,7 +42,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	int i = 0;
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
-	zend_bool collect_constants = (op_array == &ctx->script->main_op_array);
+	zend_bool collect_constants = (ZEND_OPTIMIZER_PASS_15 & ctx->optimization_level)?
+		(op_array == &ctx->script->main_op_array) : 0;
 
 	while (opline < end) {
 		switch (opline->opcode) {
@@ -324,11 +325,13 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 				if (ce) {
 					uint32_t tv = ZEND_RESULT(opline).var;
+					zend_class_constant *cc;
 					zval *c, t;
 
-					if ((c = zend_hash_find(&ce->constants_table,
-							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL) {
-						ZVAL_DEREF(c);
+					if ((cc = zend_hash_find_ptr(&ce->constants_table,
+							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL &&
+						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
+						c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 							break;
 						}

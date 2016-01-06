@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1439,7 +1439,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!isupper(*c)) {
+		if (islower(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -1508,7 +1508,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!islower(*c)) {
+		if (isupper(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -2491,8 +2491,8 @@ PHP_FUNCTION(substr_replace)
 
 	if (Z_TYPE_P(str) != IS_ARRAY) {
 		if (Z_TYPE_P(from) != IS_ARRAY) {
-			size_t repl_len = 0;
-
+			zend_string *repl_str;
+			zend_bool repl_release = 0;
 			f = Z_LVAL_P(from);
 
 			/* if "from" position is negative, count start position from the end
@@ -2533,21 +2533,26 @@ PHP_FUNCTION(substr_replace)
 					repl_idx++;
 				}
 				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
-					convert_to_string_ex(tmp_repl);
-					repl_len = Z_STRLEN_P(tmp_repl);
+					repl_str = zval_get_string(tmp_repl);
+					repl_release = 1;
+				} else {
+					repl_str = STR_EMPTY_ALLOC();
 				}
 			} else {
-				repl_len = Z_STRLEN_P(repl);
+				repl_str = Z_STR_P(repl);
 			}
 
-			result = zend_string_alloc(Z_STRLEN_P(str) - l + repl_len, 0);
+			result = zend_string_alloc(Z_STRLEN_P(str) - l + ZSTR_LEN(repl_str), 0);
 
 			memcpy(ZSTR_VAL(result), Z_STRVAL_P(str), f);
-			if (repl_len) {
-				memcpy((ZSTR_VAL(result) + f), (Z_TYPE_P(repl) == IS_ARRAY ? Z_STRVAL_P(tmp_repl) : Z_STRVAL_P(repl)), repl_len);
+			if (ZSTR_LEN(repl_str)) {
+				memcpy((ZSTR_VAL(result) + f), ZSTR_VAL(repl_str), ZSTR_LEN(repl_str));
 			}
-			memcpy((ZSTR_VAL(result) + f + repl_len), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
+			memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
 			ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
+			if (repl_release) {
+				zend_string_release(repl_str);
+			}
 			RETURN_NEW_STR(result);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
@@ -3968,12 +3973,12 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		/* For each entry in the search array, get the entry */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
-			ZVAL_DEREF(search_entry);
-			convert_to_string(search_entry);
-			if (Z_STRLEN_P(search_entry) == 0) {
+			zend_string *search_str = zval_get_string(search_entry);
+			if (ZSTR_LEN(search_str) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
 					replace_idx++;
 				}
+				zend_string_release(search_str);
 				continue;
 			}
 
@@ -4003,11 +4008,11 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}
 			}
 
-			if (Z_STRLEN_P(search_entry) == 1) {
+			if (ZSTR_LEN(search_str) == 1) {
 				zend_long old_replace_count = replace_count;
 
 				tmp_result = php_char_to_str_ex(Z_STR_P(result),
-								Z_STRVAL_P(search_entry)[0],
+								ZSTR_VAL(search_str)[0],
 								replace_value,
 								replace_len,
 								case_sensitivity,
@@ -4016,10 +4021,10 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 					zend_string_release(lc_subject_str);
 					lc_subject_str = NULL;
 				}
-			} else if (Z_STRLEN_P(search_entry) > 1) {
+			} else if (ZSTR_LEN(search_str) > 1) {
 				if (case_sensitivity) {
 					tmp_result = php_str_to_str_ex(Z_STR_P(result),
-							Z_STRVAL_P(search_entry), Z_STRLEN_P(search_entry),
+							ZSTR_VAL(search_str), ZSTR_LEN(search_str),
 							replace_value, replace_len, &replace_count);
 				} else {
 					zend_long old_replace_count = replace_count;
@@ -4028,13 +4033,15 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 						lc_subject_str = php_string_tolower(Z_STR_P(result));
 					}
 					tmp_result = php_str_to_str_i_ex(Z_STR_P(result), ZSTR_VAL(lc_subject_str),
-							Z_STR_P(search_entry), replace_value, replace_len, &replace_count);
+							search_str, replace_value, replace_len, &replace_count);
 					if (replace_count != old_replace_count) {
 						zend_string_release(lc_subject_str);
 						lc_subject_str = NULL;
 					}
 				}				
 			}
+
+			zend_string_release(search_str);
 
 			if (replace_entry_str) {
 				zend_string_release(replace_entry_str);
@@ -4055,6 +4062,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			zend_string_release(lc_subject_str);
 		}
 	} else {
+		ZEND_ASSERT(Z_TYPE_P(search) == IS_STRING);
 		if (Z_STRLEN_P(search) == 1) {
 			ZVAL_STR(result,
 				php_char_to_str_ex(subject_str,
@@ -4786,6 +4794,9 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const cha
 				switch (state) {
 					case 1: /* HTML/XML */
 						lc = '>';
+						if (*(p -1) == '-') {
+							break;
+						}
 						in_q = state = 0;
 						if (allow) {
 							if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
@@ -4915,7 +4926,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const cha
 				 * state == 2 (PHP). Switch back to HTML.
 				 */
 
-				if (state == 2 && p > buf+2 && strncasecmp(p-2, "xm", 2) == 0) {
+				if (state == 2 && p > buf+2 && strncasecmp(p-4, "<?xm", 4) == 0) {
 					state = 1;
 					break;
 				}

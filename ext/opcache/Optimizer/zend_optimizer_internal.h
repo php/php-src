@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,8 @@
 
 #ifndef ZEND_OPTIMIZER_INTERNAL_H
 #define ZEND_OPTIMIZER_INTERNAL_H
+
+#include "zend_ssa.h"
 
 #define ZEND_RESULT_TYPE(opline)		(opline)->result_type
 #define ZEND_RESULT(opline)				(opline)->result
@@ -49,6 +51,7 @@ typedef struct _zend_optimizer_ctx {
 	zend_script            *script;
 	HashTable              *constants;
 	zend_long               optimization_level;
+	zend_long               debug_level;
 } zend_optimizer_ctx;
 
 #define LITERAL_LONG(op, val) do { \
@@ -96,6 +99,9 @@ void zend_optimizer_pass2(zend_op_array *op_array);
 void zend_optimizer_pass3(zend_op_array *op_array);
 void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+int  zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, uint32_t *flags);
+void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa);
 void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_nop_removal(zend_op_array *op_array);
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);

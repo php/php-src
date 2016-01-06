@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,6 +65,7 @@ int zend_startup_constants(void);
 int zend_shutdown_constants(void);
 void zend_register_standard_constants(void);
 void clean_non_persistent_constants(void);
+ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
 ZEND_API zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, uint32_t flags);

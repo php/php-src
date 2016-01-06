@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -156,7 +156,7 @@ ZEND_API zend_utility_values zend_uv;
 /* version information */
 static char *zend_version_info;
 static uint zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2015 Zend Technologies\n"
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2016 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
 static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, zend_bool is_object) /* {{{ */
@@ -622,7 +622,7 @@ static zend_bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 	zval globals;
 
 	ZVAL_ARR(&globals, &EG(symbol_table));
-	Z_TYPE_INFO_P(&globals) = IS_ARRAY | (IS_TYPE_SYMBOLTABLE << Z_TYPE_FLAGS_SHIFT);
+	Z_TYPE_INFO_P(&globals) = IS_ARRAY;
 	ZVAL_NEW_REF(&globals, &globals);
 	zend_hash_update(&EG(symbol_table), name, &globals);
 	return 0;
@@ -983,7 +983,6 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	fprintf(stderr, "        Root    Buffered     buffer     grey\n");
 	fprintf(stderr, "      --------  --------  -----------  ------\n");
 	fprintf(stderr, "ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
-	fprintf(stderr, "ZOBJ  %8d  %8d  %9d  %8d\n", GC_G(zobj_possible_root), GC_G(zobj_buffered), GC_G(zobj_remove_from_buffer), GC_G(zobj_marked_grey));
 #endif
 
 	zend_try {

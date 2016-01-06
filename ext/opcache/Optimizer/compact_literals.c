@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -195,18 +195,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						LITERAL_CLASS_CONST, (ZEND_OP1_TYPE(opline) == IS_CONST) ? 1 : 2, 1,
 						op_array);
 					break;
-				case ZEND_FETCH_R:
-				case ZEND_FETCH_W:
-				case ZEND_FETCH_RW:
-				case ZEND_FETCH_IS:
-				case ZEND_FETCH_UNSET:
-				case ZEND_FETCH_FUNC_ARG:
-				case ZEND_UNSET_VAR:
-				case ZEND_ISSET_ISEMPTY_VAR:
-					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
-					}
-					break;
 				case ZEND_FETCH_STATIC_PROP_R:
 				case ZEND_FETCH_STATIC_PROP_W:
 				case ZEND_FETCH_STATIC_PROP_RW:
@@ -299,6 +287,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = cache_size;
 						cache_size += sizeof(void *);
 					}
+					break;
+				case ZEND_DECLARE_FUNCTION:
+				case ZEND_DECLARE_CLASS:
+				case ZEND_DECLARE_INHERITED_CLASS:
+				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 2);
 					break;
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:

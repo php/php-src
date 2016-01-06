@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -230,6 +230,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 {
 	Bucket *p, *q, *end;
 	zend_ulong nIndex;
+	zend_class_constant *c;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
@@ -265,8 +266,14 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 		q->key = p->key;
 
 		/* Copy data */
-		ZVAL_COPY_VALUE(&q->val, &p->val);
-		zend_clone_zval(&q->val);
+		c = ARENA_REALLOC(Z_PTR(p->val));
+		ZVAL_PTR(&q->val, c);
+
+		zend_clone_zval(&c->value);
+		if ((void*)c->ce >= ZCG(current_persistent_script)->arena_mem &&
+		    (void*)c->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+			c->ce = ARENA_REALLOC(c->ce);
+		}
 	}
 }
 

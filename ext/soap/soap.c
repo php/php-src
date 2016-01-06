@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -2941,6 +2941,7 @@ PHP_METHOD(SoapClient, __call)
 		real_args = safe_emalloc(sizeof(zval), arg_count, 0);
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), param) {
 			/*zval_add_ref(param);*/
+			ZVAL_DEREF(param);
 			ZVAL_COPY_VALUE(&real_args[i], param);
 			i++;
 		} ZEND_HASH_FOREACH_END();

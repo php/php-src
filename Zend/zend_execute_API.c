@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -218,7 +218,7 @@ static void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, 
 	zend_vspprintf(&message, 0, format, va);
 
 	if (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) {
-		zend_throw_error(exception_ce, message);
+		zend_throw_error(exception_ce, "%s", message);
 	} else {
 		zend_error(E_ERROR, "%s", message);
 	}
@@ -396,6 +396,12 @@ void shutdown_executor(void) /* {{{ */
 	} zend_end_try();
 
 	zend_shutdown_fpu();
+
+#ifdef ZEND_DEBUG
+	if (EG(ht_iterators_used)) {
+		zend_error(E_WARNING, "Leaked %" PRIu32 " hashtable iterators", EG(ht_iterators_used));
+	}
+#endif
 
 	EG(ht_iterators_used) = 0;
 	if (EG(ht_iterators) != EG(ht_iterators_slots)) {
@@ -937,7 +943,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	zend_class_entry *ce = NULL;
 	zval args[1];
 	zval local_retval;
-	int retval;
 	zend_string *lc_name;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
@@ -1033,7 +1038,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	fcall_cache.object = NULL;
 
 	zend_exception_save();
-	retval = zend_call_function(&fcall_info, &fcall_cache);
+	if ((zend_call_function(&fcall_info, &fcall_cache) == SUCCESS) && !EG(exception)) {
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+	}
 	zend_exception_restore();
 
 	zval_ptr_dtor(&args[0]);
@@ -1043,9 +1050,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 
 	zval_ptr_dtor(&local_retval);
 
-	if (retval == SUCCESS) {
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-	}
 	if (!key) {
 		zend_string_release(lc_name);
 	}

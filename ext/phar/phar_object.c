@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2015 The PHP Group                                |
+  | Copyright (c) 2005-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -4085,7 +4085,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	new_state.cwd[0] = DEFAULT_SLASH;
 	new_state.cwd[1] = '\0';
 	new_state.cwd_length = 1;
-	if (virtual_file_ex(&new_state, entry->filename, NULL, CWD_EXPAND TSRMLS_CC) != 0 ||
+	if (virtual_file_ex(&new_state, entry->filename, NULL, CWD_EXPAND) != 0 ||
 			new_state.cwd_length <= 1) {
 		if (EINVAL == errno && entry->filename_len > 50) {
 			char *tmp = estrndup(entry->filename, 50);

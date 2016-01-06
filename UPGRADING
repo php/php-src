@@ -45,6 +45,17 @@ PHP 7.1 UPGRADE NOTES
 - The first $varname argument for getenv() is no longer mandatory, the
   current environment variables will be returned as an associative array
   when omitted.
+- long2ip() accepts integer as parameter now
+- pg_last_notice() accepts optional long parameter to specify operation.
+  PGSQL_NOTICE_LAST - Get last notice (Default)
+  PGSQL_NOTICE_ALL - Get all stored notices
+  PGSQL_NOTICE_CLEAR - Remove all stored notices
+  It returns empty string or array on successful PGSQL_NOTICE_LAST/ALL calls.
+  It returned FALSE for empty notice previously.
+- pg_fetch_all() accepts 2nd optional result type parameter like
+  pg_fetch_row().
+- pg_select() accepts 4th optional result type parameter like pg_fetch_row().
+- parse_url() is more restrictive now and supports RFC3986.
 
 ========================================
 6. New Functions
@@ -61,10 +72,17 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+- SQLite3:
+  . Upgraded bundled SQLite lib to 3.9.2
 
 ========================================
 10. New Global Constants
 ========================================
+
+- Pgsql:
+  PGSQL_NOTICE_LAST
+  PGSQL_NOTICE_ALL
+  PGSQL_NOTICE_CLEAR
 
 ========================================
 11. Changes to INI File Handling

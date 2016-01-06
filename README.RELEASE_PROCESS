@@ -31,7 +31,7 @@ team (Bjori) on hand.
 
 6. Verify the tags to be extra sure everything was tagged properly.
 
-7. Moving extensions from/to PECL requires write acces to the destination.
+7. Moving extensions from/to PECL requires write access to the destination.
 Most developers should have this. 
 
 Moving extensions from php-src to PECL

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -170,7 +170,7 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
-		/* Only one has a type hint and the other one doesn't */
+		/* Only one has a type declaration and the other one doesn't */
 		return 0;
 	}
 
@@ -239,7 +239,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 	}
 
 	if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
-		/* Incompatible type hint */
+		/* Incompatible type */
 		return 0;
 	}
 
@@ -698,21 +698,29 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 }
 /* }}} */
 
-static void do_inherit_class_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
+static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
-	if (!zend_hash_exists(&ce->constants_table, name)) {
-		if (!Z_ISREF_P(zv)) {
-			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
-				ZVAL_NEW_PERSISTENT_REF(zv, zv);
-			} else {
-				ZVAL_NEW_REF(zv, zv);
-			}
+	zend_class_constant *c = zend_hash_find_ptr(&ce->constants_table, name);
+
+	if (c != NULL) {
+		if (UNEXPECTED((Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PPP_MASK) > (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PPP_MASK))) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(ce->parent->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		}
-		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
+	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
+		if (Z_CONSTANT(parent_const->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
-		Z_ADDREF_P(zv);
-		_zend_hash_append(&ce->constants_table, name, zv);
+		if (Z_REFCOUNTED(parent_const->value)) {
+			Z_ADDREF(parent_const->value);
+		}
+		if (ce->type & ZEND_INTERNAL_CLASS) {
+			c = pemalloc(sizeof(zend_class_constant), 1);
+		} else {
+			c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+		}
+		memcpy(c, parent_const, sizeof(zend_class_constant));
+		_zend_hash_append_ptr(&ce->constants_table, name, c);
 	}
 }
 /* }}} */
@@ -722,7 +730,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	zend_property_info *property_info;
 	zend_function *func;
 	zend_string *key;
-	zval *zv;
 
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		/* Interface can only inherit other interfaces */
@@ -859,12 +866,14 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	}
 
 	if (zend_hash_num_elements(&parent_ce->constants_table)) {
+		zend_class_constant *c;
+
 		zend_hash_extend(&ce->constants_table,
 			zend_hash_num_elements(&ce->constants_table) +
 			zend_hash_num_elements(&parent_ce->constants_table), 0);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&parent_ce->constants_table, key, zv) {
-			do_inherit_class_constant(key, zv, ce, parent_ce);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->constants_table, key, c) {
+			do_inherit_class_constant(key, c, ce);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -894,14 +903,12 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 }
 /* }}} */
 
-static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */
+static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zend_class_constant *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */
 {
-	zval *old_constant;
+	zend_class_constant *old_constant;
 
-	if ((old_constant = zend_hash_find(child_constants_table, name)) != NULL) {
-		if (!Z_ISREF_P(old_constant) ||
-		    !Z_ISREF_P(parent_constant) ||
-		    Z_REFVAL_P(old_constant) != Z_REFVAL_P(parent_constant)) {
+	if ((old_constant = zend_hash_find_ptr(child_constants_table, name)) != NULL) {
+		if (old_constant->ce != parent_constant->ce) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", ZSTR_VAL(name), ZSTR_VAL(iface->name));
 		}
 		return 0;
@@ -910,21 +917,16 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 }
 /* }}} */
 
-static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
+static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
-	if (do_inherit_constant_check(&ce->constants_table, zv, name, iface)) {
-		if (!Z_ISREF_P(zv)) {
-			if (iface->type == ZEND_INTERNAL_CLASS) {
-				ZVAL_NEW_PERSISTENT_REF(zv, zv);
-			} else {
-				ZVAL_NEW_REF(zv, zv);
-			}
+	if (do_inherit_constant_check(&ce->constants_table, c, name, iface)) {
+		if (Z_REFCOUNTED(c->value)) {
+			Z_ADDREF(c->value);
 		}
-		Z_ADDREF_P(zv);
-		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
+		if (Z_CONSTANT(c->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
-		zend_hash_update(&ce->constants_table, name, zv);
+		zend_hash_update_ptr(&ce->constants_table, name, c);
 	}
 }
 /* }}} */
@@ -936,7 +938,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	uint32_t parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
 	zend_function *func;
 	zend_string *key;
-	zval *zv;
+	zend_class_constant *c;
 
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
@@ -952,8 +954,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	}
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, zv) {
-			do_inherit_constant_check(&iface->constants_table, zv, key, iface);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+			do_inherit_constant_check(&iface->constants_table, c, key, iface);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
@@ -965,8 +967,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&iface->constants_table, key, zv) {
-			do_inherit_iface_constant(key, zv, ce, iface);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+			do_inherit_iface_constant(key, c, ce, iface);
 		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
@@ -1026,34 +1028,34 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (!strncmp(ZSTR_VAL(mname), ZEND_CLONE_FUNC_NAME, ZSTR_LEN(mname))) {
+	if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CONSTRUCTOR_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_DESTRUCTOR_FUNC_NAME,  ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 		ce->destructor = fe; fe->common.fn_flags |= ZEND_ACC_DTOR;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_GET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_GET_FUNC_NAME)) {
 		ce->__get = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_SET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_SET_FUNC_NAME)) {
 		ce->__set = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CALL_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CALL_FUNC_NAME)) {
 		ce->__call = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_UNSET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_UNSET_FUNC_NAME)) {
 		ce->__unset = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_ISSET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_ISSET_FUNC_NAME)) {
 		ce->__isset = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CALLSTATIC_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CALLSTATIC_FUNC_NAME)) {
 		ce->__callstatic = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_TOSTRING_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_TOSTRING_FUNC_NAME)) {
 		ce->__tostring = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_DEBUGINFO_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fe;
 	} else if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
 		zend_string *lowercase_name = zend_string_tolower(ce->name);

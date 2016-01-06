@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -209,7 +209,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 
 		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
 			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
-			return -1;
+			return 0;
 		}
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);
 		group = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
@@ -232,9 +232,10 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		ZVAL_COPY(&tmp, key);
 		convert_to_string(&tmp);
 
-		*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		len = Z_STRLEN(tmp);
-
+		if (len) {
+			*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+		}
 		zval_ptr_dtor(&tmp);
 		return len;
 	}
@@ -281,8 +282,14 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		RETURN_FALSE; \
 	}
 
-#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE(info, id)
-#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE(info, id)
+#define DBA_FETCH_RESOURCE_WITH_ID(info, id)	\
+	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
+		DBA_ID_DONE; \
+		RETURN_FALSE; \
+	}
+
+#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE_WITH_ID(info, id)
+#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE_WITH_ID(info, id)
 
 #define DBA_ID_DONE												\
 	if (key_free) efree(key_free)
@@ -578,7 +585,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_FALSE;
 	}
 
-	DBA_FETCH_RESOURCE(info, id);
+	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	DBA_WRITE_CHECK_WITH_ID;
 

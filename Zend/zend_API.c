@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 #include "zend_execute.h"
 #include "zend_API.h"
 #include "zend_modules.h"
+#include "zend_extensions.h"
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
@@ -199,7 +200,7 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 /* }}} */
 
 #ifdef FAST_ZPP
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
 {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
@@ -215,7 +216,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_ar
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -229,7 +230,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zen
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, char *name, zval *arg) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -1129,12 +1130,13 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 			zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 			zend_class_entry *old_scope = *scope;
 			zend_class_entry *ce;
+			zend_class_constant *c;
 			zval *val;
 			zend_property_info *prop_info;
 
 			*scope = class_type;
-			ZEND_HASH_FOREACH_VAL(&class_type->constants_table, val) {
-				ZVAL_DEREF(val);
+			ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
+				val = &c->value;
 				if (Z_CONSTANT_P(val)) {
 					if (UNEXPECTED(zval_update_constant_ex(val, 1, class_type) != SUCCESS)) {
 						return FAILURE;
@@ -2003,7 +2005,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 				lcname = zend_string_alloc(name_len, 0);
 				zend_str_tolower_copy(ZSTR_VAL(lcname), dep->name, name_len);
 
-				if (zend_hash_exists(&module_registry, lcname)) {
+				if (zend_hash_exists(&module_registry, lcname) || zend_get_extension(dep->name)) {
 					zend_string_free(lcname);
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module '%s' because conflicting module '%s' is already loaded", module->name, dep->name);
@@ -3737,13 +3739,51 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 }
 /* }}} */
 
-ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
+ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
 {
+	zend_class_constant *c;
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		if (access_type != ZEND_ACC_PUBLIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %s::%s must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+	}
+
+	if (zend_string_equals_literal_ci(name, "class")) {
+		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
+				"A class constant must not be called 'class'; it is reserved for class name fetching");
+	}
+
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		c = pemalloc(sizeof(zend_class_constant), 1);
+	} else {
+		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+	}
+	ZVAL_COPY_VALUE(&c->value, value);
+	Z_ACCESS_FLAGS(c->value) = access_type;
+	c->doc_comment = doc_comment;
+	c->ce = ce;
 	if (Z_CONSTANT_P(value)) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 	}
-	return zend_hash_str_update(&ce->constants_table, name, name_length, value) ?
-		SUCCESS : FAILURE;
+
+	if (!zend_hash_add_ptr(&ce->constants_table, name, c)) {
+		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
+			"Cannot redefine class constant %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
+{
+	int ret;
+
+	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(key);
+	return ret;
 }
 /* }}} */
 

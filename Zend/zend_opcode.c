@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -287,7 +287,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
+			if (zend_hash_num_elements(&ce->constants_table)) {
+				zend_class_constant *c;
+
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+					zval_ptr_dtor(&c->value);
+					if (c->doc_comment && c->ce == ce) {
+						zend_string_release(c->doc_comment);
+					}
+				} ZEND_HASH_FOREACH_END();
+				zend_hash_destroy(&ce->constants_table);
+			}
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
@@ -322,7 +332,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
+			if (zend_hash_num_elements(&ce->constants_table)) {
+				zend_class_constant *c;
+
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+					zval_internal_ptr_dtor(&c->value);
+					if (c->doc_comment && c->ce == ce) {
+						zend_string_release(c->doc_comment);
+					}
+				} ZEND_HASH_FOREACH_END();
+				zend_hash_destroy(&ce->constants_table);
+			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}
@@ -399,9 +419,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 	}
 	if (op_array->arg_info) {
-		int32_t num_args = op_array->num_args;
+		uint32_t num_args = op_array->num_args;
 		zend_arg_info *arg_info = op_array->arg_info;
-		int32_t i;
 
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info--;
@@ -619,13 +638,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FAST_RET:
 				zend_resolve_finally_ret(op_array, opline - op_array->opcodes);
 				break;
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				/* break omitted intentionally */
-			case ZEND_DECLARE_INHERITED_CLASS:
-			case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-				opline->extended_value = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->extended_value);
-				break;
 			case ZEND_BRK:
 			case ZEND_CONT:
 				{
@@ -647,12 +659,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
-			case ZEND_DECLARE_ANON_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				break;
-			case ZEND_CATCH:
-				/* absolute index to relative offset */
-				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				break;
 			case ZEND_JMPZNZ:
 				/* absolute index to relative offset */
@@ -667,11 +674,21 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
-			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
+			case ZEND_ASSERT_CHECK:
+				/* If result of assert is unused, result of check is unused as well */
+				if (op_array->opcodes[opline->op2.opline_num - 1].result_type & EXT_TYPE_UNUSED) {
+					opline->result_type |= EXT_TYPE_UNUSED;
+				}
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				break;
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
+			case ZEND_CATCH:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
+				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:

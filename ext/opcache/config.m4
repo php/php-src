@@ -26,6 +26,8 @@ if test "$PHP_OPCACHE" != "no"; then
     AC_DEFINE(HAVE_MPROTECT, 1, [Define if you have mprotect() function])
   ])
 
+  AC_CHECK_HEADERS([unistd.h sys/uio.h])
+
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_TRY_RUN([
 #include <sys/types.h>
@@ -402,6 +404,12 @@ fi
 	Optimizer/nop_removal.c \
 	Optimizer/compact_literals.c \
 	Optimizer/zend_cfg.c \
+	Optimizer/zend_dfg.c \
+	Optimizer/dfa_pass.c \
+	Optimizer/zend_ssa.c \
+	Optimizer/zend_inference.c \
+	Optimizer/zend_func_info.c \
+	Optimizer/zend_call_graph.c \
 	Optimizer/zend_dump.c,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 

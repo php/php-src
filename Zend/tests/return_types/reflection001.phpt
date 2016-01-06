@@ -1,5 +1,5 @@
 --TEST--
-Return type hinting and Reflection::export()
+Return type and Reflection::export()
 
 --SKIPIF--
 <?php

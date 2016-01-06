@@ -363,6 +363,7 @@ static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_ke
 PHP_FUNCTION( collator_sort_with_sort_keys )
 {
 	zval*       array                = NULL;
+	zval        garbage;
 	HashTable*  hash                 = NULL;
 	zval*       hashData             = NULL;                     /* currently processed item of input hash */
 
@@ -505,7 +506,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	zend_sort( sortKeyIndxBuf, sortKeyCount,
 			sortKeyIndxSize, collator_cmp_sort_keys, (swap_func_t)collator_sortkey_swap);
 
-	zval_ptr_dtor( array );
+	ZVAL_COPY_VALUE(&garbage, array);
 	/* for resulting hash we'll assign new hash keys rather then reordering */
 	array_init(array);
 
@@ -518,6 +519,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( utf16_buf )
 		efree( utf16_buf );
 
+	zval_ptr_dtor(&garbage);
 	efree( sortKeyIndxBuf );
 	efree( sortKeyBuf );
 

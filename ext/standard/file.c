@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -577,7 +577,6 @@ PHP_FUNCTION(file_put_contents)
 	php_stream_context *context = NULL;
 	php_stream *srcstream = NULL;
 	char mode[3] = "wb";
-	char ret_ok = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
 		return;
@@ -622,7 +621,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_RESOURCE: {
 			size_t len;
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
-				ret_ok = 0;
+				numbytes = -1;
 			} else {
 				if (len > ZEND_LONG_MAX) {
 					php_error_docref(NULL, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
@@ -643,7 +642,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
 				if (numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL, E_WARNING, "Only %pl of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
+					php_error_docref(NULL, E_WARNING, "Only "ZEND_LONG_FMT" of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
 			}
@@ -661,8 +660,8 @@ PHP_FUNCTION(file_put_contents)
 						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
 						if (bytes_written != ZSTR_LEN(str)) {
 							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
-							ret_ok = 0;
 							zend_string_release(str);
+							numbytes = -1;
 							break;
 						}
 					}
@@ -678,7 +677,7 @@ PHP_FUNCTION(file_put_contents)
 				if (zend_std_cast_object_tostring(data, &out, IS_STRING) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
 					if (numbytes != Z_STRLEN(out)) {
-						php_error_docref(NULL, E_WARNING, "Only %pd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
+						php_error_docref(NULL, E_WARNING, "Only "ZEND_LONG_FMT" of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
 					zval_dtor(&out);
@@ -686,12 +685,12 @@ PHP_FUNCTION(file_put_contents)
 				}
 			}
 		default:
-			ret_ok = 0;
+			numbytes = -1;
 			break;
 	}
 	php_stream_close(stream);
 
-	if (!ret_ok) {
+	if (numbytes < 0) {
 		RETURN_FALSE;
 	}
 

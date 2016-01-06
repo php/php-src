@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1501,18 +1501,6 @@ TEST $file
 
 	// Default ini settings
 	$ini_settings = array();
-	// additional ini overwrites
-	//$ini_overwrites[] = 'setting=value';
-	settings2array($ini_overwrites, $ini_settings);
-
-	// Any special ini settings
-	// these may overwrite the test defaults...
-	if (array_key_exists('INI', $section_text)) {
-		if (strpos($section_text['INI'], '{PWD}') !== false) {
-			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
-		}
-		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
-	}
 
 	// Additional required extensions
 	if (array_key_exists('EXTENSIONS', $section_text)) {
@@ -1524,6 +1512,19 @@ TEST $file
 				$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
 			}
 		}
+	}
+
+	// additional ini overwrites
+	//$ini_overwrites[] = 'setting=value';
+	settings2array($ini_overwrites, $ini_settings);
+
+	// Any special ini settings
+	// these may overwrite the test defaults...
+	if (array_key_exists('INI', $section_text)) {
+		if (strpos($section_text['INI'], '{PWD}') !== false) {
+			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
+		}
+		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
 	}
 
 	settings2params($ini_settings);

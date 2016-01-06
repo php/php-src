@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,10 +40,8 @@
 /* PHP 5.2 is the minimum supported version for OCI8 2.0 */
 #if PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
 #error Use PHP OCI8 1.4 for your version of PHP
-#endif
-
+#elif PHP_MAJOR_VERSION < 7
 /* PHP 7 is the minimum supported version for OCI8 2.1 */
-#if PHP_MAJOR_VERSION < 7
 #error Use PHP OCI8 2.0 for your version of PHP
 #endif
 
