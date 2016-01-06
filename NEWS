@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-10 Dec 2015, PHP 5.6.17RC1
+07 Jan 2016, PHP 5.6.17
 
 - Core:
   . Fixed bug #66909 (configure fails utf8_to_mutf7 test). (Michael Orlitzky)
@@ -12,6 +12,13 @@ PHP                                                                        NEWS
     exceptions). (Laruence)
   . Fixed bug #61751 (SAPI build problem on AIX: Undefined symbol:
     php_register_internal_extensions). (Lior Kaplan)
+
+- FPM:
+  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
+
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com).
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
@@ -27,6 +34,16 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
 
+- WDDX:
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
+    (taoguangchen at icloud dot com)
+  . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
+    Vulnerability). (taoguangchen at icloud dot com)
+
+- XMLRPC:
+  . Fixed bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker()).
+    (Julien)
+
 26 Nov 2015, PHP 5.6.16
 
 - Core:
@@ -38,7 +55,7 @@ PHP                                                                        NEWS
 - Mysqlnd:
   . Fixed bug #68344 (MySQLi does not provide way to disable peer certificate
     validation) by introducing MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
-	connection flag. (Andrey)
+    connection flag. (Andrey)
 
 - OCI8:
   . Fixed bug #68298 (OCI int overflow). (Senthil)
