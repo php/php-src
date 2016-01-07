@@ -2,7 +2,28 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
 
-?? ??? 2015, PHP 5.5.31
+?? ??? 2015, PHP 5.5.32
+
+
+
+07 Jan 2015, PHP 5.5.31
+
+- FPM:
+  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
+
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com).
+
+- WDDX:
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
+    (taoguangchen at icloud dot com)
+  . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
+    Vulnerability). (taoguangchen at icloud dot com)
+
+- XMLRPC:
+  . Fixed bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker()).
+    (Julien)
 
 01 Oct 2015, PHP 5.5.30
 
