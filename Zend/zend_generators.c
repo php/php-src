@@ -512,7 +512,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 						EG(current_execute_data) = original_execute_data;
 					} else {
-						zval_dtor(&root->value);
+						zval_ptr_dtor(&root->value);
 						ZVAL_COPY(&root->value, &root->node.parent->value);
 						ZVAL_COPY(ZEND_CALL_VAR(root->execute_data, yield_from->result.var), &root->node.parent->retval);
 					}
