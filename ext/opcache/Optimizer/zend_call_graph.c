@@ -251,7 +251,7 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 				call_info->recursive = 1;
 				func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_DIRECTLY;
 			} else {
-				memset(visited, 0, sizeof(uint32_t) * set_len);
+				memset(visited, 0, sizeof(zend_ulong) * set_len);
 				if (zend_is_indirectly_recursive(op_array, call_info->caller_op_array, visited)) {
 					call_info->recursive = 1;
 					func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_INDIRECTLY;
