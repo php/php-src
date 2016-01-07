@@ -86,6 +86,8 @@
 #define HAVE_EVP_PKEY_EC 1
 #endif
 
+ZEND_DECLARE_MODULE_GLOBALS(openssl)
+
 /* FIXME: Use the openssl constants instead of
  * enum. It is now impossible to match real values
  * against php constants. Also sorry to break the
@@ -529,7 +531,11 @@ zend_module_entry openssl_module_entry = {
 	NULL,
 	PHP_MINFO(openssl),
 	PHP_OPENSSL_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(openssl),
+	PHP_GINIT(openssl),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -1297,6 +1303,17 @@ PHP_MINIT_FUNCTION(openssl)
 }
 /* }}} */
 
+/* {{{ PHP_GINIT_FUNCTION
+*/
+PHP_GINIT_FUNCTION(openssl)
+{
+#if defined(COMPILE_DL_OPENSSL) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+	openssl_globals->errors = NULL;
+}
+/* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(openssl)
@@ -1336,6 +1353,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory);
+
+	if (OPENSSL_G(errors)) {
+		efree(OPENSSL_G(errors));
+	}
 
 	UNREGISTER_INI_ENTRIES();
 
