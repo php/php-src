@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     (Bob)
   . Fixed bug #71273 (A wrong ext directory setup in php.ini leads to crash).
     (Anatol)
+  . Fixed bug #71297 (Memory leak with consecutive yield from). (Bob)
 
 - CURL:
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with

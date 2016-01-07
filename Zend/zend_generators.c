@@ -495,7 +495,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 			if (EXPECTED(EG(exception) == NULL)) {
 				zend_op *yield_from = (zend_op *) root->execute_data->opline - 1;
 
-				if (yield_from->opcode == ZEND_YIELD_FROM && !(yield_from->result_type & EXT_TYPE_UNUSED)) {
+				if (yield_from->opcode == ZEND_YIELD_FROM) {
 					if (Z_ISUNDEF(root->node.parent->retval)) {
 						/* Throw the exception in the context of the generator */
 						zend_execute_data *original_execute_data = EG(current_execute_data);
@@ -512,6 +512,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 						EG(current_execute_data) = original_execute_data;
 					} else {
+						zval_dtor(&root->value);
 						ZVAL_COPY(&root->value, &root->node.parent->value);
 						ZVAL_COPY(ZEND_CALL_VAR(root->execute_data, yield_from->result.var), &root->node.parent->retval);
 					}
