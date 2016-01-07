@@ -1999,7 +1999,7 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 	zend_op *opline = NULL, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
 	uint32_t i, count = zend_stack_count(&CG(delayed_oplines_stack));
 
-	ZEND_ASSERT(count > offset);
+	ZEND_ASSERT(count >= offset);
 	for (i = offset; i < count; ++i) {
 		opline = get_next_op(CG(active_op_array));
 		memcpy(opline, &oplines[i], sizeof(zend_op));
@@ -2535,8 +2535,10 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
 		case ZEND_AST_STATIC_PROP:
-			zend_compile_var(&var_node, var_ast, BP_VAR_W);
+			offset = zend_delayed_compile_begin();
+			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W);
 			zend_compile_expr(&expr_node, expr_ast);
+			zend_delayed_compile_end(offset);
 			zend_emit_op(result, ZEND_ASSIGN, &var_node, &expr_node);
 			return;
 		case ZEND_AST_DIM:
@@ -2634,8 +2636,10 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
 		case ZEND_AST_STATIC_PROP:
-			zend_compile_var(&var_node, var_ast, BP_VAR_RW);
+			offset = zend_delayed_compile_begin();
+			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_RW);
 			zend_compile_expr(&expr_node, expr_ast);
+			zend_delayed_compile_end(offset);
 			zend_emit_op(result, opcode, &var_node, &expr_node);
 			return;
 		case ZEND_AST_DIM:
