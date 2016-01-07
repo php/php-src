@@ -1382,6 +1382,90 @@ SXE_METHOD(xpath)
 }
 /* }}} */
 
+SXE_METHOD(atXPath)
+{
+	php_sxe_object    *sxe;
+	zval               value;
+	char              *query;
+	size_t             query_len;
+	int                i;
+	int                nsnbr = 0;
+	xmlNsPtr          *ns = NULL;
+	xmlXPathObjectPtr  retval;
+	xmlNodeSetPtr      result;
+	xmlNodePtr         nodeptr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
+		return;
+	}
+
+	sxe = Z_SXEOBJ_P(getThis());
+
+	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
+		return; /* attributes don't have attributes */
+	}
+
+	if (!sxe->xpath) {
+		sxe->xpath = xmlXPathNewContext((xmlDocPtr) sxe->document->ptr);
+	}
+	if (!sxe->node) {
+		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement((xmlDocPtr) sxe->document->ptr), NULL);
+		if (!sxe->node) {
+			RETURN_FALSE;
+		}
+	}
+
+	nodeptr = php_sxe_get_first_node(sxe, sxe->node->node);
+
+	sxe->xpath->node = nodeptr;
+
+	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, nodeptr);
+	if (ns != NULL) {
+		while (ns[nsnbr] != NULL) {
+			nsnbr++;
+		}
+	}
+
+	sxe->xpath->namespaces = ns;
+	sxe->xpath->nsNr = nsnbr;
+
+	retval = xmlXPathEval((xmlChar *)query, sxe->xpath);
+	if (ns != NULL) {
+		xmlFree(ns);
+		sxe->xpath->namespaces = NULL;
+		sxe->xpath->nsNr = 0;
+	}
+
+	if (!retval) {
+		RETURN_FALSE;
+	}
+
+	result = retval->nodesetval;
+
+	if (result != NULL) {
+		for (i = 0; i < result->nodeNr; ++i) {
+			nodeptr = result->nodeTab[i];
+			if (nodeptr->type == XML_TEXT_NODE || nodeptr->type == XML_ELEMENT_NODE || nodeptr->type == XML_ATTRIBUTE_NODE) {
+				/**
+				 * Detect the case where the last selector is text(), simplexml
+				 * always accesses the text() child by default, therefore we assign
+				 * to the parent node.
+				 */
+				if (nodeptr->type == XML_TEXT_NODE) {
+					_node_as_zval(sxe, nodeptr->parent, return_value, SXE_ITER_NONE, NULL, NULL, 0);
+				} else if (nodeptr->type == XML_ATTRIBUTE_NODE) {
+					_node_as_zval(sxe, nodeptr->parent, return_value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, nodeptr->ns ? (xmlChar *)nodeptr->ns->href : NULL, 0);
+				} else {
+					_node_as_zval(sxe, nodeptr, return_value, SXE_ITER_NONE, NULL, NULL, 0);
+				}
+				break;
+			}
+		}
+	}
+
+	xmlXPathFreeObject(retval);
+}
+
 /* {{{ proto bool SimpleXMLElement::registerXPathNamespace(string prefix, string ns)
    Creates a prefix/ns context for the next XPath query */
 SXE_METHOD(registerXPathNamespace)
@@ -2603,6 +2687,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_xpath, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_atxpath, 0, 0, 1)
+	ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_registerxpathnamespace, 0, 0, 2)
 	ZEND_ARG_INFO(0, prefix)
 	ZEND_ARG_INFO(0, ns)
@@ -2685,6 +2773,7 @@ static const zend_function_entry sxe_functions[] = { /* {{{ */
 	SXE_ME(asXML,                  arginfo_simplexmlelement_asxml, ZEND_ACC_PUBLIC)
 	SXE_MALIAS(saveXML, asXML,	   arginfo_simplexmlelement_asxml, ZEND_ACC_PUBLIC)
 	SXE_ME(xpath,                  arginfo_simplexmlelement_xpath, ZEND_ACC_PUBLIC)
+	SXE_ME(atXPath,                arginfo_simplexmlelement_xpath, ZEND_ACC_PUBLIC)
 	SXE_ME(registerXPathNamespace, arginfo_simplexmlelement_registerxpathnamespace, ZEND_ACC_PUBLIC)
 	SXE_ME(attributes,             arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
 	SXE_ME(children,               arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
