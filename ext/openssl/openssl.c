@@ -1364,6 +1364,15 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 }
 /* }}} */
 
+/* {{{ php_openssl_store_errors */
+void php_openssl_store_errors()
+{
+	if (!OPENSSL_G(errors)) {
+		OPENSSL_G(errors) = ecalloc(1, sizeof(struct php_openssl_errors));
+	}
+}
+/* }}} */
+
 /* {{{ x509 cert functions */
 
 /* {{{ proto array openssl_get_cert_locations(void)

@@ -66,6 +66,8 @@ ZEND_TSRMLS_CACHE_EXTERN();
 
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
+void php_openssl_store_errors();
+
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
