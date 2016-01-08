@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   . Fixed bug #71273 (A wrong ext directory setup in php.ini leads to crash).
     (Anatol)
   . Fixed bug #71297 (Memory leak with consecutive yield from). (Bob)
+  . Fixed bug #71314 (var_export(INF) prints INF.0). (Andrea)
 
 - CURL:
   . Fixed bug #71227 (Can't compile php_curl statically). (Anatol)
