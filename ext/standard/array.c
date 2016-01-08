@@ -83,9 +83,11 @@
 #define INTERSECT_COMP_KEY_USER      1
 
 #define DOUBLE_DRIFT_FIX	0.000000000000001
+
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
+
 
 /* {{{ php_array_init_globals
 */
@@ -94,6 +96,7 @@ static void php_array_init_globals(zend_array_globals *array_globals)
 	memset(array_globals, 0, sizeof(zend_array_globals));
 }
 /* }}} */
+
 
 PHP_MINIT_FUNCTION(array) /* {{{ */
 {
@@ -1681,12 +1684,97 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 }
 /* }}} */
 
+/* void php_array_binary_search(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+ * 0 = return boolean
+ * 1 = return key
+ */
+static inline void php_array_binary_search(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
+{
+    zval *value,                /* value to check for */
+         *array,                /* array to check in */
+         *entry;                /* pointer to array entry*/
+	zval result;				/* comparision result */
+    zend_bool strict = 0;       /* strict comparison or not */
+    HashTable *arr_hash;
+    int low = 0;
+    int mid; 
+    int high;        
+#ifndef FAST_ZPP
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "za|b", &value, &array, &strict) == FAILURE) {
+        return;
+    }
+#else
+    ZEND_PARSE_PARAMETERS_START(2, 3)
+        Z_PARAM_ZVAL(value)
+        Z_PARAM_ARRAY(array)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_BOOL(strict)
+    ZEND_PARSE_PARAMETERS_END();
+#endif
+	arr_hash = Z_ARRVAL_P(array);
+ 
+	high = zend_hash_num_elements(arr_hash) - 1;
+	
+	if (strict) {	
+		while (low <= high) {
+			mid = (low + high) / 2;
+        
+			ZVAL_DEREF(entry);
+			entry = zend_hash_index_find(arr_hash, mid);
+
+			compare_function(&result, value, entry);
+
+			if (Z_LVAL(result) < 0) {
+				high = mid - 1;
+			} else if (Z_LVAL(result) > 0) {
+				low = mid + 1;
+			} else {
+				fast_is_identical_function(&result, value, entry);
+				if (Z_TYPE(result) == IS_TRUE) {
+					RETURN_TRUE;
+				} else {
+					low = mid + 1;
+				}	
+			}
+		}
+	} else {
+		while (low <= high) {
+			mid = (low + high) / 2;
+		
+			ZVAL_DEREF(entry);
+			entry = zend_hash_index_find(arr_hash, mid);	     
+    
+			compare_function(&result,entry,value);
+         
+			if (Z_LVAL(result) < 0) {
+				low = mid + 1;
+			} else if (Z_LVAL(result) > 0) {
+				high = mid - 1;
+			} else {
+				RETURN_TRUE;
+			}		
+		}
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto bool in_array(mixed needle, array haystack [, bool strict])
    Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+
+/* }}} */
+
+/* {{{ proto bool array_binary_search(mixed needle, array haystack [, bool strict])
+ *    Checks if the given value exists in the array using binary search*/
+PHP_FUNCTION(array_binary_search)
+{
+	php_array_binary_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+
 /* }}} */
 
 /* {{{ proto mixed array_search(mixed needle, array haystack [, bool strict])
@@ -1695,6 +1783,7 @@ PHP_FUNCTION(array_search)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+
 /* }}} */
 
 static zend_always_inline int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
@@ -1767,6 +1856,7 @@ PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, size_t
 
 	return SUCCESS;
 }
+
 /* }}} */
 
 /* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
