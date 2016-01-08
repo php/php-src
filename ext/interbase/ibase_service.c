@@ -210,7 +210,7 @@ PHP_FUNCTION(ibase_service_attach)
 	size_t hlen, ulen, plen, spb_len;
 	ibase_service *svm;
 	char buf[128], *host, *user, *pass, *loc;
-	isc_svc_handle handle = NULL;
+	isc_svc_handle handle = 0;
 
 	RESET_ERRMSG;
 
