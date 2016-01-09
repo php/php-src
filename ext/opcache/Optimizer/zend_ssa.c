@@ -38,39 +38,61 @@ static int needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa,
 }
 /* }}} */
 
-static int add_pi(zend_arena **arena, const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var, int min_var, int max_var, zend_long min, zend_long max, char underflow, char overflow, char negative) /* {{{ */
+static zend_ssa_phi *add_pi(
+		zend_arena **arena, const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa,
+		int from, int to, int var) /* {{{ */
 {
-	if (needs_pi(op_array, dfg, ssa, from, to, var)) {
-		zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
-			sizeof(zend_ssa_phi) +
-			sizeof(int) * ssa->cfg.blocks[to].predecessors_count +
-			sizeof(void*) * ssa->cfg.blocks[to].predecessors_count);
-
-		if (!phi) {
-			return FAILURE;
-		}
-		phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
-		memset(phi->sources, 0xff, sizeof(int) * ssa->cfg.blocks[to].predecessors_count);
-		phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[to].predecessors_count);
-
-		phi->pi = from;
-		phi->constraint.min_var = min_var;
-		phi->constraint.max_var = max_var;
-		phi->constraint.min_ssa_var = -1;
-		phi->constraint.max_ssa_var = -1;
-		phi->constraint.range.min = min;
-		phi->constraint.range.max = max;
-		phi->constraint.range.underflow = underflow;
-		phi->constraint.range.overflow = overflow;
-		phi->constraint.negative = negative ? NEG_INIT : NEG_NONE;
-		phi->var = var;
-		phi->ssa_var = -1;
-		phi->next = ssa->blocks[to].phis;
-		ssa->blocks[to].phis = phi;
+	zend_ssa_phi *phi;
+	if (!needs_pi(op_array, dfg, ssa, from, to, var)) {
+		return NULL;
 	}
-	return SUCCESS;
+
+	phi = zend_arena_calloc(arena, 1,
+		sizeof(zend_ssa_phi) +
+		sizeof(int) * ssa->cfg.blocks[to].predecessors_count +
+		sizeof(void*) * ssa->cfg.blocks[to].predecessors_count);
+	phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
+	memset(phi->sources, 0xff, sizeof(int) * ssa->cfg.blocks[to].predecessors_count);
+	phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[to].predecessors_count);
+
+	phi->pi = from;
+	phi->var = var;
+	phi->ssa_var = -1;
+	phi->next = ssa->blocks[to].phis;
+	ssa->blocks[to].phis = phi;
+
+	return phi;
 }
 /* }}} */
+
+static void pi_range(
+		zend_ssa_phi *phi, int min_var, int max_var, zend_long min, zend_long max,
+		char underflow, char overflow, char negative) /* {{{ */
+{
+	phi->constraint.min_var = min_var;
+	phi->constraint.max_var = max_var;
+	phi->constraint.min_ssa_var = -1;
+	phi->constraint.max_ssa_var = -1;
+	phi->constraint.range.min = min;
+	phi->constraint.range.max = max;
+	phi->constraint.range.underflow = underflow;
+	phi->constraint.range.overflow = overflow;
+	phi->constraint.negative = negative ? NEG_INIT : NEG_NONE;
+}
+/* }}} */
+
+static inline void pi_range_equals(zend_ssa_phi *phi, int var, zend_long val) {
+	pi_range(phi, var, var, val, val, 0, 0, 0);
+}
+static inline void pi_range_not_equals(zend_ssa_phi *phi, int var, zend_long val) {
+	pi_range(phi, var, var, val, val, 0, 0, 1);
+}
+static inline void pi_range_min(zend_ssa_phi *phi, int var, zend_long val) {
+	pi_range(phi, var, -1, val, ZEND_LONG_MAX, 0, 1, 0);
+}
+static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
+	pi_range(phi, -1, var, ZEND_LONG_MIN, val, 1, 0, 0);
+}
 
 /* We can interpret $a + 5 == 0 as $a = 0 - 5, i.e. shift the adjustment to the other operand.
  * This negated adjustment is what is written into the "adjustment" parameter. */
@@ -577,6 +599,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	 * Order of Phis is importent, Pis must be placed before Phis
 	 */
 	for (j = 0; j < blocks_count; j++) {
+		zend_ssa_phi *pi;
 		zend_op *opline = op_array->opcodes + ssa->cfg.blocks[j].end;
 		int bt; /* successor block number if a condition is true */
 		int bf; /* successor block number if a condition is false */
@@ -677,70 +700,70 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 			if (var1 >= 0) {
 				if ((opline-1)->opcode == ZEND_IS_EQUAL) {
-					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, var2, var2, val2, val2, 0, 0, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var1))) {
+						pi_range_equals(pi, var2, val2);
 					}
-					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, var2, val2, val2, 0, 0, 1) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var1))) {
+						pi_range_not_equals(pi, var2, val2);
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_NOT_EQUAL) {
-					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, var2, val2, val2, 0, 0, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var1))) {
+						pi_range_equals(pi, var2, val2);
 					}
-					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, var2, var2, val2, val2, 0, 0, 1) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var1))) {
+						pi_range_not_equals(pi, var2, val2);
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER) {
 					if (val2 > ZEND_LONG_MIN) {
-						if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, -1, var2, ZEND_LONG_MIN, val2-1, 1, 0, 0) != SUCCESS) {
-							goto failure;
+						if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var1))) {
+							pi_range_max(pi, var2, val2-1);
 						}
 					}
-					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, -1, val2, ZEND_LONG_MAX, 0, 1, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var1))) {
+						pi_range_min(pi, var2, val2);
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL) {
-					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, -1, var2, ZEND_LONG_MIN, val2, 1, 0, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var1))) {
+						pi_range_max(pi, var2, val2);
 					}
 					if (val2 < ZEND_LONG_MAX) {
-						if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, -1, val2+1, ZEND_LONG_MAX, 0, 1, 0) != SUCCESS) {
-							goto failure;
+						if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var1))) {
+							pi_range_min(pi, var2, val2+1);
 						}
 					}
 				}
 			}
 			if (var2 >= 0) {
 				if((opline-1)->opcode == ZEND_IS_EQUAL) {
-					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, var1, val1, val1, 0, 0, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var2))) {
+						pi_range_equals(pi, var1, val1);
 					}
-					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, var1, var1, val1, val1, 0, 0, 1) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var2))) {
+						pi_range_not_equals(pi, var1, val1);
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_NOT_EQUAL) {
-					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, var1, var1, val1, val1, 0, 0, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var2))) {
+						pi_range_equals(pi, var1, val1);
 					}
-					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, var1, val1, val1, 0, 0, 1) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var2))) {
+						pi_range_not_equals(pi, var1, val1);
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER) {
 					if (val1 < ZEND_LONG_MAX) {
-						if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, -1, val1+1, ZEND_LONG_MAX, 0, 1, 0) != SUCCESS) {
-							goto failure;
+						if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var2))) {
+							pi_range_min(pi, var1, val1+1);
 						}
 					}
-					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, -1, var1, ZEND_LONG_MIN, val1, 1, 0, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var2))) {
+						pi_range_max(pi, var1, val1);
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL) {
-					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, -1, val1, ZEND_LONG_MAX, 0 ,1, 0) != SUCCESS) {
-						goto failure;
+					if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var2))) {
+						pi_range_min(pi, var1, val1);
 					}
 					if (val1 > ZEND_LONG_MIN) {
-						if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, -1, var1, ZEND_LONG_MIN, val1-1, 1, 0, 0) != SUCCESS) {
-							goto failure;
+						if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var2))) {
+							pi_range_max(pi, var1, val1-1);
 						}
 					}
 				}
@@ -753,18 +776,18 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 
 			if ((opline-1)->opcode == ZEND_POST_DEC) {
-				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, -1, -1, 0, 0, 0) != SUCCESS) {
-					goto failure;
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var))) {
+					pi_range_equals(pi, -1, -1);
 				}
-				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, -1, -1, 0, 0, 1) != SUCCESS) {
-					goto failure;
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var))) {
+					pi_range_not_equals(pi, -1, -1);
 				}
 			} else if ((opline-1)->opcode == ZEND_POST_INC) {
-				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, 1, 1, 0, 0, 0) != SUCCESS) {
-					goto failure;
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var))) {
+					pi_range_equals(pi, -1, 1);
 				}
-				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, 1, 1, 0, 0, 1) != SUCCESS) {
-					goto failure;
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var))) {
+					pi_range_not_equals(pi, -1, 1);
 				}
 			}
 		} else if (opline->op1_type == IS_VAR &&
@@ -774,22 +797,12 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		           (opline-1)->op1_type == IS_CV) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 
-			if ((opline-1)->opcode == ZEND_PRE_DEC) {
-				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, 0, 0, 0, 0, 0) != SUCCESS) {
-					goto failure;
-				}
-				/* speculative */
-				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, 0, 0, 0, 0, 1) != SUCCESS) {
-					goto failure;
-				}
-			} else if ((opline-1)->opcode == ZEND_PRE_INC) {
-				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, 0, 0, 0, 0, 0) != SUCCESS) {
-					goto failure;
-				}
-				/* speculative */
-				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, 0, 0, 0, 0, 1) != SUCCESS) {
-					goto failure;
-				}
+			if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var))) {
+				pi_range_equals(pi, -1, 0);
+			}
+			/* speculative */
+			if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var))) {
+				pi_range_not_equals(pi, -1, 0);
 			}
 		}
 	}
