@@ -5329,10 +5329,13 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	}
 	if (mode->is_single_run_aead && enc) {
 		EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL);
-	} else if (!enc && mode->is_aead && tag &&
-			!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag)) {
-		php_error_docref(NULL, E_WARNING, "Setting tag for AEAD cipher encryption failed");
-		return FAILURE;
+	} else if (!enc && tag && tag_len > 0) {
+		if (!mode->is_aead) {
+			php_error_docref(NULL, E_WARNING, "The tag cannot be used because the cipher method does not support AEAD");
+		} else if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag)) {
+			php_error_docref(NULL, E_WARNING, "Setting tag for AEAD cipher decryption failed");
+			return FAILURE;
+		}
 	}
 	if (password_len > key_len) {
 		EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len);
@@ -5394,7 +5397,7 @@ PHP_FUNCTION(openssl_encrypt)
 	zend_long options = 0, tag_len = 16;
 	char *data, *method, *password, *iv = "", *aad = "";
 	size_t data_len, method_len, password_len, iv_len = 0, aad_len = 0;
-	zval *tag;
+	zval *tag = NULL;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
@@ -5445,7 +5448,7 @@ PHP_FUNCTION(openssl_encrypt)
 			zend_string_release(outbuf);
 			RETVAL_STR(base64_str);
 		}
-		if (mode.is_aead) {
+		if (mode.is_aead && tag) {
 			zend_string *tag_str = zend_string_alloc(tag_len, 0);
 
 			if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode.aead_get_tag_flag, tag_len, ZSTR_VAL(tag_str)) == 1) {
@@ -5457,6 +5460,11 @@ PHP_FUNCTION(openssl_encrypt)
 				zend_string_release(tag_str);
 				php_error_docref(NULL, E_WARNING, "Retrieving verification tag failed");
 			}
+		} else if (tag) {
+			zval_dtor(tag);
+			ZVAL_NULL(tag);
+			php_error_docref(NULL, E_WARNING,
+					"The authenticated tag cannot be provided for cipher that doesn not support AEAD");
 		}
 	} else {
 		zend_string_release(outbuf);
