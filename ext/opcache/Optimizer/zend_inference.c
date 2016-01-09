@@ -475,7 +475,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		tmp->min = ZEND_LONG_MAX;
 		tmp->max = ZEND_LONG_MIN;
 		tmp->overflow = 0;
-		if (p->pi >= 0) {
+		if (p->pi >= 0 && p->constraint.type_mask == (uint32_t) -1) {
 			if (p->constraint.negative) {
 				if (ssa->var_info[p->sources[0]].has_range) {
 					tmp->underflow = ssa->var_info[p->sources[0]].range.underflow;
@@ -1814,6 +1814,7 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 				    ssa->var_info[j].has_range &&
 				    ssa->vars[j].definition_phi &&
 				    ssa->vars[j].definition_phi->pi >= 0 &&
+				    ssa->vars[j].definition_phi->constraint.type_mask == (uint32_t) -1 &&
 				    ssa->vars[j].definition_phi->constraint.negative &&
 				    ssa->vars[j].definition_phi->constraint.min_ssa_var < 0 &&
 				    ssa->vars[j].definition_phi->constraint.min_ssa_var < 0) {
@@ -3658,6 +3659,9 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
 			if (p->pi >= 0) {
 				tmp = get_ssa_var_info(ssa, p->sources[0]);
+				if (p->constraint.type_mask != (uint32_t) -1) {
+					tmp &= p->constraint.type_mask;
+				}
 				UPDATE_SSA_TYPE(tmp, j);
 				if (ssa_var_info[p->sources[0]].ce) {
 					UPDATE_SSA_OBJ_TYPE(ssa_var_info[p->sources[0]].ce, ssa_var_info[p->sources[0]].is_instanceof, j);
