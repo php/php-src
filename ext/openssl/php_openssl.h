@@ -72,6 +72,7 @@ PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
 PHP_GINIT_FUNCTION(openssl);
+PHP_GSHUTDOWN_FUNCTION(openssl);
 
 PHP_FUNCTION(openssl_pkey_get_private);
 PHP_FUNCTION(openssl_pkey_get_public);

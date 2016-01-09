@@ -533,7 +533,7 @@ zend_module_entry openssl_module_entry = {
 	PHP_OPENSSL_VERSION,
 	PHP_MODULE_GLOBALS(openssl),
 	PHP_GINIT(openssl),
-	NULL,
+	PHP_GSHUTDOWN(openssl),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
@@ -1314,6 +1314,16 @@ PHP_GINIT_FUNCTION(openssl)
 }
 /* }}} */
 
+/* {{{ PHP_GSHUTDOWN_FUNCTION
+*/
+PHP_GSHUTDOWN_FUNCTION(openssl)
+{
+	if (openssl_globals->errors) {
+		pefree(openssl_globals->errors, 1);
+	}
+}
+/* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(openssl)
@@ -1354,10 +1364,6 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory);
 
-	if (OPENSSL_G(errors)) {
-		efree(OPENSSL_G(errors));
-	}
-
 	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
@@ -1375,7 +1381,7 @@ void php_openssl_store_errors()
 	}
 
 	if (!OPENSSL_G(errors)) {
-		OPENSSL_G(errors) = ecalloc(1, sizeof(struct php_openssl_errors));
+		OPENSSL_G(errors) = pecalloc(1, sizeof(struct php_openssl_errors), 1);
 	}
 
 	errors = OPENSSL_G(errors);
@@ -1425,6 +1431,7 @@ PHP_FUNCTION(openssl_get_cert_locations)
 static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_resource **resourceval)
 {
 	X509 *cert = NULL;
+	BIO *in;
 
 	if (resourceval) {
 		*resourceval = NULL;
@@ -1454,8 +1461,6 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 	convert_to_string_ex(val);
 
 	if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
-		/* read cert from the named file */
-		BIO *in;
 
 		if (php_openssl_open_base_dir_chk(Z_STRVAL_P(val) + (sizeof("file://") - 1))) {
 			return NULL;
@@ -1463,15 +1468,16 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 
 		in = BIO_new_file(Z_STRVAL_P(val) + (sizeof("file://") - 1), "r");
 		if (in == NULL) {
+			php_openssl_store_errors();
 			return NULL;
 		}
 		cert = PEM_read_bio_X509(in, NULL, NULL, NULL);
-		BIO_free(in);
+
 	} else {
-		BIO *in;
 
 		in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 		if (in == NULL) {
+			php_openssl_store_errors();
 			return NULL;
 		}
 #ifdef TYPEDEF_D2I_OF
@@ -1479,10 +1485,18 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 #else
 		cert = (X509 *) PEM_ASN1_read_bio((char *(*)())d2i_X509, PEM_STRING_X509, in, NULL, NULL, NULL);
 #endif
-		BIO_free(in);
 	}
 
-	if (cert && makeresource && resourceval) {
+	if (!BIO_free(in)) {
+		php_openssl_store_errors();
+	}
+
+	if (cert == NULL) {
+		php_openssl_store_errors();
+		return NULL;
+	}
+
+	if (makeresource && resourceval) {
 		*resourceval = zend_register_resource(cert, le_x509);
 	}
 	return cert;
@@ -1519,19 +1533,25 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 
 	bio_out = BIO_new_file(filename, "w");
 	if (bio_out) {
-		if (!notext) {
-			X509_print(bio_out, cert);
+		if (!notext && !X509_print(bio_out, cert)) {
+			php_openssl_store_errors();
 		}
-		PEM_write_bio_X509(bio_out, cert);
+		if (!PEM_write_bio_X509(bio_out, cert)) {
+			php_openssl_store_errors();
+		}
 
 		RETVAL_TRUE;
 	} else {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error opening file %s", filename);
 	}
 	if (certresource == NULL && cert) {
 		X509_free(cert);
 	}
-	BIO_free(bio_out);
+
+	if (!BIO_free(bio_out)) {
+		php_openssl_store_errors();
+	}
 }
 /* }}} */
 
