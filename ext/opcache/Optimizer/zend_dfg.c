@@ -28,7 +28,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	zend_bitset tmp, gen, def, use, in, out;
 	zend_op *opline;
 	uint32_t k;
-	int j, changed;
+	int j;
 
 	/* FIXME: can we use "gen" instead of "def" for flow analyzing? */
 	set_size = dfg->size;
@@ -205,9 +205,20 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	}
 
 	/* Calculate "in" and "out" sets */
-	do {
-		changed = 0;
+	{
+		uint32_t worklist_len = zend_bitset_len(blocks_count);
+		ALLOCA_FLAG(use_heap);
+		zend_bitset worklist = ZEND_BITSET_ALLOCA(worklist_len, use_heap);
+		memset(worklist, 0, worklist_len * ZEND_BITSET_ELM_SIZE);
 		for (j = 0; j < blocks_count; j++) {
+			zend_bitset_incl(worklist, j);
+		}
+		while (!zend_bitset_empty(worklist, worklist_len)) {
+			/* We use the last block on the worklist, because predecessors tend to be located
+			 * before the succeeding block, so this converges faster. */
+			j = zend_bitset_last(worklist, worklist_len);
+			zend_bitset_excl(worklist, j);
+
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
@@ -222,10 +233,19 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 			zend_bitset_union_with_difference(tmp, DFG_BITSET(use, set_size, j), DFG_BITSET(out, set_size, j), DFG_BITSET(def, set_size, j), set_size);
 			if (!zend_bitset_equal(DFG_BITSET(in, set_size, j), tmp, set_size)) {
 				zend_bitset_copy(DFG_BITSET(in, set_size, j), tmp, set_size);
-				changed = 1;
+
+				/* Add predecessors of changed block to worklist */
+				{
+					int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
+					for (k = 0; k < blocks[j].predecessors_count; k++) {
+						zend_bitset_incl(worklist, predecessors[k]);
+					}
+				}
 			}
 		}
-	} while (changed);
+
+		free_alloca(worklist, use_heap);
+	}
 
 	return SUCCESS;
 }
