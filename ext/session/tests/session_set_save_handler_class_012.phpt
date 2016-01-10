@@ -36,7 +36,7 @@ class MySession extends SessionHandler {
 $oldHandler = ini_get('session.save_handler');
 $handler = new MySession;
 session_set_save_handler($handler);
-session_start();
+var_dump(session_start());
 
 var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i, $_SESSION);
 
@@ -48,13 +48,14 @@ Warning: SessionHandler::open() expects exactly 2 parameters, 0 given in %s on l
 Read %s
 
 Warning: SessionHandler::read(): Parent session handler is not open in %s on line %d
+
+Warning: SessionHandler::close(): Parent session handler is not open in %s on line %d
+
+Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
+bool(false)
 string(%d) "%s"
 string(5) "files"
 string(4) "user"
 int(2)
 array(0) {
 }
-
-Warning: Unknown: Parent session handler is not open in Unknown on line 0
-
-Warning: Unknown: Parent session handler is not open in Unknown on line 0

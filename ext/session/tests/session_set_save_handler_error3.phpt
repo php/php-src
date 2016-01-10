@@ -34,6 +34,8 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : error functionality ***
 
+Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
+
 Fatal error: Uncaught exception 'Exception' with message 'Do something bad..!' in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
