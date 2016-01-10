@@ -2713,19 +2713,42 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
+	zend_ulong next_index = 0;
 	zend_bool has_elems = 0;
 
 	for (i = 0; i < list->children; ++i) {
-		zend_ast *var_ast = list->child[i];
+		zend_ast *pair_ast = list->child[i];
+		zend_ast *var_ast;
+		zend_ast *key_ast;
 		znode fetch_result, dim_node;
 
-		if (var_ast == NULL) {
+		if (pair_ast == NULL) {
+			next_index++;
 			continue;
 		}
-		has_elems = 1;
 
-		dim_node.op_type = IS_CONST;
-		ZVAL_LONG(&dim_node.u.constant, i);
+		var_ast = pair_ast->child[0];
+		key_ast = pair_ast->child[1];
+
+		if (key_ast) {
+			zend_compile_expr(&dim_node, key_ast);
+			zend_handle_numeric_op(&dim_node);
+
+			if (Z_TYPE(dim_node.u.constant) != IS_LONG && Z_TYPE(dim_node.u.constant) != IS_STRING) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Key must be an integer or string literal");
+			}
+			
+			if (Z_TYPE(dim_node.u.constant) == IS_LONG) {
+				next_index = Z_LVAL(dim_node.u.constant);
+			}
+		} else {
+			dim_node.op_type = IS_CONST;
+			ZVAL_LONG(&dim_node.u.constant, next_index);
+
+			next_index++;
+		}
+
+		has_elems = 1;
 
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);

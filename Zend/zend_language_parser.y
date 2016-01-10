@@ -1177,8 +1177,12 @@ assignment_list:
 ;
 
 assignment_list_element:
-		variable						{ $$ = $1; }
+		variable { $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
+	|	scalar T_DOUBLE_ARROW variable
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
 	|	T_LIST '(' assignment_list ')'	{ $$ = $3; }
+	|	scalar T_DOUBLE_ARROW T_LIST '(' assignment_list ')'
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
 	|	/* empty */						{ $$ = NULL; }
 ;
 

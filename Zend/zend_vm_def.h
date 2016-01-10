@@ -2073,13 +2073,26 @@ ZEND_VM_HANDLER(98, ZEND_FETCH_LIST, CONST|TMPVAR|CV, CONST)
 
 ZEND_VM_C_LABEL(try_fetch_list):
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		zval *value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
+		zval *value;
+		
+		if (Z_TYPE_P(EX_CONSTANT(opline->op2)) == IS_LONG) {
+			value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
 
-		if (UNEXPECTED(value == NULL)) {
-			zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
-			ZVAL_NULL(EX_VAR(opline->result.var));
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
 		} else {
-			ZVAL_COPY(EX_VAR(opline->result.var), value);
+			value = zend_hash_find(Z_ARRVAL_P(container), Z_STR_P(EX_CONSTANT(opline->op2)));
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
 		}
 	} else if (OP1_TYPE != IS_CONST &&
 	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
