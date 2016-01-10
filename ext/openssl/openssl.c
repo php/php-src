@@ -561,6 +561,32 @@ ZEND_GET_MODULE(openssl)
 #define PHP_OPENSSL_CHECK_LONG_TO_INT(_var, _name) \
 	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_LONG_EXCEEDS_INT(_var), _name)
 
+/* {{{ php_openssl_store_errors */
+void php_openssl_store_errors()
+{
+	struct php_openssl_errors *errors;
+	int error_code = ERR_get_error();
+
+	if (!error_code) {
+		return;
+	}
+
+	if (!OPENSSL_G(errors)) {
+		OPENSSL_G(errors) = pecalloc(1, sizeof(struct php_openssl_errors), 1);
+	}
+
+	errors = OPENSSL_G(errors);
+
+	do {
+		errors->top = (errors->top + 1) % ERR_NUM_ERRORS;
+		if (errors->top == errors->bottom) {
+			errors->bottom = (errors->bottom + 1) % ERR_NUM_ERRORS;
+		}
+		errors->buffer[errors->top] = error_code;
+	} while ((error_code = ERR_get_error()));
+
+}
+/* }}} */
 
 static int le_key;
 static int le_x509;
@@ -708,6 +734,8 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 			} else {
 				add_assoc_stringl(&subitem, sname, (char *)to_add, to_add_len);
 			}
+		} else {
+			php_openssl_store_errors();
 		}
 	}
 	if (key != NULL) {
@@ -825,6 +853,7 @@ static inline int php_openssl_config_check_syntax(const char * section_label, co
 	X509V3_set_ctx_test(&ctx);
 	X509V3_set_conf_lhash(&ctx, config);
 	if (!X509V3_EXT_add_conf(config, &ctx, (char *)section, NULL)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error loading %s section %s of %s",
 				section_label,
 				section,
@@ -844,16 +873,19 @@ static int add_oid_section(struct php_x509_request * req) /* {{{ */
 
 	str = CONF_get_string(req->req_config, NULL, "oid_section");
 	if (str == NULL) {
+		php_openssl_store_errors();
 		return SUCCESS;
 	}
 	sktmp = CONF_get_section(req->req_config, str);
 	if (sktmp == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "problem loading oid section %s", str);
 		return FAILURE;
 	}
 	for (i = 0; i < sk_CONF_VALUE_num(sktmp); i++) {
 		cnf = sk_CONF_VALUE_value(sktmp, i);
 		if (OBJ_create(cnf->value, cnf->name, cnf->name) == NID_undef) {
+			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "problem creating object %s=%s", cnf->name, cnf->value);
 			return FAILURE;
 		}
@@ -910,19 +942,25 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 	SET_OPTIONAL_STRING_ARG("config", req->config_filename, default_ssl_conf_filename);
 	SET_OPTIONAL_STRING_ARG("config_section_name", req->section_name, "req");
 	req->global_config = CONF_load(NULL, default_ssl_conf_filename, NULL);
+	if (req->global_config == NULL) {
+		php_openssl_store_errors();
+	}
 	req->req_config = CONF_load(NULL, req->config_filename, NULL);
-
 	if (req->req_config == NULL) {
+		php_openssl_store_errors();
 		return FAILURE;
 	}
 
 	/* read in the oids */
 	str = CONF_get_string(req->req_config, NULL, "oid_file");
-	if (str && !php_openssl_open_base_dir_chk(str)) {
+	if (str == NULL) {
+		php_openssl_store_errors();
+	} else if (!php_openssl_open_base_dir_chk(str)) {
 		BIO *oid_bio = BIO_new_file(str, "r");
 		if (oid_bio) {
 			OBJ_create_objects(oid_bio);
 			BIO_free(oid_bio);
+			php_openssl_store_errors();
 		}
 	}
 	if (add_oid_section(req) == FAILURE) {
@@ -945,8 +983,11 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		str = CONF_get_string(req->req_config, req->section_name, "encrypt_rsa_key");
 		if (str == NULL) {
 			str = CONF_get_string(req->req_config, req->section_name, "encrypt_key");
+			if (str == NULL) {
+				php_openssl_store_errors();
+			}
 		}
-		if (str && strcmp(str, "no") == 0) {
+		if (str != NULL && strcmp(str, "no") == 0) {
 			req->priv_key_encrypt = 0;
 		} else {
 			req->priv_key_encrypt = 1;
@@ -973,18 +1014,23 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 	if (req->digest_name == NULL) {
 		req->digest_name = CONF_get_string(req->req_config, req->section_name, "default_md");
 	}
-	if (req->digest_name) {
+	if (req->digest_name != NULL) {
 		req->digest = req->md_alg = EVP_get_digestbyname(req->digest_name);
+	} else {
+		php_openssl_store_errors();
 	}
 	if (req->md_alg == NULL) {
 		req->md_alg = req->digest = EVP_sha1();
+		php_openssl_store_errors();
 	}
 
 	PHP_SSL_CONFIG_SYNTAX_CHECK(extensions_section);
 
 	/* set the string mask */
 	str = CONF_get_string(req->req_config, req->section_name, "string_mask");
-	if (str && !ASN1_STRING_set_default_mask_asc(str)) {
+	if (str == NULL) {
+		php_openssl_store_errors();
+	} else if (!ASN1_STRING_set_default_mask_asc(str)) {
 		php_error_docref(NULL, E_WARNING, "Invalid global string mask setting %s", str);
 		return FAILURE;
 	}
@@ -1367,33 +1413,6 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ php_openssl_store_errors */
-void php_openssl_store_errors()
-{
-	struct php_openssl_errors *errors;
-	int error_code = ERR_get_error();
-
-	if (!error_code) {
-		return;
-	}
-
-	if (!OPENSSL_G(errors)) {
-		OPENSSL_G(errors) = pecalloc(1, sizeof(struct php_openssl_errors), 1);
-	}
-
-	errors = OPENSSL_G(errors);
-
-	do {
-		errors->top = (errors->top + 1) % ERR_NUM_ERRORS;
-		if (errors->top == errors->bottom) {
-			errors->bottom = (errors->bottom + 1) % ERR_NUM_ERRORS;
-		}
-		errors->buffer[errors->top] = error_code;
-	} while ((error_code = ERR_get_error()));
-
 }
 /* }}} */
 
