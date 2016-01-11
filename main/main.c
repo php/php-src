@@ -788,9 +788,20 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	if (PG(html_errors)) {
 		size_t len;
 		char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+
+		if (!replace || len < 1) {
+			replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, NULL TSRMLS_CC);
+		}
+
 		efree(buffer);
-		buffer = replace;
-		buffer_len = len;
+
+		if (replace) {
+			buffer = replace;
+			buffer_len = len;
+		} else {
+			buffer = "";
+			buffer_len = 0;
+		}
 	}
 
 	/* which function caused the problem if any at all */
@@ -935,7 +946,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
 		}
 	}
-	str_efree(buffer);
+	if (buffer_len > 0) {
+		str_efree(buffer);
+	}
 
 	php_error(type, "%s", message);
 	efree(message);
