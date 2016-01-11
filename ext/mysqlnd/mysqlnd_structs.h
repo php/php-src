@@ -474,7 +474,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND
 typedef size_t				(*func_mysqlnd_conn_data__negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const size_t flags);
 typedef size_t				(*func_mysqlnd_conn_data__get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn);
 
-typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe);
+typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe);
 
 
 
