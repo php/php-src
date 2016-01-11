@@ -538,7 +538,7 @@ void _php_ibase_module_error(char *msg, ...) /* {{{ */
 /* {{{ internal macros, functions and structures */
 typedef struct {
 	isc_db_handle *db_ptr;
-	long tpb_len;
+	zend_long tpb_len;
 	char *tpb_ptr;
 } ISC_TEB;
 
@@ -842,7 +842,7 @@ static char const dpb_args[] = {
 	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name, 0
 };
 
-int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db) /* {{{ */
+int _php_ibase_attach_db(char **args, int *len, zend_long *largs, isc_db_handle *db) /* {{{ */
 {
 	short i, dpb_len, buf_len = 257-2;  /* version byte at the front, and a null at the end */
 	char dpb_buffer[257] = { isc_dpb_version1, 0 }, *dpb;
@@ -879,7 +879,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 {
 	char *c, hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
 	int i, len[] = { 0, 0, 0, 0, 0 };
-	long largs[] = { 0, 0, 0 };
+	zend_long largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
 	zend_resource new_index_ptr, *le;
 	isc_db_handle db_handle = 0;
@@ -917,8 +917,8 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	for (i = 0; i < sizeof(args)/sizeof(char*); ++i) {
 		PHP_MD5Update(&hash_context,args[i],len[i]);
 	}
-	for (i = 0; i < sizeof(largs)/sizeof(long); ++i) {
-		PHP_MD5Update(&hash_context,(char*)&largs[i],sizeof(long));
+	for (i = 0; i < sizeof(largs)/sizeof(zend_long); ++i) {
+		PHP_MD5Update(&hash_context,(char*)&largs[i],sizeof(zend_long));
 	}
 	PHP_MD5Final((unsigned char*)hash, &hash_context);
 
@@ -946,7 +946,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 	/* ... or a persistent one */
 	do {
-		long l;
+		zend_long l;
 		static char info[] = { isc_info_base_level, isc_info_end };
 		char result[8];
 		ISC_STATUS status[20];
@@ -1138,7 +1138,7 @@ PHP_FUNCTION(ibase_trans)
 	ib_link = (ibase_db_link **) safe_emalloc(sizeof(ibase_db_link *),1+argn,0);
 
 	if (argn > 0) {
-		long trans_argl = 0;
+		zend_long trans_argl = 0;
 		char *tpb;
 		ISC_TEB *teb;
 		zval *args = NULL;
@@ -1451,7 +1451,7 @@ PHP_FUNCTION(ibase_gen_id)
 
 	/* don't return the generator value as a string unless it doesn't fit in a long */
 #if SIZEOF_LONG < 8
-	if (result < LONG_MIN || result > LONG_MAX) {
+	if (result < ZEND_LONG_MIN || result > ZEND_LONG_MAX) {
 		char *res;
 		int l;
 
@@ -1459,7 +1459,7 @@ PHP_FUNCTION(ibase_gen_id)
 		RETURN_STRINGL(res, l);
 	}
 #endif
-	RETURN_LONG((long)result);
+	RETURN_LONG((zend_long)result);
 }
 
 /* }}} */
