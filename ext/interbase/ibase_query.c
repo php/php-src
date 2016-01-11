@@ -219,7 +219,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, /* {{{
 
 	for (i = n = 0; i < sqlda->sqld; ++i) {
 		unsigned short dim;
-		unsigned long ar_size = 1;
+		zend_ulong ar_size = 1;
 		XSQLVAR *var = &sqlda->sqlvar[i];
 
 		if ((var->sqltype & ~1) == SQL_ARRAY) {
@@ -430,7 +430,7 @@ _php_ibase_alloc_query_error:
 }
 /* }}} */
 
-static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /* {{{ */
+static int _php_ibase_bind_array(zval *val, char *buf, zend_ulong buf_size, /* {{{ */
 	ibase_array *array, int dim)
 {
 	zval null_val, *pnull_val = &null_val;
@@ -441,7 +441,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 	ZVAL_NULL(pnull_val);
 
 	if (dim < array->ar_desc.array_desc_dimensions) {
-		unsigned long slice_size = buf_size / dim_len;
+		zend_ulong slice_size = buf_size / dim_len;
 		unsigned short i;
 		zval *subval = val;
 
@@ -533,7 +533,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 #ifdef HAVE_STRFTIME
 				unsigned short n;
 #endif
-#if (SIZEOF_LONG < 8)
+#if (SIZEOF_ZEND_LONG < 8)
 				ISC_INT64 l;
 #endif
 
@@ -547,7 +547,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					break;
 				case SQL_LONG:
 					convert_to_long(val);
-#if (SIZEOF_LONG > 4)
+#if (SIZEOF_ZEND_LONG > 4)
 					if (Z_LVAL_P(val) > ISC_LONG_MAX || Z_LVAL_P(val) < ISC_LONG_MIN) {
 						_php_ibase_module_error("Array parameter exceeds field width");
 						return FAILURE;
@@ -556,9 +556,9 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					*(ISC_LONG *) buf = (ISC_LONG) Z_LVAL_P(val);
 					break;
 				case SQL_INT64:
-#if (SIZEOF_LONG >= 8)
+#if (SIZEOF_ZEND_LONG >= 8)
 					convert_to_long(val);
-					*(long *) buf = Z_LVAL_P(val);
+					*(zend_long *) buf = Z_LVAL_P(val);
 #else
 					convert_to_string(val);
 					if (!sscanf(Z_STRVAL_P(val), "%" LL_MASK "d", &l)) {
@@ -1315,7 +1315,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 
 	switch (type & ~1) {
 		unsigned short l;
-		long n;
+		zend_long n;
 		char string_data[255];
 		struct tm t;
 		char *format;
@@ -1331,8 +1331,8 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			n = *(short *) data;
 			goto _sql_long;
 		case SQL_INT64:
-#if (SIZEOF_LONG >= 8)
-			n = *(long *) data;
+#if (SIZEOF_ZEND_LONG >= 8)
+			n = *(zend_long *) data;
 			goto _sql_long;
 #else
 			if (scale == 0) {
@@ -1358,14 +1358,14 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			if (scale == 0) {
 				ZVAL_LONG(val,n);
 			} else {
-				long f = (long) scales[-scale];
+				zend_long f = (zend_long) scales[-scale];
 
 				if (n >= 0) {
-					l = slprintf(string_data, sizeof(string_data), "%ld.%0*ld", n / f, -scale,  n % f);
+					l = slprintf(string_data, sizeof(string_data), ZEND_LONG_FMT ".%0*" ZEND_LONG_FMT_SPEC, n / f, -scale,  n % f);
 				} else if (n <= -f) {
-					l = slprintf(string_data, sizeof(string_data), "%ld.%0*ld", n / f, -scale,  -n % f);
+					l = slprintf(string_data, sizeof(string_data), ZEND_LONG_FMT ".%0*" ZEND_LONG_FMT_SPEC, n / f, -scale,  -n % f);
 				} else {
-					l = slprintf(string_data, sizeof(string_data), "-0.%0*ld", -scale, -n % f);
+					l = slprintf(string_data, sizeof(string_data), "-0.%0*" ZEND_LONG_FMT_SPEC, -scale, -n % f);
 				}
 				ZVAL_STRINGL(val, string_data, l);
 			}
@@ -1424,7 +1424,7 @@ format_date_time:
 }
 /* }}}	*/
 
-static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_size, /* {{{ */
+static int _php_ibase_arr_zval(zval *ar_zval, char *data, zend_ulong data_size, /* {{{ */
 	ibase_array *ib_array, int dim, int flag)
 {
 	/**
@@ -1437,7 +1437,7 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 	unsigned short i;
 
 	if (dim < ib_array->ar_desc.array_desc_dimensions) { /* array again */
-		unsigned long slice_size = data_size / dim_len;
+		zend_ulong slice_size = data_size / dim_len;
 
 		array_init(ar_zval);
 
@@ -1476,7 +1476,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 {
 	zval *result_arg;
 	zend_long flag = 0;
-	long i, array_cnt = 0;
+	zend_long i, array_cnt = 0;
 	ibase_result *ib_result;
 
 	RESET_ERRMSG;
@@ -1546,7 +1546,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 					if (flag & PHP_IBASE_FETCH_BLOBS) { /* fetch blob contents into hash */
 
 						ibase_blob blob_handle;
-						unsigned long max_len = 0;
+						zend_ulong max_len = 0;
 						static char bl_items[] = {isc_info_blob_total_length};
 						char bl_info[20];
 						unsigned short i;

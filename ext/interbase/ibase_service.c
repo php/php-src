@@ -274,7 +274,7 @@ static void _php_ibase_service_query(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 	static char spb[] = { isc_info_svc_timeout, 10, 0, 0, 0 };
 
 	char res_buf[400], *result, *heap_buf = NULL, *heap_p;
-	long heap_buf_size = 200, line_len;
+	zend_long heap_buf_size = 200, line_len;
 
 	/* info about users requires an action first */
 	if (info_action == isc_info_svc_get_users) {
@@ -312,7 +312,7 @@ query_loop:
 					}
 				}
 				if (!heap_buf || (heap_p - heap_buf + line_len +2) > heap_buf_size) {
-					long res_size = heap_buf ? heap_p - heap_buf : 0;
+					zend_long res_size = heap_buf ? heap_p - heap_buf : 0;
 
 					while (heap_buf_size < (res_size + line_len +2)) {
 						heap_buf_size *= 2;
@@ -520,7 +520,7 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 		switch (action) {
 			default:
 unknown_option:
-				_php_ibase_module_error("Unrecognised option (%ld)", action);
+				_php_ibase_module_error("Unrecognised option (" ZEND_LONG_FMT ")", action);
 				RETURN_FALSE;
 
 			case isc_spb_rpr_check_db:

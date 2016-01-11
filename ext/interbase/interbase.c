@@ -1450,7 +1450,7 @@ PHP_FUNCTION(ibase_gen_id)
 	}
 
 	/* don't return the generator value as a string unless it doesn't fit in a long */
-#if SIZEOF_LONG < 8
+#if SIZEOF_ZEND_LONG < 8
 	if (result < ZEND_LONG_MIN || result > ZEND_LONG_MAX) {
 		char *res;
 		int l;

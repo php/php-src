@@ -93,7 +93,7 @@ static void _php_ibase_event_block(ibase_db_link *ib_link, unsigned short count,
 	char **events, unsigned short *l, char **event_buf, char **result_buf)
 {
 	ISC_STATUS dummy_result[20];
-	unsigned long dummy_count[15];
+	ISC_ULONG dummy_count[15];
 
 	/**
 	 * Unfortunately, there's no clean and portable way in C to pass arguments to
@@ -131,7 +131,7 @@ PHP_FUNCTION(ibase_wait_event)
 	int num_args;
 	char *event_buffer, *result_buffer, *events[15];
 	unsigned short i = 0, event_count = 0, buffer_size;
-	unsigned long occurred_event[15];
+	ISC_ULONG occurred_event[15];
 
 	RESET_ERRMSG;
 
@@ -190,8 +190,15 @@ PHP_FUNCTION(ibase_wait_event)
 }
 /* }}} */
 
-static isc_callback _php_ibase_callback(ibase_event *event, /* {{{ */
+#if FB_API_VER >= 20
+#define PHP_ISC_CALLBACK ISC_EVENT_CALLBACK
+static ISC_EVENT_CALLBACK _php_ibase_callback(ibase_event *event, /* {{{ */
+	ISC_USHORT buffer_size, ISC_UCHAR *result_buf)
+#else
+#define PHP_ISC_CALLBACK isc_callback
+static isc_callback  _php_ibase_callback(ibase_event *event, /* {{{ */
 	unsigned short buffer_size, char *result_buf)
+#endif
 {
 	/* this function is called asynchronously by the Interbase client library. */
 	TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
@@ -203,7 +210,7 @@ static isc_callback _php_ibase_callback(ibase_event *event, /* {{{ */
 	 */
 	switch (event->state) {
 		unsigned short i;
-		unsigned long occurred_event[15];
+		ISC_ULONG occurred_event[15];
 		zval return_value, args[2];
 
 		default: /* == DEAD */
@@ -238,7 +245,7 @@ static isc_callback _php_ibase_callback(ibase_event *event, /* {{{ */
 		case NEW:
 			/* re-register the event */
 			if (isc_que_events(IB_STATUS, &event->link->handle, &event->event_id, buffer_size,
-				event->event_buffer,(isc_callback)_php_ibase_callback, (void *)event)) {
+				event->event_buffer,(PHP_ISC_CALLBACK)_php_ibase_callback, (void *)event)) {
 
 				_php_ibase_error();
 			}
@@ -345,7 +352,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 
 	/* now register the events with the Interbase API */
 	if (isc_que_events(IB_STATUS, &ib_link->handle, &event->event_id, buffer_size,
-		event->event_buffer,(isc_callback)_php_ibase_callback, (void *)event)) {
+		event->event_buffer,(PHP_ISC_CALLBACK)_php_ibase_callback, (void *)event)) {
 
 		_php_ibase_error();
 		efree(event);

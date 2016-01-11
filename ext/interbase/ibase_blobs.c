@@ -90,13 +90,13 @@ typedef struct { /* {{{ */
 /* }}} */
 } IBASE_BLOBINFO;
 
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len) /* {{{ */
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, zend_ulong max_len) /* {{{ */
 {
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 
 		ISC_STATUS stat;
 		zend_string *bl_data;
-		unsigned long cur_len;
+		zend_ulong cur_len;
 		unsigned short seg_len;
 
 		bl_data = zend_string_alloc(max_len, 0);
@@ -126,7 +126,7 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 
 int _php_ibase_blob_add(zval *string_arg, ibase_blob *ib_blob) /* {{{ */
 {
-	unsigned long put_cnt = 0, rem_cnt;
+	zend_ulong put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 
 	convert_to_string_ex(string_arg);
@@ -154,7 +154,7 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle, IBASE_BLOBINFO *bl_in
 		isc_info_blob_type
 	};
 
-	char bl_inf[sizeof(long)*8], *p;
+	char bl_inf[sizeof(zend_long)*8], *p;
 
 	bl_info->max_segment = 0;
 	bl_info->num_segments = 0;
