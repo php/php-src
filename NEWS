@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #71297 (Memory leak with consecutive yield from). (Bob)
   . Fixed bug #71314 (var_export(INF) prints INF.0). (Andrea)
+  . Fix range() segfaults (github #1695). (Thomas Punt)
 
 - CURL:
   . Fixed bug #71227 (Can't compile php_curl statically). (Anatol)
