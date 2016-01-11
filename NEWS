@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.3
 
+- Apache2handler:
+  . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
+
 - Core:
   . Fixed bug #71300 (Segfault in zend_fetch_string_offset). (Laruence)
   . Fixed bug #71221 (Null pointer deref (segfault) in get_defined_vars via
