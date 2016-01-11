@@ -36,7 +36,7 @@ static void _php_ibase_free_blob(zend_resource *rsrc) /* {{{ */
 {
 	ibase_blob *ib_blob = (ibase_blob *)rsrc->ptr;
 
-	if (ib_blob->bl_handle != NULL) { /* blob open*/
+	if (ib_blob->bl_handle != 0) { /* blob open*/
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
 			_php_ibase_module_error("You can lose data. Close any blob after reading from or "
 				"writing to it. Use ibase_blob_close() before calling ibase_close()");
@@ -90,13 +90,13 @@ typedef struct { /* {{{ */
 /* }}} */
 } IBASE_BLOBINFO;
 
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len) /* {{{ */
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, zend_ulong max_len) /* {{{ */
 {
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 
 		ISC_STATUS stat;
 		zend_string *bl_data;
-		unsigned long cur_len;
+		zend_ulong cur_len;
 		unsigned short seg_len;
 
 		bl_data = zend_string_alloc(max_len, 0);
@@ -126,7 +126,7 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 
 int _php_ibase_blob_add(zval *string_arg, ibase_blob *ib_blob) /* {{{ */
 {
-	unsigned long put_cnt = 0, rem_cnt;
+	zend_ulong put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 
 	convert_to_string_ex(string_arg);
@@ -154,7 +154,7 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle, IBASE_BLOBINFO *bl_in
 		isc_info_blob_type
 	};
 
-	char bl_inf[sizeof(long)*8], *p;
+	char bl_inf[sizeof(zend_long)*8], *p;
 
 	bl_info->max_segment = 0;
 	bl_info->num_segments = 0;
@@ -216,7 +216,7 @@ PHP_FUNCTION(ibase_blob_create)
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
 	ib_blob = (ibase_blob *) emalloc(sizeof(ibase_blob));
-	ib_blob->bl_handle = NULL;
+	ib_blob->bl_handle = 0;
 	ib_blob->type = BLOB_INPUT;
 
 	if (isc_create_blob(IB_STATUS, &ib_link->handle, &trans->handle, &ib_blob->bl_handle, &ib_blob->bl_qd)) {
@@ -261,7 +261,7 @@ PHP_FUNCTION(ibase_blob_open)
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
 	ib_blob = (ibase_blob *) emalloc(sizeof(ibase_blob));
-	ib_blob->bl_handle = NULL;
+	ib_blob->bl_handle = 0;
 	ib_blob->type = BLOB_OUTPUT;
 
 	do {
@@ -361,7 +361,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 				RETURN_FALSE;
 			}
 		}
-		ib_blob->bl_handle = NULL;
+		ib_blob->bl_handle = 0;
 
 		RETVAL_NEW_STR(_php_ibase_quad_to_string(ib_blob->bl_qd));
 	} else { /* discard created blob */
@@ -369,7 +369,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 			_php_ibase_error();
 			RETURN_FALSE;
 		}
-		ib_blob->bl_handle = NULL;
+		ib_blob->bl_handle = 0;
 		RETVAL_TRUE;
 	}
 	zend_list_delete(Z_RES_P(blob_arg));
@@ -401,7 +401,7 @@ PHP_FUNCTION(ibase_blob_info)
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
-	ibase_blob ib_blob = { NULL, BLOB_INPUT };
+	ibase_blob ib_blob = { 0, BLOB_INPUT };
 	IBASE_BLOBINFO bl_info;
 
 	RESET_ERRMSG;
@@ -477,7 +477,7 @@ PHP_FUNCTION(ibase_blob_echo)
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
-	ibase_blob ib_blob_id = { NULL, BLOB_OUTPUT  };
+	ibase_blob ib_blob_id = { 0, BLOB_OUTPUT  };
 	char bl_data[IBASE_BLOB_SEG];
 	unsigned short seg_len;
 
@@ -538,7 +538,7 @@ PHP_FUNCTION(ibase_blob_import)
 	zval *link = NULL, *file;
 	int size;
 	unsigned short b;
-	ibase_blob ib_blob = { NULL, 0 };
+	ibase_blob ib_blob = { 0, 0 };
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
 	char bl_data[IBASE_BLOB_SEG];

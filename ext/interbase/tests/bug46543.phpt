@@ -19,10 +19,10 @@ ibase_trans(1, 2, $x, $x, 3);
 
 ?>
 --EXPECTF--
-Warning: ibase_trans(): no Firebird/InterBase link resource supplied in %s on line %d
+Warning: ibase_trans(): supplied resource is not a valid Firebird/InterBase link resource in %sbug46543.php on line %d
 
-Warning: ibase_trans(): no Firebird/InterBase link resource supplied in %s on line %d
+Warning: ibase_trans(): supplied resource is not a valid Firebird/InterBase link resource in %sbug46543.php on line %d
 
-Warning: ibase_trans(): no Firebird/InterBase link resource supplied in %s on line %d
+Warning: ibase_trans(): supplied resource is not a valid Firebird/InterBase link resource in %sbug46543.php on line %d
 
-Warning: ibase_trans(): supplied resource is not a valid Firebird/InterBase link resource in %s on line %d
+Warning: ibase_trans(): supplied resource is not a valid Firebird/InterBase link resource in %sbug46543.php on line %d
