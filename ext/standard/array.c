@@ -2071,6 +2071,17 @@ PHP_FUNCTION(array_fill_keys)
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
 	} while (0)
 
+#define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
+		__calc_size = (end - start) / lstep; \
+		if (__calc_size >= HT_MAX_SIZE) { \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", start, end); \
+			RETURN_FALSE; \
+		} \
+		size = (uint32_t)(__calc_size + 1); \
+		array_init_size(return_value, size); \
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
+	} while (0)
+
 /* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
@@ -2212,43 +2223,53 @@ double_str:
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else {
-		double low, high;
-		zend_long lstep;
+		zend_long low, high;
+		/* lstep is a ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
+		zend_ulong __calc_size, lstep;
+		uint32_t i, size;
 long_str:
-		low = zval_get_double(zlow);
-		high = zval_get_double(zhigh);
-		lstep = (zend_long) step;
+		low = zval_get_long(zlow);
+		high = zval_get_long(zhigh);
+
+		if (step <= 0) {
+			err = 1;
+			goto err;
+		}
+
+		lstep = step;
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
-			if (low - high < lstep || lstep <= 0) {
+			if (low - high < lstep) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(low, high);
+			RANGE_CHECK_LONG_INIT_ARRAY(high, low);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low >= high; low -= lstep) {
-					Z_LVAL(tmp) = (zend_long)low;
+				for (i = 0; i < size; ++i) {
+					Z_LVAL(tmp) = low - (i * lstep);
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			if (high - low < lstep || lstep <= 0) {
+			if (high - low < lstep) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(high, low);
+			RANGE_CHECK_LONG_INIT_ARRAY(low, high);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low <= high; low += lstep) {
-					Z_LVAL(tmp) = (zend_long)low;
+				for (i = 0; i < size; ++i) {
+					Z_LVAL(tmp) = low + (i * lstep);
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
 			array_init(return_value);
-			Z_LVAL(tmp) = (zend_long)low;
+			Z_LVAL(tmp) = low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
@@ -2261,6 +2282,7 @@ err:
 /* }}} */
 
 #undef RANGE_CHECK_INIT_ARRAY
+#undef RANGE_CHECK_LONG_INIT_ARRAY
 
 static void php_array_data_shuffle(zval *array) /* {{{ */
 {
