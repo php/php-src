@@ -530,7 +530,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 			struct tm t = { 0, 0, 0, 0, 0, 0 };
 
 			switch (array->el_type) {
-#ifndef HAVE_STRFTIME
+#ifdef HAVE_STRFTIME
 				unsigned short n;
 #endif
 #if (SIZEOF_LONG < 8)
