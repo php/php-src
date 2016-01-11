@@ -21,11 +21,11 @@ function open($save_path, $session_name) {
     throw new Exception("Stop...!");
 }
 
-function close() { }
-function read($id) { }
-function write($id, $session_data) { }
-function destroy($id) { }
-function gc($maxlifetime) { }
+function close() { return true; }
+function read($id) { return ''; }
+function write($id, $session_data) { return true; }
+function destroy($id) { return true; }
+function gc($maxlifetime) { return 0; }
 
 var_dump(session_module_name("files"));
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
@@ -40,6 +40,8 @@ ob_end_flush();
 *** Testing session_module_name() : variation ***
 string(%d) "%s"
 string(4) "user"
+
+Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
 
 Fatal error: Uncaught exception 'Exception' with message 'Stop...!' in %s:%d
 Stack trace:
