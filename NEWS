@@ -33,6 +33,12 @@ PHP                                                                        NEWS
   . Fixed bug #71202 (Autoload function registered by another not activated
     immediately). (Laruence)
 
+- Session:
+  . Fixed bug #71038 (session_start() returns TRUE on failure).
+    Session save handlers must return 'string' always for successful read.
+    i.e. Non-existing session read must return empty string. PHP 7.0 is made
+    not to tolerate buggy return value. (Yasuo)
+
 - Standard:
   . Fixed bug #71287 (Error message contains hexadecimal instead of decimal
     number). (Laruence)
