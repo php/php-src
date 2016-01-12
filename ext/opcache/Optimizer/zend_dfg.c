@@ -92,6 +92,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_BIND_GLOBAL:
+					case ZEND_BIND_STATIC:
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:

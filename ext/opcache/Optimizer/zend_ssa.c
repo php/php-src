@@ -275,6 +275,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 					}
 					break;
 				case ZEND_BIND_GLOBAL:
+				case ZEND_BIND_STATIC:
 					if (opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
