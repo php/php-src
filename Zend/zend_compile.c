@@ -3725,7 +3725,7 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 
 static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_bool by_ref) /* {{{ */
 {
-	znode var_node, result;
+	znode var_node;
 	zend_op *opline;
 
 	zend_compile_expr(&var_node, var_ast);
@@ -4923,15 +4923,33 @@ static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* 
 
 void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 {
+	zend_op_array *op_array = CG(active_op_array);
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
+		zend_string *var_name = zend_ast_get_str(var_ast);
 		zend_bool by_ref = var_ast->attr;
-
 		zval zv;
 		ZVAL_NULL(&zv);
+
+		if (op_array->static_variables
+				&& zend_hash_exists(op_array->static_variables, var_name)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+		}
+
+		{
+			int i;
+			for (i = 0; i < op_array->last_var; i++) {
+				if (zend_string_equals(op_array->vars[i], var_name)) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use lexical variable $%s as a parameter name", ZSTR_VAL(var_name));
+				}
+			}
+		}
+
 		zend_compile_static_var_common(var_ast, &zv, by_ref);
 	}
 }
