@@ -460,6 +460,9 @@ zend_module_entry ibase_module_entry = {
 };
 
 #ifdef COMPILE_DL_INTERBASE
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE();
+#endif
 ZEND_GET_MODULE(ibase)
 #endif
 
@@ -717,6 +720,9 @@ PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(ibase)
 {
+#if defined(COMPILE_DL_INTERBASE) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	ibase_globals->num_persistent = ibase_globals->num_links = 0;
 	ibase_globals->sql_code = *ibase_globals->errmsg = 0;
 	ibase_globals->default_link = NULL;
