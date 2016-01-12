@@ -47,6 +47,7 @@ PHP                                                                        NEWS
   . Fixed bug #71188 (str_replace converts integers in original $search array
     to strings). (Laruence)
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+  . Fixed bug #71132, #71197 (range() segfaults). (Thomas Punt)
 
 07 Jan 2016 PHP 7.0.2
 
