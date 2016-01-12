@@ -1291,7 +1291,7 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 		const char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
 
-		PS(session_status) = php_session_none;
+		php_session_abort(TSRMLS_C);
 		if (output_start_filename) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {
