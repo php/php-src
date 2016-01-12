@@ -1474,14 +1474,7 @@ ZEND_VM_HELPER(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED, int type)
 		}
 	}
 
-	if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
-		if (Z_CONSTANT_P(retval)) {
-			if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
-				FREE_OP1();
-				HANDLE_EXCEPTION();
-			}
-		}
-	} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
+	if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 		FREE_OP1();
 	}
 
@@ -8002,7 +7995,6 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *closure, *var;
-	zend_string *var_name;
 
 	closure = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	if (opline->extended_value) {
@@ -8022,9 +8014,30 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 		ZVAL_DEREF(var);
 		Z_TRY_ADDREF_P(var);
 	}
+	zend_closure_bind_var(closure, opline->result.num, var);
+	ZEND_VM_NEXT_OPCODE();
+}
 
-	var_name = CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var));
-	zend_closure_bind_var(closure, var_name, var);
+ZEND_VM_HANDLER(183, ZEND_FETCH_STATIC, CV, UNUSED, REF)
+{
+	USE_OPLINE
+	zval *var = GET_OP1_ZVAL_PTR(BP_VAR_W);
+	zval *val = &EX(func)->op_array.static_variables[opline->op2.num];
+
+	if (UNEXPECTED(Z_CONSTANT_P(val))) {
+		SAVE_OPLINE();
+		if (UNEXPECTED(zval_update_constant_ex(val, 1, NULL) != SUCCESS)) {
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	if (opline->extended_value) {
+		ZVAL_MAKE_REF(val);
+	} 
+
+	zval_ptr_dtor(var);
+	ZVAL_COPY(var, val);
+
 	ZEND_VM_NEXT_OPCODE();
 }
 

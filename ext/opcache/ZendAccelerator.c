@@ -2187,10 +2187,10 @@ static void zend_accel_fast_shutdown(void)
 				break;
 			} else {
 				if (func->op_array.static_variables) {
-					if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-						if (--GC_REFCOUNT(func->op_array.static_variables) == 0) {
-							accel_fast_hash_destroy(func->op_array.static_variables);
-						}
+					int i = func->op_array.last_static_var;
+					while (i > 0) {
+						i--;
+						accel_fast_zval_dtor(&func->op_array.static_variables[i]);
 					}
 				}
 				zend_accel_fast_del_bucket(EG(function_table), HT_IDX_TO_HASH(_idx-1), _p);
@@ -2209,10 +2209,10 @@ static void zend_accel_fast_shutdown(void)
 					ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
 						if (func->type == ZEND_USER_FUNCTION) {
 							if (func->op_array.static_variables) {
-								if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-									if (--GC_REFCOUNT(func->op_array.static_variables) == 0) {
-										accel_fast_hash_destroy(func->op_array.static_variables);
-									}
+								int i = func->op_array.last_static_var;
+								while (i > 0) {
+									i--;
+									accel_fast_zval_dtor(&func->op_array.static_variables[i]);
 								}
 								func->op_array.static_variables = NULL;
 							}

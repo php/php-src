@@ -82,7 +82,10 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->try_catch_array = NULL;
 	op_array->last_live_range = 0;
 
+	op_array->last_static_var = 0;
 	op_array->static_variables = NULL;
+	op_array->static_vars = NULL;
+
 	op_array->last_try_catch = 0;
 
 	op_array->this_var = -1;
@@ -135,9 +138,13 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
-	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		zend_hash_clean(op_array->static_variables);
+	if (op_array->static_variables) {
+		int i = op_array->last_static_var;
+		while (i > 0) {
+			i--;
+			zval_ptr_dtor(&op_array->static_variables[i]);
+			ZVAL_NULL(&op_array->static_variables[i]);
+		}
 	}
 }
 
@@ -364,11 +371,13 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	zval *end;
 	uint32_t i;
 
-	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		if (--GC_REFCOUNT(op_array->static_variables) == 0) {
-			zend_array_destroy(op_array->static_variables);
+	if (op_array->static_variables) {
+		i = op_array->last_static_var;
+		while (i > 0) {
+			i--;
+			zval_ptr_dtor(&op_array->static_variables[i]);
 		}
+		efree(op_array->static_variables);
 	}
 
 	if (op_array->run_time_cache && !op_array->function_name) {
@@ -381,6 +390,16 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 
 	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
+
+	if (op_array->static_vars) {
+		i = op_array->last_static_var;
+		while (i > 0) {
+			i--;
+			zend_string_release(op_array->static_vars[i]);
+		}
+		efree(op_array->static_vars);
+	}
+
 
 	if (op_array->vars) {
 		i = op_array->last_var;
@@ -626,6 +645,14 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
+
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		op_array->static_variables = (zval *)erealloc(op_array->static_variables, sizeof(zval) * (op_array->last_static_var + 1));
+	} else if (CG(context).static_vars_size != op_array->last_static_var) {
+		op_array->static_variables = (zval *)erealloc(op_array->static_variables, sizeof(zval) * op_array->last_static_var);
+	}
+	CG(context).static_vars_size = op_array->last_static_var;
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {

@@ -48,11 +48,8 @@ static void zend_accel_destroy_zend_function(zval *zv)
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		if (function->op_array.static_variables) {
-			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
-					FREE_HASHTABLE(function->op_array.static_variables);
-				}
-			}
+			zend_cleanup_op_array_data((zend_op_array*)function);
+			efree(function->op_array.static_variables);
 			function->op_array.static_variables = NULL;
 		}
 	}
@@ -277,6 +274,24 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	}
 }
 
+static void zend_func_copy_ctor(zend_op_array *op_array)
+{
+	zval *dst, *end, *src = op_array->static_variables;
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		op_array->static_variables = emalloc(sizeof(zval) * (op_array->last_static_var + 1));
+	} else if (src) {
+		op_array->static_variables = emalloc(sizeof(zval) * op_array->last_static_var);
+	}
+
+	if (src) {
+		end = src + op_array->last_static_var;
+		dst = op_array->static_variables;
+		for (; src != end; src++, dst++) {
+			ZVAL_COPY_VALUE(dst, src);
+		}
+	}
+}
+
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce)
 {
 	Bucket *p, *q, *end;
@@ -321,6 +336,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		/* Copy data */
 		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
 		new_entry = (zend_op_array*)Z_PTR(q->val);
+		zend_func_copy_ctor(new_entry);
 
 		if ((void*)new_entry->scope >= ZCG(current_persistent_script)->arena_mem &&
 		    (void*)new_entry->scope < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
@@ -571,7 +587,7 @@ failure:
 	}
 }
 
-static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable *source)
+static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
 {
 	zend_function *function1, *function2;
 	Bucket *p, *end;
@@ -593,6 +609,9 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 			}
 		} else {
 			_zend_hash_append_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
+		}
+		if (pCopyConstructor) {
+			pCopyConstructor(ARENA_REALLOC(Z_PTR(p->val)));
 		}
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
@@ -687,6 +706,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 	op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	*op_array = persistent_script->script.main_op_array;
+	zend_func_copy_ctor(op_array);
 
 	if (EXPECTED(from_shared_memory)) {
 		zend_hash_init(&ZCG(bind_hash), 10, NULL, NULL, 0);
@@ -712,7 +732,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
 		   classes - which depend on pre-bind class entries existent in the class table */
 		if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
-			zend_accel_function_hash_copy_from_shm(CG(function_table), &persistent_script->script.function_table);
+			zend_accel_function_hash_copy_from_shm(CG(function_table), &persistent_script->script.function_table, (unique_copy_ctor_func_t) zend_func_copy_ctor);
 		}
 
 		/* Register __COMPILER_HALT_OFFSET__ constant */

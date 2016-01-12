@@ -3092,6 +3092,9 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			break;
+		case ZEND_FETCH_STATIC:
+//TODO: ??? We know nothing expect is_ref?
+			break;
 		case ZEND_SEND_VAR_EX:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_REF:

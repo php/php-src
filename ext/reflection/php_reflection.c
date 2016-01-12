@@ -771,26 +771,24 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 static void _function_closure_string(string *str, zend_function *fptr, char* indent)
 {
 	uint32_t i, count;
-	zend_string *key;
-	HashTable *static_variables;
+	zend_string **static_names;
 
 	if (fptr->type != ZEND_USER_FUNCTION || !fptr->op_array.static_variables) {
 		return;
 	}
 
-	static_variables = fptr->op_array.static_variables;
-	count = zend_hash_num_elements(static_variables);
+	static_names = fptr->op_array.static_vars;
+	count = fptr->op_array.last_static_var; 
 
 	if (!count) {
 		return;
 	}
 
 	string_printf(str, "\n");
-	string_printf(str, "%s- Bound Variables [%d] {\n", indent, zend_hash_num_elements(static_variables));
-	i = 0;
-	ZEND_HASH_FOREACH_STR_KEY(static_variables, key) {
-		string_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i++, ZSTR_VAL(key));
-	} ZEND_HASH_FOREACH_END();
+	string_printf(str, "%s- Bound Variables [%d] {\n", indent, count);
+	for (i = 0; i < count; i++) {
+		string_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i, ZSTR_VAL(static_names[i]));
+	}
 	string_printf(str, "%s}\n", indent);
 }
 /* }}} */
@@ -1927,18 +1925,15 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	/* Return an empty array in case no static variables exist */
 	array_init(return_value);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.static_variables != NULL) {
-		if (GC_REFCOUNT(fptr->op_array.static_variables) > 1) {
-			if (!(GC_FLAGS(fptr->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(fptr->op_array.static_variables)--;
-			}
-			fptr->op_array.static_variables = zend_array_dup(fptr->op_array.static_variables);
-		}
-		ZEND_HASH_FOREACH_VAL(fptr->op_array.static_variables, val) {
+		int i;
+		for (i = 0; i < fptr->op_array.last_static_var; i++) {
+			val = &fptr->op_array.static_variables[i];
 			if (UNEXPECTED(zval_update_constant_ex(val, 1, fptr->common.scope) != SUCCESS)) {
 				return;
 			}
-		} ZEND_HASH_FOREACH_END();
-		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, zval_add_ref);
+			Z_TRY_ADDREF_P(val);
+			zend_hash_update(Z_ARRVAL_P(return_value), fptr->op_array.static_vars[i], val);
+		}
 	}
 }
 /* }}} */
