@@ -585,7 +585,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		zend_update_extended_info(op_array);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_HANDLE_OP_ARRAY) {
-		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST) {
+		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_HANDLER) {
 			zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array);
 		}
 	}
