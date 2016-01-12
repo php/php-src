@@ -460,6 +460,9 @@ zend_module_entry ibase_module_entry = {
 };
 
 #ifdef COMPILE_DL_INTERBASE
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE();
+#endif
 ZEND_GET_MODULE(ibase)
 #endif
 
@@ -509,7 +512,7 @@ void _php_ibase_error(void) /* {{{ */
 
 	IBG(sql_code) = isc_sqlcode(IB_STATUS);
 
-	while ((s - IBG(errmsg)) < MAX_ERRMSG - (IBASE_MSGSIZE + 2) && fb_interpret(s, MAX_ERRMSG, &statusp)) {
+	while ((s - IBG(errmsg)) < MAX_ERRMSG && fb_interpret(s, MAX_ERRMSG - strlen(IBG(errmsg)) - 1, &statusp)) {
 		strcat(IBG(errmsg), " ");
 		s = IBG(errmsg) + strlen(IBG(errmsg));
 	}
@@ -717,6 +720,9 @@ PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(ibase)
 {
+#if defined(COMPILE_DL_INTERBASE) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	ibase_globals->num_persistent = ibase_globals->num_links = 0;
 	ibase_globals->sql_code = *ibase_globals->errmsg = 0;
 	ibase_globals->default_link = NULL;
