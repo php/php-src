@@ -23,6 +23,11 @@ PHP                                                                        NEWS
 
 - Session:
   . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
+  . Fixed bug #71038 (session_start() returns TRUE on failure).
+    It's fixed partially on PHP 5.6. It still returns TRUE on session read
+    failure for compatibility. Session save handlers should return 'string'
+    always for successful read. i.e. Non-existing session read must return
+    empty string. PHP 7.0 is made not to tolerate buggy return value. (Yasuo)
 
 - SPL:
   . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
