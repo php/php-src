@@ -87,6 +87,7 @@ zend_class_entry *php_session_id_iface_entry;
 	}
 
 static void php_session_send_cookie(TSRMLS_D);
+static void php_session_abort(TSRMLS_D);
 
 /* Dispatched by RINIT and by php_session_destroy */
 static inline void php_rinit_session_globals(TSRMLS_D) /* {{{ */
@@ -495,13 +496,17 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 	char *val = NULL;
 	int vallen;
 
+	PS(session_status) = php_session_active;
+
 	if (!PS(mod)) {
+		PS(session_status) = php_session_disabled;
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session");
 		return;
 	}
 
 	/* Open session handler first */
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
+		php_session_abort(TSRMLS_C);
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		return;
 	}
@@ -510,6 +515,7 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 	if (!PS(id)) {
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 		if (!PS(id)) {
+			php_session_abort(TSRMLS_C);
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			return;
 		}
@@ -521,7 +527,6 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 	/* Set session ID for compatibility for older/3rd party save handlers */
 	if (!PS(use_strict_mode)) {
 		php_session_reset_id(TSRMLS_C);
-		PS(session_status) = php_session_active;
 	}
 
 	/* GC must be done before read */
@@ -530,14 +535,14 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 	/* Read data */
 	php_session_track_init(TSRMLS_C);
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == FAILURE) {
+		/* php_session_abort(TSRMLS_C); */
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
 		/* It's better to raise error for this, but disabled error for better compatibility */
-		/*
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-		*/
+		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path)); */
+		/* return; */
 	}
 	/* Set session ID if session read didn't activated session */
-	if (PS(use_strict_mode) && PS(session_status) != php_session_active) {
+	if (PS(use_strict_mode) && PS(session_status) == php_session_none) {
 		php_session_reset_id(TSRMLS_C);
 		PS(session_status) = php_session_active;
 	}
@@ -1280,11 +1285,13 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 	php_session_cache_limiter_t *lim;
 
 	if (PS(cache_limiter)[0] == '\0') return 0;
+	if (PS(session_status) != php_session_active) return -1;
 
 	if (SG(headers_sent)) {
 		const char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
 
+		PS(session_status) = php_session_none;
 		if (output_start_filename) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {
