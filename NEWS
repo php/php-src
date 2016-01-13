@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
 
 - Core:
+  . Fixed bug #71248 (Wrong interface is enforced). (Dmitry)
   . Fixed bug #71300 (Segfault in zend_fetch_string_offset). (Laruence)
   . Fixed bug #71221 (Null pointer deref (segfault) in get_defined_vars via
     ob_start). (hugh at allthethings dot co dot nz)
