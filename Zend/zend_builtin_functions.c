@@ -1198,8 +1198,12 @@ ZEND_FUNCTION(get_object_vars)
 		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
 			if (key) {
 				if (zend_check_property_access(zobj, key) == SUCCESS) {
-					/* Not separating references */
-					if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+					if (Z_ISREF_P(value) && Z_REFCOUNT_P(value) == 1) {
+						value = Z_REFVAL_P(value);
+					}
+					if (Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
 					if (ZSTR_VAL(key)[0] == 0) {
 						const char *prop_name, *class_name;
 						size_t prop_len;

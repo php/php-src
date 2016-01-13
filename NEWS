@@ -2,10 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.3
 
-- Apache2handler:
-  . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
-
 - Core:
+  . Fixed bug #71336 (Wrong is_ref on properties as exposed via
+    get_object_vars()). (Laruence)
   . Fixed bug #71248 (Wrong interface is enforced). (Dmitry)
   . Fixed bug #71300 (Segfault in zend_fetch_string_offset). (Laruence)
   . Fixed bug #71221 (Null pointer deref (segfault) in get_defined_vars via
@@ -18,6 +17,9 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #71297 (Memory leak with consecutive yield from). (Bob)
   . Fixed bug #71314 (var_export(INF) prints INF.0). (Andrea)
+
+- Apache2handler:
+  . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
 
 - CURL:
   . Fixed bug #71227 (Can't compile php_curl statically). (Anatol)
