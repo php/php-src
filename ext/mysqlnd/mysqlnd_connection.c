@@ -534,29 +534,29 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 }
 /* }}} */
 
-/* {{{ mysqlnd_conn_data::connect */
+/* {{{ mysqlnd_conn_data::get_scheme */
 static MYSQLND_STRING
-MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe)
+MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe)
 {
 	MYSQLND_STRING transport;
 	DBG_ENTER("mysqlnd_conn_data::get_scheme");
 #ifndef PHP_WIN32
 	if (hostname.l == sizeof("localhost") - 1 && !strncasecmp(hostname.s, "localhost", hostname.l)) {
-		DBG_INF_FMT("socket=%s", socket_or_pipe.s? socket_or_pipe.s:"n/a");
-		if (!socket_or_pipe.s) {
-			socket_or_pipe.s = "/tmp/mysql.sock";
-			socket_or_pipe.l = strlen(socket_or_pipe.s);
+		DBG_INF_FMT("socket=%s", socket_or_pipe->s? socket_or_pipe->s:"n/a");
+		if (!socket_or_pipe->s) {
+			socket_or_pipe->s = "/tmp/mysql.sock";
+			socket_or_pipe->l = strlen(socket_or_pipe->s);
 		}
-		transport.l = mnd_sprintf(&transport.s, 0, "unix://%s", socket_or_pipe.s);
+		transport.l = mnd_sprintf(&transport.s, 0, "unix://%s", socket_or_pipe->s);
 		*unix_socket = TRUE;
 #else
 	if (hostname.l == sizeof(".") - 1 && hostname.s[0] == '.') {
 		/* named pipe in socket */
-		if (!socket_or_pipe.s) {
-			socket_or_pipe.s = "\\\\.\\pipe\\MySQL";
-			socket_or_pipe.l = strlen(socket_or_pipe.s);
+		if (!socket_or_pipe->s) {
+			socket_or_pipe->s = "\\\\.\\pipe\\MySQL";
+			socket_or_pipe->l = strlen(socket_or_pipe->s);
 		}
-		transport.l = mnd_sprintf(&transport.s, 0, "pipe://%s", socket_or_pipe.s);
+		transport.l = mnd_sprintf(&transport.s, 0, "pipe://%s", socket_or_pipe->s);
 		*named_pipe = TRUE;
 #endif
 	} else {
@@ -657,7 +657,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		mysql_flags |= CLIENT_CONNECT_WITH_DB;
 	}
 
-	transport = conn->m->get_scheme(conn, hostname, socket_or_pipe, port, &unix_socket, &named_pipe);
+	transport = conn->m->get_scheme(conn, hostname, &socket_or_pipe, port, &unix_socket, &named_pipe);
 
 	mysql_flags = conn->m->get_updated_connect_flags(conn, mysql_flags);
 
