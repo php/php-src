@@ -222,6 +222,12 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
+#ifdef PHP_WIN32
+#define WIN32_MAX_SPAWN_CHILDREN 64
+HANDLE win32_kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
+int win32_kids;
+#endif
+
 #ifndef HAVE_ATTRIBUTE_WEAK
 static void fcgi_log(int type, const char *format, ...) {
 	va_list ap;
@@ -1427,6 +1433,25 @@ void fastcgi_cleanup(int signal)
 		exit(0);
 	}
 }
+#else
+BOOL fastcgi_cleanup(DWORD sig)
+{
+	int i = win32_kids;
+
+	while (0 < i--) {
+		if (NULL == win32_kid_cgi_ps[i]) {
+				continue;
+		}
+
+		TerminateProcess(win32_kid_cgi_ps[i], 0);
+		CloseHandle(win32_kid_cgi_ps[i]);
+		win32_kid_cgi_ps[i] = NULL;
+	}
+
+	parent = 0;
+
+	return TRUE;
+}
 #endif
 
 PHP_INI_BEGIN()
@@ -2080,70 +2105,78 @@ consult the installation file that came with this distribution, or visit \n\
 #else
 		if (children) {
 			char *cmd_line;
-			HANDLE kid_cgi_ps[64];
-			int kids = children < 64 ? children : 64;
 			char kid_buf[16];
 			char my_name[MAX_PATH] = {0};
+			int i;
+
+			ZeroMemory(&win32_kid_cgi_ps, sizeof(win32_kid_cgi_ps));
+			win32_kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
+			
+			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
 
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", NULL); /* kids will inherit the env, don't let them spawn */
 
 			GetModuleFileName(NULL, my_name, MAX_PATH);
 			cmd_line = my_name;
 
-			while (0 < kids--) {
-				PROCESS_INFORMATION pi;
-				STARTUPINFO si;
+			while (parent) {
+				i = win32_kids;
+				while (0 < i--) {
+					DWORD status;
 
-				ZeroMemory(&si, sizeof(si));
-				si.cb = sizeof(si);
-				ZeroMemory(&pi, sizeof(pi));
-
-				si.dwFlags = STARTF_USESTDHANDLES;
-				si.hStdOutput = INVALID_HANDLE_VALUE;
-				si.hStdInput  = (HANDLE)_get_osfhandle(fcgi_fd);
-				si.hStdError  = INVALID_HANDLE_VALUE;
-
-				if (CreateProcess(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-					kid_cgi_ps[kids] = pi.hProcess;
-					CloseHandle(pi.hThread);
-				} else {
-					DWORD err = GetLastError();
-					char *err_text;
-
-					kid_cgi_ps[kids] = INVALID_HANDLE_VALUE;
-
-					(void)FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-						NULL,
-						err,
-						LANG_NEUTRAL,
-						(LPTSTR)&err_text,
-						0,
-						NULL);
-					
-					fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
+					if (NULL != win32_kid_cgi_ps[i]) {
+						if(!GetExitCodeProcess(win32_kid_cgi_ps[i], &status) || status != STILL_ACTIVE) {
+							CloseHandle(win32_kid_cgi_ps[i]);
+							win32_kid_cgi_ps[i] = NULL;
+						}
+					}
 				}
+
+				i = win32_kids;
+				while (0 < i--) {
+					PROCESS_INFORMATION pi;
+					STARTUPINFO si;
+
+					if (NULL != win32_kid_cgi_ps[i]) {
+						continue;
+					}
+
+					ZeroMemory(&si, sizeof(si));
+					si.cb = sizeof(si);
+					ZeroMemory(&pi, sizeof(pi));
+
+					si.dwFlags = STARTF_USESTDHANDLES;
+					si.hStdOutput = INVALID_HANDLE_VALUE;
+					si.hStdInput  = (HANDLE)_get_osfhandle(fcgi_fd);
+					si.hStdError  = INVALID_HANDLE_VALUE;
+
+					if (CreateProcess(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+						win32_kid_cgi_ps[i] = pi.hProcess;
+						CloseHandle(pi.hThread);
+					} else {
+						DWORD err = GetLastError();
+						char *err_text;
+
+						win32_kid_cgi_ps[i] = NULL;
+
+						(void)FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+							NULL,
+							err,
+							LANG_NEUTRAL,
+							(LPTSTR)&err_text,
+							0,
+							NULL);
+						
+						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
+					}
+				}
+				
+				WaitForMultipleObjects(win32_kids, win32_kid_cgi_ps, FALSE, INFINITE);
 			}
 			
 			snprintf(kid_buf, 16, "%d", children);
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf); /* restore my env */
 
-			kids = children < 64 ? children : 64;
-			WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
-
-			while (0 < kids--) {
-				DWORD status;
-
-				if (INVALID_HANDLE_VALUE == kid_cgi_ps[kids]) {
-					if(!GetExitCodeProcess(kid_cgi_ps[kids], &status)) {
-						continue;
-					}
-
-					if(status != STILL_ACTIVE){
-						CloseHandle(kid_cgi_ps[kids]);
-						kid_cgi_ps[kids] = INVALID_HANDLE_VALUE;
-					}
-				}
-			}
 			goto parent_out;
 		} else {
 			parent = 0;
