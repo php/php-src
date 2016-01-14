@@ -29,6 +29,9 @@ PHP                                                                        NEWS
     always for successful read. i.e. Non-existing session read must return
     empty string. PHP 7.0 is made not to tolerate buggy return value. (Yasuo)
 
+- SOAP:
+  . Fixed bug #70979 (crash with bad soap request). (Anatol)
+
 - SPL:
   . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
     (Laruence)
