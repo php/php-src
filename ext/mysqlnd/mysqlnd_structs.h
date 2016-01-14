@@ -157,6 +157,7 @@ struct st_mysqlnd_error_info
 	unsigned int error_no;
 	zend_llist * error_list;
 
+	zend_bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *m;
 };
 
