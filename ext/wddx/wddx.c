@@ -978,7 +978,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
-						Z_TYPE_P(ent1->data) == IS_STRING && Z_STRLEN_P(ent1->data) && ent2->type == ST_STRUCT) {
+						Z_TYPE_P(ent1->data) == IS_STRING && Z_STRLEN_P(ent1->data) &&
+						ent2->type == ST_STRUCT && Z_TYPE_P(ent2->data) == IS_ARRAY) {
 						zend_bool incomplete_class = 0;
 
 						zend_str_tolower(Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data));
