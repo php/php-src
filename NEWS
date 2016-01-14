@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
     reference to CURLFile). (Laruence)
 
+- Interbase:
+  . Fixed Bug #71305 (Crash when optional resource is omitted).
+  (Laruence, Anatol)
+
 - LDAP:
   . Fixed bug #71249 (ldap_mod_replace/ldap_mod_add store value as string
     "Array"). (Laruence)
