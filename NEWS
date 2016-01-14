@@ -33,6 +33,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed bug #71249 (ldap_mod_replace/ldap_mod_add store value as string
     "Array"). (Laruence)
+
+- SOAP:
+  . Fixed bug #70979 (crash with bad soap request). (Anatol)
   
 - SPL:
   . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
