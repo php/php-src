@@ -348,7 +348,7 @@ bail:
 			entry.filename_len = entry.uncompressed_filesize;
 
 			/* Check for overflow - bug 61065 */
-			if (entry.filename_len == UINT_MAX) {
+			if (entry.filename_len == UINT_MAX || entry.filename_len == 0) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
 				}
