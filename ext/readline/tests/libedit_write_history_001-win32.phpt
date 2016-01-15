@@ -3,14 +3,14 @@ readline_write_history(): Basic test
 --SKIPIF--
 <?php if (!extension_loaded("readline") || !function_exists('readline_add_history')) die("skip");
 if (READLINE_LIB != "libedit") die("skip libedit only");
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+	die('skip windows only test');
 }
 ?>
 --FILE--
 <?php
 
-$name = tempnam('/tmp', 'readline.tmp');
+$name = tempnam(sys_get_temp_dir(), 'readline.tmp');
 
 readline_add_history('foo');
 readline_add_history('');
@@ -24,9 +24,6 @@ unlink($name);
 
 ?>
 --EXPECT--
-string(21) "_HiStOrY_V2_
-foo
-
+string(6) "foo
 1
-
 "
