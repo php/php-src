@@ -512,7 +512,10 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 	}
 
 	/* If there is no ID, use session module to create one */
-	if (!PS(id)) {
+	if (!PS(id) || !PS(id)[0]) {
+		if (PS(id)) {
+			efree(PS(id));
+		}
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 		if (!PS(id)) {
 			php_session_abort(TSRMLS_C);
@@ -2102,10 +2105,6 @@ static PHP_FUNCTION(session_decode)
 static PHP_FUNCTION(session_start)
 {
 	/* skipping check for non-zero args for performance reasons here ?*/
-	if (PS(id) && !strlen(PS(id))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot start session with empty session ID");
-		RETURN_FALSE;
-	}
 
 	php_session_start(TSRMLS_C);
 
