@@ -786,7 +786,9 @@ PHP_MINFO_FUNCTION(cli_readline)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Readline Support", "enabled");
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+	php_info_print_table_row(2, "Readline library", "WinEditLine");
+#else
 	php_info_print_table_row(2, "Readline library", (rl_library_version ? rl_library_version : "Unknown"));
 #endif
 	php_info_print_table_end();
