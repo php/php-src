@@ -530,7 +530,7 @@ static void php_session_initialize(void) /* {{{ */
 	/* If there is no ID, use session module to create one */
 	if (!PS(id) || !ZSTR_VAL(PS(id))[0]) {
 		if (PS(id)) {
-			efree(PS(id));
+			zend_string_release(PS(id));
 		}
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
