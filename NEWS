@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 
 - Session:
   . Improved fix for bug #68063 (Empty session IDs do still start sessions). (Yasuo)
+  . Fixed bug #69111 (Crash in SessionHandler::read()). (Yasuo)
   . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
   . Fixed bug #71038 (session_start() returns TRUE on failure).
     It's fixed partially on PHP 5.6. It still returns TRUE on session read
