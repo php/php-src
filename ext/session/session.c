@@ -103,6 +103,7 @@ static void php_session_abort(void);
 static inline void php_rinit_session_globals(void) /* {{{ */
 {
 	/* Do NOT init PS(mod_user_names) here! */
+	/* TODO: These could be moved to MINIT and removed. These should be initialized by php_rshutdown_session_globals() always when execution is finished. */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
@@ -130,10 +131,15 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 		zend_string_release(PS(id));
 		PS(id) = NULL;
 	}
+
 	if (PS(session_vars)) {
 		zend_string_release(PS(session_vars));
 		PS(session_vars) = NULL;
 	}
+
+	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
+	/* Set session status to prevent error while restoring save handler INI value. */
+	PS(session_status) = php_session_none;
 }
 /* }}} */
 
@@ -1662,8 +1668,8 @@ PHPAPI void php_session_start(void) /* {{{ */
 static void php_session_flush(int write) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
-		PS(session_status) = php_session_none;
 		php_session_save_current_state(write);
+		PS(session_status) = php_session_none;
 	}
 }
 /* }}} */
@@ -1671,10 +1677,10 @@ static void php_session_flush(int write) /* {{{ */
 static void php_session_abort(void) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
-		PS(session_status) = php_session_none;
 		if (PS(mod_data) || PS(mod_user_implemented)) {
 			PS(mod)->s_close(&PS(mod_data));
 		}
+		PS(session_status) = php_session_none;
 	}
 }
 /* }}} */
