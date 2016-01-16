@@ -2709,46 +2709,22 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, int d
 }
 /* }}} */
 
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
+static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
 {
-	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
-	zend_ulong next_index = 0;
 	zend_bool has_elems = 0;
 
 	for (i = 0; i < list->children; ++i) {
-		zend_ast *pair_ast = list->child[i];
-		zend_ast *var_ast;
-		zend_ast *key_ast;
+		zend_ast *var_ast = list->child[i];
 		znode fetch_result, dim_node;
 
-		if (pair_ast == NULL) {
-			next_index++;
+		if (var_ast == NULL) {
 			continue;
 		}
-
-		var_ast = pair_ast->child[0];
-		key_ast = pair_ast->child[1];
-
-		if (key_ast) {
-			zend_compile_expr(&dim_node, key_ast);
-			zend_handle_numeric_op(&dim_node);
-
-			if (Z_TYPE(dim_node.u.constant) != IS_LONG && Z_TYPE(dim_node.u.constant) != IS_STRING) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Key must be an integer or string literal");
-			}
-			
-			if (Z_TYPE(dim_node.u.constant) == IS_LONG) {
-				next_index = Z_LVAL(dim_node.u.constant);
-			}
-		} else {
-			dim_node.op_type = IS_CONST;
-			ZVAL_LONG(&dim_node.u.constant, next_index);
-
-			next_index++;
-		}
-
 		has_elems = 1;
+
+		dim_node.op_type = IS_CONST;
+		ZVAL_LONG(&dim_node.u.constant, i);
 
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);
@@ -2760,6 +2736,45 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 
 	if (!has_elems) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
+	}
+}
+/* }}} */
+
+static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
+{
+	uint32_t i;
+
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *pair_ast = list->child[i];
+		zend_ast *var_ast = pair_ast->child[0];
+		zend_ast *key_ast = pair_ast->child[1];
+		znode fetch_result, dim_node;
+
+		zend_compile_expr(&dim_node, key_ast);
+		zend_handle_numeric_op(&dim_node);
+
+		if (Z_TYPE(dim_node.u.constant) != IS_LONG && Z_TYPE(dim_node.u.constant) != IS_STRING) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Key must be an integer or string literal");
+		}
+
+		if (expr_node->op_type == IS_CONST) {
+			Z_TRY_ADDREF(expr_node->u.constant);
+		}
+
+		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
+		zend_emit_assign_znode(var_ast, &fetch_result);
+	}
+}
+/* }}} */
+
+static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+
+	if (list->children > 0 && list->child[0] != NULL && list->child[0]->kind == ZEND_AST_ARRAY_ELEM) {
+		zend_compile_keyed_list_assign(list, expr_node);
+	} else {
+		zend_compile_unkeyed_list_assign(list, expr_node);
 	}
 
 	*result = *expr_node;
