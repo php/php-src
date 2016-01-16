@@ -2753,10 +2753,6 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 		zend_compile_expr(&dim_node, key_ast);
 		zend_handle_numeric_op(&dim_node);
 
-		if (Z_TYPE(dim_node.u.constant) != IS_LONG && Z_TYPE(dim_node.u.constant) != IS_STRING) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Key must be an integer or string literal");
-		}
-
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
