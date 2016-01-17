@@ -1174,7 +1174,7 @@ property_name:
 assignment_list:
 		unkeyed_assignment_list
 			{ $$ = $1; }
-	|	keyed_assignment_list
+	|	keyed_assignment_list possible_comma
 			{ $$ = $1; }
 ;
 
