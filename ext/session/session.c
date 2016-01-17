@@ -2113,6 +2113,7 @@ static PHP_FUNCTION(session_regenerate_id)
 		zend_string_release(PS(id));
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
+			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
 			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			RETURN_FALSE;
@@ -2120,6 +2121,7 @@ static PHP_FUNCTION(session_regenerate_id)
 	}
 	/* Read is required to make new session data at this point. */
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
+		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
 		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		RETURN_FALSE;
