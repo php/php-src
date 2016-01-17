@@ -2055,13 +2055,13 @@ static PHP_FUNCTION(session_regenerate_id)
 		return;
 	}
 
-	if (SG(headers_sent) && PS(use_cookies)) {
-		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - headers already sent");
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - session is not active");
 		RETURN_FALSE;
 	}
 
-	if (PS(session_status) != php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - session is not active");
+	if (SG(headers_sent) && PS(use_cookies)) {
+		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - headers already sent");
 		RETURN_FALSE;
 	}
 
