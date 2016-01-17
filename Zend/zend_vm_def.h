@@ -2093,6 +2093,11 @@ ZEND_VM_C_LABEL(num_index_list):
 			}
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				ZEND_VM_C_GOTO(num_index_list);
+			}
+
 ZEND_VM_C_LABEL(str_index_list):
 			value = zend_hash_find(Z_ARRVAL_P(container), str);
 

@@ -10,7 +10,7 @@ $arr = [
 
 const COMPILE_TIME_RESOLVABLE = 1;
 
-define('PROBABLY_NOT_COMPILE_TIME_RESOLVABLE', (int)file_get_contents("data:text/plain,2"));
+define('PROBABLY_NOT_COMPILE_TIME_RESOLVABLE', file_get_contents("data:text/plain,2"));
 
 list(
     COMPILE_TIME_RESOLVABLE => $one,

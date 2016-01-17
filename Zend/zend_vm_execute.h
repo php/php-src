@@ -5773,6 +5773,11 @@ num_index_list:
 			}
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
 str_index_list:
 			value = zend_hash_find(Z_ARRVAL_P(container), str);
 
@@ -11387,6 +11392,11 @@ num_index_list:
 			}
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
 str_index_list:
 			value = zend_hash_find(Z_ARRVAL_P(container), str);
 
@@ -38022,6 +38032,11 @@ num_index_list:
 			}
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
 str_index_list:
 			value = zend_hash_find(Z_ARRVAL_P(container), str);
 
@@ -48006,6 +48021,11 @@ num_index_list:
 			}
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
 str_index_list:
 			value = zend_hash_find(Z_ARRVAL_P(container), str);
 
@@ -51309,6 +51329,11 @@ num_index_list:
 			}
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
 str_index_list:
 			value = zend_hash_find(Z_ARRVAL_P(container), str);
 
@@ -54793,6 +54818,11 @@ num_index_list:
 			}
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
 str_index_list:
 			value = zend_hash_find(Z_ARRVAL_P(container), str);
 
