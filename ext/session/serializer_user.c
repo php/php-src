@@ -20,6 +20,11 @@
 #include "php.h"
 #include "php_session.h"
 
+PS_SERIALIZER_ENCODE_FUNC(user);
+PS_SERIALIZER_DECODE_FUNC(user);
+
+ps_serializer ps_serializer_user = PS_SERIALIZER_ENTRY(user);
+
 
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
@@ -36,26 +41,8 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 }
 
 
-#define FINISH \
-	if (Z_TYPE(retval) != IS_UNDEF) { \
-		if (Z_TYPE(retval) == IS_TRUE) { \
-			ret = SUCCESS; \
-		} else if (Z_TYPE(retval) == IS_FALSE) { \
-			ret = FAILURE; \
-		} else { \
-			if (!EG(exception)) { \
-				php_error_docref(NULL, E_WARNING, \
-				                 "Session callback expects true/false return value"); \
-			} \
-			ret = FAILURE; \
-			zval_ptr_dtor(&retval); \
-		} \
-	} \
-	return ret \
-}
-
-
 #define PSF(a) PS(serializer_user_names).name.ps_##a
+
 
 /* {{{ PS_SERIALIZER_ENCODE_FUNC
  */
@@ -65,12 +52,13 @@ PS_SERIALIZER_ENCODE_FUNC(user)
 
 	if (Z_ISUNDEF(PSF(encode))) {
 		php_error_docref(NULL, E_WARNING,
-			"User decode function is not defined");
+			"User session encode function is not defined");
 		return NULL;
 	}
 
 	ZVAL_UNDEF(&retval);
 	args[0] = PS(http_session_vars);
+	Z_ADDREF(args[0]);
 	ps_call_handler(&PSF(encode), 1, args, &retval);
 
 	if (Z_TYPE(retval) == IS_STRING) {
@@ -85,7 +73,7 @@ PS_SERIALIZER_ENCODE_FUNC(user)
 			zval_ptr_dtor(&retval);
 		}
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING,
+			php_error_docref(NULL, E_RECOVERABLE_ERROR,
 							 "Session decode callback expects string or FALSE return value");
 		}
 	}
@@ -93,21 +81,24 @@ PS_SERIALIZER_ENCODE_FUNC(user)
 }
 /* }}} */
 
+
 /* {{{ PS_SERIALIZER_DECODE_FUNC
  */
 PS_SERIALIZER_DECODE_FUNC(user)
 {
-	zval retval;
-	zval args[1];
-	zend_string *data;
+	zval args[1], retval;
 	zend_bool bailout = 0;
+	zend_string *data;
+	zend_string *var_name = zend_string_init("_SESSION", sizeof("_SESSION") - 1, 0);
 
-	if (vallen == 0) {
-		return SUCCESS;
+	if (Z_ISUNDEF(PSF(encode))) {
+		php_error_docref(NULL, E_RECOVERABLE_ERROR,
+			"User session decode function is not defined");
+		return FAILURE;
 	}
 
 	data = zend_string_init(val, vallen, 0);
-	ZVAL_STR_COPY(&args[0], data);
+	ZVAL_STR(&args[0], data);
 	ZVAL_UNDEF(&retval);
 	zend_try {
 		ps_call_handler(&PSF(decode), 1, args, &retval);
@@ -117,14 +108,26 @@ PS_SERIALIZER_DECODE_FUNC(user)
 		
 
 	if (bailout) {
-		zend_string_release(data);
 		if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
+		zend_bailout();
+	}
+
+	if (Z_TYPE(retval) != IS_ARRAY) {
+		zval_ptr_dtor(&retval);
+		php_error_docref(NULL, E_RECOVERABLE_ERROR,
+						 "User session decode function must return array");
 		return FAILURE;
 	}
 
-	zend_string_release(data);
+	if (!Z_ISUNDEF(PS(http_session_vars))) {
+		zval_ptr_dtor(&PS(http_session_vars));
+	}
+	ZVAL_NEW_REF(&PS(http_session_vars), &retval);
+	Z_ADDREF_P(&PS(http_session_vars));
+	zend_hash_update_ind(&EG(symbol_table), var_name, &PS(http_session_vars));
+	zend_string_release(var_name);
 	return SUCCESS;
 }
 /* }}} */

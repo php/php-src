@@ -104,7 +104,7 @@ static void php_session_abort(void);
 /* Dispatched by RINIT and by php_session_destroy */
 static inline void php_rinit_session_globals(void) /* {{{ */
 {
-	/* Do NOT init PS(mod_user_names) here! */
+	/* Do NOT init PS(mod_user_names)/PS(serializer_user_names) here! */
 	/* TODO: These could be moved to MINIT and removed. These should be initialized by php_rshutdown_session_globals() always when execution is finished. */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
@@ -119,7 +119,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 /* Dispatched by RSHUTDOWN and by php_session_destroy */
 static inline void php_rshutdown_session_globals(void) /* {{{ */
 {
-	/* Do NOT destroy PS(mod_user_names) here! */
+	/* Do NOT destroy PS(mod_user_names)/PS(serializer_user_names) here! */
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
 		ZVAL_UNDEF(&PS(http_session_vars));
@@ -579,7 +579,14 @@ static void php_session_initialize(void) /* {{{ */
 		if (PS(lazy_write)) {
 			PS(session_vars) = zend_string_copy(val);
 		}
-		php_session_decode(val);
+		if (php_session_decode(val) == FAILURE) {
+			zend_string_release(val);
+			php_session_abort();
+			php_error_docref(NULL, E_WARNING,
+							 "Failed to decode session data (serializer: %s)",
+							 zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler")-1, 0));
+			return;
+		}
 		zend_string_release(val);
 	}
 }
@@ -1669,7 +1676,9 @@ PHPAPI void php_session_start(void) /* {{{ */
 	}
 
 	php_session_initialize();
-	php_session_cache_limiter();
+	if (PS(session_status) == php_session_active) {
+		php_session_cache_limiter();
+	}
 }
 /* }}} */
 
@@ -1992,6 +2001,53 @@ static PHP_FUNCTION(session_set_save_handler)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto void session_set_serializer(string encode, string decode)
+   Sets user-level serializer functions */
+static PHP_FUNCTION(session_set_serializer)
+{
+	zval *args[2];
+	zend_string *name, *ini_name, *ini_val;
+	int i;
+
+	if (PS(session_status) == php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Cannot change session serializer while session is active");
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &args[0], &args[1]) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	for (i = 0; i < 2; i++) {
+		if (!zend_is_callable(args[i], 0, &name)) {
+			zend_string_release(name);
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Argument %d is not a valid callback", i+1);
+			RETURN_FALSE;
+		}
+		zend_string_release(name);
+	}
+
+	if (PS(serializer) && PS(serializer) != &ps_serializer_user) {
+		ini_name = zend_string_init("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
+		ini_val = zend_string_init("user", sizeof("user") - 1, 0);
+		zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release(ini_val);
+		zend_string_release(ini_name);
+	}
+
+	for (i = 0; i < 2; i++) {
+		if (!Z_ISUNDEF(PS(serializer_user_names).names[i])) {
+			zval_ptr_dtor(&PS(serializer_user_names).names[i]);
+		}
+		ZVAL_COPY(&PS(serializer_user_names).names[i], args[i]);
+	}
+	
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 /* {{{ proto string session_save_path([string newname])
    Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
@@ -2482,6 +2538,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_save_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, update_timestamp)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_serializer, 0, 0, 2)
+	ZEND_ARG_INFO(0, encode)
+	ZEND_ARG_INFO(0, decode)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_cache_limiter, 0, 0, 0)
 	ZEND_ARG_INFO(0, cache_limiter)
 ZEND_END_ARG_INFO()
@@ -2550,6 +2611,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_destroy,           arginfo_session_void)
 	PHP_FE(session_unset,             arginfo_session_void)
 	PHP_FE(session_set_save_handler,  arginfo_session_set_save_handler)
+	PHP_FE(session_set_serializer,    arginfo_session_set_serializer)
 	PHP_FE(session_cache_limiter,     arginfo_session_cache_limiter)
 	PHP_FE(session_cache_expire,      arginfo_session_cache_expire)
 	PHP_FE(session_set_cookie_params, arginfo_session_set_cookie_params)
@@ -2669,6 +2731,12 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 			ZVAL_UNDEF(&PS(mod_user_names).names[i]);
 		}
 	}
+	for (i = 0; i < 2; i++) {
+		if (!Z_ISUNDEF(PS(serializer_user_names).names[i])) {
+			zval_ptr_dtor(&PS(serializer_user_names).names[i]);
+			ZVAL_UNDEF(&PS(serializer_user_names).names[i]);
+		}
+	}
 
 	return SUCCESS;
 }
@@ -2695,6 +2763,9 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->session_vars = NULL;
 	for (i = 0; i < PS_NUM_APIS; i++) {
 		ZVAL_UNDEF(&ps_globals->mod_user_names.names[i]);
+	}
+	for (i = 0; i < 2; i++) {
+		ZVAL_UNDEF(&ps_globals->serializer_user_names.names[i]);
 	}
 	ZVAL_UNDEF(&ps_globals->http_session_vars);
 }

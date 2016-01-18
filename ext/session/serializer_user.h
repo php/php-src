@@ -19,6 +19,9 @@
 #ifndef MOD_SERIALIZER_USER_H
 #define MOD_SERIALIZER_USER_H
 
+extern ps_serializer ps_serializer_user;
+#define ps_serializer_user_ptr &ps_serializer_user
+
 PS_SERIALIZER_FUNCS(user);
 
 #endif
