@@ -56,6 +56,8 @@
 #include "mod_files.h"
 #include "mod_user.h"
 
+#include "mod_serializer_user.h"
+
 #ifdef HAVE_LIBMM
 #include "mod_mm.h"
 #endif
@@ -1092,10 +1094,11 @@ break_outer_loop:
 /* }}} */
 
 #define MAX_SERIALIZERS 32
-#define PREDEFINED_SERIALIZERS 3
+#define PREDEFINED_SERIALIZERS 4
 
 static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 	PS_SERIALIZER_ENTRY(php_serialize),
+	PS_SERIALIZER_ENTRY(user),
 	PS_SERIALIZER_ENTRY(php),
 	PS_SERIALIZER_ENTRY(php_binary)
 };
