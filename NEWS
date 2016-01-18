@@ -35,7 +35,7 @@ PHP                                                                        NEWS
     "Array"). (Laruence)
 
 - mbsgring:
-  . Fixed bug #71397 (mb_send_mail segmentation fault). (Yasuo)
+  . Fixed bug #71397 (mb_send_mail segmentation fault). (Andrea, Yasuo)
 
 - SOAP:
   . Fixed bug #70979 (crash with bad soap request). (Anatol)
