@@ -2644,6 +2644,8 @@ function toolset_setup_common_cflags()
 		} else {
 			if (VCVERS >= 1900) {
 				ADD_FLAG('CFLAGS', "/guard:cf");
+			}
+			if (VCVERS >= 1800) {
 				if (PHP_PGI != "yes" && PHP_PGO != "yes") {
 					ADD_FLAG('CFLAGS', "/Zc:inline");
 				}
