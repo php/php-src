@@ -32,8 +32,6 @@ function decode($string) {
 }
 
 
-$path = dirname(__FILE__);
-session_save_path($path);
 var_dump(session_set_serializer("encode", "decode"));
 
 var_dump(session_start());
