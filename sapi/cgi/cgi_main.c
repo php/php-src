@@ -226,6 +226,8 @@ static php_cgi_globals_struct php_cgi_globals;
 #define WIN32_MAX_SPAWN_CHILDREN 64
 HANDLE win32_kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
 int win32_kids;
+HANDLE win32_job;
+JOBOBJECT_EXTENDED_LIMIT_INFORMATION win32_ji = { 0 };
 #endif
 
 #ifndef HAVE_ATTRIBUTE_WEAK
@@ -2119,6 +2121,10 @@ consult the installation file that came with this distribution, or visit \n\
 			GetModuleFileName(NULL, my_name, MAX_PATH);
 			cmd_line = my_name;
 
+			win32_job = CreateJobObject(NULL, NULL);
+			win32_ji.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+			SetInformationJobObject(win32_job, JobObjectExtendedLimitInformation, &win32_ji, sizeof(win32_ji));
+
 			while (parent) {
 				i = win32_kids;
 				while (0 < i--) {
@@ -2152,6 +2158,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 					if (CreateProcess(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
 						win32_kid_cgi_ps[i] = pi.hProcess;
+						AssignProcessToJobObject(win32_job, pi.hProcess);
 						CloseHandle(pi.hThread);
 					} else {
 						DWORD err = GetLastError();
