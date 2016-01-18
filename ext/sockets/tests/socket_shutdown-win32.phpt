@@ -7,8 +7,8 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 if (!extension_loaded('sockets')) {
   die('SKIP sockets extension not available.');
 }
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+	die('skip windows only test');
 }
 ?>
 --FILE--
@@ -50,8 +50,10 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: Transport endpoint is not connected in %s on line %d
+Warning: socket_shutdown(): unable to shutdown socket [%d]: A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied.
+ in %s on line %d
 bool(false)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: Invalid argument in %s on line %d
+Warning: socket_shutdown(): unable to shutdown socket [%d]: An invalid argument was supplied.
+ in %s on line %d
 bool(false)
