@@ -585,7 +585,20 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 	zval *child = zend_hash_find(&ce->function_table, key);
 
 	if (child) {
-		do_inheritance_check_on_method((zend_function*)Z_PTR_P(child), parent);
+		zend_function *func = (zend_function*)Z_PTR_P(child);
+		zend_function *orig_prototype = func->common.prototype;
+
+		do_inheritance_check_on_method(func, parent);
+		if (func->common.prototype != orig_prototype &&
+		    func->type == ZEND_USER_FUNCTION &&
+		    func->common.scope != ce &&
+		    !func->op_array.static_variables) {
+			/* Lazy duplication */
+			zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+			memcpy(new_function, func, sizeof(zend_op_array));
+			Z_PTR_P(child) = new_function;
+			func->common.prototype = orig_prototype;
+		}
 		return NULL;
 	}
 

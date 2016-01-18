@@ -95,6 +95,11 @@ PHP 7.1 UPGRADE NOTES
 - Core:
   . Support for ftok()
 
+- FCGI
+  . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,
+    the first php-fcgi.exe process will exec the specified number of children.
+    Those will share the same TCP socket. 
+
 ========================================
 13. Other Changes
 ========================================

@@ -3,8 +3,8 @@ readline_info(): Basic test
 --SKIPIF--
 <?php if (!extension_loaded("readline")) die("skip"); 
 if (READLINE_LIB != "libedit") die("skip libedit only");
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+	die('skip windows only test');
 }
 ?>
 --FILE--
@@ -22,15 +22,11 @@ var_dump(readline_info('attempted_completion_over'));
 
 ?>
 --EXPECTF--
-array(6) {
+array(4) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
   int(0)
-  ["end"]=>
-  int(0)
-  ["library_version"]=>
-  string(%d) "%s"
   ["readline_name"]=>
   string(0) ""
   ["attempted_completion_over"]=>

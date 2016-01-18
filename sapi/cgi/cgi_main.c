@@ -102,7 +102,6 @@ struct sigaction act, old_term, old_quit, old_int;
 
 static void (*php_php_import_environment_variables)(zval *array_ptr);
 
-#ifndef PHP_WIN32
 /* these globals used for forking children on unix systems */
 /**
  * Number of child processes that will get created to service requests
@@ -115,6 +114,7 @@ static int children = 0;
  */
 static int parent = 1;
 
+#ifndef PHP_WIN32
 /* Did parent received exit signals SIG_TERM/SIG_INT/SIG_QUIT */
 static int exit_signal = 0;
 
@@ -220,6 +220,12 @@ static php_cgi_globals_struct php_cgi_globals;
 	}
 #else
 #define TRANSLATE_SLASHES(path)
+#endif
+
+#ifdef PHP_WIN32
+#define WIN32_MAX_SPAWN_CHILDREN 64
+HANDLE win32_kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
+int win32_kids;
 #endif
 
 #ifndef HAVE_ATTRIBUTE_WEAK
@@ -354,9 +360,7 @@ static void sapi_fcgi_flush(void *server_context)
 	fcgi_request *request = (fcgi_request*) server_context;
 
 	if (
-#ifndef PHP_WIN32
 		!parent &&
-#endif
 		request && !fcgi_flush(request, 0)) {
 
 		php_handle_aborted_connection();
@@ -900,9 +904,7 @@ static int sapi_cgi_deactivate(void)
 	if (SG(sapi_started)) {
 		if (fcgi_is_fastcgi()) {
 			if (
-#ifndef PHP_WIN32
 				!parent &&
-#endif
 				!fcgi_finish_request((fcgi_request*)SG(server_context), 0)) {
 				php_handle_aborted_connection();
 			}
@@ -1430,6 +1432,25 @@ void fastcgi_cleanup(int signal)
 	} else {
 		exit(0);
 	}
+}
+#else
+BOOL fastcgi_cleanup(DWORD sig)
+{
+	int i = win32_kids;
+
+	while (0 < i--) {
+		if (NULL == win32_kid_cgi_ps[i]) {
+				continue;
+		}
+
+		TerminateProcess(win32_kid_cgi_ps[i], 0);
+		CloseHandle(win32_kid_cgi_ps[i]);
+		win32_kid_cgi_ps[i] = NULL;
+	}
+
+	parent = 0;
+
+	return TRUE;
 }
 #endif
 
@@ -1979,8 +2000,7 @@ consult the installation file that came with this distribution, or visit \n\
 		/* library is already initialized, now init our request */
 		request = fcgi_init_request(fcgi_fd, NULL, NULL, NULL);
 
-#ifndef PHP_WIN32
-		/* Pre-fork, if required */
+		/* Pre-fork or spawn, if required */
 		if (getenv("PHP_FCGI_CHILDREN")) {
 			char * children_str = getenv("PHP_FCGI_CHILDREN");
 			children = atoi(children_str);
@@ -1996,6 +2016,7 @@ consult the installation file that came with this distribution, or visit \n\
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
 		}
 
+#ifndef PHP_WIN32
 		if (children) {
 			int running = 0;
 			pid_t pid;
@@ -2081,6 +2102,85 @@ consult the installation file that came with this distribution, or visit \n\
 			parent = 0;
 		}
 
+#else
+		if (children) {
+			char *cmd_line;
+			char kid_buf[16];
+			char my_name[MAX_PATH] = {0};
+			int i;
+
+			ZeroMemory(&win32_kid_cgi_ps, sizeof(win32_kid_cgi_ps));
+			win32_kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
+			
+			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
+
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN", NULL); /* kids will inherit the env, don't let them spawn */
+
+			GetModuleFileName(NULL, my_name, MAX_PATH);
+			cmd_line = my_name;
+
+			while (parent) {
+				i = win32_kids;
+				while (0 < i--) {
+					DWORD status;
+
+					if (NULL != win32_kid_cgi_ps[i]) {
+						if(!GetExitCodeProcess(win32_kid_cgi_ps[i], &status) || status != STILL_ACTIVE) {
+							CloseHandle(win32_kid_cgi_ps[i]);
+							win32_kid_cgi_ps[i] = NULL;
+						}
+					}
+				}
+
+				i = win32_kids;
+				while (0 < i--) {
+					PROCESS_INFORMATION pi;
+					STARTUPINFO si;
+
+					if (NULL != win32_kid_cgi_ps[i]) {
+						continue;
+					}
+
+					ZeroMemory(&si, sizeof(si));
+					si.cb = sizeof(si);
+					ZeroMemory(&pi, sizeof(pi));
+
+					si.dwFlags = STARTF_USESTDHANDLES;
+					si.hStdOutput = INVALID_HANDLE_VALUE;
+					si.hStdInput  = (HANDLE)_get_osfhandle(fcgi_fd);
+					si.hStdError  = INVALID_HANDLE_VALUE;
+
+					if (CreateProcess(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+						win32_kid_cgi_ps[i] = pi.hProcess;
+						CloseHandle(pi.hThread);
+					} else {
+						DWORD err = GetLastError();
+						char *err_text;
+
+						win32_kid_cgi_ps[i] = NULL;
+
+						(void)FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+							NULL,
+							err,
+							LANG_NEUTRAL,
+							(LPTSTR)&err_text,
+							0,
+							NULL);
+						
+						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
+					}
+				}
+				
+				WaitForMultipleObjects(win32_kids, win32_kid_cgi_ps, FALSE, INFINITE);
+			}
+			
+			snprintf(kid_buf, 16, "%d", children);
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf); /* restore my env */
+
+			goto parent_out;
+		} else {
+			parent = 0;
+		}
 #endif /* WIN32 */
 	}
 
@@ -2584,9 +2684,7 @@ out:
 #endif
 	}
 
-#ifndef PHP_WIN32
 parent_out:
-#endif
 
 	SG(server_context) = NULL;
 	php_module_shutdown();

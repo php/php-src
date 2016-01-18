@@ -3067,6 +3067,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		case ZEND_BIND_GLOBAL:
+		case ZEND_BIND_STATIC:
 			tmp = (MAY_BE_REF | MAY_BE_ANY );
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			break;

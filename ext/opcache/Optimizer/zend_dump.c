@@ -510,9 +510,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				case ZEND_FETCH_LOCAL:
 					fprintf(stderr, " (local)");
 					break;
-				case ZEND_FETCH_STATIC:
-					fprintf(stderr, " (static)");
-					break;
 				case ZEND_FETCH_GLOBAL_LOCK:
 					fprintf(stderr, " (global+lock)");
 					break;

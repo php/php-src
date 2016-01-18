@@ -60,10 +60,10 @@ extern int le_link, le_plink, le_trans;
 
 ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	ISC_STATUS status[20];
-	long default_link;
-	long num_links, num_persistent;
+	zend_resource *default_link;
+	zend_long num_links, num_persistent;
 	char errmsg[MAX_ERRMSG];
-	long sql_code;
+	zend_long sql_code;
 ZEND_END_MODULE_GLOBALS(ibase)
 
 ZEND_EXTERN_MODULE_GLOBALS(ibase)
@@ -95,7 +95,7 @@ typedef struct {
 
 typedef struct event {
 	ibase_db_link *link;
-	long link_res_id;
+	zend_resource* link_res;
 	ISC_LONG event_id;
 	unsigned short event_count;
 	char **events;
@@ -155,13 +155,15 @@ void _php_ibase_module_error(char *, ...)
 
 /* determine if a resource is a link or transaction handle */
 #define PHP_IBASE_LINK_TRANS(zv, lh, th)													\
-	do { if (!zv) {																			\
-			lh = (ibase_db_link *)zend_fetch_resource2(IBG(default_link),				\
-				"InterBase link", le_link, le_plink); }										\
-		else																				\
-			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, zv, &lh, &th);		\
-		if (SUCCESS != _php_ibase_def_trans(lh, &th)) { RETURN_FALSE; }			\
-	} while (0)
+		do {                                                                                \
+			if (!zv) {                                                                      \
+				lh = (ibase_db_link *)zend_fetch_resource2(                                 \
+						IBG(default_link), "InterBase link", le_link, le_plink);            \
+			} else {                                                                        \
+				_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, zv, &lh, &th);  \
+			}                                                                               \
+			if (SUCCESS != _php_ibase_def_trans(lh, &th)) { RETURN_FALSE; }                 \
+		} while (0)
 
 int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans);
 void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval *link_id,
@@ -174,7 +176,7 @@ void php_ibase_query_minit(INIT_FUNC_ARGS);
 void php_ibase_blobs_minit(INIT_FUNC_ARGS);
 int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
 zend_string *_php_ibase_quad_to_string(ISC_QUAD const qd);
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len);
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, zend_ulong max_len);
 int _php_ibase_blob_add(zval *string_arg, ibase_blob *ib_blob);
 
 /* provided by ibase_events.c */

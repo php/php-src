@@ -1474,14 +1474,7 @@ ZEND_VM_HELPER(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED, int type)
 		}
 	}
 
-	if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
-		if (Z_CONSTANT_P(retval)) {
-			if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
-				FREE_OP1();
-				HANDLE_EXCEPTION();
-			}
-		}
-	} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
+	if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 		FREE_OP1();
 	}
 
@@ -8026,6 +8019,57 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 	var_name = CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var));
 	zend_closure_bind_var(closure, var_name, var);
 	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	HashTable *ht;
+	zval *varname;
+	zval *value;
+	zval *variable_ptr;
+
+	SAVE_OPLINE();
+	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	zval_ptr_dtor(variable_ptr);
+
+	ht = EX(func)->op_array.static_variables;
+	ZEND_ASSERT(ht != NULL);
+	if (GC_REFCOUNT(ht) > 1) {
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+			GC_REFCOUNT(ht)--;
+		}
+		EX(func)->op_array.static_variables = ht = zend_array_dup(ht);
+	}
+
+	varname = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	value = zend_hash_find(ht, Z_STR_P(varname));
+
+	if (opline->extended_value) {
+		if (Z_CONSTANT_P(value)) {
+			if (UNEXPECTED(zval_update_constant_ex(value, 1, NULL) != SUCCESS)) {
+				ZVAL_NULL(variable_ptr);
+				HANDLE_EXCEPTION();
+			}
+		}
+		if (UNEXPECTED(!Z_ISREF_P(value))) {
+			zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
+			GC_REFCOUNT(ref) = 2;
+			GC_TYPE_INFO(ref) = IS_REFERENCE;
+			ZVAL_COPY_VALUE(&ref->val, value);
+			Z_REF_P(value) = ref;
+			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
+			ZVAL_REF(variable_ptr, ref);
+		} else {
+			Z_ADDREF_P(value);
+			ZVAL_REF(variable_ptr, Z_REF_P(value));
+		}
+	} else {
+		ZVAL_COPY(variable_ptr, value);
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
