@@ -19,7 +19,6 @@ ob_start();
 
 echo "*** Testing session_set_serializer() : basic functionality ***\n";
 
-
 function encode($array) {
 	echo "encoded: ". serialize($array) ."\n";
 	return serialize($array);
@@ -29,7 +28,6 @@ function decode($string) {
 	echo "decoding: ". ($string) . "\n";
 	return unserialize($string) ?: array();
 }
-
 
 $path = dirname(__FILE__);
 session_save_path($path);

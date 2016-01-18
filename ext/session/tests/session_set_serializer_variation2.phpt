@@ -30,7 +30,6 @@ function decode($string) {
 	return unserialize($string) ?: array();
 }
 
-
 $path = dirname(__FILE__);
 session_save_path($path);
 var_dump(session_set_serializer("encode", "no_decode"));

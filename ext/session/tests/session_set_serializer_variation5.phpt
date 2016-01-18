@@ -36,7 +36,7 @@ var_dump(session_set_serializer("encode", "decode"));
 var_dump(session_start());
 $session_id = session_id();
 // encode() is executed by session_commit().
-// encode() returns invalid type and RSHUTDON try to finish session.
+// encode() returns invalid type and RSHUTDOWN tries to finish session.
 // Therefore, ecode() is called twice.
 var_dump($session_id, session_commit());
 
