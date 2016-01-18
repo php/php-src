@@ -83,6 +83,9 @@ zend_class_entry *php_session_update_timestamp_class_entry;
 /* SessionUpdateTimestampInterface */
 zend_class_entry *php_session_update_timestamp_iface_entry;
 
+/* SessionSerializerInterface */
+zend_class_entry *php_session_serializer_iface_entry;
+
 /* ***********
    * Helpers *
    *********** */
@@ -1867,7 +1870,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		zend_bool register_shutdown = 1;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 
 		/* For compatibility reason, implemeted interface is not checked */
@@ -2008,41 +2011,76 @@ static PHP_FUNCTION(session_set_serializer)
 {
 	zval *args[2];
 	zend_string *name, *ini_name, *ini_val;
-	int i;
+	int i, argc = ZEND_NUM_ARGS();
 
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session serializer while session is active");
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &args[0], &args[1]) == FAILURE) {
-		RETURN_FALSE;
+	if (argc > 2) {
+		php_error_docref(NULL, E_WARNING, "Accepts 1 or 2 paramters");
+		return;
 	}
 
-	for (i = 0; i < 2; i++) {
-		if (!zend_is_callable(args[i], 0, &name)) {
-			zend_string_release(name);
-			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Argument %d is not a valid callback", i+1);
+	if (argc == 1) {
+		/* Object */
+		zend_string *func_name;
+		zend_function *current_mptr;
+
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &args[0], php_session_serializer_iface_entry) == FAILURE) {
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Only SessionSerializerInterface object can be used as session serializer object");
 			RETURN_FALSE;
 		}
-		zend_string_release(name);
+		i = 0;
+		ZEND_HASH_FOREACH_STR_KEY(&php_session_serializer_iface_entry->function_table, func_name) {
+			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(args[0])->function_table, func_name))) {
+				if (!Z_ISUNDEF(PS(serializer_user_names).names[i])) {
+					zval_ptr_dtor(&PS(serializer_user_names).names[i]);
+				}
+				array_init_size(&PS(serializer_user_names).names[i], 2);
+				Z_ADDREF_P(args[0]);
+				add_next_index_zval(&PS(serializer_user_names).names[i], args[0]);
+				add_next_index_str(&PS(serializer_user_names).names[i], zend_string_copy(func_name));
+			} else {
+				php_error_docref(NULL, E_ERROR, "Session handler's function table is corrupt");
+				RETURN_FALSE;
+			}
+			++i;
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		/* Functions */
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &args[0], &args[1]) == FAILURE) {
+			return;
+		}
+		for (i = 0; i < 2; i++) {
+			if (!zend_is_callable(args[i], 0, &name)) {
+				zend_string_release(name);
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Argument %d is not a valid callback", i+1);
+				RETURN_FALSE;
+			}
+			zend_string_release(name);
+		}
+		for (i = 0; i < 2; i++) {
+			if (!Z_ISUNDEF(PS(serializer_user_names).names[i])) {
+				zval_ptr_dtor(&PS(serializer_user_names).names[i]);
+			}
+			ZVAL_COPY(&PS(serializer_user_names).names[i], args[i]);
+		}
 	}
 
 	if (PS(serializer) && PS(serializer) != &ps_serializer_user) {
+		int ret;
+
 		ini_name = zend_string_init("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
 		ini_val = zend_string_init("user", sizeof("user") - 1, 0);
-		zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ret = zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(ini_val);
 		zend_string_release(ini_name);
-	}
-
-	for (i = 0; i < 2; i++) {
-		if (!Z_ISUNDEF(PS(serializer_user_names).names[i])) {
-			zval_ptr_dtor(&PS(serializer_user_names).names[i]);
+		if (ret == FAILURE) {
+			RETURN_FALSE;
 		}
-		ZVAL_COPY(&PS(serializer_user_names).names[i], args[i]);
 	}
-	
 
 	RETURN_TRUE;
 }
@@ -2595,6 +2633,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_session_class_updateTimestamp, 0)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_session_serializer_encode, 0)
+	ZEND_ARG_INFO(0, raw_data)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_session_serializer_decode, 0)
+	ZEND_ARG_INFO(0, encoded_data)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ session_functions[]
@@ -2647,7 +2694,7 @@ static const zend_function_entry php_session_id_iface_functions[] = {
 };
 /* }}} */
 
-/* {{{ SessionUpdateTimestampHandler functions[]
+/* {{{ SessionUpdateTimestampInterface functions[]
  */
 static const zend_function_entry php_session_update_timestamp_iface_functions[] = {
 	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateId, arginfo_session_class_validateId)
@@ -2655,6 +2702,16 @@ static const zend_function_entry php_session_update_timestamp_iface_functions[] 
 	{ NULL, NULL, NULL }
 };
 /* }}} */
+
+/* {{{ SessionSerializerInterface functions[]
+ */
+static const zend_function_entry php_session_serializer_iface_functions[] = {
+	PHP_ABSTRACT_ME(SessionSerializerInterface, encode, arginfo_session_serializer_encode)
+	PHP_ABSTRACT_ME(SessionSerializerInterface, decode, arginfo_session_serializer_decode)
+	{ NULL, NULL, NULL }
+};
+/* }}} */
+
 
 /* {{{ SessionHandler functions[]
  */
@@ -2800,6 +2857,10 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	INIT_CLASS_ENTRY(ce, PS_UPDATE_TIMESTAMP_IFACE_NAME, php_session_update_timestamp_iface_functions);
 	php_session_update_timestamp_iface_entry = zend_register_internal_class(&ce);
 	php_session_update_timestamp_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
+
+	INIT_CLASS_ENTRY(ce, PS_SERIALIZER_IFACE_NAME, php_session_serializer_iface_functions);
+	php_session_serializer_iface_entry = zend_register_internal_class(&ce);
+	php_session_serializer_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
 	/* Register base class */
 	INIT_CLASS_ENTRY(ce, PS_CLASS_NAME, php_session_class_functions);

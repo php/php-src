@@ -342,4 +342,8 @@ extern PHP_METHOD(SessionHandler, create_sid);
 extern PHP_METHOD(SessionHandler, validateId);
 extern PHP_METHOD(SessionHandler, updateTimestamp);
 
+#define PS_SERIALIZER_IFACE_NAME "SessionSerializerInterface"
+extern zend_class_entry *php_session_serializer_iface_entry;
+
+
 #endif
