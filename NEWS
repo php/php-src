@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug #71249 (ldap_mod_replace/ldap_mod_add store value as string
     "Array"). (Laruence)
 
+- mbsgring:
+  . Fixed bug #71397 (mb_send_mail segmentation fault). (Yasuo)
+
 - SOAP:
   . Fixed bug #70979 (crash with bad soap request). (Anatol)
   
