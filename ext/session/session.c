@@ -1119,7 +1119,7 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 
 PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SERIALIZER_ENCODE_ARGS), int (*decode)(PS_SERIALIZER_DECODE_ARGS)) /* {{{ */
 {
-	int ret = -1;
+	int ret = FAILURE;
 	int i;
 
 	for (i = 0; i < MAX_SERIALIZERS; i++) {
@@ -1128,7 +1128,7 @@ PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SE
 			ps_serializers[i].encode = encode;
 			ps_serializers[i].decode = decode;
 			ps_serializers[i + 1].name = NULL;
-			ret = 0;
+			ret = SUCCESS;
 			break;
 		}
 	}
@@ -1150,13 +1150,13 @@ static ps_module *ps_modules[MAX_MODULES + 1] = {
 
 PHPAPI int php_session_register_module(ps_module *ptr) /* {{{ */
 {
-	int ret = -1;
+	int ret = FAILURE;
 	int i;
 
 	for (i = 0; i < MAX_MODULES; i++) {
 		if (!ps_modules[i]) {
 			ps_modules[i] = ptr;
-			ret = 0;
+			ret = SUCCESS;
 			break;
 		}
 	}
