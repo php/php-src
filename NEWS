@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.3
+21 Jan 2016 PHP 7.0.3RC1
 
 - Core:
   . Fixed bug #71336 (Wrong is_ref on properties as exposed via
