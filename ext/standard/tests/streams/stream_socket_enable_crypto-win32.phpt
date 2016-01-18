@@ -42,6 +42,8 @@ bool(false)
 
 Warning: stream_socket_enable_crypto(): When enabling encryption you must specify the crypto type in %s on line %d
 bool(false)
+
+Warning: stream_socket_enable_crypto(): SSLv2 unavailable in the OpenSSL library against which PHP is linked in %s on line %d
 bool(false)
 
 Warning: stream_socket_enable_crypto(): SSL: A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied.
