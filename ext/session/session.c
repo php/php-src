@@ -56,7 +56,7 @@
 #include "mod_files.h"
 #include "mod_user.h"
 
-#include "mod_serializer_user.h"
+#include "serializer_user.h"
 
 #ifdef HAVE_LIBMM
 #include "mod_mm.h"
