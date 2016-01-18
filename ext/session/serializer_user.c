@@ -69,9 +69,6 @@ PS_SERIALIZER_ENCODE_FUNC(user)
 	} else if (Z_TYPE(retval) == IS_FALSE) {
 		return NULL;
 	} else {
-		if (!Z_ISUNDEF(retval)) {
-			zval_ptr_dtor(&retval);
-		}
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_RECOVERABLE_ERROR,
 							 "Session decode callback expects string or FALSE return value");
@@ -87,7 +84,6 @@ PS_SERIALIZER_ENCODE_FUNC(user)
 PS_SERIALIZER_DECODE_FUNC(user)
 {
 	zval args[1], retval;
-	zend_bool bailout = 0;
 	zend_string *data;
 	zend_string *var_name = zend_string_init("_SESSION", sizeof("_SESSION") - 1, 0);
 
@@ -100,22 +96,12 @@ PS_SERIALIZER_DECODE_FUNC(user)
 	data = zend_string_init(val, vallen, 0);
 	ZVAL_STR(&args[0], data);
 	ZVAL_UNDEF(&retval);
-	zend_try {
-		ps_call_handler(&PSF(decode), 1, args, &retval);
-	} zend_catch {
-		bailout = 1;
-	} zend_end_try();
-		
+	ps_call_handler(&PSF(decode), 1, args, &retval);
 
-	if (bailout) {
+	if (Z_TYPE(retval) != IS_ARRAY) {
 		if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
-		zend_bailout();
-	}
-
-	if (Z_TYPE(retval) != IS_ARRAY) {
-		zval_ptr_dtor(&retval);
 		php_error_docref(NULL, E_RECOVERABLE_ERROR,
 						 "User session decode function must return array");
 		return FAILURE;
