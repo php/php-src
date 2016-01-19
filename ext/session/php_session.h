@@ -332,6 +332,10 @@ extern zend_class_entry *php_session_id_iface_entry;
 #define PS_UPDATE_TIMESTAMP_IFACE_NAME "SessionUpdateTimestampHandlerInterface"
 extern zend_class_entry *php_session_update_timestamp_iface_entry;
 
+#define PS_SERIALIZER_IFACE_NAME "SessionSerializerInterface"
+extern zend_class_entry *php_session_serializer_iface_entry;
+
+
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);
 extern PHP_METHOD(SessionHandler, read);
@@ -341,9 +345,6 @@ extern PHP_METHOD(SessionHandler, gc);
 extern PHP_METHOD(SessionHandler, create_sid);
 extern PHP_METHOD(SessionHandler, validateId);
 extern PHP_METHOD(SessionHandler, updateTimestamp);
-
-#define PS_SERIALIZER_IFACE_NAME "SessionSerializerInterface"
-extern zend_class_entry *php_session_serializer_iface_entry;
 
 
 #endif

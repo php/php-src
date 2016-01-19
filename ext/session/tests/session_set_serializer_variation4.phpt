@@ -31,7 +31,6 @@ function decode($string) {
 	return unserialize($string) ?: array();
 }
 
-
 var_dump(session_set_serializer("encode", "decode"));
 
 // Shouldn't reach here
