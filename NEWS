@@ -16,7 +16,7 @@ PHP                                                                        NEWS
   . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
 
 - PDO_Firebird:
-  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X86_64). (Mariuz)
 
 - Pgsql:
   . Implemented FR #31021 (pg_last_notice() is needed to get all notice

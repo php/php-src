@@ -3725,7 +3725,7 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 
 static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_bool by_ref) /* {{{ */
 {
-	znode var_node, result;
+	znode var_node;
 	zend_op *opline;
 
 	zend_compile_expr(&var_node, var_ast);
@@ -3746,16 +3746,10 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 	}
 	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
 
-	opline = zend_emit_op(&result, by_ref ? ZEND_FETCH_W : ZEND_FETCH_R, &var_node, NULL);
-	opline->extended_value = ZEND_FETCH_STATIC;
-
-	if (by_ref) {
-		zend_ast *fetch_ast = zend_ast_create(ZEND_AST_VAR, var_ast);
-		zend_emit_assign_ref_znode(fetch_ast, &result);
-	} else {
-		zend_ast *fetch_ast = zend_ast_create(ZEND_AST_VAR, var_ast);
-		zend_emit_assign_znode(fetch_ast, &result);
-	}
+	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, &var_node);
+	opline->op1_type = IS_CV;
+	opline->op1.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR(var_node.u.constant)));
+	opline->extended_value = by_ref;
 }
 /* }}} */
 
@@ -4929,15 +4923,33 @@ static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* 
 
 void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 {
+	zend_op_array *op_array = CG(active_op_array);
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
+		zend_string *var_name = zend_ast_get_str(var_ast);
 		zend_bool by_ref = var_ast->attr;
-
 		zval zv;
 		ZVAL_NULL(&zv);
+
+		if (op_array->static_variables
+				&& zend_hash_exists(op_array->static_variables, var_name)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+		}
+
+		{
+			int i;
+			for (i = 0; i < op_array->last_var; i++) {
+				if (zend_string_equals(op_array->vars[i], var_name)) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use lexical variable $%s as a parameter name", ZSTR_VAL(var_name));
+				}
+			}
+		}
+
 		zend_compile_static_var_common(var_ast, &zv, by_ref);
 	}
 }
