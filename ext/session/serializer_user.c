@@ -51,7 +51,7 @@ PS_SERIALIZER_ENCODE_FUNC(user)
 	zval args[1], retval;
 
 	if (Z_ISUNDEF(PSF(encode))) {
-		php_error_docref(NULL, E_WARNING,
+		php_error_docref(NULL, E_RECOVERABLE_ERROR,
 			"User session encode function is not defined");
 		return NULL;
 	}

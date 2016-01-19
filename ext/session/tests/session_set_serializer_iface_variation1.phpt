@@ -35,7 +35,7 @@ class MySerializer {
 $handler = new MySerializer;
 
 var_dump(session_set_serializer($handler));
-
+// Shound't reach here
 session_start();
 $session_id = session_id();
 $_SESSION["Blah"] = "Hello World!";

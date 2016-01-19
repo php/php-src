@@ -44,6 +44,7 @@ $_SESSION["Guff"] = 1234567890;
 var_dump($_SESSION);
 
 session_write_close();
+// Shouldn't reach here
 session_unset();
 var_dump($_SESSION);
 
