@@ -28,6 +28,14 @@ function noisy_gc($maxlifetime) {
 
 echo "*** Testing session_set_save_handler() : variation ***\n";
 
+/***
+Note: Besides maxlifetime setting is ignored, custome save handler deletes
+session data file always when it is called becuase of gc_probability and
+gc_divisor are 1. gc is called always. Because of this, session data file
+does not exists always and session ID validation fails always. As a result
+create ID function is called always.
+***/
+
 require_once "save_handler.inc";
 $path = dirname(__FILE__);
 var_dump(session_save_path($path));
@@ -53,6 +61,7 @@ var_dump(session_start());
 var_dump(session_destroy());
 
 ob_end_flush();
+
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : variation ***
@@ -61,9 +70,9 @@ string(0) ""
 *** Without lazy_write ***
 bool(true)
 Open [%s,PHPSESSID]
-CreateID [PHPT-%d]
 GC [0]
 1 deleted
+CreateID [PHPT-%d]
 Read [%s,PHPT-%d]
 bool(true)
 string(%d) "PHPT-%d"
@@ -75,9 +84,10 @@ string(%d) "PHPT-%d"
 string(%d) "PHPT-%d"
 bool(true)
 Open [%s,PHPSESSID]
-ValidateID [%s,PHPT-%d]
 GC [0]
 1 deleted
+ValidateID [%s,PHPT-%d]
+CreateID [PHPT-%d]
 Read [%s,PHPT-%d]
 bool(true)
 Write [%s,PHPT-%d,]
@@ -87,9 +97,10 @@ string(%d) "PHPT-%d"
 *** Cleanup ***
 string(%d) "PHPT-%d"
 Open [%s,PHPSESSID]
-ValidateID [%s,PHPT-%d]
 GC [0]
 1 deleted
+ValidateID [%s,PHPT-%d]
+CreateID [PHPT-%d]
 Read [%s,PHPT-%d]
 bool(true)
 Destroy [%s,PHPT-%d]
