@@ -46,7 +46,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 		return FAILURE;
 	}
 
-	if (*flags & ZEND_FUNC_INDIRECT_VAR_ASSESS) {
+	if (*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) {
 		/* TODO: we can't analyze functions with indirect variable access ??? */
 		return FAILURE;
 	}

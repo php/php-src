@@ -22,7 +22,7 @@
 #include "zend_ssa.h"
 
 /* func flags */
-#define ZEND_FUNC_INDIRECT_VAR_ASSESS      (1<<0)
+#define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)
 #define ZEND_FUNC_HAS_CALLS                (1<<1)
 #define ZEND_FUNC_VARARG                   (1<<2)
 #define ZEND_FUNC_NO_LOOPS                 (1<<3)

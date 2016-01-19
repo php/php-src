@@ -853,7 +853,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	if (ssa) {
 		fprintf(stderr, ", ssa_vars=%d", ssa->vars_count);
 	}
-	if (func_flags & ZEND_FUNC_INDIRECT_VAR_ASSESS) {
+	if (func_flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) {
 		fprintf(stderr, ", dynamic");
 	}
 	if (func_flags & ZEND_FUNC_RECURSIVE) {

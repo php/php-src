@@ -264,7 +264,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				}
 				break;
 			case ZEND_INCLUDE_OR_EVAL:
-				flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+				flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
 				if (build_flags & ZEND_CFG_STACKLESS) {
@@ -292,17 +292,17 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				if ((fn = zend_hash_find_ptr(EG(function_table), Z_STR_P(zv))) != NULL) {
 					if (fn->type == ZEND_INTERNAL_FUNCTION) {
 						if (zend_string_equals_literal(Z_STR_P(zv), "extract")) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "compact")) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "parse_str") &&
 						           opline->extended_value == 1) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "mb_parse_str") &&
 						           opline->extended_value == 1) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "get_defined_vars")) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_num_args")) {
 							flags |= ZEND_FUNC_VARARG;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_get_arg")) {
@@ -366,7 +366,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_UNSET_VAR:
 				if (!(opline->extended_value & ZEND_QUICK_SET)) {
-					flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 				break;
 			case ZEND_FETCH_R:
@@ -376,11 +376,11 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_FETCH_IS:
 			case ZEND_FETCH_UNSET:
 				if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) {
-					flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
 				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
 				           !op_array->function_name) {
-					flags |= ZEND_FUNC_INDIRECT_VAR_ASSESS;
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 				break;
 		}
