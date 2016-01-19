@@ -2121,7 +2121,8 @@ consult the installation file that came with this distribution, or visit \n\
 			
 			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
 
-			SetEnvironmentVariable("PHP_FCGI_CHILDREN", NULL); /* kids will inherit the env, don't let them spawn */
+			/* kids will inherit the env, don't let them spawn */
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN", NULL);
 
 			GetModuleFileName(NULL, my_name, MAX_PATH);
 			cmd_line = my_name;
@@ -2198,7 +2199,8 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 			
 			snprintf(kid_buf, 16, "%d", children);
-			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf); /* restore my env */
+			/* restore my env */
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
 
 			goto parent_out;
 		} else {
