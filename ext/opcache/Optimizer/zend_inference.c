@@ -3067,8 +3067,11 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		case ZEND_BIND_GLOBAL:
+			tmp = (MAY_BE_REF | MAY_BE_ANY);
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+			break;
 		case ZEND_BIND_STATIC:
-			tmp = (MAY_BE_REF | MAY_BE_ANY );
+			tmp = MAY_BE_ANY | (opline->extended_value ? MAY_BE_REF : (MAY_BE_RC1 | MAY_BE_RCN));
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			break;
 		case ZEND_SEND_VAR:
@@ -4071,17 +4074,22 @@ int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const 
 	}
 	ssa_var_info = ssa->var_info;
 
-	for (i = 0; i < op_array->last_var; i++) {
-		if (!op_array->function_name) {
+	if (!op_array->function_name) {
+		for (i = 0; i < op_array->last_var; i++) {
 			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-		} else if (i == EX_VAR_TO_NUM(op_array->this_var)) {
-			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
-			ssa_var_info[i].ce = op_array->scope;
-			ssa_var_info[i].is_instanceof = 1;
-		} else {
-			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RCN;
+			ssa_var_info[i].has_range = 0;
 		}
-		ssa_var_info[i].has_range = 0;
+	} else {
+		for (i = 0; i < op_array->last_var; i++) {
+			if (i == EX_VAR_TO_NUM(op_array->this_var)) {
+				ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
+				ssa_var_info[i].ce = op_array->scope;
+				ssa_var_info[i].is_instanceof = 1;
+			} else {
+				ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RCN;
+			}
+			ssa_var_info[i].has_range = 0;
+		}
 	}
 	for (i = op_array->last_var; i < ssa->vars_count; i++) {
 		ssa_var_info[i].type = 0;

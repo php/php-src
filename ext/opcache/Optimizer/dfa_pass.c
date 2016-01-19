@@ -34,6 +34,11 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 {
 	uint32_t build_flags;
 
+	if (op_array->last_try_catch) {
+		/* TODO: we can't analyze functions with try/catch/finally ??? */
+		return FAILURE;
+	}
+
     /* Build SSA */
 	memset(ssa, 0, sizeof(zend_ssa));
 
@@ -41,7 +46,8 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 		return FAILURE;
 	}
 
-	if (*flags & ZEND_FUNC_TOO_DYNAMIC) {
+	if (*flags & ZEND_FUNC_INDIRECT_VAR_ASSESS) {
+		/* TODO: we can't analyze functions with indirect variable access ??? */
 		return FAILURE;
 	}
 
