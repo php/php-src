@@ -1622,29 +1622,34 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	if ((spki = NETSCAPE_SPKI_new()) == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to create new SPKAC");
 		goto cleanup;
 	}
 
 	if (challenge) {
 		if (!ASN1_STRING_set(spki->spkac->challenge, challenge, (int)challenge_len)) {
+			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "Unable to set challenge data");
 			goto cleanup;
 		}
 	}
 
 	if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to embed public key");
 		goto cleanup;
 	}
 
 	if (!NETSCAPE_SPKI_sign(spki, pkey, mdtype)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to sign with specified algorithm");
 		goto cleanup;
 	}
 
 	spkstr = NETSCAPE_SPKI_b64_encode(spki);
 	if (!spkstr){
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to encode SPKAC");
 		goto cleanup;
 	}
@@ -1709,12 +1714,14 @@ PHP_FUNCTION(openssl_spki_verify)
 
 	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to decode supplied SPKAC");
 		goto cleanup;
 	}
 
 	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
 	if (pkey == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to acquire signed public key");
 		goto cleanup;
 	}
@@ -1735,6 +1742,8 @@ cleanup:
 
 	if (i > 0) {
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 }
 /* }}} */
@@ -1771,12 +1780,14 @@ PHP_FUNCTION(openssl_spki_export)
 
 	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to decode supplied SPKAC");
 		goto cleanup;
 	}
 
 	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
 	if (pkey == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to acquire signed public key");
 		goto cleanup;
 	}
@@ -1787,6 +1798,8 @@ PHP_FUNCTION(openssl_spki_export)
 
 		BIO_get_mem_ptr(out, &bio_buf);
 		RETVAL_STRINGL((char *)bio_buf->data, bio_buf->length);
+	} else {
+		php_openssl_store_errors();
 	}
 	goto cleanup;
 
@@ -1840,6 +1853,7 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 
 	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to decode SPKAC");
 		goto cleanup;
 	}
