@@ -12,6 +12,17 @@ var_dump($good, $happy);
 
 echo PHP_EOL;
 
+$stdClassCollection = new SplObjectStorage;
+$foo = new StdClass;
+$stdClassCollection[$foo] = "foo";
+$bar = new StdClass;
+$stdClassCollection[$bar] = "bar";
+
+list($foo => $fooStr, $bar => $barStr) = $stdClassCollection;
+var_dump($fooStr, $barStr);
+
+echo PHP_EOL;
+
 class IndexPrinter implements ArrayAccess
 {
     public function offsetGet($offset) {
@@ -35,6 +46,9 @@ list("123" => $x) = $op;
 --EXPECT--
 string(3) "bad"
 string(3) "sad"
+
+string(3) "foo"
+string(3) "bar"
 
 GET int(123)
 GET string(3) "123"

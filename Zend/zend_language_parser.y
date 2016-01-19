@@ -1199,9 +1199,9 @@ keyed_assignment_list:
 ;
 
 keyed_assignment_list_element:
-		scalar T_DOUBLE_ARROW variable
+		expr T_DOUBLE_ARROW variable
 			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
-	|	scalar T_DOUBLE_ARROW T_LIST '(' assignment_list ')'
+	|	expr T_DOUBLE_ARROW T_LIST '(' assignment_list ')'
 			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
 ;
 
