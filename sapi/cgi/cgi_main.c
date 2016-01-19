@@ -225,10 +225,10 @@ static php_cgi_globals_struct php_cgi_globals;
 
 #ifdef PHP_WIN32
 #define WIN32_MAX_SPAWN_CHILDREN 64
-HANDLE win32_kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
-int win32_kids;
-HANDLE win32_job = NULL;
-JOBOBJECT_EXTENDED_LIMIT_INFORMATION win32_ji = { 0 };
+HANDLE kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
+int kids;
+HANDLE job = NULL;
+JOBOBJECT_EXTENDED_LIMIT_INFORMATION job_info = { 0 };
 #endif
 
 #ifndef HAVE_ATTRIBUTE_WEAK
@@ -1439,20 +1439,20 @@ void fastcgi_cleanup(int signal)
 #else
 BOOL fastcgi_cleanup(DWORD sig)
 {
-	int i = win32_kids;
+	int i = kids;
 
 	while (0 < i--) {
-		if (NULL == win32_kid_cgi_ps[i]) {
+		if (NULL == kid_cgi_ps[i]) {
 				continue;
 		}
 
-		TerminateProcess(win32_kid_cgi_ps[i], 0);
-		CloseHandle(win32_kid_cgi_ps[i]);
-		win32_kid_cgi_ps[i] = NULL;
+		TerminateProcess(kid_cgi_ps[i], 0);
+		CloseHandle(kid_cgi_ps[i]);
+		kid_cgi_ps[i] = NULL;
 	}
 
-	if (win32_job) {
-		CloseHandle(win32_job);
+	if (job) {
+		CloseHandle(job);
 	}
 
 	parent = 0;
@@ -2116,8 +2116,8 @@ consult the installation file that came with this distribution, or visit \n\
 			char my_name[MAX_PATH] = {0};
 			int i;
 
-			ZeroMemory(&win32_kid_cgi_ps, sizeof(win32_kid_cgi_ps));
-			win32_kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
+			ZeroMemory(&kid_cgi_ps, sizeof(kid_cgi_ps));
+			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
 			
 			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
 
@@ -2126,8 +2126,8 @@ consult the installation file that came with this distribution, or visit \n\
 			GetModuleFileName(NULL, my_name, MAX_PATH);
 			cmd_line = my_name;
 
-			win32_job = CreateJobObject(NULL, NULL);
-			if (!win32_job) {
+			job = CreateJobObject(NULL, NULL);
+			if (!job) {
 				DWORD err = GetLastError();
 				char *err_text = php_win32_error_to_msg(err);
 
@@ -2135,8 +2135,9 @@ consult the installation file that came with this distribution, or visit \n\
 
 				goto parent_out;
 			}
-			win32_ji.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-			if (!SetInformationJobObject(win32_job, JobObjectExtendedLimitInformation, &win32_ji, sizeof(win32_ji))) {
+
+			job_info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+			if (!SetInformationJobObject(job, JobObjectExtendedLimitInformation, &job_info, sizeof(job_info))) {
 				DWORD err = GetLastError();
 				char *err_text = php_win32_error_to_msg(err);
 
@@ -2144,24 +2145,24 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 
 			while (parent) {
-				i = win32_kids;
+				i = kids;
 				while (0 < i--) {
 					DWORD status;
 
-					if (NULL != win32_kid_cgi_ps[i]) {
-						if(!GetExitCodeProcess(win32_kid_cgi_ps[i], &status) || status != STILL_ACTIVE) {
-							CloseHandle(win32_kid_cgi_ps[i]);
-							win32_kid_cgi_ps[i] = NULL;
+					if (NULL != kid_cgi_ps[i]) {
+						if(!GetExitCodeProcess(kid_cgi_ps[i], &status) || status != STILL_ACTIVE) {
+							CloseHandle(kid_cgi_ps[i]);
+							kid_cgi_ps[i] = NULL;
 						}
 					}
 				}
 
-				i = win32_kids;
+				i = kids;
 				while (0 < i--) {
 					PROCESS_INFORMATION pi;
 					STARTUPINFO si;
 
-					if (NULL != win32_kid_cgi_ps[i]) {
+					if (NULL != kid_cgi_ps[i]) {
 						continue;
 					}
 
@@ -2175,8 +2176,8 @@ consult the installation file that came with this distribution, or visit \n\
 					si.hStdError  = INVALID_HANDLE_VALUE;
 
 					if (CreateProcess(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-						win32_kid_cgi_ps[i] = pi.hProcess;
-						if (!AssignProcessToJobObject(win32_job, pi.hProcess)) {
+						kid_cgi_ps[i] = pi.hProcess;
+						if (!AssignProcessToJobObject(job, pi.hProcess)) {
 							DWORD err = GetLastError();
 							char *err_text = php_win32_error_to_msg(err);
 
@@ -2187,13 +2188,13 @@ consult the installation file that came with this distribution, or visit \n\
 						DWORD err = GetLastError();
 						char *err_text = php_win32_error_to_msg(err);
 
-						win32_kid_cgi_ps[i] = NULL;
+						kid_cgi_ps[i] = NULL;
 
 						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
 					}
 				}
 				
-				WaitForMultipleObjects(win32_kids, win32_kid_cgi_ps, FALSE, INFINITE);
+				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
 			}
 			
 			snprintf(kid_buf, 16, "%d", children);
