@@ -365,6 +365,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(i + 1);
 				break;
 			case ZEND_UNSET_VAR:
+			case ZEND_ISSET_ISEMPTY_VAR:
 				if (!(opline->extended_value & ZEND_QUICK_SET)) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
