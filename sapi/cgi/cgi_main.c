@@ -35,6 +35,7 @@
 #ifdef PHP_WIN32
 # include "win32/time.h"
 # include "win32/signal.h"
+# include "win32/winutil.h"
 # include <process.h>
 #endif
 
@@ -226,7 +227,7 @@ static php_cgi_globals_struct php_cgi_globals;
 #define WIN32_MAX_SPAWN_CHILDREN 64
 HANDLE win32_kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
 int win32_kids;
-HANDLE win32_job;
+HANDLE win32_job = NULL;
 JOBOBJECT_EXTENDED_LIMIT_INFORMATION win32_ji = { 0 };
 #endif
 
@@ -1450,6 +1451,10 @@ BOOL fastcgi_cleanup(DWORD sig)
 		win32_kid_cgi_ps[i] = NULL;
 	}
 
+	if (win32_job) {
+		CloseHandle(win32_job);
+	}
+
 	parent = 0;
 
 	return TRUE;
@@ -2122,8 +2127,21 @@ consult the installation file that came with this distribution, or visit \n\
 			cmd_line = my_name;
 
 			win32_job = CreateJobObject(NULL, NULL);
+			if (!win32_job) {
+				DWORD err = GetLastError();
+				char *err_text = php_win32_error_to_msg(err);
+
+				fprintf(stderr, "unable to create job object: [0x%08lx]: %s\n", err, err_text);
+
+				goto parent_out;
+			}
 			win32_ji.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-			SetInformationJobObject(win32_job, JobObjectExtendedLimitInformation, &win32_ji, sizeof(win32_ji));
+			if (!SetInformationJobObject(win32_job, JobObjectExtendedLimitInformation, &win32_ji, sizeof(win32_ji))) {
+				DWORD err = GetLastError();
+				char *err_text = php_win32_error_to_msg(err);
+
+				fprintf(stderr, "unable to configure job object: [0x%08lx]: %s\n", err, err_text);
+			}
 
 			while (parent) {
 				i = win32_kids;
@@ -2158,22 +2176,19 @@ consult the installation file that came with this distribution, or visit \n\
 
 					if (CreateProcess(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
 						win32_kid_cgi_ps[i] = pi.hProcess;
-						AssignProcessToJobObject(win32_job, pi.hProcess);
+						if (!AssignProcessToJobObject(win32_job, pi.hProcess)) {
+							DWORD err = GetLastError();
+							char *err_text = php_win32_error_to_msg(err);
+
+							fprintf(stderr, "unable to assign child process to job object: [0x%08lx]: %s\n", err, err_text);
+						}
 						CloseHandle(pi.hThread);
 					} else {
 						DWORD err = GetLastError();
-						char *err_text;
+						char *err_text = php_win32_error_to_msg(err);
 
 						win32_kid_cgi_ps[i] = NULL;
 
-						(void)FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-							NULL,
-							err,
-							LANG_NEUTRAL,
-							(LPTSTR)&err_text,
-							0,
-							NULL);
-						
 						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
 					}
 				}
