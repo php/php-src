@@ -2751,7 +2751,6 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 		znode fetch_result, dim_node;
 
 		zend_compile_expr(&dim_node, key_ast);
-		zend_handle_numeric_op(&dim_node);
 
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);
