@@ -386,7 +386,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		string_printf(str, "%s%s", indent, ce->info.user.doc_comment);
+		string_printf(str, "%s%s", indent, ZSTR_VAL(ce->info.user.doc_comment));
 		string_write(str, "\n", 1);
 	}
 
