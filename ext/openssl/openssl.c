@@ -1890,8 +1890,12 @@ PHP_FUNCTION(openssl_x509_export)
 	}
 
 	bio_out = BIO_new(BIO_s_mem());
-	if (!notext) {
-		X509_print(bio_out, cert);
+	if (!bio_out) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
+	if (!notext && !X509_print(bio_out, cert)) {
+		php_openssl_store_errors();
 	}
 	if (PEM_write_bio_X509(bio_out, cert)) {
 		BUF_MEM *bio_buf;
@@ -1901,12 +1905,16 @@ PHP_FUNCTION(openssl_x509_export)
 		ZVAL_STRINGL(zout, bio_buf->data, bio_buf->length);
 
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 
-	if (certresource == NULL && cert) {
+	BIO_free(bio_out);
+
+cleanup:
+	if (certresource == NULL && cert != NULL) {
 		X509_free(cert);
 	}
-	BIO_free(bio_out);
 }
 /* }}} */
 
