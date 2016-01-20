@@ -12,6 +12,11 @@ if (PHP_CLI == "yes") {
 		ADD_FLAG("CFLAGS_CLI", "/D PHP_WIN32_DEBUG_HEAP");
 	}
 	ADD_FLAG("LDFLAGS_CLI", "/stack:67108864");
+
+	if (CHECK_LIB("edit_a.lib;edit.lib", "cli", PHP_CLI) &&
+		CHECK_HEADER_ADD_INCLUDE("editline/readline.h", "CFLAGS_CLI")) {
+		ADD_FLAG("CFLAGS_CLI", "/D HAVE_LIBEDIT");
+	}
 }
 
 if (PHP_CLI_WIN32 == "yes") {

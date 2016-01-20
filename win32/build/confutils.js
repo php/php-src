@@ -2645,6 +2645,15 @@ function toolset_setup_common_cflags()
 			if (VCVERS >= 1900) {
 				ADD_FLAG('CFLAGS', "/guard:cf");
 			}
+			if (VCVERS >= 1800) {
+				if (PHP_PGI != "yes" && PHP_PGO != "yes") {
+					ADD_FLAG('CFLAGS', "/Zc:inline");
+				}
+				/* We enable /opt:icf only with the debug pack, so /Gw only makes sense there, too. */
+				if (PHP_DEBUG_PACK == "yes") {
+					ADD_FLAG('CFLAGS', "/Gw");
+				}
+			}
 		}
 
 	} else if (CLANG_TOOLSET) {

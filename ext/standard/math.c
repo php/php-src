@@ -146,6 +146,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 
+	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 	precision_places = 14 - php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));
@@ -154,8 +155,10 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	   the requested places BUT is small enough to make sure a non-zero value
 	   is returned, pre-round the result to the precision */
 	if (precision_places > places && precision_places - places < 15) {
-		f2 = php_intpow10(abs(precision_places));
-		if (precision_places >= 0) {
+		int64_t use_precision = precision_places < INT_MIN+1 ? INT_MIN+1 : precision_places;
+
+		f2 = php_intpow10(abs((int)use_precision));
+		if (use_precision >= 0) {
 			tmp_value = value * f2;
 		} else {
 			tmp_value = value / f2;
@@ -163,8 +166,11 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		/* preround the result (tmp_value will always be something * 1e14,
 		   thus never larger than 1e15 here) */
 		tmp_value = php_round_helper(tmp_value, mode);
+
+		use_precision = places - precision_places;
+		use_precision = use_precision < INT_MIN+1 ? INT_MIN+1 : use_precision;
 		/* now correctly move the decimal point */
-		f2 = php_intpow10(abs(places - precision_places));
+		f2 = php_intpow10(abs((int)use_precision));
 		/* because places < precision_places */
 		tmp_value = tmp_value / f2;
 	} else {

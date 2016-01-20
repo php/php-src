@@ -38,21 +38,22 @@ typedef enum _zend_ssa_negative_lat {
 } zend_ssa_negative_lat;
 
 /* Special kind of SSA Phi function used in eSSA */
-typedef struct _zend_ssa_pi_range {
+typedef struct _zend_ssa_pi_constraint {
 	zend_ssa_range         range;       /* simple range constraint */
 	int                    min_var;
 	int                    max_var;
 	int                    min_ssa_var; /* ((min_var>0) ? MIN(ssa_var) : 0) + range.min */
 	int                    max_ssa_var; /* ((man_var>0) ? MAX(ssa_var) : 0) + range.man */
 	zend_ssa_negative_lat  negative;
-} zend_ssa_pi_range;
+	uint32_t               type_mask;   /* If -1 this is a range constraint */
+} zend_ssa_pi_constraint;
 
 /* SSA Phi - ssa_var = Phi(source0, source1, ...sourceN) */
 typedef struct _zend_ssa_phi zend_ssa_phi;
 struct _zend_ssa_phi {
 	zend_ssa_phi          *next;          /* next Phi in the same BB */
 	int                    pi;            /* if >= 0 this is actually a e-SSA Pi */
-	zend_ssa_pi_range      constraint;    /* e-SSA Pi constraint */
+	zend_ssa_pi_constraint constraint;    /* e-SSA Pi constraint */
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
 	int                    block;         /* current BB index */

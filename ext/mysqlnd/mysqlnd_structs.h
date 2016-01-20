@@ -32,6 +32,9 @@
 #define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
 
+#define MYSQLND_CLASS_METHODS_INSTANCE_NAME(class)		mysqlnd_##class##_methods_ptr
+#define MYSQLND_CLASS_METHODS_INSTANCE_DECLARE(class)	extern const MYSQLND_CLASS_METHODS_TYPE(class) * MYSQLND_CLASS_METHODS_INSTANCE_NAME(class)
+#define MYSQLND_CLASS_METHODS_INSTANCE_DEFINE(class)	const MYSQLND_CLASS_METHODS_TYPE(class) * MYSQLND_CLASS_METHODS_INSTANCE_NAME(class) = & MYSQLND_CLASS_METHOD_TABLE_NAME(class)
 
 typedef struct st_mysqlnd_string
 {
@@ -154,6 +157,7 @@ struct st_mysqlnd_error_info
 	unsigned int error_no;
 	zend_llist * error_list;
 
+	zend_bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *m;
 };
 

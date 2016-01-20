@@ -21,6 +21,7 @@
 #include "zend_dfg.h"
 #include "zend_ssa.h"
 #include "zend_dump.h"
+#include "zend_inference.h"
 
 static int needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
 {
@@ -78,6 +79,7 @@ static void pi_range(
 	phi->constraint.range.underflow = underflow;
 	phi->constraint.range.overflow = overflow;
 	phi->constraint.negative = negative ? NEG_INIT : NEG_NONE;
+	phi->constraint.type_mask = (uint32_t) -1;
 }
 /* }}} */
 
@@ -92,6 +94,27 @@ static inline void pi_range_min(zend_ssa_phi *phi, int var, zend_long val) {
 }
 static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
 	pi_range(phi, -1, var, ZEND_LONG_MIN, val, 1, 0, 0);
+}
+
+static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
+	phi->constraint.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
+	phi->constraint.type_mask |= type_mask;
+	if (type_mask & MAY_BE_NULL) {
+		phi->constraint.type_mask |= MAY_BE_UNDEF;
+	}
+}
+static inline void pi_not_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
+	uint32_t relevant = MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+	pi_type_mask(phi, ~type_mask & relevant);
+}
+static inline uint32_t mask_for_type_check(uint32_t type) {
+	if (type == _IS_BOOL) {
+		return MAY_BE_TRUE|MAY_BE_FALSE;
+	} else if (type == IS_ARRAY) {
+		return MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+	} else {
+		return 1 << type;
+	}
 }
 
 /* We can interpret $a + 5 == 0 as $a = 0 - 5, i.e. shift the adjustment to the other operand.
@@ -804,6 +827,59 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			/* speculative */
 			if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var))) {
 				pi_range_not_equals(pi, -1, 0);
+			}
+		} else if (opline->op1_type == IS_TMP_VAR && (opline-1)->opcode == ZEND_TYPE_CHECK &&
+				   opline->op1.var == (opline-1)->result.var && (opline-1)->op1_type == IS_CV) {
+			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
+			uint32_t type = (opline-1)->extended_value;
+			if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var))) {
+				pi_type_mask(pi, mask_for_type_check(type));
+			}
+			if (type != IS_OBJECT && type != IS_RESOURCE) {
+				/* is_object() and is_resource() may return false, even though the value is
+				 * an object/resource. */
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var))) {
+					pi_not_type_mask(pi, mask_for_type_check(type));
+				}
+			}
+		} else if (opline->op1_type == IS_TMP_VAR &&
+				   ((opline-1)->opcode == ZEND_IS_IDENTICAL
+					|| (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL) &&
+				   opline->op1.var == (opline-1)->result.var) {
+			int var;
+			zval *val;
+			uint32_t type_mask;
+			if ((opline-1)->op1_type == IS_CV && (opline-1)->op2_type == IS_CONST) {
+				var = EX_VAR_TO_NUM((opline-1)->op1.var);
+				val = CRT_CONSTANT((opline-1)->op2);
+			} else if ((opline-1)->op1_type == IS_CONST && (opline-1)->op2_type == IS_CV) {
+				var = EX_VAR_TO_NUM((opline-1)->op2.var);
+				val = CRT_CONSTANT((opline-1)->op1);
+			} else {
+				continue;
+			}
+
+			/* We're interested in === null/true/false comparisons here, because they eliminate
+			 * a type in the false-branch. Other === VAL comparisons are unlikely to be useful. */
+			if (Z_TYPE_P(val) != IS_NULL && Z_TYPE_P(val) != IS_TRUE && Z_TYPE_P(val) != IS_FALSE) {
+				continue;
+			}
+
+			type_mask = _const_op_type(val);
+			if ((opline-1)->opcode == ZEND_IS_IDENTICAL) {
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var))) {
+					pi_type_mask(pi, type_mask);
+				}
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var))) {
+					pi_not_type_mask(pi, type_mask);
+				}
+			} else {
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bf, var))) {
+					pi_type_mask(pi, type_mask);
+				}
+				if ((pi = add_pi(arena, op_array, &dfg, ssa, j, bt, var))) {
+					pi_not_type_mask(pi, type_mask);
+				}
 			}
 		}
 	}

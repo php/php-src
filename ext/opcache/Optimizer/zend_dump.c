@@ -305,8 +305,14 @@ void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int s
 	}
 }
 
-static void zend_dump_pi_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_pi_range *r)
+static void zend_dump_pi_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_pi_constraint *r)
 {
+	if (r->type_mask != (uint32_t) -1) {
+		fprintf(stderr, " TYPE");
+		zend_dump_type_info(r->type_mask, NULL, 0);
+		return;
+	}
+
 	if (r->range.underflow && r->range.overflow) {
 		return;
 	}
@@ -791,7 +797,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 				fprintf(stderr, " = Pi(");
 				zend_dump_ssa_var(op_array, ssa, p->sources[0], 0, p->var);
 				fprintf(stderr, " &");
-				zend_dump_pi_range(op_array, ssa, &p->constraint);
+				zend_dump_pi_constraint(op_array, ssa, &p->constraint);
 				fprintf(stderr, ")\n");
 			}
 			p = p->next;
@@ -852,6 +858,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	fprintf(stderr, ", vars=%d, tmps=%d", op_array->last_var, op_array->T);
 	if (ssa) {
 		fprintf(stderr, ", ssa_vars=%d", ssa->vars_count);
+	}
+	if (func_flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) {
+		fprintf(stderr, ", dynamic");
 	}
 	if (func_flags & ZEND_FUNC_RECURSIVE) {
 		fprintf(stderr, ", recursive");

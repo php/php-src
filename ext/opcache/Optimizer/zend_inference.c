@@ -475,7 +475,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		tmp->min = ZEND_LONG_MAX;
 		tmp->max = ZEND_LONG_MIN;
 		tmp->overflow = 0;
-		if (p->pi >= 0) {
+		if (p->pi >= 0 && p->constraint.type_mask == (uint32_t) -1) {
 			if (p->constraint.negative) {
 				if (ssa->var_info[p->sources[0]].has_range) {
 					tmp->underflow = ssa->var_info[p->sources[0]].range.underflow;
@@ -1814,6 +1814,7 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 				    ssa->var_info[j].has_range &&
 				    ssa->vars[j].definition_phi &&
 				    ssa->vars[j].definition_phi->pi >= 0 &&
+				    ssa->vars[j].definition_phi->constraint.type_mask == (uint32_t) -1 &&
 				    ssa->vars[j].definition_phi->constraint.negative &&
 				    ssa->vars[j].definition_phi->constraint.min_ssa_var < 0 &&
 				    ssa->vars[j].definition_phi->constraint.min_ssa_var < 0) {
@@ -3067,8 +3068,11 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		case ZEND_BIND_GLOBAL:
+			tmp = (MAY_BE_REF | MAY_BE_ANY);
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+			break;
 		case ZEND_BIND_STATIC:
-			tmp = (MAY_BE_REF | MAY_BE_ANY );
+			tmp = MAY_BE_ANY | (opline->extended_value ? MAY_BE_REF : (MAY_BE_RC1 | MAY_BE_RCN));
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			break;
 		case ZEND_SEND_VAR:
@@ -3655,6 +3659,9 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
 			if (p->pi >= 0) {
 				tmp = get_ssa_var_info(ssa, p->sources[0]);
+				if (p->constraint.type_mask != (uint32_t) -1) {
+					tmp &= p->constraint.type_mask;
+				}
 				UPDATE_SSA_TYPE(tmp, j);
 				if (ssa_var_info[p->sources[0]].ce) {
 					UPDATE_SSA_OBJ_TYPE(ssa_var_info[p->sources[0]].ce, ssa_var_info[p->sources[0]].is_instanceof, j);
@@ -4071,17 +4078,22 @@ int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const 
 	}
 	ssa_var_info = ssa->var_info;
 
-	for (i = 0; i < op_array->last_var; i++) {
-		if (!op_array->function_name) {
+	if (!op_array->function_name) {
+		for (i = 0; i < op_array->last_var; i++) {
 			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-		} else if (i == EX_VAR_TO_NUM(op_array->this_var)) {
-			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
-			ssa_var_info[i].ce = op_array->scope;
-			ssa_var_info[i].is_instanceof = 1;
-		} else {
-			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RCN;
+			ssa_var_info[i].has_range = 0;
 		}
-		ssa_var_info[i].has_range = 0;
+	} else {
+		for (i = 0; i < op_array->last_var; i++) {
+			if (i == EX_VAR_TO_NUM(op_array->this_var)) {
+				ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
+				ssa_var_info[i].ce = op_array->scope;
+				ssa_var_info[i].is_instanceof = 1;
+			} else {
+				ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RCN;
+			}
+			ssa_var_info[i].has_range = 0;
+		}
 	}
 	for (i = op_array->last_var; i < ssa->vars_count; i++) {
 		ssa_var_info[i].type = 0;

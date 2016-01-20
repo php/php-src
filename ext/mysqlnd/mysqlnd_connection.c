@@ -40,7 +40,7 @@ PHPAPI const char * const mysqlnd_server_gone = "MySQL server has gone away";
 PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
 PHPAPI const char * const mysqlnd_out_of_memory = "Out of memory";
 
-PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
+PHPAPI MYSQLND_STATS * mysqlnd_global_stats = NULL;
 
 
 /* {{{ mysqlnd_upsert_status::reset */
@@ -152,8 +152,8 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ mysqlnd_error_info_init */
-enum_func_status
-mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
+PHPAPI enum_func_status
+mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const zend_bool persistent)
 {
 	DBG_ENTER("mysqlnd_error_info_init");
 	info->m = mysqlnd_error_info_get_methods();
@@ -163,8 +163,24 @@ mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
 	if (info->error_list) {
 		zend_llist_init(info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, persistent);
 	}
-
+	info->persistent = persistent;
 	DBG_RETURN(info->error_list? PASS:FAIL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_error_info_free_contents */
+PHPAPI void
+mysqlnd_error_info_free_contents(MYSQLND_ERROR_INFO * const info)
+{
+	DBG_ENTER("mysqlnd_error_info_free_contents");
+	info->m->reset(info);
+	if (info->error_list) {
+		mnd_pefree(info->error_list, info->persistent);
+		info->error_list = NULL;
+	}
+
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -200,10 +216,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_connection_state)
 MYSQLND_CLASS_METHODS_END;
 
 
-
-
 /* {{{ mysqlnd_upsert_status_init */
-void
+PHPAPI void
 mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 {
 	DBG_ENTER("mysqlnd_error_info_init");
@@ -212,6 +226,7 @@ mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
 
 
 /* {{{ mysqlnd_conn_data::free_options */
@@ -318,11 +333,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->last_message.s, pers);
 		conn->last_message.s = NULL;
 	}
-	if (conn->error_info->error_list) {
-		zend_llist_clean(conn->error_info->error_list);
-		mnd_pefree(conn->error_info->error_list, pers);
-		conn->error_info->error_list = NULL;
-	}
+
 	conn->charset = NULL;
 	conn->greet_charset = NULL;
 
@@ -340,6 +351,11 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 
 	conn->m->free_contents(conn);
 	conn->m->free_options(conn);
+
+	if (conn->error_info) {
+		mysqlnd_error_info_free_contents(conn->error_info);
+		conn->error_info = NULL;
+	}
 
 	if (conn->protocol_frame_codec) {
 		mysqlnd_pfc_free(conn->protocol_frame_codec, conn->stats, conn->error_info);
