@@ -1,5 +1,5 @@
 --TEST--
-errmsg: default value for parameters with array type hint can only be an array or NULL
+errmsg: default value for parameters with array type can only be an array or NULL
 --FILE--
 <?php
 
@@ -11,4 +11,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Default value for parameters with array type hint can only be an array or NULL in %s on line %d
+Fatal error: Default value for parameters with array type can only be an array or NULL in %s on line %d

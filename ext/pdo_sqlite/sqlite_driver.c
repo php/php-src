@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -301,8 +301,7 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 	switch (attr) {
 		case PDO_ATTR_TIMEOUT:
-			convert_to_long(val);
-			sqlite3_busy_timeout(H->db, Z_LVAL_P(val) * 1000);
+			sqlite3_busy_timeout(H->db, zval_get_long(val) * 1000);
 			return 1;
 	}
 	return 0;

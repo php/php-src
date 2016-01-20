@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -170,7 +170,7 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
-		/* Only one has a type hint and the other one doesn't */
+		/* Only one has a type declaration and the other one doesn't */
 		return 0;
 	}
 
@@ -239,7 +239,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 	}
 
 	if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
-		/* Incompatible type hint */
+		/* Incompatible type */
 		return 0;
 	}
 
@@ -585,7 +585,20 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 	zval *child = zend_hash_find(&ce->function_table, key);
 
 	if (child) {
-		do_inheritance_check_on_method((zend_function*)Z_PTR_P(child), parent);
+		zend_function *func = (zend_function*)Z_PTR_P(child);
+		zend_function *orig_prototype = func->common.prototype;
+
+		do_inheritance_check_on_method(func, parent);
+		if (func->common.prototype != orig_prototype &&
+		    func->type == ZEND_USER_FUNCTION &&
+		    func->common.scope != ce &&
+		    !func->op_array.static_variables) {
+			/* Lazy duplication */
+			zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+			memcpy(new_function, func, sizeof(zend_op_array));
+			Z_PTR_P(child) = new_function;
+			func->common.prototype = orig_prototype;
+		}
 		return NULL;
 	}
 
@@ -1026,34 +1039,34 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
-	if (!strncmp(ZSTR_VAL(mname), ZEND_CLONE_FUNC_NAME, ZSTR_LEN(mname))) {
+	if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CONSTRUCTOR_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_DESTRUCTOR_FUNC_NAME,  ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 		ce->destructor = fe; fe->common.fn_flags |= ZEND_ACC_DTOR;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_GET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_GET_FUNC_NAME)) {
 		ce->__get = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_SET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_SET_FUNC_NAME)) {
 		ce->__set = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CALL_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CALL_FUNC_NAME)) {
 		ce->__call = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_UNSET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_UNSET_FUNC_NAME)) {
 		ce->__unset = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_ISSET_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_ISSET_FUNC_NAME)) {
 		ce->__isset = fe;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_CALLSTATIC_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_CALLSTATIC_FUNC_NAME)) {
 		ce->__callstatic = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_TOSTRING_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_TOSTRING_FUNC_NAME)) {
 		ce->__tostring = fe;
-	} else if (!strncmp(ZSTR_VAL(mname), ZEND_DEBUGINFO_FUNC_NAME, ZSTR_LEN(mname))) {
+	} else if (zend_string_equals_literal(mname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fe;
 	} else if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
 		zend_string *lowercase_name = zend_string_tolower(ce->name);

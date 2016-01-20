@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1198,8 +1198,12 @@ ZEND_FUNCTION(get_object_vars)
 		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
 			if (key) {
 				if (zend_check_property_access(zobj, key) == SUCCESS) {
-					/* Not separating references */
-					if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+					if (Z_ISREF_P(value) && Z_REFCOUNT_P(value) == 1) {
+						value = Z_REFVAL_P(value);
+					}
+					if (Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
 					if (ZSTR_VAL(key)[0] == 0) {
 						const char *prop_name, *class_name;
 						size_t prop_len;
@@ -1946,6 +1950,10 @@ ZEND_FUNCTION(get_defined_functions)
 ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table = zend_rebuild_symbol_table();
+
+	if (UNEXPECTED(symbol_table == NULL)) {
+		return;
+	}
 
 	RETURN_ARR(zend_array_dup(symbol_table));
 }
