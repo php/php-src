@@ -4,15 +4,15 @@ PHP                                                                        NEWS
 
 04 Feb 2016, PHP 5.6.18
 
-- Apache2handler:
-  . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
-
 - Core:
   . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
   . Added support for new HTTP 451 code. (Julien)
   . Fixed bug #71273 (A wrong ext directory setup in php.ini leads to crash).
     (Anatol);
+
+- Apache2handler:
+  . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
