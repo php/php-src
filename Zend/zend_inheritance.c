@@ -933,13 +933,20 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zen
 static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	if (do_inherit_constant_check(&ce->constants_table, c, name, iface)) {
+		zend_class_constant *ct;
 		if (Z_REFCOUNTED(c->value)) {
 			Z_ADDREF(c->value);
 		}
 		if (Z_CONSTANT(c->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
-		zend_hash_update_ptr(&ce->constants_table, name, c);
+		if (ce->type & ZEND_INTERNAL_CLASS) {
+			ct = pemalloc(sizeof(zend_class_constant), 1);
+		} else {
+			ct = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+		}
+		memcpy(ct, c, sizeof(zend_class_constant));
+		zend_hash_update_ptr(&ce->constants_table, name, ct);
 	}
 }
 /* }}} */
