@@ -31,6 +31,11 @@
 
 #undef ZEND_TEST_EXCEPTIONS
 
+#if ZEND_DEBUG
+static zend_class_entry *zend_test_interface;
+static zend_class_entry *zend_test_class;
+#endif
+
 static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
 static ZEND_FUNCTION(func_get_arg);
@@ -338,6 +343,15 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_standard_class_def = zend_register_internal_class(&class_entry);
 
 	zend_register_default_classes();
+
+#if ZEND_DEBUG
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestInterface", NULL);
+	zend_test_interface = zend_register_internal_interface(&class_entry);
+	zend_declare_class_constant_long(zend_test_interface, ZEND_STRL("DUMMY"), 0);
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestClass", NULL);
+	zend_test_class = zend_register_internal_class_ex(&class_entry, NULL);
+	zend_class_implements(zend_test_class, 1, zend_test_interface);
+#endif
 
 	return SUCCESS;
 }
