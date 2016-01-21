@@ -2110,6 +2110,7 @@ ZEND_FUNCTION(zend_test_func2)
 
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
+
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {
