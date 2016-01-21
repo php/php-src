@@ -1,6 +1,6 @@
 --TEST--
 Overloaded function 002
---SKIPF--
+--SKIPIF--
 <?php
 if (!PHP_DEBUG) die("skip only run in debug version");
 ?>
