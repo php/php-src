@@ -51,7 +51,7 @@ ini_set("url_rewriter.tags", "a=href,fieldset=,area=href,frame=src,input=src");
 <fieldset>
 <?php
 
-session_destroy();
+session_destroy(true);
 ?>
 --EXPECT--
 <form><input type="hidden" name="PHPSESSID" value="abtest" />

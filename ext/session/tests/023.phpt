@@ -28,7 +28,7 @@ $arr[3]->method();
 
 var_dump($baz);
 var_dump($arr);
-session_destroy();
+session_destroy(true);
 --EXPECT--
 object(foo)#1 (2) {
   ["bar"]=>

@@ -67,15 +67,15 @@ class MySession2 implements MySessionHandlerInterface {
 function good_write($id, $data) {
 	global $handler;
 	echo "good handler writing\n";
-	return file_put_contents($handler->path . $id, $data);
+	return (bool)file_put_contents($handler->path . $id, $data);
 }
 
 $handler = new MySession2;
 
 $ret = session_set_save_handler(array($handler, 'open'), array($handler, 'close'),
 	array($handler, 'read'), 'good_write', array($handler, 'destroy'), array($handler, 'gc'));
-
 var_dump($ret);
+
 $ret = session_set_save_handler($handler);
 var_dump($ret);
 

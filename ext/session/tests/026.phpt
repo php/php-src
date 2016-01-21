@@ -18,14 +18,14 @@ session_start();
 class a {
     public $test = "hallo";
 }
- 
+
 class b {
     public $a;
     function __construct(&$a) {
         $this->a = &$a;
     }
 }
- 
+
 $a = new a();
 $b = new b($a);
 
@@ -44,7 +44,7 @@ $a = $_SESSION['a'];
 $b = $_SESSION['b'];
 echo "values after session:\n";
 var_dump($a,$b);
-session_destroy();
+session_destroy(true);
 ?>
 --EXPECTF--
 original values:

@@ -32,7 +32,7 @@ session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 var_dump(session_module_name());
 var_dump(session_start());
 var_dump(session_module_name());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 ob_end_flush();
 ?>

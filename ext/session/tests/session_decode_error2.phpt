@@ -25,7 +25,7 @@ for($index = 0; $index < strlen($data); $index++) {
     var_dump($_SESSION);
 };
 
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 echo "Done";
 ob_end_flush();
 ?>

@@ -60,7 +60,7 @@ session_write_close();
 
 session_start();
 $_SESSION['C'] = 'D';
-session_destroy();
+session_destroy(true);
 
 session_start();
 $_SESSION['E'] = 'F';
@@ -71,7 +71,7 @@ $_SESSION['E'] = 'F';
 open: path = /tmp, name = sid
 gc: maxlifetime = %d
 read: id = %s
-write: id = %s, data = A|s:1:"B";
+write: id = %s, data = A|s:1:"B";__PHP_SESSION__|a:5:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:10:"TTL_UPDATE";i:%d;s:4:"SIDS";a:0:{}}
 close
 open: path = /tmp, name = sid
 gc: maxlifetime = %d
@@ -81,5 +81,5 @@ close
 open: path = /tmp, name = sid
 gc: maxlifetime = %d
 read: id = %s
-write: id = %s, data = E|s:1:"F";
+write: id = %s, data = E|s:1:"F";__PHP_SESSION__|a:5:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:10:"TTL_UPDATE";i:%d;s:4:"SIDS";a:0:{}}
 close

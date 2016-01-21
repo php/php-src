@@ -45,7 +45,7 @@ write: goodbye cruel world
 
 Fatal error: Uncaught Exception in %s
 Stack trace:
-#0 [internal function]: write('%s', '')
+#0 [internal function]: write('%s', '__PHP_SESSION__...')
 #1 {main}
   thrown in %s on line %d
 close: goodbye cruel world

@@ -51,7 +51,7 @@ var_dump(session_regenerate_id());
 var_dump(find_cookie_header());
 var_dump($id !== session_id());
 var_dump(session_id());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 ob_end_flush();
 ?>');

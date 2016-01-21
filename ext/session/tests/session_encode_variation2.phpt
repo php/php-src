@@ -18,7 +18,7 @@ ob_start();
 echo "*** Testing session_encode() : variation ***\n";
 
 var_dump(session_encode());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 var_dump(session_encode());
 
 echo "Done";

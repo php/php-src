@@ -58,7 +58,7 @@ var_dump(session_id());
 echo "*** Cleanup ***\n";
 var_dump(session_id($session_id));
 var_dump(session_start());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 ob_end_flush();
 
@@ -76,7 +76,7 @@ CreateID [PHPT-%d]
 Read [%s,PHPT-%d]
 bool(true)
 string(%d) "PHPT-%d"
-Write [%s,PHPT-%d,]
+Write [%s,PHPT-%d,__PHP_SESSION__|a:5:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:10:"TTL_UPDATE";i:%d;s:4:"SIDS";a:0:{}}]
 Close [%s,PHPSESSID]
 NULL
 string(%d) "PHPT-%d"
@@ -90,7 +90,7 @@ ValidateID [%s,PHPT-%d]
 CreateID [PHPT-%d]
 Read [%s,PHPT-%d]
 bool(true)
-Write [%s,PHPT-%d,]
+Write [%s,PHPT-%d,__PHP_SESSION__|a:5:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:10:"TTL_UPDATE";i:%d;s:4:"SIDS";a:0:{}}]
 Close [%s,PHPSESSID]
 NULL
 string(%d) "PHPT-%d"

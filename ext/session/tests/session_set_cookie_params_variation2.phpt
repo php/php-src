@@ -24,7 +24,7 @@ var_dump(session_start());
 var_dump(ini_get("session.cookie_path"));
 var_dump(session_set_cookie_params(3600, "/blah"));
 var_dump(ini_get("session.cookie_path"));
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 var_dump(ini_get("session.cookie_path"));
 var_dump(session_set_cookie_params(3600, "/guff"));
 var_dump(ini_get("session.cookie_path"));

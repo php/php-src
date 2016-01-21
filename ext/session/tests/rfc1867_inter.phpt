@@ -52,7 +52,7 @@ var_dump(session_id());
 var_dump($_FILES);
 var_dump($_SESSION["upload_progress_" . basename(__FILE__) . "_1"]);
 var_dump($_SESSION["upload_progress_" . basename(__FILE__) . "_2"]);
-session_destroy();
+session_destroy(true);
 ?>
 --EXPECTF--
 string(%d) "rfc1867-tests"
