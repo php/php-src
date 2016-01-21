@@ -1929,6 +1929,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_b
 		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_ERROR, "Could not generate signature");
 		return NULL;
 	}
