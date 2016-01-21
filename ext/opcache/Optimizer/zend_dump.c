@@ -92,7 +92,9 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	if (ZEND_VM_OP_NUM == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " %u", op.num);
 	} else if (ZEND_VM_OP_TRY_CATCH == (flags & ZEND_VM_OP_MASK)) {
-		fprintf(stderr, " try-catch(%u)", op.num);
+		if (opline->opcode != ZEND_FAST_RET || opline->extended_value) {
+			fprintf(stderr, " try-catch(%u)", op.num);
+		}
 	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
 		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
 			fprintf(stderr, " live-range(%u)", op.num);
