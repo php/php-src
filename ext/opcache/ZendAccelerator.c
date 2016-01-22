@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,10 +40,10 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/standard/md5.h"
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 # include "zend_file_cache.h"
-# include "ext/standard/md5.h"
 #endif
 
 #ifndef ZEND_WIN32
@@ -1157,7 +1157,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 		return new_persistent_script;
 	}
 
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level)) {
+	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		return new_persistent_script;
 	}
 
@@ -1215,7 +1215,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level)) {
+	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		return new_persistent_script;
 	}
 
@@ -2348,6 +2348,7 @@ static inline int accel_find_sapi(void)
 		"apache2filter",
 		"apache2handler",
 		"litespeed",
+		"uwsgi",
 		NULL
 	};
 	const char **sapi_name;
@@ -2459,8 +2460,6 @@ static void accel_globals_dtor(zend_accel_globals *accel_globals)
 	}
 }
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
-
 #define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_CHAR) ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
 
 static void accel_gen_system_id(void)
@@ -2489,7 +2488,6 @@ static void accel_gen_system_id(void)
 		md5str[(i * 2) + 1] = c;
 	}
 }
-#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 # ifndef _WIN32
@@ -2515,6 +2513,9 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		MAP_PRIVATE | MAP_ANONYMOUS,
 		-1, 0);
 	if (mem == MAP_FAILED) {
+		zend_error(E_WARNING,
+			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap failed: %s (%d)",
+			strerror(errno), errno);
 		return -1;
 	}
 	memcpy(mem, start, size);
@@ -2525,20 +2526,36 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_HUGETLB,
 		-1, 0);
 #  endif
-#  ifdef MADV_HUGEPAGE
 	if (ret == MAP_FAILED) {
 		ret = mmap(start, size,
 			PROT_READ | PROT_WRITE | PROT_EXEC,
 			MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
 			-1, 0);
+		/* this should never happen? */
+		ZEND_ASSERT(ret != MAP_FAILED);
+#  ifdef MADV_HUGEPAGE
 		if (-1 == madvise(start, size, MADV_HUGEPAGE)) {
+			memcpy(start, mem, size);
+			mprotect(start, size, PROT_READ | PROT_EXEC);
 			munmap(mem, size);
+			zend_error(E_WARNING,
+				ACCELERATOR_PRODUCT_NAME " huge_code_pages: madvise(HUGEPAGE) failed: %s (%d)",
+				strerror(errno), errno);
 			return -1;
 		}
-	}
+#  else
+		memcpy(start, mem, size);
+		mprotect(start, size, PROT_READ | PROT_EXEC);
+		munmap(mem, size);
+		zend_error(E_WARNING,
+			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
+			strerror(errno), errno);
+		return -1;
 #  endif
+	}
+
 	if (ret == start) {
-	    memcpy(start, mem, size);
+		memcpy(start, mem, size);
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 	}
 	munmap(mem, size);
@@ -2600,9 +2617,7 @@ static int accel_startup(zend_extension *extension)
 		return FAILURE;
 	}
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	accel_gen_system_id();
-#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 	if (ZCG(accel_directives).huge_code_pages &&
@@ -2753,6 +2768,8 @@ file_cache_fallback:
 		zend_accel_blacklist_load(&accel_blacklist, ZCG(accel_directives.user_blacklist_filename));
 	}
 
+	zend_optimizer_startup();
+
 	return SUCCESS;
 }
 
@@ -2769,6 +2786,8 @@ void accel_shutdown(void)
 {
 	zend_ini_entry *ini_entry;
 	zend_bool file_cache_only = 0;
+
+	zend_optimizer_shutdown();
 
 	zend_accel_blacklist_shutdown(&accel_blacklist);
 
@@ -2875,7 +2894,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	ACCELERATOR_VERSION,					/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2015",				/* copyright */
+	"Copyright (c) 1999-2016",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */

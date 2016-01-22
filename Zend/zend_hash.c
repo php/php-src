@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,8 @@
 #else
 # define HT_ASSERT(c)
 #endif
+
+#define HT_POISONED_PTR ((HashTable *) (intptr_t) -1)
 
 #if ZEND_DEBUG
 /*
@@ -112,7 +114,7 @@ static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
 		   rather than using an undefined bis scan result. */
 		return nSize;
 	}
-#elif defined(__GNUC__) || __has_builtin(__builtin_clz)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_clz))  && defined(PHP_HAVE_BUILTIN_CLZ)
 	return 0x2 << (__builtin_clz(nSize - 1) ^ 0x1f);
 #else
 	nSize -= 1;
@@ -283,6 +285,40 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend
 	}
 }
 
+static uint32_t zend_array_recalc_elements(HashTable *ht)
+{
+       zval *val;
+       uint32_t num = ht->nNumOfElements;
+
+	   ZEND_HASH_FOREACH_VAL(ht, val) {
+		   if (Z_TYPE_P(val) == IS_UNDEF) continue;
+		   if (Z_TYPE_P(val) == IS_INDIRECT) {
+			   if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
+				   num--;
+			   }
+		   }
+       } ZEND_HASH_FOREACH_END();
+       return num;
+}
+/* }}} */
+
+ZEND_API uint32_t zend_array_count(HashTable *ht)
+{
+	uint32_t num;
+	if (UNEXPECTED(ht->u.v.flags & HASH_FLAG_HAS_EMPTY_IND)) {
+		num = zend_array_recalc_elements(ht);
+		if (UNEXPECTED(ht->nNumOfElements == num)) {
+			ht->u.v.flags &= ~HASH_FLAG_HAS_EMPTY_IND;
+		}
+	} else if (UNEXPECTED(ht == &EG(symbol_table))) {
+		num = zend_array_recalc_elements(ht);
+	} else {
+		num = zend_hash_num_elements(ht);
+	}
+	return num;
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProtection)
 {
 	if (bApplyProtection) {
@@ -337,9 +373,34 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos(uint32_t idx, HashTab
 	if (iter->pos == HT_INVALID_IDX) {
 		return HT_INVALID_IDX;
 	} else if (UNEXPECTED(iter->ht != ht)) {
-		if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 			iter->ht->u.v.nIteratorsCount--;
 		}
+		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
+			ht->u.v.nIteratorsCount++;
+		}
+		iter->ht = ht;
+		iter->pos = ht->nInternalPointer;
+	}
+	return iter->pos;
+}
+
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval *array)
+{
+	HashTable *ht = Z_ARRVAL_P(array);
+	HashTableIterator *iter = EG(ht_iterators) + idx;
+
+	ZEND_ASSERT(idx != (uint32_t)-1);
+	if (iter->pos == HT_INVALID_IDX) {
+		return HT_INVALID_IDX;
+	} else if (UNEXPECTED(iter->ht != ht)) {
+		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+			iter->ht->u.v.nIteratorsCount--;
+		}
+		SEPARATE_ARRAY(array);
+		ht = Z_ARRVAL_P(array);
 		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
 			ht->u.v.nIteratorsCount++;
 		}
@@ -355,7 +416,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 
 	ZEND_ASSERT(idx != (uint32_t)-1);
 
-	if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+	if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+			&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 		iter->ht->u.v.nIteratorsCount--;
 	}
 	iter->ht = NULL;
@@ -372,20 +434,13 @@ static zend_never_inline void ZEND_FASTCALL _zend_hash_iterators_remove(HashTabl
 {
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
-	uint32_t idx;
 
 	while (iter != end) {
 		if (iter->ht == ht) {
-			iter->ht = NULL;
+			iter->ht = HT_POISONED_PTR;
 		}
 		iter++;
 	}
-
-	idx = EG(ht_iterators_used);
-	while (idx > 0 && EG(ht_iterators)[idx - 1].ht == NULL) {
-		idx--;
-	}
-	EG(ht_iterators_used) = idx;
 }
 
 static zend_always_inline void zend_hash_iterators_remove(HashTable *ht)
@@ -1056,6 +1111,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 					} else {
 						ZVAL_UNDEF(data);
 					}
+					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);
@@ -1099,6 +1155,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str,
 						ht->pDestructor(data);
 					}
 					ZVAL_UNDEF(data);
+					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -292,6 +292,21 @@ static void zend_persist_property_info_calc(zval *zv)
 	}
 }
 
+static void zend_persist_class_constant_calc(zval *zv)
+{
+	zend_class_constant *c = Z_PTR_P(zv);
+
+	if (!zend_shared_alloc_get_xlat_entry(c)) {
+		zend_shared_alloc_register_xlat_entry(c, c);
+		ADD_ARENA_SIZE(sizeof(zend_class_constant));
+		zend_persist_zval_calc(&c->value);
+		if (ZCG(accel_directives).save_comments && c->doc_comment) {
+			ADD_STRING(c->doc_comment);
+		}
+	}
+}
+
+
 static void zend_persist_class_entry_calc(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -316,7 +331,7 @@ static void zend_persist_class_entry_calc(zval *zv)
 				zend_persist_zval_calc(&ce->default_static_members_table[i]);
 			}
 		}
-		zend_hash_persist_calc(&ce->constants_table, zend_persist_zval_calc);
+		zend_hash_persist_calc(&ce->constants_table, zend_persist_class_constant_calc);
 
 		if (ce->info.user.filename) {
 			ADD_STRING(ce->info.user.filename);

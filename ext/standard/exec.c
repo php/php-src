@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -253,7 +253,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 #endif
 
 
-	cmd = zend_string_alloc(2 * l, 0);
+	cmd = zend_string_safe_alloc(2, l, 0, 0);
 
 	for (x = 0, y = 0; x < l; x++) {
 		int mb_len = php_mblen(str + x, (l - x));
@@ -345,7 +345,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	size_t estimate = (4 * l) + 3;
 
 
-	cmd = zend_string_alloc(4 * l + 2, 0); /* worst case */
+	cmd = zend_string_safe_alloc(4, l, 2, 0); /* worst case */
 
 #ifdef PHP_WIN32
 	ZSTR_VAL(cmd)[y++] = '"';

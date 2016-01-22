@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -810,7 +810,7 @@ PHP_FUNCTION(com_message_pump)
 }
 /* }}} */
 
-/* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitive])
+/* {{{ proto bool com_load_typelib(string typelib_name [, bool case_insensitive])
    Loads a Typelibrary and registers its constants */
 PHP_FUNCTION(com_load_typelib)
 {

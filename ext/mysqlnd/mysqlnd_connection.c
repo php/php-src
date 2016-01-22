@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,7 @@ PHPAPI const char * const mysqlnd_server_gone = "MySQL server has gone away";
 PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
 PHPAPI const char * const mysqlnd_out_of_memory = "Out of memory";
 
-PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
+PHPAPI MYSQLND_STATS * mysqlnd_global_stats = NULL;
 
 
 /* {{{ mysqlnd_upsert_status::reset */
@@ -152,8 +152,8 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ mysqlnd_error_info_init */
-enum_func_status
-mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
+PHPAPI enum_func_status
+mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const zend_bool persistent)
 {
 	DBG_ENTER("mysqlnd_error_info_init");
 	info->m = mysqlnd_error_info_get_methods();
@@ -163,8 +163,24 @@ mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
 	if (info->error_list) {
 		zend_llist_init(info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, persistent);
 	}
-
+	info->persistent = persistent;
 	DBG_RETURN(info->error_list? PASS:FAIL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_error_info_free_contents */
+PHPAPI void
+mysqlnd_error_info_free_contents(MYSQLND_ERROR_INFO * const info)
+{
+	DBG_ENTER("mysqlnd_error_info_free_contents");
+	info->m->reset(info);
+	if (info->error_list) {
+		mnd_pefree(info->error_list, info->persistent);
+		info->error_list = NULL;
+	}
+
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -200,10 +216,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_connection_state)
 MYSQLND_CLASS_METHODS_END;
 
 
-
-
 /* {{{ mysqlnd_upsert_status_init */
-void
+PHPAPI void
 mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 {
 	DBG_ENTER("mysqlnd_error_info_init");
@@ -212,6 +226,7 @@ mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
 
 
 /* {{{ mysqlnd_conn_data::free_options */
@@ -318,11 +333,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->last_message.s, pers);
 		conn->last_message.s = NULL;
 	}
-	if (conn->error_info->error_list) {
-		zend_llist_clean(conn->error_info->error_list);
-		mnd_pefree(conn->error_info->error_list, pers);
-		conn->error_info->error_list = NULL;
-	}
+
 	conn->charset = NULL;
 	conn->greet_charset = NULL;
 
@@ -340,6 +351,11 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 
 	conn->m->free_contents(conn);
 	conn->m->free_options(conn);
+
+	if (conn->error_info) {
+		mysqlnd_error_info_free_contents(conn->error_info);
+		conn->error_info = NULL;
+	}
 
 	if (conn->protocol_frame_codec) {
 		mysqlnd_pfc_free(conn->protocol_frame_codec, conn->stats, conn->error_info);
@@ -468,7 +484,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags)
 {
+#ifdef MYSQLND_COMPRESSION_ENABLED
 	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
+#endif
 	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
@@ -476,10 +494,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
 	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
-
-	if (PG(open_basedir) && strlen(PG(open_basedir))) {
-		mysql_flags ^= CLIENT_LOCAL_FILES;
-	}
 
 #ifndef MYSQLND_COMPRESSION_ENABLED
 	if (mysql_flags & CLIENT_COMPRESS) {
@@ -536,29 +550,29 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 }
 /* }}} */
 
-/* {{{ mysqlnd_conn_data::connect */
+/* {{{ mysqlnd_conn_data::get_scheme */
 static MYSQLND_STRING
-MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe)
+MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe)
 {
 	MYSQLND_STRING transport;
 	DBG_ENTER("mysqlnd_conn_data::get_scheme");
 #ifndef PHP_WIN32
 	if (hostname.l == sizeof("localhost") - 1 && !strncasecmp(hostname.s, "localhost", hostname.l)) {
-		DBG_INF_FMT("socket=%s", socket_or_pipe.s? socket_or_pipe.s:"n/a");
-		if (!socket_or_pipe.s) {
-			socket_or_pipe.s = "/tmp/mysql.sock";
-			socket_or_pipe.l = strlen(socket_or_pipe.s);
+		DBG_INF_FMT("socket=%s", socket_or_pipe->s? socket_or_pipe->s:"n/a");
+		if (!socket_or_pipe->s) {
+			socket_or_pipe->s = "/tmp/mysql.sock";
+			socket_or_pipe->l = strlen(socket_or_pipe->s);
 		}
-		transport.l = mnd_sprintf(&transport.s, 0, "unix://%s", socket_or_pipe.s);
+		transport.l = mnd_sprintf(&transport.s, 0, "unix://%s", socket_or_pipe->s);
 		*unix_socket = TRUE;
 #else
 	if (hostname.l == sizeof(".") - 1 && hostname.s[0] == '.') {
 		/* named pipe in socket */
-		if (!socket_or_pipe.s) {
-			socket_or_pipe.s = "\\\\.\\pipe\\MySQL";
-			socket_or_pipe.l = strlen(socket_or_pipe.s);
+		if (!socket_or_pipe->s) {
+			socket_or_pipe->s = "\\\\.\\pipe\\MySQL";
+			socket_or_pipe->l = strlen(socket_or_pipe->s);
 		}
-		transport.l = mnd_sprintf(&transport.s, 0, "pipe://%s", socket_or_pipe.s);
+		transport.l = mnd_sprintf(&transport.s, 0, "pipe://%s", socket_or_pipe->s);
 		*named_pipe = TRUE;
 #endif
 	} else {
@@ -659,7 +673,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		mysql_flags |= CLIENT_CONNECT_WITH_DB;
 	}
 
-	transport = conn->m->get_scheme(conn, hostname, socket_or_pipe, port, &unix_socket, &named_pipe);
+	transport = conn->m->get_scheme(conn, hostname, &socket_or_pipe, port, &unix_socket, &named_pipe);
 
 	mysql_flags = conn->m->get_updated_connect_flags(conn, mysql_flags);
 
@@ -755,8 +769,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			}
 			conn->unix_socket.l = strlen(conn->unix_socket.s);
 		}
-		conn->max_packet_size	= MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
-		/* todo: check if charset is available */
 
 		SET_EMPTY_ERROR(conn->error_info);
 
@@ -1261,9 +1273,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 	DBG_INF_FMT("state=%u", state);
 
 	if (state >= CONN_READY) {
-		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
+		MYSQLND_DEC_GLOBAL_STATISTIC(STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
-			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
+			MYSQLND_DEC_GLOBAL_STATISTIC(STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 	}
 	switch (state) {
@@ -1399,6 +1411,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 	return conn->last_message.s;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_get_client_info */
 PHPAPI const char * mysqlnd_get_client_info()
@@ -1675,10 +1688,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQLND_OPT_SSL_CIPHER:
 		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
 		case MYSQL_OPT_CONNECT_TIMEOUT:
-		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			ret = conn->vio->data->m.set_client_option(conn->vio, option, value);
 			break;
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQL_OPT_COMPRESS:
 		case MYSQL_SERVER_PUBLIC_KEY:
 			ret = conn->protocol_frame_codec->data->m.set_client_option(conn->protocol_frame_codec, option, value);
@@ -1823,7 +1836,7 @@ end:
 /* {{{ mysqlnd_conn_data::set_client_option_2d */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * const conn,
-														enum_mysqlnd_client_option option,
+														const enum_mysqlnd_client_option option,
 														const char * const key,
 														const char * const value
 														)
@@ -2483,9 +2496,10 @@ MYSQLND_CLASS_METHODS_END;
 #include "php_network.h"
 
 /* {{{ mysqlnd_stream_array_to_fd_set */
-MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
+MYSQLND **
+mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
 {
-	int cnt = 0;
+	unsigned int cnt = 0;
 	MYSQLND **p = conn_array, **p_p;
 	MYSQLND **ret = NULL;
 
@@ -2519,7 +2533,8 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
 
 
 /* {{{ mysqlnd_stream_array_to_fd_set */
-static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd)
+static unsigned int
+mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd)
 {
 	php_socket_t this_fd;
 	php_stream *stream = NULL;
@@ -2535,17 +2550,19 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		 * */
 		stream = (*p)->data->vio->data->m.get_stream((*p)->data->vio);
 		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
-		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
-										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
+		if (stream != NULL &&
+			SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) &&
+			ZEND_VALID_SOCKET(this_fd))
+		{
 
 			PHP_SAFE_FD_SET(this_fd, fds);
 
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
 			}
-			cnt++;
+			++cnt;
 		}
-		p++;
+		++p;
 	}
 	DBG_RETURN(cnt ? 1 : 0);
 }
@@ -2553,11 +2570,12 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 
 
 /* {{{ mysqlnd_stream_array_from_fd_set */
-static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
+static unsigned int
+mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 {
 	php_socket_t this_fd;
 	php_stream *stream = NULL;
-	int ret = 0;
+	unsigned int ret = 0;
 	zend_bool disproportion = FALSE;
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
 	DBG_ENTER("mysqlnd_stream_array_from_fd_set");
@@ -2571,14 +2589,14 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 				if (disproportion) {
 					*bckwd = *fwd;
 				}
-				bckwd++;
-				fwd++;
-				ret++;
+				++bckwd;
+				++fwd;
+				++ret;
 				continue;
 			}
 		}
 		disproportion = TRUE;
-		fwd++;
+		++fwd;
 	}
 	*bckwd = NULL;/* NULL-terminate the list */
 
@@ -2722,9 +2740,9 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
 
 /* {{{ mysqlnd_connection_init */
 PHPAPI MYSQLND *
-mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory)
+mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory)
 {
-	struct st_mysqlnd_object_factory_methods * factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND * ret;
 	DBG_ENTER("mysqlnd_connection_init");
 	ret = factory->get_connection(factory, persistent);

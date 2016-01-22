@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -701,8 +701,8 @@ class_statement_list:
 class_statement:
 		variable_modifiers property_list ';'
 			{ $$ = $2; $$->attr = $1; }
-	|	T_CONST class_const_list ';'
-			{ $$ = $2; RESET_DOC_COMMENT(); }
+	|	method_modifiers T_CONST class_const_list ';'
+			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
 	|	method_modifiers function returns_ref identifier '(' parameter_list ')'
@@ -810,11 +810,11 @@ class_const_list:
 ;
 
 class_const_decl:
-	identifier '=' expr { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3); }
+	identifier '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 const_decl:
-	T_STRING '=' expr { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3); }
+	T_STRING '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 echo_expr_list:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,13 +94,10 @@ static const zend_internal_function zend_pass_function = {
 #define READY_TO_DESTROY(zv) \
 	(UNEXPECTED(zv) && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
-#define EXTRACT_ZVAL_PTR(zv, check_null) do {		\
+#define EXTRACT_ZVAL_PTR(zv) do {		\
 	zval *__zv = (zv);								\
 	if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {	\
-		if (!(check_null) ||						\
-		    EXPECTED(Z_INDIRECT_P(__zv))) {			\
-			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	\
-		}											\
+		ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	    \
 	}												\
 } while (0)
 
@@ -150,7 +147,7 @@ static const zend_internal_function zend_pass_function = {
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);
 
-	page->top = ZEND_VM_STACK_ELEMETS(page);
+	page->top = ZEND_VM_STACK_ELEMENTS(page);
 	page->end = (zval*)((char*)page + size);
 	page->prev = prev;
 	return page;
@@ -946,6 +943,24 @@ static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf,
 		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 
+static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, const char *returned_msg, const char *returned_kind)
+{
+	const char *fname = ZSTR_VAL(zf->common.function_name);
+	const char *fsep;
+	const char *fclass;
+
+	if (zf->common.scope) {
+		fsep =  "::";
+		fclass = ZSTR_VAL(zf->common.scope->name);
+	} else {
+		fsep =  "";
+		fclass = "";
+	}
+
+	zend_type_error("%s%s%s() must not return a value, %s%s returned",
+		fclass, fsep, fname, returned_msg, returned_kind);
+}
+
 #if ZEND_DEBUG
 static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 {
@@ -975,6 +990,8 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 			} else if (ret_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
 				/* pass */
+			} else if (ret_info->type_hint == IS_VOID) {
+				zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
 			} else {
 				/* Use strict check to verify return value of internal function */
 				zend_verify_internal_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
@@ -1035,6 +1052,12 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 			} else if (ret_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
 				/* pass */
+			/* There would be a check here for the IS_VOID type hint, which
+			 * would trigger an error because a value had been returned.
+			 * However, zend_compile.c already does a compile-time check
+			 * that bans `return ...;` within a void function. Thus we can skip
+			 * this part of the runtime check for non-internal functions.
+			 */
 			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(ret_info->type_hint, ret, ZEND_RET_USES_STRICT_TYPES()))) {
 				zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
 			}
@@ -1048,7 +1071,7 @@ static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **c
 	char *need_msg;
 	zend_class_entry *ce;
 
-	if (ret_info->type_hint) {
+	if (ret_info->type_hint && EXPECTED(ret_info->type_hint != IS_VOID)) {
 		if (ret_info->class_name) {
 			if (EXPECTED(*cache_slot)) {
 				ce = (zend_class_entry*)*cache_slot;
@@ -1514,15 +1537,6 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_d
 	if (EXPECTED(fetch_type == ZEND_FETCH_GLOBAL_LOCK) ||
 	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
 		ht = &EG(symbol_table);
-	} else if (EXPECTED(fetch_type == ZEND_FETCH_STATIC)) {
-		ZEND_ASSERT(EX(func)->op_array.static_variables != NULL);
-		ht = EX(func)->op_array.static_variables;
-		if (GC_REFCOUNT(ht) > 1) {
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(ht)--;
-			}
-			EX(func)->op_array.static_variables = ht = zend_array_dup(ht);
-		}
 	} else {
 		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
 		if (!EX(symbol_table)) {
@@ -1678,6 +1692,120 @@ try_again:
 	return offset;
 }
 
+static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
+{
+	const char *msg = NULL;
+	const zend_op *opline = EG(current_execute_data)->opline;
+	const zend_op *end;
+	uint32_t var;
+
+	switch (opline->opcode) {
+		case ZEND_ASSIGN_ADD:
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_MOD:
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+		case ZEND_ASSIGN_CONCAT:
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
+		case ZEND_ASSIGN_POW:
+			msg = "Cannot use assign-op operators with string offsets";
+			break;
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+			/* TODO: Encode the "reason" into opline->extended_value??? */
+			var = opline->result.var;
+			opline++;
+			end = EG(current_execute_data)->func->op_array.opcodes +
+				EG(current_execute_data)->func->op_array.last;
+			while (opline < end) {
+				if (opline->op1_type == IS_VAR && opline->op1.var == var) {
+					switch (opline->opcode) {
+						case ZEND_ASSIGN_ADD:
+						case ZEND_ASSIGN_SUB:
+						case ZEND_ASSIGN_MUL:
+						case ZEND_ASSIGN_DIV:
+						case ZEND_ASSIGN_MOD:
+						case ZEND_ASSIGN_SL:
+						case ZEND_ASSIGN_SR:
+						case ZEND_ASSIGN_CONCAT:
+						case ZEND_ASSIGN_BW_OR:
+						case ZEND_ASSIGN_BW_AND:
+						case ZEND_ASSIGN_BW_XOR:
+						case ZEND_ASSIGN_POW:
+							if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+								msg = "Cannot use string offset as an object";
+							} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+								msg = "Cannot use string offset as an array";
+							} else {
+								msg = "Cannot use assign-op operators with string offsets";
+							}
+							break;
+						case ZEND_PRE_INC_OBJ:
+						case ZEND_PRE_DEC_OBJ:
+						case ZEND_POST_INC_OBJ:
+						case ZEND_POST_DEC_OBJ:
+						case ZEND_PRE_INC:
+						case ZEND_PRE_DEC:
+						case ZEND_POST_INC:
+						case ZEND_POST_DEC:
+							msg = "Cannot increment/decrement string offsets";
+							break;
+						case ZEND_FETCH_DIM_W:
+						case ZEND_FETCH_DIM_RW:
+						case ZEND_FETCH_DIM_FUNC_ARG:
+						case ZEND_FETCH_DIM_UNSET:
+						case ZEND_ASSIGN_DIM:
+							msg = "Cannot use string offset as an array";
+							break;
+						case ZEND_FETCH_OBJ_W:
+						case ZEND_FETCH_OBJ_RW:
+						case ZEND_FETCH_OBJ_FUNC_ARG:
+						case ZEND_FETCH_OBJ_UNSET:
+						case ZEND_ASSIGN_OBJ:
+							msg = "Cannot use string offset as an object";
+							break;
+						case ZEND_ASSIGN_REF:
+						case ZEND_ADD_ARRAY_ELEMENT:
+						case ZEND_INIT_ARRAY:
+							msg = "Cannot create references to/from string offsets";
+							break;
+						case ZEND_RETURN_BY_REF:
+							msg = "Cannot return string offsets by reference";
+							break;
+						case ZEND_UNSET_DIM:
+						case ZEND_UNSET_OBJ:
+							msg = "Cannot unset string offsets";
+							break;
+						case ZEND_YIELD:
+							msg = "Cannot yield string offsets by reference";
+							break;
+						case ZEND_SEND_REF:
+						case ZEND_SEND_VAR_EX:
+							msg = "Only variables can be passed by reference";
+							break;
+						EMPTY_SWITCH_DEFAULT_CASE();
+					}
+					break;
+				}
+				if (opline->op2_type == IS_VAR && opline->op2.var == var) {
+					ZEND_ASSERT(opline->opcode == ZEND_ASSIGN_REF);
+					msg = "Cannot create references to/from string offsets";
+					break;
+				}
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	ZEND_ASSERT(msg != NULL);
+	zend_throw_error(NULL, msg);
+}
+
 static zend_always_inline zend_long zend_fetch_string_offset(zval *container, zval *dim, int type)
 {
 	zend_long offset = zend_check_string_offset(dim, type);
@@ -1728,11 +1856,11 @@ convert_to_array:
 
 		if (dim == NULL) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
-			ZVAL_INDIRECT(result, &EG(error_zval));
 		} else {
 			zend_check_string_offset(dim, type);
-			ZVAL_INDIRECT(result, NULL); /* wrong string offset */
+			zend_wrong_string_offset();
 		}
+		ZVAL_INDIRECT(result, &EG(error_zval));
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_throw_error(NULL, "Cannot use object as array");
@@ -1954,6 +2082,12 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				return;
 			}
 		} else if (EXPECTED(zobj->properties != NULL)) {
+			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(zobj->properties)--;
+				}
+				zobj->properties = zend_array_dup(zobj->properties);
+			}
 			retval = zend_hash_find(zobj->properties, Z_STR_P(prop_ptr));
 			if (EXPECTED(retval)) {
 				ZVAL_INDIRECT(result, retval);
@@ -2387,7 +2521,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	EG(vm_stack)->prev->top = (zval*)call;
 
 	/* delete previous stack segment if it becames empty */
-	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMETS(EG(vm_stack)->prev))) {
+	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMENTS(EG(vm_stack)->prev))) {
 		zend_vm_stack r = EG(vm_stack)->prev;
 
 		EG(vm_stack)->prev = r->prev;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -534,7 +534,7 @@ PHP_FUNCTION(oci_lob_write)
 {
 	zval *tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	zend_long data_len;
+	size_t data_len;
 	zend_long write_len = 0;
 	ub4 bytes_written;
 	char *data;
@@ -545,7 +545,7 @@ PHP_FUNCTION(oci_lob_write)
 		}
 		
 		if (ZEND_NUM_ARGS() == 2) {
-			data_len = MIN(data_len, write_len);
+			data_len = MIN((zend_long) data_len, write_len);
 		}
 	}
 	else {
@@ -554,7 +554,7 @@ PHP_FUNCTION(oci_lob_write)
 		}
 
 		if (ZEND_NUM_ARGS() == 3) {
-			data_len = MIN(data_len, write_len);
+			data_len = MIN((zend_long) data_len, write_len);
 		}
 	}
 	

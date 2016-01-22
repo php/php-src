@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 BEGIN_EXTERN_C()
 
 void zend_register_closure_ce(void);
+void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -142,14 +142,14 @@ PHP_FUNCTION(header_register_callback)
 }
 /* }}} */
 
-static void sapi_run_header_callback(void)
+static void sapi_run_header_callback(zval *callback)
 {
 	int   error;
 	zend_fcall_info fci;
 	char *callback_error = NULL;
 	zval retval;
 
-	if (zend_fcall_info_init(&SG(callback_func), 0, &fci, &SG(fci_cache), NULL, &callback_error) == SUCCESS) {
+	if (zend_fcall_info_init(callback, 0, &fci, &SG(fci_cache), NULL, &callback_error) == SUCCESS) {
 		fci.retval = &retval;
 
 		error = zend_call_function(&fci, &SG(fci_cache));
@@ -446,7 +446,6 @@ SAPI_API void sapi_activate(void)
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(headers_sent) = 0;
-	SG(callback_run) = 0;
 	ZVAL_UNDEF(&SG(callback_func));
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
@@ -543,8 +542,6 @@ SAPI_API void sapi_deactivate(void)
 	sapi_send_headers_free();
 	SG(sapi_started) = 0;
 	SG(headers_sent) = 0;
-	SG(callback_run) = 0;
-	zval_ptr_dtor(&SG(callback_func));
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
 }
@@ -851,7 +848,7 @@ SAPI_API int sapi_send_headers(void)
 	int retval;
 	int ret = FAILURE;
 
-	if (SG(headers_sent) || SG(request_info).no_headers || SG(callback_run)) {
+	if (SG(headers_sent) || SG(request_info).no_headers) {
 		return SUCCESS;
 	}
 
@@ -871,9 +868,12 @@ SAPI_API int sapi_send_headers(void)
 		SG(sapi_headers).send_default_content_type = 0;
 	}
 
-	if (Z_TYPE(SG(callback_func)) != IS_UNDEF && !SG(callback_run)) {
-		SG(callback_run) = 1;
-		sapi_run_header_callback();
+	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
+		zval cb;
+		ZVAL_COPY_VALUE(&cb, &SG(callback_func));
+		ZVAL_UNDEF(&SG(callback_func));
+		sapi_run_header_callback(&cb);
+		zval_ptr_dtor(&cb);
 	}
 
 	SG(headers_sent) = 1;

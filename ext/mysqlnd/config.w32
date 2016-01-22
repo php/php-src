@@ -21,6 +21,7 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_protocol_frame_codec.c " +
 			"mysqlnd_ps.c " +
 			"mysqlnd_ps_codec.c " +
+			"mysqlnd_read_buffer.c " +
 			"mysqlnd_result.c " +
 			"mysqlnd_result_meta.c " +
 			"mysqlnd_statistics.c " +

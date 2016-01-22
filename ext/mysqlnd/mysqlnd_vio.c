@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -74,7 +74,7 @@ mysqlnd_set_sock_keepalive(php_stream * stream)
 /* {{{ mysqlnd_vio::network_read */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count,
-											 MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
+										  MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	enum_func_status return_value = PASS;
 	php_stream * net_stream = vio->data->m.get_stream(vio);
@@ -105,7 +105,7 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 /* {{{ mysqlnd_vio::network_write */
 static size_t
 MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_uchar * const buffer, const size_t count,
-											  MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
+										   MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	size_t ret;
 	DBG_ENTER("mysqlnd_vio::network_write");
@@ -318,8 +318,7 @@ MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTR
 	open_stream = vio->data->m.get_open_stream(vio, scheme, error_info);
 	if (open_stream) {
 		php_stream * net_stream = open_stream(vio, scheme, persistent, conn_stats, error_info);
-		if (net_stream) {
-			(void) vio->data->m.set_stream(vio, net_stream);
+		if (net_stream && PASS == vio->data->m.set_stream(vio, net_stream)) {
 			vio->data->m.post_connect_set_opt(vio, scheme, conn_stats, error_info);
 			ret = PASS;
 		}
@@ -337,19 +336,6 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 	DBG_ENTER("mysqlnd_vio::set_client_option");
 	DBG_INF_FMT("option=%u", option);
 	switch (option) {
-		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
-			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
-			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
-				DBG_RETURN(FAIL);
-			}
-			net->cmd_buffer.length = *(unsigned int*) value;
-			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, net->cmd_buffer.length);
-			if (!net->cmd_buffer.buffer) {
-				net->cmd_buffer.buffer = mnd_pemalloc(net->cmd_buffer.length, net->persistent);
-			} else {
-				net->cmd_buffer.buffer = mnd_perealloc(net->cmd_buffer.buffer, net->cmd_buffer.length, net->persistent);
-			}
-			break;
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			DBG_INF("MYSQLND_OPT_NET_READ_BUFFER_SIZE");
 			net->data->options.net_read_buffer_size = *(unsigned int*) value;
@@ -575,6 +561,10 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 		ZVAL_BOOL(&verify_peer_zval, verify);
 		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
 		php_stream_context_set_option(context, "ssl", "verify_peer_name", &verify_peer_zval);
+		if (net->data->options.ssl_verify_peer == MYSQLND_SSL_PEER_DONT_VERIFY) {
+			ZVAL_TRUE(&verify_peer_zval);
+			php_stream_context_set_option(context, "ssl", "allow_self_signed", &verify_peer_zval);
+		}
 	}
 #if PHP_API_VERSION >= 20131106
 	php_stream_context_set(net_stream, context);
@@ -685,7 +675,7 @@ MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS
 		} else {
 			php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE);
 		}
-		(void) net->data->m.set_stream(net, NULL);
+		net->data->m.set_stream(net, NULL);
 	}
 
 	DBG_VOID_RETURN;
@@ -699,9 +689,6 @@ MYSQLND_METHOD(mysqlnd_vio, init)(MYSQLND_VIO * const net, MYSQLND_STATS * const
 {
 	unsigned int buf_size;
 	DBG_ENTER("mysqlnd_vio::init");
-
-	buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
-	net->data->m.set_client_option(net, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size);
 
 	buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to unsigned int*/
 	net->data->m.set_client_option(net, MYSQLND_OPT_NET_READ_BUFFER_SIZE, (char *)&buf_size);
@@ -723,12 +710,6 @@ MYSQLND_METHOD(mysqlnd_vio, dtor)(MYSQLND_VIO * const vio, MYSQLND_STATS * const
 		vio->data->m.free_contents(vio);
 		vio->data->m.close_stream(vio, stats, error_info);
 
-		if (vio->cmd_buffer.buffer) {
-			DBG_INF("Freeing cmd buffer");
-			mnd_pefree(vio->cmd_buffer.buffer, vio->persistent);
-			vio->cmd_buffer.buffer = NULL;
-		}
-
 		mnd_pefree(vio->data, vio->data->persistent);
 		mnd_pefree(vio, vio->persistent);
 	}
@@ -749,16 +730,26 @@ MYSQLND_METHOD(mysqlnd_vio, get_stream)(const MYSQLND_VIO * const net)
 
 
 /* {{{ mysqlnd_vio::set_stream */
-static php_stream *
-MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const net, php_stream * net_stream)
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const vio, php_stream * net_stream)
 {
-	php_stream * ret = NULL;
 	DBG_ENTER("mysqlnd_vio::set_stream");
-	if (net) {
-		net->data->stream = net_stream;
-		ret = net->data->stream;
+	if (vio) {
+		vio->data->stream = net_stream;
+		DBG_RETURN(PASS);
 	}
-	DBG_RETURN(ret);
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_vio::has_valid_stream */
+static zend_bool
+MYSQLND_METHOD(mysqlnd_vio, has_valid_stream)(const MYSQLND_VIO * const vio)
+{
+	DBG_ENTER("mysqlnd_vio::has_valid_stream");
+	DBG_INF_FMT("%p %p", vio, vio? vio->data->stream:NULL);
+	DBG_RETURN((vio && vio->data->stream)? TRUE: FALSE);
 }
 /* }}} */
 
@@ -775,6 +766,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_vio)
 
 	MYSQLND_METHOD(mysqlnd_vio, get_stream),
 	MYSQLND_METHOD(mysqlnd_vio, set_stream),
+	MYSQLND_METHOD(mysqlnd_vio, has_valid_stream),
 	MYSQLND_METHOD(mysqlnd_vio, get_open_stream),
 
 	MYSQLND_METHOD(mysqlnd_vio, set_client_option),
@@ -794,11 +786,12 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_vio_init */
 PHPAPI MYSQLND_VIO *
-mysqlnd_vio_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_VIO * vio;
 	DBG_ENTER("mysqlnd_vio_init");
-	vio = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_vio(persistent, stats, error_info);
+	vio = factory->get_vio(persistent, stats, error_info);
 	DBG_RETURN(vio);
 }
 /* }}} */

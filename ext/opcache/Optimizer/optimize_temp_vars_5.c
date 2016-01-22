@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,18 +154,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 				zend_bitset_incl(valid_T, currT);
 			}
 			ZEND_OP2(opline).var = NUM_VAR(map_T[currT] + offset);
-		}
-
-		if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
-		    opline->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
-            opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-			currT = VAR_NUM(opline->extended_value) - offset;
-			if (!zend_bitset_in(valid_T, currT)) {
-				GET_AVAILABLE_T();
-				map_T[currT] = i;
-				zend_bitset_incl(valid_T, currT);
-			}
-			opline->extended_value = NUM_VAR(map_T[currT] + offset);
 		}
 
 		/* Allocate OP_DATA->op2 after "operands", but before "result" */

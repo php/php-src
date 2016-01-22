@@ -1,5 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#else
+#include "php_config.h"
 #endif
 
 #ifdef HAVE_GD_PNG

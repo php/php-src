@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1526,9 +1526,18 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			if (ce->__tostring &&
 				(zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception))) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
+					zval *msg, ex, rv;
 					zval_ptr_dtor(&retval);
+					ZVAL_OBJ(&ex, EG(exception));
 					EG(exception) = NULL;
-					zend_error_noreturn(E_ERROR, "Method %s::__toString() must not throw an exception", ZSTR_VAL(ce->name));
+					msg = zend_read_property(Z_OBJCE(ex), &ex, "message", sizeof("message") - 1, 1, &rv);
+					if (UNEXPECTED(Z_TYPE_P(msg) != IS_STRING)) {
+						ZVAL_EMPTY_STRING(&rv);
+						msg = &rv;
+					}
+					zend_error_noreturn(E_ERROR,
+							"Method %s::__toString() must not throw an exception, caught %s: %s",
+							ZSTR_VAL(ce->name), ZSTR_VAL(Z_OBJCE(ex)->name), Z_STRVAL_P(msg));
 					return FAILURE;
 				}
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
