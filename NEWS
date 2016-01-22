@@ -15,6 +15,11 @@ PHP                                                                        NEWS
 - Hash:
   . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
 
+- JSON:
+  . Escaped U+2028 and U+2029 when JSON_UNESCAPED_UNICODE is supplied as
+    json_encode options and added JSON_UNESCAPED_LINE_TERMINATORS to restore
+    the previous behaviour. (Eddie Kohler)
+
 - PDO_Firebird:
   . Fixed bug #60052 (Integer returned as a 64bit integer on X86_64). (Mariuz)
 
