@@ -342,8 +342,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
 		return FAILURE;
 	}
-	/* If $_SESSION is not empty, there should be internal data */
-	if (zend_hash_num_elements(Z_ARRVAL(PS(http_session_vars)))
+	if (Z_TYPE(PS(internal_data)) == IS_ARRAY
 		&& php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
 		php_session_destroy(1);
 		php_session_track_init();

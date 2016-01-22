@@ -26,6 +26,6 @@ session_destroy(true);
 --EXPECTF--
 *** Testing session_gc() : basic feature
 
-Warning: session_gc(): Session is not active in /home/yohgaki/workspace/ext/git/oss/php.net/github-php-src/ext/session/tests/session_gc.php on line 7
+Warning: session_gc(): Session is not active in %s on line 7
 bool(false)
 int(0)
