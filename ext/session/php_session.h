@@ -216,7 +216,6 @@ typedef struct _php_ps_globals {
 	zend_long ttl_destroy; /* TTL actually remove from session storage */
 	zend_long regenerate_id; /* Session ID regeneration period */
 	zval internal_data;
-	zend_string *internal_data_key;
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
