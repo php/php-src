@@ -302,6 +302,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 /* }}} */
 
 static int zend_test_class_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
+	RETVAL_STR(zend_string_copy(method));
 	return 0;
 }
 /* }}} */

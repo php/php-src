@@ -10,4 +10,4 @@ $a = new _ZendTestClass();
 var_dump($a->{trim(" test")}());
 ?>
 --EXPECT--
-NULL
+string(4) "test"
