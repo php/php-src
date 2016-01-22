@@ -366,7 +366,12 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_UNSET_VAR:
 			case ZEND_ISSET_ISEMPTY_VAR:
-				if (!(opline->extended_value & ZEND_QUICK_SET)) {
+				if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) &&
+				    !(opline->extended_value & ZEND_QUICK_SET)) {
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
+				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
+				           !op_array->function_name) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 				break;
