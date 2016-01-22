@@ -2034,6 +2034,7 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 		names = (GENERAL_NAMES*) (method->d2i(NULL, &p, length));
 	}
 	if (names == NULL) {
+		php_openssl_store_errors();
 		return -1;
 	}
 
@@ -2180,6 +2181,10 @@ PHP_FUNCTION(openssl_x509_parse)
 			extname = buf;
 		}
 		bio_out = BIO_new(BIO_s_mem());
+		if (bio_out == NULL) {
+			php_openssl_store_errors();
+			RETURN_FALSE;
+		}
 		if (nid == NID_subject_alt_name) {
 			if (openssl_x509v3_subjectAltName(bio_out, extension) == 0) {
 				BIO_get_mem_ptr(bio_out, &bio_buf);
