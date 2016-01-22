@@ -33,7 +33,7 @@
 #define php_dns_search(res, dname, class, type, answer, anslen) \
 			res_nsearch(res, dname, class, type, answer, anslen);
 #define php_dns_free_handle(res) \
-			res_nclose(res); \
+			res_ndestroy(res); \
 			php_dns_free_res(res)
 
 #elif defined(HAVE_RES_SEARCH)
