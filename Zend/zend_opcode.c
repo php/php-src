@@ -291,9 +291,11 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_class_constant *c;
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-					zval_ptr_dtor(&c->value);
-					if (c->doc_comment && c->ce == ce) {
-						zend_string_release(c->doc_comment);
+					if (c->ce == ce) {
+						zval_ptr_dtor(&c->value);
+						if (c->doc_comment) {
+							zend_string_release(c->doc_comment);
+						}
 					}
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
