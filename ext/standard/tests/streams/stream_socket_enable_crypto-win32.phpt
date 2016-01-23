@@ -5,7 +5,7 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 --SKIPIF--
 <?php
 if (phpversion() < "5.3.0") { die('SKIP php version so lower.'); }
-if (!extension_loaded('openssl')) { die('ext/openssl required'); }
+if (!extension_loaded('openssl')) { die('skip ext/openssl required'); }
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 	die('skip windows only test');
 }
@@ -20,8 +20,8 @@ if (is_resource($sock)) {
   var_dump(stream_socket_enable_crypto($sock, true));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv2_CLIENT));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv3_CLIENT));
-  var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv23_CLIENT));  
-  var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT));  
+  var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv23_CLIENT));
+  var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv2_SERVER));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv3_SERVER));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER));
