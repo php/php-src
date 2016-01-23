@@ -614,26 +614,24 @@ static zend_long php_session_gc(void) /* {{{ */
 } /* }}} */
 
 
-static void php_session_save_sids(zend_string *old, zend_string *new) { /* {{{ */
+static void php_session_save_sids(zend_string *old) { /* {{{ */
 	zval *psids, key, el;
 
 	ZEND_ASSERT(Z_TYPE(PS(internal_data)) == IS_ARRAY);
 
-	if (old && new && !zend_string_equals(old, new)) {
-		psids = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-								   PSDK_SIDS, sizeof(PSDK_SIDS)-1);
-		ZEND_ASSERT(Z_TYPE_P(psids) == IS_ARRAY);
-		if (zend_hash_num_elements(Z_ARRVAL_P(psids)) > PS(num_sids)) {
-			ZVAL_UNDEF(&key);
-			zend_hash_internal_pointer_reset(Z_ARRVAL_P(psids));
-			zend_hash_get_current_key_zval(Z_ARRVAL_P(psids), &key);
-			zend_hash_index_del(Z_ARRVAL_P(psids), Z_LVAL(key));
-		}
-		ZVAL_STR_COPY(&el, old);
-		zend_hash_next_index_insert(Z_ARRVAL_P(psids), &el);
-		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
-							  PSDK_SIDS, sizeof(PSDK_SIDS)-1, psids);
+	psids = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+							   PSDK_SIDS, sizeof(PSDK_SIDS)-1);
+	ZEND_ASSERT(Z_TYPE_P(psids) == IS_ARRAY);
+	if (zend_hash_num_elements(Z_ARRVAL_P(psids)) > PS(num_sids)) {
+		ZVAL_UNDEF(&key);
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(psids));
+		zend_hash_get_current_key_zval(Z_ARRVAL_P(psids), &key);
+		zend_hash_index_del(Z_ARRVAL_P(psids), Z_LVAL(key));
 	}
+	ZVAL_STR_COPY(&el, old);
+	zend_hash_next_index_insert(Z_ARRVAL_P(psids), &el);
+	zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
+					  PSDK_SIDS, sizeof(PSDK_SIDS)-1, psids);
 } /* }}} */
 
 
@@ -715,7 +713,6 @@ static void php_session_send_new_sid(zval *new_sid) /* {{{ */
 static void php_session_initialize(void) /* {{{ */
 {
 	zend_string *val = NULL;
-	zend_string *old_sid = NULL;
 	int retry_count = 0;
 
 	PS(session_status) = php_session_active;
@@ -742,14 +739,10 @@ retry:
 	/* If there is no ID, use session module to create one */
 	if (!PS(id) || !ZSTR_VAL(PS(id))[0]) {
 		if (PS(id)) {
-			if (!old_sid) {
-				old_sid = zend_string_copy(PS(id));
-			}
 			zend_string_release(PS(id));
 		}
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
-			if (old_sid) zend_string_release(old_sid);
 			php_session_abort();
 			php_error_docref(NULL, E_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			return;
@@ -776,7 +769,6 @@ retry:
 	/* Read data */
 	php_session_track_init();
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, PS(gc_maxlifetime)) == FAILURE) {
-		if (old_sid) zend_string_release(old_sid);
 		php_session_abort();
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
 		/* It's better to raise error for this, but disabled error for better compatibility */
@@ -860,12 +852,6 @@ retry:
 		} else {
 			/* Newly created session */
 			php_session_set_timestamps(1);
-		}
-
-		php_session_save_sids(old_sid, PS(id));
-
-		if (old_sid) {
-			zend_string_release(old_sid);
 		}
 	}
 }
@@ -1967,7 +1953,7 @@ static int php_session_regenerate_id(zend_bool del_ses) /* {{{ */
 	PS(mod)->s_close(&PS(mod_data));
 
 	/* Save and set old session ID */
-	php_session_save_sids(PS(id), new_sid);
+	php_session_save_sids(PS(id));
 	zend_string_release(PS(id));
 	PS(id) = zend_string_copy(new_sid);
 	zend_string_release(new_sid);
