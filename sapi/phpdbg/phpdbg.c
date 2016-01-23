@@ -1297,7 +1297,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool init_file_default;
 	char *oplog_file;
 	size_t oplog_file_len;
-	zend_ulong flags;
+	uint64_t flags;
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = -1;
