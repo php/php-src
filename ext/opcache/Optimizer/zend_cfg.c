@@ -535,7 +535,7 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 			if (b->successors[0] >= 0) {
 				edges++;
 				blocks[b->successors[0]].predecessors_count++;
-				if (b->successors[1] >= 0) {
+				if (b->successors[1] >= 0 && b->successors[1] != b->successors[0]) {
 					edges++;
 					blocks[b->successors[1]].predecessors_count++;
 				}
@@ -564,7 +564,8 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 				zend_basic_block *b = blocks + blocks[j].successors[0];
 				predecessors[b->predecessor_offset + b->predecessors_count] = j;
 				b->predecessors_count++;
-				if (blocks[j].successors[1] >= 0) {
+				if (blocks[j].successors[1] >= 0
+						&& blocks[j].successors[1] != blocks[j].successors[0]) {
 					zend_basic_block *b = blocks + blocks[j].successors[1];
 					predecessors[b->predecessor_offset + b->predecessors_count] = j;
 					b->predecessors_count++;
