@@ -55,35 +55,9 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op1.var));
 						}
 					}
-					if (next->op2_type == IS_CV) {
+					if (next->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 						if (!DFG_ISSET(def, set_size, j,EX_VAR_TO_NUM(next->op2.var))) {
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op2.var));
-						}
-					} else if (next->op2_type == IS_VAR ||
-							   next->op2_type == IS_TMP_VAR) {
-						/* ZEND_ASSIGN_??? use the second operand
-						   of the following OP_DATA instruction as
-						   a temporary variable */
-						switch (opline->opcode) {
-							case ZEND_ASSIGN_DIM:
-							case ZEND_ASSIGN_OBJ:
-							case ZEND_ASSIGN_ADD:
-							case ZEND_ASSIGN_SUB:
-							case ZEND_ASSIGN_MUL:
-							case ZEND_ASSIGN_DIV:
-							case ZEND_ASSIGN_MOD:
-							case ZEND_ASSIGN_SL:
-							case ZEND_ASSIGN_SR:
-							case ZEND_ASSIGN_CONCAT:
-							case ZEND_ASSIGN_BW_OR:
-							case ZEND_ASSIGN_BW_AND:
-							case ZEND_ASSIGN_BW_XOR:
-							case ZEND_ASSIGN_POW:
-								break;
-							default:
-								if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(next->op2.var))) {
-									DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op2.var));
-								}
 						}
 					}
 				}
