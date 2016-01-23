@@ -28,7 +28,7 @@ class MySession2 {
 	}
 
 	public function read($id) {
-		return @file_get_contents($this->path . $id);
+		return (string)@file_get_contents($this->path . $id);
 	}
 
 	public function write($id, $data) {

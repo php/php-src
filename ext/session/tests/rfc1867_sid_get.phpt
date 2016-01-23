@@ -40,6 +40,7 @@ Content-Disposition: form-data; name="file2"; filename="file2.txt"
 -----------------------------20896060251896012921717172737--
 --FILE--
 <?php
+ob_start();
 session_start();
 var_dump(session_id());
 var_dump(basename(__FILE__) == $_POST[ini_get("session.upload_progress.name")]);

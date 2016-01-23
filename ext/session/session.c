@@ -342,13 +342,15 @@ static int php_session_decode(zend_string *data) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
 		return FAILURE;
 	}
-	if (Z_TYPE(PS(internal_data)) == IS_ARRAY
+#if 1
+	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY && Z_TYPE(PS(internal_data)) == IS_ARRAY
 		&& php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
 		php_session_destroy(1);
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Session has been destroyed");
 		/* Retun SUCCESS intentionally */
 	}
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -2156,6 +2158,9 @@ static void php_session_abort(void) /* {{{ */
 static void php_session_reset(void) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
+		if (PS(mod_data) || PS(mod_user_implemented)) {
+			PS(mod)->s_close(&PS(mod_data));
+		}
 		php_session_initialize();
 	}
 }
@@ -3326,8 +3331,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 		progress->next_update = Z_LVAL_P(progress->post_bytes_processed) + progress->update_step;
 	}
 
-	php_session_initialize();
-	PS(session_status) = php_session_active;
+	php_session_start();
 	IF_SESSION_VARS() {
 		progress->cancel_upload |= php_check_cancel_upload(progress);
 		if (Z_REFCOUNTED(progress->data)) Z_ADDREF(progress->data);
@@ -3338,8 +3342,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 
 static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress) /* {{{ */
 {
-	php_session_initialize();
-	PS(session_status) = php_session_active;
+	php_session_start();
 	IF_SESSION_VARS() {
 		zend_hash_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s);
 	}

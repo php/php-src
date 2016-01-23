@@ -37,6 +37,12 @@ Content-Disposition: form-data; name="file2"; filename="file2.txt"
 -----------------------------20896060251896012921717172737--
 --FILE--
 <?php
+//ob_start();
+/*
+ob start() will not work, since invalid session ID error/session read errors
+are raised before script execution by RFC1867 handler. Thus, only "headers already
+sent" error happens on following session_start().
+*/
 error_reporting(0);
 session_start();
 var_dump(session_id());
@@ -50,14 +56,12 @@ Warning: Unknown: The session id is too long or contains illegal characters, val
 
 Warning: Unknown: Failed to read session data: files (path: ) in Unknown on line 0
 
-Warning: Unknown: Failed to write session data (files). Please verify that the current setting of session.save_path is correct () in Unknown on line 0
+Warning: Unknown: Cannot send session cookie - headers already sent in Unknown on line 0
 
 Warning: Unknown: The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,' in Unknown on line 0
 
 Warning: Unknown: Failed to read session data: files (path: ) in Unknown on line 0
-
-Warning: Unknown: Failed to write session data (files). Please verify that the current setting of session.save_path is correct () in Unknown on line 0
-string(%d) "%s"
+string(%s) "%s"
 bool(true)
 array(2) {
   [%u|b%"file1"]=>
