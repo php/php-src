@@ -13,9 +13,12 @@ ob_start();
 
 echo "*** Testing timestamp : basic feature\n";
 
+// Testing timestamp update, stored SID
+
 ini_set('session.ttl', 100);
 ini_set('session.ttl_destroy', 100);
 ini_set('session.ttl_update', 0);
+ini_set('session.regenerate_id', 300000);
 $now = time();
 
 session_start();
@@ -33,8 +36,10 @@ $new_info = session_info();
 session_destroy(true);
 
 var_dump($old_sid, $new_sid, $old_sid === $new_sid);
-var_dump($old_info['CREATED'] === $new_info['CREATED']);
-var_dump($old_info['UPDATED'] !== $new_info['UPDATED']);
+var_dump(
+	$old_info['CREATED'] === $new_info['CREATED'],
+	$old_info['UPDATED'] !== $new_info['UPDATED']
+);
 
 
 session_id($old_sid);

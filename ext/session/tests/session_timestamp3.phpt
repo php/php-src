@@ -13,12 +13,12 @@ ob_start();
 
 echo "*** Testing timestamp : basic feature\n";
 
-// Testing auto regenerate and destory
+// Testing auto regenerate ID
 
-ini_set('session.ttl', 1);
-ini_set('session.ttl_destroy', 0);
+ini_set('session.ttl', 1800);
+ini_set('session.ttl_destroy', 300);
 ini_set('session.ttl_update', 300);
-ini_set('session.ttl_update', 300);
+ini_set('session.regenerate_id', 1);
 $now = time();
 
 session_start();
@@ -67,7 +67,9 @@ array(5) {
   array(0) {
   }
 }
-array(1) {
+array(2) {
+  ["foo"]=>
+  string(3) "bar"
   ["bar"]=>
   string(3) "foo"
 }
@@ -81,7 +83,9 @@ array(5) {
   ["TTL_UPDATE"]=>
   int(%d)
   ["SIDS"]=>
-  array(0) {
+  array(1) {
+    [0]=>
+    string(%d) "%s"
   }
 }
 string(32) "%s"

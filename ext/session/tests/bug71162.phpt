@@ -2,12 +2,12 @@
 updateTimestamp never called when session data is empty
 --INI--
 session.use_strict_mode=0
+session.serialize_handler=php_serialize
 --XFAIL--
-Current session module is designed to write empty session always. In addition,
-current session module only supports SessionHandlerInterface only from PHP 7.0.
+This will be fixed soon.
 --FILE--
 <?php
-class MySessionHandler implements SessionUpdateTimestampHandlerInterface
+class MySessionHandler implements SessionHandlerInterface, SessionIdInterface, SessionUpdateTimestampHandlerInterface
 {
     public function open($path, $sessname) {
         return TRUE;
@@ -34,13 +34,13 @@ class MySessionHandler implements SessionUpdateTimestampHandlerInterface
         return TRUE;
     }
 
-	public function create_sid() {
-		return sha1(random_bytes(32));
-	}
+    public function create_sid() {
+        return sha1(random_bytes(32));
+    }
 
-	public function validateId($sid) {
-		return TRUE;
-	}
+    public function validateId($sid) {
+        return TRUE;
+    }
 
     public function updateTimestamp($sessid, $sessdata) {
         echo __FUNCTION__, PHP_EOL;
@@ -63,9 +63,19 @@ var_dump(session_start(['lazy_write'=>1]));
 session_commit();
 
 session_id(sha1(''));
-var_dump(session_id());
 var_dump(session_start(['lazy_write'=>0]));
+var_dump(session_id());
+$_SESSION['foo']='bar';
 session_commit();
+
+session_id(sha1(''));
+var_dump(session_start(['lazy_write'=>0]));
+var_dump(session_id());
+$_SESSION['foo']='bar';
+session_commit();
+
+session_start();
+session_destroy(true);
 ?>
 --EXPECT--
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
@@ -77,3 +87,6 @@ updateTimestamp
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 bool(true)
 write
+string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+bool(true)
+updateTimestamp
