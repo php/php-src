@@ -532,7 +532,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	dfg.in  = dfg.use + set_size * blocks_count;
 	dfg.out = dfg.in  + set_size * blocks_count;
 
-	if (zend_build_dfg(op_array, &ssa->cfg, &dfg) != SUCCESS) {
+	if (zend_build_dfg(op_array, &ssa->cfg, &dfg, build_flags) != SUCCESS) {
 		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
 	}
