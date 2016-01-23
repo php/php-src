@@ -64,6 +64,18 @@ array(5) {
   array(0) {
   }
 }
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
 array(5) {
   ["CREATED"]=>
   int(%d)
@@ -74,9 +86,11 @@ array(5) {
   ["TTL_UPDATE"]=>
   int(%d)
   ["SIDS"]=>
-  array(0) {
+  array(1) {
+    int(%d)
   }
 }
 string(32) "%s"
 string(32) "%s"
+bool(true)
 bool(true)

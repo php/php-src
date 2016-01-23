@@ -676,6 +676,42 @@ static void php_session_set_timestamps(zend_bool created) /* {{{ */
 	}
 } /* }}} */
 
+
+static void php_session_send_new_sid(zval *new_sid) /* {{{ */
+{
+	zval tmp, *zp, *updated, *new_sid_sent;
+	zend_string *tmp_sid;
+	time_t now = time(NULL);
+
+	/* New session ID should be resend? */
+	new_sid_sent = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+									  PSDK_NEW_SID_SENT, sizeof(PSDK_NEW_SID_SENT)-1);
+	updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+								 PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
+	if (!new_sid_sent && Z_LVAL_P(updated)+60 < time(NULL)) {
+		ZVAL_LONG(&tmp, now);
+		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
+						  PSDK_NEW_SID_SENT, sizeof(PSDK_NEW_SID_SENT)-1, &tmp);
+		/* Only send new SID. Do not change current SID */
+		/* Other option: Read new session data via new SID */
+		zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+								PSDK_SIDS, sizeof(PSDK_SIDS)-1);
+		zend_hash_internal_pointer_end(Z_ARRVAL_P(zp));
+		new_sid = zend_hash_get_current_data(Z_ARRVAL_P(zp));
+		tmp_sid = zend_string_copy(PS(id));
+		zend_string_release(PS(id));
+		PS(id) = zend_string_copy(Z_STR_P(new_sid));
+
+		php_session_reset_id();
+
+		zend_string_release(PS(id));
+		PS(id) = zend_string_copy(tmp_sid);
+		zend_string_release(tmp_sid);
+	}
+}
+/* }}} */
+
+
 static void php_session_initialize(void) /* {{{ */
 {
 	zend_string *val = NULL;
@@ -754,7 +790,7 @@ retry:
 	}
 
 	if (val) {
-		zval *entry, tmp;;
+		zval *entry;
 		time_t now = time(NULL);
 
 		if (PS(lazy_write)) {
@@ -785,6 +821,8 @@ retry:
 				return;
 			}
 
+			new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+										 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
 			/* TTL Check */
 			zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 									PSDK_TTL, sizeof(PSDK_TTL)-1);
@@ -795,15 +833,12 @@ retry:
 					php_session_destroy(1); /* Acutually delete data. */
 				}
 				/* Access to old session should not happen under normal circumstance */
-				new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-											 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
 				if (new_sid) {
 					php_error_docref(NULL, E_NOTICE,
 									 "Obsolete session data access detected. Possible "
 									 "security incident, but alert could be false positive. "
 									 "(Decendant session ID: %s)", Z_STRVAL_P(new_sid));
 				}
-
 				/* Be protective. Should not happen. */
 				if (retry_count++ > 3) {
 					php_error_docref(NULL, E_RECOVERABLE_ERROR,
@@ -812,8 +847,7 @@ retry:
 				goto retry;
 			}
 
-			if (!(new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-													  PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1))) {
+			if (!new_sid) {
 				/* Update outstanding session timestamps */
 				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 										PSDK_TTL_UPDATE, sizeof(PSDK_TTL_UPDATE)-1);
@@ -821,33 +855,7 @@ retry:
 					php_session_set_timestamps(0);
 				}
 			} else {
-			zval *updated, *new_sid_sent;
-				/* New session ID should be resend? */
-				new_sid_sent = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-												  PSDK_NEW_SID_SENT, sizeof(PSDK_NEW_SID_SENT)-1);
-				updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-											 PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
-				if (!new_sid_sent && Z_LVAL_P(updated)+60 < time(NULL)) {
-					zend_string *tmp_sid;
-					ZVAL_LONG(&tmp, now);
-					zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
-									  PSDK_NEW_SID_SENT, sizeof(PSDK_NEW_SID_SENT)-1, &tmp);
-					/* Only send new SID. Do not change current SID */
-					/* Other option: Read new session data via new SID */
-					zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-											PSDK_SIDS, sizeof(PSDK_SIDS)-1);
-					zend_hash_internal_pointer_end(Z_ARRVAL_P(zp));
-					new_sid = zend_hash_get_current_data(Z_ARRVAL_P(zp));
-					tmp_sid = zend_string_copy(PS(id));
-					zend_string_release(PS(id));
-					PS(id) = zend_string_copy(Z_STR_P(new_sid));
-
-					php_session_reset_id();
-
-					zend_string_release(PS(id));
-					PS(id) = zend_string_copy(tmp_sid);
-					zend_string_release(tmp_sid);
-				}
+				php_session_send_new_sid(new_sid);
 			}
 		} else {
 			/* Newly created session */
