@@ -211,11 +211,12 @@ typedef struct _php_ps_globals {
 	zend_bool lazy_write; /* omit session write when it is possible */
 	zend_string *session_vars; /* serialized original session data */
 
+	zval internal_data;
 	zend_long ttl; /* Session TTL */
 	zend_long ttl_update; /* Settion TTL update frequency */
 	zend_long ttl_destroy; /* TTL actually remove from session storage */
 	zend_long regenerate_id; /* Session ID regeneration period */
-	zval internal_data;
+	zend_long num_sids; /* Number of session IDs stored */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

@@ -615,32 +615,24 @@ static zend_long php_session_gc(void) /* {{{ */
 
 
 static void php_session_save_sids(zend_string *old, zend_string *new) { /* {{{ */
-	zval *psids, sids, key, el;
+	zval *psids, key, el;
 
-	ZEND_ASSERT(!Z_ISUNDEF(PS(internal_data)));
+	ZEND_ASSERT(Z_TYPE(PS(internal_data)) == IS_ARRAY);
 
 	if (old && new && !zend_string_equals(old, new)) {
 		psids = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 								   PSDK_SIDS, sizeof(PSDK_SIDS)-1);
-		if (psids) {
-			if (zend_hash_num_elements(Z_ARRVAL_P(psids)) > 8) {
-				ZVAL_UNDEF(&key);
-				zend_hash_internal_pointer_reset(Z_ARRVAL_P(psids));
-				zend_hash_get_current_key_zval(Z_ARRVAL_P(psids), &key);
-				zend_hash_index_del(Z_ARRVAL_P(psids), Z_LVAL(key));
-			}
+		ZEND_ASSERT(Z_TYPE_P(psids) == IS_ARRAY);
+		if (zend_hash_num_elements(Z_ARRVAL_P(psids)) > PS(num_sids)) {
+			ZVAL_UNDEF(&key);
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(psids));
+			zend_hash_get_current_key_zval(Z_ARRVAL_P(psids), &key);
+			zend_hash_index_del(Z_ARRVAL_P(psids), Z_LVAL(key));
 		}
 		ZVAL_STR_COPY(&el, old);
-		if (psids) {
-			zend_hash_next_index_insert(Z_ARRVAL_P(psids), &el);
-			zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
+		zend_hash_next_index_insert(Z_ARRVAL_P(psids), &el);
+		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
 							  PSDK_SIDS, sizeof(PSDK_SIDS)-1, psids);
-		} else {
-			array_init(&sids);
-			zend_hash_next_index_insert(Z_ARRVAL(sids), &el);
-			zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
-							  PSDK_SIDS, sizeof(PSDK_SIDS)-1, &sids);
-		}
 	}
 } /* }}} */
 
@@ -698,6 +690,7 @@ static void php_session_initialize(void) /* {{{ */
 		return;
 	}
 
+retry:
 	/* Open session handler first */
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
@@ -710,7 +703,6 @@ static void php_session_initialize(void) /* {{{ */
 	/* GC must be done before s_validate_sid() and s_read() */
 	php_session_gc();
 
-retry:
 	/* If there is no ID, use session module to create one */
 	if (!PS(id) || !ZSTR_VAL(PS(id))[0]) {
 		if (PS(id)) {
@@ -779,8 +771,7 @@ retry:
 		entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 											   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 		if (entry) {
-			zval *zp, *new_sid, *new_sid_sent;
-			zend_bool regenerated = 0;
+			zval *zp, *new_sid;
 
 			ZVAL_COPY(&PS(internal_data), entry);
 			zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
@@ -791,26 +782,22 @@ retry:
 									PSDK_CREATED, sizeof(PSDK_CREATED)-1);
 			if (Z_LVAL_P(zp) + PS(regenerate_id) < now) {
 				php_session_regenerate_id(0);
-				regenerated = 1;
+				return;
 			}
 
 			/* TTL Check */
 			zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 									PSDK_TTL, sizeof(PSDK_TTL)-1);
-			if (!regenerated && Z_LVAL_P(zp) < now) {
-				/* This session is obsolete */
+			if (Z_LVAL_P(zp) < now) {
 				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 										PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
 				if (Z_LVAL_P(zp) + PS(ttl_destroy) < now) {
 					php_session_destroy(1); /* Acutually delete data. */
-					zend_string_release(PS(id));
-					PS(id) = NULL;
 				}
-
 				/* Access to old session should not happen under normal circumstance */
 				new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 											 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
-				if (!Z_ISUNDEF_P(new_sid)) {
+				if (new_sid) {
 					php_error_docref(NULL, E_NOTICE,
 									 "Obsolete session data access detected. Possible "
 									 "security incident, but alert could be false positive. "
@@ -825,9 +812,7 @@ retry:
 				goto retry;
 			}
 
-			if (regenerated) {
-				/* Nothing to do */
-			} else if (!(new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+			if (!(new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 													  PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1))) {
 				/* Update outstanding session timestamps */
 				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
@@ -836,7 +821,7 @@ retry:
 					php_session_set_timestamps(0);
 				}
 			} else {
-				zval *updated;
+			zval *updated, *new_sid_sent;
 				/* New session ID should be resend? */
 				new_sid_sent = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 												  PSDK_NEW_SID_SENT, sizeof(PSDK_NEW_SID_SENT)-1);
@@ -1175,6 +1160,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.ttl_update",         "300",       PHP_INI_ALL, OnUpdateLong,   ttl_update,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.ttl_destroy",        "300",       PHP_INI_ALL, OnUpdateLong,   ttl_destroy,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.regenerate_id",      "64800",     PHP_INI_ALL, OnUpdateLong,   regenerate_id,      php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.num_sids",           "8",         PHP_INI_ALL, OnUpdateLong,   num_sids,           php_ps_globals,    ps_globals)
 
 
 	/* Upload progress */
