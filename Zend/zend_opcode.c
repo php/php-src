@@ -668,9 +668,13 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_VERIFY_RETURN_TYPE:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 					if (opline->op1_type != IS_UNUSED) {
-						(opline + 1)->op1 = opline->op1;
-						(opline + 1)->op1_type = opline->op1_type;
+						zend_op *ret = opline;
+						do ret++; while (ret->opcode != ZEND_RETURN);
+
+						ret->op1 = opline->op1;
+						ret->op1_type = opline->op1_type;
 					}
+
 					MAKE_NOP(opline);
 				}
 				break;

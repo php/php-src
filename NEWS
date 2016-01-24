@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.4
 
-
+- Core:
+  . Fixed bug #71441 (Typehinted Generator with return in try/finally crashes).
+    (Bob)
 
 04 Feb 2016 PHP 7.0.3
 
