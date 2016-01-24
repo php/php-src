@@ -973,7 +973,7 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (ZSTR_LEN(text) > ULONG_MAX / (breakchar_len + 1) - 1) {
-		p_error_docref(NULL, E_WARNING, "Integer overflow is occurred");
+		p_error_docref(NULL, E_WARNING, "Integer overflow has occurred");
 		RETURN_FALSE;
 	}
 
