@@ -25,7 +25,10 @@ session_start();
 $old_sid = session_id();
 $old_info = session_info();
 $_SESSION['foo'] = 'bar';
-var_dump($_SESSION, $old_info);
+var_dump(
+	$_SESSION,
+	$old_info
+);
 session_commit();
 
 sleep(2);
@@ -34,11 +37,15 @@ session_start();
 $new_sid = session_id();
 $new_info = session_info();
 $_SESSION['bar'] = 'foo';
-var_dump($_SESSION, $new_info);
+var_dump(
+	$_SESSION,
+	$new_info
+);
 @session_destroy(-1);
 
-var_dump($old_sid, $new_sid);
 var_dump(
+	$old_sid,
+	$new_sid,
 	$old_sid !== $new_sid,
 	$old_info['CREATED'] !== $new_info['CREATED']
 );

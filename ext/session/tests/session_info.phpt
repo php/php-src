@@ -120,9 +120,7 @@ array(3) {
   ["UPDATED"]=>
   int(%d)
   ["SIDS"]=>
-  array(9) {
-    [2]=>
-    string(32) "%s"
+  array(8) {
     [3]=>
     string(32) "%s"
     [4]=>
@@ -142,6 +140,6 @@ array(3) {
   }
 }
 bool(true)
-string(474) "a:3:{s:7:"CREATED";%s}"
-string(474) "a:3:{s:7:"CREATED";%s}"
+string(430) "a:3:{s:7:"CREATED";%s}"
+string(430) "a:3:{s:7:"CREATED";%s}"
 

@@ -605,7 +605,7 @@ static void php_session_save_sids(zend_string *old) { /* {{{ */
 	psids = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 							   PSDK_SIDS, sizeof(PSDK_SIDS)-1);
 	ZEND_ASSERT(Z_TYPE_P(psids) == IS_ARRAY);
-	if (zend_hash_num_elements(Z_ARRVAL_P(psids)) > PS(num_sids)) {
+	if (zend_hash_num_elements(Z_ARRVAL_P(psids)) >= PS(num_sids)) {
 		ZVAL_UNDEF(&key);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(psids));
 		zend_hash_get_current_key_zval(Z_ARRVAL_P(psids), &key);
@@ -1150,11 +1150,11 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.hash_function",          "1",         PHP_INI_ALL, OnUpdateHashFunc)
 	STD_PHP_INI_ENTRY("session.hash_bits_per_character", "5",    PHP_INI_ALL, OnUpdateLong,   hash_bits_per_character, php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.lazy_write",       "1",         PHP_INI_ALL, OnUpdateBool,   lazy_write,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.ttl",                "1800",      PHP_INI_ALL, OnUpdateLong,   ttl,                php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.ttl_update",         "300",       PHP_INI_ALL, OnUpdateLong,   ttl_update,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.ttl_destroy",        "300",       PHP_INI_ALL, OnUpdateLong,   ttl_destroy,        php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.regenerate_id",      "64800",     PHP_INI_ALL, OnUpdateLong,   regenerate_id,      php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.num_sids",           "8",         PHP_INI_ALL, OnUpdateLong,   num_sids,           php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.ttl",                "1800",      PHP_INI_ALL, OnUpdateLongGEZero, ttl,            php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.ttl_update",         "300",       PHP_INI_ALL, OnUpdateLongGEZero, ttl_update,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.ttl_destroy",        "300",       PHP_INI_ALL, OnUpdateLong,       ttl_destroy,    php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.regenerate_id",      "64800",     PHP_INI_ALL, OnUpdateLongGEZero, regenerate_id,  php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.num_sids",           "8",         PHP_INI_ALL, OnUpdateLongGEZero, num_sids,       php_ps_globals,    ps_globals)
 
 
 	/* Upload progress */

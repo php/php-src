@@ -17,10 +17,14 @@ echo "*** Testing timestamp : basic feature\n";
 
 session_start();
 $_SESSION['__PHP_SESSION__'] = 'bar';
-var_dump(session_commit());
+var_dump(
+	session_commit()
+);
 
 session_start();
-var_dump($_SESSION);
+var_dump(
+	$_SESSION
+);
 session_commit();
 
 // Cleanup

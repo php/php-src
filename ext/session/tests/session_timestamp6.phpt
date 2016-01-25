@@ -13,13 +13,22 @@ ob_start();
 
 echo "*** Testing timestamp : basic feature\n";
 
-// Testing timestamp update, stored SID
+// Testing 0 timestamp
 
-ini_set('session.ttl', 100);
-ini_set('session.ttl_destroy', 100);
+ini_set('session.ttl', 0);
+ini_set('session.ttl_destroy', 0);
 ini_set('session.ttl_update', 0);
-ini_set('session.regenerate_id', 300000);
+ini_set('session.regenerate_id', 0);
+ini_set('session.num_sids', 0);
 $now = time();
+
+var_dump(
+	ini_get('session.ttl'),
+	ini_get('session.ttl_destroy'),
+	ini_get('session.ttl_update'),
+	ini_get('session.regenerate_id'),
+	ini_get('session.num_sids')
+);
 
 session_start();
 $old_sid = session_id();
@@ -42,8 +51,8 @@ $new_info = session_info();
 var_dump(
 	$old_sid,
 	$new_sid,
-	$old_sid === $new_sid,
-	$old_info['CREATED'] === $new_info['CREATED'],
+	$old_sid !== $new_sid,
+	$old_info['CREATED'] !== $new_info['CREATED'],
 	$old_info['UPDATED'] !== $new_info['UPDATED']
 );
 
@@ -54,6 +63,11 @@ session_start();
 ?>
 --EXPECTF--
 *** Testing timestamp : basic feature
+string(1) "0"
+string(1) "0"
+string(1) "0"
+string(1) "0"
+string(1) "0"
 array(3) {
   ["CREATED"]=>
   int(%d)
