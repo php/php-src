@@ -2040,7 +2040,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 				/* Need to fetch global match which equals pmatch[0] */
 				zval *pzval;
 				HashTable *ht = Z_ARRVAL(subpats);
-				if ((pzval = zend_hash_index_find(ht, 0)) != NULL) {
+				if ((pzval = zend_hash_index_find(ht, 0)) != NULL && Z_TYPE_P(pzval) == IS_ARRAY) {
 					/* If everything goes according to the master plan
 					   tmpcopy now contains two elements:
 					   0 = the match
