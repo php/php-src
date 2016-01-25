@@ -60,7 +60,7 @@ session_write_close();
 
 session_start();
 $_SESSION['C'] = 'D';
-session_destroy(true);
+@session_destroy(-1);
 
 session_start();
 $_SESSION['E'] = 'F';

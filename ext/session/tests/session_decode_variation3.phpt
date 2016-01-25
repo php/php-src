@@ -26,7 +26,7 @@ var_dump($_SESSION);
 $encoded = "foo|i:1234567890;";
 var_dump(session_decode($encoded));
 var_dump($_SESSION);
-var_dump(session_destroy(true));
+var_dump(session_destroy(-1));
 
 echo "Done";
 ob_end_flush();
@@ -58,6 +58,8 @@ array(3) {
   ["guff"]=>
   float(123.456)
 }
+
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few secounds duration at least on stable network, few miniutes for unstable network in %s on line %d
 
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)

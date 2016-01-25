@@ -164,7 +164,7 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 /* }}} */
 
 
-static int php_session_destroy(zend_bool immediate) /* {{{ */
+static int php_session_destroy(zend_long duration) /* {{{ */
 {
 	int retval = SUCCESS;
 
@@ -174,15 +174,19 @@ static int php_session_destroy(zend_bool immediate) /* {{{ */
 	}
 
 	ZEND_ASSERT(PS(id));
-	if (immediate) {
+	if (duration < 0) {
 		if (PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
 			retval = FAILURE;
-			php_error_docref(NULL, E_WARNING, "Session object destruction failed");
+			php_error_docref(NULL, E_WARNING, "Session data destruction failed");
 		}
 	} else {
 		zval tmp;
+		/* NULL PSDK_NEW_SID indicates no descendant session. i.e. simply destroyed */
 		ZVAL_NULL(&tmp);
 		zend_hash_str_add(Z_ARRVAL(PS(internal_data)), PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1, &tmp);
+		/* Set new TTL */
+		ZVAL_LONG(&tmp, time(NULL) + duration);
+		zend_hash_str_update(Z_ARRVAL(PS(internal_data)), PSDK_TTL, sizeof(PSDK_TTL)-1, &tmp);
 		php_session_save_current_state(1);
 	}
 
@@ -337,7 +341,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
 		return FAILURE;
 	}
 	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
-		php_session_destroy(1);
+		php_session_destroy(PS(ttl_destroy));
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
 		return FAILURE;
@@ -345,7 +349,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
 #if 1
 	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY && Z_TYPE(PS(internal_data)) == IS_ARRAY
 		&& php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
-		php_session_destroy(1);
+		php_session_destroy(PS(ttl_destroy));
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Session has been destroyed");
 		/* Retun SUCCESS intentionally */
@@ -836,7 +840,7 @@ retry:
 				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 										PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
 				if (Z_LVAL_P(zp) + PS(ttl_destroy) < now) {
-					php_session_destroy(1);
+					php_session_destroy(PS(ttl_destroy));
 					/* Back to active state */
 					PS(session_status) = php_session_active;
 				}
@@ -2753,17 +2757,24 @@ static PHP_FUNCTION(session_gc)
 
 	ZVAL_LONG(return_value, php_session_gc());
 }
-/* {{{ proto bool session_destroy(void)
+/* {{{ proto bool session_destroy([long duration])
    Destroy the current session and all data associated with it */
 static PHP_FUNCTION(session_destroy)
 {
-	zend_bool immediate = 0;
+	zend_long duration = PS(ttl_destroy);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &immediate) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &duration) == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(php_session_destroy(immediate) == SUCCESS);
+	if (duration <= 0) {
+		/* Negative value destroy session data immediately.
+		   0 sets TTL value to current time stamp, but it still may
+		   cause random lost session by server side race condition. */
+		php_error_docref(NULL, E_NOTICE, "Immediate session data removal may cause random lost sessions. It is advised to set few secounds duration at least on stable network, few miniutes for unstable network");
+	}
+
+	RETURN_BOOL(php_session_destroy(duration) == SUCCESS);
 }
 /* }}} */
 

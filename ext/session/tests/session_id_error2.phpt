@@ -21,7 +21,7 @@ var_dump(session_id("test"));
 var_dump(session_id());
 var_dump(session_id("1234567890"));
 var_dump(session_id());
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 var_dump(session_id());
 
 echo "Done";

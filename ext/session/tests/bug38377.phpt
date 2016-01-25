@@ -6,7 +6,7 @@ Bug #38377 (session_destroy() gives warning after session_regenerate_id())
 <?php
 session_start();
 session_regenerate_id();
-session_destroy(true);
+@session_destroy(-1);
 echo "Done\n";
 ?>
 --EXPECT--

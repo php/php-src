@@ -44,7 +44,7 @@ $a = $_SESSION['a'];
 $b = $_SESSION['b'];
 echo "values after session:\n";
 var_dump($a,$b);
-session_destroy(true);
+@session_destroy(-1);
 ?>
 --EXPECTF--
 original values:

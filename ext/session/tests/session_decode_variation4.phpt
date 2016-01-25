@@ -24,7 +24,7 @@ var_dump($_SESSION);
 $encoded = "A2Zvb2k6MTIzNDU2Nzg5MDs=";
 var_dump(session_decode(base64_decode($encoded)));
 var_dump($_SESSION);
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 
 echo "Done";
 ob_end_flush();

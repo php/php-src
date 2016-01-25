@@ -24,7 +24,7 @@ var_dump(session_start());
 var_dump(ini_get("session.cookie_httponly"));
 var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, TRUE));
 var_dump(ini_get("session.cookie_httponly"));
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 var_dump(ini_get("session.cookie_httponly"));
 var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, FALSE));
 var_dump(ini_get("session.cookie_httponly"));

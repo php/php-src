@@ -18,13 +18,13 @@ echo "*** Testing session_start() : variation ***\n";
 var_dump(session_start());
 var_dump(session_destroy());
 var_dump(session_start());
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 var_dump(session_start());
 var_dump(session_destroy());
 var_dump(session_start());
 var_dump(session_destroy());
 var_dump(session_start());
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 
 echo "Done";
 ob_end_flush();

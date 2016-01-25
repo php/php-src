@@ -22,7 +22,7 @@ var_dump(session_commit());
 var_dump(session_commit());
 var_dump(session_commit());
 var_dump(session_start());
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 
 echo "Done";
 ob_end_flush();

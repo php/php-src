@@ -64,7 +64,7 @@ $new = serialize($new_info);
 $old = serialize($old_info);
 var_dump($new === $old, $new, $old);
 
-session_destroy(true);
+@session_destroy(-1);
 
 ?>
 --EXPECTF--

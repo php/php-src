@@ -22,7 +22,7 @@ var_dump(session_start());
 var_dump(session_cache_limiter());
 var_dump(session_cache_limiter("public"));
 var_dump(session_cache_limiter());
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 var_dump(session_cache_limiter());
 
 echo "Done";

@@ -21,7 +21,7 @@ var_dump(session_start());
 $_SESSION["foo"] = 1234567890;
 $encoded = session_encode();
 var_dump(base64_encode($encoded));
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 
 echo "Done";
 ob_end_flush();

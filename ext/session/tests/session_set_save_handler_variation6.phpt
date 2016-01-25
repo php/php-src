@@ -54,7 +54,7 @@ session_write_close();
 
 echo "Cleanup\n";
 session_start();
-session_destroy(true);
+@session_destroy(-1);
 
 ob_end_flush();
 ?>

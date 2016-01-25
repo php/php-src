@@ -89,7 +89,7 @@ foreach($inputs as $input) {
     $iterator++;
 };
 
-session_destroy(true);
+@session_destroy(-1);
 fclose($fp);
 echo "Done";
 ob_end_flush();

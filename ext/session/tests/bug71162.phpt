@@ -75,7 +75,7 @@ $_SESSION['foo']='bar';
 session_commit();
 
 session_start();
-session_destroy(true);
+@session_destroy(-1);
 ?>
 --EXPECT--
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

@@ -33,7 +33,7 @@ session_start();
 $new_sid = session_id();
 var_dump(session_info());
 $new_info = session_info();
-session_destroy(true);
+@session_destroy(-1);
 
 var_dump($old_sid, $new_sid, $old_sid === $new_sid);
 var_dump(
@@ -44,7 +44,7 @@ var_dump(
 
 session_id($old_sid);
 session_start();
-session_destroy(true);
+@session_destroy(-1);
 ?>
 --EXPECTF--
 *** Testing timestamp : basic feature

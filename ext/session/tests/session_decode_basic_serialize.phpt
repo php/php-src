@@ -92,7 +92,7 @@ foreach($inputs as $input) {
     $iterator++;
 };
 
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 fclose($fp);
 echo "Done";
 ob_end_flush();

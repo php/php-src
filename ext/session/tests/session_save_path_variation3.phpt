@@ -22,7 +22,7 @@ ini_set("session.save_path", "/blah");
 var_dump(session_save_path());
 var_dump(session_start());
 var_dump(session_save_path());
-var_dump(session_destroy(true));
+var_dump(@session_destroy(-1));
 var_dump(session_save_path());
 
 echo "Done";
@@ -37,8 +37,6 @@ Warning: session_start(): open(%s, O_RDWR) failed: No such file or directory (2)
 Warning: session_start(): Failed to read session data: files (path: %sblah) in %s on line %d
 bool(false)
 string(5) "/blah"
-
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)
 string(5) "/blah"
 Done
