@@ -23,7 +23,6 @@ session_commit();
 // All should be true
 var_dump(abs($now - $info['CREATED']) <= 1);
 var_dump(($info['CREATED'] - $info['UPDATED']) === 0);
-var_dump(($info['TTL'] - $info['CREATED']) == ini_get('session.ttl'));
 var_dump(count($info['SIDS']) === 0);
 
 session_start();
@@ -69,12 +68,10 @@ var_dump($new === $old, $new, $old);
 --EXPECTF--
 *** Testing session_info() : basic feature
 string(32) "%s"
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(0) {
@@ -83,26 +80,21 @@ array(4) {
 bool(true)
 bool(true)
 bool(true)
-bool(true)
 string(32) "%s"
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(0) {
   }
 }
 string(32) "%s"
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(0) {
@@ -110,12 +102,10 @@ array(4) {
 }
 bool(true)
 string(32) "%s"
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(1) {
@@ -124,12 +114,10 @@ array(4) {
   }
 }
 string(32) "%s"
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(9) {
@@ -154,6 +142,6 @@ array(4) {
   }
 }
 bool(true)
-string(497) "a:4:{s:7:"CREATED";%s}"
-string(497) "a:4:{s:7:"CREATED";%s}"
+string(474) "a:3:{s:7:"CREATED";%s}"
+string(474) "a:3:{s:7:"CREATED";%s}"
 

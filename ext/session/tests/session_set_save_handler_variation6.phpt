@@ -72,7 +72,7 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;__PHP_SESSION__|a:4:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:4:"SIDS";a:0:{}}]
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}]
 Close [%s,PHPSESSID]
 array(3) {
   ["Blah"]=>
@@ -93,7 +93,7 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";__PHP_SESSION__|a:4:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:4:"SIDS";a:0:{}}]
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}]
 Close [%s,PHPSESSID]
 Starting session again..!
 Open [%s,PHPSESSID]

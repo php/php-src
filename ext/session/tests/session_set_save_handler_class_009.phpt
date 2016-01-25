@@ -57,6 +57,6 @@ ob_end_flush();
 *** Testing session_set_save_handler() : implicit shutdown ***
 (#1) constructor called
 done
-(#1) writing %s = foo|s:3:"bar";__PHP_SESSION__|a:4:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:4:"SIDS";a:0:{}}
+(#1) writing %s = foo|s:3:"bar";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 (#1) closing %s
 (#1) destructor called

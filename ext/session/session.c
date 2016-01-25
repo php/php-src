@@ -87,7 +87,6 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 #define PSDK_ARRAY        "__PHP_SESSION__"   /* Container array name */
 #define PSDK_CREATED      "CREATED"
 #define PSDK_UPDATED      "UPDATED"
-#define PSDK_TTL          "TTL"
 #define PSDK_NEW_SID      "NEW_SID"
 #define PSDK_NEW_SID_SENT "NEW_SID_SENT"
 #define PSDK_SIDS         "SIDS"              /* Array keeps old SIDs */
@@ -183,9 +182,6 @@ static int php_session_destroy(zend_long duration) /* {{{ */
 		/* NULL PSDK_NEW_SID indicates no descendant session. i.e. simply destroyed */
 		ZVAL_NULL(&tmp);
 		zend_hash_str_add(Z_ARRVAL(PS(internal_data)), PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1, &tmp);
-		/* Set new TTL */
-		ZVAL_LONG(&tmp, time(NULL) + duration);
-		zend_hash_str_update(Z_ARRVAL(PS(internal_data)), PSDK_TTL, sizeof(PSDK_TTL)-1, &tmp);
 		php_session_save_current_state(1);
 	}
 
@@ -215,11 +211,6 @@ static int php_session_validate_internal_data(zval *internal_data) {
 	if (!zp || Z_TYPE_P(zp) != IS_LONG) {
 		return FAILURE;
 	}	
-	zp = zend_hash_str_find(Z_ARRVAL_P(internal_data),
-							PSDK_TTL, sizeof(PSDK_TTL)-1);
-	if (!zp || Z_TYPE_P(zp) != IS_LONG) {
-		return FAILURE;
-	}
 	zp = zend_hash_str_find(Z_ARRVAL_P(internal_data),
 							PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
 	if (zp && (Z_TYPE_P(zp) != IS_STRING || Z_TYPE_P(zp) != IS_NULL)) {
@@ -643,10 +634,6 @@ static void php_session_set_timestamps(zend_bool created) /* {{{ */
 						  PSDK_CREATED, sizeof(PSDK_CREATED)-1, &el);
 		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
 						  PSDK_UPDATED, sizeof(PSDK_UPDATED)-1, &el);
-		ZVAL_LONG(&el, now + PS(ttl));
-		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
-						  PSDK_TTL, sizeof(PSDK_TTL)-1, &el);
-		ZVAL_LONG(&el, now + PS(ttl_update));
 		/* Initialize SIDs array also */
 		array_init(&el);
 		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
@@ -655,9 +642,6 @@ static void php_session_set_timestamps(zend_bool created) /* {{{ */
 		ZVAL_LONG(&el, now);
 		zend_hash_str_update(Z_ARRVAL(PS(internal_data)),
 							 PSDK_UPDATED, sizeof(PSDK_UPDATED)-1, &el);
-		ZVAL_LONG(&el, now + PS(ttl));
-		zend_hash_str_update(Z_ARRVAL(PS(internal_data)),
-							 PSDK_TTL, sizeof(PSDK_TTL)-1, &el);
 	}
 } /* }}} */
 
@@ -818,8 +802,8 @@ retry:
 										 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
 			/* TTL Check */
 			zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-									PSDK_TTL, sizeof(PSDK_TTL)-1);
-			if (Z_LVAL_P(zp) < now) {
+									PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
+			if (Z_LVAL_P(zp) + PS(ttl) < now) {
 				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 										PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
 				if (Z_LVAL_P(zp) + PS(ttl_destroy) < now) {
@@ -827,8 +811,9 @@ retry:
 					/* Back to active state */
 					PS(session_status) = php_session_active;
 				}
-				/* Access to old session should not happen under normal circumstance */
-				if (new_sid) {
+				/* Access to old session should not happen under normal circumstance
+				   if new session ID is assigned. */
+				if (new_sid && Z_TYPE_P(new_sid) == IS_STRING) {
 					php_error_docref(NULL, E_NOTICE,
 									 "Obsolete session data access detected. Possible "
 									 "security incident, but alert could be false positive. "

@@ -54,12 +54,10 @@ array(1) {
   ["foo"]=>
   string(3) "bar"
 }
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(0) {
@@ -69,12 +67,10 @@ array(1) {
   ["bar"]=>
   string(3) "foo"
 }
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(0) {

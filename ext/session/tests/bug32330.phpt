@@ -71,7 +71,7 @@ $_SESSION['E'] = 'F';
 open: path = /tmp, name = sid
 gc: maxlifetime = %d
 read: id = %s
-write: id = %s, data = A|s:1:"B";__PHP_SESSION__|a:4:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:4:"SIDS";a:0:{}}
+write: id = %s, data = A|s:1:"B";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 close
 open: path = /tmp, name = sid
 gc: maxlifetime = %d
@@ -81,5 +81,5 @@ close
 open: path = /tmp, name = sid
 gc: maxlifetime = %d
 read: id = %s
-write: id = %s, data = E|s:1:"F";__PHP_SESSION__|a:4:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:3:"TTL";i:%d;s:4:"SIDS";a:0:{}}
+write: id = %s, data = E|s:1:"F";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 close

@@ -48,23 +48,19 @@ session_start();
 ?>
 --EXPECTF--
 *** Testing timestamp : basic feature
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(0) {
   }
 }
-array(4) {
+array(3) {
   ["CREATED"]=>
   int(%d)
   ["UPDATED"]=>
-  int(%d)
-  ["TTL"]=>
   int(%d)
   ["SIDS"]=>
   array(0) {
