@@ -88,7 +88,6 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 #define PSDK_CREATED      "CREATED"
 #define PSDK_UPDATED      "UPDATED"
 #define PSDK_TTL          "TTL"
-#define PSDK_TTL_UPDATE   "TTL_UPDATE"
 #define PSDK_NEW_SID      "NEW_SID"
 #define PSDK_NEW_SID_SENT "NEW_SID_SENT"
 #define PSDK_SIDS         "SIDS"              /* Array keeps old SIDs */
@@ -222,11 +221,6 @@ static int php_session_validate_internal_data(zval *internal_data) {
 		return FAILURE;
 	}
 	zp = zend_hash_str_find(Z_ARRVAL_P(internal_data),
-							PSDK_TTL_UPDATE, sizeof(PSDK_TTL_UPDATE)-1);
-	if (!zp || Z_TYPE_P(zp) != IS_LONG) {
-		return FAILURE;
-	}
-	zp = zend_hash_str_find(Z_ARRVAL_P(internal_data),
 							PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
 	if (zp && (Z_TYPE_P(zp) != IS_STRING || Z_TYPE_P(zp) != IS_NULL)) {
 		return FAILURE;
@@ -238,21 +232,15 @@ static int php_session_validate_internal_data(zval *internal_data) {
 	}
 	zp = zend_hash_str_find(Z_ARRVAL_P(internal_data),
 							PSDK_SIDS, sizeof(PSDK_SIDS)-1);
-	if (!zp) {
+	if (!zp || Z_TYPE_P(zp) != IS_ARRAY) {
 		return FAILURE;
 	} else {
 		zend_string *str_idx;
 		zend_ulong num_idx;
 		zval *value;
 
-		if (Z_TYPE_P(zp) != IS_ARRAY) {
-			return FAILURE;
-		}
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(zp), num_idx, str_idx, value) {
-			if (str_idx) {
-				return FAILURE;
-			}
-			if (Z_TYPE_P(value) != IS_STRING) {
+			if (str_idx || (Z_TYPE_P(value) != IS_STRING)) {
 				return FAILURE;
 			}
 			(void) num_idx;
@@ -323,7 +311,7 @@ static zend_string *php_session_encode(void) /* {{{ */
 {
 	IF_SESSION_VARS() {
 		if (!PS(serializer)) {
-			php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object");
+			php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to encode session data");
 			return NULL;
 		}
 		return PS(serializer)->encode();
@@ -337,13 +325,13 @@ static zend_string *php_session_encode(void) /* {{{ */
 static int php_session_decode(zend_string *data) /* {{{ */
 {
 	if (!PS(serializer)) {
-		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
+		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session data");
 		return FAILURE;
 	}
 	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
 		php_session_destroy(PS(ttl_destroy));
 		php_session_track_init();
-		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
+		php_error_docref(NULL, E_WARNING, "Failed to decode session data. Session has been destroyed");
 		return FAILURE;
 	}
 #if 1
@@ -606,7 +594,7 @@ static zend_long php_session_gc(void) /* {{{ */
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
 #ifdef SESSION_DEBUG
 			if (nrdels != -1) {
-				php_error_docref(NULL, E_NOTICE, "purged %d expired session objects", nrdels);
+				php_error_docref(NULL, E_NOTICE, "purged %d expired session data", nrdels);
 			}
 #endif
 		} else {
@@ -659,8 +647,6 @@ static void php_session_set_timestamps(zend_bool created) /* {{{ */
 		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
 						  PSDK_TTL, sizeof(PSDK_TTL)-1, &el);
 		ZVAL_LONG(&el, now + PS(ttl_update));
-		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
-						  PSDK_TTL_UPDATE, sizeof(PSDK_TTL_UPDATE)-1, &el);
 		/* Initialize SIDs array also */
 		array_init(&el);
 		zend_hash_str_add(Z_ARRVAL(PS(internal_data)),
@@ -672,9 +658,6 @@ static void php_session_set_timestamps(zend_bool created) /* {{{ */
 		ZVAL_LONG(&el, now + PS(ttl));
 		zend_hash_str_update(Z_ARRVAL(PS(internal_data)),
 							 PSDK_TTL, sizeof(PSDK_TTL)-1, &el);
-		ZVAL_LONG(&el, now + PS(ttl_update));
-		zend_hash_str_update(Z_ARRVAL(PS(internal_data)),
-							 PSDK_TTL_UPDATE, sizeof(PSDK_TTL_UPDATE)-1, &el);
 	}
 } /* }}} */
 
@@ -864,8 +847,8 @@ retry:
 			if (!new_sid) {
 				/* Update outstanding session timestamps */
 				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-										PSDK_TTL_UPDATE, sizeof(PSDK_TTL_UPDATE)-1);
-				if (Z_LVAL_P(zp) < now) {
+										PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
+				if (Z_LVAL_P(zp) + PS(ttl_update)  < now) {
 					php_session_set_timestamps(0);
 				}
 			} else {
