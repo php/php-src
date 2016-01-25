@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
---- libmagic.orig/apprentice.c	Tue Nov 19 22:01:12 2013
-+++ libmagic/apprentice.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/apprentice.c	2016-01-25 11:17:38.141978563 +0800
++++ libmagic/apprentice.c	2016-01-25 11:19:37.409347842 +0800
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -530,7 +530,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	m->mimetype[0] = '\0';		/* initialise MIME type to none */
  	return 0;
  }
-@@ -2575,59 +2597,76 @@
+@@ -2575,59 +2597,75 @@
  private struct magic_map *
  apprentice_map(struct magic_set *ms, const char *fn)
  {
@@ -544,29 +544,29 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	size_t i;
 +	php_stream *stream = NULL;
 +	php_stream_statbuf st;
-+
-+
-+	TSRMLS_FETCH();
  
 -	fd = -1;
 -	if ((map = CAST(struct magic_map *, calloc(1, sizeof(*map)))) == NULL) {
++
++	TSRMLS_FETCH();
++
 +	if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
  		file_oomem(ms, sizeof(*map));
-+		efree(map);
- 		goto error;
- 	}
- 
+-		goto error;
++		return NULL;
++	}
++
 +	if (fn == NULL) {
 +		map->p = (void *)&php_magic_database;
 +		goto internal_loaded;
-+	}
-+
+ 	}
+ 
 +#ifdef PHP_WIN32
 +	/* Don't bother on windows with php_stream_open_wrapper,
 +	return to give apprentice_load() a chance. */
 +	if (php_stream_stat_path_ex((char *)fn, 0, &st, NULL) == SUCCESS) {
 +               if (st.sb.st_mode & S_IFDIR) {
-+                       goto error;
++                       return NULL;
 +               }
 +       }
 +#endif
@@ -628,7 +628,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	if (*ptr != MAGICNO) {
  		if (swap4(*ptr) != MAGICNO) {
  			file_error(ms, 0, "bad magic in `%s'", dbname);
-@@ -2641,17 +2680,29 @@
+@@ -2641,17 +2679,29 @@
  	else
  		version = ptr[1];
  	if (version != VERSIONNO) {
@@ -666,7 +666,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	}
  	map->magic[0] = CAST(struct magic *, map->p) + 1;
  	nentries = 0;
-@@ -2664,22 +2715,29 @@
+@@ -2664,22 +2714,29 @@
  			map->magic[i + 1] = map->magic[i] + map->nmagic[i];
  		nentries += map->nmagic[i];
  	}
@@ -701,7 +701,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	return NULL;
  }
  
-@@ -2700,14 +2758,19 @@
+@@ -2700,14 +2757,19 @@
  	char *dbname;
  	int rv = -1;
  	uint32_t i;
@@ -724,7 +724,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		file_error(ms, errno, "cannot open `%s'", dbname);
  		goto out;
  	}
-@@ -2717,31 +2780,33 @@
+@@ -2717,31 +2779,33 @@
  		goto out;
  	}
  
@@ -764,7 +764,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	return rv;
  }
  
-@@ -2754,6 +2819,7 @@
+@@ -2754,6 +2818,7 @@
  {
  	const char *p, *q;
  	char *buf;
@@ -772,7 +772,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	if (strip) {
  		if ((p = strrchr(fn, '/')) != NULL)
-@@ -2775,16 +2841,18 @@
+@@ -2775,16 +2840,18 @@
  	q++;
  	/* Compatibility with old code that looked in .mime */
  	if (ms->flags & MAGIC_MIME) {
@@ -797,7 +797,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	/* Compatibility with old code that looked in .mime */
  	if (strstr(p, ".mime") != NULL)
-@@ -2874,7 +2942,7 @@
+@@ -2874,7 +2941,7 @@
  	m->offset = swap4((uint32_t)m->offset);
  	m->in_offset = swap4((uint32_t)m->in_offset);
  	m->lineno = swap4((uint32_t)m->lineno);
@@ -807,8 +807,8 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		m->str_flags = swap4(m->str_flags);
  	}
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
---- libmagic.orig/ascmagic.c	Thu Feb 13 00:20:53 2014
-+++ libmagic/ascmagic.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/ascmagic.c	2016-01-25 11:17:38.161978563 +0800
++++ libmagic/ascmagic.c	2016-01-25 11:19:37.410347842 +0800
 @@ -139,7 +139,7 @@
  		/* malloc size is a conservative overestimate; could be
  		   improved, or at least realloced after conversion. */
@@ -829,8 +829,8 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  	return rv;
  }
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
---- libmagic.orig/cdf.c	Tue Feb 26 17:20:42 2013
-+++ libmagic/cdf.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/cdf.c	2016-01-25 11:17:38.140978563 +0800
++++ libmagic/cdf.c	2016-01-25 11:19:37.410347842 +0800
 @@ -35,7 +35,7 @@
  #include "file.h"
  
@@ -1050,8 +1050,8 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  				(void)fprintf(stderr, "timestamp %s\n", buf);
  			} else {
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
---- libmagic.orig/cdf.h	Thu Jun 21 00:19:55 2012
-+++ libmagic/cdf.h	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/cdf.h	2016-01-25 11:17:38.160978563 +0800
++++ libmagic/cdf.h	2016-01-25 11:19:37.410347842 +0800
 @@ -35,10 +35,12 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1103,8 +1103,8 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
      cdf_property_info_t **, size_t *, size_t *);
  int cdf_read_summary_info(const cdf_info_t *, const cdf_header_t *,
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
---- libmagic.orig/cdf_time.c	Thu Jun 21 00:18:33 2012
-+++ libmagic/cdf_time.c	Sun Nov  9 19:16:18 2014
+--- libmagic.orig/cdf_time.c	2016-01-25 11:17:38.160978563 +0800
++++ libmagic/cdf_time.c	2016-01-25 11:19:37.410347842 +0800
 @@ -96,7 +96,7 @@
  }
  
@@ -1163,8 +1163,8 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	static const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
  	static const char *ref = "Sat Apr 23 01:30:00 1977";
 diff -u libmagic.orig/compress.c libmagic/compress.c
---- libmagic.orig/compress.c	Sun Jan  5 16:55:21 2014
-+++ libmagic/compress.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/compress.c	2016-01-25 11:17:38.149978563 +0800
++++ libmagic/compress.c	2016-01-25 11:19:37.410347842 +0800
 @@ -32,6 +32,7 @@
   *	uncompress(method, old, n, newch) - uncompress old into new, 
   *					    using method, return sizeof new
@@ -1326,8 +1326,8 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 -#endif
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
 diff -u libmagic.orig/file.h libmagic/file.h
---- libmagic.orig/file.h	Thu Feb 13 00:20:53 2014
-+++ libmagic/file.h	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/file.h	2016-01-25 11:17:38.140978563 +0800
++++ libmagic/file.h	2016-01-25 11:19:37.411347842 +0800
 @@ -33,11 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1485,24 +1485,22 @@ diff -u libmagic.orig/file.h libmagic/file.h
  size_t strlcat(char *, const char *, size_t);
  #endif
  #ifndef HAVE_STRCASESTR
-@@ -535,6 +516,14 @@
- #endif
- #else
+@@ -537,4 +518,12 @@
  #define FILE_RCSID(id)
-+#endif
-+
+ #endif
+ 
 +#ifdef PHP_WIN32
 +#define FINFO_LSEEK_FUNC _lseek
 +#define FINFO_READ_FUNC _read
 +#else
 +#define FINFO_LSEEK_FUNC lseek
 +#define FINFO_READ_FUNC read
- #endif
- 
++#endif
++
  #endif /* __file_h__ */
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
---- libmagic.orig/fsmagic.c	Sun Dec  1 20:22:13 2013
-+++ libmagic/fsmagic.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/fsmagic.c	2016-01-25 11:17:38.139978563 +0800
++++ libmagic/fsmagic.c	2016-01-25 11:19:37.411347842 +0800
 @@ -59,27 +59,21 @@
  # define minor(dev)  ((dev) & 0xff)
  #endif
@@ -1826,8 +1824,8 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	return ret;
  }
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
---- libmagic.orig/funcs.c	Thu Feb 13 00:20:53 2014
-+++ libmagic/funcs.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/funcs.c	2016-01-25 11:17:38.150978563 +0800
++++ libmagic/funcs.c	2016-01-25 11:19:37.411347842 +0800
 @@ -27,7 +27,7 @@
  #include "file.h"
  
@@ -2165,9 +2163,10 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 -	return rv;
 +	return rep_cnt;
  }
+Common subdirectories: libmagic.orig/.libs and libmagic/.libs
 diff -u libmagic.orig/magic.c libmagic/magic.c
---- libmagic.orig/magic.c	Sun Dec  1 20:22:13 2013
-+++ libmagic/magic.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/magic.c	2016-01-25 11:17:38.161978563 +0800
++++ libmagic/magic.c	2016-01-25 11:19:37.411347842 +0800
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -2505,17 +2504,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  public const char *
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	Tue Feb 11 16:30:44 2014
-+++ libmagic/magic.h	Sun Jan  4 17:06:01 2015
-@@ -75,7 +75,7 @@
- #define	MAGIC_NO_CHECK_FORTRAN	0x000000 /* Don't check ascii/fortran */
- #define	MAGIC_NO_CHECK_TROFF	0x000000 /* Don't check ascii/troff */
- 
--#define MAGIC_VERSION		516	/* This implementation */
-+#define MAGIC_VERSION		517	/* This implementation */
- 
- 
- #ifdef __cplusplus
+--- libmagic.orig/magic.h	2016-01-25 11:17:38.139978563 +0800
++++ libmagic/magic.h	2016-01-25 11:19:37.412347842 +0800
 @@ -88,6 +88,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -2532,9 +2522,21 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  int magic_list(magic_t, const char *);
  int magic_errno(magic_t);
  
+diff -u libmagic.orig/patchlevel.h libmagic/patchlevel.h
+--- libmagic.orig/patchlevel.h	2016-01-25 11:17:38.141978563 +0800
++++ libmagic/patchlevel.h	2016-01-25 11:19:37.412347842 +0800
+@@ -351,7 +351,7 @@
+  *
+  * Revision 1.8  93/02/19  15:01:26  ian
+  * Numerous changes from Guy Harris too numerous to mention but including
+- * byte-order independance, fixing "old-style masking", etc. etc. A bugfix
++ * byte-order independence, fixing "old-style masking", etc. etc. A bugfix
+  * for broken symlinks from martin@@d255s004.zfe.siemens.de.
+  * 
+  * Revision 1.7  93/01/05  14:57:27  ian
 diff -u libmagic.orig/print.c libmagic/print.c
---- libmagic.orig/print.c	Tue Feb 26 19:25:00 2013
-+++ libmagic/print.c	Sun Jan  4 17:04:32 2015
+--- libmagic.orig/print.c	2016-01-25 11:17:38.162978563 +0800
++++ libmagic/print.c	2016-01-25 11:19:37.412347842 +0800
 @@ -28,13 +28,17 @@
  /*
   * print.c - debugging printout routines
@@ -2767,8 +2769,8 @@ diff -u libmagic.orig/print.c libmagic/print.c
  		t = ts.tv_sec;
  	}
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
---- libmagic.orig/readcdf.c	Tue Jan  7 04:13:42 2014
-+++ libmagic/readcdf.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/readcdf.c	2016-01-25 11:17:38.160978563 +0800
++++ libmagic/readcdf.c	2016-01-25 11:19:37.412347842 +0800
 @@ -26,11 +26,15 @@
  #include "file.h"
  
@@ -2984,9 +2986,11 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  		}
  		if (NOTMIME(ms)) {
  			if (str != NULL) {
+Only in libmagic.orig/: readelf.c
+Only in libmagic.orig/: readelf.h
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
---- libmagic.orig/softmagic.c	Thu Feb 13 00:20:53 2014
-+++ libmagic/softmagic.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/softmagic.c	2016-01-25 11:17:38.139978563 +0800
++++ libmagic/softmagic.c	2016-01-25 11:19:45.545347848 +0800
 @@ -50,6 +50,11 @@
  #include <locale.h>
  #endif
@@ -3164,21 +3168,24 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  {
  	/*
  	 * Note: FILE_SEARCH and FILE_REGEX do not actually copy
-@@ -1066,15 +1061,24 @@
+@@ -1066,15 +1061,27 @@
  			const char *last;	/* end of search region */
  			const char *buf;	/* start of search region */
  			const char *end;
 -			size_t lines;
 +			size_t lines, linecnt, bytecnt;
- 
++
 +			linecnt = m->str_range;
 +			bytecnt = linecnt * 80;
-+
+ 
 +			if (bytecnt == 0) {
 +				bytecnt = 8192;
 +			}
 +			if (bytecnt > nbytes) {
 +				bytecnt = nbytes;
++			}
++			if (offset > bytecnt) {
++				offset = bytecnt;
 +			}
  			if (s == NULL) {
  				ms->search.s_len = 0;
@@ -3191,7 +3198,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  			/* mget() guarantees buf <= last */
  			for (lines = linecnt, b = buf; lines && b < end &&
  			     ((b = CAST(const char *,
-@@ -1087,7 +1091,7 @@
+@@ -1087,7 +1094,7 @@
  					b++;
  			}
  			if (lines)
@@ -3200,7 +3207,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  
  			ms->search.s = buf;
  			ms->search.s_len = last - buf;
-@@ -1158,7 +1162,6 @@
+@@ -1158,7 +1165,6 @@
      int *need_separator, int *returnval)
  {
  	uint32_t soffset, offset = ms->offset;
@@ -3208,7 +3215,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	int rv, oneed_separator, in_type;
  	char *sbuf, *rbuf;
  	union VALUETYPE *p = &ms->ms_value;
-@@ -1170,17 +1173,13 @@
+@@ -1170,17 +1176,13 @@
  	}
  
  	if (mcopy(ms, p, m->type, m->flag & INDIR, s, (uint32_t)(offset + o),
@@ -3228,7 +3235,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	}
  
  	if (m->flag & INDIR) {
-@@ -1672,16 +1671,13 @@
+@@ -1672,16 +1674,13 @@
  			if ((ms->flags & MAGIC_DEBUG) != 0)
  				fprintf(stderr, "indirect +offs=%u\n", offset);
  		}
@@ -3246,7 +3253,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		}
  	}
  
-@@ -1755,11 +1751,21 @@
+@@ -1755,11 +1754,21 @@
  		ms->offset = soffset;
  		if (rv == 1) {
  			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
@@ -3271,7 +3278,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		}
  		return rv;
  
-@@ -1875,6 +1881,42 @@
+@@ -1875,6 +1884,42 @@
  	return file_strncmp(a, b, len, flags);
  }
  
@@ -3314,7 +3321,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  private int
  magiccheck(struct magic_set *ms, struct magic *m)
  {
-@@ -2035,63 +2077,151 @@
+@@ -2035,63 +2080,90 @@
  		break;
  	}
  	case FILE_REGEX: {
@@ -3324,142 +3331,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 -
 -		if (ms->search.s == NULL)
 -			return 0;
-+		zval *pattern;
-+		int options = 0;
-+		pcre_cache_entry *pce;
-+		TSRMLS_FETCH();
-+		
-+		MAKE_STD_ZVAL(pattern);
-+		ZVAL_STRINGL(pattern, (char *)m->value.s, m->vallen, 0);
-+	
-+		options |= PCRE_MULTILINE;
-+		
-+		if (m->str_flags & STRING_IGNORE_CASE) {
-+			options |= PCRE_CASELESS;
-+		}
-+		
-+		convert_libmagic_pattern(pattern, options);
-+		
-+		l = v = 0;
-+		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
-+			zval_dtor(pattern);
-+			FREE_ZVAL(pattern);
-+			return -1;
-+		} else {
-+			/* pce now contains the compiled regex */
-+			zval *retval;
-+			zval *subpats;
-+			char *haystack;
-+
-+			MAKE_STD_ZVAL(retval);
-+			ALLOC_INIT_ZVAL(subpats);
-+			
-+			/* Cut the search len from haystack, equals to REG_STARTEND */
-+			haystack = estrndup(ms->search.s, ms->search.s_len);
-+
-+			/* match v = 0, no match v = 1 */
-+			php_pcre_match_impl(pce, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
-+			/* Free haystack */
-+			efree(haystack);
-+			
-+			if (Z_LVAL_P(retval) < 0) {
-+				zval_ptr_dtor(&subpats);
-+				FREE_ZVAL(retval);
-+				zval_dtor(pattern);
-+				FREE_ZVAL(pattern);
-+				return -1;
-+			} else if ((Z_LVAL_P(retval) > 0) && (Z_TYPE_P(subpats) == IS_ARRAY)) {
-+				
-+				/* Need to fetch global match which equals pmatch[0] */
-+				HashTable *ht = Z_ARRVAL_P(subpats);
-+				HashPosition outer_pos;
-+				zval *pattern_match = NULL, *pattern_offset = NULL;
-+				
-+				zend_hash_internal_pointer_reset_ex(ht, &outer_pos); 
-+				
-+				if (zend_hash_has_more_elements_ex(ht, &outer_pos) == SUCCESS &&
-+					zend_hash_move_forward_ex(ht, &outer_pos)) {
-+					
-+					zval **ppzval;
-+					
-+					/* The first element (should be) is the global match 
-+					   Need to move to the inner array to get the global match */
-+					
-+					if (zend_hash_get_current_data_ex(ht, (void**)&ppzval, &outer_pos) != FAILURE) { 
-+						
-+						HashTable *inner_ht;
-+						HashPosition inner_pos;
-+						zval **match, **offset;
-+						zval tmpcopy = **ppzval, matchcopy, offsetcopy;
-+						
-+						zval_copy_ctor(&tmpcopy); 
-+						INIT_PZVAL(&tmpcopy);
-+						
-+						inner_ht = Z_ARRVAL(tmpcopy);
-+						
-+						/* If everything goes according to the master plan
-+						   tmpcopy now contains two elements:
-+						   0 = the match
-+						   1 = starting position of the match */
-+						zend_hash_internal_pointer_reset_ex(inner_ht, &inner_pos); 
-+						
-+						if (zend_hash_has_more_elements_ex(inner_ht, &inner_pos) == SUCCESS &&
-+							zend_hash_move_forward_ex(inner_ht, &inner_pos)) {
-+						
-+							if (zend_hash_get_current_data_ex(inner_ht, (void**)&match, &inner_pos) != FAILURE) { 
-+									
-+								matchcopy = **match;
-+								zval_copy_ctor(&matchcopy);
-+								INIT_PZVAL(&matchcopy);
-+								convert_to_string(&matchcopy); 
-+								
-+								MAKE_STD_ZVAL(pattern_match);
-+								Z_STRVAL_P(pattern_match) = (char *)Z_STRVAL(matchcopy);
-+								Z_STRLEN_P(pattern_match) = Z_STRLEN(matchcopy);
-+								Z_TYPE_P(pattern_match) = IS_STRING; 
-+
-+								zval_dtor(&matchcopy);
-+							}
-+						}
-+						
-+						if (zend_hash_has_more_elements_ex(inner_ht, &inner_pos) == SUCCESS &&
-+							zend_hash_move_forward_ex(inner_ht, &inner_pos)) {
-+							
-+							if (zend_hash_get_current_data_ex(inner_ht, (void**)&offset, &inner_pos) != FAILURE) { 
-+								
-+								offsetcopy = **offset;
-+								zval_copy_ctor(&offsetcopy);
-+								INIT_PZVAL(&offsetcopy);
-+								convert_to_long(&offsetcopy); 
-+								
-+								MAKE_STD_ZVAL(pattern_offset);
-+								Z_LVAL_P(pattern_offset) = Z_LVAL(offsetcopy);
-+								Z_TYPE_P(pattern_offset) = IS_LONG;
-+								
-+								zval_dtor(&offsetcopy);
-+							}
-+						}
-+						zval_dtor(&tmpcopy); 	
-+					}
-+					
-+					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
-+						ms->search.s += (int)Z_LVAL_P(pattern_offset); /* this is where the match starts */
-+						ms->search.offset += (size_t)Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
-+						ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
-+						v = 0;
-+						
-+						efree(pattern_match);
-+						efree(pattern_offset);
-+						
-+					} else {
-+						zval_ptr_dtor(&subpats);
-+						FREE_ZVAL(retval);
-+						zval_dtor(pattern);
-+						FREE_ZVAL(pattern);
-+						return -1;
-+					}
-+				}
- 
+-
 -		l = 0;
 -		rc = regcomp(&rx, m->value.s,
 -		    REG_EXTENDED|REG_NEWLINE|
@@ -3494,8 +3366,84 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 -				    (size_t)(pmatch[0].rm_eo - pmatch[0].rm_so);
 -				v = 0;
 -				break;
- 
+-
 -			case REG_NOMATCH:
++		zval *pattern;
++		int options = 0;
++		pcre_cache_entry *pce;
++		TSRMLS_FETCH();
++		
++		MAKE_STD_ZVAL(pattern);
++		ZVAL_STRINGL(pattern, (char *)m->value.s, m->vallen, 0);
++	
++		options |= PCRE_MULTILINE;
++		
++		if (m->str_flags & STRING_IGNORE_CASE) {
++			options |= PCRE_CASELESS;
++		}
++		
++		convert_libmagic_pattern(pattern, options);
++		
++		l = v = 0;
++		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
++			zval_dtor(pattern);
++			FREE_ZVAL(pattern);
++			return -1;
++		} else {
++			/* pce now contains the compiled regex */
++			zval *retval;
++			zval *subpats;
++			char *haystack;
++
++			MAKE_STD_ZVAL(retval);
++			ALLOC_INIT_ZVAL(subpats);
++			
++			/* Cut the search len from haystack, equals to REG_STARTEND */
++			haystack = estrndup(ms->search.s, ms->search.s_len);
++
++			/* match v = 0, no match v = 1 */
++			php_pcre_match_impl(pce, haystack, ms->search.s_len, retval, subpats, 0, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
++			/* Free haystack */
++			efree(haystack);
++			
++			if (Z_LVAL_P(retval) < 0) {
++				zval_ptr_dtor(&subpats);
++				FREE_ZVAL(retval);
++				zval_dtor(pattern);
++				FREE_ZVAL(pattern);
++				return -1;
++			} else if ((Z_LVAL_P(retval) > 0) && (Z_TYPE_P(subpats) == IS_ARRAY)) {
++				/* Need to fetch global match which equals pmatch[0] */
++				zval **ppzval;
++				HashTable *ht = Z_ARRVAL_P(subpats);
++				/* The first element (should be) is the global match 
++				   Need to move to the inner array to get the global match */
++				if (zend_hash_index_find(ht, 0, (void **)&ppzval) == SUCCESS) {
++					zval **match, **offset;
++					/* If everything goes according to the master plan
++					   tmpcopy now contains two elements:
++					   0 = the match
++					   1 = starting position of the match */
++					if (zend_hash_index_find(Z_ARRVAL_PP(ppzval), 0, (void **)&match) == SUCCESS 
++							&& zend_hash_index_find(Z_ARRVAL_PP(ppzval), 1, (void **)&offset) == SUCCESS) {
++						if (Z_TYPE_PP(match) != IS_STRING || Z_TYPE_PP(offset) != IS_LONG) {
++							goto error_out;
++						}
++						ms->search.s += (int)Z_LVAL_PP(offset); /* this is where the match starts */
++						ms->search.offset += (size_t)Z_LVAL_PP(offset); /* this is where the match starts as size_t */
++						ms->search.rm_len = Z_STRLEN_PP(match) /* This is the length of the matched pattern */;
++						v = 0;
++					} else {
++						goto error_out;
++					}
++				} else {
++error_out:
++					zval_ptr_dtor(&subpats);
++					FREE_ZVAL(retval);
++					zval_dtor(pattern);
++					FREE_ZVAL(pattern);
++					return -1;
++				}
 +			} else {
  				v = 1;
 -				break;
@@ -3519,8 +3467,8 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	}
  	case FILE_INDIRECT:
 diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
---- libmagic.orig/strcasestr.c	Thu Dec  5 17:57:50 2013
-+++ libmagic/strcasestr.c	Sun Jan  4 17:06:01 2015
+--- libmagic.orig/strcasestr.c	2016-01-25 11:17:38.160978563 +0800
++++ libmagic/strcasestr.c	2016-01-25 11:19:37.413347842 +0800
 @@ -37,6 +37,8 @@
  __RCSID("$NetBSD: strncasecmp.c,v 1.2 2007/06/04 18:19:27 christos Exp $");
  #endif /* LIBC_SCCS and not lint */
