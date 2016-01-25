@@ -847,13 +847,9 @@ retry:
 									 "security incident, but alert could be false positive. "
 									 "(Decendant session ID: %s)", Z_STRVAL_P(new_sid));
 				}
-				if (PS(id)) {
-					zend_string_release(PS(id));
-					PS(id) = NULL;
-				}
 				/* Be protective. Should not happen. */
 				if (retry_count++ > 3) {
-					PS(session_status) = php_session_none;
+					php_session_abort();
 					php_error_docref(NULL, E_RECOVERABLE_ERROR,
 									 "Too many session ID reset retries");
 					return;
