@@ -112,6 +112,22 @@ do {																			\
 	} \
 }
 
+#define STRIP_UNDERSCORES(n, len) \
+{ \
+	int i, old_len = len; \
+	char *new_n, *old_n; \
+	for (i = 0, new_n = old_n = n; i < old_len; ++i, ++old_n) { \
+		if (*old_n != '_') { \
+			*new_n++ = *old_n; \
+		} else { \
+			--len; \
+		} \
+	} \
+	if (old_len > len) { \
+		*new_n = '\0'; \
+	} \
+}
+
 /* To save initial string length after scanning to first variable */
 #define SET_DOUBLE_QUOTES_SCANNED_LENGTH(len) SCNG(scanned_string_len) = (len)
 #define GET_DOUBLE_QUOTES_SCANNED_LENGTH()    SCNG(scanned_string_len)
@@ -1092,11 +1108,11 @@ restart:
 
 /*!re2c
 re2c:yyfill:check = 0;
-LNUM	[0-9]+
-DNUM	([0-9]*"."[0-9]+)|([0-9]+"."[0-9]*)
+LNUM	[0-9]+(_[0-9]+)*
+DNUM	(([0-9]+(_[0-9]+)*)*"."([0-9]+(_[0-9]+)*)+)|(([0-9]+(_[0-9]+)*)+"."([0-9]+(_[0-9]+)*)*)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
-HNUM	"0x"[0-9a-fA-F]+
-BNUM	"0b"[01]+
+HNUM	"0x"[0-9a-fA-F]+(_[0-9a-fA-F]+)*
+BNUM	"0b"[01]+(_[01]+)*
 LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
@@ -1600,14 +1616,23 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{BNUM} {
-	char *bin = yytext + 2; /* Skip "0b" */
-	int len = yyleng - 2;
-	char *end;
+	/* The +/- 2 skips "0b" */
+	int len = yyleng - 2, contains_underscores, i;
+	char *end, *bin = yytext + 2;
 
 	/* Skip any leading 0s */
-	while (*bin == '0') {
+	while (*bin == '0' || *bin == '_') {
 		++bin;
 		--len;
+	}
+
+	for (i = 0; i < len && bin[i] != '_'; ++i);
+
+	contains_underscores = i != len;
+
+	if (contains_underscores) {
+		bin = estrndup(bin, len);
+		STRIP_UNDERSCORES(bin, len)
 	}
 
 	if (len < SIZEOF_ZEND_LONG * 8) {
@@ -1616,71 +1641,112 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		} else {
 			errno = 0;
 			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, &end, 2));
-			ZEND_ASSERT(!errno && end == yytext + yyleng);
+			ZEND_ASSERT(!errno && end == bin + len);
+		}
+		if (contains_underscores) {
+			efree(bin);
 		}
 		RETURN_TOKEN(T_LNUMBER);
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-		ZEND_ASSERT(end == yytext + yyleng);
+		ZEND_ASSERT(end == bin + len);
+		if (contains_underscores) {
+			efree(bin);
+		}
 		RETURN_TOKEN(T_DNUMBER);
 	}
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
-	char *end;
-	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
+	int len = yyleng, contains_underscores, i;
+	char *end, *lnum = yytext;
+
+	for (i = 0; i < len && lnum[i] != '_'; ++i);
+
+	contains_underscores = i != len;
+
+	if (contains_underscores) {
+		lnum = estrndup(lnum, len);
+		STRIP_UNDERSCORES(lnum, len)
+	}
+
+	if (len < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
 		errno = 0;
-		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 0));
+		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, 0));
 		/* This isn't an assert, we need to ensure 019 isn't valid octal
 		 * Because the lexing itself doesn't do that for us
 		 */
-		if (end != yytext + yyleng) {
+		if (end != lnum + len) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
+			if (contains_underscores) {
+				efree(lnum);
+			}
 			RETURN_TOKEN(T_LNUMBER);
 		}
 	} else {
 		errno = 0;
-		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 0));
+		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, 0));
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
-			if (yytext[0] == '0') { /* octal overflow */
+			if (lnum[0] == '0') { /* octal overflow */
 				errno = 0;
-				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, (const char **)&end));
+				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
 			} else {
-				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, (const char **)&end));
+				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
 			}
 			/* Also not an assert for the same reason */
-			if (end != yytext + yyleng) {
+			if (end != lnum + len) {
 				zend_throw_exception(zend_ce_parse_error,
 					"Invalid numeric literal", 0);
 				ZVAL_UNDEF(zendlval);
+				if (contains_underscores) {
+					efree(lnum);
+				}
 				RETURN_TOKEN(T_DNUMBER);
 			}
 			ZEND_ASSERT(!errno);
+			if (contains_underscores) {
+				efree(lnum);
+			}
 			RETURN_TOKEN(T_DNUMBER);
 		}
 		/* Also not an assert for the same reason */
-		if (end != yytext + yyleng) {
+		if (end != lnum + len) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
+			if (contains_underscores) {
+				efree(lnum);
+			}
 			RETURN_TOKEN(T_DNUMBER);
 		}
 	}
 	ZEND_ASSERT(!errno);
+	if (contains_underscores) {
+		efree(lnum);
+	}
 	RETURN_TOKEN(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
-	char *hex = yytext + 2; /* Skip "0x" */
-	int len = yyleng - 2;
-	char *end;
+	/* The +/- 2 skips "0x" */
+	int len = yyleng - 2, contains_underscores, i;
+	char *end, *hex = yytext + 2;
 
 	/* Skip any leading 0s */
-	while (*hex == '0') {
-		hex++;
-		len--;
+	while (*hex == '0' || *hex == '_') {
+		++hex;
+		--len;
+	}
+
+	for (i = 0; i < len && hex[i] != '_'; ++i);
+
+	contains_underscores = i != len;
+
+	if (contains_underscores) {
+		hex = estrndup(hex, len);
+		STRIP_UNDERSCORES(hex, len)
 	}
 
 	if (len < SIZEOF_ZEND_LONG * 2 || (len == SIZEOF_ZEND_LONG * 2 && *hex <= '7')) {
@@ -1691,11 +1757,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, ZEND_STRTOL(hex, &end, 16));
 			ZEND_ASSERT(!errno && end == hex + len);
 		}
+		if (contains_underscores) {
+			efree(hex);
+		}
 		RETURN_TOKEN(T_LNUMBER);
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == hex + len);
+		if (contains_underscores) {
+			efree(hex);
+		}
 		RETURN_TOKEN(T_DNUMBER);
 	}
 }
@@ -1723,10 +1795,24 @@ string:
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
 	const char *end;
+	int len = yyleng, contains_underscores, i;
+	char *dnum = yytext;
 
-	ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
+	for (i = 0; i < len && dnum[i] != '_'; ++i);
+
+	contains_underscores = i != len;
+
+	if (contains_underscores) {
+		dnum = estrndup(dnum, len);
+		STRIP_UNDERSCORES(dnum, len)
+	}
+
+	ZVAL_DOUBLE(zendlval, zend_strtod(dnum, &end));
 	/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-	ZEND_ASSERT(end == yytext + yyleng);
+	ZEND_ASSERT(end == dnum + len);
+	if (contains_underscores) {
+		efree(dnum);
+	}
 	RETURN_TOKEN(T_DNUMBER);
 }
 
