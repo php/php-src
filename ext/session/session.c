@@ -325,7 +325,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Failed to decode session data. Session has been destroyed");
 		return FAILURE;
 	}
-#if 1
+
 	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY && Z_TYPE(PS(internal_data)) == IS_ARRAY
 		&& php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
 		php_session_destroy(PS(ttl_destroy));
@@ -333,7 +333,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Session has been destroyed");
 		/* Retun SUCCESS intentionally */
 	}
-#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -858,6 +858,15 @@ static void php_session_save_current_state(int write) /* {{{ */
 				zend_string *val;
 
 				ZEND_ASSERT(!Z_ISUNDEF(PS(internal_data)));
+
+				/* Check internal data array key */
+				if (zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
+									   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1)) {
+					php_error_docref(NULL, E_WARNING, "Reserved key(" PSDK_ARRAY ") found. Removing the data");
+					zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
+									  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
+				}
+
 				Z_ADDREF(PS(internal_data));
 				zend_hash_str_add(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 								  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1, &PS(internal_data));
