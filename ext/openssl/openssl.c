@@ -1317,6 +1317,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 	EVP_cleanup();
 
+#if OPENSSL_VERSION_NUMBER >= 0x00090805f
+	ERR_free_strings();
+#endif
+
 	php_unregister_url_stream_wrapper("https");
 	php_unregister_url_stream_wrapper("ftps");
 
