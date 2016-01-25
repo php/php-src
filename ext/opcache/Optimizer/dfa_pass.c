@@ -221,7 +221,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 	}
 }
 
-void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 	uint32_t flags = 0;

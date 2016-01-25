@@ -1736,7 +1736,7 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 
 #define PASSES 3
 
-void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_cfg cfg;
 	zend_basic_block *blocks, *end, *b;
