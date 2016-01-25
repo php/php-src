@@ -3,6 +3,7 @@ Test session.hash_function ini setting : basic functionality
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
+session.hash_function=1
 session.hash_bits_per_character=4
 --FILE--
 <?php
@@ -32,7 +33,7 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session.hash_function : basic functionality ***
-string(1) "0"
+string(1) "1"
 bool(true)
 bool(true)
 string(32) "%s"

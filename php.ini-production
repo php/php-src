@@ -138,11 +138,6 @@
 ;   Development Value: "GP"
 ;   Production Value: "GP"
 
-; session.hash_bits_per_character
-;   Default Value: 4
-;   Development Value: 5
-;   Production Value: 5
-
 ; short_open_tag
 ;   Default Value: On
 ;   Development Value: Off
@@ -1302,8 +1297,9 @@ session.save_handler = files
 ; Whether to use strict session mode.
 ; Strict session mode does not accept uninitialized session ID and regenerate
 ; session ID if browser sends uninitialized session ID. Strict mode protects
-; applications from session fixation via session adoption vulnerability. It is
-; disabled by default for maximum compatibility, but enabling it is encouraged.
+; applications from session fixation via session adoption vulnerability.
+;
+; WARNING: Disabling use_strict_mode may allow to steal session ID permanently.
 ; https://wiki.php.net/rfc/strict_sessions
 session.use_strict_mode = 1
 
@@ -1343,29 +1339,62 @@ session.cookie_domain =
 
 ; Whether or not to add the httpOnly flag to the cookie, which makes it inaccessible to browser scripting languages such as JavaScript.
 ; http://php.net/session.cookie-httponly
-session.cookie_httponly =
+session.cookie_httponly = 1
 
 ; Handler used to serialize data.  php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler
 session.serialize_handler = php
 
 ; Defines session TTL (Time To Live) value in seconds for session internal data.
-; Session data is not usable when TTL exceeds current time. TTL update frequency
-; is controlled by session.ttl_update value.
+; Session data became usable when TTL exceeds current time. TTL update frequency
+; is controlled by session.ttl_update value below. When obsolete session data is
+; accessed, session module creates new session ID with empty $_SESSION.
+;
+; NOTE: It is not recommended to use long session TTL for automatic logins. One
+; should implement by your own automatic login by random automatic login cookie
+; key that is only send when it is needed. The automatic login cookie key must be
+; updated every time when it is used.
 ; http://php.net/session.ttl
 session.ttl = 1800
 
 ; Session module has lazy_write feature that saves number of session data write
-; when sesison data is not changed. TTL update changes session data. This value
-; controls TTL update freqnency in seconds.
+; when session data is not changed. This value controls session TTL update frequency
+; in seconds.
+;
+; NOTICE: Set long enough value for your needs, at least 60 is recommended.
+; Otherwise, lazy_write feature will not work as expected and session module writes
+; session data even when $_SESSION is unchanged. This value must be small enough
+; compare to session.ttl.
 ; http://php.net/session.ttl_update
 session.ttl_update = 300
 
 ; Defines destroyed session TTL value in seconds.
 ; Session data cannot be deleted immediately, otherwise race condition occurs in
 ; server and/or client. This results in random lost session. Set appropriate values
-; for your targetted application network. Wireless/module network needs longer value.
-session.ttl_destroy
+; for your targeted application network. Wireless/module network needs longer value.
+; Negative value for immediate deletion.
+;
+; WARNING: Set long enough value for your targeted network stability, at least for
+; 60 for wired network and 300 for wireless is recommended. Otherwise, you may
+; experience random lost sessions.
+; http://php.net/session.ttl_update
+session.ttl_destroy = 300
+
+; Defines session ID regeneration period in seconds.
+; Session ID should be renewed periodically to mitigate risks of stolen sessions.
+; Positive value enables periodic session ID regeneration. Default value is set to
+; longer than it should be for maximum compatibility.
+;
+; WARNING: Set long enough value for your targeted network stability, at least for
+; 60 for wired network and 300 for wireless is recommended. Otherwise, you may
+; experience random lost sessions. However, shorter period possible is recommended.
+; http://php.net/session.regenerate_id
+session.regenerate_id = 64800
+
+; Defines number of stored old session IDs that returned by session_info().
+; Keep this value as small as possible for better performance. Use 0 for disabling.
+; http://php.net/session.num_sids
+session.num_sids = 8
 
 ; Defines the probability that the 'garbage collection' process is started
 ; on every session initialization. The probability is calculated by using
@@ -1373,6 +1402,9 @@ session.ttl_destroy
 ; and gc_divisor is the denominator in the equation. Setting this value to 1
 ; when the session.gc_divisor value is 100 will give you approximately a 1% chance
 ; the gc will run on any give request.
+; 0 for disabling probability based GC.
+; NOTE: It is advised to use session_gc() as server task whenever it is possible
+; rather than using probability based GC.
 ; http://php.net/session.gc-probability
 session.gc_probability = 1
 
@@ -1389,8 +1421,9 @@ session.gc_divisor = 5000
 
 ; After this number of seconds, stored data will be seen as 'garbage' and
 ; cleaned up by the garbage collection process.
+; Although it is not mandatory, this value should be longer than session.ttl.
 ; http://php.net/session.gc-maxlifetime
-session.gc_maxlifetime = 1800
+session.gc_maxlifetime = 3600
 
 ; NOTE: If you are using the subdirectory option for storing session files
 ;       (see session.save_path above), then garbage collection does *not*
@@ -1448,7 +1481,7 @@ session.use_trans_sid = 0
 ; the hash extension. A list of available hashes is returned by the hash_algos()
 ; function.
 ; http://php.net/session.hash-function
-session.hash_function = 0
+session.hash_function = 1
 
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.
@@ -1456,7 +1489,7 @@ session.hash_function = 0
 ;   4  (4 bits: 0-9, a-f)
 ;   5  (5 bits: 0-9, a-v)
 ;   6  (6 bits: 0-9, a-z, A-Z, "-", ",")
-; Default Value: 4
+; Default Value: 5
 ; Development Value: 5
 ; Production Value: 5
 ; http://php.net/session.hash-bits-per-character

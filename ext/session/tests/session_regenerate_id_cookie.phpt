@@ -68,14 +68,14 @@ string(%d) "X-Powered-By: PHP/7.%s
 Expires: %s
 Cache-Control: no-store, no-cache, must-revalidate
 Pragma: no-cache
-Set-Cookie: PHPSESSID=%s; path=/
+Set-Cookie: PHPSESSID=%s; path=/; HttpOnly
 Content-type: text/html; charset=UTF-8
 
 bool(true)
-Set-Cookie: PHPSESSID=%s; path=/
+Set-Cookie: PHPSESSID=%s; path=/; HttpOnly
 bool(true)
 bool(true)
-Set-Cookie: PHPSESSID=%s; path=/
+Set-Cookie: PHPSESSID=%s; path=/; HttpOnly
 bool(true)
 bool(true)
 string(32) "%s"

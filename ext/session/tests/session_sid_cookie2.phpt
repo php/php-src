@@ -2,7 +2,7 @@
 session id by COOKIE
 --INI--
 session.hash_function=1
-session.hash_bis_per_charactor=4
+session.hash_bits_per_character=4
 session.save_path=
 session.name=PHPSESSID
 session.use_strict_mode=0
