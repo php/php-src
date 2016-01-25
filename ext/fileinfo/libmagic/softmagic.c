@@ -2028,7 +2028,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			haystack = estrndup(ms->search.s, ms->search.s_len);
 
 			/* match v = 0, no match v = 1 */
-			php_pcre_match_impl(pce, haystack, ms->search.s_len, &retval, &subpats, 1, 1, PREG_OFFSET_CAPTURE, 0);
+			php_pcre_match_impl(pce, haystack, ms->search.s_len, &retval, &subpats, 0, 1, PREG_OFFSET_CAPTURE, 0);
 			/* Free haystack */
 			efree(haystack);
 
@@ -2040,64 +2040,30 @@ magiccheck(struct magic_set *ms, struct magic *m)
 				/* Need to fetch global match which equals pmatch[0] */
 				zval *pzval;
 				HashTable *ht = Z_ARRVAL(subpats);
-				zval *pattern_match = NULL, *pattern_offset = NULL;
-				int first = 1, inner_first;
-
-				ZEND_HASH_FOREACH_VAL(ht, pzval) {
-					HashTable *inner_ht;
-					zval *match, *offset;
-					zval tmpcopy, matchcopy, offsetcopy;
-
-					if (first) {
-						first = 0;
-						continue;
-					}
-					ZVAL_DUP(&tmpcopy, pzval);
-
-					inner_ht = Z_ARRVAL(tmpcopy);
-
+				if ((pzval = zend_hash_index_find(ht, 0)) != NULL) {
 					/* If everything goes according to the master plan
 					   tmpcopy now contains two elements:
 					   0 = the match
 					   1 = starting position of the match */
-					inner_first = 1;
-					ZEND_HASH_FOREACH_VAL(inner_ht, match) {
-						if (inner_first) {
-							inner_first = 0;
-							continue;
+					zval *match, *offset;
+					if ((match = zend_hash_index_find(Z_ARRVAL_P(pzval), 0)) &&
+							(offset = zend_hash_index_find(Z_ARRVAL_P(pzval), 1))) {
+						if (Z_TYPE_P(match) != IS_STRING && Z_TYPE_P(offset) != IS_LONG) {
+							goto error_out;
 						}
-						ZVAL_DUP(&matchcopy, match);
-						convert_to_string(&matchcopy);
-						pattern_match = &matchcopy;
-					} ZEND_HASH_FOREACH_END();
-
-					inner_first = 1;
-					ZEND_HASH_FOREACH_VAL(inner_ht, offset) {
-						if (inner_first) {
-							inner_first = 0;
-							continue;
-						}
-						ZVAL_DUP(&offsetcopy, offset);
-						convert_to_long(&offsetcopy);
-						pattern_offset = &offsetcopy;
-					} ZEND_HASH_FOREACH_END();
-
-					zval_dtor(&tmpcopy);
-
-					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
-						ms->search.s += Z_LVAL_P(pattern_offset); /* this is where the match starts */
-						ms->search.offset += Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
-						ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
+						ms->search.s += Z_LVAL_P(offset); /* this is where the match starts */
+						ms->search.offset += Z_LVAL_P(offset); /* this is where the match starts as size_t */
+						ms->search.rm_len = Z_STRLEN_P(match) /* This is the length of the matched pattern */;
 						v = 0;
-
-						zval_ptr_dtor(pattern_match);
-						zval_ptr_dtor(pattern_offset);
 					} else {
-						zval_ptr_dtor(&subpats);
-						zval_ptr_dtor(&pattern);
-						return -1;
+						goto error_out;
 					}
-				} ZEND_HASH_FOREACH_END();
+				} else {
+error_out:
+					zval_ptr_dtor(&subpats);
+					zval_ptr_dtor(&pattern);
+					return -1;
+				}
 			} else {
 				v = 1;
 			}
