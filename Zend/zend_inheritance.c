@@ -724,15 +724,15 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 		if (Z_CONSTANT(parent_const->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
-		if (Z_REFCOUNTED(parent_const->value)) {
-			Z_ADDREF(parent_const->value);
-		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
+			if (Z_REFCOUNTED(parent_const->value)) {
+				Z_ADDREF(parent_const->value);
+			}
 			c = pemalloc(sizeof(zend_class_constant), 1);
+			memcpy(c, parent_const, sizeof(zend_class_constant));
 		} else {
-			c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+			c = parent_const;
 		}
-		memcpy(c, parent_const, sizeof(zend_class_constant));
 		_zend_hash_append_ptr(&ce->constants_table, name, c);
 	}
 }
@@ -933,13 +933,20 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zen
 static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	if (do_inherit_constant_check(&ce->constants_table, c, name, iface)) {
-		if (Z_REFCOUNTED(c->value)) {
-			Z_ADDREF(c->value);
-		}
+		zend_class_constant *ct;
 		if (Z_CONSTANT(c->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
-		zend_hash_update_ptr(&ce->constants_table, name, c);
+		if (ce->type & ZEND_INTERNAL_CLASS) {
+			if (Z_REFCOUNTED(c->value)) {
+				Z_ADDREF(c->value);
+			}
+			ct = pemalloc(sizeof(zend_class_constant), 1);
+			memcpy(ct, c, sizeof(zend_class_constant));
+		} else {
+			ct = c;
+		}
+		zend_hash_update_ptr(&ce->constants_table, name, ct);
 	}
 }
 /* }}} */

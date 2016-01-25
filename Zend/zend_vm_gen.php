@@ -55,31 +55,18 @@ define("ZEND_VM_KIND_SWITCH", 2);
 define("ZEND_VM_KIND_GOTO",   3);
 
 $vm_op_flags = array(
-	"ZEND_VM_OP1_SPEC"        => 1<<0,
-	"ZEND_VM_OP1_CONST"       => 1<<1,
-	"ZEND_VM_OP1_TMPVAR"      => 1<<2,
-	"ZEND_VM_OP1_MASK"        => 0xf0,
-	"ZEND_VM_OP1_NUM"         => 0x10,
-	"ZEND_VM_OP1_JMP_ADDR"    => 0x20,
-	"ZEND_VM_OP1_TRY_CATCH"   => 0x30,
-	"ZEND_VM_OP1_LIVE_RANGE"  => 0x40,
-	"ZEND_VM_OP1_THIS"        => 0x50,
-	"ZEND_VM_OP1_NEXT"        => 0x60,
-	"ZEND_VM_OP1_CLASS_FETCH" => 0x70,
-	"ZEND_VM_OP1_CONSTRUCTOR" => 0x80,
-
-	"ZEND_VM_OP2_SPEC"        => 1<<8,
-	"ZEND_VM_OP2_CONST"       => 1<<9,
-	"ZEND_VM_OP2_TMPVAR"      => 1<<10,
-	"ZEND_VM_OP2_MASK"        => 0xf000,
-	"ZEND_VM_OP2_NUM"         => 0x1000,
-	"ZEND_VM_OP2_JMP_ADDR"    => 0x2000,
-	"ZEND_VM_OP2_TRY_CATCH"   => 0x3000,
-	"ZEND_VM_OP2_LIVE_RANGE"  => 0x4000,
-	"ZEND_VM_OP2_THIS"        => 0x5000,
-	"ZEND_VM_OP2_NEXT"        => 0x6000,
-	"ZEND_VM_OP2_CLASS_FETCH" => 0x7000,
-	"ZEND_VM_OP2_CONSTRUCTOR" => 0x8000,
+	"ZEND_VM_OP_SPEC"         => 1<<0,
+	"ZEND_VM_OP_CONST"        => 1<<1,
+	"ZEND_VM_OP_TMPVAR"       => 1<<2,
+	"ZEND_VM_OP_MASK"         => 0xf0,
+	"ZEND_VM_OP_NUM"          => 0x10,
+	"ZEND_VM_OP_JMP_ADDR"     => 0x20,
+	"ZEND_VM_OP_TRY_CATCH"    => 0x30,
+	"ZEND_VM_OP_LIVE_RANGE"   => 0x40,
+	"ZEND_VM_OP_THIS"         => 0x50,
+	"ZEND_VM_OP_NEXT"         => 0x60,
+	"ZEND_VM_OP_CLASS_FETCH"  => 0x70,
+	"ZEND_VM_OP_CONSTRUCTOR"  => 0x80,
 
 	"ZEND_VM_EXT_VAR_FETCH"   => 1<<16,
 	"ZEND_VM_EXT_ISSET"       => 1<<17,
@@ -107,20 +94,20 @@ foreach ($vm_op_flags as $name => $val) {
 
 $vm_op_decode = array(
 	"ANY"                  => 0,
-	"CONST"                => ZEND_VM_OP1_SPEC | ZEND_VM_OP1_CONST,
-	"TMP"                  => ZEND_VM_OP1_SPEC,
-	"VAR"                  => ZEND_VM_OP1_SPEC,
-	"UNUSED"               => ZEND_VM_OP1_SPEC,
-	"CV"                   => ZEND_VM_OP1_SPEC,
-	"TMPVAR"               => ZEND_VM_OP1_SPEC | ZEND_VM_OP1_TMPVAR,
-	"NUM"                  => ZEND_VM_OP1_NUM,
-	"JMP_ADDR"             => ZEND_VM_OP1_JMP_ADDR,
-	"TRY_CATCH"            => ZEND_VM_OP1_TRY_CATCH,
-	"LIVE_RANGE"           => ZEND_VM_OP1_LIVE_RANGE,
-	"THIS"                 => ZEND_VM_OP1_THIS,
-	"NEXT"                 => ZEND_VM_OP1_NEXT,
-	"CLASS_FETCH"          => ZEND_VM_OP1_CLASS_FETCH,
-	"CONSTRUCTOR"          => ZEND_VM_OP1_CONSTRUCTOR,
+	"CONST"                => ZEND_VM_OP_SPEC | ZEND_VM_OP_CONST,
+	"TMP"                  => ZEND_VM_OP_SPEC,
+	"VAR"                  => ZEND_VM_OP_SPEC,
+	"UNUSED"               => ZEND_VM_OP_SPEC,
+	"CV"                   => ZEND_VM_OP_SPEC,
+	"TMPVAR"               => ZEND_VM_OP_SPEC | ZEND_VM_OP_TMPVAR,
+	"NUM"                  => ZEND_VM_OP_NUM,
+	"JMP_ADDR"             => ZEND_VM_OP_JMP_ADDR,
+	"TRY_CATCH"            => ZEND_VM_OP_TRY_CATCH,
+	"LIVE_RANGE"           => ZEND_VM_OP_LIVE_RANGE,
+	"THIS"                 => ZEND_VM_OP_THIS,
+	"NEXT"                 => ZEND_VM_OP_NEXT,
+	"CLASS_FETCH"          => ZEND_VM_OP_CLASS_FETCH,
+	"CONSTRUCTOR"          => ZEND_VM_OP_CONSTRUCTOR,
 );
 
 $vm_ext_decode = array(
@@ -1445,7 +1432,7 @@ function parse_operand_spec($def, $lineno, $str, &$flags) {
 			die("ERROR ($def:$lineno): Wrong operand type '$str'\n");
 		}
 	}
-	if (!($flags & ZEND_VM_OP1_SPEC)) {
+	if (!($flags & ZEND_VM_OP_SPEC)) {
 		if (count($a) != 1) {
 			die("ERROR ($def:$lineno): Wrong operand type '$str'\n");
 		}
@@ -1649,6 +1636,8 @@ function gen_vm($def, $skel) {
 	foreach($vm_op_flags as $name => $val) {
 		fprintf($f, "#define %-24s 0x%08x\n", $name, $val);
 	}
+	fputs($f, "#define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)\n");
+	fputs($f, "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n");
 	fputs($f, "\n");
 	fputs($f, "BEGIN_EXTERN_C()\n\n");
 	fputs($f, "ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);\n");

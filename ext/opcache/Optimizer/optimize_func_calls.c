@@ -38,7 +38,7 @@ typedef struct _optimizer_call_info {
 	zend_op       *opline;
 } optimizer_call_info;
 
-void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
