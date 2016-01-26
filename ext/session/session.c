@@ -780,7 +780,7 @@ retry:
 		zend_string_release(val);
 
 		/* Protection against malformed session data */
-		if (Z_TYPE(PS(http_session_vars)) != IS_ARRAY) {
+		if (Z_TYPE_P(Z_REFVAL(PS(http_session_vars))) != IS_ARRAY) {
 			php_session_abort();
 			php_session_track_init();
 			php_error_docref(NULL, E_WARNING,
@@ -2644,7 +2644,7 @@ static PHP_FUNCTION(session_decode)
 	}
 
 	/* Handle internal session data */
-	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY) {
+	if (Z_TYPE_P(Z_REFVAL(PS(http_session_vars))) == IS_ARRAY) {
 		entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 								   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 		if (entry) {
@@ -2657,6 +2657,15 @@ static PHP_FUNCTION(session_decode)
 			zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 							  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 		}
+	} else {
+		php_session_abort();
+		php_session_track_init();
+		if (!Z_ISUNDEF(PS(internal_data))) {
+			zval_ptr_dtor(&PS(internal_data));
+		}
+		php_error_docref(NULL, E_WARNING,
+						 "Malformed session data detected: %s (path: %s) Session aborted",
+						 PS(mod)->s_name, PS(save_path));
 	}
 
 	RETURN_TRUE;

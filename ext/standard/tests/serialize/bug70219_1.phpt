@@ -34,9 +34,7 @@ var_dump($data);
 var_dump($_SESSION);
 ?>
 --EXPECTF--
-Warning: session_start(): Malformed session data detected: files (path: ) Session aborted in %s on line 3
-
-Warning: session_decode(): Session is not active. You cannot decode session data in %s on line 11
+Warning: session_decode(): Malformed session data detected: files (path: ) Session aborted in %s on line 11
 
 Warning: session_decode(): Session is not active. You cannot decode session data in %s on line 11
 array(2) {
