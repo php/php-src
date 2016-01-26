@@ -110,6 +110,16 @@ PHP 7.1 UPGRADE NOTES
     the first php-fcgi.exe process will exec the specified number of children.
     Those will share the same TCP socket. 
 
+- readline:
+  . The readline extension is supported through the WinEditLine library
+    (http://mingweditline.sourceforge.net/). Thereby, the inteactive CLI
+    shell is supported as well (php.exe -a).
+
+    It is well known, but nevertheless is worth mentioning again, that
+    the readline extension is not thread safe and will never be. Thus,
+    the usage of it with any true thread safe SAPI (like Apache mod_winnt) is
+    strongely discouraged.
+
 ========================================
 13. Other Changes
 ========================================
