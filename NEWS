@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.4
 
 - Core:
+  . Fixed bug #71443 (Segfault using built-in webserver with intl using
+    symfony). (Laruence)
   . Fixed bug #71442 (forward_static_call crash). (Laruence)
   . Fixed bug #71441 (Typehinted Generator with return in try/finally crashes).
     (Bob)
