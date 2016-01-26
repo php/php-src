@@ -2223,6 +2223,7 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 	X509_INFO *xi;
 
 	if(!(stack = sk_X509_new_null())) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_ERROR, "memory allocation failure");
 		goto end;
 	}
@@ -2233,6 +2234,7 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 	}
 
 	if(!(in=BIO_new_file(certfile, "r"))) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error opening the file, %s", certfile);
 		sk_X509_free(stack);
 		goto end;
@@ -2240,6 +2242,7 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 
 	/* This loads from a file, a stack of x509/crl/pkey sets */
 	if(!(sk=PEM_X509_INFO_read_bio(in, NULL, NULL, NULL))) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error reading the file, %s", certfile);
 		sk_X509_free(stack);
 		goto end;
@@ -2276,14 +2279,22 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 
 	csc = X509_STORE_CTX_new();
 	if (csc == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_ERROR, "memory allocation failure");
 		return 0;
 	}
-	X509_STORE_CTX_init(csc, ctx, x, untrustedchain);
-	if(purpose >= 0) {
-		X509_STORE_CTX_set_purpose(csc, purpose);
+	if (!X509_STORE_CTX_init(csc, ctx, x, untrustedchain)) {
+		php_openssl_store_errors();
+		php_error_docref(NULL, E_WARNING, "cert store initialization failed");
+		return 0;
+	}
+	if (purpose >= 0 && !X509_STORE_CTX_set_purpose(csc, purpose)) {
+		php_openssl_store_errors();
 	}
 	ret = X509_verify_cert(csc);
+	if (ret < 0) {
+		php_openssl_store_errors();
+	}
 	X509_STORE_CTX_free(csc);
 
 	return ret;
@@ -2361,6 +2372,7 @@ static X509_STORE * setup_verify(zval * calist)
 	store = X509_STORE_new();
 
 	if (store == NULL) {
+		php_openssl_store_errors();
 		return NULL;
 	}
 
@@ -2376,6 +2388,7 @@ static X509_STORE * setup_verify(zval * calist)
 			if ((sb.st_mode & S_IFREG) == S_IFREG) {
 				file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
 				if (file_lookup == NULL || !X509_LOOKUP_load_file(file_lookup, Z_STRVAL_P(item), X509_FILETYPE_PEM)) {
+					php_openssl_store_errors();
 					php_error_docref(NULL, E_WARNING, "error loading file %s", Z_STRVAL_P(item));
 				} else {
 					nfiles++;
@@ -2384,6 +2397,7 @@ static X509_STORE * setup_verify(zval * calist)
 			} else {
 				dir_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
 				if (dir_lookup == NULL || !X509_LOOKUP_add_dir(dir_lookup, Z_STRVAL_P(item), X509_FILETYPE_PEM)) {
+					php_openssl_store_errors();
 					php_error_docref(NULL, E_WARNING, "error loading directory %s", Z_STRVAL_P(item));
 				} else {
 					ndirs++;
@@ -2394,14 +2408,14 @@ static X509_STORE * setup_verify(zval * calist)
 	}
 	if (nfiles == 0) {
 		file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-		if (file_lookup) {
-			X509_LOOKUP_load_file(file_lookup, NULL, X509_FILETYPE_DEFAULT);
+		if (file_lookup == NULL || !X509_LOOKUP_load_file(file_lookup, NULL, X509_FILETYPE_DEFAULT)) {
+			php_openssl_store_errors();
 		}
 	}
 	if (ndirs == 0) {
 		dir_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
-		if (dir_lookup) {
-			X509_LOOKUP_add_dir(dir_lookup, NULL, X509_FILETYPE_DEFAULT);
+		if (dir_lookup == NULL || !X509_LOOKUP_add_dir(dir_lookup, NULL, X509_FILETYPE_DEFAULT)) {
+			php_openssl_store_errors();
 		}
 	}
 	return store;
