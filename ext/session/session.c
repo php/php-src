@@ -172,6 +172,8 @@ static int php_session_destroy(zend_long duration) /* {{{ */
 	}
 
 	ZEND_ASSERT(PS(id));
+	ZEND_ASSERT(Z_TYPE(PS(internal_data)) == IS_ARRAY);
+
 	if (duration < 0) {
 		if (PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
 			retval = FAILURE;
@@ -196,7 +198,8 @@ static int php_session_destroy(zend_long duration) /* {{{ */
 static int php_session_validate_internal_data(zval *internal_data) {
 	zval *zp;
 
-	ZEND_ASSERT(internal_data && Z_TYPE_P(internal_data) == IS_ARRAY);
+	ZEND_ASSERT(PS(session_status) == php_session_active);
+	ZEND_ASSERT(internal_data);
 
 	if (Z_ISUNDEF_P(internal_data) || Z_TYPE_P(internal_data) != IS_ARRAY) {
 		return FAILURE;
@@ -283,11 +286,17 @@ static void php_session_track_init(void) /* {{{ */
 {
 	zval session_vars;
 	zend_string *var_name = zend_string_init("_SESSION", sizeof("_SESSION") - 1, 0);
+
 	/* Unconditionally destroy existing array -- possible dirty data */
 	zend_delete_global_variable(var_name);
 
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
+	}
+
+	if (!Z_ISUNDEF(PS(internal_data))) {
+		zval_ptr_dtor(&PS(internal_data));
+		ZVAL_UNDEF(&PS(internal_data));
 	}
 
 	array_init(&session_vars);
@@ -315,6 +324,8 @@ static zend_string *php_session_encode(void) /* {{{ */
 
 static int php_session_decode(zend_string *data) /* {{{ */
 {
+	ZEND_ASSERT(PS(session_status) == php_session_active);
+
 	if (!PS(serializer)) {
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session data");
 		return FAILURE;
@@ -324,14 +335,6 @@ static int php_session_decode(zend_string *data) /* {{{ */
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session data. Session has been destroyed");
 		return FAILURE;
-	}
-
-	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY && Z_TYPE(PS(internal_data)) == IS_ARRAY
-		&& php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
-		php_session_destroy(PS(ttl_destroy));
-		php_session_track_init();
-		php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Session has been destroyed");
-		/* Retun SUCCESS intentionally */
 	}
 
 	return SUCCESS;
@@ -777,16 +780,19 @@ retry:
 		zend_string_release(val);
 
 		/* Handle internal session data */
-		if (!Z_ISUNDEF(PS(internal_data))) {
-			zval_ptr_dtor(&PS(internal_data));
-			ZVAL_UNDEF(&PS(internal_data));
-		}
 		entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 											   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 		if (entry) {
 			zval *zp, *new_sid;
 
 			ZVAL_COPY(&PS(internal_data), entry);
+			if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
+				php_session_set_timestamps(1);
+				/* Do not raise error for PHP7, but PHP 8 */
+				/*
+				php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken data has been wiped");
+				*/
+			}
 			zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 							  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 
@@ -2613,6 +2619,7 @@ static PHP_FUNCTION(session_encode)
 static PHP_FUNCTION(session_decode)
 {
 	zend_string *str = NULL;
+	zval *entry;
 
 	if (PS(session_status) != php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Session is not active. You cannot decode session data");
@@ -2626,6 +2633,21 @@ static PHP_FUNCTION(session_decode)
 	if (php_session_decode(str) == FAILURE) {
 		RETURN_FALSE;
 	}
+
+	/* Handle internal session data */
+	entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
+							   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
+	if (entry) {
+		zval_ptr_dtor(&PS(internal_data));
+		ZVAL_COPY(&PS(internal_data), entry);
+		if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
+			php_session_set_timestamps(1);
+			php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken data has been wiped");
+		}
+		zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
+						  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
