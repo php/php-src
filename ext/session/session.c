@@ -779,6 +779,15 @@ retry:
 		php_session_decode(val);
 		zend_string_release(val);
 
+		/* Protection against malformed session data */
+		if (Z_TYPE(PS(http_session_vars)) != IS_ARRAY) {
+			php_session_abort();
+			php_session_track_init();
+			php_error_docref(NULL, E_WARNING,
+							 "Malformed session data detected: %s (path: %s) Session aborted",
+							 PS(mod)->s_name, PS(save_path));
+		}
+
 		/* Handle internal session data */
 		entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 											   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
@@ -2635,17 +2644,19 @@ static PHP_FUNCTION(session_decode)
 	}
 
 	/* Handle internal session data */
-	entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
-							   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
-	if (entry) {
-		zval_ptr_dtor(&PS(internal_data));
-		ZVAL_COPY(&PS(internal_data), entry);
-		if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
-			php_session_set_timestamps(1);
-			php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken data has been wiped");
+	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY) {
+		entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
+								   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
+		if (entry) {
+			zval_ptr_dtor(&PS(internal_data));
+			ZVAL_COPY(&PS(internal_data), entry);
+			if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
+				php_session_set_timestamps(1);
+				php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken data has been wiped");
+			}
+			zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
+							  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 		}
-		zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
-						  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 	}
 
 	RETURN_TRUE;
