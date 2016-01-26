@@ -325,8 +325,11 @@ try_again:
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
-
-				ZVAL_LONG(op, ZEND_STRTOL(ZSTR_VAL(str), NULL, base));
+				if (base == 10) {
+					ZVAL_LONG(op, zval_get_long(op));
+				} else {
+					ZVAL_LONG(op, ZEND_STRTOL(ZSTR_VAL(str), NULL, base));
+				}
 				zend_string_release(str);
 			}
 			break;
@@ -756,10 +759,24 @@ try_again:
 		case IS_DOUBLE:
 			return zend_dval_to_lval(Z_DVAL_P(op));
 		case IS_STRING:
-			if (!silent) {
-				if (is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), NULL, NULL, -1)==0) {
-					zend_error(E_WARNING, "A non-numeric value encountered");
+			{
+				zend_uchar type;
+				zend_long lval;
+				double dval;
+				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, silent ? 1 : -1))) {
+					if (!silent) {
+						zend_error(E_WARNING, "A non-numeric value encountered");
+					}
 					return 0;
+				} else if (EXPECTED(type == IS_LONG)) {
+					return lval;
+				} else {
+					/* Previously we used strtol here, not is_numeric_string,
+					 * and strtol gives you LONG_MAX/_MIN on overflow.
+					 * We use use saturating conversion to emulate strtol()'s
+					 * behaviour.
+					 */
+					 return zend_dval_to_lval_cap(dval);
 				}
 			}
 			return ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10);
