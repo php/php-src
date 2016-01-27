@@ -196,6 +196,11 @@ PHP_FUNCTION(iptcembed)
 		RETURN_FALSE;
 	}
 
+	if (iptcdata_len >= SIZE_MAX - sizeof(psheader) - 1025) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "IPTC data too large");
+		RETURN_FALSE;
+	}
+
 	if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {
 		php_error_docref(NULL, E_WARNING, "Unable to open %s", jpeg_file);
 		RETURN_FALSE;
@@ -204,7 +209,7 @@ PHP_FUNCTION(iptcembed)
 	if (spool < 2) {
 		zend_fstat(fileno(fp), &sb);
 
-		spoolbuf = zend_string_alloc(iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 0);
+		spoolbuf = zend_string_safe_alloc(1, iptcdata_len + sizeof(psheader) + 1024 + 1, sb.st_size, 0);
 		poi = (unsigned char*)ZSTR_VAL(spoolbuf);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
 	}
