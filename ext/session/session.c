@@ -706,6 +706,14 @@ static void php_session_initialize(void) /* {{{ */
 	}
 
 retry:
+	/* Be protective. Should not happen. */
+	if (retry_count++ > 3) {
+		php_session_abort();
+		php_error_docref(NULL, E_RECOVERABLE_ERROR,
+						 "Too many session ID reset retries");
+		return;
+	}
+
 	/* Open session handler first */
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
@@ -792,7 +800,7 @@ retry:
 		entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 											   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 		if (entry) {
-			zval *zp, *new_sid;
+			zval *new_sid, *created, *updated;
 
 			ZVAL_COPY(&PS(internal_data), entry);
 			if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
@@ -805,53 +813,57 @@ retry:
 			zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 							  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
 
-			/* Regenerate Check */
-			zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+			new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+										 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
+			created = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 									PSDK_CREATED, sizeof(PSDK_CREATED)-1);
-			if (PS(regenerate_id) > 0 && Z_LVAL_P(zp) + PS(regenerate_id) < now) {
+			updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+									PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
+
+			/* Check destroyed/regenerated session TTL is reached */
+			if (new_sid && Z_LVAL_P(updated) + PS(ttl_destroy) < now) {
+				switch (Z_TYPE_P(new_sid)) {
+					case IS_STRING:
+						php_error_docref(NULL, E_NOTICE,
+										 "Obsolete session data access detected. Possible "
+										 "security incident, but alert could be false positive. "
+										 "(Decendant session ID: %s)", Z_STRVAL_P(new_sid));
+					/* Fall through */
+					case IS_NULL:
+						php_session_destroy(-1);
+						/* Back to active state */
+						PS(session_status) = php_session_active;
+						goto retry;
+						break;
+					default:
+						/* Should not happen */
+						php_error_docref(NULL, E_ERROR,
+										 "Malformed NEW_SID: %d", Z_TYPE_P(new_sid));
+						break;
+				}
+			} else if (Z_LVAL_P(updated) + PS(ttl) < now) {
+				/* Check newly created session TTL is reached */
+				php_session_destroy(-1);
+				/* Back to active state */
+				PS(session_status) = php_session_active;
+				goto retry;
+			}
+
+			/* Check regenerate ID is required */
+			if (PS(regenerate_id) > 0 && Z_LVAL_P(created) + PS(regenerate_id) < now) {
 				php_session_regenerate_id(0);
 				return;
 			}
 
-			new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-										 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
-			/* TTL Check */
-			zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-									PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
-			if (Z_LVAL_P(zp) + PS(ttl) < now) {
-				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-										PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
-				if (Z_LVAL_P(zp) + PS(ttl_destroy) < now) {
-					php_session_destroy(PS(ttl_destroy));
-					/* Back to active state */
-					PS(session_status) = php_session_active;
-				}
-				/* Access to old session should not happen under normal circumstance
-				   if new session ID is assigned. */
-				if (new_sid && Z_TYPE_P(new_sid) == IS_STRING) {
-					php_error_docref(NULL, E_NOTICE,
-									 "Obsolete session data access detected. Possible "
-									 "security incident, but alert could be false positive. "
-									 "(Decendant session ID: %s)", Z_STRVAL_P(new_sid));
-				}
-				/* Be protective. Should not happen. */
-				if (retry_count++ > 3) {
-					php_session_abort();
-					php_error_docref(NULL, E_RECOVERABLE_ERROR,
-									 "Too many session ID reset retries");
-					return;
-				}
-				goto retry;
-			}
-
 			if (!new_sid) {
 				/* Update outstanding session timestamps */
-				zp = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+				updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 										PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
-				if (Z_LVAL_P(zp) + PS(ttl_update)  < now) {
+				if (Z_LVAL_P(updated) + PS(ttl_update)  < now) {
 					php_session_set_timestamps(0);
 				}
 			} else {
+				/* Send new SID again if needed */
 				php_session_send_new_sid(new_sid);
 			}
 		} else {
@@ -1617,7 +1629,9 @@ static int php_session_cache_limiter(void) /* {{{ */
 		const char *output_start_filename = php_output_get_start_filename();
 		int output_start_lineno = php_output_get_start_lineno();
 
-		php_session_abort();
+		if (PS(use_only_cookies)) {
+			php_session_abort();
+		}
 		if (output_start_filename) {
 			php_error_docref(NULL, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {

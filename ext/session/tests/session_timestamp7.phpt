@@ -37,7 +37,7 @@ echo "--------------------------------\n";
 session_start();
 $data = session_encode();
 $session = unserialize($data);
-$session['some']['var'] = 1234;
+$session['other']['var'] = 1234;
 $session['__PHP_SESSION__']['CREATED'] = 0;
 $session['__PHP_SESSION__']['UPDATED'] = 0;
 $session['__PHP_SESSION__']['SIDS'] = array('foo'=>'bar');
@@ -94,16 +94,12 @@ array(3) {
   ["UPDATED"]=>
   int(%d)
   ["SIDS"]=>
-  array(1) {
-    [0]=>
-    string(32) "%s"
+  array(0) {
   }
 }
 bool(true)
-array(2) {
-  ["foo"]=>
-  string(3) "bar"
-  ["some"]=>
+array(1) {
+  ["other"]=>
   array(1) {
     ["var"]=>
     int(1234)
