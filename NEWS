@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.4
 
 - Core:
+  . Fixed bug #71474 (Crash because of VM stack corruption on Magento2).
+    (Dmitry)
   . Fixed bug #71450 (An integer overflow bug in php_str_to_str_ex()). (Stas)
   . Fixed bug #71449 (An integer overflow bug in php_implode()). (Stas)
   . Fixed bug #71443 (Segfault using built-in webserver with intl using
