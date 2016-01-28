@@ -2666,7 +2666,7 @@ static PHP_FUNCTION(session_decode)
 			ZVAL_COPY(&PS(internal_data), entry);
 			if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
 				php_session_set_timestamps(1);
-				php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken data has been wiped");
+				php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken internal session data has been wiped");
 			}
 			zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 							  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
