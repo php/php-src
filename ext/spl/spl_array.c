@@ -277,7 +277,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 
 	if ((type == BP_VAR_W || type == BP_VAR_RW) && (ht->u.v.nApplyCount > 0)) {
 		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-		return &EG(error_zval);
+		return NULL;
 	}
 
 try_again:
@@ -365,8 +365,7 @@ num_index:
 		goto try_again;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
-		return (type == BP_VAR_W || type == BP_VAR_RW) ?
-			&EG(error_zval) : &EG(uninitialized_zval);
+		return (type == BP_VAR_W || type == BP_VAR_RW) ? NULL : &EG(uninitialized_zval);
 	}
 } /* }}} */
 

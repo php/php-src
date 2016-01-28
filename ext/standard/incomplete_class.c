@@ -54,7 +54,7 @@ static zval *incomplete_class_get_property(zval *object, zval *member, int type,
 	incomplete_class_message(object, E_NOTICE);
 
 	if (type == BP_VAR_W || type == BP_VAR_RW) {
-		return &EG(error_zval);
+		return NULL;
 	} else {
 		return &EG(uninitialized_zval);
 	}
@@ -69,8 +69,7 @@ static void incomplete_class_write_property(zval *object, zval *member, zval *va
 
 static zval *incomplete_class_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
 {
-	incomplete_class_message(object, E_NOTICE);
-	return &EG(error_zval);
+	return NULL;
 }
 /* }}} */
 
