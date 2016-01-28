@@ -1106,7 +1106,7 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 
 	if (object_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		do {
-			if (object_op_type == IS_VAR && UNEXPECTED(object == &EG(error_zval))) {
+			if (object_op_type == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_ERROR)) {
 				if (retval) {
  					ZVAL_NULL(retval);
 				}
@@ -1649,7 +1649,7 @@ str_index:
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
 				retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
-					&EG(error_zval) : &EG(uninitialized_zval);
+					NULL : &EG(uninitialized_zval);
 		}
 	}
 	return retval;
@@ -1832,10 +1832,15 @@ fetch_from_array:
 			retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(retval == NULL)) {
 				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-				retval = &EG(error_zval);
+				ZVAL_ERROR(result);
+				return;
 			}
 		} else {
 			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
+			if (UNEXPECTED(!retval)) {
+				ZVAL_ERROR(result);
+				return;
+			}
 		}
 		ZVAL_INDIRECT(result, retval);
 		return;
@@ -1860,11 +1865,11 @@ convert_to_array:
 			zend_check_string_offset(dim, type);
 			zend_wrong_string_offset();
 		}
-		ZVAL_INDIRECT(result, &EG(error_zval));
+		ZVAL_ERROR(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_throw_error(NULL, "Cannot use object as array");
-			retval = &EG(error_zval);
+			ZVAL_ERROR(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
@@ -1897,25 +1902,25 @@ convert_to_array:
 					ZVAL_INDIRECT(result, retval);
 				}
 			} else {
-				ZVAL_INDIRECT(result, &EG(error_zval));
+				ZVAL_ERROR(result);
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-		if (UNEXPECTED(container == &EG(error_zval))) {
-			ZVAL_INDIRECT(result, &EG(error_zval));
-		} else if (type != BP_VAR_UNSET) {
+		if (type != BP_VAR_UNSET) {
 			goto convert_to_array;
 		} else {
 			/* for read-mode only */
 			ZVAL_NULL(result);
 		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_ERROR)) {
+		ZVAL_ERROR(result);
 	} else {
 		if (type == BP_VAR_UNSET) {
 			zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
 			ZVAL_NULL(result);
 		} else {
 			zend_error(E_WARNING, "Cannot use a scalar value as an array");
-			ZVAL_INDIRECT(result, &EG(error_zval));
+			ZVAL_ERROR(result);
 		}
 	}
 }
@@ -2044,8 +2049,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 {
     if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
-			if (container_op_type == IS_VAR && UNEXPECTED(container == &EG(error_zval))) {
-				ZVAL_INDIRECT(result, &EG(error_zval));
+			if (container_op_type == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_ERROR)) {
+				ZVAL_ERROR(result);
 				return;
 			}
 
@@ -2064,7 +2069,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				object_init(container);
 			} else {
 				zend_error(E_WARNING, "Attempt to modify property of non-object");
-				ZVAL_INDIRECT(result, &EG(error_zval));
+				ZVAL_ERROR(result);
 				return;
 			}
 		} while (0);
@@ -2107,7 +2112,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				}
 			} else {
 				zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
-				ZVAL_INDIRECT(result, &EG(error_zval));
+				ZVAL_ERROR(result);
 			}
 		} else {
 			ZVAL_INDIRECT(result, ptr);
@@ -2121,7 +2126,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		}
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
-		ZVAL_INDIRECT(result, &EG(error_zval));
+		ZVAL_ERROR(result);
 	}
 }
 

@@ -324,6 +324,7 @@ struct _zend_ast_ref {
 /* internal types */
 #define IS_INDIRECT             	15
 #define IS_PTR						17
+#define IS_ERROR					19
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -779,6 +780,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define ZVAL_CE(z, c) do {										\
 		Z_CE_P(z) = (c);										\
 		Z_TYPE_INFO_P(z) = IS_PTR;								\
+	} while (0)
+
+#define ZVAL_ERROR(z) do {				\
+		Z_TYPE_INFO_P(z) = IS_ERROR;	\
 	} while (0)
 
 #define Z_REFCOUNT_P(pz)			zval_refcount_p(pz)
