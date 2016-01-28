@@ -3493,8 +3493,8 @@ PHPAPI double php_get_nan(void) /* {{{ */
 	return HUGE_VAL + -HUGE_VAL;
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val = 0.0;
-	((php_uint32*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
-	((php_uint32*)&val)[0] = 0;
+	((uint32_t*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
+	((uint32_t*)&val)[0] = 0;
 	return val;
 #elif HAVE_ATOF_ACCEPTS_NAN
 	return atof("NAN");
@@ -3510,8 +3510,8 @@ PHPAPI double php_get_inf(void) /* {{{ */
 	return HUGE_VAL;
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val = 0.0;
-	((php_uint32*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
-	((php_uint32*)&val)[0] = 0;
+	((uint32_t*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
+	((uint32_t*)&val)[0] = 0;
 	return val;
 #elif HAVE_ATOF_ACCEPTS_INF
 	return atof("INF");

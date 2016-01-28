@@ -55,7 +55,7 @@
 
 PHPAPI void php_srand(zend_long seed);
 PHPAPI zend_long php_rand(void);
-PHPAPI void php_mt_srand(php_uint32 seed);
-PHPAPI php_uint32 php_mt_rand(void);
+PHPAPI void php_mt_srand(uint32_t seed);
+PHPAPI uint32_t php_mt_rand(void);
 
 #endif	/* PHP_RAND_H */
