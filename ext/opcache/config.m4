@@ -14,11 +14,11 @@ PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HU
 
 if test "$PHP_OPCACHE" != "no"; then
 
-  if test "$PHP_OPCACHE_FILE" == "yes"; then
+  if test "$PHP_OPCACHE_FILE" = "yes"; then
     AC_DEFINE(HAVE_OPCACHE_FILE_CACHE, 1, [Define to enable file based caching (experimental)])
   fi
 
-  if test "$PHP_HUGE_CODE_PAGES" == "yes"; then
+  if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
   fi
 
