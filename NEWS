@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #71297 (Memory leak with consecutive yield from). (Bob)
   . Fixed bug #71314 (var_export(INF) prints INF.0). (Andrea)
+  . Fixed bug #71039 (exec functions ignore length but look for NULL termination).
+    (Anatol)
 
 - Apache2handler:
   . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
