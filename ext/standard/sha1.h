@@ -25,8 +25,8 @@
 
 /* SHA1 context. */
 typedef struct {
-	php_uint32 state[5];		/* state (ABCD) */
-	php_uint32 count[2];		/* number of bits, modulo 2^64 (lsb first) */
+	uint32_t state[5];		/* state (ABCD) */
+	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA1_CTX;
 

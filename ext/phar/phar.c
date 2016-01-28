@@ -521,10 +521,10 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 #endif
 #define PHAR_ZIP_16(var) ((php_uint16)((((php_uint16)var[0]) & 0xff) | \
 	(((php_uint16)var[1]) & 0xff) << 8))
-#define PHAR_ZIP_32(var) ((php_uint32)((((php_uint32)var[0]) & 0xff) | \
-	(((php_uint32)var[1]) & 0xff) << 8 | \
-	(((php_uint32)var[2]) & 0xff) << 16 | \
-	(((php_uint32)var[3]) & 0xff) << 24))
+#define PHAR_ZIP_32(var) ((uint32_t)((((uint32_t)var[0]) & 0xff) | \
+	(((uint32_t)var[1]) & 0xff) << 8 | \
+	(((uint32_t)var[2]) & 0xff) << 16 | \
+	(((uint32_t)var[3]) & 0xff) << 24))
 
 /**
  * Open an already loaded phar
@@ -604,7 +604,7 @@ int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len
  *
  * data is the serialized zval
  */
-int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_len) /* {{{ */
+int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len) /* {{{ */
 {
 	php_unserialize_data_t var_hash;
 
@@ -649,14 +649,14 @@ int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_l
  * This is used by phar_open_from_filename to process the manifest, but can be called
  * directly.
  */
-static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, zend_long halt_offset, phar_archive_data** pphar, php_uint32 compression, char **error) /* {{{ */
+static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, zend_long halt_offset, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry;
-	php_uint32 manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
+	uint32_t manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
 	php_uint16 manifest_ver;
-	php_uint32 len;
+	uint32_t len;
 	zend_long offset;
 	int sig_len, register_alias = 0, temp_alias = 0;
 	char *signature = NULL;
@@ -778,7 +778,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 
 		switch(sig_flags) {
 			case PHAR_SIG_OPENSSL: {
-				php_uint32 signature_len;
+				uint32_t signature_len;
 				char *sig;
 				zend_off_t whence;
 
@@ -1565,7 +1565,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 	const zend_long tokenlen = sizeof(token) - 1;
 	zend_long halt_offset;
 	size_t got;
-	php_uint32 compression = PHAR_FILE_COMPRESSED_NONE;
+	uint32_t compression = PHAR_FILE_COMPRESSED_NONE;
 
 	if (error) {
 		*error = NULL;
@@ -2309,9 +2309,9 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 /**
  * Validate the CRC32 of a file opened from within the phar
  */
-int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error, int process_zip) /* {{{ */
+int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip) /* {{{ */
 {
-	php_uint32 crc = ~0;
+	uint32_t crc = ~0;
 	int len = idata->internal_file->uncompressed_filesize;
 	php_stream *fp = idata->fp;
 	phar_entry_info *entry = idata->internal_file;
@@ -2476,8 +2476,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	zend_off_t manifest_ftell;
 	zend_long offset;
 	size_t wrote;
-	php_uint32 manifest_len, mytime, loc, new_manifest_count;
-	php_uint32 newcrc32;
+	uint32_t manifest_len, mytime, loc, new_manifest_count;
+	uint32_t newcrc32;
 	php_stream *file, *oldfile, *newfile, *stubfile;
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
@@ -2809,7 +2809,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		php_stream_flush(entry->cfp);
 		php_stream_filter_remove(filter, 1);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
-		entry->compressed_filesize = (php_uint32) php_stream_tell(entry->cfp);
+		entry->compressed_filesize = (uint32_t) php_stream_tell(entry->cfp);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);
 		entry->old_flags = entry->flags;

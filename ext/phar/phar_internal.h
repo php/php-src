@@ -229,17 +229,17 @@ enum phar_fp_type {
 /* entry for one file in a phar file */
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
-	php_uint32               uncompressed_filesize;
-	php_uint32               timestamp;
-	php_uint32               compressed_filesize;
-	php_uint32               crc32;
-	php_uint32               flags;
+	uint32_t                 uncompressed_filesize;
+	uint32_t                 timestamp;
+	uint32_t                 compressed_filesize;
+	uint32_t                 crc32;
+	uint32_t                 flags;
 	/* remainder */
 	/* when changing compression, save old flags in case fp is NULL */
-	php_uint32               old_flags;
+	uint32_t                 old_flags;
 	zval                     metadata;
 	int                      metadata_len; /* only used for cached manifests */
-	php_uint32               filename_len;
+	uint32_t                 filename_len;
 	char                     *filename;
 	enum phar_fp_type        fp_type;
 	/* offset within original phar file of the file contents */
@@ -295,14 +295,14 @@ struct _phar_archive_data {
 	HashTable                virtual_dirs;
 	/* hash of mounted directory paths */
 	HashTable                mounted_dirs;
-	php_uint32               flags;
-	php_uint32               min_timestamp;
-	php_uint32               max_timestamp;
+	uint32_t                 flags;
+	uint32_t                 min_timestamp;
+	uint32_t                 max_timestamp;
 	php_stream               *fp;
 	/* decompressed file contents are stored here */
 	php_stream               *ufp;
 	int                      refcount;
-	php_uint32               sig_flags;
+	uint32_t                 sig_flags;
 	int                      sig_len;
 	char                     *signature;
 	zval                     metadata;
@@ -536,7 +536,7 @@ void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
 int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error, int process_zip);
+int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
 int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error);
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
 int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
@@ -544,7 +544,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error);
 int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len);
 int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error);
 int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error);
+int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error);
 int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, int *signature_length, char **error);
 
 /* utility functions */
@@ -558,7 +558,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 zend_string *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_len);
+int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);
@@ -572,7 +572,7 @@ int phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
 int phar_is_tar(char *buf, char *fname);
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error);
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error);
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
 int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error);
 

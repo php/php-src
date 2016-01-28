@@ -28,8 +28,8 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 {
 	char *p;
 	size_t nr;
-	php_uint32 crcinit = 0;
-	register php_uint32 crc;
+	uint32_t crcinit = 0;
+	register uint32_t crc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &p, &nr) == FAILURE) {
 		return;
