@@ -6,9 +6,15 @@ PHP                                                                        NEWS
   . Fixed bug #74780 (parse_url() borken when query string contains colon). 
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
+  . Allow loading PHP/Zend extensions by name in ini files (extension=<name>).
+    (francois at tekwire dot net)
 
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
+
+- Standard:
+  . Add support for extension name as argument to dl().
+    (francois at tekwire dot net)
 
 22 Jun 2017, PHP 7.2.0alpha2
 
