@@ -2246,33 +2246,35 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	first_extra_arg = op_array->num_args;
 	num_args = EX_NUM_ARGS();
 	if (UNEXPECTED(num_args > first_extra_arg)) {
-		zval *end, *src, *dst;
-		uint32_t type_flags = 0;
+		if (EXPECTED(!(op_array->fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
+			zval *end, *src, *dst;
+			uint32_t type_flags = 0;
 
-		if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
-			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-			EX(opline) += first_extra_arg;
-		}
+			if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+				/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+				EX(opline) += first_extra_arg;
+			}
 
-		/* move extra args into separate array after all CV and TMP vars */
-		end = EX_VAR_NUM(first_extra_arg - 1);
-		src = end + (num_args - first_extra_arg);
-		dst = src + (op_array->last_var + op_array->T - first_extra_arg);
-		if (EXPECTED(src != dst)) {
-			do {
-				type_flags |= Z_TYPE_INFO_P(src);
-				ZVAL_COPY_VALUE(dst, src);
-				ZVAL_UNDEF(src);
-				src--;
-				dst--;
-			} while (src != end);
-		} else {
-			do {
-				type_flags |= Z_TYPE_INFO_P(src);
-				src--;
-			} while (src != end);
+			/* move extra args into separate array after all CV and TMP vars */
+			end = EX_VAR_NUM(first_extra_arg - 1);
+			src = end + (num_args - first_extra_arg);
+			dst = src + (op_array->last_var + op_array->T - first_extra_arg);
+			if (EXPECTED(src != dst)) {
+				do {
+					type_flags |= Z_TYPE_INFO_P(src);
+					ZVAL_COPY_VALUE(dst, src);
+					ZVAL_UNDEF(src);
+					src--;
+					dst--;
+				} while (src != end);
+			} else {
+				do {
+					type_flags |= Z_TYPE_INFO_P(src);
+					src--;
+				} while (src != end);
+			}
+			ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
 		}
-		ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
 	} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 		EX(opline) += num_args;
@@ -2359,33 +2361,35 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		first_extra_arg = op_array->num_args;
 		num_args = EX_NUM_ARGS();
 		if (UNEXPECTED(num_args > first_extra_arg)) {
-			zval *end, *src, *dst;
-			uint32_t type_flags = 0;
+			if (EXPECTED(!(op_array->fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
+				zval *end, *src, *dst;
+				uint32_t type_flags = 0;
 
-			if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
-				/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-				EX(opline) += first_extra_arg;
-			}
+				if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+					/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+					EX(opline) += first_extra_arg;
+				}
 
-			/* move extra args into separate array after all CV and TMP vars */
-			end = EX_VAR_NUM(first_extra_arg - 1);
-			src = end + (num_args - first_extra_arg);
-			dst = src + (op_array->last_var + op_array->T - first_extra_arg);
-			if (EXPECTED(src != dst)) {
-				do {
-					type_flags |= Z_TYPE_INFO_P(src);
-					ZVAL_COPY_VALUE(dst, src);
-					ZVAL_UNDEF(src);
-					src--;
-					dst--;
-				} while (src != end);
-			} else {
-				do {
-					type_flags |= Z_TYPE_INFO_P(src);
-					src--;
-				} while (src != end);
+				/* move extra args into separate array after all CV and TMP vars */
+				end = EX_VAR_NUM(first_extra_arg - 1);
+				src = end + (num_args - first_extra_arg);
+				dst = src + (op_array->last_var + op_array->T - first_extra_arg);
+				if (EXPECTED(src != dst)) {
+					do {
+						type_flags |= Z_TYPE_INFO_P(src);
+						ZVAL_COPY_VALUE(dst, src);
+						ZVAL_UNDEF(src);
+						src--;
+						dst--;
+					} while (src != end);
+				} else {
+					do {
+						type_flags |= Z_TYPE_INFO_P(src);
+						src--;
+					} while (src != end);
+				}
+				ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
 			}
-			ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
 		} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 			EX(opline) += num_args;
