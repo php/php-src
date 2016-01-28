@@ -46,7 +46,7 @@
 #include <fcntl.h>
 #endif
 
-#if (HAVE_NICE || defined(__linux__)) && HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -55,7 +55,7 @@ static int cmd_max_len;
 /* {{{ PHP_MINIT_FUNCTION(exec) */
 PHP_MINIT_FUNCTION(exec)
 {
-#ifdef __linux__
+#ifdef _SC_ARG_MAX
 	cmd_max_len = sysconf(_SC_ARG_MAX);
 #elif defined(ARG_MAX)
 	cmd_max_len = ARG_MAX;
