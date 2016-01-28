@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
+?? ??? 2016, PHP 5.5.32
+
+- Core:
+  . Fixed bug #71039 (exec functions ignore length but look for NULL termination).
+    (Anatol)
+
 
 07 Jan 2015, PHP 5.5.31
 
