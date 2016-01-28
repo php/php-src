@@ -2106,7 +2106,7 @@ static PHP_FUNCTION(session_regenerate_id)
 
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		PS(session_status) = php_session_none;
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create(open) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		RETURN_FALSE;
 	}
 
