@@ -394,6 +394,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #68822 (request time is reset too early). (honghu069 at 163 dot com)
 
+- JSON:
+  . Fixed bug #64695 (JSON_NUMERIC_CHECK has issues with strings that are 
+    numbers plus the letter e). (Jakub Zelenka)
+
 - ODBC:
   . Fixed bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
 
@@ -1017,8 +1021,6 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed bug #66021 (Blank line inside empty array/object when
     JSON_PRETTY_PRINT is set). (Kevin Israel)
-  . Fixed bug #64695 (JSON_NUMERIC_CHECK has issues with strings that are 
-    numbers plus the letter e). (Jakub Zelenka)
 
 - LDAP:
   . Fixed issue with null bytes in LDAP bindings. (Matthew Daley)
