@@ -4,6 +4,7 @@ ReflectionType possible types
 <?php
 
 $functions = [
+    function(): void {},
     function(): int {},
     function(): float {},
     function(): string {},
@@ -20,6 +21,7 @@ foreach ($functions as $function) {
 }
 ?>
 --EXPECTF--
+string(4) "void"
 string(3) "int"
 string(5) "float"
 string(6) "string"
