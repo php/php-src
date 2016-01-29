@@ -360,6 +360,10 @@ PS_READ_FUNC(files)
 		PS(session_status) = php_session_active;
 	}
 
+	if (!PS(id)) {
+		return FAILURE;
+	}
+
 	ps_files_open(data, PS(id) TSRMLS_CC);
 	if (data->fd < 0) {
 		return FAILURE;
