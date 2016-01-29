@@ -58,7 +58,7 @@ var_dump(
 );
 
 // Cleanup
-@session_destroy(-1);
+@session_destroy(true);
 session_commit();
 ?>
 --EXPECTF--

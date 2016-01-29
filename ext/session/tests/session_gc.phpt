@@ -20,7 +20,7 @@ session_start();
 
 var_dump(session_gc());
 
-@session_destroy(-1);
+@session_destroy(true);
 
 ?>
 --EXPECTF--

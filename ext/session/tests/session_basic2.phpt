@@ -50,10 +50,10 @@ echo "*** Cleanup ***\n";
 ini_set('session.use_strict_mode',0);
 var_dump(session_id($session_id_new1));
 var_dump(session_start());
-var_dump(@session_destroy(-1));
+var_dump(@session_destroy(true));
 var_dump(session_id($session_id_new2));
 var_dump(session_start());
-var_dump(@session_destroy(-1));
+var_dump(@session_destroy(true));
 
 ob_end_flush();
 ?>

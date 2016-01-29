@@ -82,7 +82,7 @@ session_unset();
 
 //Cleanup
 session_start();
-@session_destroy(-1);
+@session_destroy(true);
 
 --EXPECTF--
 *** Testing session_set_save_handler() function: class with validate_sid ***

@@ -162,7 +162,7 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 /* }}} */
 
 
-static int php_session_destroy(zend_long duration) /* {{{ */
+static int php_session_destroy(zend_bool immediate) /* {{{ */
 {
 	int retval = SUCCESS;
 
@@ -174,7 +174,7 @@ static int php_session_destroy(zend_long duration) /* {{{ */
 	ZEND_ASSERT(PS(id));
 	ZEND_ASSERT(Z_TYPE(PS(internal_data)) == IS_ARRAY);
 
-	if (duration < 0) {
+	if (immediate) {
 		if (PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
 			retval = FAILURE;
 			php_error_docref(NULL, E_WARNING, "Session data destruction failed");
@@ -331,7 +331,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
 		return FAILURE;
 	}
 	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
-		php_session_destroy(PS(ttl_destroy));
+		php_session_destroy(1);
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session data. Session has been destroyed");
 		return FAILURE;
@@ -832,27 +832,32 @@ retry:
 									 "This error indicates you had security problem most likely. "
 									 "(Current session ID: %s) (Decendant session ID: %s)", PS(id), Z_STRVAL_P(new_sid));
 					/* Keep offending session data for investigation */
-					php_session_destroy(600);
+					php_rshutdown_session_globals();
+					php_rinit_session_globals();
 					/* Back to active state */
 					PS(session_status) = php_session_active;
 					goto retry;
 					break;
 				case IS_NULL:
-					php_session_destroy(-1);
+					php_session_destroy(1);
 					/* Back to active state */
 					PS(session_status) = php_session_active;
 					goto retry;
 					break;
 				default:
 					/* Should not happen */
-					php_session_destroy(-1);
-					php_error_docref(NULL, E_ERROR,
-									 "Malformed NEW_SID: %d", Z_TYPE_P(new_sid));
-					return;
+					{
+						/* This leaks memory, but it's fatal anyway */
+						zend_string *tmp = zend_string_copy(PS(id));
+						/* Keep offending session data for investigation */
+						php_error_docref(NULL, E_ERROR,
+										 "Malformed session data. (Current session ID: %s) (NEW_SID data type: %d)", ZSTR_VAL(tmp), Z_TYPE_P(new_sid));
+						return;
+					}
 			}
 		} else if (Z_LVAL_P(updated) + PS(ttl) < now) {
 			/* Check newly created session TTL is reached */
-			php_session_destroy(-1);
+			php_session_destroy(1);
 			/* Back to active state */
 			PS(session_status) = php_session_active;
 			goto retry;
@@ -2801,24 +2806,22 @@ static PHP_FUNCTION(session_gc)
 	}
 	ZVAL_LONG(return_value, nrdels);
 }
-/* {{{ proto bool session_destroy([long duration])
+/* {{{ proto bool session_destroy([bool immediate])
    Destroy the current session and all data associated with it */
 static PHP_FUNCTION(session_destroy)
 {
-	zend_long duration = PS(ttl_destroy);
+	zend_bool immediate=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &duration) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &immediate) == FAILURE) {
 		return;
 	}
 
-	if (duration <= 0) {
-		/* Negative value destroy session data immediately.
-		   0 sets TTL value to current time stamp, but it still may
-		   cause random lost session by server side race condition. */
-		php_error_docref(NULL, E_NOTICE, "Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network");
+	if (immediate) {
+		/* Immediate destroy may cause random lost session by server side race condition. */
+		php_error_docref(NULL, E_NOTICE, "Immediate session data removal may cause random lost sessions. It is advised not to delete immediately");
 	}
 
-	RETURN_BOOL(php_session_destroy(duration) == SUCCESS);
+	RETURN_BOOL(php_session_destroy(immediate) == SUCCESS);
 }
 /* }}} */
 

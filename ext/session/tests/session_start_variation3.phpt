@@ -25,7 +25,7 @@ var_dump(session_start());
 var_dump(session_write_close());
 var_dump(session_start());
 var_dump(session_write_close());
-var_dump(session_destroy(-1));
+var_dump(session_destroy(true));
 
 echo "Done";
 ob_end_flush();
@@ -43,7 +43,7 @@ NULL
 bool(true)
 NULL
 
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)

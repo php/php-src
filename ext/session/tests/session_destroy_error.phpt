@@ -97,123 +97,106 @@ ob_end_flush();
 *** Testing session_destroy() : error functionality ***
 
 -- Iteration 1 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
 bool(true)
 
 -- Iteration 2 --
+
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 3 --
+
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 4 --
 
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 5 --
+
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 6 --
 
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 7 --
+
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 8 --
 
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 9 --
 
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 10 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
 bool(true)
 
 -- Iteration 11 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
 bool(true)
 
 -- Iteration 12 --
+
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 13 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
 bool(true)
 
 -- Iteration 14 --
+
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 15 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
 bool(true)
 
 -- Iteration 16 --
-
-Warning: session_destroy() expects parameter 1 to be integer, string given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 17 --
-
-Notice: A session had already been started - ignoring session_start() in %s on line %d
-
-Warning: session_destroy() expects parameter 1 to be integer, string given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 18 --
 
-Notice: A session had already been started - ignoring session_start() in %s on line %d
-
-Warning: session_destroy() expects parameter 1 to be integer, string given in %s on line %d
-NULL
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
+bool(true)
 
 -- Iteration 19 --
 
-Notice: A session had already been started - ignoring session_start() in %s on line %d
-
-Warning: session_destroy() expects parameter 1 to be integer, string given in %s on line %d
-NULL
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
+bool(true)
 
 -- Iteration 20 --
 
-Notice: A session had already been started - ignoring session_start() in %s on line %d
-
-Warning: session_destroy() expects parameter 1 to be integer, string given in %s on line %d
-NULL
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
+bool(true)
 
 -- Iteration 21 --
 
-Notice: A session had already been started - ignoring session_start() in %s on line %d
-
-Warning: session_destroy() expects parameter 1 to be integer, object given in %s on line %d
+Warning: session_destroy() expects parameter 1 to be boolean, object given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Notice: A session had already been started - ignoring session_start() in %s on line %d
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
+Notice: A session had already been started - ignoring session_start() in %s on line 82
 bool(true)
 
 -- Iteration 23 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
 bool(true)
 
 -- Iteration 24 --
 
-Warning: session_destroy() expects parameter 1 to be integer, resource given in %s on line %d
+Warning: session_destroy() expects parameter 1 to be boolean, resource given in %s on line %d
 NULL
 Done
-

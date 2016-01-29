@@ -52,10 +52,10 @@ var_dump(
 
 // Cleanup
 session_start();
-@session_destroy(-1);
+@session_destroy(true);
 session_commit();
 session_id($id_begin);
-@session_destroy(-1);
+@session_destroy(true);
 session_commit();
 ?>
 --EXPECTF--

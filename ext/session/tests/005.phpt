@@ -87,7 +87,7 @@ var_dump($_SESSION["baz"]);
 var_dump($_SESSION["arr"]);
 var_dump($_SESSION["c"]);
 
-@session_destroy(-1);
+@session_destroy(true);
 ?>
 --EXPECTF--
 OPEN: PHPSESSID

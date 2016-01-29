@@ -58,7 +58,7 @@ var_dump(session_id());
 echo "*** Cleanup ***\n";
 var_dump(session_id($session_id));
 var_dump(session_start());
-var_dump(@session_destroy(-1));
+var_dump(@session_destroy(true));
 
 ob_end_flush();
 

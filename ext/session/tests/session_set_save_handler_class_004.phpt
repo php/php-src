@@ -35,7 +35,7 @@ session_write_close();
 session_unset();
 
 session_start();
-@session_destroy(-1);
+@session_destroy(true);
 
 
 --EXPECTF--

@@ -19,25 +19,25 @@ var_dump(session_start());
 var_dump(session_cache_limiter());
 var_dump(session_cache_limiter("public"));
 var_dump(session_cache_limiter());
-var_dump(@session_destroy(-1));
+var_dump(@session_destroy(true));
 
 var_dump(session_start());
 var_dump(session_cache_limiter());
 var_dump(session_cache_limiter("private"));
 var_dump(session_cache_limiter());
-var_dump(@session_destroy(-1));
+var_dump(@session_destroy(true));
 
 var_dump(session_start());
 var_dump(session_cache_limiter());
 var_dump(session_cache_limiter("nocache"));
 var_dump(session_cache_limiter());
-var_dump(@session_destroy(-1));
+var_dump(@session_destroy(true));
 
 var_dump(session_start());
 var_dump(session_cache_limiter());
 var_dump(session_cache_limiter("private_no_expire"));
 var_dump(session_cache_limiter());
-var_dump(@session_destroy(-1));
+var_dump(@session_destroy(true));
 
 echo "Done";
 ob_end_flush();

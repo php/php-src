@@ -19,7 +19,7 @@ PHPSESSID=session-id-by-get
 session_start();
 var_dump(session_id());
 var_dump($_GET, $_POST, $_COOKIE, $_ENV['REQUEST_METHOD'], $_SESSION, session_status() === PHP_SESSION_ACTIVE);
-@session_destroy(-1);
+@session_destroy(true);
 ?>
 --EXPECTF--
 string(40) "%s"

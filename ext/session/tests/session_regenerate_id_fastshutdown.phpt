@@ -9,7 +9,7 @@ opcache.fast_shutdown=1
 session_start();
 define ("user", "foo");
 var_dump(session_regenerate_id());
-@session_destroy(-1);
+@session_destroy(true);
 ?>
 --EXPECT--
 bool(true)

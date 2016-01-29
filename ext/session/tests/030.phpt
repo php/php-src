@@ -14,10 +14,10 @@ error_reporting(E_ALL);
 
 session_id("abtest");
 session_start();
-@session_destroy(-1);
+@session_destroy(true);
 session_id("abtest2");
 session_start();
-@session_destroy(-1);
+@session_destroy(true);
 
 print "I live\n";
 ?>

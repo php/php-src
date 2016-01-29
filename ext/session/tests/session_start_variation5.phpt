@@ -27,7 +27,7 @@ var_dump(session_write_close());
 var_dump($_SESSION);
 
 session_start();
-@session_destroy(-1);
+@session_destroy(true);
 echo "Done";
 ob_end_flush();
 ?>
