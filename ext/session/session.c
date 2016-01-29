@@ -826,11 +826,17 @@ retry:
 		if (new_sid && Z_LVAL_P(updated) + PS(ttl_destroy) < now) {
 			switch (Z_TYPE_P(new_sid)) {
 				case IS_STRING:
-					php_error_docref(NULL, E_NOTICE,
+					php_error_docref(NULL, E_WARNING,
 									 "Obsolete session data access detected. Possible "
 									 "security incident, but alert could be false positive. "
-									 "(Decendant session ID: %s)", Z_STRVAL_P(new_sid));
-					/* Fall through */
+									 "This error indicates you had security problem most likely. "
+									 "(Current session ID: %s) (Decendant session ID: %s)", PS(id), Z_STRVAL_P(new_sid));
+					/* Keep offending session data for investigation */
+					php_session_destroy(600);
+					/* Back to active state */
+					PS(session_status) = php_session_active;
+					goto retry;
+					break;
 				case IS_NULL:
 					php_session_destroy(-1);
 					/* Back to active state */
