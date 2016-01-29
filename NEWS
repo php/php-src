@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #71434 (finfo throws notice for specific python file). (Laruence)
 
+- FPM:
+  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi setup).
+    (Matt Haught, Remi)
+
 04 Feb 2016 PHP 7.0.3
 
 - Core:
