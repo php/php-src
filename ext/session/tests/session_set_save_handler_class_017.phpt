@@ -34,7 +34,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function read($id) {
-		return (string)@file_get_contents($this->path . $id);
+		return @file_get_contents($this->path . $id);
 	}
 
 	public function write($id, $data) {
