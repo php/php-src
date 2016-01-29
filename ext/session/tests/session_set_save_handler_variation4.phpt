@@ -51,8 +51,8 @@ ob_end_flush();
 *** Testing session_set_save_handler() : variation ***
 
 Open [%s,PHPSESSID]
-GC [0]
 Read [%s,%s]
+GC [0]
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"
@@ -65,9 +65,15 @@ Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
 NULL
 Open [%s,PHPSESSID]
-GC [0]
 Read [%s,%s]
-array(0) {
+GC [0]
+array(3) {
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
+  bool(false)
+  ["Guff"]=>
+  int(1234567890)
 }
 Destroy [%s,%s]
 
