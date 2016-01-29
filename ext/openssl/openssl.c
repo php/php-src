@@ -3526,6 +3526,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 					in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 				}
 				if (in == NULL) {
+					php_openssl_store_errors();
 					TMP_CLEAN;
 				}
 				key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
@@ -3552,9 +3553,16 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 		}
 	}
 
-	if (public_key && cert && key == NULL) {
-		/* extract public key from X509 cert */
-		key = (EVP_PKEY *) X509_get_pubkey(cert);
+	if (key == NULL) {
+		php_openssl_store_errors();
+
+		if (public_key && cert) {
+			/* extract public key from X509 cert */
+			key = (EVP_PKEY *) X509_get_pubkey(cert);
+			if (key == NULL) {
+				php_openssl_store_errors();
+			}
+		}
 	}
 
 	if (free_cert && cert) {
@@ -3584,6 +3592,9 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	}
 
 	randfile = CONF_get_string(req->req_config, req->section_name, "RANDFILE");
+	if (randfile == NULL) {
+		php_openssl_store_errors();
+	}
 	php_openssl_load_rand_file(randfile, &egdsocket, &seeded);
 
 	if ((req->priv_key = EVP_PKEY_new()) != NULL) {
@@ -3603,12 +3614,16 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 							return NULL;
 						}
 						rsaparam = RSA_new();
-						RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL);
+						if (rsaparam == NULL || !RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL)) {
+							php_openssl_store_errors();
+						}
 						BN_free(bne);
 					}
 #endif
 					if (rsaparam && EVP_PKEY_assign_RSA(req->priv_key, rsaparam)) {
 						return_val = req->priv_key;
+					} else {
+						php_openssl_store_errors();
 					}
 				}
 				break;
@@ -3626,10 +3641,15 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 						if (DSA_generate_key(dsaparam)) {
 							if (EVP_PKEY_assign_DSA(req->priv_key, dsaparam)) {
 								return_val = req->priv_key;
+							} else {
+								php_openssl_store_errors();
 							}
 						} else {
+							php_openssl_store_errors();
 							DSA_free(dsaparam);
 						}
+					} else {
+						php_openssl_store_errors();
 					}
 				}
 				break;
@@ -3649,10 +3669,15 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 						if (DH_check(dhparam, &codes) && codes == 0 && DH_generate_key(dhparam)) {
 							if (EVP_PKEY_assign_DH(req->priv_key, dhparam)) {
 								return_val = req->priv_key;
+							} else {
+								php_openssl_store_errors();
 							}
 						} else {
+							php_openssl_store_errors();
 							DH_free(dhparam);
 						}
+					} else {
+						php_openssl_store_errors();
 					}
 				}
 				break;
@@ -3660,6 +3685,8 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 			default:
 				php_error_docref(NULL, E_WARNING, "Unsupported private key type");
 		}
+	} else {
+		php_openssl_store_errors();
 	}
 
 	php_openssl_write_rand_file(randfile, egdsocket, seeded);
@@ -3783,11 +3810,17 @@ PHP_FUNCTION(openssl_pkey_new)
 					if (rsa->n && rsa->d) {
 						if (EVP_PKEY_assign_RSA(pkey, rsa)) {
 							RETURN_RES(zend_register_resource(pkey, le_key));
+						} else {
+							php_openssl_store_errors();
 						}
 					}
 					RSA_free(rsa);
+				} else {
+					php_openssl_store_errors();
 				}
 				EVP_PKEY_free(pkey);
+			} else {
+				php_openssl_store_errors();
 			}
 			RETURN_FALSE;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "dsa", sizeof("dsa") - 1)) != NULL &&
@@ -3802,16 +3835,22 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, pub_key);
 					if (dsa->p && dsa->q && dsa->g) {
-						if (!dsa->priv_key && !dsa->pub_key) {
-							DSA_generate_key(dsa);
+						if (!dsa->priv_key && !dsa->pub_key && !DSA_generate_key(dsa)) {
+							php_openssl_store_errors();
 						}
 						if (EVP_PKEY_assign_DSA(pkey, dsa)) {
 							RETURN_RES(zend_register_resource(pkey, le_key));
+						} else {
+							php_openssl_store_errors();
 						}
 					}
 					DSA_free(dsa);
+				} else {
+					php_openssl_store_errors();
 				}
 				EVP_PKEY_free(pkey);
+			} else {
+				php_openssl_store_errors();
 			}
 			RETURN_FALSE;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "dh", sizeof("dh") - 1)) != NULL &&
@@ -3829,10 +3868,16 @@ PHP_FUNCTION(openssl_pkey_new)
 							EVP_PKEY_assign_DH(pkey, dh)) {
 						ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
 						return;
+					} else {
+						php_openssl_store_errors();
 					}
 					DH_free(dh);
+				} else {
+					php_openssl_store_errors();
 				}
 				EVP_PKEY_free(pkey);
+			} else {
+				php_openssl_store_errors();
 			}
 			RETURN_FALSE;
 		}
@@ -3891,6 +3936,10 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS) {
 		bio_out = BIO_new_file(filename, "w");
+		if (bio_out == NULL) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
 
 		if (passphrase && req.priv_key_encrypt) {
 			if (req.priv_key_encrypt_cipher) {
@@ -3917,8 +3966,12 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 			/* Success!
 			 * If returning the output as a string, do so now */
 			RETVAL_TRUE;
+		} else {
+			php_openssl_store_errors();
 		}
 	}
+
+clean_exit:
 	PHP_SSL_REQ_DISPOSE(&req);
 
 	if (key_resource == NULL && key) {
@@ -3994,6 +4047,8 @@ PHP_FUNCTION(openssl_pkey_export)
 			bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
 			zval_dtor(out);
 			ZVAL_STRINGL(out, bio_mem_ptr, bio_mem_len);
+		} else {
+			php_openssl_store_errors();
 		}
 	}
 	PHP_SSL_REQ_DISPOSE(&req);
@@ -4086,7 +4141,11 @@ PHP_FUNCTION(openssl_pkey_get_details)
 		RETURN_FALSE;
 	}
 	out = BIO_new(BIO_s_mem());
-	PEM_write_bio_PUBKEY(out, pkey);
+	if (!PEM_write_bio_PUBKEY(out, pkey)) {
+		BIO_free(out);
+		php_openssl_store_errors();
+		RETURN_FALSE;
+	}
 	pbio_len = BIO_get_mem_data(out, &pbio);
 
 	array_init(return_value);
