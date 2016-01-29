@@ -2777,6 +2777,8 @@ static PHP_FUNCTION(session_info)
    Perform session GC manually */
 static PHP_FUNCTION(session_gc)
 {
+	zend_long nrdels;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -2786,7 +2788,11 @@ static PHP_FUNCTION(session_gc)
 		RETURN_FALSE;
 	}
 
-	ZVAL_LONG(return_value, php_session_gc());
+	nrdels = php_session_gc();
+	if (nrdels < 0) {
+		RETURN_FALSE;
+	}
+	ZVAL_LONG(return_value, nrdels);
 }
 /* {{{ proto bool session_destroy([long duration])
    Destroy the current session and all data associated with it */
