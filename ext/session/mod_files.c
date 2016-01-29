@@ -175,6 +175,7 @@ static void ps_files_open(ps_files *data, const char *key)
 				data->basedir = NULL;
 				data->basedir_len = 0;
 			}
+			efree(data);
 			php_error_docref(NULL, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
 			return;
 		}
