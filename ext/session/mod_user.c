@@ -91,16 +91,7 @@ PS_OPEN_FUNC(user)
 	SESS_ZVAL_STRING((char*)save_path, args[0]);
 	SESS_ZVAL_STRING((char*)session_name, args[1]);
 
-	zend_try {
-		retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
-	} zend_catch {
-		PS(session_status) = php_session_none;
-		if (retval) {
-			zval_ptr_dtor(&retval);
-		}
-		zend_bailout();
-	} zend_end_try();
-
+	retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
 	PS(mod_user_implemented) = 1;
 
 	FINISH;

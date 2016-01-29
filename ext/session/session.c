@@ -87,19 +87,15 @@ zend_class_entry *php_session_id_iface_entry;
 	}
 
 static void php_session_send_cookie(TSRMLS_D);
-static void php_session_abort(TSRMLS_D);
 
 /* Dispatched by RINIT and by php_session_destroy */
 static inline void php_rinit_session_globals(TSRMLS_D) /* {{{ */
 {
-	/* Do NOT init PS(mod_user_names) here! */
-
-	/* TODO: These could be moved to MINIT and removed. These should be initialized by php_rshutdown_session_globals() always when execution is finished. */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = 0;
-	PS(define_sid) = 1;
+	/* Do NOT init PS(mod_user_names) here! */
 	PS(http_session_vars) = NULL;
 }
 /* }}} */
@@ -121,9 +117,6 @@ static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 		efree(PS(id));
 		PS(id) = NULL;
 	}
-	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
-	/* Set session status to prevent error while restoring save handler INI value. */
-	PS(session_status) = php_session_none;
 }
 /* }}} */
 
@@ -475,56 +468,26 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 }
 /* }}} */
 
-
-static void php_session_gc(TSRMLS_D) /* {{{ */
-{
-	int nrand;
-
-	/* GC must be done before reading session data. */
-	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
-		int nrdels = -1;
-
-		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg(TSRMLS_C));
-		if (nrand < PS(gc_probability)) {
-			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
-#ifdef SESSION_DEBUG
-			if (nrdels != -1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "purged %d expired session objects", nrdels);
-			}
-#endif
-		}
-	}
-} /* }}} */
-
-
 static void php_session_initialize(TSRMLS_D) /* {{{ */
 {
 	char *val = NULL;
 	int vallen;
 
-	PS(session_status) = php_session_active;
-
 	if (!PS(mod)) {
-		PS(session_status) = php_session_disabled;
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session");
 		return;
 	}
 
 	/* Open session handler first */
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
-		php_session_abort(TSRMLS_C);
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		return;
 	}
 
 	/* If there is no ID, use session module to create one */
-	if (!PS(id) || !PS(id)[0]) {
-		if (PS(id)) {
-			efree(PS(id));
-		}
+	if (!PS(id)) {
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 		if (!PS(id)) {
-			php_session_abort(TSRMLS_C);
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			return;
 		}
@@ -536,22 +499,20 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 	/* Set session ID for compatibility for older/3rd party save handlers */
 	if (!PS(use_strict_mode)) {
 		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
-
-	/* GC must be done before read */
-	php_session_gc(TSRMLS_C);
 
 	/* Read data */
 	php_session_track_init(TSRMLS_C);
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == FAILURE) {
-		/* php_session_abort(TSRMLS_C); */
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
 		/* It's better to raise error for this, but disabled error for better compatibility */
-		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path)); */
-		/* return; */
+		/*
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		*/
 	}
 	/* Set session ID if session read didn't activated session */
-	if (PS(use_strict_mode) && PS(session_status) == php_session_none) {
+	if (PS(use_strict_mode) && PS(session_status) != php_session_active) {
 		php_session_reset_id(TSRMLS_C);
 		PS(session_status) = php_session_active;
 	}
@@ -1119,7 +1080,7 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 
 PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SERIALIZER_ENCODE_ARGS), int (*decode)(PS_SERIALIZER_DECODE_ARGS)) /* {{{ */
 {
-	int ret = FAILURE;
+	int ret = -1;
 	int i;
 
 	for (i = 0; i < MAX_SERIALIZERS; i++) {
@@ -1128,7 +1089,7 @@ PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SE
 			ps_serializers[i].encode = encode;
 			ps_serializers[i].decode = decode;
 			ps_serializers[i + 1].name = NULL;
-			ret = SUCCESS;
+			ret = 0;
 			break;
 		}
 	}
@@ -1150,13 +1111,13 @@ static ps_module *ps_modules[MAX_MODULES + 1] = {
 
 PHPAPI int php_session_register_module(ps_module *ptr) /* {{{ */
 {
-	int ret = FAILURE;
+	int ret = -1;
 	int i;
 
 	for (i = 0; i < MAX_MODULES; i++) {
 		if (!ps_modules[i]) {
 			ps_modules[i] = ptr;
-			ret = SUCCESS;
+			ret = 0;
 			break;
 		}
 	}
@@ -1294,13 +1255,11 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 	php_session_cache_limiter_t *lim;
 
 	if (PS(cache_limiter)[0] == '\0') return 0;
-	if (PS(session_status) != php_session_active) return -1;
 
 	if (SG(headers_sent)) {
 		const char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
 
-		php_session_abort(TSRMLS_C);
 		if (output_start_filename) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {
@@ -1531,6 +1490,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	zval **ppid;
 	zval **data;
 	char *p, *value;
+	int nrand;
 	int lensess;
 
 	if (PS(use_only_cookies)) {
@@ -1650,14 +1610,28 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 
 	php_session_initialize(TSRMLS_C);
 	php_session_cache_limiter(TSRMLS_C);
+
+	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
+		int nrdels = -1;
+
+		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg(TSRMLS_C));
+		if (nrand < PS(gc_probability)) {
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
+#ifdef SESSION_DEBUG
+			if (nrdels != -1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "purged %d expired session objects", nrdels);
+			}
+#endif
+		}
+	}
 }
 /* }}} */
 
 static void php_session_flush(TSRMLS_D) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
-		php_session_save_current_state(TSRMLS_C);
 		PS(session_status) = php_session_none;
+		php_session_save_current_state(TSRMLS_C);
 	}
 }
 /* }}} */
@@ -1665,10 +1639,10 @@ static void php_session_flush(TSRMLS_D) /* {{{ */
 static void php_session_abort(TSRMLS_D) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
+		PS(session_status) = php_session_none;
 		if (PS(mod_data) || PS(mod_user_implemented)) {
 			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
 		}
-		PS(session_status) = php_session_none;
 	}
 }
 /* }}} */
@@ -2111,6 +2085,10 @@ static PHP_FUNCTION(session_decode)
 static PHP_FUNCTION(session_start)
 {
 	/* skipping check for non-zero args for performance reasons here ?*/
+	if (PS(id) && !strlen(PS(id))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot start session with empty session ID");
+		RETURN_FALSE;
+	}
 
 	php_session_start(TSRMLS_C);
 
