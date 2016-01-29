@@ -504,7 +504,7 @@ bool(false)
 array(0) {
 }
 
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few secounds duration at least on stable network, few miniutes for unstable network in %s on line %d
+Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network in %s on line %d
 
 Warning: session_destroy(): Trying to destroy uninitialized session in %s%esession_decode_error2.php on line %d
 bool(false)

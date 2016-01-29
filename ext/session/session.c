@@ -2804,7 +2804,7 @@ static PHP_FUNCTION(session_destroy)
 		/* Negative value destroy session data immediately.
 		   0 sets TTL value to current time stamp, but it still may
 		   cause random lost session by server side race condition. */
-		php_error_docref(NULL, E_NOTICE, "Immediate session data removal may cause random lost sessions. It is advised to set few secounds duration at least on stable network, few miniutes for unstable network");
+		php_error_docref(NULL, E_NOTICE, "Immediate session data removal may cause random lost sessions. It is advised to set few seconds duration at least on stable network, few miniutes for unstable network");
 	}
 
 	RETURN_BOOL(php_session_destroy(duration) == SUCCESS);
