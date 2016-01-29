@@ -23,7 +23,7 @@
 
 #define R 10
 
-static const php_hash_uint64 rc[R + 1] = {
+static const uint64_t rc[R + 1] = {
     L64(0x0000000000000000),
     L64(0x1823c6e887b8014f),
     L64(0x36a6d2f5796f9152),
@@ -37,7 +37,7 @@ static const php_hash_uint64 rc[R + 1] = {
     L64(0xca2dbf07ad5a8333),
 };
 
-static const php_hash_uint64 C0[256] = {
+static const uint64_t C0[256] = {
     L64(0x18186018c07830d8), L64(0x23238c2305af4626), L64(0xc6c63fc67ef991b8), L64(0xe8e887e8136fcdfb),
     L64(0x878726874ca113cb), L64(0xb8b8dab8a9626d11), L64(0x0101040108050209), L64(0x4f4f214f426e9e0d),
     L64(0x3636d836adee6c9b), L64(0xa6a6a2a6590451ff), L64(0xd2d26fd2debdb90c), L64(0xf5f5f3f5fb06f70e),
@@ -104,7 +104,7 @@ static const php_hash_uint64 C0[256] = {
     L64(0x2828a0285d885075), L64(0x5c5c6d5cda31b886), L64(0xf8f8c7f8933fed6b), L64(0x8686228644a411c2),
 };
 
-static const php_hash_uint64 C1[256] = {
+static const uint64_t C1[256] = {
     L64(0xd818186018c07830), L64(0x2623238c2305af46), L64(0xb8c6c63fc67ef991), L64(0xfbe8e887e8136fcd),
     L64(0xcb878726874ca113), L64(0x11b8b8dab8a9626d), L64(0x0901010401080502), L64(0x0d4f4f214f426e9e),
     L64(0x9b3636d836adee6c), L64(0xffa6a6a2a6590451), L64(0x0cd2d26fd2debdb9), L64(0x0ef5f5f3f5fb06f7),
@@ -171,7 +171,7 @@ static const php_hash_uint64 C1[256] = {
     L64(0x752828a0285d8850), L64(0x865c5c6d5cda31b8), L64(0x6bf8f8c7f8933fed), L64(0xc28686228644a411),
 };
 
-static const php_hash_uint64 C2[256] = {
+static const uint64_t C2[256] = {
     L64(0x30d818186018c078), L64(0x462623238c2305af), L64(0x91b8c6c63fc67ef9), L64(0xcdfbe8e887e8136f),
     L64(0x13cb878726874ca1), L64(0x6d11b8b8dab8a962), L64(0x0209010104010805), L64(0x9e0d4f4f214f426e),
     L64(0x6c9b3636d836adee), L64(0x51ffa6a6a2a65904), L64(0xb90cd2d26fd2debd), L64(0xf70ef5f5f3f5fb06),
@@ -238,7 +238,7 @@ static const php_hash_uint64 C2[256] = {
     L64(0x50752828a0285d88), L64(0xb8865c5c6d5cda31), L64(0xed6bf8f8c7f8933f), L64(0x11c28686228644a4),
 };
 
-static const php_hash_uint64 C3[256] = {
+static const uint64_t C3[256] = {
     L64(0x7830d818186018c0), L64(0xaf462623238c2305), L64(0xf991b8c6c63fc67e), L64(0x6fcdfbe8e887e813),
     L64(0xa113cb878726874c), L64(0x626d11b8b8dab8a9), L64(0x0502090101040108), L64(0x6e9e0d4f4f214f42),
     L64(0xee6c9b3636d836ad), L64(0x0451ffa6a6a2a659), L64(0xbdb90cd2d26fd2de), L64(0x06f70ef5f5f3f5fb),
@@ -305,7 +305,7 @@ static const php_hash_uint64 C3[256] = {
     L64(0x8850752828a0285d), L64(0x31b8865c5c6d5cda), L64(0x3fed6bf8f8c7f893), L64(0xa411c28686228644),
 };
 
-static const php_hash_uint64 C4[256] = {
+static const uint64_t C4[256] = {
     L64(0xc07830d818186018), L64(0x05af462623238c23), L64(0x7ef991b8c6c63fc6), L64(0x136fcdfbe8e887e8),
     L64(0x4ca113cb87872687), L64(0xa9626d11b8b8dab8), L64(0x0805020901010401), L64(0x426e9e0d4f4f214f),
     L64(0xadee6c9b3636d836), L64(0x590451ffa6a6a2a6), L64(0xdebdb90cd2d26fd2), L64(0xfb06f70ef5f5f3f5),
@@ -372,7 +372,7 @@ static const php_hash_uint64 C4[256] = {
     L64(0x5d8850752828a028), L64(0xda31b8865c5c6d5c), L64(0x933fed6bf8f8c7f8), L64(0x44a411c286862286),
 };
 
-static const php_hash_uint64 C5[256] = {
+static const uint64_t C5[256] = {
     L64(0x18c07830d8181860), L64(0x2305af462623238c), L64(0xc67ef991b8c6c63f), L64(0xe8136fcdfbe8e887),
     L64(0x874ca113cb878726), L64(0xb8a9626d11b8b8da), L64(0x0108050209010104), L64(0x4f426e9e0d4f4f21),
     L64(0x36adee6c9b3636d8), L64(0xa6590451ffa6a6a2), L64(0xd2debdb90cd2d26f), L64(0xf5fb06f70ef5f5f3),
@@ -439,7 +439,7 @@ static const php_hash_uint64 C5[256] = {
     L64(0x285d8850752828a0), L64(0x5cda31b8865c5c6d), L64(0xf8933fed6bf8f8c7), L64(0x8644a411c2868622),
 };
 
-static const php_hash_uint64 C6[256] = {
+static const uint64_t C6[256] = {
     L64(0x6018c07830d81818), L64(0x8c2305af46262323), L64(0x3fc67ef991b8c6c6), L64(0x87e8136fcdfbe8e8),
     L64(0x26874ca113cb8787), L64(0xdab8a9626d11b8b8), L64(0x0401080502090101), L64(0x214f426e9e0d4f4f),
     L64(0xd836adee6c9b3636), L64(0xa2a6590451ffa6a6), L64(0x6fd2debdb90cd2d2), L64(0xf3f5fb06f70ef5f5),
@@ -506,7 +506,7 @@ static const php_hash_uint64 C6[256] = {
     L64(0xa0285d8850752828), L64(0x6d5cda31b8865c5c), L64(0xc7f8933fed6bf8f8), L64(0x228644a411c28686),
 };
 
-static const php_hash_uint64 C7[256] = {
+static const uint64_t C7[256] = {
     L64(0x186018c07830d818), L64(0x238c2305af462623), L64(0xc63fc67ef991b8c6), L64(0xe887e8136fcdfbe8),
     L64(0x8726874ca113cb87), L64(0xb8dab8a9626d11b8), L64(0x0104010805020901), L64(0x4f214f426e9e0d4f),
     L64(0x36d836adee6c9b36), L64(0xa6a2a6590451ffa6), L64(0xd26fd2debdb90cd2), L64(0xf5f3f5fb06f70ef5),
