@@ -778,7 +778,7 @@ retry:
 	}
 
 	if (val) {
-		zval *entry;
+		zval *entry, *new_sid, *created, *updated;
 		time_t now = time(NULL);
 
 		if (PS(lazy_write)) {
@@ -799,76 +799,74 @@ retry:
 		/* Handle internal session data */
 		entry = zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
 											   PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
-		if (entry) {
-			zval *new_sid, *created, *updated;
-
-			ZVAL_COPY(&PS(internal_data), entry);
-			if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
-				php_session_set_timestamps(1);
-				/* Do not raise error for PHP7, but PHP 8 */
-				/*
-				php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken data has been wiped");
-				*/
-			}
-			zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
-							  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
-
-			new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-										 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
-			created = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-									PSDK_CREATED, sizeof(PSDK_CREATED)-1);
-			updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-									PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
-
-			/* Check destroyed/regenerated session TTL is reached */
-			if (new_sid && Z_LVAL_P(updated) + PS(ttl_destroy) < now) {
-				switch (Z_TYPE_P(new_sid)) {
-					case IS_STRING:
-						php_error_docref(NULL, E_NOTICE,
-										 "Obsolete session data access detected. Possible "
-										 "security incident, but alert could be false positive. "
-										 "(Decendant session ID: %s)", Z_STRVAL_P(new_sid));
-					/* Fall through */
-					case IS_NULL:
-						php_session_destroy(-1);
-						/* Back to active state */
-						PS(session_status) = php_session_active;
-						goto retry;
-						break;
-					default:
-						/* Should not happen */
-						php_error_docref(NULL, E_ERROR,
-										 "Malformed NEW_SID: %d", Z_TYPE_P(new_sid));
-						break;
-				}
-			} else if (Z_LVAL_P(updated) + PS(ttl) < now) {
-				/* Check newly created session TTL is reached */
-				php_session_destroy(-1);
-				/* Back to active state */
-				PS(session_status) = php_session_active;
-				goto retry;
-			}
-
-			/* Check regenerate ID is required */
-			if (PS(regenerate_id) > 0 && Z_LVAL_P(created) + PS(regenerate_id) < now) {
-				php_session_regenerate_id(0);
-				return;
-			}
-
-			if (!new_sid) {
-				/* Update outstanding session timestamps */
-				updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
-										PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
-				if (Z_LVAL_P(updated) + PS(ttl_update)  < now) {
-					php_session_set_timestamps(0);
-				}
-			} else {
-				/* Send new SID again if needed */
-				php_session_send_new_sid(new_sid);
-			}
-		} else {
+		if (!entry) {
 			/* Newly created session */
 			php_session_set_timestamps(1);
+			return;
+		}
+		ZVAL_COPY(&PS(internal_data), entry);
+		if (php_session_validate_internal_data(&PS(internal_data)) == FAILURE) {
+			php_session_set_timestamps(1);
+			/* Do not raise error for PHP7, but PHP 8 */
+			/*
+			  php_error_docref(NULL, E_WARNING, "Broken internal session data detected. Broken data has been wiped");
+			*/
+		}
+		zend_hash_str_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))),
+						  PSDK_ARRAY, sizeof(PSDK_ARRAY)-1);
+
+		new_sid = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+									 PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1);
+		created = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+									 PSDK_CREATED, sizeof(PSDK_CREATED)-1);
+		updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+									 PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
+
+		/* Check destroyed/regenerated session TTL is reached */
+		if (new_sid && Z_LVAL_P(updated) + PS(ttl_destroy) < now) {
+			switch (Z_TYPE_P(new_sid)) {
+				case IS_STRING:
+					php_error_docref(NULL, E_NOTICE,
+									 "Obsolete session data access detected. Possible "
+									 "security incident, but alert could be false positive. "
+									 "(Decendant session ID: %s)", Z_STRVAL_P(new_sid));
+					/* Fall through */
+				case IS_NULL:
+					php_session_destroy(-1);
+					/* Back to active state */
+					PS(session_status) = php_session_active;
+					goto retry;
+					break;
+				default:
+					/* Should not happen */
+					php_error_docref(NULL, E_ERROR,
+									 "Malformed NEW_SID: %d", Z_TYPE_P(new_sid));
+					break;
+			}
+		} else if (Z_LVAL_P(updated) + PS(ttl) < now) {
+			/* Check newly created session TTL is reached */
+			php_session_destroy(-1);
+			/* Back to active state */
+			PS(session_status) = php_session_active;
+			goto retry;
+		}
+
+		/* Check regenerate ID is required */
+		if (PS(regenerate_id) > 0 && Z_LVAL_P(created) + PS(regenerate_id) < now) {
+			php_session_regenerate_id(0);
+			return;
+		}
+
+		if (!new_sid) {
+			/* Update outstanding session timestamps */
+			updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
+										 PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
+			if (Z_LVAL_P(updated) + PS(ttl_update)  < now) {
+				php_session_set_timestamps(0);
+			}
+		} else {
+			/* Send new SID again if needed */
+			php_session_send_new_sid(new_sid);
 		}
 	}
 }

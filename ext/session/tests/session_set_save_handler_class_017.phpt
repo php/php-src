@@ -42,7 +42,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function destroy($id) {
-		@unlink($this->path . $id);
+		return @unlink($this->path . $id);
 	}
 
 	public function gc($maxlifetime) {
