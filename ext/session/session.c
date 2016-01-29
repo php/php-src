@@ -839,9 +839,10 @@ retry:
 					break;
 				default:
 					/* Should not happen */
+					php_session_destroy(-1);
 					php_error_docref(NULL, E_ERROR,
 									 "Malformed NEW_SID: %d", Z_TYPE_P(new_sid));
-					break;
+					return;
 			}
 		} else if (Z_LVAL_P(updated) + PS(ttl) < now) {
 			/* Check newly created session TTL is reached */
