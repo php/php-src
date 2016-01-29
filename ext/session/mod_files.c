@@ -361,6 +361,18 @@ PS_READ_FUNC(files)
 	}
 
 	if (!PS(id)) {
+		if (data) {
+			if (data->lastkey) {
+				efree(data->lastkey);
+				data->lastkey = NULL;
+			}
+			if (data->basedir) {
+				efree(data->basedir);
+				data->basedir = NULL;
+			}
+			efree(data);
+			*mod_data = NULL;
+		}
 		return FAILURE;
 	}
 
