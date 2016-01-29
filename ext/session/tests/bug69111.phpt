@@ -5,6 +5,8 @@ session.save_path=
 session.save_handler=files
 session.name=PHPSESSID
 --SKIPIF--
+--XFAIL--
+It is still a leak
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php

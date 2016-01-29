@@ -113,13 +113,9 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	int i;
 	size_t n;
 
-	if (!data) {
-		return NULL;
-	}
-
 	key_len = strlen(key);
 	if (key_len <= data->dirdepth ||
-		buflen < (data->basedir_len + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
+		buflen < (strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
 	}
 
@@ -157,7 +153,7 @@ static void ps_files_close(ps_files *data)
 	}
 }
 
-static int ps_files_open(ps_files *data, const char *key)
+static void ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
@@ -175,11 +171,11 @@ static int ps_files_open(ps_files *data, const char *key)
 
 		if (php_session_valid_key(key) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
-			return FAILURE;
+			return;
 		}
 
 		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
-			return FAILURE;
+			return;
 		}
 
 		data->lastkey = estrdup(key);
@@ -191,7 +187,7 @@ static int ps_files_open(ps_files *data, const char *key)
 		/* Check to make sure that the opened file is not outside of allowable dirs.
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
 		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
-			return FAILURE;
+			return;
 		}
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
 #endif
@@ -203,7 +199,7 @@ static int ps_files_open(ps_files *data, const char *key)
 			if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid())) {
 				close(data->fd);
 				data->fd = -1;
-				return FAILURE;
+				return;
 			}
 #endif
 			do {
@@ -220,11 +216,8 @@ static int ps_files_open(ps_files *data, const char *key)
 #endif
 		} else {
 			php_error_docref(NULL, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, strerror(errno), errno);
-			return FAILURE;
 		}
 	}
-
-	return SUCCESS;
 }
 
 static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
@@ -234,9 +227,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
        data->lastkey and reopen when it is needed. */
-	if (FAILURE == ps_files_open(data, ZSTR_VAL(key))) {
-		return FAILURE;
-	}
+	ps_files_open(data, ZSTR_VAL(key));
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -474,18 +465,7 @@ PS_READ_FUNC(files)
 	zend_stat_t sbuf;
 	PS_FILES_DATA;
 
-	if (FAILURE == ps_files_open(data, ZSTR_VAL(key))) {
-		if (data->basedir) {
-			efree(data->basedir);
-			data->basedir = NULL;
-			data->basedir_len = 0;
-		}
-		efree(data);
-		PS_SET_MOD_DATA(NULL);
-
-		return FAILURE;
-	}
-
+	ps_files_open(data, ZSTR_VAL(key));
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -556,18 +536,7 @@ PS_WRITE_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	if (FAILURE == ps_files_write(data, key, val)) {
-		if (data->basedir) {
-			efree(data->basedir);
-			data->basedir = NULL;
-			data->basedir_len = 0;
-		}
-		efree(data);
-		PS_SET_MOD_DATA(NULL);
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return ps_files_write(data, key, val);
 }
 
 
@@ -606,16 +575,7 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	ret = VCWD_UTIME(buf, newtime);
 	if (ret == -1) {
 		/* New session ID, create data file */
-		if (FAILURE == ps_files_write(data, key, val)) {
-			if (data->basedir) {
-				efree(data->basedir);
-				data->basedir = NULL;
-				data->basedir_len = 0;
-			}
-			efree(data);
-			PS_SET_MOD_DATA(NULL);
-			return FAILURE;
-		}
+		return ps_files_write(data, key, val);
 	}
 
 	return SUCCESS;
@@ -637,11 +597,11 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (data && !ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
 		return FAILURE;
 	}
 
-	if (data && data->fd != -1) {
+	if (data->fd != -1) {
 		ps_files_close(data);
 
 		if (VCWD_UNLINK(buf) == -1) {
