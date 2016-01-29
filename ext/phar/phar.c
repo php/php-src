@@ -516,11 +516,11 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 	memcpy(&var, buffer, sizeof(var)); \
 	buffer += 4
 # define PHAR_GET_16(buffer, var) \
-	var = *(php_uint16*)(buffer); \
+	var = *(uint16_t*)(buffer); \
 	buffer += 2
 #endif
-#define PHAR_ZIP_16(var) ((php_uint16)((((php_uint16)var[0]) & 0xff) | \
-	(((php_uint16)var[1]) & 0xff) << 8))
+#define PHAR_ZIP_16(var) ((uint16_t)((((uint16_t)var[0]) & 0xff) | \
+	(((uint16_t)var[1]) & 0xff) << 8))
 #define PHAR_ZIP_32(var) ((uint32_t)((((uint32_t)var[0]) & 0xff) | \
 	(((uint32_t)var[1]) & 0xff) << 8 | \
 	(((uint32_t)var[2]) & 0xff) << 16 | \
@@ -655,7 +655,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry;
 	uint32_t manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
-	php_uint16 manifest_ver;
+	uint16_t manifest_ver;
 	uint32_t len;
 	zend_long offset;
 	int sig_len, register_alias = 0, temp_alias = 0;

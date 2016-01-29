@@ -18,8 +18,8 @@
 
 #include "phar_internal.h"
 
-#define PHAR_GET_16(var) ((php_uint16)((((php_uint16)var[0]) & 0xff) | \
-	(((php_uint16)var[1]) & 0xff) << 8))
+#define PHAR_GET_16(var) ((uint16_t)((((uint16_t)var[0]) & 0xff) | \
+	(((uint16_t)var[1]) & 0xff) << 8))
 #define PHAR_GET_32(var) ((uint32_t)((((uint32_t)var[0]) & 0xff) | \
 	(((uint32_t)var[1]) & 0xff) << 8 | \
 	(((uint32_t)var[2]) & 0xff) << 16 | \
@@ -37,9 +37,9 @@ static inline void phar_write_16(char buffer[2], uint32_t value)
 	buffer[0] = (unsigned char) (value & 0xff);
 }
 # define PHAR_SET_32(var, value) phar_write_32(var, (uint32_t) (value));
-# define PHAR_SET_16(var, value) phar_write_16(var, (php_uint16) (value));
+# define PHAR_SET_16(var, value) phar_write_16(var, (uint16_t) (value));
 
-static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_uint16 len) /* {{{ */
+static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len) /* {{{ */
 {
 	union {
 		phar_zip_extra_field_header header;
@@ -143,7 +143,7 @@ static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
 
 static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 {
-	php_uint16 ctime, cdate;
+	uint16_t ctime, cdate;
 	struct tm *tm, tmbuf;
 
 	tm = php_localtime_r(&time, &tmbuf);
@@ -168,7 +168,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
 	zend_long size;
-	php_uint16 i;
+	uint16_t i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
 	char *p = buf, *ext, *actual_alias = NULL;
