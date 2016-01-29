@@ -115,7 +115,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 
 	key_len = strlen(key);
 	if (key_len <= data->dirdepth ||
-		buflen < (strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
+		buflen < (data->basedir_len + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
 	}
 
@@ -170,6 +170,11 @@ static void ps_files_open(ps_files *data, const char *key)
 		ps_files_close(data);
 
 		if (php_session_valid_key(key) == FAILURE) {
+			if (data->basedir) {
+				efree(data->basedir);
+				data->basedir = NULL;
+				data->basedir_len = 0;
+			}
 			php_error_docref(NULL, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
 			return;
 		}
