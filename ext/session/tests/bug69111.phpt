@@ -17,4 +17,5 @@ $sh->write("foo", "bar");
 var_dump($sh->read(@$id));
 ?>
 --EXPECTF--
+Warning: SessionHandler::read(): The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,' in %sbug69111.php on line %d
 bool(false)
