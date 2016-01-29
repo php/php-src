@@ -27,7 +27,7 @@
 # include "ext/hash/php_hash.h"
 #endif
 
-#define PHP_SESSION_API 20150121
+#define PHP_SESSION_API 20160121
 
 #include "php_version.h"
 #define PHP_SESSION_VERSION PHP_VERSION

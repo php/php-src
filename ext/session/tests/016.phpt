@@ -22,5 +22,5 @@ session_write_close();
 print "I live\n";
 ?>
 --EXPECTF--
-Warning: session_start(): Failed to read session data: files (path: 123;:/really%scompletely:::/invalid;;,23123;213) in %s on line %d
+Warning: session_write_close(): Failed to write session data (files). Please verify that the current setting of session.save_path is correct (123;:/really%scompletely:::/invalid;;,23123;213) in %s on line %d
 I live
