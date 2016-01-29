@@ -1812,6 +1812,11 @@ timelib_time* timelib_strtotime(char *s, size_t len, struct timelib_error_contai
 		{                                                              \
 			add_pbf_error(s, "Unexpected data found.", string, begin); \
 		}
+#define TIMELIB_CHECK_SIGNED_NUMBER                                    \
+		if (strchr("-0123456789", *ptr) == NULL)                       \
+		{                                                              \
+			add_pbf_error(s, "Unexpected data found.", string, begin); \
+		}
 
 static void timelib_time_reset_fields(timelib_time *time)
 {
@@ -2016,7 +2021,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				timelib_eat_spaces((char **) &ptr);
 				break;
 			case 'U': /* epoch seconds */
-				TIMELIB_CHECK_NUMBER;
+				TIMELIB_CHECK_SIGNED_NUMBER;
 				TIMELIB_HAVE_RELATIVE();
 				tmp = timelib_get_unsigned_nr((char **) &ptr, 24);
 				s->time->y = 1970;
