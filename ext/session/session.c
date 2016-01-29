@@ -846,14 +846,15 @@ retry:
 					break;
 				default:
 					/* Should not happen */
-					{
-						/* This leaks memory, but it's fatal anyway */
-						zend_string *tmp = zend_string_copy(PS(id));
-						/* Keep offending session data for investigation */
-						php_error_docref(NULL, E_ERROR,
-										 "Malformed session data. (Current session ID: %s) (NEW_SID data type: %d)", ZSTR_VAL(tmp), Z_TYPE_P(new_sid));
-						return;
-					}
+					/* Keep offending session data for investigation.
+					php_rshutdown_session_globals();
+					php_rinit_session_globals();
+					are not called because following E_ERROR should finish
+					script execution. */
+					php_error_docref(NULL, E_ERROR,
+									 "Malformed session data. (Current session ID: %s) (NEW_SID data type: %d)",
+									 ZSTR_VAL(PS(id)), Z_TYPE_P(new_sid));
+					return;
 			}
 		} else if (Z_LVAL_P(updated) + PS(ttl) < now) {
 			/* Check newly created session TTL is reached */
