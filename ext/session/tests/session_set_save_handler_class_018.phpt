@@ -55,11 +55,11 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function create_sid() {
-		return 'my_sid';
+		return 'my_sid'.PHP_VERSION_ID;
 	}
 
 	public function validate_sid($id) {
-		return 'my_sid'===$id;
+		return 'my_sid'.PHP_VERSION_ID===$id;
 	}
 }
 
@@ -80,9 +80,13 @@ var_dump($_SESSION);
 session_write_close();
 session_unset();
 
+//Cleanup
+session_start();
+@session_destroy(-1);
+
 --EXPECTF--
 *** Testing session_set_save_handler() function: class with validate_sid ***
-string(%d) "my_sid"
+string(%d) "my_sid%d"
 string(4) "user"
 array(1) {
   ["foo"]=>
