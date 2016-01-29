@@ -2804,18 +2804,22 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 	dn_sect = CONF_get_string(req->req_config, req->section_name, "distinguished_name");
 	if (dn_sect == NULL) {
+		php_openssl_store_errors();
 		return FAILURE;
 	}
 	dn_sk = CONF_get_section(req->req_config, dn_sect);
 	if (dn_sk == NULL) {
+		php_openssl_store_errors();
 		return FAILURE;
 	}
 	attr_sect = CONF_get_string(req->req_config, req->section_name, "attributes");
 	if (attr_sect == NULL) {
+		php_openssl_store_errors();
 		attr_sk = NULL;
 	} else {
 		attr_sk = CONF_get_section(req->req_config, attr_sect);
 		if (attr_sk == NULL) {
+			php_openssl_store_errors();
 			return FAILURE;
 		}
 	}
@@ -2841,6 +2845,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8,
 								(unsigned char*)Z_STRVAL_P(item), -1, -1, 0))
 					{
+						php_openssl_store_errors();
 						php_error_docref(NULL, E_WARNING,
 							"dn: add_entry_by_NID %d -> %s (failed; check error"
 							" queue and value of string_mask OpenSSL option "
@@ -2894,6 +2899,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				continue;
 			}
 			if (!X509_NAME_add_entry_by_txt(subj, type, MBSTRING_UTF8, (unsigned char*)v->value, -1, -1, 0)) {
+				php_openssl_store_errors();
 				php_error_docref(NULL, E_WARNING, "add_entry_by_txt %s -> %s (failed)", type, v->value);
 				return FAILURE;
 			}
@@ -2911,6 +2917,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8, (unsigned char*)Z_STRVAL_P(item), -1, -1, 0)) {
+						php_openssl_store_errors();
 						php_error_docref(NULL, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_P(item));
 						return FAILURE;
 					}
@@ -2926,6 +2933,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 					continue;
 				}
 				if (!X509_REQ_add1_attr_by_txt(csr, v->name, MBSTRING_UTF8, (unsigned char*)v->value, -1)) {
+					php_openssl_store_errors();
 					php_error_docref(NULL, E_WARNING,
 						"add1_attr_by_txt %s -> %s (failed; check error queue "
 						"and value of string_mask OpenSSL option if illegal "
@@ -2935,9 +2943,13 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				}
 			}
 		}
+	} else {
+		php_openssl_store_errors();
 	}
 
-	X509_REQ_set_pubkey(csr, req->priv_key);
+	if (!X509_REQ_set_pubkey(csr, req->priv_key)) {
+		php_openssl_store_errors();
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -2980,7 +2992,17 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 	} else {
 		in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 	}
+
+	if (in == NULL) {
+		php_openssl_store_errors();
+		return NULL;
+	}
+
 	csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
+	if (csr == NULL) {
+		php_openssl_store_errors();
+	}
+
 	BIO_free(in);
 
 	return csr;
@@ -3015,20 +3037,25 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	}
 
 	bio_out = BIO_new_file(filename, "w");
-	if (bio_out) {
-		if (!notext) {
-			X509_REQ_print(bio_out, csr);
+	if (bio_out != NULL) {
+		if (!notext && !X509_REQ_print(bio_out, csr)) {
+			php_openssl_store_errors();
 		}
-		PEM_write_bio_X509_REQ(bio_out, csr);
-		RETVAL_TRUE;
+		if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
+			php_error_docref(NULL, E_WARNING, "error writing PEM to file %s", filename);
+			php_openssl_store_errors();
+		} else {
+			RETVAL_TRUE;
+		}
+		BIO_free(bio_out);
 	} else {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error opening file %s", filename);
 	}
 
-	if (csr_resource == NULL && csr) {
+	if (csr_resource == NULL && csr != NULL) {
 		X509_REQ_free(csr);
 	}
-	BIO_free(bio_out);
 }
 /* }}} */
 
@@ -3057,8 +3084,8 @@ PHP_FUNCTION(openssl_csr_export)
 	/* export to a var */
 
 	bio_out = BIO_new(BIO_s_mem());
-	if (!notext) {
-		X509_REQ_print(bio_out, csr);
+	if (!notext && !X509_REQ_print(bio_out, csr)) {
+		php_openssl_store_errors();
 	}
 
 	if (PEM_write_bio_X509_REQ(bio_out, csr)) {
@@ -3069,6 +3096,8 @@ PHP_FUNCTION(openssl_csr_export)
 		ZVAL_STRINGL(zout, bio_buf->data, bio_buf->length);
 
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 
 	if (csr_resource == NULL && csr) {
@@ -3116,6 +3145,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 	if (cert && !X509_check_private_key(cert, priv_key)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "private key does not correspond to signing cert");
 		goto cleanup;
 	}
@@ -3126,12 +3156,14 @@ PHP_FUNCTION(openssl_csr_sign)
 	/* Check that the request matches the signature */
 	key = X509_REQ_get_pubkey(csr);
 	if (key == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error unpacking public key");
 		goto cleanup;
 	}
 	i = X509_REQ_verify(csr, key);
 
 	if (i < 0) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Signature verification problems");
 		goto cleanup;
 	}
@@ -3144,12 +3176,14 @@ PHP_FUNCTION(openssl_csr_sign)
 
 	new_cert = X509_new();
 	if (new_cert == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "No memory");
 		goto cleanup;
 	}
 	/* Version 3 cert */
-	if (!X509_set_version(new_cert, 2))
+	if (!X509_set_version(new_cert, 2)) {
 		goto cleanup;
+	}
 
 
 	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), (long)serial);
@@ -3160,12 +3194,14 @@ PHP_FUNCTION(openssl_csr_sign)
 		cert = new_cert;
 	}
 	if (!X509_set_issuer_name(new_cert, X509_get_subject_name(cert))) {
+		php_openssl_store_errors();
 		goto cleanup;
 	}
 	X509_gmtime_adj(X509_get_notBefore(new_cert), 0);
 	X509_gmtime_adj(X509_get_notAfter(new_cert), 60*60*24*(long)num_days);
 	i = X509_set_pubkey(new_cert, key);
 	if (!i) {
+		php_openssl_store_errors();
 		goto cleanup;
 	}
 	if (req.extensions_section) {
@@ -3174,12 +3210,14 @@ PHP_FUNCTION(openssl_csr_sign)
 		X509V3_set_ctx(&ctx, cert, new_cert, csr, NULL, 0);
 		X509V3_set_conf_lhash(&ctx, req.req_config);
 		if (!X509V3_EXT_add_conf(req.req_config, &ctx, req.extensions_section, new_cert)) {
+			php_openssl_store_errors();
 			goto cleanup;
 		}
 	}
 
 	/* Now sign it */
 	if (!X509_sign(new_cert, priv_key, req.digest)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "failed to sign it");
 		goto cleanup;
 	}
@@ -3257,6 +3295,7 @@ PHP_FUNCTION(openssl_csr_new)
 					if (req.request_extensions_section && !X509V3_EXT_REQ_add_conf(req.req_config,
 								&ext_ctx, req.request_extensions_section, csr))
 					{
+						php_openssl_store_errors();
 						php_error_docref(NULL, E_WARNING, "Error loading extension section %s", req.request_extensions_section);
 					} else {
 						RETVAL_TRUE;
@@ -3265,6 +3304,7 @@ PHP_FUNCTION(openssl_csr_new)
 							ZVAL_RES(return_value, zend_register_resource(csr, le_csr));
 							csr = NULL;
 						} else {
+							php_openssl_store_errors();
 							php_error_docref(NULL, E_WARNING, "Error signing request");
 						}
 
@@ -3284,7 +3324,10 @@ PHP_FUNCTION(openssl_csr_new)
 						req.priv_key = NULL;
 					}
 				}
+			} else {
+				php_openssl_store_errors();
 			}
+
 		}
 	}
 	if (csr) {
@@ -3343,7 +3386,12 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 		RETURN_FALSE;
 	}
 
-	tpubkey=X509_REQ_get_pubkey(csr);
+	tpubkey = X509_REQ_get_pubkey(csr);
+	if (tpubkey == NULL) {
+		php_openssl_store_errors();
+		RETURN_FALSE;
+	}
+
 	RETURN_RES(zend_register_resource(tpubkey, le_key));
 }
 /* }}} */
