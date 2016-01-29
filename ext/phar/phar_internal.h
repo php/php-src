@@ -199,13 +199,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 
-#ifndef php_uint16
-# if SIZEOF_SHORT == 2
-#  define php_uint16 unsigned short
-# else
-#  define php_uint16 uint16_t
-# endif
-#endif
 #include "pharzip.h"
 
 typedef union _phar_archive_object  phar_archive_object;
