@@ -527,9 +527,9 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 	if (PS(hash_bits_per_character) < 4
 			|| PS(hash_bits_per_character) > 6) {
-		PS(hash_bits_per_character) = 4;
+		PS(hash_bits_per_character) = 5;
 
-		php_error_docref(NULL, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
+		php_error_docref(NULL, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 5 for now");
 	}
 
 	outid = zend_string_alloc((digest_len + 2) * ((8.0f / PS(hash_bits_per_character) + 0.5)), 0);
