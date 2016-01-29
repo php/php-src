@@ -11,7 +11,7 @@ PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
 PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
 [  --enable-phpdbg-debug      Build phpdbg in debug mode], no, no)
 
-if test "$BUILD_PHPDBG" == "" && test "$PHP_PHPDBG" != "no"; then
+if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
