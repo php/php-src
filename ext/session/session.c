@@ -796,7 +796,7 @@ retry:
 			php_session_track_init();
 			php_error_docref(NULL, E_WARNING,
 							 "Malformed session data detected: %s (path: %s) Session aborted. (Session ID: %s)",
-							 PS(mod)->s_name, PS(save_path), tmp);
+							 PS(mod)->s_name, PS(save_path), ZSTR_VAL(tmp));
 			zend_string_release(tmp); /* Release after php_error may cause leak, but accept */
 		}
 
