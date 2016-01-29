@@ -30,7 +30,6 @@ PHP                                                                        NEWS
 
 - Session:
   . Improved fix for bug #68063 (Empty session IDs do still start sessions). (Yasuo)
-  . Fixed bug #69111 (Crash in SessionHandler::read()) (Yasuo)
   . Fixed bug #71038 (session_start() returns TRUE on failure).
     Session save handlers must return 'string' always for successful read.
     i.e. Non-existing session read must return empty string. PHP 7.0 is made
