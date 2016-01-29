@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi setup).
     (Matt Haught, Remi)
 
+- Session:
+  . Fixed bug #69111 (Crash in SessionHandler::read()). (Anatol)
+
 04 Feb 2016, PHP 5.6.18
 
 - Core:
