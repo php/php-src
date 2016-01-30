@@ -3527,7 +3527,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 
 #if ZEND_DEBUG
 	ZEND_ASSERT(
-		!call->func ||
+		EG(exception) || !call->func ||
 		!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 		zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
@@ -3655,7 +3655,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 
 #if ZEND_DEBUG
 		ZEND_ASSERT(
-			!call->func ||
+			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
@@ -3786,7 +3786,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		
 #if ZEND_DEBUG
 		ZEND_ASSERT(
-			!call->func ||
+			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
@@ -7925,7 +7925,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 
 #if ZEND_DEBUG
 		ZEND_ASSERT(
-			!call->func ||
+			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
