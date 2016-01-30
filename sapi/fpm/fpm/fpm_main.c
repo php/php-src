@@ -1095,11 +1095,6 @@ static void init_request_info(void)
 				memmove(env_script_filename, p, strlen(p) + 1);
 				apache_was_here = 1;
 			}
-			/* ignore query string if sent by Apache (RewriteRule) */
-			p = strchr(env_script_filename, '?');
-			if (p) {
-				*p =0;
-			}
 		}
 
 		if (env_script_filename &&
@@ -1116,11 +1111,16 @@ static void init_request_info(void)
 				memmove(env_script_filename, p, strlen(p) + 1);
 				apache_was_here = 1;
 			}
+		}
+
+		if (env_server_software &&
+			strncmp(env_server_software, "Apache", sizeof("Apache") - 1) == 0) {
 			/* ignore query string if sent by Apache (RewriteRule) */
-			p = strchr(env_script_filename, '?');
+			char *p = strchr(env_script_filename, '?');
 			if (p) {
 				*p =0;
 			}
+			apache_was_here = 1;
 		}
 
 		if (CGIG(fix_pathinfo)) {
