@@ -33,10 +33,7 @@
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
-
-#if HAVE_SPL
 #include "ext/spl/spl_exceptions.h"
-#endif
 
 #if HAVE_SNMP
 
@@ -2414,11 +2411,7 @@ PHP_MINIT_FUNCTION(snmp)
 
 	/* Register SNMPException class */
 	INIT_CLASS_ENTRY(cex, "SNMPException", NULL);
-#ifdef HAVE_SPL
 	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
-#else
-	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_ce_exception);
-#endif
 
 	return SUCCESS;
 }
@@ -2452,9 +2445,7 @@ PHP_MINFO_FUNCTION(snmp)
  */
 #if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep snmp_module_deps[] = {
-#ifdef HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
-#endif
 	ZEND_MOD_END
 };
 #endif

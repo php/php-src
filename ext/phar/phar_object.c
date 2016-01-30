@@ -25,10 +25,7 @@
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_data;
 static zend_class_entry *phar_ce_PharException;
-
-#if HAVE_SPL
 static zend_class_entry *phar_ce_entry;
-#endif
 
 #if PHP_VERSION_ID >= 50300
 # define PHAR_ARG_INFO
@@ -1071,7 +1068,6 @@ PHP_METHOD(Phar, isValidPharFilename)
 }
 /* }}} */
 
-#if HAVE_SPL
 /**
  * from spl_directory
  */
@@ -1104,7 +1100,6 @@ static spl_other_handler phar_spl_foreign_handler = {
 	phar_spl_foreign_dtor,
 	phar_spl_foreign_clone
 };
-#endif /* HAVE_SPL */
 
 /* {{{ proto void Phar::__construct(string fname [, int flags [, string alias]])
  * Construct a Phar archive object
@@ -1117,9 +1112,6 @@ static spl_other_handler phar_spl_foreign_handler = {
  */
 PHP_METHOD(Phar, __construct)
 {
-#if !HAVE_SPL
-	zend_throw_exception_ex(zend_ce_exception, 0, "Cannot instantiate Phar object without SPL extension");
-#else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	size_t fname_len, alias_len = 0;
 	int arch_len, entry_len, is_data;
@@ -1244,7 +1236,6 @@ PHP_METHOD(Phar, __construct)
 
 	phar_obj->spl.info_class = phar_ce_entry;
 	efree(fname);
-#endif /* HAVE_SPL */
 }
 /* }}} */
 
@@ -1362,8 +1353,6 @@ PHP_METHOD(Phar, unlinkArchive)
 	RETURN_TRUE;
 }
 /* }}} */
-
-#if HAVE_SPL
 
 #define PHAR_ARCHIVE_OBJECT() \
 	zval *zobj = getThis(); \
@@ -5043,8 +5032,6 @@ PHP_METHOD(PharFileInfo, decompress)
 }
 /* }}} */
 
-#endif /* HAVE_SPL */
-
 /* {{{ phar methods */
 PHAR_ARG_INFO
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar___construct, 0, 0, 1)
@@ -5113,7 +5100,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_ua, 0, 0, 1)
 	ZEND_ARG_INFO(0, archive)
 ZEND_END_ARG_INFO()
 
-#if HAVE_SPL
 PHAR_ARG_INFO
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_build, 0, 0, 1)
 	ZEND_ARG_INFO(0, iterator)
@@ -5232,12 +5218,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_phar__void, 0)
 ZEND_END_ARG_INFO()
 
 
-#endif /* HAVE_SPL */
-
 zend_function_entry php_archive_methods[] = {
-#if !HAVE_SPL
-	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
-#else
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, __destruct,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
@@ -5279,7 +5260,6 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, startBuffering,        arginfo_phar__void,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, stopBuffering,         arginfo_phar__void,        ZEND_ACC_PUBLIC)
-#endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            arginfo_phar__void,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canCompress,           arginfo_phar_cancompress,  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
@@ -5299,7 +5279,6 @@ zend_function_entry php_archive_methods[] = {
 	PHP_FE_END
 };
 
-#if HAVE_SPL
 PHAR_ARG_INFO
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
@@ -5328,7 +5307,6 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, setMetadata,        arginfo_phar_setMetadata,   ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
-#endif /* HAVE_SPL */
 
 zend_function_entry phar_exception_methods[] = {
 	PHP_FE_END
@@ -5345,7 +5323,6 @@ void phar_object_init(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "PharException", phar_exception_methods);
 	phar_ce_PharException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 
-#if HAVE_SPL
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
 	phar_ce_archive = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator);
 
@@ -5358,15 +5335,6 @@ void phar_object_init(void) /* {{{ */
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", php_entry_methods);
 	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo);
-#else
-	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
-	phar_ce_archive = zend_register_internal_class(&ce);
-	phar_ce_archive->ce_flags |= ZEND_ACC_FINAL;
-
-	INIT_CLASS_ENTRY(ce, "PharData", php_archive_methods);
-	phar_ce_data = zend_register_internal_class(&ce);
-	phar_ce_data->ce_flags |= ZEND_ACC_FINAL;
-#endif
 
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)

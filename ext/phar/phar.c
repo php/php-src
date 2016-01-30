@@ -3581,9 +3581,7 @@ static const zend_module_dep phar_deps[] = {
 #if defined(HAVE_HASH) && !defined(COMPILE_DL_HASH)
 	ZEND_MOD_REQUIRED("hash")
 #endif
-#if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
-#endif
 	ZEND_MOD_END
 };
 
