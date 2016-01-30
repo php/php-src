@@ -49,6 +49,7 @@
 #ifdef HAVE_SPL
 #include "ext/spl/spl_array.h"
 #endif
+#include "php_traversal.h"
 
 /* {{{ defines */
 #define EXTR_OVERWRITE			0
@@ -2799,7 +2800,7 @@ PHP_FUNCTION(array_unshift)
 	Z_ARRVAL_P(stack)->nNextFreeElement  = new_hash.nNextFreeElement;
 	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
 	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
-	
+
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 
 	/* Clean up and return the number of elements in the stack */
@@ -4073,7 +4074,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		ZVAL_UNDEF(&list->val);
 		if (hash->nNumOfElements > 1) {
 			if (behavior == INTERSECT_NORMAL) {
-				zend_sort((void *) lists[i], hash->nNumOfElements, 
+				zend_sort((void *) lists[i], hash->nNumOfElements,
 						sizeof(Bucket), intersect_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 				zend_sort((void *) lists[i], hash->nNumOfElements,
@@ -5083,6 +5084,69 @@ PHP_FUNCTION(array_product)
 		convert_to_double(&entry_n);
 		Z_DVAL_P(return_value) *= Z_DVAL(entry_n);
 	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+typedef struct _php_traverse_context_until {
+	PHP_TRAVERSE_CONTEXT_STANDARD_MEMBERS()
+	int stop_value;
+	int result;
+} php_traverse_context_until;
+
+static zend_bool php_traverse_until(zval *value, zval *key, void *context)
+{
+	zval args[3];
+	zval retval;
+	int call_res;
+	php_traverse_context_until *data = context;
+
+	ZVAL_COPY(&args[0], value);
+	ZVAL_COPY(&args[1], key);
+	ZVAL_COPY(&args[2], data->traversable);
+	data->fci.params = args;
+	data->fci.retval = &retval;
+
+	call_res = zend_call_function(&data->fci, &data->fci_cache);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&args[2]);
+	data->result = call_res == SUCCESS ? zend_is_true(&retval) : 0;
+	zval_ptr_dtor(&retval);
+
+	return data->result != data->stop_value; // stop condition
+}
+
+static void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value)
+{
+	php_traverse_context_until context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "tf", &context.traversable, &context.fci, &context.fci_cache) == FAILURE) {
+		return;
+	}
+
+	context.stop_value = stop_value;
+	context.result = !stop_value;
+	context.fci.param_count = 3;
+	context.fci.no_separation = 0;
+
+	php_traverse(context.traversable, php_traverse_until, PHP_TRAVERSE_MODE_KEY_VAL, &context);
+
+	RETURN_BOOL(context.result);
+}
+
+/* {{{ proto bool array_every(array input, mixed predicate)
+   Determines whether the predicate holds for all elements in the array. */
+PHP_FUNCTION(array_every)
+{
+	php_array_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto array array_filter(array input, mixed predicate)
+   Determines whether the predicate holds for at least one element in the array. */
+PHP_FUNCTION(array_any)
+{
+	php_array_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 

@@ -30,6 +30,7 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_inheritance.h"
+#include "zend_interfaces.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -625,6 +626,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
+		case 't':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (!zend_parse_arg_traversable(arg, p, check_null)) {
+					return "array or traversable";
+				}
+			}
+			break;
+
 		case 'H':
 		case 'h':
 			{
@@ -828,7 +839,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 'f': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
-			case 'L':
+			case 'L': case 't':
 				max_num_args++;
 				break;
 
