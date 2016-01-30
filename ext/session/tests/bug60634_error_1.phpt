@@ -41,11 +41,6 @@ session_start();
 session_write_close();
 echo "um, hi\n";
 
-/*
-FIXME: Something wrong. It should try to close after error, otherwise session
-may keep "open" state.
-*/
-
 ?>
 --EXPECTF--
 write: goodbye cruel world
@@ -56,4 +51,3 @@ Stack trace:
 #1 %s(%d): session_write_close()
 #2 {main}
   thrown in %s on line %d
-

@@ -3014,7 +3014,11 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			xmlFreeNode(dummy);
 		} ZEND_HASH_FOREACH_END();
 		smart_str_0(&list);
-		xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		if (list.s) {
+			xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		} else {
+			xmlNodeSetContentLen(ret, BAD_CAST(""), 0);
+		}
 		smart_str_free(&list);
 	} else {
 		zval tmp;
@@ -3054,7 +3058,11 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			start = next;
 		}
 		smart_str_0(&list);
-		xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		if (list.s) {
+			xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		} else {
+			xmlNodeSetContentLen(ret, BAD_CAST(""), 0);
+		}
 		smart_str_free(&list);
 		efree(str);
 		if (data == &tmp) {zval_dtor(&tmp);}

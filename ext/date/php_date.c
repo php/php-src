@@ -2142,7 +2142,7 @@ static int date_object_compare_date(zval *d1, zval *d2) /* {{{ */
 		timelib_update_ts(o2->time, o2->time->tz_info);
 	}
 
-	return (o1->time->sse == o2->time->sse) ? 0 : ((o1->time->sse < o2->time->sse) ? -1 : 1);
+	return timelib_time_compare(o1->time, o2->time);
 } /* }}} */
 
 static HashTable *date_object_get_gc(zval *object, zval **table, int *n) /* {{{ */
