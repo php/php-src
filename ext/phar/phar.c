@@ -1326,11 +1326,6 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	if (!pphar) {
 		pphar = &mydata;
 	}
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		return FAILURE;
-	}
-#endif
 	if (php_check_open_basedir(fname)) {
 		return FAILURE;
 	}
@@ -1490,11 +1485,6 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 	} else if (error && *error) {
 		return FAILURE;
 	}
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		return FAILURE;
-	}
-#endif
 	if (php_check_open_basedir(fname)) {
 		return FAILURE;
 	}
@@ -2284,13 +2274,6 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 		}
 		return FAILURE;
 	}
-
-
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		return FAILURE;
-	}
-#endif
 
 	if (php_check_open_basedir(fname)) {
 		return FAILURE;

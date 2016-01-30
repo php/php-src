@@ -121,11 +121,7 @@ static php_stream *
 MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
-#if PHP_API_VERSION < 20100412
-	unsigned int streams_options = ENFORCE_SAFE_MODE;
-#else
 	unsigned int streams_options = 0;
-#endif
 	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
@@ -160,11 +156,7 @@ static php_stream *
 MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
-#if PHP_API_VERSION < 20100412
-	unsigned int streams_options = ENFORCE_SAFE_MODE;
-#else
 	unsigned int streams_options = 0;
-#endif
 	unsigned int streams_flags = STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT;
 	char * hashed_details = NULL;
 	int hashed_details_len = 0;
@@ -566,11 +558,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 			php_stream_context_set_option(context, "ssl", "allow_self_signed", &verify_peer_zval);
 		}
 	}
-#if PHP_API_VERSION >= 20131106
 	php_stream_context_set(net_stream, context);
-#else
-	php_stream_context_set(net_stream, context);
-#endif
 	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL) < 0 ||
 	    php_stream_xport_crypto_enable(net_stream, 1) < 0)
 	{
@@ -586,11 +574,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	  of the context, which means usage of already freed memory, bad. Actually we don't need this
 	  context anymore after we have enabled SSL on the connection. Thus it is very simple, we remove it.
 	*/
-#if PHP_API_VERSION >= 20131106
 	php_stream_context_set(net_stream, NULL);
-#else
-	php_stream_context_set(net_stream, NULL);
-#endif
 
 	if (net->data->options.timeout_read) {
 		struct timeval tv;

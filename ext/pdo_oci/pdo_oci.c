@@ -38,12 +38,10 @@ const zend_function_entry pdo_oci_functions[] = {
 
 /* {{{ pdo_oci_module_entry */
 
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_oci_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 
 zend_module_entry pdo_oci_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,

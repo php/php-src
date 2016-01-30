@@ -116,12 +116,10 @@ const zend_function_entry pdo_functions[] = {
 /* }}} */
 
 /* {{{ pdo_functions[] */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_module_entry */
