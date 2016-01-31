@@ -889,9 +889,15 @@ retry:
 
 		if (!new_sid) {
 			/* Active session. Update session timestamps */
+			/* TODO:
+			   Updating session data only for timestap update has risk that over write
+			   session data by older data. Updating timestamp when user session data is
+			   updated is optimal. This requires to update time stamp at closing/writing
+			   session. This may be addressed when Precise Session Management RFC is accepted.
+			*/
 			updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 										 PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
-			if (Z_LVAL_P(updated) + PS(ttl_update)  < now) {
+			if (Z_LVAL_P(updated) + PS(ttl_update) < now) {
 				php_session_set_timestamps(0);
 			}
 		} else {
