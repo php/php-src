@@ -4369,6 +4369,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 	in = BIO_new_file(filename, (flags & PKCS7_BINARY) ? "rb" : "r");
 	if (in == NULL) {
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 	p7 = SMIME_read_PKCS7(in, &datain);
@@ -4376,6 +4377,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 #if DEBUG_SMIME
 		zend_printf("SMIME_read_PKCS7 failed\n");
 #endif
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 
@@ -4387,6 +4389,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 		dataout = BIO_new_file(datafilename, "w");
 		if (dataout == NULL) {
+			php_openssl_store_errors();
 			goto clean_exit;
 		}
 	}
@@ -4409,19 +4412,31 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 			if (certout) {
 				int i;
 				signers = PKCS7_get0_signers(p7, NULL, (int)flags);
+				if (signers != NULL) {
 
-				for(i = 0; i < sk_X509_num(signers); i++) {
-					PEM_write_bio_X509(certout, sk_X509_value(signers, i));
+					for (i = 0; i < sk_X509_num(signers); i++) {
+						if (!PEM_write_bio_X509(certout, sk_X509_value(signers, i))) {
+							php_openssl_store_errors();
+							RETVAL_LONG(-1);
+							php_error_docref(NULL, E_WARNING, "failed to write signer %d", i);
+						}
+					}
+
+					sk_X509_free(signers);
+				} else {
+					RETVAL_LONG(-1);
+					php_openssl_store_errors();
 				}
+
 				BIO_free(certout);
-				sk_X509_free(signers);
 			} else {
+				php_openssl_store_errors();
 				php_error_docref(NULL, E_WARNING, "signature OK, but cannot open %s for writing", signersfilename);
 				RETVAL_LONG(-1);
 			}
 		}
-		goto clean_exit;
 	} else {
+		php_openssl_store_errors();
 		RETVAL_FALSE;
 	}
 clean_exit:
@@ -4466,11 +4481,13 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 
 	infile = BIO_new_file(infilename, "r");
 	if (infile == NULL) {
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 
 	outfile = BIO_new_file(outfilename, "w");
 	if (outfile == NULL) {
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 
@@ -4491,6 +4508,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 					make a copy and push that on the stack instead */
 				cert = X509_dup(cert);
 				if (cert == NULL) {
+					php_openssl_store_errors();
 					goto clean_exit;
 				}
 			}
@@ -4510,6 +4528,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				make a copy and push that on the stack instead */
 			cert = X509_dup(cert);
 			if (cert == NULL) {
+				php_openssl_store_errors();
 				goto clean_exit;
 			}
 		}
@@ -4527,6 +4546,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	p7 = PKCS7_encrypt(recipcerts, infile, (EVP_CIPHER*)cipher, (int)flags);
 
 	if (p7 == NULL) {
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 
@@ -4546,7 +4566,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	(void)BIO_reset(infile);
 
 	/* write the encrypted data */
-	SMIME_write_PKCS7(outfile, p7, infile, (int)flags);
+	if (!SMIME_write_PKCS7(outfile, p7, infile, (int)flags)) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
 
 	RETVAL_TRUE;
 
@@ -4616,18 +4639,21 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 
 	infile = BIO_new_file(infilename, "r");
 	if (infile == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error opening input file %s!", infilename);
 		goto clean_exit;
 	}
 
 	outfile = BIO_new_file(outfilename, "w");
 	if (outfile == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error opening output file %s!", outfilename);
 		goto clean_exit;
 	}
 
 	p7 = PKCS7_sign(cert, privkey, others, infile, (int)flags);
 	if (p7 == NULL) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error creating PKCS7 structure!");
 		goto clean_exit;
 	}
@@ -4636,18 +4662,26 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 
 	/* tack on extra headers */
 	if (zheaders) {
+		int ret;
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
 			convert_to_string_ex(hval);
 
 			if (strindex) {
-				BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), Z_STRVAL_P(hval));
+				ret = BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), Z_STRVAL_P(hval));
 			} else {
-				BIO_printf(outfile, "%s\n", Z_STRVAL_P(hval));
+				ret = BIO_printf(outfile, "%s\n", Z_STRVAL_P(hval));
+			}
+			if (ret < 0) {
+				php_openssl_store_errors();
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
 	/* write the signed data */
-	SMIME_write_PKCS7(outfile, p7, infile, (int)flags);
+	if (!SMIME_write_PKCS7(outfile, p7, infile, (int)flags)) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
 
 	RETVAL_TRUE;
 
@@ -4708,20 +4742,25 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 
 	in = BIO_new_file(infilename, "r");
 	if (in == NULL) {
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 	out = BIO_new_file(outfilename, "w");
 	if (out == NULL) {
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 
 	p7 = SMIME_read_PKCS7(in, &datain);
 
 	if (p7 == NULL) {
+		php_openssl_store_errors();
 		goto clean_exit;
 	}
 	if (PKCS7_decrypt(p7, key, cert, out, PKCS7_DETACHED)) {
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 clean_exit:
 	PKCS7_free(p7);
