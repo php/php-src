@@ -5,7 +5,7 @@ openssl_csr_sign() tests
 --FILE--
 <?php
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
-$priv = "file://" . dirname(__FILE__) . "/private.key";
+$priv = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
 $wrong = "wrong";
 $pub = "file://" . dirname(__FILE__) . "/public.key";
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';

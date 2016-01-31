@@ -5,7 +5,7 @@ openssl_pkcs7_decrypt() tests
 --FILE--
 <?php
 $infile = dirname(__FILE__) . "/cert.crt";
-$privkey = "file://" . dirname(__FILE__) . "/private.key";
+$privkey = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
 $encrypted = tempnam("/tmp", "ssl");
 if ($encrypted === false)
 	die("failed to get a temporary filename!");
