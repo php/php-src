@@ -4310,6 +4310,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 		ZSTR_VAL(out_buffer)[key_length] = 0;
 		RETURN_NEW_STR(out_buffer);
 	} else {
+		php_openssl_store_errors();
 		zend_string_release(out_buffer);
 		RETURN_FALSE;
 	}
