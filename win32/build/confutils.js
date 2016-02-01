@@ -2016,7 +2016,8 @@ function generate_makefile()
 			var dll = "php_" + extensions_enabled[i][0] + ".dll";
 			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
 			MF.WriteLine("  @if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
-			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)");
+			MF.WriteLine("  @if not exist $(PHP_PREFIX)\\ext mkdir $(PHP_PREFIX)\\ext >nul");
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\ext");
 		}
 	} else {
 		MF.WriteBlankLines(1);
