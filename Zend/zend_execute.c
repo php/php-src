@@ -1106,7 +1106,7 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 
 	if (object_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		do {
-			if (object_op_type == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_ERROR)) {
+			if (object_op_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(object))) {
 				if (retval) {
  					ZVAL_NULL(retval);
 				}
@@ -1912,7 +1912,7 @@ convert_to_array:
 			/* for read-mode only */
 			ZVAL_NULL(result);
 		}
-	} else if (EXPECTED(Z_TYPE_P(container) == IS_ERROR)) {
+	} else if (EXPECTED(Z_ISERROR_P(container))) {
 		ZVAL_ERROR(result);
 	} else {
 		if (type == BP_VAR_UNSET) {
@@ -2049,7 +2049,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 {
     if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
-			if (container_op_type == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_ERROR)) {
+			if (container_op_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(container))) {
 				ZVAL_ERROR(result);
 				return;
 			}

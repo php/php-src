@@ -29,13 +29,16 @@ in EBCDIC, but can be specified as escapes. --/
 
 /^A\ˆ/
     A B
+    A\x41B
 
 /-- Test \H --/
 
 /^A\È/
     AB
+    A\x42B
     ** Fail
     A B
+    A\x41B
 
 /-- Test \R --/
 

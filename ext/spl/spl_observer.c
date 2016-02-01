@@ -117,32 +117,34 @@ void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 
 } /* }}} */
 
-static zend_string *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *this, zval *obj) {
+static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zval *this, zval *obj) {
 	if (intern->fptr_get_hash) {
 		zval rv;
 		zend_call_method_with_1_params(this, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, obj);
 		if (!Z_ISUNDEF(rv)) {
 			if (Z_TYPE(rv) == IS_STRING) {
-				return Z_STR(rv);
+				key->key = Z_STR(rv);
+				return SUCCESS;
 			} else {
 				zend_throw_exception(spl_ce_RuntimeException, "Hash needs to be a string", 0);
 
 				zval_ptr_dtor(&rv);
-				return NULL;
+				return FAILURE;
 			}
 		} else {
-			return NULL;
+			return FAILURE;
 		}
 	} else {
-		zend_string *hash = zend_string_alloc(sizeof(zend_object*), 0);
-		memcpy(ZSTR_VAL(hash), (void*)&Z_OBJ_P(obj), sizeof(zend_object*));
-		ZSTR_VAL(hash)[ZSTR_LEN(hash)] = '\0';
-		return hash;
+		key->key = NULL;
+		key->h = Z_OBJ_HANDLE_P(obj);
+		return SUCCESS;
 	}
 }
 
-static void spl_object_storage_free_hash(spl_SplObjectStorage *intern, zend_string *hash) {
-	zend_string_release(hash);
+static void spl_object_storage_free_hash(spl_SplObjectStorage *intern, zend_hash_key *key) {
+	if (key->key) {
+		zend_string_release(key->key);
+	}
 }
 
 static void spl_object_storage_dtor(zval *element) /* {{{ */
@@ -153,21 +155,24 @@ static void spl_object_storage_dtor(zval *element) /* {{{ */
 	efree(el);
 } /* }}} */
 
-spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern, zend_string *hash) /* {{{ */
+static spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern, zend_hash_key *key) /* {{{ */
 {
-	return (spl_SplObjectStorageElement*)zend_hash_find_ptr(&intern->storage, hash);
+	if (key->key) {
+		return zend_hash_find_ptr(&intern->storage, key->key);
+	} else {
+		return zend_hash_index_find_ptr(&intern->storage, key->h);
+	}
 } /* }}} */
 
 spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zval *this, zval *obj, zval *inf) /* {{{ */
 {
 	spl_SplObjectStorageElement *pelement, element;
-	zend_string *hash = spl_object_storage_get_hash(intern, this, obj);
-
-	if (!hash) {
+	zend_hash_key key;
+	if (spl_object_storage_get_hash(&key, intern, this, obj) == FAILURE) {
 		return NULL;
 	}
 
-	pelement = spl_object_storage_get(intern, hash);
+	pelement = spl_object_storage_get(intern, &key);
 
 	if (pelement) {
 		zval_ptr_dtor(&pelement->inf);
@@ -176,7 +181,7 @@ spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *int
 		} else {
 			ZVAL_NULL(&pelement->inf);
 		}
-		spl_object_storage_free_hash(intern, hash);
+		spl_object_storage_free_hash(intern, &key);
 		return pelement;
 	}
 
@@ -186,20 +191,28 @@ spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *int
 	} else {
 		ZVAL_NULL(&element.inf);
 	}
-	pelement = zend_hash_update_mem(&intern->storage, hash, &element, sizeof(spl_SplObjectStorageElement));
-	spl_object_storage_free_hash(intern, hash);
+	if (key.key) {
+		pelement = zend_hash_update_mem(&intern->storage, key.key, &element, sizeof(spl_SplObjectStorageElement));
+	} else {
+		pelement = zend_hash_index_update_mem(&intern->storage, key.h, &element, sizeof(spl_SplObjectStorageElement));
+	}
+	spl_object_storage_free_hash(intern, &key);
 	return pelement;
 } /* }}} */
 
-int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *this, zval *obj) /* {{{ */
+static int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *this, zval *obj) /* {{{ */
 {
 	int ret = FAILURE;
-	zend_string *hash = spl_object_storage_get_hash(intern, this, obj);
-	if (!hash) {
+	zend_hash_key key;
+	if (spl_object_storage_get_hash(&key, intern, this, obj) == FAILURE) {
 		return ret;
 	}
-	ret = zend_hash_del(&intern->storage, hash);
-	spl_object_storage_free_hash(intern, hash);
+	if (key.key) {
+		ret = zend_hash_del(&intern->storage, key.key);
+	} else {
+		ret = zend_hash_index_del(&intern->storage, key.h);
+	}
+	spl_object_storage_free_hash(intern, &key);
 
 	return ret;
 } /* }}}*/
@@ -369,13 +382,17 @@ static zend_object *spl_SplObjectStorage_new(zend_class_entry *class_type)
 int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *this, zval *obj) /* {{{ */
 {
 	int found;
-	zend_string *hash = spl_object_storage_get_hash(intern, this, obj);
-	if (!hash) {
+	zend_hash_key key;
+	if (spl_object_storage_get_hash(&key, intern, this, obj) == FAILURE) {
 		return 0;
 	}
 
-	found = zend_hash_exists(&intern->storage, hash);
-	spl_object_storage_free_hash(intern, hash);
+	if (key.key) {
+		found = zend_hash_exists(&intern->storage, key.key);
+	} else {
+		found = zend_hash_index_exists(&intern->storage, key.h);
+	}
+	spl_object_storage_free_hash(intern, &key);
 	return found;
 } /* }}} */
 
@@ -430,19 +447,18 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	zval *obj;
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(getThis());
-	zend_string *hash;
+	zend_hash_key key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
 		return;
 	}
 
-	hash = spl_object_storage_get_hash(intern, getThis(), obj);
-	if (!hash) {
+	if (spl_object_storage_get_hash(&key, intern, getThis(), obj) == FAILURE) {
 		return;
 	}
 
-	element = spl_object_storage_get(intern, hash);
-	spl_object_storage_free_hash(intern, hash);
+	element = spl_object_storage_get(intern, &key);
+	spl_object_storage_free_hash(intern, &key);
 
 	if (!element) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Object not found");
@@ -774,7 +790,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 
 	while (count-- > 0) {
 		spl_SplObjectStorageElement *pelement;
-		zend_string *hash;
+		zend_hash_key key;
 
 		if (*p != ';') {
 			goto outexcept;
@@ -801,14 +817,13 @@ SPL_METHOD(SplObjectStorage, unserialize)
 			ZVAL_UNDEF(&inf);
 		}
 
-		hash = spl_object_storage_get_hash(intern, getThis(), &entry);
-		if (!hash) {
+		if (spl_object_storage_get_hash(&key, intern, getThis(), &entry) == FAILURE) {
 			zval_ptr_dtor(&entry);
 			zval_ptr_dtor(&inf);
 			goto outexcept;
 		}
-		pelement = spl_object_storage_get(intern, hash);
-		spl_object_storage_free_hash(intern, hash);
+		pelement = spl_object_storage_get(intern, &key);
+		spl_object_storage_free_hash(intern, &key);
 		if (pelement) {
 			if (!Z_ISUNDEF(pelement->inf)) {
 				var_push_dtor(&var_hash, &pelement->inf);

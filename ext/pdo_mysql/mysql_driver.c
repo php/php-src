@@ -630,12 +630,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 
 #ifndef PDO_USE_MYSQLND
-#if PHP_API_VERSION < 20100412
-		if ((PG(open_basedir) && PG(open_basedir)[0] != '\0') || PG(safe_mode))
-#else
-		if (PG(open_basedir) && PG(open_basedir)[0] != '\0')
-#endif
-		{
+		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
 			local_infile = 0;
 		}
 #endif

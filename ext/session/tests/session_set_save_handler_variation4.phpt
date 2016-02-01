@@ -75,4 +75,3 @@ array(0) {
 Destroy [%s,%s]
 Close [%s,PHPSESSID]
 bool(true)
-
