@@ -4828,6 +4828,8 @@ PHP_FUNCTION(openssl_private_encrypt)
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 	if (cryptedbuf) {
 		zend_string_release(cryptedbuf);
@@ -4895,6 +4897,8 @@ PHP_FUNCTION(openssl_private_decrypt)
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 
 	if (keyresource == NULL) {
@@ -4955,6 +4959,8 @@ PHP_FUNCTION(openssl_public_encrypt)
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
@@ -5024,6 +5030,8 @@ PHP_FUNCTION(openssl_public_decrypt)
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
 	}
 
 	if (cryptedbuf) {
