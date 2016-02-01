@@ -4938,6 +4938,7 @@ PHP_FUNCTION(openssl_seal)
 	memset(eks, 0, sizeof(*eks) * nkeys);
 	key_resources = safe_emalloc(nkeys, sizeof(zend_resource*), 0);
 	memset(key_resources, 0, sizeof(zend_resource*) * nkeys);
+	memset(pkeys, 0, sizeof(*pkeys) * nkeys);
 
 	/* get the public keys we are using to seal this data */
 	i = 0;
@@ -4999,7 +5000,7 @@ PHP_FUNCTION(openssl_seal)
 
 clean_exit:
 	for (i=0; i<nkeys; i++) {
-		if (key_resources[i] == NULL) {
+		if (key_resources[i] == NULL && pkeys[i] != NULL) {
 			EVP_PKEY_free(pkeys[i]);
 		}
 		if (eks[i]) {
