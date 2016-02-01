@@ -212,10 +212,10 @@ typedef struct _php_ps_globals {
 	zend_string *session_vars; /* serialized original session data */
 
 	zval internal_data;
-	zend_long ttl; /* Session TTL */
-	zend_long ttl_update; /* Settion TTL update frequency */
-	zend_long ttl_destroy; /* TTL actually remove from session storage */
-	zend_long regenerate_id; /* Session ID regeneration period */
+	zend_long ttl; /* Session TTL - (UPDATED + ttl) < time(NULL) is expiration condition */
+	zend_long ttl_update; /* UPDATED timestamp update frequency - (UPDATED + ttl_update) < time(NULL) is update condition  */
+	zend_long ttl_destroy; /* Time to actually remove session data from storage - (UPDATED + ttl_destroy) < time(NULL) is removal condition  */
+	zend_long regenerate_id; /* Session ID regeneration period - (CREATED + regenerate_id) < time(NULL) is regeneration condition */
 	zend_long num_sids; /* Number of session IDs stored */
 } php_ps_globals;
 

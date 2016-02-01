@@ -849,7 +849,7 @@ retry:
 					break;
 				case IS_NULL:
 					/* When session is destroyed by session_destroy(FALSE),
-					   session data stay in storage and client keeps session
+					   session data stays in storage and client keeps session
 					   ID cookie. In this case, request should be treated the
 					   same as new request. Remove session data and generate
 					   new session ID by retry. */
@@ -888,7 +888,7 @@ retry:
 		}
 
 		if (!new_sid) {
-			/* Active session. Update session timestamps */
+			/* Active session. Update session timestamps if needed*/
 			updated = zend_hash_str_find(Z_ARRVAL(PS(internal_data)),
 										 PSDK_UPDATED, sizeof(PSDK_UPDATED)-1);
 			if (Z_LVAL_P(updated) + PS(ttl_update) < now) {
