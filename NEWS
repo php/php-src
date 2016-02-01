@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
     Out of Bounds). (emmanuel dot law at gmail dot com).
 
+- PCRE:
+  . Upgraded bundled PCRE library to 8.38.
+
 - WDDX:
   . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
     (taoguangchen at icloud dot com)

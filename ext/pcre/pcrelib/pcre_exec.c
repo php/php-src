@@ -688,7 +688,7 @@ the alternative names that are used. */
 #define foc           number
 #define save_mark     data
 
-/* These statements are here to stop the compiler complaining about uninitialized
+/* These statements are here to stop the compiler complaining about unitialized
 variables. */
 
 #ifdef SUPPORT_UCP
@@ -6685,7 +6685,8 @@ if (md->offset_vector != NULL)
   register int *iend = iptr - re->top_bracket;
   if (iend < md->offset_vector + 2) iend = md->offset_vector + 2;
   while (--iptr >= iend) *iptr = -1;
-  md->offset_vector[0] = md->offset_vector[1] = -1;
+  if (offsetcount > 0) md->offset_vector[0] = -1;
+  if (offsetcount > 1) md->offset_vector[1] = -1;
   }
 
 /* Set up the first character to match, if available. The first_char value is
