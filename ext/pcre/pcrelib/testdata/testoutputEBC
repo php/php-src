@@ -41,15 +41,21 @@ No match
 /^A\ˆ/
     A B
  0: A\x20
+    A\x41B
+ 0: AA
 
 /-- Test \H --/
 
 /^A\È/
     AB
  0: AB
+    A\x42B
+ 0: AB
     ** Fail
 No match
     A B
+No match
+    A\x41B
 No match
 
 /-- Test \R --/

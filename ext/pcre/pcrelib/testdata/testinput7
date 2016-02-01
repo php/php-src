@@ -838,4 +838,19 @@ of case for anything other than the ASCII letters. --/
 /^s?c/mi8I
     scat
 
+/[\W\p{Any}]/BZ
+    abc
+    123 
+
+/[\W\pL]/BZ
+    abc
+    ** Failers 
+    123     
+
+/a[[:punct:]b]/WBZ
+
+/a[[:punct:]b]/8WBZ
+
+/a[b[:punct:]]/8WBZ
+
 /-- End of testinput7 --/
