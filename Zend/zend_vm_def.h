@@ -7001,7 +7001,7 @@ ZEND_VM_HANDLER(138, ZEND_INSTANCEOF, TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR)
 	expr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 ZEND_VM_C_LABEL(try_instanceof):
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT || Z_TYPE_P(expr) == IS_ENUM) {
 		zend_class_entry *ce;
 
 		if (OP2_TYPE == IS_CONST) {
@@ -7025,7 +7025,7 @@ ZEND_VM_C_LABEL(try_instanceof):
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_TYPE_P(expr) == IS_ENUM ? zend_enum_ce(expr) : Z_OBJCE_P(expr), ce);
 	} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		ZEND_VM_C_GOTO(try_instanceof);

@@ -30,6 +30,7 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_inheritance.h"
+#include "zend_enum.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -176,6 +177,8 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "string";
 		case IS_OBJECT:
 			return "object";
+		case IS_ENUM:
+			return "enum";
 		case IS_RESOURCE:
 			return "resource";
 		case IS_NULL:
@@ -661,6 +664,31 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
+		case 'e':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (!zend_parse_arg_enum(arg, p, NULL, check_null)) {
+					return "enum";
+				}
+			}
+			break;
+
+		case 'E':
+			{
+				zval **p = va_arg(*va, zval **);
+				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
+
+				if (!zend_parse_arg_enum(arg, p, ce, check_null)) {
+					if (ce) {
+						return ZSTR_VAL(ce->name);
+					} else {
+						return "enum";
+					}
+				}
+			}
+			break;
+
 		case 'C':
 			{
 				zend_class_entry *lookup, **pce = va_arg(*va, zend_class_entry **);
@@ -823,6 +851,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 's': case 'b':
 			case 'r': case 'a':
 			case 'o': case 'O':
+			case 'e': case 'E':
 			case 'z': case 'Z':
 			case 'C': case 'h':
 			case 'f': case 'A':
@@ -4110,6 +4139,8 @@ static int same_zval(zval *zv1, zval *zv2)  /* {{{ */
 		case IS_OBJECT:
 		case IS_RESOURCE:
 			return Z_COUNTED_P(zv1) == Z_COUNTED_P(zv2);
+		case IS_ENUM:
+			return zend_enum_equals(zv1, zv2);
 		default:
 			return 0;
 	}

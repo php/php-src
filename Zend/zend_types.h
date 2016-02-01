@@ -116,6 +116,7 @@ typedef union _zend_value {
 		uint32_t w1;
 		uint32_t w2;
 	} ww;
+	uint64_t          w3;
 } zend_value;
 
 struct _zval_struct {
@@ -310,19 +311,20 @@ struct _zend_ast_ref {
 #define IS_ARRAY					7
 #define IS_OBJECT					8
 #define IS_RESOURCE					9
-#define IS_REFERENCE				10
+#define IS_ENUM						10
+#define IS_REFERENCE					11
 
 /* constant expressions */
-#define IS_CONSTANT					11
-#define IS_CONSTANT_AST				12
+#define IS_CONSTANT					12
+#define IS_CONSTANT_AST					13
 
 /* fake types */
-#define _IS_BOOL					13
-#define IS_CALLABLE					14
+#define _IS_BOOL					14
+#define IS_CALLABLE					15
 #define IS_VOID						18
 
 /* internal types */
-#define IS_INDIRECT             	15
+#define IS_INDIRECT             			16
 #define IS_PTR						17
 #define _IS_ERROR					19
 
@@ -575,6 +577,15 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_ASTVAL(zval)				(zval).value.ast->ast
 #define Z_ASTVAL_P(zval_p)			Z_ASTVAL(*(zval_p))
 
+#define Z_ENUM_CLASS(zval)			(zval).value.ww.w1
+#define Z_ENUM_CLASS_P(zval_p)			Z_ENUM_CLASS(*(zval_p))
+
+#define Z_ENUM(zval)				(zval).value.w3
+#define Z_ENUM_P(zval_p)			Z_ENUM(*(zval_p))
+
+#define Z_ENUM_HANDLE(zval)			(zval).value.ww.w2
+#define Z_ENUM_HANDLE_P(zval_p)			Z_ENUM_HANDLE(*(zval_p))
+
 #define Z_INDIRECT(zval)			(zval).value.zv
 #define Z_INDIRECT_P(zval_p)		Z_INDIRECT(*(zval_p))
 
@@ -763,6 +774,13 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		_ast->ast = (a);										\
 		Z_AST_P(__z) = _ast;									\
 		Z_TYPE_INFO_P(__z) = IS_CONSTANT_AST_EX;				\
+	} while (0)
+
+#define ZVAL_ENUM(z, c, h) do {						\
+		zval *__z = (z);						\
+		Z_ENUM_CLASS_P(__z) = (c);						\
+		Z_ENUM_HANDLE_P(__z) = (h);						\
+		Z_TYPE_INFO_P(__z) = IS_ENUM;		\
 	} while (0)
 
 #define ZVAL_INDIRECT(z, v) do {								\

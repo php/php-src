@@ -40,6 +40,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_inheritance.h"
+#include "zend_enum.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -792,23 +793,24 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 
 	if (cur_arg_info->type_hint) {
 		ZVAL_DEREF(arg);
-		if (EXPECTED(cur_arg_info->type_hint == Z_TYPE_P(arg))) {
+		if (EXPECTED(cur_arg_info->type_hint == Z_TYPE_P(arg)) || (Z_TYPE_P(arg) == IS_ENUM && cur_arg_info->type_hint == IS_OBJECT)) {
 			if (cur_arg_info->class_name) {
+				zend_class_entry *arg_ce = Z_TYPE_P(arg) == IS_ENUM ? zend_enum_ce(arg) : Z_OBJCE_P(arg);
 				if (EXPECTED(*cache_slot)) {
 					ce = (zend_class_entry*)*cache_slot;
 				} else {
 					ce = zend_verify_arg_class_kind(cur_arg_info);
 					if (UNEXPECTED(!ce)) {
-						zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name), arg);
+						zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(arg_ce->name), arg);
 						return 0;
 					}
 					*cache_slot = (void*)ce;
 				}
-				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), ce))) {
+				if (UNEXPECTED(!instanceof_function(arg_ce, ce))) {
 					need_msg =
 						(ce->ce_flags & ZEND_ACC_INTERFACE) ?
 						"implement interface " : "be an instance of ";
-					zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name), arg);
+					zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "instance of ", ZSTR_VAL(arg_ce->name), arg);
 					return 0;
 				}
 			}
@@ -821,6 +823,8 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 					if (UNEXPECTED(!ce)) {
 						if (Z_TYPE_P(arg) == IS_OBJECT) {
 							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name), arg);
+						} else if (Z_TYPE_P(arg) == IS_ENUM) {
+							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(zend_enum_ce(arg)->name), arg);
 						} else {
 							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "", zend_zval_type_name(arg), arg);
 						}

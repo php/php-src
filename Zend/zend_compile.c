@@ -24,6 +24,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_constants.h"
+#include "zend_enum.h"
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
@@ -3471,6 +3472,8 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_typecheck(result, args, IS_ARRAY);
 	} else if (zend_string_equals_literal(lcname, "is_object")) {
 		return zend_compile_func_typecheck(result, args, IS_OBJECT);
+	} else if (zend_string_equals_literal(lcname, "is_enum")) {
+		return zend_compile_func_typecheck(result, args, IS_ENUM);
 	} else if (zend_string_equals_literal(lcname, "is_resource")) {
 		return zend_compile_func_typecheck(result, args, IS_RESOURCE);
 	} else if (zend_string_equals_literal(lcname, "defined")) {
@@ -5514,6 +5517,22 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 }
 /* }}} */
 
+static void zend_compile_enum_elements(zend_ast *ast) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+	uint32_t i;
+	zend_enum_entry *ee = (zend_enum_entry *) CG(active_class_entry);
+	ee->enum_handle = CG(enum_handle)++;
+	ee->handle_map = emalloc(sizeof(*ee->handle_map) * list->children);
+	zend_hash_index_add_ptr(&CG(enums), ee->enum_handle, ee);
+
+	for (i = 0; i < list->children; i++) {
+		zend_string *name = zend_new_interned_string_safe(zend_ast_get_str(list->child[i]));
+		zend_enum_add(ee, name);
+	}
+}
+/* }}} */
+
 void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
@@ -5521,7 +5540,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_ast *implements_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
 	zend_string *name, *lcname, *import_name = NULL;
-	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
+	zend_class_entry *ce = zend_arena_alloc(&CG(arena), (decl->flags & ZEND_ACC_ENUM) ? sizeof(zend_enum_entry) : sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
 
@@ -5629,7 +5648,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		zend_compile_implements(&declare_node, implements_ast);
 	}
 
-	zend_compile_stmt(stmt_ast);
+	if (decl->flags & ZEND_ACC_ENUM) {
+		zend_compile_enum_elements(stmt_ast);
+	} else {
+		zend_compile_stmt(stmt_ast);
+	}
 
 	/* Reset lineno for final opcodes and errors */
 	CG(zend_lineno) = ast->lineno;

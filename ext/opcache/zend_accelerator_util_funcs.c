@@ -24,6 +24,7 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_persist.h"
 #include "zend_shared_alloc.h"
+#include "zend_enum.h"
 
 #if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
@@ -524,6 +525,13 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		}
 		trait_precedences[i] = NULL;
 		ce->trait_precedences = trait_precedences;
+	}
+
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_enum_entry *ee = (zend_enum_entry *) ce, *old_ee = (zend_enum_entry *) old_ce;
+		zend_hash_index_update_ptr(&CG(enums), ee->enum_handle, ce);
+		ee->handle_map = emalloc(zend_hash_num_elements(&ce->constants_table) * sizeof(zend_string *));
+		memcpy(ee->handle_map, old_ee->handle_map, zend_hash_num_elements(&ce->constants_table) * sizeof(zend_string *));
 	}
 }
 

@@ -27,6 +27,7 @@
 #include "zend_vm.h"
 #include "zend_constants.h"
 #include "zend_operators.h"
+#include "zend_enum.h"
 
 #define zend_accel_store(p, size) \
 	    (p = _zend_shared_memdup((void*)p, size, 1))
@@ -754,10 +755,11 @@ static void zend_persist_class_entry(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
-		memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_class_entry));
+		size_t size = (ce->ce_flags & ZEND_ACC_ENUM) ? sizeof(zend_enum_entry) : sizeof(zend_class_entry);
+		memcpy(ZCG(arena_mem), Z_PTR_P(zv), size);
 		zend_shared_alloc_register_xlat_entry(Z_PTR_P(zv), ZCG(arena_mem));
 		ce = Z_PTR_P(zv) = ZCG(arena_mem);
-		ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_class_entry)));
+		ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(size));
 		zend_accel_store_interned_string(ce->name);
 		zend_hash_persist(&ce->function_table, zend_persist_op_array);
 		if (ce->default_properties_table) {
@@ -779,6 +781,23 @@ static void zend_persist_class_entry(zval *zv)
 		ce->static_members_table = NULL;
 
 		zend_hash_persist(&ce->constants_table, zend_persist_class_constant);
+
+		if (ce->ce_flags & ZEND_ACC_ENUM) {
+			zend_string *name;
+			zend_class_constant *c;
+			uint32_t handle = ZCSG(enum_handle)++;
+			zend_enum_entry *ee = (zend_enum_entry *) ce;
+			if ((handle & 0x80000000) == 0) { // this should never happen on a production server, but might rarely on a development environment... 
+				zend_accel_schedule_restart(ACCEL_RESTART_HASH);
+			}
+			ee->enum_handle = handle;
+			zend_accel_store(ee->handle_map, sizeof(zend_string *) * zend_hash_num_elements(&ce->constants_table));
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, name, c) {
+				ZEND_ASSERT(Z_TYPE(c->value) == IS_ENUM);
+				Z_ENUM_CLASS(c->value) = handle;
+				ee->handle_map[Z_ENUM_HANDLE(c->value)] = name; // store the interned strings
+			} ZEND_HASH_FOREACH_END();
+		}
 
 		if (ce->info.user.filename) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */

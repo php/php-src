@@ -72,6 +72,10 @@ PHP_FUNCTION(gettype)
 		 */
 			break;
 
+		case IS_ENUM:
+			RETVAL_STRING("enum");
+			break;
+
 		case IS_RESOURCE:
 			{
 				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
@@ -121,6 +125,9 @@ PHP_FUNCTION(settype)
 		convert_to_boolean(var);
 	} else if (!strcasecmp(type, "null")) {
 		convert_to_null(var);
+	} else if (!strcasecmp(type, "enum")) {
+		php_error_docref(NULL, E_WARNING, "Cannot convert to enum type");
+		RETURN_FALSE;
 	} else if (!strcasecmp(type, "resource")) {
 		php_error_docref(NULL, E_WARNING, "Cannot convert to resource type");
 		RETURN_FALSE;
@@ -324,6 +331,15 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
+/* {{{ proto bool is_enum(mixed var)
+   Returns true if variable is null
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
+PHP_FUNCTION(is_enum)
+{
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ENUM);
+}
+/* }}} */
+
 /* {{{ proto bool is_numeric(mixed value)
    Returns true if value is a number or a numeric string */
 PHP_FUNCTION(is_numeric)
@@ -383,6 +399,7 @@ PHP_FUNCTION(is_scalar)
 		case IS_DOUBLE:
 		case IS_LONG:
 		case IS_STRING:
+		case IS_ENUM:
 			RETURN_TRUE;
 			break;
 

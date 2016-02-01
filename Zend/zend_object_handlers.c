@@ -1348,6 +1348,8 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 				}
 			}
 		}
+	} else if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_ENUM)) {
+		zend_throw_error(NULL, "Cannot create an instance of an enum");
 	}
 
 	return constructor;

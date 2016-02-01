@@ -25,6 +25,7 @@
 #include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
+#include "zend_enum.h"
 
 /* FASYNC under Solaris */
 #ifdef HAVE_SYS_FILE_H
@@ -727,6 +728,9 @@ head_done:
 					phpdbg_xml("</object>");
 				}
 				break;
+			case IS_ENUM:
+				phpdbg_xml("<enum refstatus=\"%s\" class=\"%s\" name=\"%s\" />", COMMON, ZSTR_VAL(zend_enum_ce(zv)->name), ZSTR_VAL(zend_enum_name(zv)));
+				break;
 			case IS_RESOURCE: {
 				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(zv));
 				phpdbg_xml("<resource refstatus=\"%s\" id=\"%pd\" type=\"%ld\" />", COMMON, Z_RES_P(zv)->handle, type_name ? type_name : "unknown");
@@ -831,6 +835,9 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 				ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen ? 0 : '+');
 			break;
 		}
+		case IS_ENUM:
+			decode = estrdup("<enum>");
+			break;
 		case IS_CONSTANT:
 			decode = estrdup("<constant>");
 			break;

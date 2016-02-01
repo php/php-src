@@ -31,6 +31,7 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_enum.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -180,6 +181,7 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
+		case IS_ENUM:
 			convert_to_long_base(op, 10);
 			break;
 	}
@@ -215,6 +217,7 @@ try_again:
 				ZVAL_LONG(&(holder), Z_RES_HANDLE_P(op));					\
 				(op) = &(holder);											\
 				break;														\
+			case IS_ENUM:													\
 			case IS_OBJECT:													\
 				ZVAL_COPY(&(holder), op);										\
 				convert_to_long_base(&(holder), 10);						\
@@ -243,6 +246,18 @@ try_again:
 			ZVAL_COPY_VALUE(dst, newop);													\
 			conv_func(dst);																	\
 		}																					\
+	}
+
+/* }}} */
+
+/* {{{ convert_object_to_type: dst will be either ctype or UNDEF */
+#define convert_enum_to_type(op, dst, ctype)										\
+	if (ctype == _IS_BOOL) {														\
+		 ZVAL_TRUE(dst);																	\
+	} else {														\
+		zend_error(E_RECOVERABLE_ERROR,													\
+			"Enum %s could not be converted to %s", ZSTR_VAL(zend_enum_ce(op)->name), \
+		zend_get_type_by_const(ctype));													\
 	}
 
 /* }}} */
@@ -323,6 +338,13 @@ try_again:
 			zval_ptr_dtor(op);
 			ZVAL_LONG(op, tmp);
 			break;
+		case IS_ENUM:
+			{
+				zval dst;
+				convert_enum_to_type(op, &dst, IS_LONG);
+				ZVAL_COPY_VALUE(op, &dst);
+				break;
+			}
 		case IS_OBJECT:
 			{
 				zval dst;
@@ -383,6 +405,13 @@ try_again:
 			zval_ptr_dtor(op);
 			ZVAL_DOUBLE(op, tmp);
 			break;
+		case IS_ENUM:
+			{
+				zval dst;
+				convert_enum_to_type(op, &dst, IS_DOUBLE);
+				ZVAL_COPY_VALUE(op, &dst);
+				break;
+			}
 		case IS_OBJECT:
 			{
 				zval dst;
@@ -468,6 +497,13 @@ try_again:
 			zval_ptr_dtor(op);
 			ZVAL_BOOL(op, tmp);
 			break;
+		case IS_ENUM:
+			{
+				zval dst;
+				convert_enum_to_type(op, &dst, _IS_BOOL);
+				ZVAL_COPY_VALUE(op, &dst);
+				break;
+			}
 		case IS_OBJECT:
 			{
 				zval dst;
@@ -548,6 +584,12 @@ try_again:
 			zval_ptr_dtor(op);
 			ZVAL_NEW_STR(op, zend_string_init("Array", sizeof("Array")-1, 0));
 			break;
+		case IS_ENUM: {
+			zval dst;
+			convert_enum_to_type(op, &dst, IS_STRING);
+			ZVAL_COPY_VALUE(op, &dst);
+			break;
+		}
 		case IS_OBJECT: {
 			zval dst;
 
@@ -745,6 +787,12 @@ try_again:
 			return ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10);
 		case IS_ARRAY:
 			return zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1 : 0;
+		case IS_ENUM:
+			{
+				zval dst;
+				convert_enum_to_type(op, &dst, IS_LONG);
+				return Z_LVAL(dst);
+			}
 		case IS_OBJECT:
 			{
 				zval dst;
@@ -783,6 +831,12 @@ try_again:
 			return zend_strtod(Z_STRVAL_P(op), NULL);
 		case IS_ARRAY:
 			return zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1.0 : 0.0;
+		case IS_ENUM:
+			{
+				zval dst;
+				convert_enum_to_type(op, &dst, IS_DOUBLE);
+				return Z_DVAL(dst);
+			}
 		case IS_OBJECT:
 			{
 				zval dst;
@@ -833,6 +887,12 @@ try_again:
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
 			return zend_string_init("Array", sizeof("Array")-1, 0);
+		case IS_ENUM:
+			{
+				zval dst;
+				convert_enum_to_type(op, &dst, IS_STRING);
+				return Z_STR(dst);
+			}
 		case IS_OBJECT: {
 			zval tmp;
 			if (Z_OBJ_HT_P(op)->cast_object) {
@@ -1818,6 +1878,7 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 			case TYPE_PAIR(IS_FALSE, IS_NULL):
 			case TYPE_PAIR(IS_FALSE, IS_FALSE):
 			case TYPE_PAIR(IS_TRUE, IS_TRUE):
+			case TYPE_PAIR(IS_TRUE, IS_ENUM):
 				ZVAL_LONG(result, 0);
 				return SUCCESS;
 
@@ -1851,6 +1912,15 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 
 			case TYPE_PAIR(IS_NULL, IS_OBJECT):
 				ZVAL_LONG(result, -1);
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_NULL, IS_ENUM):
+			case TYPE_PAIR(IS_FALSE, IS_ENUM):
+				ZVAL_LONG(result, -1);
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_ENUM, IS_ENUM):
+				ZVAL_LONG(result, zend_enum_equals(op1, op2) == 0);
 				return SUCCESS;
 
 			default:
@@ -1928,7 +1998,13 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 						return SUCCESS;
 					}
 				}
-				if (!converted) {
+				if (Z_TYPE_P(op1)==IS_ENUM) {
+					ZVAL_LONG(result, 1);
+					return SUCCESS;
+				} else if (Z_TYPE_P(op2)==IS_ENUM) {
+					ZVAL_LONG(result, -1);
+					return SUCCESS;
+				} else if (!converted) {
 					if (Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op1) == IS_FALSE) {
 						ZVAL_LONG(result, zval_is_true(op2) ? -1 : 0);
 						return SUCCESS;
@@ -2008,6 +2084,8 @@ ZEND_API int ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
 		case IS_ARRAY:
 			return (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
 				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0);
+		case IS_ENUM:
+			return zend_enum_equals(op1, op2);
 		case IS_OBJECT:
 			return (Z_OBJ_P(op1) == Z_OBJ_P(op2) && Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2));
 		default:

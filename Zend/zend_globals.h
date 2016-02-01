@@ -65,7 +65,7 @@ END_EXTERN_C()
 
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
-
+typedef struct _zend_enum_entry zend_enum_entry;
 
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
@@ -80,6 +80,8 @@ struct _zend_compiler_globals {
 
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
+	HashTable enums;
+	uint32_t enum_handle;
 
 	HashTable filenames_table;
 

@@ -24,6 +24,7 @@
 #include "phpdbg_info.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_prompt.h"
+#include "zend_enum.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -261,6 +262,12 @@ retry_switch:
 					case IS_DOUBLE:
 						VARIABLEINFO("value=\"%lf\"", "\ndouble (%lf)", Z_DVAL_P(data));
 						break;
+					case IS_ENUM:
+						phpdbg_try_access {
+							VARIABLEINFO("class=\"%s\" name=\"%s\"", "\nenum(%s::%s)", ZSTR_VAL(zend_enum_ce(data)->name), ZSTR_VAL(zend_enum_name(data)));
+						} phpdbg_catch_access {
+							VARIABLEINFO("", "");
+						} phpdbg_end_try_access();
 					case IS_REFERENCE:
 						isref = "&";
 						data = Z_REFVAL_P(data);

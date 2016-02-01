@@ -27,6 +27,7 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 #include "zend_API.h"
+#include "zend_enum.h"
 
 #include "zend_vm.h"
 
@@ -306,6 +307,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (ce->info.user.doc_comment) {
 				zend_string_release(ce->info.user.doc_comment);
 			}
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				efree(((zend_enum_entry *) ce)->handle_map);
+			}
 
 			_destroy_zend_class_traits_info(ce);
 
@@ -347,6 +351,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
+			}
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				free(((zend_enum_entry *) ce)->handle_map);
 			}
 			free(ce);
 			break;

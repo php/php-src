@@ -25,6 +25,7 @@
 #include "zend_extensions.h"
 #include "zend_shared_alloc.h"
 #include "zend_operators.h"
+#include "zend_enum.h"
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
@@ -312,7 +313,12 @@ static void zend_persist_class_entry_calc(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
-		ADD_ARENA_SIZE(sizeof(zend_class_entry));
+		if (ce->ce_flags & ZEND_ACC_ENUM) {
+			ADD_ARENA_SIZE(sizeof(zend_enum_entry));
+			ADD_SIZE(sizeof(zend_string *) * zend_hash_num_elements(&ce->constants_table));
+		} else {
+			ADD_ARENA_SIZE(sizeof(zend_class_entry));
+		}
 		ADD_INTERNED_STRING(ce->name, 0);
 		zend_hash_persist_calc(&ce->function_table, zend_persist_op_array_calc);
 		if (ce->default_properties_table) {

@@ -463,6 +463,9 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			case IS_OBJECT:
 				fprintf(stderr, " (object)");
 				break;
+			case IS_ENUM:
+				fprintf(stderr, " (enum)");
+				break;
 			case IS_RESOURCE:
 				fprintf(stderr, " (resource)");
 				break;
