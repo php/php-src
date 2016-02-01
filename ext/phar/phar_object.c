@@ -2164,7 +2164,7 @@ its_ok:
 }
 /* }}} */
 
-static zend_object *phar_convert_to_other(phar_archive_data *source, int convert, char *ext, php_uint32 flags) /* {{{ */
+static zend_object *phar_convert_to_other(phar_archive_data *source, int convert, char *ext, uint32_t flags) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, newentry;
@@ -2288,7 +2288,7 @@ PHP_METHOD(Phar, convertToExecutable)
 	char *ext = NULL;
 	int is_data;
 	size_t ext_len = 0;
-	php_uint32 flags;
+	uint32_t flags;
 	zend_object *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday, so there) */
 	zend_long format = 9021976, method = 9021976;
@@ -2392,7 +2392,7 @@ PHP_METHOD(Phar, convertToData)
 	char *ext = NULL;
 	int is_data;
 	size_t ext_len = 0;
-	php_uint32 flags;
+	uint32_t flags;
 	zend_object *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday so there) */
 	zend_long format = 9021976, method = 9021976;
@@ -3066,7 +3066,7 @@ PHP_METHOD(Phar, getModified)
 static int phar_set_compression(zval *zv, void *argument) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
-	php_uint32 compress = *(php_uint32 *)argument;
+	uint32_t compress = *(uint32_t *)argument;
 
 	if (entry->is_deleted) {
 		return ZEND_HASH_APPLY_KEEP;
@@ -3104,7 +3104,7 @@ static int phar_test_compression(zval *zv, void *argument) /* {{{ */
 }
 /* }}} */
 
-static void pharobj_set_compression(HashTable *manifest, php_uint32 compress) /* {{{ */
+static void pharobj_set_compression(HashTable *manifest, uint32_t compress) /* {{{ */
 {
 	zend_hash_apply_with_argument(manifest, phar_set_compression, &compress);
 }
@@ -3130,7 +3130,7 @@ PHP_METHOD(Phar, compress)
 	zend_long method;
 	char *ext = NULL;
 	size_t ext_len = 0;
-	php_uint32 flags;
+	uint32_t flags;
 	zend_object *ret;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3239,7 +3239,7 @@ PHP_METHOD(Phar, decompress)
 PHP_METHOD(Phar, compressFiles)
 {
 	char *error;
-	php_uint32 flags;
+	uint32_t flags;
 	zend_long method;
 	PHAR_ARCHIVE_OBJECT();
 
