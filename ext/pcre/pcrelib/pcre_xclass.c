@@ -244,7 +244,7 @@ while ((t = *data++) != XCL_END)
 
       case PT_PXPUNCT:
       if ((PRIV(ucp_gentype)[prop->chartype] == ucp_P ||
-            (c < 256 && PRIV(ucp_gentype)[prop->chartype] == ucp_S)) == isprop)
+            (c < 128 && PRIV(ucp_gentype)[prop->chartype] == ucp_S)) == isprop)
         return !negated;
       break;
 

@@ -1053,8 +1053,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler
 #endif
 		FAIL_IF(push_inst(compiler, MFLO | D(SLJIT_R0), DR(SLJIT_R0)));
 		return push_inst(compiler, MFHI | D(SLJIT_R1), DR(SLJIT_R1));
-	case SLJIT_LUDIV:
-	case SLJIT_LSDIV:
+	case SLJIT_UDIVMOD:
+	case SLJIT_SDIVMOD:
+	case SLJIT_UDIVI:
+	case SLJIT_SDIVI:
+		SLJIT_COMPILE_ASSERT((SLJIT_UDIVMOD & 0x2) == 0 && SLJIT_UDIVI - 0x2 == SLJIT_UDIVMOD, bad_div_opcode_assignments);
 #if !(defined SLJIT_MIPS_R1 && SLJIT_MIPS_R1)
 		FAIL_IF(push_inst(compiler, NOP, UNMOVABLE_INS));
 		FAIL_IF(push_inst(compiler, NOP, UNMOVABLE_INS));
@@ -1062,15 +1065,15 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler
 
 #if (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
 		if (int_op)
-			FAIL_IF(push_inst(compiler, (op == SLJIT_LUDIV ? DIVU : DIV) | S(SLJIT_R0) | T(SLJIT_R1), MOVABLE_INS));
+			FAIL_IF(push_inst(compiler, ((op | 0x2) == SLJIT_UDIVI ? DIVU : DIV) | S(SLJIT_R0) | T(SLJIT_R1), MOVABLE_INS));
 		else
-			FAIL_IF(push_inst(compiler, (op == SLJIT_LUDIV ? DDIVU : DDIV) | S(SLJIT_R0) | T(SLJIT_R1), MOVABLE_INS));
+			FAIL_IF(push_inst(compiler, ((op | 0x2) == SLJIT_UDIVI ? DDIVU : DDIV) | S(SLJIT_R0) | T(SLJIT_R1), MOVABLE_INS));
 #else
-		FAIL_IF(push_inst(compiler, (op == SLJIT_LUDIV ? DIVU : DIV) | S(SLJIT_R0) | T(SLJIT_R1), MOVABLE_INS));
+		FAIL_IF(push_inst(compiler, ((op | 0x2) == SLJIT_UDIVI ? DIVU : DIV) | S(SLJIT_R0) | T(SLJIT_R1), MOVABLE_INS));
 #endif
 
 		FAIL_IF(push_inst(compiler, MFLO | D(SLJIT_R0), DR(SLJIT_R0)));
-		return push_inst(compiler, MFHI | D(SLJIT_R1), DR(SLJIT_R1));
+		return (op >= SLJIT_UDIVI) ? SLJIT_SUCCESS : push_inst(compiler, MFHI | D(SLJIT_R1), DR(SLJIT_R1));
 	}
 
 	return SLJIT_SUCCESS;
