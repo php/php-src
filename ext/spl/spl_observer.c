@@ -836,7 +836,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		var_replace(&var_hash, &entry, &element->obj);
 		var_replace(&var_hash, &inf, &element->inf);
 		zval_ptr_dtor(&entry);
+		ZVAL_UNDEF(&entry);
 		zval_ptr_dtor(&inf);
+		ZVAL_UNDEF(&inf);
 	}
 
 	if (*p != ';') {
