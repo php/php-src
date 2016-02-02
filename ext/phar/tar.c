@@ -195,6 +195,13 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 }
 /* }}} */
 
+#if !HAVE_STRNLEN
+static size_t strnlen(const char *s, size_t maxlen) {
+        char *r = (char *)memchr(s, '\0', maxlen);
+        return r ? r-s : maxlen;
+}
+#endif
+
 int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
@@ -204,6 +211,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 	php_uint32 sum1, sum2, size, old;
 	phar_archive_data *myphar, *actual;
 	int last_was_longlink = 0;
+	int linkname_len;
 
 	if (error) {
 		*error = NULL;
@@ -264,7 +272,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			goto next;
 		}
 
-		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+		if (((!old && hdr->prefix[0] == 0) || old) && strnlen(hdr->name, 100) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			zend_off_t curloc;
 
 			if (size > 511) {
@@ -348,7 +356,7 @@ bail:
 			entry.filename_len = entry.uncompressed_filesize;
 
 			/* Check for overflow - bug 61065 */
-			if (entry.filename_len == UINT_MAX) {
+			if (entry.filename_len == UINT_MAX || entry.filename_len == 0) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
 				}
@@ -472,20 +480,22 @@ bail:
 		}
 
 		entry.link = NULL;
-
+		/* link field is null-terminated unless it has 100 non-null chars.
+		 * Thus we can not use strlen. */
+		linkname_len = strnlen(hdr->linkname, 100);
 		if (entry.tar_type == TAR_LINK) {
-			if (!zend_hash_str_exists(&myphar->manifest, hdr->linkname, strlen(hdr->linkname))) {
+			if (!zend_hash_str_exists(&myphar->manifest, hdr->linkname, linkname_len)) {
 				if (error) {
-					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%s\"", fname, hdr->linkname);
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%.*s\"", fname, linkname_len, hdr->linkname);
 				}
 				pefree(entry.filename, entry.is_persistent);
 				php_stream_close(fp);
 				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
-			entry.link = estrdup(hdr->linkname);
+			entry.link = estrndup(hdr->linkname, linkname_len);
 		} else if (entry.tar_type == TAR_SYMLINK) {
-			entry.link = estrdup(hdr->linkname);
+			entry.link = estrndup(hdr->linkname, linkname_len);
 		}
 		phar_set_inode(&entry);
 		if ((newentry = zend_hash_str_add_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) == NULL) {
