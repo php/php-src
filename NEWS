@@ -1,7 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
-?? ??? 2016, PHP 5.5.32
+?? ??? 2016, PHP 5.5.33
+
+04 Feb 2016, PHP 5.5.32
 
 - Core:
   . Fixed bug #71039 (exec functions ignore length but look for NULL termination).
@@ -9,6 +11,12 @@ PHP                                                                        NEWS
   . Fixed bug #71323 (Output of stream_get_meta_data can be falsified by its 
     input). (Leo Gaspard)
   . Fixed bug #71459 (Integer overflow in iptcembed()). (Stas)
+
+- GD:
+  . Improved the fix for bug #70976. (Remi)
+
+- PCRE:
+  . Upgraded pcrelib to 8.38. 
 
 - Phar:
   . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
