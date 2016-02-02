@@ -1,62 +1,64 @@
 --TEST--
-openssl_x509_parse() basic test for OpenSSL 0.9
+openssl_x509_parse() basic test with critical extension
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; 
-if (OPENSSL_VERSION_NUMBER > 0x10000000) die("skip Output requires OpenSSL 0.9");
+if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
 ?>
 --FILE--
 <?php
-$cert = "file://" . dirname(__FILE__) . "/cert.crt";
+$cert = "file://" . dirname(__FILE__) . "/cert_digicert.crt";
 
 var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));
 ?>
 --EXPECTF--
-array(13) {
+array(16) {
   ["name"]=>
-  string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
+  string(71) "/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA"
   ["subject"]=>
-  array(5) {
+  array(4) {
     ["C"]=>
-    string(2) "BR"
-    ["ST"]=>
-    string(17) "Rio Grande do Sul"
-    ["L"]=>
-    string(12) "Porto Alegre"
+    string(2) "US"
+    ["O"]=>
+    string(12) "DigiCert Inc"
+    ["OU"]=>
+    string(16) "www.digicert.com"
     ["CN"]=>
-    string(21) "Henrique do N. Angelo"
-    ["emailAddress"]=>
-    string(16) "hnangelo@php.net"
+    string(27) "DigiCert Assured ID Root CA"
   }
   ["hash"]=>
-  string(8) "%s"
+  string(8) "b1159c4c"
   ["issuer"]=>
-  array(5) {
+  array(4) {
     ["C"]=>
-    string(2) "BR"
-    ["ST"]=>
-    string(17) "Rio Grande do Sul"
-    ["L"]=>
-    string(12) "Porto Alegre"
+    string(2) "US"
+    ["O"]=>
+    string(12) "DigiCert Inc"
+    ["OU"]=>
+    string(16) "www.digicert.com"
     ["CN"]=>
-    string(21) "Henrique do N. Angelo"
-    ["emailAddress"]=>
-    string(16) "hnangelo@php.net"
+    string(27) "DigiCert Assured ID Root CA"
   }
   ["version"]=>
   int(2)
   ["serialNumber"]=>
-  string(20) "12593567369101004962"
+  string(38) "17154717934120587862167794914071425081"
   ["validFrom"]=>
-  string(13) "080630102843Z"
+  string(13) "061110000000Z"
   ["validTo"]=>
-  string(13) "080730102843Z"
+  string(13) "311110000000Z"
   ["validFrom_time_t"]=>
-  int(1214821723)
+  int(1163116800)
   ["validTo_time_t"]=>
-  int(1217413723)
+  int(1952035200)
+  ["signatureTypeSN"]=>
+  string(8) "RSA-SHA1"
+  ["signatureTypeLN"]=>
+  string(21) "sha1WithRSAEncryption"
+  ["signatureTypeNID"]=>
+  int(65)
   ["purposes"]=>
-  array(8) {
+  array(9) {
     [1]=>
     array(3) {
       [0]=>
@@ -78,7 +80,7 @@ array(13) {
     [3]=>
     array(3) {
       [0]=>
-      bool(true)
+      bool(false)
       [1]=>
       bool(true)
       [2]=>
@@ -96,7 +98,7 @@ array(13) {
     [5]=>
     array(3) {
       [0]=>
-      bool(true)
+      bool(false)
       [1]=>
       bool(true)
       [2]=>
@@ -129,68 +131,83 @@ array(13) {
       [2]=>
       string(10) "ocsphelper"
     }
+    [9]=>
+    array(3) {
+      [0]=>
+      bool(false)
+      [1]=>
+      bool(true)
+      [2]=>
+      string(13) "timestampsign"
+    }
   }
   ["extensions"]=>
-  array(3) {
-    ["subjectKeyIdentifier"]=>
-    string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
-    ["authorityKeyIdentifier"]=>
-    string(202) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
-DirName:/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net
-serial:AE:C5:56:CC:72:37:50:A2
-"
+  array(4) {
+    ["keyUsage"]=>
+    string(45) "Digital Signature, Certificate Sign, CRL Sign"
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
+    ["subjectKeyIdentifier"]=>
+    string(59) "45:EB:A2:AF:F4:92:CB:82:31:2D:51:8B:A7:A7:21:9D:F3:6D:C8:0F"
+    ["authorityKeyIdentifier"]=>
+    string(66) "keyid:45:EB:A2:AF:F4:92:CB:82:31:2D:51:8B:A7:A7:21:9D:F3:6D:C8:0F
+"
   }
   ["criticalExtensions"]=>
-  array(0) {
+  array(2) {
+    [0]=>
+    string(8) "keyUsage"
+    [1]=>
+    string(16) "basicConstraints"
   }
 }
-array(13) {
+array(16) {
   ["name"]=>
-  string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
+  string(71) "/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA"
   ["subject"]=>
-  array(5) {
+  array(4) {
     ["countryName"]=>
-    string(2) "BR"
-    ["stateOrProvinceName"]=>
-    string(17) "Rio Grande do Sul"
-    ["localityName"]=>
-    string(12) "Porto Alegre"
+    string(2) "US"
+    ["organizationName"]=>
+    string(12) "DigiCert Inc"
+    ["organizationalUnitName"]=>
+    string(16) "www.digicert.com"
     ["commonName"]=>
-    string(21) "Henrique do N. Angelo"
-    ["emailAddress"]=>
-    string(16) "hnangelo@php.net"
+    string(27) "DigiCert Assured ID Root CA"
   }
   ["hash"]=>
-  string(8) "%s"
+  string(8) "b1159c4c"
   ["issuer"]=>
-  array(5) {
+  array(4) {
     ["countryName"]=>
-    string(2) "BR"
-    ["stateOrProvinceName"]=>
-    string(17) "Rio Grande do Sul"
-    ["localityName"]=>
-    string(12) "Porto Alegre"
+    string(2) "US"
+    ["organizationName"]=>
+    string(12) "DigiCert Inc"
+    ["organizationalUnitName"]=>
+    string(16) "www.digicert.com"
     ["commonName"]=>
-    string(21) "Henrique do N. Angelo"
-    ["emailAddress"]=>
-    string(16) "hnangelo@php.net"
+    string(27) "DigiCert Assured ID Root CA"
   }
   ["version"]=>
   int(2)
   ["serialNumber"]=>
-  string(20) "12593567369101004962"
+  string(38) "17154717934120587862167794914071425081"
   ["validFrom"]=>
-  string(13) "080630102843Z"
+  string(13) "061110000000Z"
   ["validTo"]=>
-  string(13) "080730102843Z"
+  string(13) "311110000000Z"
   ["validFrom_time_t"]=>
-  int(1214821723)
+  int(1163116800)
   ["validTo_time_t"]=>
-  int(1217413723)
+  int(1952035200)
+  ["signatureTypeSN"]=>
+  string(8) "RSA-SHA1"
+  ["signatureTypeLN"]=>
+  string(21) "sha1WithRSAEncryption"
+  ["signatureTypeNID"]=>
+  int(65)
   ["purposes"]=>
-  array(8) {
+  array(9) {
     [1]=>
     array(3) {
       [0]=>
@@ -212,7 +229,7 @@ array(13) {
     [3]=>
     array(3) {
       [0]=>
-      bool(true)
+      bool(false)
       [1]=>
       bool(true)
       [2]=>
@@ -230,7 +247,7 @@ array(13) {
     [5]=>
     array(3) {
       [0]=>
-      bool(true)
+      bool(false)
       [1]=>
       bool(true)
       [2]=>
@@ -263,20 +280,34 @@ array(13) {
       [2]=>
       string(11) "OCSP helper"
     }
+    [9]=>
+    array(3) {
+      [0]=>
+      bool(false)
+      [1]=>
+      bool(true)
+      [2]=>
+      string(18) "Time Stamp signing"
+    }
   }
   ["extensions"]=>
-  array(3) {
-    ["subjectKeyIdentifier"]=>
-    string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
-    ["authorityKeyIdentifier"]=>
-    string(202) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
-DirName:/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net
-serial:AE:C5:56:CC:72:37:50:A2
-"
+  array(4) {
+    ["keyUsage"]=>
+    string(45) "Digital Signature, Certificate Sign, CRL Sign"
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
+    ["subjectKeyIdentifier"]=>
+    string(59) "45:EB:A2:AF:F4:92:CB:82:31:2D:51:8B:A7:A7:21:9D:F3:6D:C8:0F"
+    ["authorityKeyIdentifier"]=>
+    string(66) "keyid:45:EB:A2:AF:F4:92:CB:82:31:2D:51:8B:A7:A7:21:9D:F3:6D:C8:0F
+"
   }
   ["criticalExtensions"]=>
-  array(0) {
+  array(2) {
+    [0]=>
+    string(8) "keyUsage"
+    [1]=>
+    string(16) "basicConstraints"
   }
 }
+
