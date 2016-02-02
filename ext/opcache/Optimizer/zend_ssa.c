@@ -23,19 +23,47 @@
 #include "zend_dump.h"
 #include "zend_inference.h"
 
-static int needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
-{
-	if (from == to || ssa->cfg.blocks[to].predecessors_count != 1) {
-		zend_ssa_phi *p = ssa->blocks[to].phis;
-		while (p) {
-			if (p->pi < 0 && p->var == var) {
-				return 1;
-			}
-			p = p->next;
+static zend_bool dominates(const zend_basic_block *blocks, int a, int b) {
+	while (blocks[b].level > blocks[a].level) {
+		b = blocks[b].idom;
+	}
+	return a == b;
+}
+
+static zend_bool dominates_other_predecessors(
+		const zend_cfg *cfg, const zend_basic_block *block, int check, int exclude) {
+	int i;
+	for (i = 0; i < block->predecessors_count; i++) {
+		int predecessor = cfg->predecessors[block->predecessor_offset + i];
+		if (predecessor != exclude && !dominates(cfg->blocks, check, predecessor)) {
+			return 0;
 		}
+	}
+	return 1;
+}
+
+static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
+{
+	zend_basic_block *from_block, *to_block;
+	int other_successor;
+
+	if (!DFG_ISSET(dfg->in, dfg->size, to, var)) {
+		/* Variable is not live, certainly won't benefit from pi */
 		return 0;
 	}
-	return DFG_ISSET(dfg->in, dfg->size, to, var);
+
+	to_block = &ssa->cfg.blocks[to];
+	if (to_block->predecessors_count == 1) {
+		/* Always place pi if one predecessor (an if branch) */
+		return 1;
+	}
+
+	/* Check that the other successor of the from block does not dominate all other predecessors.
+	 * If it does, we'd probably end up annihilating a positive+negative pi assertion. */
+	from_block = &ssa->cfg.blocks[from];
+	other_successor = from_block->successors[0] == to
+		? from_block->successors[1] : from_block->successors[0];
+	return !dominates_other_predecessors(&ssa->cfg, to_block, other_successor, from);
 }
 /* }}} */
 
@@ -917,7 +945,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				ZEND_BITSET_REVERSE_FOREACH(tmp, set_size, i) {
 					zend_ssa_phi **pp = &ssa_blocks[j].phis;
 					while (*pp) {
-						if ((*pp)->pi <= 0 && (*pp)->var == i) {
+						if ((*pp)->pi < 0 && (*pp)->var == i) {
 							break;
 						}
 						pp = &(*pp)->next;
