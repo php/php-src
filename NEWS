@@ -10,15 +10,15 @@ PHP                                                                        NEWS
     input). (Leo Gaspard)
   . Fixed bug #71459 (Integer overflow in iptcembed()). (Stas)
 
-- WDDX:
-  . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
-  
 - Phar:
   . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
   . Fixed bug #71391 (NULL Pointer Dereference in phar_tar_setupmetadata()).
     (Stas)
   . Fixed bug #71488 (Stack overflow when decompressing tar archives). (Stas)
 
+- WDDX:
+  . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
+  
 07 Jan 2015, PHP 5.5.31
 
 - FPM:
