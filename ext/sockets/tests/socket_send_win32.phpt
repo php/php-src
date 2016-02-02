@@ -7,8 +7,8 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 if (!extension_loaded('sockets')) {
   die('SKIP sockets extension not available.');
 }
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+	die('skip windows only test');
 }
 ?>
 --FILE--
@@ -22,14 +22,6 @@ $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
 
 if(socket_send($socket, $stringSocket, $stringSocketLenght, MSG_OOB)===$stringSocketLenght){
-  print("okey\n");
-}
-
-if(socket_send($socket, $stringSocket, $stringSocketLenght, MSG_EOR)===$stringSocketLenght){
-  print("okey\n");
-}
-
-if(socket_send($socket, $stringSocket, $stringSocketLenght, MSG_EOF)===$stringSocketLenght){
   print("okey\n");
 }
 
@@ -47,7 +39,5 @@ unset($socket);
 unset($socketConn);
 ?>
 --EXPECTF--
-okey
-okey
 okey
 okey

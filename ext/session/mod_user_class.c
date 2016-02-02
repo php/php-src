@@ -22,10 +22,6 @@
 #include "php_session.h"
 
 #define PS_SANITY_CHECK						\
-	if (PS(session_status) != php_session_active) { \
-		php_error_docref(NULL, E_WARNING, "Session is not active"); \
-		RETURN_FALSE; \
-	} \
 	if (PS(default_mod) == NULL) {				\
 		php_error_docref(NULL, E_CORE_ERROR, "Cannot call default session handler"); \
 		RETURN_FALSE;						\
@@ -44,7 +40,6 @@ PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
 	size_t save_path_len, session_name_len;
-	int ret;
 
 	PS_SANITY_CHECK;
 
@@ -53,15 +48,7 @@ PHP_METHOD(SessionHandler, open)
 	}
 
 	PS(mod_user_is_open) = 1;
-
-	zend_try {
-		ret = PS(default_mod)->s_open(&PS(mod_data), save_path, session_name);
-	} zend_catch {
-		PS(session_status) = php_session_none;
-		zend_bailout();
-	} zend_end_try();
-
-	RETVAL_BOOL(SUCCESS == ret);
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_open(&PS(mod_data), save_path, session_name));
 }
 /* }}} */
 
@@ -69,8 +56,6 @@ PHP_METHOD(SessionHandler, open)
    Wraps the old close handler */
 PHP_METHOD(SessionHandler, close)
 {
-	int ret;
-
 	PS_SANITY_CHECK_IS_OPEN;
 
 	// don't return on failure, since not closing the default handler
@@ -78,15 +63,7 @@ PHP_METHOD(SessionHandler, close)
 	zend_parse_parameters_none();
 
 	PS(mod_user_is_open) = 0;
-
-	zend_try {
-		ret = PS(default_mod)->s_close(&PS(mod_data));
-	} zend_catch {
-		PS(session_status) = php_session_none;
-		zend_bailout();
-	} zend_end_try();
-
-	RETVAL_BOOL(SUCCESS == ret);
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_close(&PS(mod_data)));
 }
 /* }}} */
 
