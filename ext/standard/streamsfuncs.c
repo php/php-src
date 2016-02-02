@@ -498,6 +498,12 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	array_init(return_value);
 
+	if (!php_stream_populate_meta_data(stream, return_value)) {
+		add_assoc_bool(return_value, "timed_out", 0);
+		add_assoc_bool(return_value, "blocked", 1);
+		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
+	}
+
 	if (stream->wrapperdata) {
 		MAKE_STD_ZVAL(newval);
 		MAKE_COPY_ZVAL(&stream->wrapperdata, newval);
@@ -531,12 +537,6 @@ PHP_FUNCTION(stream_get_meta_data)
 	add_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
 		add_assoc_string(return_value, "uri", stream->orig_path, 1);
-	}
-
-	if (!php_stream_populate_meta_data(stream, return_value)) {
-		add_assoc_bool(return_value, "timed_out", 0);
-		add_assoc_bool(return_value, "blocked", 1);
-		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
 	}
 
 }
@@ -687,7 +687,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 				} else { /* HASH_KEY_IS_STRING */
 					zend_hash_update(new_hash, key, key_len, (void *)elem, sizeof(zval *), (void **)&dest_elem);
 				}
-				
+
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
 				}
@@ -1444,7 +1444,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size must be a positive integer, given %ld", csize);
 		RETURN_FALSE;
 	}
-	/* stream.chunk_size is actually a size_t, but php_stream_set_option 
+	/* stream.chunk_size is actually a size_t, but php_stream_set_option
 	 * can only use an int to accept the new value and return the old one.
 	 * In any case, values larger than INT_MAX for a chunk size make no sense.
 	 */
@@ -1452,11 +1452,11 @@ PHP_FUNCTION(stream_set_chunk_size)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size cannot be larger than %d", INT_MAX);
 		RETURN_FALSE;
 	}
-	
+
 	php_stream_from_zval(stream, &zstream);
 
 	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_SET_CHUNK_SIZE, (int)csize, NULL);
-	
+
 	RETURN_LONG(ret > 0 ? (long)ret : (long)EOF);
 }
 /* }}} */

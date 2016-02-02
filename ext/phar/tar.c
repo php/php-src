@@ -195,6 +195,13 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 }
 /* }}} */
 
+#if !HAVE_STRNLEN
+static size_t strnlen(const char *s, size_t maxlen) {
+        char *r = (char *)memchr(s, '\0', maxlen);
+        return r ? r-s : maxlen;
+}
+#endif
+
 int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
@@ -204,6 +211,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 	php_uint32 sum1, sum2, size, old;
 	phar_archive_data *myphar, **actual;
 	int last_was_longlink = 0;
+	int linkname_len;
 
 	if (error) {
 		*error = NULL;
@@ -264,7 +272,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			goto next;
 		}
 
-		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+		if (((!old && hdr->prefix[0] == 0) || old) && strnlen(hdr->name, 100) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			off_t curloc;
 
 			if (size > 511) {
@@ -474,20 +482,22 @@ bail:
 		}
 
 		entry.link = NULL;
-
+		/* link field is null-terminated unless it has 100 non-null chars.
+		 * Thus we can not use strlen. */
+		linkname_len = strnlen(hdr->linkname, 100);
 		if (entry.tar_type == TAR_LINK) {
-			if (!zend_hash_exists(&myphar->manifest, hdr->linkname, strlen(hdr->linkname))) {
+			if (!zend_hash_exists(&myphar->manifest, hdr->linkname, linkname_len)) {
 				if (error) {
-					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%s\"", fname, hdr->linkname);
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%.*s\"", fname, linkname_len, hdr->linkname);
 				}
 				pefree(entry.filename, entry.is_persistent);
 				php_stream_close(fp);
 				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
-			entry.link = estrdup(hdr->linkname);
+			entry.link = estrndup(hdr->linkname, linkname_len);
 		} else if (entry.tar_type == TAR_SYMLINK) {
-			entry.link = estrdup(hdr->linkname);
+			entry.link = estrndup(hdr->linkname, linkname_len);
 		}
 		phar_set_inode(&entry TSRMLS_CC);
 		zend_hash_add(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), (void **) &newentry);
@@ -880,6 +890,9 @@ static int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ 
 
 	if (entry->filename_len >= sizeof(".phar/.metadata") && !memcmp(entry->filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
 		if (entry->filename_len == sizeof(".phar/.metadata.bin")-1 && !memcmp(entry->filename, ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
+			if (entry->phar->metadata == NULL) {
+				return ZEND_HASH_APPLY_REMOVE;
+			}
 			return phar_tar_setmetadata(entry->phar->metadata, entry, error TSRMLS_CC);
 		}
 		/* search for the file this metadata entry references */

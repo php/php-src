@@ -4886,6 +4886,7 @@ PHP_METHOD(PharFileInfo, getContent)
 
 	phar_seek_efp(link, 0, SEEK_SET, 0, 0 TSRMLS_CC);
 	Z_TYPE_P(return_value) = IS_STRING;
+	Z_STRVAL_P(return_value) = NULL;
 	Z_STRLEN_P(return_value) = php_stream_copy_to_mem(fp, &(Z_STRVAL_P(return_value)), link->uncompressed_filesize, 0);
 
 	if (!Z_STRVAL_P(return_value)) {
