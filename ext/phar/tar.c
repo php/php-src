@@ -488,22 +488,22 @@ bail:
 			entry.link = estrdup(hdr->linkname);
 		}
 		phar_set_inode(&entry);
-                
-                if (zend_hash_str_exists(&myphar->manifest, entry.filename, entry.filename_len)) {
-                    newentry = zend_hash_str_update_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
-                } else {
-                    newentry = zend_hash_str_add_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
-                }
 
-                if (newentry == NULL) {
-                        if (error) {
-                                spprintf(error, 4096, "phar error: tar-based phar \"%s\" cannot be registered", entry.filename);
-                        }
-                        php_stream_close(fp);
-                        phar_destroy_phar_data(myphar);
-                        return FAILURE;
-                }
-                
+		if (zend_hash_str_exists(&myphar->manifest, entry.filename, entry.filename_len)) {
+			newentry = zend_hash_str_update_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
+		} else {
+			newentry = zend_hash_str_add_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
+		}
+
+		if (newentry == NULL) {
+			if (error) {
+				spprintf(error, 4096, "phar error: tar-based phar \"%s\" cannot be registered", entry.filename);
+			}
+			php_stream_close(fp);
+			phar_destroy_phar_data(myphar);
+			return FAILURE;
+		}
+
 		if (entry.is_persistent) {
 			++entry.manifest_pos;
 		}
