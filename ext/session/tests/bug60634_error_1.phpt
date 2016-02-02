@@ -40,8 +40,19 @@ session_start();
 session_write_close();
 echo "um, hi\n";
 
+/*
+FIXME: Since session module try to write/close session data in
+RSHUTDOWN, write() is executed twices. This is caused by undefined
+function error and zend_bailout(). Current session module codes
+depends on this behavior. These codes should be modified to remove
+multiple write().
+*/
+
 ?>
 --EXPECTF--
+write: goodbye cruel world
+
+Fatal error: Call to undefined function undefined_function() in %s on line %d
 write: goodbye cruel world
 
 Fatal error: Call to undefined function undefined_function() in %s on line %d

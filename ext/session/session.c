@@ -92,12 +92,14 @@ static void php_session_abort(TSRMLS_D);
 /* Dispatched by RINIT and by php_session_destroy */
 static inline void php_rinit_session_globals(TSRMLS_D) /* {{{ */
 {
+	/* Do NOT init PS(mod_user_names) here! */
+
+	/* TODO: These could be moved to MINIT and removed. These should be initialized by php_rshutdown_session_globals() always when execution is finished. */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = 0;
 	PS(define_sid) = 1;
-	/* Do NOT init PS(mod_user_names) here! */
 	PS(http_session_vars) = NULL;
 }
 /* }}} */
@@ -119,6 +121,9 @@ static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 		efree(PS(id));
 		PS(id) = NULL;
 	}
+	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
+	/* Set session status to prevent error while restoring save handler INI value. */
+	PS(session_status) = php_session_none;
 }
 /* }}} */
 
@@ -1114,7 +1119,7 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 
 PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SERIALIZER_ENCODE_ARGS), int (*decode)(PS_SERIALIZER_DECODE_ARGS)) /* {{{ */
 {
-	int ret = -1;
+	int ret = FAILURE;
 	int i;
 
 	for (i = 0; i < MAX_SERIALIZERS; i++) {
@@ -1123,7 +1128,7 @@ PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SE
 			ps_serializers[i].encode = encode;
 			ps_serializers[i].decode = decode;
 			ps_serializers[i + 1].name = NULL;
-			ret = 0;
+			ret = SUCCESS;
 			break;
 		}
 	}
@@ -1145,13 +1150,13 @@ static ps_module *ps_modules[MAX_MODULES + 1] = {
 
 PHPAPI int php_session_register_module(ps_module *ptr) /* {{{ */
 {
-	int ret = -1;
+	int ret = FAILURE;
 	int i;
 
 	for (i = 0; i < MAX_MODULES; i++) {
 		if (!ps_modules[i]) {
 			ps_modules[i] = ptr;
-			ret = 0;
+			ret = SUCCESS;
 			break;
 		}
 	}
@@ -1651,8 +1656,8 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 static void php_session_flush(TSRMLS_D) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
-		PS(session_status) = php_session_none;
 		php_session_save_current_state(TSRMLS_C);
+		PS(session_status) = php_session_none;
 	}
 }
 /* }}} */
@@ -1660,10 +1665,10 @@ static void php_session_flush(TSRMLS_D) /* {{{ */
 static void php_session_abort(TSRMLS_D) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
-		PS(session_status) = php_session_none;
 		if (PS(mod_data) || PS(mod_user_implemented)) {
 			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
 		}
+		PS(session_status) = php_session_none;
 	}
 }
 /* }}} */

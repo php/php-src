@@ -45,3 +45,5 @@ echo "um, hi\n";
 close: goodbye cruel world
 
 Fatal error: Call to undefined function undefined_function() in %s on line %d
+
+Warning: Unknown: Failed to write session data (user). Please verify that the current setting of session.save_path is correct () in Unknown on line 0

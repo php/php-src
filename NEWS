@@ -1,9 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 5.6.18
-
-- Apache2handler:
-  . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
+21 Jan 2016, PHP 5.6.18RC1
 
 - Core:
   . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
@@ -11,6 +8,9 @@ PHP                                                                        NEWS
   . Added support for new HTTP 451 code. (Julien)
   . Fixed bug #71273 (A wrong ext directory setup in php.ini leads to crash).
     (Anatol);
+
+- Apache2handler:
+  . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 
 - Session:
   . Improved fix for bug #68063 (Empty session IDs do still start sessions). (Yasuo)
+  . Fixed bug #69111 (Crash in SessionHandler::read()). (Yasuo)
   . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
   . Fixed bug #71038 (session_start() returns TRUE on failure).
     It's fixed partially on PHP 5.6. It still returns TRUE on session read
