@@ -1,13 +1,18 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-21 Jan 2016, PHP 5.6.18RC1
+21 Jan 2016, PHP 5.6.18
 
 - Core:
-  . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
+  . Fixed bug #71039 (exec functions ignore length but look for NULL termination).
+    (Anatol)
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
+  . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Added support for new HTTP 451 code. (Julien)
   . Fixed bug #71273 (A wrong ext directory setup in php.ini leads to crash).
-    (Anatol);
+    (Anatol)
+  . Fixed bug #71323 (Output of stream_get_meta_data can be falsified by its 
+    input). (Leo Gaspard)
+  . Fixed bug #71459 (Integer overflow in iptcembed()). (Stas)
 
 - Apache2handler:
   . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
@@ -20,6 +25,12 @@ PHP                                                                        NEWS
   . Fixed bug #71127 (Define in auto_prepend_file is overwrite). (Laruence)
   . Fixed bug #71024 (Unable to use PHP 7.0 x64 side-by-side with PHP 5.6 x32
     on the same server). (Anatol)
+
+- Phar:
+  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
+  . Fixed bug #71391 (NULL Pointer Dereference in phar_tar_setupmetadata()).
+    (Stas)
+  . Fixed bug #71488 (Stack overflow when decompressing tar archives). (Stas)
 
 - Session:
   . Improved fix for bug #68063 (Empty session IDs do still start sessions). (Yasuo)
@@ -40,6 +51,9 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+
+- WDDX:
+  . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
 
 07 Jan 2016, PHP 5.6.17
 
