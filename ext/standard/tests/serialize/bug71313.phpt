@@ -6,9 +6,9 @@ $data = unserialize("C:16:\"SplObjectStorage\":113:{x:i:2;O:8:\"stdClass\":0:{},
 var_dump($data);
 ?>
 --EXPECTF--
-Fatal error: Uncaught UnexpectedValueException: Error at offset 82 of 113 bytes in %s/bug71313.php:2
+Fatal error: Uncaught UnexpectedValueException: Error at offset 82 of 113 bytes in %s%ebug71313.php:2
 Stack trace:
 #0 [internal function]: SplObjectStorage->unserialize('%s')
-#1 %s/bug71313.php(2): unserialize('%s')
+#1 %s%ebug71313.php(2): unserialize('%s')
 #2 {main}
-  thrown in %s/bug71313.php on line 2
+  thrown in %s%ebug71313.php on line 2
