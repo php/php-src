@@ -50,6 +50,10 @@
 #include <unistd.h>
 #endif
 
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 static int cmd_max_len;
 
 /* {{{ PHP_MINIT_FUNCTION(exec) */
@@ -57,6 +61,13 @@ PHP_MINIT_FUNCTION(exec)
 {
 #ifdef _SC_ARG_MAX
 	cmd_max_len = sysconf(_SC_ARG_MAX);
+	if (-1 == cmd_max_len) {
+#ifdef _POSIX_ARG_MAX
+		cmd_max_len = _POSIX_ARG_MAX;
+#else
+		cmd_max_len = 4096;
+#endif
+	}
 #elif defined(ARG_MAX)
 	cmd_max_len = ARG_MAX;
 #elif defined(PHP_WIN32)
