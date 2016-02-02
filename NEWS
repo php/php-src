@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.3
+04 Feb 2016 PHP 7.0.3
 
 - Core:
   . Added support for new HTTP 451 code. (Julien)
@@ -40,10 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug #71249 (ldap_mod_replace/ldap_mod_add store value as string
     "Array"). (Laruence)
 
-- mbsgring:
-  . Fixed bug #71397 (mb_send_mail segmentation fault). (Yasuo)
+- mbstring:
+  . Fixed bug #71397 (mb_send_mail segmentation fault). (Andrea, Yasuo)
 
-OpenSSL:
+- OpenSSL:
   . Fixed bug #71475 (openssl_seal() uninitialized memory usage). (Stas)
 
 - Phar:
@@ -64,16 +64,6 @@ OpenSSL:
     unserialize)). (Sean Heelan)
   . Fixed bug #71313 (Use-after-free vulnerability in SPL(SplObjectStorage,
     unserialize)). (Sean Heelan)
-  
-- Session:
-  . Improved fix for bug #68063 (Empty session IDs do still start sessions). (Yasuo)
-  . Fixed bug #69111 (Crash in SessionHandler::read()) (Yasuo)
-  . Fixed bug #71038 (session_start() returns TRUE on failure).
-    Session save handlers must return 'string' always for successful read.
-    i.e. Non-existing session read must return empty string. PHP 7.0 is made
-    not to tolerate buggy return value. (Yasuo)
-  . Fixed bug #71394 (session_regenerate_id() must close opened session on errors).
-    (Yasuo)
 
 - Standard:
   . Fixed bug #71287 (Error message contains hexadecimal instead of decimal
@@ -88,12 +78,10 @@ OpenSSL:
     array to strings). (Laruence)
   . Fixed bug #71188 (str_replace converts integers in original $search array
     to strings). (Laruence)
-  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
   . Fixed bug #71132, #71197 (range() segfaults). (Thomas Punt)
 
 - WDDX:
   . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
-
 
 07 Jan 2016 PHP 7.0.2
 
