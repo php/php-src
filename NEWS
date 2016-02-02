@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Upgraded bundled PCRE library to 8.38.
 
+- Standard:
+  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+
 04 Feb 2016, PHP 5.6.18
 
 - Core:
@@ -43,9 +46,6 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #71204 (segfault if clean spl_autoload_funcs while autoloading).
     (Laruence)
-
-- Standard:
-  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
 07 Jan 2016, PHP 5.6.17
 
