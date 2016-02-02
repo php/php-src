@@ -697,7 +697,9 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			plen = sep - path;
 			vlen = (semi ? semi - sep : mlen - plen) - 1 /* '=' */;
 			key = estrndup(path, plen);
-			add_assoc_stringl_ex(&meta, key, plen, sep + 1, vlen);
+			if (plen != sizeof("mediatype")-1 || memcmp(key, "mediatype", sizeof("mediatype")-1)) {
+				add_assoc_stringl_ex(&meta, key, plen, sep + 1, vlen);
+			}
 			efree(key);
 			plen += vlen + 1;
 			mlen -= plen;
