@@ -17,7 +17,7 @@ It is recommended to do so a couple of days before the packaging day, to
 have enough time to investigate failures, communicate with the authors and
 commit the fixes.
 The RM for the branch is also responsible for keeping the CI green on
-ongoing bases between the releases. Check the CI status for your branch
+ongoing basis between the releases. Check the CI status for your branch
 periodically and resolve the failures ASAP. See more in:
 https://wiki.php.net/rfc/travis_ci
 
@@ -271,8 +271,8 @@ to upgrade.
 10. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 http://news.php.net/php.internals/17222.
-Please make sure that the mail to php-announce@ is its own completely seperate email.
-This is to make sure that repiles to the announcement on php-general@ or internals@
+Please make sure that the mail to php-announce@ is its own completely separate email.
+This is to make sure that replies to the announcement on php-general@ or internals@
 will not accidentally hit the php-announce@ mailinglist.
 
 Re-releasing the same version (or -pl)
@@ -309,6 +309,6 @@ to upgrade.
 5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 the news entry.
-Please make sure that the mail to php-announce@ is its own completely seperate email.
-This is to make sure that repiles to the announcement on php-general@ or internals@
+Please make sure that the mail to php-announce@ is its own completely separate email.
+This is to make sure that replies to the announcement on php-general@ or internals@
 will not accidentally hit the php-announce@ mailinglist.

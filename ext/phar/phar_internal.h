@@ -55,13 +55,11 @@
 #include "TSRM/tsrm_strtok_r.h"
 #endif
 #include "Zend/zend_virtual_cwd.h"
-#if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
 #include "ext/spl/spl_engine.h"
 #include "ext/spl/spl_exceptions.h"
 #include "ext/spl/spl_iterators.h"
-#endif
 #include "php_phar.h"
 #ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash.h"
@@ -210,10 +208,8 @@ ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #include "pharzip.h"
 
-#if HAVE_SPL
 typedef union _phar_archive_object  phar_archive_object;
 typedef union _phar_entry_object    phar_entry_object;
-#endif
 
 /*
  * used in phar_entry_info->fp_type to
@@ -473,21 +469,17 @@ typedef struct _phar_entry_data {
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 
-#if HAVE_SPL
 /* archive php object */
 union _phar_archive_object {
 	spl_filesystem_object    spl;
 	phar_archive_data        *archive;
 };
-#endif
 
-#if HAVE_SPL
 /* entry php object */
 union _phar_entry_object {
 	spl_filesystem_object    spl;
 	phar_entry_info          *entry;
 };
-#endif
 
 #ifndef PHAR_MAIN
 extern zend_string *(*phar_save_resolve_path)(const char *filename, int filename_len);

@@ -321,7 +321,7 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 
 	do {
 		us = (unsigned char)s[pos];
-		if (us >= 0x80 && !(options & PHP_JSON_UNESCAPED_UNICODE)) {
+		if (us >= 0x80 && (!(options & PHP_JSON_UNESCAPED_UNICODE) || us == 0xE2)) {
 			/* UTF-8 character */
 			us = php_next_utf8_char((const unsigned char *)s, len, &pos, &status);
 			if (status != SUCCESS) {
@@ -331,6 +331,15 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 				JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 				smart_str_appendl(buf, "null", 4);
 				return;
+			}
+			/* Escape U+2028/U+2029 line terminators, UNLESS both
+			   JSON_UNESCAPED_UNICODE and
+			   JSON_UNESCAPED_LINE_TERMINATORS were provided */
+			if ((options & PHP_JSON_UNESCAPED_UNICODE)
+				&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+					|| us < 0x2028 || us > 0x2029)) {
+				smart_str_appendl(buf, &s[pos - 3], 3);
+				continue;
 			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
 			if (us >= 0x10000) {

@@ -61,7 +61,6 @@ extern public void convert_libmagic_pattern(zval *pattern, char *val, int len, i
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
-	int rv;
 	va_list ap;
 	int len;
 	char *buf = NULL, *newstr;
@@ -283,7 +282,9 @@ simple:
 		if (file_printf(ms, "%s", code_mime) == -1)
 			rv = -1;
 	}
+#if PHP_FILEINFO_UNCOMPRESS
  done_encoding:
+#endif
 	free(u8buf);
 	if (rv)
 		return rv;
@@ -438,7 +439,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	(void)setlocale(LC_CTYPE, "C");
 
 	opts |= PCRE_MULTILINE;
-	convert_libmagic_pattern(&patt, pat, strlen(pat), opts);
+	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
 	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
 		zval_ptr_dtor(&patt);
 		rep_cnt = -1;

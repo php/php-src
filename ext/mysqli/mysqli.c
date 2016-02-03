@@ -34,6 +34,7 @@
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 #include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 #include "zend_interfaces.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
@@ -582,9 +583,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.get_property_ptr_ptr = std_hnd->get_property_ptr_ptr;
 	mysqli_object_handlers.has_property = mysqli_object_has_property;
-#if PHP_VERSION_ID >= 50300
 	mysqli_object_handlers.get_debug_info = mysqli_object_get_debug_info;
-#endif
 	memcpy(&mysqli_object_driver_handlers, &mysqli_object_handlers, sizeof(zend_object_handlers));
 	mysqli_object_driver_handlers.free_obj = mysqli_driver_free_storage;
 	memcpy(&mysqli_object_link_handlers, &mysqli_object_handlers, sizeof(zend_object_handlers));
@@ -603,11 +602,7 @@ PHP_MINIT_FUNCTION(mysqli)
 		"MySqli persistent connection", module_number);
 
 	INIT_CLASS_ENTRY(cex, "mysqli_sql_exception", mysqli_exception_methods);
-#ifdef HAVE_SPL
 	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
-#else
-	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_ce_exception);
-#endif
 	mysqli_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(mysqli_exception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
 	zend_declare_property_string(mysqli_exception_class_entry, "sqlstate", sizeof("sqlstate")-1, "00000", ZEND_ACC_PROTECTED);
@@ -999,9 +994,7 @@ PHP_MINFO_FUNCTION(mysqli)
 
 /* Dependancies */
 static const  zend_module_dep mysqli_deps[] = {
-#if defined(HAVE_SPL) && (PHP_VERSION_ID >= 50100)
 	ZEND_MOD_REQUIRED("spl")
-#endif
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_MOD_REQUIRED("mysqlnd")
 #endif

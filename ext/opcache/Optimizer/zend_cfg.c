@@ -366,7 +366,12 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_UNSET_VAR:
 			case ZEND_ISSET_ISEMPTY_VAR:
-				if (!(opline->extended_value & ZEND_QUICK_SET)) {
+				if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) &&
+				    !(opline->extended_value & ZEND_QUICK_SET)) {
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
+				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
+				           !op_array->function_name) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 				break;
@@ -530,7 +535,7 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 			if (b->successors[0] >= 0) {
 				edges++;
 				blocks[b->successors[0]].predecessors_count++;
-				if (b->successors[1] >= 0) {
+				if (b->successors[1] >= 0 && b->successors[1] != b->successors[0]) {
 					edges++;
 					blocks[b->successors[1]].predecessors_count++;
 				}
@@ -559,7 +564,8 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 				zend_basic_block *b = blocks + blocks[j].successors[0];
 				predecessors[b->predecessor_offset + b->predecessors_count] = j;
 				b->predecessors_count++;
-				if (blocks[j].successors[1] >= 0) {
+				if (blocks[j].successors[1] >= 0
+						&& blocks[j].successors[1] != blocks[j].successors[0]) {
 					zend_basic_block *b = blocks + blocks[j].successors[1];
 					predecessors[b->predecessor_offset + b->predecessors_count] = j;
 					b->predecessors_count++;

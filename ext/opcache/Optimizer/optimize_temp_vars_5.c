@@ -39,7 +39,7 @@
 		max = i;							\
 	}
 
-void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int T = op_array->T;
 	int offset = op_array->last_var;

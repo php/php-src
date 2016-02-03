@@ -155,6 +155,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 						 && ssa->ops[op2].op2_use_chain < 0
 						 && !ssa->vars[var1].phi_use_chain
 						 && !ssa->vars[var1].sym_use_chain
+						 /* see Zend/tests/generators/aborted_yield_during_new.phpt */
+						 && op_array->opcodes[ssa->vars[var1].definition].opcode != ZEND_NEW
 						) {
 							int op1 = ssa->vars[var1].definition;
 							int var3 = i;
@@ -219,7 +221,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 	}
 }
 
-void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 	uint32_t flags = 0;

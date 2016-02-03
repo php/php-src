@@ -1087,7 +1087,7 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		c = Z_PTR_P(zv);
 
-		zend_file_cache_unserialize_class_constant(&c->value, script, buf);
+		zend_file_cache_unserialize_zval(&c->value, script, buf);
 		if (c->ce && !IS_UNSERIALIZED(c->ce)) {
 			UNSERIALIZE_PTR(c->ce);
 		}
