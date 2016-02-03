@@ -376,7 +376,7 @@ PW32IO int php_win32_ioutil_open(const char *path, int flags, ...)
 	HANDLE file;
 	int fd;
 	mode_t mode = 0;
-	wchar_t *pathw = php_win32_ioutil_mb_to_w(path);
+	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
 	BOOL use_a = 0;
 
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
@@ -673,7 +673,7 @@ PW32IO HANDLE php_win32_ioutil_findfirstfile_w(char *path, WIN32_FIND_DATA *data
 		return ret;
 	}
 
-	pathw = php_win32_ioutil_mb_to_w(path);
+	pathw = php_win32_ioutil_any_to_w(path);
 
 	if (!pathw) {
 		err = GetLastError();

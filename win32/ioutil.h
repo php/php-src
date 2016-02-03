@@ -127,7 +127,7 @@ PW32IO int php_win32_ioutil_open(const char *path, int flags, ...);
 
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	const char *patha = path; \
-	wchar_t *pathw = php_win32_ioutil_mb_to_w(path); \
+	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
 	BOOL use_w = (NULL != pathw);
 
 #define PHP_WIN32_IOUTIL_CLEANUP_W() \
@@ -252,15 +252,6 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 #endif
 
 #if 0
-/* Prepared. This should be used instead of php_win32_ioutil_mb_to_w to get paths prepended with \\?\ transparently. */
-zend_always_inline static wchar_t *php_win32_ioutil_path_get_w(char *path)
-{
-	wchar_t *ret;
-
-
-
-}
-
 zend_always_inline static HANDLE php_win32_ioutil_get_file_handle(char *path, WIN32_FIND_DATA *data)
 {
 		HANDLE ret = FindFirstFileA(path, data);
