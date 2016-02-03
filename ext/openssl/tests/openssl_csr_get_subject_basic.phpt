@@ -8,7 +8,7 @@ if (!function_exists("utf8_decode")) die("skip");
 --FILE--
 <?php
 
-$csr = file_get_contents(dirname(__FILE__) . '/005_crt.txt');
+$csr = file_get_contents(dirname(__FILE__) . '/cert.csr');
 if ($out = openssl_csr_get_subject($csr, 1)) {
 	var_dump($out);
 }

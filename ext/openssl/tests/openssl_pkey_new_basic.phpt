@@ -1,5 +1,5 @@
 --TEST--
-openssl_pkey_new() with an empty sub-array arg generates a malformed resource
+openssl_pkey_new() tests
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--

@@ -11,10 +11,14 @@ var_dump(openssl_csr_new(1,$a,1,1));
 $a = array();
 var_dump(openssl_csr_new(array(), $a, array('config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf'), array()));
 
-//this leaks
+// this leaks
 $a = array(1,2);
 $b = array(1,2);
 var_dump(openssl_csr_new($a, $b, array('config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf')));
+
+// options type check
+$x = openssl_pkey_new();
+var_dump(openssl_csr_new(["countryName" => "DE"], $x, ["x509_extensions" => 0xDEADBEEF]));
 
 
 echo "Done\n";
@@ -30,5 +34,6 @@ Warning: openssl_csr_new(): key array must be of the form array(0 => key, 1 => p
 
 Warning: openssl_csr_new(): add1_attr_by_txt challengePassword_min -> 4 (failed; check error queue and value of string_mask OpenSSL option if illegal characters are reported) in %s on line %d
 bool(false)
+resource(%d) of type (OpenSSL X.509 CSR)
 resource(%d) of type (OpenSSL X.509 CSR)
 Done
