@@ -298,8 +298,10 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
    MoveFileEx has to be used */
 #if defined(ZEND_WIN32)
 # define VCWD_RENAME(oldname, newname) (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0 ? -1 : 0)
+#define VCWD_MKDIR(pathname, mode) php_win32_ioutil_mkdir(pathname, mode)
 #else
 # define VCWD_RENAME(oldname, newname) rename(oldname, newname)
+#define VCWD_MKDIR(pathname, mode) mkdir(pathname, mode)
 #endif
 #define VCWD_CHDIR(path) chdir(path)
 #define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
@@ -307,7 +309,6 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_STAT(path, buff) php_sys_stat(path, buff)
 #define VCWD_LSTAT(path, buff) lstat(path, buff)
 #define VCWD_UNLINK(path) unlink(path)
-#define VCWD_MKDIR(pathname, mode) mkdir(pathname, mode)
 #define VCWD_RMDIR(pathname) rmdir(pathname)
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)

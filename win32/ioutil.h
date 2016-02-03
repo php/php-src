@@ -85,7 +85,7 @@ PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr);
 __forceinline wchar_t *php_win32_ioutil_any_to_w(const char* in)
 {
 	const char *idx = in, *end = in + strlen(in);
-	
+
 	while (idx <= end) {
 		if (!__isascii(*idx)) {
 			break;
