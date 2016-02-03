@@ -1764,7 +1764,7 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode) /* {{{ */
 	}
 
 #ifdef ZEND_WIN32
-	retval = mkdir(new_state.cwd);
+	retval = php_win32_ioutil_mkdir(new_state.cwd);
 #else
 	retval = mkdir(new_state.cwd, mode);
 #endif

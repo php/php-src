@@ -543,7 +543,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 
 PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 {/*{{{*/
-	wchar_t *pathw = php_win32_ioutil_mb_to_w(path);
+	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
 	int ret = -1;
 	DWORD err = 0;
 
