@@ -9,7 +9,6 @@ Bug #71504: Parsing of tar file with duplicate filenames causes memory leak
 $fname = str_replace('\\', '/', dirname(__FILE__) . '/files/HTML_CSS-1.5.4.tgz');
 try {
 	$tar = new PharData($fname);
-	$tar->extractTo(__DIR__ . '/files/ff');
 } catch(Exception $e) {
 	echo $e->getMessage() . "\n";
 }
