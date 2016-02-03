@@ -33,14 +33,7 @@ PHP                                                                        NEWS
   . Fixed bug #71488 (Stack overflow when decompressing tar archives). (Stas)
 
 - Session:
-  . Improved fix for bug #68063 (Empty session IDs do still start sessions). (Yasuo)
-  . Fixed bug #69111 (Crash in SessionHandler::read()). (Yasuo)
-  . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
-  . Fixed bug #71038 (session_start() returns TRUE on failure).
-    It's fixed partially on PHP 5.6. It still returns TRUE on session read
-    failure for compatibility. Session save handlers should return 'string'
-    always for successful read. i.e. Non-existing session read must return
-    empty string. PHP 7.0 is made not to tolerate buggy return value. (Yasuo)
+  . Fixed bug #69111 (Crash in SessionHandler::read()). (Anatol)
 
 - SOAP:
   . Fixed bug #70979 (crash with bad soap request). (Anatol)
