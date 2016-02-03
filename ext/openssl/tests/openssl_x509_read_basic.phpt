@@ -1,5 +1,5 @@
 --TEST--
-openssl_x509_read() and openssl_x509_free() tests
+openssl_x509_read() tests with testing openssl_x509_free as well
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
