@@ -14,7 +14,7 @@ $dn = array(
 	"localityName" => "Porto Alegre",
 	"commonName" => "Henrique do N. Angelo",
 	"emailAddress" => "hnangelo@php.net"
-	);
+);
 
 $args = array(
 	"digest_alg" => "sha1",
@@ -22,7 +22,7 @@ $args = array(
 	"private_key_type" => OPENSSL_KEYTYPE_DSA,
 	"encrypt_key" => true,
 	"config" => $config,
-	);
+);
 
 $privkey = openssl_pkey_new($config_arg);
 $csr = openssl_csr_new($dn, $privkey, $args);

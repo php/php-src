@@ -20,8 +20,9 @@ var_dump(openssl_x509_export($d, $output4));	// read cert from a resource
 var_dump(openssl_x509_export($e, $output5));	// read an array, fails
 
 $outfilename = tempnam("/tmp", "ssl");
-if ($outfilename === false)
-        die("failed to get a temporary filename!");
+if ($outfilename === false) {
+	die("failed to get a temporary filename!");
+}
 
 echo "---\n";
 
@@ -34,7 +35,7 @@ echo "---\n";
 
 var_dump($exists = file_exists($outfilename));
 if ($exists) {
-        @unlink($outfilename);
+	@unlink($outfilename);
 }
 echo "---\n";
 
