@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
+- XMLRPC:
+  . Fixed bug #71501 (xmlrpc_encode_request ignores encoding option). (Hieu Le)
+
 04 Feb 2016 PHP 7.0.3
 
 - Core:
