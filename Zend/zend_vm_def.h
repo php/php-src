@@ -3527,7 +3527,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 
 #if ZEND_DEBUG
 	ZEND_ASSERT(
-		!call->func ||
+		EG(exception) || !call->func ||
 		!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 		zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
@@ -3655,7 +3655,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 
 #if ZEND_DEBUG
 		ZEND_ASSERT(
-			!call->func ||
+			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
@@ -3786,7 +3786,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		
 #if ZEND_DEBUG
 		ZEND_ASSERT(
-			!call->func ||
+			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
@@ -7833,10 +7833,8 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 {
 	zend_array *args;
 	zend_function *fbc = EX(func);
-	zend_object *object = Z_OBJ(EX(This));
 	zval *ret = EX(return_value);
 	uint32_t call_info = EX_CALL_INFO() & (ZEND_CALL_NESTED | ZEND_CALL_TOP | ZEND_CALL_RELEASE_THIS);
-	zend_class_entry *scope = EX(called_scope);
 	uint32_t num_args = EX_NUM_ARGS();
 	zend_execute_data *call;
 	USE_OPLINE
@@ -7859,9 +7857,11 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	SAVE_OPLINE();
 	call = execute_data;
 	execute_data = EG(current_execute_data) = EX(prev_execute_data);
-	zend_vm_stack_free_call_frame(call);
-	call = zend_vm_stack_push_call_frame(call_info, fbc->common.prototype, 2, scope, object);
-	call->prev_execute_data = execute_data;
+
+	ZEND_ASSERT(zend_vm_calc_used_stack(2, fbc->common.prototype) <= (size_t)(((char*)EG(vm_stack_end)) - (char*)call));
+
+	call->func = fbc->common.prototype;
+	ZEND_CALL_NUM_ARGS(call) = 2;
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
 	ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
@@ -7925,7 +7925,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 
 #if ZEND_DEBUG
 		ZEND_ASSERT(
-			!call->func ||
+			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
 #endif
@@ -7949,7 +7949,7 @@ ZEND_VM_C_LABEL(call_trampoline_end):
 	opline = EX(opline);
 
 	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-		object = Z_OBJ(call->This);
+		zend_object *object = Z_OBJ(call->This);
 		OBJ_RELEASE(object);
 	}
 	EG(scope) = EX(func)->op_array.scope;

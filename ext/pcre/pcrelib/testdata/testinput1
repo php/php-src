@@ -5720,4 +5720,17 @@ AbcdCBefgBhiBqz
 /[\Q]a\E]+/
     aa]]
 
+/(?:((abcd))|(((?:(?:(?:(?:abc|(?:abcdef))))b)abcdefghi)abc)|((*ACCEPT)))/
+    1234abcd
+
+/(\2)(\1)/
+
+"Z*(|d*){216}"
+
+"(?1)(?#?'){8}(a)"
+    baaaaaaaaac
+
+"(?|(\k'Pm')|(?'Pm'))"
+    abcd
+
 /-- End of testinput1 --/

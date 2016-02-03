@@ -585,7 +585,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		zend_update_extended_info(op_array);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_HANDLE_OP_ARRAY) {
-		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST) {
+		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_HANDLER) {
 			zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array);
 		}
 	}
@@ -668,9 +668,13 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_VERIFY_RETURN_TYPE:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 					if (opline->op1_type != IS_UNUSED) {
-						(opline + 1)->op1 = opline->op1;
-						(opline + 1)->op1_type = opline->op1_type;
+						zend_op *ret = opline;
+						do ret++; while (ret->opcode != ZEND_RETURN);
+
+						ret->op1 = opline->op1;
+						ret->op1_type = opline->op1_type;
 					}
+
 					MAKE_NOP(opline);
 				}
 				break;

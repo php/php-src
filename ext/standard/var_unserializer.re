@@ -556,6 +556,10 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
+	if (rval_ref == rval) {
+		return 0;
+	}
+
 	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
 		ZVAL_UNDEF(rval);
 		return 1;
