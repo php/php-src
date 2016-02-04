@@ -74,6 +74,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #71475 (openssl_seal() uninitialized memory usage). (Stas)
 
+- PCRE:
+  . Upgraded pcrelib to 8.38.
+
 - Phar:
   . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
   . Fixed bug #71391 (NULL Pointer Dereference in phar_tar_setupmetadata()).
