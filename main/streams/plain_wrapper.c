@@ -466,7 +466,11 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 			return 0; /* everything should be closed already -> success */
 		}
 		if (data->temp_name) {
+#ifdef PHP_WIN32
+			php_win32_ioutil_unlink(ZSTR_VAL(data->temp_name));
+#else
 			unlink(ZSTR_VAL(data->temp_name));
+#endif
 			/* temporary streams are never persistent */
 			zend_string_release(data->temp_name);
 			data->temp_name = NULL;

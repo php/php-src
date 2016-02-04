@@ -1745,7 +1745,11 @@ CWD_API int virtual_unlink(const char *path) /* {{{ */
 		return -1;
 	}
 
+#ifdef ZEND_WIN32
+	retval = php_win32_ioutil_unlink(new_state.cwd);
+#else
 	retval = unlink(new_state.cwd);
+#endif
 
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
@@ -1764,7 +1768,7 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode) /* {{{ */
 	}
 
 #ifdef ZEND_WIN32
-	retval = php_win32_ioutil_mkdir(new_state.cwd);
+	retval = php_win32_ioutil_mkdir(new_state.cwd, mode);
 #else
 	retval = mkdir(new_state.cwd, mode);
 #endif
@@ -1784,8 +1788,11 @@ CWD_API int virtual_rmdir(const char *pathname) /* {{{ */
 		return -1;
 	}
 
+#ifdef ZEND_WIN32
+	retval = php_win32_ioutil_rmdir(new_state.cwd);
+#else
 	retval = rmdir(new_state.cwd);
-
+#endif
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
