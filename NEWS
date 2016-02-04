@@ -4,14 +4,14 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #68078 (Datetime comparisons ignore microseconds). (Willem-Jan
-    Zijderveld <wjzijderveld@gmail.com>)
+    Zijderveld)
 
 - Fileinfo:
   . Fixed bug #71434 (finfo throws notice for specific python file). (Laruence)
 
 - FPM:
-  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi setup).
-    (Matt Haught, Remi)
+  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
+    setup). (Matt Haught, Remi)
 
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
@@ -19,8 +19,8 @@ PHP                                                                        NEWS
 04 Feb 2016, PHP 5.6.18
 
 - Core:
-  . Fixed bug #71039 (exec functions ignore length but look for NULL termination).
-    (Anatol)
+  . Fixed bug #71039 (exec functions ignore length but look for NULL
+    termination). (Anatol)
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
   . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Added support for new HTTP 451 code. (Julien)
@@ -99,8 +99,8 @@ PHP                                                                        NEWS
   . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
 
 - WDDX:
-  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
-    (taoguangchen at icloud dot com)
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet
+    Deserialization). (taoguangchen at icloud dot com)
   . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
     Vulnerability). (taoguangchen at icloud dot com)
 
