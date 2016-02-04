@@ -482,7 +482,8 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	BOOL res;
 	process_pair *proc;
 	char *cmd;
-	int i;
+	wchar_t *cmdw, *cwdw = NULL;
+	int i, use_w = 0;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
@@ -503,6 +504,21 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 			return NULL;
 		}
 		ptype++;
+	}
+
+	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
+	if (!cmd) {
+		return NULL;
+	}
+
+	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
+	cmdw = php_win32_ioutil_any_to_w(cmd);
+	if (cwd) {
+		cwdw = php_win32_ioutil_any_to_w(cwd);
+	}
+	/* cwd can be NULL, it is a valid case if NULL was passed. */
+	if (cmdw && !cwd || cmdw && cwdw) {
+		use_w = 1;
 	}
 
 	security.nLength				= sizeof(SECURITY_ATTRIBUTES);
@@ -548,19 +564,27 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		}
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
-	if (!cmd) {
-		return NULL;
-	}
-
-	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
 	if (asuser) {
-		res = CreateProcessAsUser(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		if (use_w) {
+			res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
+		} else {
+			res = CreateProcessAsUserA(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		}
 		CloseHandle(token_user);
 	} else {
-		res = CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		if (use_w) {
+			res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
+		} else {
+			res = CreateProcessA(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		}
 	}
 	free(cmd);
+	if (cmdw) {
+		free(cmdw);
+	}
+	if (cwdw) {
+		free(cwdw);
+	}
 
 	if (!res) {
 		return NULL;
