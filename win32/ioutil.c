@@ -154,7 +154,10 @@ PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_iout
 	* UNIX semantics. In particular, this ensures that the file can
 	* be deleted even whilst it's open.
 	*/
-	opts->share = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+	/* opts->share = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE; */
+	/* XXX No UINX behavior  Good to know it's doable. 
+	   Not being done as this means a behavior change. Should be evaluated properly. */
+	opts->share = FILE_SHARE_READ | FILE_SHARE_WRITE;
 
 	switch (flags & (_O_CREAT | _O_EXCL | _O_TRUNC)) {
 		case 0:
@@ -216,7 +219,8 @@ PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_iout
 	}*/
 
 	/* Setting this flag makes it possible to open a directory. */
-	opts->attributes |= FILE_FLAG_BACKUP_SEMANTICS;
+	/* XXX not being done as this means a behavior change. Should be evaluated properly. */
+	/* opts->attributes |= FILE_FLAG_BACKUP_SEMANTICS; */
 
 	return 1;
 
