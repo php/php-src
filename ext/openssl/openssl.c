@@ -5268,8 +5268,9 @@ PHP_FUNCTION(openssl_seal)
 	} ZEND_HASH_FOREACH_END();
 
 	if (!EVP_EncryptInit(&ctx,cipher,NULL,NULL)) {
-		RETVAL_FALSE;
 		EVP_CIPHER_CTX_cleanup(&ctx);
+		php_openssl_store_errors();
+		RETVAL_FALSE;
 		goto clean_exit;
 	}
 
@@ -5280,9 +5281,10 @@ PHP_FUNCTION(openssl_seal)
 	if (!EVP_SealInit(&ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) ||
 			!EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len) ||
 			!EVP_SealFinal(&ctx, buf + len1, &len2)) {
-		RETVAL_FALSE;
 		efree(buf);
 		EVP_CIPHER_CTX_cleanup(&ctx);
+		php_openssl_store_errors();
+		RETVAL_FALSE;
 		goto clean_exit;
 	}
 
@@ -5389,21 +5391,18 @@ PHP_FUNCTION(openssl_open)
 	buf = emalloc(data_len + 1);
 
 	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, (int)ekey_len, iv_buf, pkey) &&
-			EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
-		if (!EVP_OpenFinal(&ctx, buf + len1, &len2) || (len1 + len2 == 0)) {
-			efree(buf);
-			RETVAL_FALSE;
-		} else {
-			zval_dtor(opendata);
-			buf[len1 + len2] = '\0';
-			ZVAL_NEW_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
-			efree(buf);
-			RETVAL_TRUE;
-		}
+			EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len) &&
+			EVP_OpenFinal(&ctx, buf + len1, &len2) && (len1 + len2 > 0)) {
+		zval_dtor(opendata);
+		buf[len1 + len2] = '\0';
+		ZVAL_NEW_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
+		RETVAL_TRUE;
 	} else {
-		efree(buf);
+		php_openssl_store_errors();
 		RETVAL_FALSE;
 	}
+
+	efree(buf);
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
 	}
