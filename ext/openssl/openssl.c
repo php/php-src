@@ -1984,6 +1984,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	char *extname;
 	BIO *bio_out;
 	BUF_MEM *bio_buf;
+	char * hexserial;
 	char buf[256];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zcert, &useshortnames) == FAILURE) {
@@ -2012,6 +2013,18 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_long(return_value, "version", 			X509_get_version(cert));
 
 	add_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)));
+
+	/* Return the hex representation of the serial number, as defined by OpenSSL */
+	hexserial = BN_bn2hex(ASN1_INTEGER_to_BN(X509_get_serialNumber(cert), NULL));
+
+	/* If we received null back from BN_bn2hex, there was a critical error in openssl,
+	 * and we should not continue.
+	 */
+	if (!hexserial) {
+		RETURN_FALSE;
+	}
+	add_assoc_string(return_value, "serialNumberHex", hexserial, 1); 
+	OPENSSL_free(hexserial);
 
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
 	add_assoc_asn1_string(return_value, "validTo", 		X509_get_notAfter(cert));
