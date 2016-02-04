@@ -33,6 +33,7 @@
 #include <Sddl.h>
 #include "tsrm_win32.h"
 #include "zend_virtual_cwd.h"
+#include "win32/ioutil.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
@@ -208,12 +209,24 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BYTE * psec_desc = NULL;
 	BOOL fAccess = FALSE;
 
+	PHP_WIN32_IOUTIL_INIT_W(pathname);
+
 	realpath_cache_bucket * bucket = NULL;
 	char * real_path = NULL;
 
 	if (mode == 1 /*X_OK*/) {
 		DWORD type;
-		return GetBinaryType(pathname, &type) ? 0 : -1;
+		int ret;
+		if (use_w) {
+			ret = GetBinaryTypeW(pathw, &type) ? 0 : -1;
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+		} else {
+			ret = GetBinaryTypeA(patha, &type) ? 0 : -1;
+#endif
+		}
+		PHP_WIN32_IOUTIL_CLEANUP_W();
+
+		return ret;
 	} else {
 		if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
 			real_path = (char *)malloc(MAX_PATH);
@@ -223,13 +236,15 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 			pathname = real_path;
  		}
 
-		if(access(pathname, mode)) {
+		if(php_win32_ioutil_access_cond(pathname, mode)) {
+			PHP_WIN32_IOUTIL_CLEANUP_W();
 			free(real_path);
 			return errno;
 		}
 
  		/* If only existence check is made, return now */
  		if (mode == 0) {
+			PHP_WIN32_IOUTIL_CLEANUP_W();
 			free(real_path);
 			return 0;
 		}
