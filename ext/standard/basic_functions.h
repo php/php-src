@@ -151,6 +151,10 @@ PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, size_t
 
 #define MT_N (624)
 
+/* Deprecated type aliases -- use the standard types instead */
+typedef uint32_t php_uint32;
+typedef int32_t php_int32;
+
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
