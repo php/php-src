@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for reading CP1251 to UTF-8 path 
+Test fopen() for reading cp1252 to UTF-8 path 
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -11,14 +11,14 @@ skip_if_not_win();
 --FILE--
 <?php
 /*
-#vim: set fileencoding=cp1251
-#vim: set encoding=cp1251
+#vim: set fileencoding=cp1252
+#vim: set encoding=cp1252
 */
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "ïðèâåò"; // cp1251 string
-$fnw = iconv('cp1251', 'utf-8', $fn);
+$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "tschüß"; // cp1252 string
+$fnw = iconv('cp1252', 'utf-8', $fn);
 
 $f = fopen($fnw, 'r');
 if ($f) {
@@ -32,6 +32,7 @@ if ($f) {
 ===DONE===
 --EXPECTF--	
 resource(6) of type (stream)
-string(35) "opened an utf8 filename for reading"
+string(6) "hallo
+"
 bool(true)
 ===DONE===
