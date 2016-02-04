@@ -323,7 +323,7 @@ static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_str
 
 static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
-	register zend_ulong hash = Z_UL(5381);
+	zend_ulong hash = Z_UL(5381);
 
 	/* variant with the hash unrolled eight times */
 	for (; len >= 8; len -= 8) {
