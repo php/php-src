@@ -218,36 +218,31 @@ static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 }
 
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){ /* {{{ */
-	HINSTANCE kernel32;
 	HANDLE hFile;
 	DWORD dwRet;
-
-	typedef BOOL (WINAPI *gfpnh_func)(HANDLE, LPTSTR, DWORD, DWORD);
-	gfpnh_func pGetFinalPathNameByHandle;
+	wchar_t *linkw = php_win32_ioutil_any_to_w(link), targetw[MAXPATHLEN];
 
 	if (!target_len) {
 		return -1;
 	}
 
-	kernel32 = LoadLibrary("kernel32.dll");
-
-	if (kernel32) {
-		pGetFinalPathNameByHandle = (gfpnh_func)GetProcAddress(kernel32, "GetFinalPathNameByHandleA");
-		if (pGetFinalPathNameByHandle == NULL) {
-			return -1;
-		}
+	if (linkw) {
+		hFile = CreateFileW(linkw,            // file to open
+					 GENERIC_READ,          // open for reading
+					 FILE_SHARE_READ,       // share for reading
+					 NULL,                  // default security
+					 OPEN_EXISTING,         // existing file only
+					 FILE_FLAG_BACKUP_SEMANTICS, // normal file
+					 NULL);                 // no attr. template
 	} else {
-		return -1;
+		hFile = CreateFileA(link,            // file to open
+					 GENERIC_READ,          // open for reading
+					 FILE_SHARE_READ,       // share for reading
+					 NULL,                  // default security
+					 OPEN_EXISTING,         // existing file only
+					 FILE_FLAG_BACKUP_SEMANTICS, // normal file
+					 NULL);                 // no attr. template
 	}
-
-	hFile = CreateFile(link,            // file to open
-				 GENERIC_READ,          // open for reading
-				 FILE_SHARE_READ,       // share for reading
-				 NULL,                  // default security
-				 OPEN_EXISTING,         // existing file only
-				 FILE_FLAG_BACKUP_SEMANTICS, // normal file
-				 NULL);                 // no attr. template
-
 	if( hFile == INVALID_HANDLE_VALUE) {
 			return -1;
 	}
@@ -258,9 +253,22 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		with VS2012 and earlier, and seems not to be fixed till
 		now. Thus, correcting target_len so it's suddenly don't
 		overflown. */
-	dwRet = pGetFinalPathNameByHandle(hFile, target, target_len - 1, VOLUME_NAME_DOS);
+	if (linkw) {
+		dwRet = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
+	} else {
+		dwRet = GetFinalPathNameByHandleA(hFile, target, target_len - 1, VOLUME_NAME_DOS);
+	}
 	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
 		return -1;
+	}
+	if (linkw) {
+		char *_tmp = php_win32_ioutil_w_to_utf8(targetw);
+		if (!_tmp) {
+			free(linkw);
+			return -1;
+		}
+		memcpy(target, _tmp, dwRet);
+		target[dwRet] = '\0';
 	}
 
 	CloseHandle(hFile);
@@ -295,9 +303,23 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	LARGE_INTEGER t;
 	const size_t path_len = strlen(path);
 	ALLOCA_FLAG(use_heap_large);
+	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
 
-	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &data)) {
-		return zend_stat(path, buf);
+	if (pathw) {
+		if (!GetFileAttributesExW(pathw, GetFileExInfoStandard, &data)) {
+			free(pathw);
+#if ZEND_ENABLE_ZVAL_LONG64
+			return _wstat64(pathw, buf);
+#else
+			return _wstat(pathw, buf);
+#endif
+		}
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+	} else {
+		if (!GetFileAttributesExA(path, GetFileExInfoStandard, &data)) {
+			return zend_stat(path, buf);
+		}
+#endif
 	}
 
 	if (path_len >= 1 && path[1] == ':') {
@@ -309,33 +331,65 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	} else if (IS_UNC_PATH(path, path_len)) {
 		buf->st_dev = buf->st_rdev = 0;
 	} else {
-		char  cur_path[MAXPATHLEN+1];
-		DWORD len = sizeof(cur_path);
-		char *tmp = cur_path;
+		if (pathw) {
+			wchar_t cur_path[MAXPATHLEN+1];
+			DWORD len = sizeof(cur_path);
+			wchar_t *tmp = cur_path;
 
-		while(1) {
-			DWORD r = GetCurrentDirectory(len, tmp);
-			if (r < len) {
-				if (tmp[1] == ':') {
-					if (path[0] >= 'A' && path[0] <= 'Z') {
-						buf->st_dev = buf->st_rdev = path[0] - 'A';
+			while(1) {
+				DWORD r = GetCurrentDirectoryW(len, tmp);
+				if (r < len) {
+					if (tmp[1] == L':') {
+						if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
+							buf->st_dev = buf->st_rdev = pathw[0] - L'A';
+						} else {
+							buf->st_dev = buf->st_rdev = pathw[0] - L'a';
+						}
 					} else {
-						buf->st_dev = buf->st_rdev = path[0] - 'a';
+						buf->st_dev = buf->st_rdev = -1;
 					}
-				} else {
+					break;
+				} else if (!r) {
 					buf->st_dev = buf->st_rdev = -1;
+					break;
+				} else {
+					len = r+1;
+					tmp = (wchar_t*)malloc(len*sizeof(wchar_t));
 				}
-				break;
-			} else if (!r) {
-				buf->st_dev = buf->st_rdev = -1;
-				break;
-			} else {
-				len = r+1;
-				tmp = (char*)malloc(len);
 			}
-		}
-		if (tmp != cur_path) {
-			free(tmp);
+			if (tmp != cur_path) {
+				free(tmp);
+			}
+
+		} else {
+			char  cur_path[MAXPATHLEN+1];
+			DWORD len = sizeof(cur_path);
+			char *tmp = cur_path;
+
+			while(1) {
+				DWORD r = GetCurrentDirectoryA(len, tmp);
+				if (r < len) {
+					if (tmp[1] == ':') {
+						if (path[0] >= 'A' && path[0] <= 'Z') {
+							buf->st_dev = buf->st_rdev = path[0] - 'A';
+						} else {
+							buf->st_dev = buf->st_rdev = path[0] - 'a';
+						}
+					} else {
+						buf->st_dev = buf->st_rdev = -1;
+					}
+					break;
+				} else if (!r) {
+					buf->st_dev = buf->st_rdev = -1;
+					break;
+				} else {
+					len = r+1;
+					tmp = (char*)malloc(len);
+				}
+			}
+			if (tmp != cur_path) {
+				free(tmp);
+			}
 		}
 	}
 
@@ -347,8 +401,15 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		REPARSE_DATA_BUFFER * pbuffer;
 		DWORD retlength = 0;
 
-		hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		if (pathw) {
+			hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		} else {
+			hLink = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		}
 		if(hLink == INVALID_HANDLE_VALUE) {
+			if (pathw) {
+				free(pathw);
+			}
 			return -1;
 		}
 
@@ -356,6 +417,9 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
 			free_alloca(pbuffer, use_heap_large);
 			CloseHandle(hLink);
+			if (pathw) {
+				free(pathw);
+			}
 			return -1;
 		}
 
@@ -399,6 +463,11 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	buf->st_atime = FileTimeToUnixTime(&data.ftLastAccessTime);
 	buf->st_ctime = FileTimeToUnixTime(&data.ftCreationTime);
 	buf->st_mtime = FileTimeToUnixTime(&data.ftLastWriteTime);
+
+	if (pathw) {
+		free(pathw);
+	}
+
 	return 0;
 }
 /* }}} */
@@ -777,9 +846,20 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 	int i, j, save;
 	int directory = 0;
 #ifdef ZEND_WIN32
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	WIN32_FIND_DATA data;
-	HANDLE hFind;
+#endif
+	WIN32_FIND_DATAW dataw;
+	HANDLE hFind = INVALID_HANDLE_VALUE;
 	ALLOCA_FLAG(use_heap_large)
+	wchar_t *pathw = NULL;
+	BOOL use_w = 0;
+#define FREE_PATHW() \
+	if (pathw) { \
+		free(pathw); \
+		pathw = NULL; \
+	}
+
 #else
 	zend_stat_t st;
 #endif
@@ -872,13 +952,25 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		}
 
 #ifdef ZEND_WIN32
-		if (save && (hFind = FindFirstFile(path, &data)) == INVALID_HANDLE_VALUE) {
-			if (use_realpath == CWD_REALPATH) {
-				/* file not found */
-				return -1;
+		if (save) {
+			pathw = php_win32_ioutil_any_to_w(path);
+			if (pathw) {
+				hFind = FindFirstFileW(pathw, &dataw);
+				use_w = 1;
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+			} else {
+				hFind = FindFirstFile(path, &data);
+#endif
 			}
-			/* continue resolution anyway but don't save result in the cache */
-			save = 0;
+			if (INVALID_HANDLE_VALUE == hFind) {
+				if (use_realpath == CWD_REALPATH) {
+					/* file not found */
+					FREE_PATHW();
+					return -1;
+				}
+				/* continue resolution anyway but don't save result in the cache */
+				save = 0;
+			}
 		}
 
 		if (save) {
@@ -890,7 +982,12 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 		if(save &&
 				!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
-				(data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+                               (use_w ? (dataw.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) : (data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT))
+#else
+                               (dataw.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+#endif
+				) {
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
 			REPARSE_DATA_BUFFER * pbuffer;
@@ -904,21 +1001,31 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			int substitutename_off = 0;
 
 			if(++(*ll) > LINK_MAX) {
+				FREE_PATHW();
 				return -1;
 			}
 
-			hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+			if (use_w) {
+				hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+#if !PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+			} else {
+				hLink = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+#endif
+			}
 			if(hLink == INVALID_HANDLE_VALUE) {
+				FREE_PATHW();
 				return -1;
 			}
 
 			pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 			if (pbuffer == NULL) {
+				FREE_PATHW();
 				return -1;
 			}
 			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
 				free_alloca(pbuffer, use_heap_large);
 				CloseHandle(hLink);
+				FREE_PATHW();
 				return -1;
 			}
 
@@ -934,6 +1041,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					printname, MAX_PATH, NULL, NULL
 				)) {
 					free_alloca(pbuffer, use_heap_large);
+					FREE_PATHW();
 					return -1;
 				};
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
@@ -946,6 +1054,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					substitutename, MAX_PATH, NULL, NULL
 				)) {
 					free_alloca(pbuffer, use_heap_large);
+					FREE_PATHW();
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
@@ -960,6 +1069,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					printname, MAX_PATH, NULL, NULL
 				)) {
 					free_alloca(pbuffer, use_heap_large);
+					FREE_PATHW();
 					return -1;
 				};
 				printname[pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR)] = 0;
@@ -971,6 +1081,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					substitutename, MAX_PATH, NULL, NULL
 				)) {
 					free_alloca(pbuffer, use_heap_large);
+					FREE_PATHW();
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
@@ -982,6 +1093,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			} else {
 				/* XXX this might be not the end, restart handling with REPARSE_GUID_DATA_BUFFER should be implemented. */
 				free_alloca(pbuffer, use_heap_large);
+				FREE_PATHW();
 				return -1;
 			}
 
@@ -1033,6 +1145,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					j = tsrm_realpath_r(path, 0, j, ll, t, 0, is_dir, &directory);
 					if(j < 0) {
 						free_alloca(tmp, use_heap);
+						FREE_PATHW();
 						return -1;
 					}
 				}
@@ -1040,6 +1153,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			else {
 				if(i + j >= MAXPATHLEN - 1) {
 					free_alloca(tmp, use_heap);
+					FREE_PATHW();
 					return -1;
 				}
 
@@ -1049,10 +1163,15 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				j  = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory);
 				if(j < 0) {
 					free_alloca(tmp, use_heap);
+					FREE_PATHW();
 					return -1;
 				}
 			}
-			directory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+			directory =  use_w ? (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) : (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+#else
+			directory = (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+#endif
 
 			if(link_is_dir) {
 				*link_is_dir = directory;
@@ -1060,9 +1179,14 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		}
 		else {
 			if (save) {
-				directory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+				directory = use_w ? (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 : (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+#else
+				directory = (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+#endif
 				if (is_dir && !directory) {
 					/* not a directory */
+					FREE_PATHW();
 					return -1;
 				}
 			}
@@ -1139,11 +1263,21 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #ifdef ZEND_WIN32
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
 				free_alloca(tmp, use_heap);
+				FREE_PATHW();
 				return -1;
 			}
 			if (save) {
-				i = (int)strlen(data.cFileName);
-				memcpy(path+j, data.cFileName, i+1);
+				if (use_w) {
+					char *tmp_path = php_win32_ioutil_w_to_utf8(dataw.cFileName);
+					i = (int)strlen(tmp_path);
+					memcpy(path+j, tmp_path, i+1);
+					free(tmp_path);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+				} else {
+					i = (int)strlen(data.cFileName);
+					memcpy(path+j, data.cFileName, i+1);
+#endif
+				}
 				j += i;
 			} else {
 				/* use the original file or directory name as it wasn't found */
@@ -1167,6 +1301,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		}
 
 		free_alloca(tmp, use_heap);
+#ifdef ZEND_WIN32
+		FREE_PATHW();	
+#undef FREE_PATHW
+#endif
 		return j;
 	}
 }
