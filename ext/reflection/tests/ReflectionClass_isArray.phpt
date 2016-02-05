@@ -12,11 +12,6 @@ foreach ($reflection->getParameters() as $parameter) {
     var_dump($parameter->isArray());
 }
 ?>
---CLEAN--
-<?php
-unset($reflection);
-unset($parameter);
-?>
 --EXPECT--
 bool(false)
 bool(false)
