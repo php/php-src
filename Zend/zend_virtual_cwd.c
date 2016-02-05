@@ -1007,7 +1007,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			if (use_w) {
 				hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
-#if !PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 			} else {
 				hLink = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 #endif
