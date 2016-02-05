@@ -257,7 +257,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							/* mark as removed (empty live range) */
 							op_array->live_range[opline->op2.num].var = (uint32_t)-1;
 						}
-						ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
+						ZEND_RESULT_TYPE(src) = IS_UNUSED;
 						MAKE_NOP(opline);
 					}
 				}
@@ -1612,7 +1612,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_DO_ICALL:
 						case ZEND_DO_UCALL:
 						case ZEND_DO_FCALL_BY_NAME:
-							opline->result_type |= EXT_TYPE_UNUSED;
+							opline->result_type = IS_UNUSED;
 							break;
 					}
 				} else {
@@ -1624,7 +1624,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
 							opline->opcode -= 2;
-							opline->result_type = IS_VAR | EXT_TYPE_UNUSED;
+							opline->result_type = IS_UNUSED;
 							break;
 						case ZEND_QM_ASSIGN:
 						case ZEND_BOOL:

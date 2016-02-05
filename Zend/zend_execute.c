@@ -68,7 +68,7 @@ static void zend_extension_statement_handler(const zend_extension *extension, ze
 static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array);
 static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array);
 
-#define RETURN_VALUE_USED(opline) (!((opline)->result_type & EXT_TYPE_UNUSED))
+#define RETURN_VALUE_USED(opline) ((opline)->result_type != IS_UNUSED)
 
 static ZEND_FUNCTION(pass)
 {

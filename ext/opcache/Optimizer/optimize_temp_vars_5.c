@@ -170,16 +170,11 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 						}
 					}
 				}
-			} else { /* Au still needs to be assigned a T which is a bit dumb. Should consider changing Zend */
+			} else {
+				/* Code which gets here is using a wrongly built opcode such as RECV() */
 				GET_AVAILABLE_T();
-
-				if (RESULT_UNUSED(opline)) {
-					zend_bitset_excl(taken_T, i);
-				} else {
-					/* Code which gets here is using a wrongly built opcode such as RECV() */
-					map_T[currT] = i;
-					zend_bitset_incl(valid_T, currT);
-				}
+				map_T[currT] = i;
+				zend_bitset_incl(valid_T, currT);
 				ZEND_RESULT(opline).var = NUM_VAR(i + offset);
 			}
 		}

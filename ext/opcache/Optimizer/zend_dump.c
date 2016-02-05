@@ -404,10 +404,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				zend_dump_var(op_array, opline->result_type, EX_VAR_TO_NUM(opline->result.var));
 			}
 			fprintf(stderr, " = ");
-		} else if (!(dump_flags & ZEND_DUMP_HIDE_UNUSED_VARS) &&
-		    (opline->result_type & IS_VAR) &&
-		    (opline->result_type & EXT_TYPE_UNUSED)) {
-			fprintf(stderr, "U%u = ", EX_VAR_TO_NUM(opline->result.var));
 		}
 	}
 

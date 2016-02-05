@@ -108,7 +108,7 @@ typedef struct _zend_cfg {
 	CRT_CONSTANT_EX(op_array, node, (build_flags & ZEND_RT_CONSTANTS))
 
 #define RETURN_VALUE_USED(opline) \
-	(!((opline)->result_type & EXT_TYPE_UNUSED))
+	((opline)->result_type != IS_UNUSED)
 
 BEGIN_EXTERN_C()
 

@@ -743,7 +743,7 @@ void zend_do_free(znode *op1) /* {{{ */
 				   their selves */
 				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 			} else {
-				opline->result_type |= EXT_TYPE_UNUSED;
+				opline->result_type = IS_UNUSED;
 			}
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
@@ -756,7 +756,7 @@ void zend_do_free(znode *op1) /* {{{ */
 				if (opline->result_type==IS_VAR
 					&& opline->result.var == op1->u.op.var) {
 					if (opline->opcode == ZEND_NEW) {
-						opline->result_type |= EXT_TYPE_UNUSED;
+						opline->result_type = IS_UNUSED;
 						opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 						while (opline->opcode != ZEND_DO_FCALL || opline->op1.num != ZEND_CALL_CTOR) {
 							opline--;
@@ -2904,9 +2904,6 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
-	if (!result) {
-		opline->result_type |= EXT_TYPE_UNUSED;
-	}
 
 	if (zend_is_call(source_ast)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;

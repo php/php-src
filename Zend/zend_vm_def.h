@@ -3627,6 +3627,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
 	zval *ret;
+	zval retval;
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
@@ -3634,7 +3635,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	call->prev_execute_data = execute_data;
 	EG(current_execute_data) = call;
 
-	ret = EX_VAR(opline->result.var);
+	ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 	Z_VAR_FLAGS_P(ret) = 0;
 
@@ -3644,7 +3645,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	ZEND_ASSERT(
 		EG(exception) || !call->func ||
 		!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+		zend_verify_internal_return_type(call->func, ret));
 #endif
 
 	EG(current_execute_data) = call->prev_execute_data;
@@ -3652,7 +3653,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	zend_vm_stack_free_call_frame(call);
 
 	if (!RETURN_VALUE_USED(opline)) {
-		zval_ptr_dtor(EX_VAR(opline->result.var));
+		zval_ptr_dtor(ret);
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -3730,6 +3731,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		}
 		EG(scope) = EX(func)->op_array.scope;
 	} else {
+		zval retval;
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
@@ -3762,7 +3764,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 			}
 		}
 
-		ret = EX_VAR(opline->result.var);
+		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 		Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 
@@ -3772,7 +3774,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		ZEND_ASSERT(
 			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+			zend_verify_internal_return_type(call->func, ret));
 #endif
 
 		EG(current_execute_data) = call->prev_execute_data;
@@ -3780,7 +3782,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		zend_vm_stack_free_call_frame(call);
 
 		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(EX_VAR(opline->result.var));
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -3857,6 +3859,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		}
 	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
 		int should_change_scope = 0;
+		zval retval;
 
 		if (fbc->common.scope) {
 			should_change_scope = 1;
@@ -3888,7 +3891,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 			}
 		}
 
-		ret = EX_VAR(opline->result.var);
+		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 		Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 
@@ -3903,14 +3906,14 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		ZEND_ASSERT(
 			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+			zend_verify_internal_return_type(call->func, ret));
 #endif
 
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
 
 		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(EX_VAR(opline->result.var));
+			zval_ptr_dtor(ret);
 		}
 
 		if (UNEXPECTED(should_change_scope)) {
@@ -3919,6 +3922,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 			ZEND_VM_C_GOTO(fcall_end);
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
+		zval retval;
 		/* Not sure what should be done here if it's a static method */
 		object = Z_OBJ(call->This);
 		if (UNEXPECTED(object == NULL)) {
@@ -3935,11 +3939,12 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 
 		EG(scope) = fbc->common.scope;
 
-		ZVAL_NULL(EX_VAR(opline->result.var));
+		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
+		ZVAL_NULL(ret);
 
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
-		object->handlers->call_method(fbc->common.function_name, object, call, EX_VAR(opline->result.var));
+		object->handlers->call_method(fbc->common.function_name, object, call, ret);
 		EG(current_execute_data) = call->prev_execute_data;
 
 		zend_vm_stack_free_args(call);
@@ -3950,9 +3955,9 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		efree(fbc);
 
 		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(EX_VAR(opline->result.var));
+			zval_ptr_dtor(ret);
 		} else {
-			Z_VAR_FLAGS_P(EX_VAR(opline->result.var)) = 0;
+			Z_VAR_FLAGS_P(ret) = 0;
 		}
 	}
 
@@ -8106,7 +8111,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 		ZEND_ASSERT(
 			EG(exception) || !call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+			zend_verify_internal_return_type(call->func, ret));
 #endif
 
 		EG(current_execute_data) = call->prev_execute_data;
