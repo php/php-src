@@ -2365,7 +2365,7 @@ ZEND_VM_C_LABEL(assign_dim_clean):
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
-ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV, SPEC(RETVAL))
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -2402,45 +2402,50 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 
 	SAVE_OPLINE();
 	value_ptr = GET_OP2_ZVAL_PTR_PTR(BP_VAR_W);
+	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 	if (OP1_TYPE == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var))) &&
 	    UNEXPECTED(!Z_ISERROR_P(EX_VAR(opline->op1.var)))) {
+
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
 		FREE_OP2_VAR_PTR();
 		HANDLE_EXCEPTION();
-	}
-	if (OP2_TYPE == IS_VAR &&
-	    (value_ptr == &EG(uninitialized_zval) ||
-	     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-	      !(Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF)))) {
-		if (!OP2_FREE && UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op2.var)) != IS_INDIRECT)) { /* undo the effect of get_zval_ptr_ptr() */
-			Z_TRY_ADDREF_P(value_ptr);
-		}
+
+	} else if (OP2_TYPE == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           UNEXPECTED(!(Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
+
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			FREE_OP2_VAR_PTR();
 			HANDLE_EXCEPTION();
 		}
-		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
-	}
 
-	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-	if ((OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) ||
-	    (OP2_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))) {
-		variable_ptr = &EG(uninitialized_zval);
+		value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, OP2_TYPE);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
+		}
+		/* zend_assign_to_variable() always takes care of op2, never free it! */
+
 	} else {
-		zend_assign_to_variable_reference(variable_ptr, value_ptr);
-	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+		if ((OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) ||
+		    (OP2_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))) {
+			variable_ptr = &EG(uninitialized_zval);
+		} else {
+			zend_assign_to_variable_reference(variable_ptr, value_ptr);
+		}
+
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+		}
+
+		FREE_OP2_VAR_PTR();
 	}
 
 	FREE_OP1_VAR_PTR();
-	FREE_OP2_VAR_PTR();
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
