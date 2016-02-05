@@ -2023,7 +2023,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	if (!hexserial) {
 		RETURN_FALSE;
 	}
-	add_assoc_string(return_value, "serialNumberHex", hexserial, 1); 
+	add_assoc_string(return_value, "serialNumberHex", hexserial); 
 	OPENSSL_free(hexserial);
 
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
