@@ -5480,9 +5480,9 @@ PHP_FUNCTION(openssl_digest)
 	siglen = EVP_MD_size(mdtype);
 	sigbuf = zend_string_alloc(siglen, 0);
 
-	EVP_DigestInit(&md_ctx, mdtype);
-	EVP_DigestUpdate(&md_ctx, (unsigned char *)data, data_len);
-	if (EVP_DigestFinal (&md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
+	if (EVP_DigestInit(&md_ctx, mdtype) &&
+			EVP_DigestUpdate(&md_ctx, (unsigned char *)data, data_len) &&
+			EVP_DigestFinal (&md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
 		if (raw_output) {
 			ZSTR_VAL(sigbuf)[siglen] = '\0';
 			ZSTR_LEN(sigbuf) = siglen;
@@ -5497,6 +5497,7 @@ PHP_FUNCTION(openssl_digest)
 			RETVAL_STR(digest_str);
 		}
 	} else {
+		php_openssl_store_errors();
 		zend_string_release(sigbuf);
 		RETVAL_FALSE;
 	}
