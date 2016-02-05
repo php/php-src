@@ -2475,7 +2475,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				}
 			} ZEND_HASH_FOREACH_END();
 
-			zend_hash_index_update_ptr(ch->to_free->slist, option, slist);
+			if ((*ch->clone) == 1) {
+				zend_hash_index_update_ptr(ch->to_free->slist, option, slist);
+			} else {
+				zend_hash_next_index_insert_ptr(ch->to_free->slist, slist);
+			}
 
 			error = curl_easy_setopt(ch->cp, option, slist);
 
