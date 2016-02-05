@@ -4,7 +4,8 @@
 
 #include "php.h"
 #include "readdir.h"
-#include "TSRM.h"
+#include "win32/ioutil.h"
+
 /**********************************************************************
  * Implement dirent-style opendir/readdir/rewinddir/closedir on Win32
  *
@@ -19,10 +20,30 @@
  * The DIR typedef is not compatible with Unix.
  **********************************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* typedef DIR - not the same as Unix */
+struct DIR_W32 {
+	HANDLE handle;				/* _findfirst/_findnext handle */
+	int offset;					/* offset into directory */
+	short finished;				/* 1 if there are not more files */
+	short is_w;
+	struct {
+		WIN32_FIND_DATAA a;
+		WIN32_FIND_DATAW w;
+	} fileinfo;    /* from _findfirst/_findnext */
+	char *dira;		/* the dir we are reading */
+	wchar_t *dirw;		/* the dir we are reading */
+	struct dirent dent;			/* the dirent to return */
+};
+
 DIR *opendir(const char *dir)
 {
 	DIR *dp;
 	char *filespec;
+	wchar_t *filespecw, *resolvedw;
 	HANDLE handle;
 	int index;
 	char resolved_path_buff[MAXPATHLEN];
@@ -31,38 +52,71 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	filespec = (char *)malloc(strlen(resolved_path_buff) + 2 + 1);
-	if (filespec == NULL) {
-		return NULL;
-	}
-	strcpy(filespec, resolved_path_buff);
-	index = (int)strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' ||
-	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
-		filespec[index] = '\0';
-	strcat(filespec, "\\*");
-
 	dp = (DIR *) malloc(sizeof(DIR));
 	if (dp == NULL) {
-		free(filespec);
 		return NULL;
 	}
-	dp->offset = 0;
-	dp->finished = 0;
 
-	if ((handle = FindFirstFile(filespec, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
-		DWORD err = GetLastError();
-		if (err == ERROR_NO_MORE_FILES || err == ERROR_FILE_NOT_FOUND) {
-			dp->finished = 1;
-		} else {
-			free(dp);
-			free(filespec);
+	resolvedw = php_win32_ioutil_any_to_w(resolved_path_buff);
+
+	if (resolvedw) {
+		filespecw = (wchar_t *)malloc((wcslen(resolvedw) + 2 + 1)*sizeof(wchar_t));
+		if (filespecw == NULL) {
 			return NULL;
 		}
+		wcscpy(filespecw, resolvedw);
+		index = (int)wcslen(filespecw) - 1;
+		if (index >= 0 && (filespecw[index] == L'/' ||
+		   (filespecw[index] == L'\\' && index == 0)))
+			filespecw[index] = L'\0';
+		wcscat(filespecw, L"\\*");
+
+		if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo.w))) == INVALID_HANDLE_VALUE) {
+			DWORD err = GetLastError();
+			if (err == ERROR_NO_MORE_FILES || err == ERROR_FILE_NOT_FOUND) {
+				dp->finished = 1;
+			} else {
+				free(dp);
+				free(filespecw);
+				return NULL;
+			}
+		}
+		dp->dirw = _wcsdup(resolvedw);
+		dp->dira = NULL;
+		free(filespecw);
+		free(resolvedw);
+		dp->is_w = 1;
+	} else {
+		filespec = (char *)malloc(strlen(resolved_path_buff) + 2 + 1);
+		if (filespec == NULL) {
+			return NULL;
+		}
+		strcpy(filespec, resolved_path_buff);
+		index = (int)strlen(filespec) - 1;
+		if (index >= 0 && (filespec[index] == '/' ||
+		   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
+			filespec[index] = '\0';
+		strcat(filespec, "\\*");
+
+		if ((handle = FindFirstFile(filespec, &(dp->fileinfo.a))) == INVALID_HANDLE_VALUE) {
+			DWORD err = GetLastError();
+			if (err == ERROR_NO_MORE_FILES || err == ERROR_FILE_NOT_FOUND) {
+				dp->finished = 1;
+			} else {
+				free(dp);
+				free(filespec);
+				return NULL;
+			}
+		}
+		dp->dira = _strdup(resolved_path_buff);
+		dp->dirw = NULL;
+		free(filespec);
+
+		dp->is_w = 0;
 	}
-	dp->dir = strdup(resolved_path_buff);
 	dp->handle = handle;
-	free(filespec);
+	dp->offset = 0;
+	dp->finished = 0;
 
 	return dp;
 }
@@ -73,16 +127,36 @@ struct dirent *readdir(DIR *dp)
 		return NULL;
 
 	if (dp->offset != 0) {
-		if (FindNextFile(dp->handle, &(dp->fileinfo)) == 0) {
-			dp->finished = 1;
+		if (dp->is_w) {
+			if (FindNextFileW(dp->handle, &(dp->fileinfo.w)) == 0) {
+				dp->finished = 1;
+				return NULL;
+			}
+		} else {
+			if (FindNextFileA(dp->handle, &(dp->fileinfo.a)) == 0) {
+				dp->finished = 1;
+				return NULL;
+			}
+		}
+	}
+	if (dp->is_w) {
+		char *_tmp;
+
+		_tmp = php_win32_ioutil_w_to_utf8(dp->fileinfo.w.cFileName);
+		if (!_tmp) {
+			/* wide to utf8 failed, should never happen. */
 			return NULL;
 		}
+		strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME+1);
+		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
+		free(_tmp);
+	} else {
+		strlcpy(dp->dent.d_name, dp->fileinfo.a.cFileName, _MAX_FNAME+1);
+		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	}
 	dp->offset++;
 
-	strlcpy(dp->dent.d_name, dp->fileinfo.cFileName, _MAX_FNAME+1);
 	dp->dent.d_ino = 1;
-	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
 
 	return &(dp->dent);
@@ -96,17 +170,39 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 	}
 
 	if (dp->offset != 0) {
-		if (FindNextFile(dp->handle, &(dp->fileinfo)) == 0) {
-			dp->finished = 1;
-			*result = NULL;
+		if (dp->is_w) {
+			if (FindNextFileW(dp->handle, &(dp->fileinfo.w)) == 0) {
+				dp->finished = 1;
+				*result = NULL;
+				return 0;
+			}
+		} else {
+			if (FindNextFileA(dp->handle, &(dp->fileinfo.a)) == 0) {
+				dp->finished = 1;
+				*result = NULL;
+				return 0;
+			}
+		}
+	}
+
+	if (dp->is_w) {
+		char *_tmp;
+		_tmp = php_win32_ioutil_w_to_utf8(dp->fileinfo.w.cFileName);
+		if (!_tmp) {
+			/* wide to utf8 failed, should never happen. */
+			result = NULL;
 			return 0;
 		}
+		strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME+1);
+		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
+		free(_tmp);
+	} else {
+		strlcpy(dp->dent.d_name, dp->fileinfo.a.cFileName, _MAX_FNAME+1);
+		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	}
 	dp->offset++;
 
-	strlcpy(dp->dent.d_name, dp->fileinfo.cFileName, _MAX_FNAME+1);
 	dp->dent.d_ino = 1;
-	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
 
 	memcpy(entry, &dp->dent, sizeof(*entry));
@@ -125,8 +221,10 @@ int closedir(DIR *dp)
 	if (dp->handle != INVALID_HANDLE_VALUE) {
 		FindClose(dp->handle);
 	}
-	if (dp->dir)
-		free(dp->dir);
+	if (dp->dira)
+		free(dp->dira);
+	if (dp->dirw)
+		free(dp->dirw);
 	if (dp)
 		free(dp);
 
@@ -137,6 +235,7 @@ int rewinddir(DIR *dp)
 {
 	/* Re-set to the beginning */
 	char *filespec;
+	wchar_t *filespecw;
 	HANDLE handle;
 	int index;
 
@@ -145,27 +244,51 @@ int rewinddir(DIR *dp)
 	dp->offset = 0;
 	dp->finished = 0;
 
-	filespec = (char *)malloc(strlen(dp->dir) + 2 + 1);
-	if (filespec == NULL) {
-		return -1;
+	if (dp->is_w) {
+		filespecw = (wchar_t *)malloc((wcslen((wchar_t *)dp->dirw) + 2 + 1)*sizeof(wchar_t));
+		if (filespecw == NULL) {
+			return -1;
+		}
+
+		wcscpy(filespecw, (wchar_t *)dp->dirw);
+		index = (int)wcslen(filespecw) - 1;
+		if (index >= 0 && (filespecw[index] == L'/' ||
+		   (filespecw[index] == L'\\' && index == 0)))
+			filespecw[index] = L'\0';
+		wcscat(filespecw, L"/*");
+
+		if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo.w))) == INVALID_HANDLE_VALUE) {
+			dp->finished = 1;
+		}
+
+		free(filespecw);
+	} else {
+		filespec = (char *)malloc(strlen((char *)dp->dira) + 2 + 1);
+		if (filespec == NULL) {
+			return -1;
+		}
+
+		strcpy(filespec, (char *)dp->dira);
+		index = (int)strlen(filespec) - 1;
+		if (index >= 0 && (filespec[index] == '/' ||
+		   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
+			filespec[index] = '\0';
+		strcat(filespec, "/*");
+
+		if ((handle = FindFirstFile(filespec, &(dp->fileinfo.a))) == INVALID_HANDLE_VALUE) {
+			dp->finished = 1;
+		}
+
+		free(filespec);
 	}
-
-	strcpy(filespec, dp->dir);
-	index = (int)strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' ||
-	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
-		filespec[index] = '\0';
-	strcat(filespec, "/*");
-
-	if ((handle = FindFirstFile(filespec, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
-		dp->finished = 1;
-	}
-
 	dp->handle = handle;
-	free(filespec);
 
 	return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * Local variables:
