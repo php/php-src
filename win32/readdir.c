@@ -57,7 +57,10 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	resolvedw = php_win32_ioutil_any_to_w(resolved_path_buff);
+	/* opendir HAS to start by a unicode version. If the dir was initially
+		opened without unicode but contains some mb filenames, those filenames
+		will fail to be read! */
+	resolvedw = php_win32_ioutil_mb_to_w(resolved_path_buff);
 
 	if (resolvedw) {
 		filespecw = (wchar_t *)malloc((wcslen(resolvedw) + 2 + 1)*sizeof(wchar_t));
