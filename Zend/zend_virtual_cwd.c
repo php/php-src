@@ -1772,9 +1772,17 @@ CWD_API int virtual_open(const char *path, int flags, ...) /* {{{ */
 		mode = (mode_t) va_arg(arg, int);
 		va_end(arg);
 
+#ifdef ZEND_WIN32
+		f = php_win32_ioutil_open(new_state.cwd, flags, mode);
+#else
 		f = open(new_state.cwd, flags, mode);
+#endif
 	} else {
+#ifdef ZEND_WIN32
+		f = php_win32_ioutil_open(new_state.cwd, flags);
+#else
 		f = open(new_state.cwd, flags);
+#endif
 	}
 	CWD_STATE_FREE_ERR(&new_state);
 	return f;
