@@ -673,7 +673,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/",
 			"/FREE_OP_DATA\(\)/",
 			"/FREE_UNFETCHED_OP_DATA\(\)/",
-			"/RETURN_VALUE_USED\(opline\)/"
+			"/RETURN_VALUE_USED\(opline\)/",
+			"/arg_num <= MAX_ARG_FLAG_NUM/",
 		),
 		array(
 			$op1_type[$op1],
@@ -724,6 +725,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			$op_data_free_op[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
 			$op_data_free_unfetched[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
 			isset($extra_spec['retval']) ? $extra_spec['retval'] : "RETURN_VALUE_USED(opline)",
+			isset($extra_spec['quick_arg']) ? $extra_spec['quick_arg'] : "arg_num <= MAX_ARG_FLAG_NUM",
 		),
 		$code);
 
@@ -1192,6 +1194,11 @@ function extra_spec_name($extra_spec) {
 	if (isset($extra_spec["retval"])) {
 		$s .= "_RETVAL_".($extra_spec["retval"] ? "USED" : "UNUSED");
 	}
+	if (isset($extra_spec["quick_arg"])) {
+		if ($extra_spec["quick_arg"]) {
+			$s .= "_QUICK";
+		}
+	}
 	return $s;
 }
 
@@ -1202,6 +1209,9 @@ function extra_spec_flags($extra_spec) {
 	}
 	if (isset($extra_spec["retval"])) {
 		$s[] = "SPEC_RULE_RETVAL";
+	}
+	if (isset($extra_spec["quick_arg"])) {
+		$s[] = "SPEC_RULE_QUICK_ARG";
 	}
 	return $s;
 }
@@ -1343,11 +1353,12 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 		if (preg_match("/(.*)[{][%]([A-Z_]*)[%][}](.*)/", $line, $m)) {
 			switch ($m[2]) {
 				case "DEFINES":
-					out($f,"#define SPEC_START_MASK   0x0000ffff\n");
-					out($f,"#define SPEC_RULE_OP1     0x00010000\n");
-					out($f,"#define SPEC_RULE_OP2     0x00020000\n");
-					out($f,"#define SPEC_RULE_OP_DATA 0x00040000\n");
-					out($f,"#define SPEC_RULE_RETVAL  0x00080000\n");
+					out($f,"#define SPEC_START_MASK     0x0000ffff\n");
+					out($f,"#define SPEC_RULE_OP1       0x00010000\n");
+					out($f,"#define SPEC_RULE_OP2       0x00020000\n");
+					out($f,"#define SPEC_RULE_OP_DATA   0x00040000\n");
+					out($f,"#define SPEC_RULE_RETVAL    0x00080000\n");
+					out($f,"#define SPEC_RULE_QUICK_ARG 0x00100000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void **zend_opcode_handlers;\n");
@@ -1698,6 +1709,9 @@ function parse_spec_rules($def, $lineno, $str) {
 				case "RETVAL":
 					$ret["retval"] = [0, 1];
 					break;
+				case "QUICK_ARG":
+					$ret["quick_arg"] = [0, 1];
+					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
 			}
@@ -2018,6 +2032,7 @@ function gen_vm($def, $skel) {
 		out($f, "\tif (spec & SPEC_RULE_OP2) offset = offset * 5 + zend_vm_decode[op->op2_type];\n");
 		out($f, "\tif (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
 		out($f, "\tif (spec & SPEC_RULE_RETVAL) offset = offset * 2 + ((op->result_type & EXT_TYPE_UNUSED) == 0);\n");
+		out($f, "\tif (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);\n");
 		out($f, "\treturn zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];\n");
 	}
 	out($f, "}\n\n");

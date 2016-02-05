@@ -306,11 +306,12 @@ static zend_uchar zend_user_opcodes[256] = {0,
 	241,242,243,244,245,246,247,248,249,250,251,252,253,254,255
 };
 
-#define SPEC_START_MASK   0x0000ffff
-#define SPEC_RULE_OP1     0x00010000
-#define SPEC_RULE_OP2     0x00020000
-#define SPEC_RULE_OP_DATA 0x00040000
-#define SPEC_RULE_RETVAL  0x00080000
+#define SPEC_START_MASK     0x0000ffff
+#define SPEC_RULE_OP1       0x00010000
+#define SPEC_RULE_OP2       0x00020000
+#define SPEC_RULE_OP_DATA   0x00040000
+#define SPEC_RULE_RETVAL    0x00080000
+#define SPEC_RULE_QUICK_ARG 0x00100000
 
 static const uint32_t *zend_spec_handlers;
 static const void **zend_opcode_handlers;
@@ -3297,7 +3298,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER
 
 	uint32_t arg_num = opline->op2.num;
 
-	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+	if (EXPECTED(0)) {
+		if (QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_val_by_ref;
+		}
+	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_val_by_ref:
+		SAVE_OPLINE();
+		zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
+
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_UNDEF(arg);
+		HANDLE_EXCEPTION();
+	}
+	value = EX_CONSTANT(opline->op1);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	ZVAL_COPY_VALUE(arg, value);
+	if (IS_CONST == IS_CONST) {
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+			zval_copy_ctor_func(arg);
+		}
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_CONST_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value, *arg;
+
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(1)) {
 		if (QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto send_val_by_ref;
 		}
@@ -11822,7 +11854,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER(Z
 	zend_free_op free_op1;
 	uint32_t arg_num = opline->op2.num;
 
-	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+	if (EXPECTED(0)) {
+		if (QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_val_by_ref;
+		}
+	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_val_by_ref:
+		SAVE_OPLINE();
+		zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_UNDEF(arg);
+		HANDLE_EXCEPTION();
+	}
+	value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	ZVAL_COPY_VALUE(arg, value);
+	if (IS_TMP_VAR == IS_CONST) {
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+			zval_copy_ctor_func(arg);
+		}
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value, *arg;
+	zend_free_op free_op1;
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(1)) {
 		if (QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto send_val_by_ref;
 		}
@@ -15128,7 +15191,56 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER(Z
 	zend_free_op free_op1;
 	uint32_t arg_num = opline->op2.num;
 
-	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+	if (EXPECTED(0)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_var_by_ref;
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_var_by_ref:
+		ZEND_VM_TAIL_CALL(ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(varptr) == IS_UNDEF)) {
+		SAVE_OPLINE();
+		GET_OP1_UNDEF_CV(varptr, BP_VAR_R);
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_NULL(arg);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_VAR == IS_CV) {
+		ZVAL_OPT_DEREF(varptr);
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_VAR == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(varptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(varptr);
+
+			varptr = Z_REFVAL_P(varptr);
+			ZVAL_COPY_VALUE(arg, varptr);
+			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(arg)) {
+				Z_ADDREF_P(arg);
+			}
+		} else {
+			ZVAL_COPY_VALUE(arg, varptr);
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+	zend_free_op free_op1;
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(1)) {
 		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto send_var_by_ref;
 		}
@@ -33977,7 +34089,56 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_CV_HANDLER(ZE
 
 	uint32_t arg_num = opline->op2.num;
 
-	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+	if (EXPECTED(0)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_var_by_ref;
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_var_by_ref:
+		ZEND_VM_TAIL_CALL(ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	varptr = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(varptr) == IS_UNDEF)) {
+		SAVE_OPLINE();
+		GET_OP1_UNDEF_CV(varptr, BP_VAR_R);
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_NULL(arg);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_CV == IS_CV) {
+		ZVAL_OPT_DEREF(varptr);
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_CV == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(varptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(varptr);
+
+			varptr = Z_REFVAL_P(varptr);
+			ZVAL_COPY_VALUE(arg, varptr);
+			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(arg)) {
+				Z_ADDREF_P(arg);
+			}
+		} else {
+			ZVAL_COPY_VALUE(arg, varptr);
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_CV_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(1)) {
 		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto send_var_by_ref;
 		}
@@ -54660,9 +54821,14 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER,
+		ZEND_SEND_VAR_EX_SPEC_VAR_QUICK_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_VAR_EX_SPEC_CV_HANDLER,
+		ZEND_SEND_VAR_EX_SPEC_CV_QUICK_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_REF_SPEC_VAR_HANDLER,
@@ -55484,7 +55650,12 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_CV_HANDLER,
 		ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER,
+		ZEND_SEND_VAL_EX_SPEC_CONST_QUICK_HANDLER,
 		ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER,
+		ZEND_SEND_VAL_EX_SPEC_TMP_QUICK_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -56563,7 +56734,7 @@ void zend_init_opcodes_handlers(void)
 		776 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
 		826 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		851 | SPEC_RULE_OP1,
-		2906,
+		2916,
 		856,
 		857 | SPEC_RULE_OP1,
 		862 | SPEC_RULE_OP1,
@@ -56571,9 +56742,9 @@ void zend_init_opcodes_handlers(void)
 		872 | SPEC_RULE_OP1,
 		877 | SPEC_RULE_OP1,
 		882 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2906,
-		2906,
-		2906,
+		2916,
+		2916,
+		2916,
 		907 | SPEC_RULE_OP1,
 		912 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		937 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -56588,125 +56759,125 @@ void zend_init_opcodes_handlers(void)
 		1034,
 		1035 | SPEC_RULE_OP2,
 		1040 | SPEC_RULE_OP1,
-		1045 | SPEC_RULE_OP1,
-		1050 | SPEC_RULE_OP1,
+		1045 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
 		1055 | SPEC_RULE_OP1,
-		1060 | SPEC_RULE_OP2,
-		1065 | SPEC_RULE_OP1,
-		1070 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1095 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1120 | SPEC_RULE_OP1,
-		1125 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1150 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1175 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1200 | SPEC_RULE_OP1,
+		1060 | SPEC_RULE_OP1,
+		1065 | SPEC_RULE_OP2,
+		1070 | SPEC_RULE_OP1,
+		1075 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1100 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1125 | SPEC_RULE_OP1,
+		1130 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1155 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1180 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1205 | SPEC_RULE_OP1,
 		1210 | SPEC_RULE_OP1,
-		1215 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1240 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1265 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1290 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1315 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1340 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1365 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1390 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1415 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1440 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1465 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1490 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1515 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1540 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1565 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1590 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1615 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1640 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1665 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1690 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2906,
-		1715,
-		1716,
-		1717,
-		1718,
-		1719,
-		1720 | SPEC_RULE_OP1,
-		1725 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1750 | SPEC_RULE_OP1,
-		1755 | SPEC_RULE_OP2,
-		1760 | SPEC_RULE_OP1,
+		1215 | SPEC_RULE_OP1,
+		1220 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1245 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1270 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1295 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1320 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1345 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1370 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1395 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1420 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1445 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1470 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1495 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1520 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1545 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1570 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1595 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1620 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1645 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1670 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1695 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2916,
+		1720,
+		1721,
+		1722,
+		1723,
+		1724,
+		1725 | SPEC_RULE_OP1,
+		1730 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1755 | SPEC_RULE_OP1,
+		1760 | SPEC_RULE_OP2,
 		1765 | SPEC_RULE_OP1,
-		1770 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1795 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1820 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1845 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1870 | SPEC_RULE_OP1,
-		1875 | SPEC_RULE_OP1,
-		1880 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1905,
-		1906 | SPEC_RULE_OP1,
-		1911 | SPEC_RULE_OP1,
+		1770 | SPEC_RULE_OP1,
+		1775 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1800 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1825 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1850 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1875 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1885 | SPEC_RULE_OP1,
+		1890 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1915,
 		1916 | SPEC_RULE_OP1,
 		1921 | SPEC_RULE_OP1,
-		1926 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1951 | SPEC_RULE_OP1,
-		1956 | SPEC_RULE_OP1,
+		1926 | SPEC_RULE_OP1,
+		1931 | SPEC_RULE_OP1,
+		1936 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1961 | SPEC_RULE_OP1,
-		1966 | SPEC_RULE_OP2,
-		1971,
-		1972,
-		1973,
-		1974 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1999 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2024 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2049 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2074 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		2199,
-		2200 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2225,
-		2226 | SPEC_RULE_OP2,
-		2231,
-		2232 | SPEC_RULE_OP1,
-		2237 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2262 | SPEC_RULE_OP2,
-		2267 | SPEC_RULE_OP2,
-		2272,
-		2273 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		2398 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2423,
-		2424,
-		2425,
-		2426 | SPEC_RULE_OP1,
-		2431 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2456,
-		2457,
-		2458 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2483,
-		2484,
-		2485,
-		2486 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2511 | SPEC_RULE_OP1,
-		2516,
-		2517,
-		2518,
-		2519,
-		2520 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2545 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2570 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2595 | SPEC_RULE_OP1,
-		2600 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2625,
-		2626 | SPEC_RULE_OP2,
-		2631 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2656 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2681 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2706 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2731 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2756 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2781 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2806 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2831 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2856 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2881 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2906
+		1966 | SPEC_RULE_OP1,
+		1971 | SPEC_RULE_OP1,
+		1976 | SPEC_RULE_OP2,
+		1981,
+		1982,
+		1983,
+		1984 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2009 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2034 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2059 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2084 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		2209,
+		2210 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2235,
+		2236 | SPEC_RULE_OP2,
+		2241,
+		2242 | SPEC_RULE_OP1,
+		2247 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2272 | SPEC_RULE_OP2,
+		2277 | SPEC_RULE_OP2,
+		2282,
+		2283 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		2408 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2433,
+		2434,
+		2435,
+		2436 | SPEC_RULE_OP1,
+		2441 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2466,
+		2467,
+		2468 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2493,
+		2494,
+		2495,
+		2496 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2521 | SPEC_RULE_OP1,
+		2526,
+		2527,
+		2528,
+		2529,
+		2530 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2555 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2580 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2605 | SPEC_RULE_OP1,
+		2610 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2635,
+		2636 | SPEC_RULE_OP2,
+		2641 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2666 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2691 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2716 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2741 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2766 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2791 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2816 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2841 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2866 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2891 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2916
 	};
 	zend_opcode_handlers = labels;
 	zend_spec_handlers = specs;
@@ -56738,6 +56909,7 @@ static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* 
 	if (spec & SPEC_RULE_OP2) offset = offset * 5 + zend_vm_decode[op->op2_type];
 	if (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];
 	if (spec & SPEC_RULE_RETVAL) offset = offset * 2 + ((op->result_type & EXT_TYPE_UNUSED) == 0);
+	if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);
 	return zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];
 }
 
