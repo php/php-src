@@ -574,7 +574,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SPEC_HANDLER(ZEND_OPCODE_H
 	ZEND_VM_CONTINUE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
@@ -604,13 +604,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPC
 	zend_vm_stack_free_args(call);
 	zend_vm_stack_free_call_frame(call);
 
-	if (!RETURN_VALUE_USED(opline)) {
+	if (!0) {
 		zval_ptr_dtor(EX_VAR(opline->result.var));
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_throw_exception_internal(NULL);
-		if (RETURN_VALUE_USED(opline)) {
+		if (0) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 		HANDLE_EXCEPTION();
@@ -620,7 +620,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPC
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+	zend_function *fbc = call->func;
+	zval *ret;
+
+	SAVE_OPLINE();
+	EX(call) = call->prev_execute_data;
+
+	call->prev_execute_data = execute_data;
+	EG(current_execute_data) = call;
+
+	ret = EX_VAR(opline->result.var);
+	ZVAL_NULL(ret);
+	Z_VAR_FLAGS_P(ret) = 0;
+
+	fbc->internal_function.handler(call, ret);
+
+#if ZEND_DEBUG
+	ZEND_ASSERT(
+		EG(exception) || !call->func ||
+		!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+		zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+#endif
+
+	EG(current_execute_data) = call->prev_execute_data;
+	zend_vm_stack_free_args(call);
+	zend_vm_stack_free_call_frame(call);
+
+	if (!1) {
+		zval_ptr_dtor(EX_VAR(opline->result.var));
+	}
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_throw_exception_internal(NULL);
+		if (1) {
+			zval_ptr_dtor(EX_VAR(opline->result.var));
+		}
+		HANDLE_EXCEPTION();
+	}
+
+	ZEND_VM_INTERRUPT_CHECK();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
@@ -633,7 +679,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_HANDLER(ZEND_OPC
 	EG(scope) = NULL;
 	ret = NULL;
 	call->symbol_table = NULL;
-	if (RETURN_VALUE_USED(opline)) {
+	if (0) {
 		ret = EX_VAR(opline->result.var);
 		ZVAL_NULL(ret);
 		Z_VAR_FLAGS_P(ret) = 0;
@@ -645,7 +691,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_HANDLER(ZEND_OPC
 	ZEND_VM_ENTER();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+	zend_function *fbc = call->func;
+	zval *ret;
+
+	SAVE_OPLINE();
+	EX(call) = call->prev_execute_data;
+
+	EG(scope) = NULL;
+	ret = NULL;
+	call->symbol_table = NULL;
+	if (1) {
+		ret = EX_VAR(opline->result.var);
+		ZVAL_NULL(ret);
+		Z_VAR_FLAGS_P(ret) = 0;
+	}
+
+	call->prev_execute_data = execute_data;
+	i_init_func_execute_data(call, &fbc->op_array, ret, 0);
+
+	ZEND_VM_ENTER();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
@@ -658,7 +729,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		EG(scope) = NULL;
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(RETURN_VALUE_USED(opline))) {
+			if (EXPECTED(0)) {
 				ret = EX_VAR(opline->result.var);
 				zend_generator_create_zval(call, &fbc->op_array, ret);
 				Z_VAR_FLAGS_P(ret) = 0;
@@ -670,7 +741,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(
 		} else {
 			ret = NULL;
 			call->symbol_table = NULL;
-			if (RETURN_VALUE_USED(opline)) {
+			if (0) {
 				ret = EX_VAR(opline->result.var);
 				ZVAL_NULL(ret);
 				Z_VAR_FLAGS_P(ret) = 0;
@@ -732,14 +803,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!0) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_throw_exception_internal(NULL);
-		if (RETURN_VALUE_USED(opline)) {
+		if (0) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 		HANDLE_EXCEPTION();
@@ -748,7 +819,110 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+	zend_function *fbc = call->func;
+	zval *ret;
+
+	SAVE_OPLINE();
+	EX(call) = call->prev_execute_data;
+
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
+		EG(scope) = NULL;
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			if (EXPECTED(1)) {
+				ret = EX_VAR(opline->result.var);
+				zend_generator_create_zval(call, &fbc->op_array, ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			} else {
+				zend_vm_stack_free_args(call);
+			}
+
+			zend_vm_stack_free_call_frame(call);
+		} else {
+			ret = NULL;
+			call->symbol_table = NULL;
+			if (1) {
+				ret = EX_VAR(opline->result.var);
+				ZVAL_NULL(ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			}
+
+			call->prev_execute_data = execute_data;
+			i_init_func_execute_data(call, &fbc->op_array, ret, 0);
+
+			ZEND_VM_ENTER();
+		}
+		EG(scope) = EX(func)->op_array.scope;
+	} else {
+		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
+
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+				fbc->common.scope ? "::" : "",
+				ZSTR_VAL(fbc->common.function_name));
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+		}
+
+		call->prev_execute_data = execute_data;
+		EG(current_execute_data) = call;
+
+		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			uint32_t i;
+			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
+			zval *p = ZEND_CALL_ARG(call, 1);
+
+			for (i = 0; i < num_args; ++i) {
+				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
+					EG(current_execute_data) = call->prev_execute_data;
+					zend_vm_stack_free_args(call);
+					zend_vm_stack_free_call_frame(call);
+					zend_throw_exception_internal(NULL);
+					HANDLE_EXCEPTION();
+				}
+				p++;
+			}
+		}
+
+		ret = EX_VAR(opline->result.var);
+		ZVAL_NULL(ret);
+		Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
+
+		fbc->internal_function.handler(call, ret);
+
+#if ZEND_DEBUG
+		ZEND_ASSERT(
+			EG(exception) || !call->func ||
+			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+#endif
+
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_args(call);
+		zend_vm_stack_free_call_frame(call);
+
+		if (!1) {
+			zval_ptr_dtor(EX_VAR(opline->result.var));
+		}
+	}
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_throw_exception_internal(NULL);
+		if (1) {
+			zval_ptr_dtor(EX_VAR(opline->result.var));
+		}
+		HANDLE_EXCEPTION();
+	}
+	ZEND_VM_INTERRUPT_CHECK();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
@@ -779,7 +953,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		EG(scope) = fbc->common.scope;
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(RETURN_VALUE_USED(opline))) {
+			if (EXPECTED(0)) {
 				ret = EX_VAR(opline->result.var);
 				zend_generator_create_zval(call, &fbc->op_array, ret);
 				Z_VAR_FLAGS_P(ret) = 0;
@@ -792,7 +966,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 		} else {
 			ret = NULL;
 			call->symbol_table = NULL;
-			if (RETURN_VALUE_USED(opline)) {
+			if (0) {
 				ret = EX_VAR(opline->result.var);
 				ZVAL_NULL(ret);
 				Z_VAR_FLAGS_P(ret) = 0;
@@ -828,7 +1002,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
 					EG(current_execute_data) = call->prev_execute_data;
 					zend_vm_stack_free_args(call);
-					if (RETURN_VALUE_USED(opline)) {
+					if (0) {
 						ZVAL_UNDEF(EX_VAR(opline->result.var));
 					}
 					if (UNEXPECTED(should_change_scope)) {
@@ -862,7 +1036,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
 
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!0) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 
@@ -902,7 +1076,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 		}
 		efree(fbc);
 
-		if (!RETURN_VALUE_USED(opline)) {
+		if (!0) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		} else {
 			Z_VAR_FLAGS_P(EX_VAR(opline->result.var)) = 0;
@@ -933,7 +1107,202 @@ fcall_end:
 	zend_vm_stack_free_call_frame(call);
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_throw_exception_internal(NULL);
-		if (RETURN_VALUE_USED(opline)) {
+		if (0) {
+			zval_ptr_dtor(EX_VAR(opline->result.var));
+		}
+		HANDLE_EXCEPTION();
+	}
+
+	ZEND_VM_INTERRUPT_CHECK();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+	zend_function *fbc = call->func;
+	zend_object *object;
+	zval *ret;
+
+	SAVE_OPLINE();
+	EX(call) = call->prev_execute_data;
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
+			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			HANDLE_EXCEPTION();
+		}
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+				fbc->common.scope ? "::" : "",
+				ZSTR_VAL(fbc->common.function_name));
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+		}
+	}
+
+	LOAD_OPLINE();
+
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
+		EG(scope) = fbc->common.scope;
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			if (EXPECTED(1)) {
+				ret = EX_VAR(opline->result.var);
+				zend_generator_create_zval(call, &fbc->op_array, ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			} else {
+				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
+					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
+				}
+				zend_vm_stack_free_args(call);
+			}
+		} else {
+			ret = NULL;
+			call->symbol_table = NULL;
+			if (1) {
+				ret = EX_VAR(opline->result.var);
+				ZVAL_NULL(ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			}
+
+			call->prev_execute_data = execute_data;
+			i_init_func_execute_data(call, &fbc->op_array, ret, 1);
+
+			if (EXPECTED(zend_execute_ex == execute_ex)) {
+				ZEND_VM_ENTER();
+			} else {
+				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+				zend_execute_ex(call);
+			}
+		}
+	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
+		int should_change_scope = 0;
+
+		if (fbc->common.scope) {
+			should_change_scope = 1;
+			EG(scope) = fbc->common.scope;
+		}
+
+		call->prev_execute_data = execute_data;
+		EG(current_execute_data) = call;
+
+		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			uint32_t i;
+			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
+			zval *p = ZEND_CALL_ARG(call, 1);
+
+			for (i = 0; i < num_args; ++i) {
+				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
+					EG(current_execute_data) = call->prev_execute_data;
+					zend_vm_stack_free_args(call);
+					if (1) {
+						ZVAL_UNDEF(EX_VAR(opline->result.var));
+					}
+					if (UNEXPECTED(should_change_scope)) {
+						goto fcall_end_change_scope;
+					} else {
+						goto fcall_end;
+					}
+				}
+				p++;
+			}
+		}
+
+		ret = EX_VAR(opline->result.var);
+		ZVAL_NULL(ret);
+		Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
+
+		if (!zend_execute_internal) {
+			/* saves one function call if zend_execute_internal is not used */
+			fbc->internal_function.handler(call, ret);
+		} else {
+			zend_execute_internal(call, ret);
+		}
+
+#if ZEND_DEBUG
+		ZEND_ASSERT(
+			EG(exception) || !call->func ||
+			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+#endif
+
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_args(call);
+
+		if (!1) {
+			zval_ptr_dtor(EX_VAR(opline->result.var));
+		}
+
+		if (UNEXPECTED(should_change_scope)) {
+			goto fcall_end_change_scope;
+		} else {
+			goto fcall_end;
+		}
+	} else { /* ZEND_OVERLOADED_FUNCTION */
+		/* Not sure what should be done here if it's a static method */
+		object = Z_OBJ(call->This);
+		if (UNEXPECTED(object == NULL)) {
+			zend_vm_stack_free_args(call);
+			if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+				zend_string_release(fbc->common.function_name);
+			}
+			efree(fbc);
+			zend_vm_stack_free_call_frame(call);
+
+			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
+			HANDLE_EXCEPTION();
+		}
+
+		EG(scope) = fbc->common.scope;
+
+		ZVAL_NULL(EX_VAR(opline->result.var));
+
+		call->prev_execute_data = execute_data;
+		EG(current_execute_data) = call;
+		object->handlers->call_method(fbc->common.function_name, object, call, EX_VAR(opline->result.var));
+		EG(current_execute_data) = call->prev_execute_data;
+
+		zend_vm_stack_free_args(call);
+
+		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+			zend_string_release(fbc->common.function_name);
+		}
+		efree(fbc);
+
+		if (!1) {
+			zval_ptr_dtor(EX_VAR(opline->result.var));
+		} else {
+			Z_VAR_FLAGS_P(EX_VAR(opline->result.var)) = 0;
+		}
+	}
+
+fcall_end_change_scope:
+	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+		object = Z_OBJ(call->This);
+#if 0
+		if (UNEXPECTED(EG(exception) != NULL) && (opline->op1.num & ZEND_CALL_CTOR)) {
+			if (!(opline->op1.num & ZEND_CALL_CTOR_RESULT_UNUSED)) {
+#else
+		if (UNEXPECTED(EG(exception) != NULL) && (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR)) {
+			if (!(ZEND_CALL_INFO(call) & ZEND_CALL_CTOR_RESULT_UNUSED)) {
+#endif
+				GC_REFCOUNT(object)--;
+			}
+			if (GC_REFCOUNT(object) == 1) {
+				zend_object_store_ctor_failed(object);
+			}
+		}
+		OBJ_RELEASE(object);
+	}
+	EG(scope) = EX(func)->op_array.scope;
+
+fcall_end:
+	zend_vm_stack_free_call_frame(call);
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_throw_exception_internal(NULL);
+		if (1) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 		HANDLE_EXCEPTION();
@@ -54797,7 +55166,8 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_DO_FCALL_SPEC_HANDLER,
+		ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HANDLER,
+		ZEND_DO_FCALL_SPEC_RETVAL_USED_HANDLER,
 		ZEND_INIT_FCALL_SPEC_CONST_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -55755,9 +56125,12 @@ void zend_init_opcodes_handlers(void)
 		ZEND_INIT_DYNAMIC_CALL_SPEC_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_INIT_DYNAMIC_CALL_SPEC_CV_HANDLER,
-		ZEND_DO_ICALL_SPEC_HANDLER,
-		ZEND_DO_UCALL_SPEC_HANDLER,
-		ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER,
+		ZEND_DO_ICALL_SPEC_RETVAL_UNUSED_HANDLER,
+		ZEND_DO_ICALL_SPEC_RETVAL_USED_HANDLER,
+		ZEND_DO_UCALL_SPEC_RETVAL_UNUSED_HANDLER,
+		ZEND_DO_UCALL_SPEC_RETVAL_USED_HANDLER,
+		ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_UNUSED_HANDLER,
+		ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_USED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -56734,7 +57107,7 @@ void zend_init_opcodes_handlers(void)
 		776 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
 		826 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		851 | SPEC_RULE_OP1,
-		2916,
+		2920,
 		856,
 		857 | SPEC_RULE_OP1,
 		862 | SPEC_RULE_OP1,
@@ -56742,9 +57115,9 @@ void zend_init_opcodes_handlers(void)
 		872 | SPEC_RULE_OP1,
 		877 | SPEC_RULE_OP1,
 		882 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2916,
-		2916,
-		2916,
+		2920,
+		2920,
+		2920,
 		907 | SPEC_RULE_OP1,
 		912 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		937 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -56753,131 +57126,131 @@ void zend_init_opcodes_handlers(void)
 		1012,
 		1013 | SPEC_RULE_OP1,
 		1018 | SPEC_RULE_OP2,
-		1023,
-		1024 | SPEC_RULE_OP2,
-		1029 | SPEC_RULE_OP1,
-		1034,
-		1035 | SPEC_RULE_OP2,
-		1040 | SPEC_RULE_OP1,
-		1045 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
-		1055 | SPEC_RULE_OP1,
-		1060 | SPEC_RULE_OP1,
-		1065 | SPEC_RULE_OP2,
-		1070 | SPEC_RULE_OP1,
-		1075 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1100 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1125 | SPEC_RULE_OP1,
-		1130 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1155 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1180 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1205 | SPEC_RULE_OP1,
-		1210 | SPEC_RULE_OP1,
-		1215 | SPEC_RULE_OP1,
-		1220 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1245 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1270 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1295 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1320 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1345 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1370 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1395 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1420 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1445 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1470 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1495 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1520 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1545 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1570 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1595 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1620 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1645 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1670 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1695 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2916,
-		1720,
+		1023 | SPEC_RULE_RETVAL,
+		1025 | SPEC_RULE_OP2,
+		1030 | SPEC_RULE_OP1,
+		1035,
+		1036 | SPEC_RULE_OP2,
+		1041 | SPEC_RULE_OP1,
+		1046 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1056 | SPEC_RULE_OP1,
+		1061 | SPEC_RULE_OP1,
+		1066 | SPEC_RULE_OP2,
+		1071 | SPEC_RULE_OP1,
+		1076 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1101 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1126 | SPEC_RULE_OP1,
+		1131 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1156 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1181 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1206 | SPEC_RULE_OP1,
+		1211 | SPEC_RULE_OP1,
+		1216 | SPEC_RULE_OP1,
+		1221 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1246 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1271 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1296 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1321 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1346 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1371 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1396 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1421 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1446 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1471 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1496 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1521 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1546 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1571 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1596 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1621 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1646 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1671 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1696 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2920,
 		1721,
 		1722,
 		1723,
 		1724,
-		1725 | SPEC_RULE_OP1,
-		1730 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1755 | SPEC_RULE_OP1,
-		1760 | SPEC_RULE_OP2,
-		1765 | SPEC_RULE_OP1,
-		1770 | SPEC_RULE_OP1,
-		1775 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1800 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1825 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1850 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1875 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
-		1885 | SPEC_RULE_OP1,
-		1890 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1915,
-		1916 | SPEC_RULE_OP1,
-		1921 | SPEC_RULE_OP1,
-		1926 | SPEC_RULE_OP1,
-		1931 | SPEC_RULE_OP1,
-		1936 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1961 | SPEC_RULE_OP1,
-		1966 | SPEC_RULE_OP1,
-		1971 | SPEC_RULE_OP1,
-		1976 | SPEC_RULE_OP2,
-		1981,
-		1982,
-		1983,
-		1984 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2009 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2034 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2059 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2084 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		2209,
-		2210 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2235,
-		2236 | SPEC_RULE_OP2,
-		2241,
-		2242 | SPEC_RULE_OP1,
-		2247 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2272 | SPEC_RULE_OP2,
-		2277 | SPEC_RULE_OP2,
-		2282,
-		2283 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		2408 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2433,
-		2434,
-		2435,
-		2436 | SPEC_RULE_OP1,
-		2441 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2466,
-		2467,
-		2468 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2493,
-		2494,
-		2495,
-		2496 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2521 | SPEC_RULE_OP1,
-		2526,
-		2527,
-		2528,
-		2529,
-		2530 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2555 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2580 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2605 | SPEC_RULE_OP1,
-		2610 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2635,
-		2636 | SPEC_RULE_OP2,
-		2641 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2666 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2691 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2716 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2741 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2766 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2791 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2816 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2841 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2866 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2891 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2916
+		1725,
+		1726 | SPEC_RULE_OP1,
+		1731 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1756 | SPEC_RULE_OP1,
+		1761 | SPEC_RULE_OP2,
+		1766 | SPEC_RULE_OP1,
+		1771 | SPEC_RULE_OP1,
+		1776 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1801 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1826 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1851 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1876 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1886 | SPEC_RULE_OP1,
+		1891 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1916,
+		1917 | SPEC_RULE_OP1,
+		1922 | SPEC_RULE_OP1,
+		1927 | SPEC_RULE_OP1,
+		1932 | SPEC_RULE_OP1,
+		1937 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1962 | SPEC_RULE_OP1,
+		1967 | SPEC_RULE_OP1,
+		1972 | SPEC_RULE_OP1,
+		1977 | SPEC_RULE_OP2,
+		1982 | SPEC_RULE_RETVAL,
+		1984 | SPEC_RULE_RETVAL,
+		1986 | SPEC_RULE_RETVAL,
+		1988 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2013 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2038 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2063 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2088 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		2213,
+		2214 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2239,
+		2240 | SPEC_RULE_OP2,
+		2245,
+		2246 | SPEC_RULE_OP1,
+		2251 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2276 | SPEC_RULE_OP2,
+		2281 | SPEC_RULE_OP2,
+		2286,
+		2287 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		2412 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2437,
+		2438,
+		2439,
+		2440 | SPEC_RULE_OP1,
+		2445 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2470,
+		2471,
+		2472 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2497,
+		2498,
+		2499,
+		2500 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2525 | SPEC_RULE_OP1,
+		2530,
+		2531,
+		2532,
+		2533,
+		2534 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2559 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2584 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2609 | SPEC_RULE_OP1,
+		2614 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2639,
+		2640 | SPEC_RULE_OP2,
+		2645 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2670 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2695 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2720 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2745 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2770 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2795 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2820 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2845 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2870 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2895 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2920
 	};
 	zend_opcode_handlers = labels;
 	zend_spec_handlers = specs;
