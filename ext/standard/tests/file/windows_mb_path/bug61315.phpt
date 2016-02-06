@@ -49,13 +49,13 @@ Active code page: 65001
 getting basename of %s\ソフト
 string(9) "ソフト"
 bool(true)
-string(119) "%s\ソフト"
+string(%d) "%s\ソフト"
 Active code page: %d
 Active code page: 65001
 getting basename of %s\フォルダ
 string(12) "フォルダ"
 bool(true)
-string(122) "%s\フォルダ"
+string(%d) "%s\フォルダ"
 Active code page: %d
 bool(true)
 bool(true)
