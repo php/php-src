@@ -41,8 +41,8 @@ bool(true)
 bool(true)
 Active code page: 65001
 getting basename of %s\測試多字節路徑5\測試多字節路徑4
-string(0) ""
-bool(false)
+string(22) "測試多字節路徑4"
+bool(true)
 string(%d) "%s\測試多字節路徑5\測試多字節路徑4"
 Active code page: %d
 bool(true)

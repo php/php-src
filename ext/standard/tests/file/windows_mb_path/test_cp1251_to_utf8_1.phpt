@@ -41,8 +41,8 @@ bool(true)
 bool(true)
 Active code page: 65001
 getting basename of %s\привет3\привет4
-string(0) ""
-bool(false)
+string(13) "привет4"
+bool(true)
 string(%d) "%s\привет3\привет4"
 Active code page: %d
 bool(true)
