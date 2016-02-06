@@ -366,6 +366,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 			}
 
 		} else {
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 			char  cur_path[MAXPATHLEN+1];
 			DWORD len = sizeof(cur_path);
 			char *tmp = cur_path;
@@ -394,6 +395,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 			if (tmp != cur_path) {
 				free(tmp);
 			}
+#endif
 		}
 	}
 
@@ -407,8 +409,10 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 
 		if (pathw) {
 			hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		} else {
 			hLink = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+#endif
 		}
 		if(hLink == INVALID_HANDLE_VALUE) {
 			if (pathw) {
