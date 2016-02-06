@@ -114,10 +114,14 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode);
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 PW32IO int php_win32_ioutil_mkdir_a(const char *path, mode_t mode);
 PW32IO int php_win32_ioutil_open_a(const char *path, int flags, ...);
+PW32IO int php_win32_ioutil_chdir_a(const char *path);
+PW32IO int php_win32_ioutil_rename_a(const char *oldname, const char *newname);
 #endif
 
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
+PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
+PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
 
 #if 0
 PW32IO int php_win32_ioutil_access_a(const char *path, mode_t mode);
@@ -145,11 +149,10 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 
 	if (use_w) {
 		ret = _waccess(pathw, mode);
+		PHP_WIN32_IOUTIL_CLEANUP_W();
 	} else {
 		ret = _access(patha, mode);
 	}
-
-	PHP_WIN32_IOUTIL_CLEANUP_W();
 
 	return ret;
 }
@@ -170,6 +173,7 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 
 	if (use_w) {
 		ret = php_win32_ioutil_open_w(pathw, flags, mode);
+		PHP_WIN32_IOUTIL_CLEANUP_W();
 	} else {
 		ret = php_win32_ioutil_open_a(patha, flags, mode);
 	}
@@ -178,8 +182,6 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 		DWORD err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
-
-	PHP_WIN32_IOUTIL_CLEANUP_W();
 
 	return ret;
 }
@@ -196,14 +198,13 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 			err = GetLastError();
 			ret = -1;
 		}
+		PHP_WIN32_IOUTIL_CLEANUP_W();
 	} else {
 		if (!DeleteFileA(patha)) {
 			err = GetLastError();
 			ret = -1;
 		}
 	}
-
-	PHP_WIN32_IOUTIL_CLEANUP_W();
 
 	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
@@ -240,23 +241,71 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 	return ret;
 }
 
+/* This needs to be improved once long path support is implemented. Use ioutil_open() and then
+fdopen() might be the way, if we learn how to convert the mode options (maybe grab the routine
+ from the streams). */
 __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
 {
 	FILE *ret;
-	const wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
-	const wchar_t *modew = php_win32_ioutil_mb_to_w(modea);
+	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
+	wchar_t *modew = php_win32_ioutil_mb_to_w(modea);
+	DWORD err = 0;
 
 	if (pathw && modew) {
 		ret = _wfopen(pathw, modew);
+		_get_errno(&err);
+		free(pathw);
+		free(modew);
 	} else {
 		ret = fopen(patha, modea);
+		_get_errno(&err);
 	}
 
-	if (pathw) {
-		free(pathw);
+	if (0 > ret) {
+		_set_errno(err);
 	}
-	if (modew) {
-		free(modew);
+	return ret;
+}
+
+__forceinline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
+{
+	wchar_t *oldnamew = php_win32_ioutil_any_to_w(oldnamea);
+	wchar_t *newnamew = php_win32_ioutil_any_to_w(newnamea);
+	int ret;
+	DWORD err = 0;
+
+	if (oldnamew && newnamew) {
+		ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
+		free(oldnamew);
+		free(newnamew);
+	} else {
+		ret = php_win32_ioutil_rename_a(oldnamea, newnamea);
+	}
+
+	if (0 > ret) {
+		SET_ERRNO_FROM_WIN32_CODE(err);
+	}
+
+	return ret;
+}
+
+__forceinline static int php_win32_ioutil_chdir(const char *patha)
+{
+	int ret;
+	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
+	DWORD err = 0;
+
+	if (pathw) {
+		ret = php_win32_ioutil_chdir_w(pathw);
+		err = GetLastError();
+		free(pathw);
+	} else {
+		ret = php_win32_ioutil_chdir_a(patha);
+		err = GetLastError();
+	}
+
+	if (0 > ret) {
+		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
 	return ret;
@@ -272,6 +321,8 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 #define php_win32_ioutil_rmdir_cond php_win32_ioutil_rmdir_w
 #define php_win32_ioutil_rmdir php_win32_ioutil_rmdir_w
 #define php_win32_ioutil_fopen _wfopen
+#define php_win32_ioutil_rename php_win32_ioutil_rename_w
+#define php_win32_ioutil_chdir php_win32_ioutil_chdir_w
 #endif
 
 

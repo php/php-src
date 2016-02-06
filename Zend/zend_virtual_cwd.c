@@ -1836,7 +1836,7 @@ CWD_API int virtual_rename(const char *oldname, const char *newname) /* {{{ */
 	   MoveFileEx has to be used */
 #ifdef ZEND_WIN32
 	/* MoveFileEx returns 0 on failure, other way 'round for this function */
-	retval = (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0) ? -1 : 0;
+	retval = php_win32_ioutil_rename(oldname, newname);
 #else
 	retval = rename(oldname, newname);
 #endif
