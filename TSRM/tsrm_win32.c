@@ -788,9 +788,19 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	FILETIME mtime, atime;
 	HANDLE hFile;
+	PHP_WIN32_IOUTIL_INIT_W(filename);
 
-	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
-				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	if (use_w) {
+		hFile = CreateFileW(pathw, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+					 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+	} else {
+		hFile = CreateFileA(patha, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+					 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+#endif
+	}
+
+	PHP_WIN32_IOUTIL_CLEANUP_W();
 
 	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but
 	   the CreateFile operation succeeds */
