@@ -32,7 +32,7 @@ if ($f) {
 ===DONE===
 --EXPECTF--	
 resource(6) of type (stream)
-string(34) "reading file wihh eucjp filename
+string(33) "reading file wihh eucjp filename
 "
 bool(true)
 ===DONE===
