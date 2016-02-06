@@ -234,6 +234,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 					 OPEN_EXISTING,         // existing file only
 					 FILE_FLAG_BACKUP_SEMANTICS, // normal file
 					 NULL);                 // no attr. template
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		hFile = CreateFileA(link,            // file to open
 					 GENERIC_READ,          // open for reading
@@ -242,6 +243,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 					 OPEN_EXISTING,         // existing file only
 					 FILE_FLAG_BACKUP_SEMANTICS, // normal file
 					 NULL);                 // no attr. template
+#endif
 	}
 	if( hFile == INVALID_HANDLE_VALUE) {
 			return -1;
@@ -255,8 +257,10 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		overflown. */
 	if (linkw) {
 		dwRet = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		dwRet = GetFinalPathNameByHandleA(hFile, target, target_len - 1, VOLUME_NAME_DOS);
+#endif
 	}
 	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
 		return -1;
