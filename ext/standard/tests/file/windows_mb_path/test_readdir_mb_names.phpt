@@ -43,6 +43,7 @@ filename: Voláçao : filetype: file
 filename: Voláçao3 : filetype: dir
 filename: českýtestování.inc : filetype: file
 filename: š.txt : filetype: file
+filename: Ελλάδα.txt : filetype: file
 filename: привет : filetype: file
 filename: привет3 : filetype: dir
 filename: テストマルチバイト・パス : filetype: file
