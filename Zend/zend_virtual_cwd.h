@@ -291,11 +291,11 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #else
 
 #define VCWD_GETCWD(buff, size) getcwd(buff, size)
-#define VCWD_FOPEN(path, mode)  fopen(path, mode)
 #define VCWD_CREAT(path, mode) creat(path, mode)
 /* rename on windows will fail if newname already exists.
    MoveFileEx has to be used */
 #if defined(ZEND_WIN32)
+#define VCWD_FOPEN(path, mode)  php_win32_ioutil_fopen(path, mode)
 #define VCWD_OPEN(path, flags) php_win32_ioutil_open(path, flags)
 #define VCWD_OPEN_MODE(path, flags, mode) php_win32_ioutil_open(path, flags, mode)
 # define VCWD_RENAME(oldname, newname) (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0 ? -1 : 0)
@@ -303,6 +303,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_RMDIR(pathname) php_win32_ioutil_rmdir(pathname)
 #define VCWD_UNLINK(path) php_win32_ioutil_unlink(path)
 #else
+#define VCWD_FOPEN(path, mode)  fopen(path, mode)
 #define VCWD_OPEN(path, flags) open(path, flags)
 #define VCWD_OPEN_MODE(path, flags, mode)	open(path, flags, mode)
 # define VCWD_RENAME(oldname, newname) rename(oldname, newname)
