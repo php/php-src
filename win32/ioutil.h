@@ -116,12 +116,14 @@ PW32IO int php_win32_ioutil_mkdir_a(const char *path, mode_t mode);
 PW32IO int php_win32_ioutil_open_a(const char *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_a(const char *path);
 PW32IO int php_win32_ioutil_rename_a(const char *oldname, const char *newname);
+PW32IO char *php_win32_ioutil_getcwd_a(const char *buf, int len);
 #endif
 
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
+PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
 
 #if 0
 PW32IO int php_win32_ioutil_access_a(const char *path, mode_t mode);
@@ -312,6 +314,44 @@ __forceinline static int php_win32_ioutil_chdir(const char *patha)
 
 	return ret;
 }
+
+__forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
+{
+	wchar_t *tmp_bufw = NULL;
+	char *tmp_bufa = NULL;
+	DWORD err = 0;
+
+	tmp_bufw = php_win32_ioutil_getcwd_w(tmp_bufw, len);
+	if (!tmp_bufw) {
+		err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	tmp_bufa = php_win32_ioutil_w_to_utf8(tmp_bufw);
+	if (!tmp_bufa) {
+		buf = php_win32_ioutil_getcwd_a(buf, len);
+		err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return buf;
+	} else if (strlen(tmp_bufa) > len) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+		return NULL;
+	}
+
+	if (!buf) {
+		/* If buf was NULL, the result has to be freed outside here. */
+		buf = tmp_bufa;
+	} else {
+		memmove(buf, tmp_bufa, len);
+		free(tmp_bufa);
+	}
+
+	free(tmp_bufw);
+
+	return buf;
+}
+
 #else /* no ANSI compat mode */
 #define php_win32_ioutil_access_cond _waccess
 #define php_win32_ioutil_access _waccess

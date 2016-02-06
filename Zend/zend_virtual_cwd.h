@@ -290,7 +290,6 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #else
 
-#define VCWD_GETCWD(buff, size) getcwd(buff, size)
 #define VCWD_CREAT(path, mode) creat(path, mode)
 /* rename on windows will fail if newname already exists.
    MoveFileEx has to be used */
@@ -304,6 +303,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_UNLINK(path) php_win32_ioutil_unlink(path)
 #define VCWD_CHDIR(path) php_win32_ioutil_chdir(path)
 #define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
+#define VCWD_GETCWD(buff, size) php_win32_ioutil_getcwd(buff, size)
 #else
 #define VCWD_FOPEN(path, mode)  fopen(path, mode)
 #define VCWD_OPEN(path, flags) open(path, flags)
@@ -314,6 +314,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_UNLINK(path) unlink(path)
 #define VCWD_CHDIR(path) chdir(path)
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
+#define VCWD_GETCWD(buff, size) getcwd(buff, size)
 #endif
 
 #define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)

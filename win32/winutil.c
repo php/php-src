@@ -267,7 +267,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 119 */   ,   {   0                               ,   0               }
         /* 120 */   ,   {   0                               ,   0               }
         /* 121 */   ,   {   0                               ,   0               }
-        /* 122 */   ,   {   0                               ,   0               }
+        /* 122 */   ,   {   ERROR_INSUFFICIENT_BUFFER       ,   ERANGE          }
         /* 123 */   ,   {   ERROR_INVALID_NAME              ,   ENOENT          }
         /* 124 */   ,   {   ERROR_INVALID_HANDLE            ,   EINVAL          }
         /* 125 */   ,   {   0                               ,   0               }
