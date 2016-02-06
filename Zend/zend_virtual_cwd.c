@@ -1638,7 +1638,11 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode) /* {{{ */
 		return NULL;
 	}
 
+#ifdef ZEND_WIN32
+	f = php_win32_ioutil_fopen(new_state.cwd, mode);
+#else
 	f = fopen(new_state.cwd, mode);
+#endif
 
 	CWD_STATE_FREE_ERR(&new_state);
 

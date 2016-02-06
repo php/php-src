@@ -239,6 +239,28 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 
 	return ret;
 }
+
+__forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
+{
+	FILE *ret;
+	const wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
+	const wchar_t *modew = php_win32_ioutil_mb_to_w(modea);
+
+	if (pathw && modew) {
+		ret = _wfopen(pathw, modew);
+	} else {
+		ret = fopen(patha, modea);
+	}
+
+	if (pathw) {
+		free(pathw);
+	}
+	if (modew) {
+		free(modew);
+	}
+
+	return ret;
+}
 #else /* no ANSI compat mode */
 #define php_win32_ioutil_access_cond _waccess
 #define php_win32_ioutil_access _waccess
@@ -249,7 +271,9 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 #define php_win32_ioutil_unlink php_win32_ioutil_unlink_w
 #define php_win32_ioutil_rmdir_cond php_win32_ioutil_rmdir_w
 #define php_win32_ioutil_rmdir php_win32_ioutil_rmdir_w
+#define php_win32_ioutil_fopen _wfopen
 #endif
+
 
 #if 0
 zend_always_inline static HANDLE php_win32_ioutil_get_file_handle(char *path, WIN32_FIND_DATA *data)
