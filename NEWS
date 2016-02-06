@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #71442 (forward_static_call crash). (Laruence)
   . Fixed bug #71441 (Typehinted Generator with return in try/finally crashes).
     (Bob)
+  . Fixed bug #71529 (Variable references on array elements don't work when
+    using count). (Nikita)
 
 - CURL:
   . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
