@@ -9,15 +9,17 @@ function get_active_cp()
 	return $m[1];
 }
 
-function set_active_cp($cp)
+function set_active_cp($cp, $echo = true)
 {
-	echo exec("chcp $cp"), "\n";
+	$ret = exec("chcp $cp");
+
+	if ($echo) echo "Active code page: ", get_active_cp(), "\n";
 }
 
 function get_basename_with_cp($path, $cp, $echo = true)
 {
 	$old_cp = get_active_cp();
-	set_active_cp($cp);
+	set_active_cp($cp, $echo);
 
 	if ($echo) echo "getting basename of $path\n";
 
@@ -27,7 +29,7 @@ function get_basename_with_cp($path, $cp, $echo = true)
 	if ($echo) var_dump($out, $out == basename($path));
 	if ($echo) var_dump(realpath($path));
 
-	set_active_cp($old_cp);
+	set_active_cp($old_cp, $echo);
 
 	return $out;
 }
