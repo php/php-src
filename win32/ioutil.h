@@ -245,7 +245,7 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 
 /* This needs to be improved once long path support is implemented. Use ioutil_open() and then
 fdopen() might be the way, if we learn how to convert the mode options (maybe grab the routine
- from the streams). */
+ from the streams). That will allow to split for _a and _w. */
 __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
 {
 	FILE *ret;
@@ -352,6 +352,28 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 	return buf;
 }
 
+/* TODO improve with usage of native APIs, split for _a and _w. */
+__forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
+{
+	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
+	DWORD err = 0;
+	int ret;
+
+	if (pathw) {
+		ret = _wchmod(pathw, mode);
+		_get_errno(&err);
+		free(pathw);
+	} else {
+		ret = _chmod(patha, mode);
+		_get_errno(&err);
+	}
+
+	if (0 > ret) {
+		_set_errno(err);
+	}
+	return ret;
+}
+
 #else /* no ANSI compat mode */
 #define php_win32_ioutil_access_cond _waccess
 #define php_win32_ioutil_access _waccess
@@ -365,6 +387,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 #define php_win32_ioutil_fopen _wfopen
 #define php_win32_ioutil_rename php_win32_ioutil_rename_w
 #define php_win32_ioutil_chdir php_win32_ioutil_chdir_w
+#define php_win32_ioutil_chmod _wchmod
 #endif
 
 

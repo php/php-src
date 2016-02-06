@@ -1720,9 +1720,11 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 		if (_tmp & _S_IWRITE) {
 			mode |= _S_IWRITE;
 		}
+		ret = php_win32_ioutil_chmod(new_state.cwd, mode);
 	}
-#endif
+#else
 	ret = chmod(new_state.cwd, mode);
+#endif
 
 	CWD_STATE_FREE_ERR(&new_state);
 	return ret;
