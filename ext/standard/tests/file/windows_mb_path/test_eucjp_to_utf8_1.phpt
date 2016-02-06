@@ -41,8 +41,8 @@ bool(true)
 bool(true)
 Active code page: 65001
 getting basename of %s\テストマルチバイト・パス42\テストマルチバイト・パス4
-string(0) ""
-bool(false)
+string(37) "テストマルチバイト・パス4"
+bool(true)
 string(%d) "%s\テストマルチバイト・パス42\テストマルチバイト・パス4"
 Active code page: %d
 bool(true)
