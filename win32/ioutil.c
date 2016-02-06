@@ -571,7 +571,7 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 PW32IO int php_win32_ioutil_unlink_a(const char *path)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 
@@ -582,11 +582,11 @@ PW32IO int php_win32_ioutil_unlink_a(const char *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 #endif
 
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 
@@ -597,11 +597,11 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 PW32IO int php_win32_ioutil_rmdir_a(const char *path)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 
@@ -612,11 +612,11 @@ PW32IO int php_win32_ioutil_rmdir_a(const char *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 #endif
 
 PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 
@@ -627,11 +627,11 @@ PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 PW32IO int php_win32_ioutil_chdir_a(const char *path)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 	
@@ -642,11 +642,11 @@ PW32IO int php_win32_ioutil_chdir_a(const char *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 #endif
 
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 	
@@ -657,11 +657,11 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 PW32IO int php_win32_ioutil_rename_a(const char *oldname, const char *newname)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 
@@ -672,11 +672,11 @@ PW32IO int php_win32_ioutil_rename_a(const char *oldname, const char *newname)
 	}
 
 	return ret;
-}
+}/*}}}*/
 #endif
 
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
-{
+{/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
 	
@@ -687,7 +687,7 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0
