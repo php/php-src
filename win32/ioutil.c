@@ -689,6 +689,78 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 	return ret;
 }/*}}}*/
 
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+PW32IO char *php_win32_ioutil_getcwd_a(const char *buf, int len)
+{/*{{{*/
+	DWORD err = 0;
+	char *tmp_buf = NULL;
+	
+	/* If buf was NULL, the result has to be freed outside here. */
+	if (!buf) {
+		DWORD tmp_len = GetCurrentDirectoryA(0, NULL) + 1;
+		if (!tmp_len) {
+			err = GetLastError();
+			SET_ERRNO_FROM_WIN32_CODE(err);
+			return NULL;
+		} else if (tmp_len > len) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+			return NULL;
+		}
+
+		len = tmp_len;
+
+		tmp_buf = (char *)malloc((len)*sizeof(char));
+		if (!tmp_buf) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			return NULL;
+		}
+		buf = tmp_buf;
+	}
+
+	if (!GetCurrentDirectoryA(len, buf)) {
+		err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+	}
+
+	return buf;
+}/*}}}*/
+#endif
+
+PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
+{/*{{{*/
+	DWORD err = 0;
+	wchar_t *tmp_buf = NULL;
+
+	/* If buf was NULL, the result has to be freed outside here. */
+	if (!buf) {
+		DWORD tmp_len = GetCurrentDirectoryW(0, NULL) + 1;
+		if (!tmp_len) {
+			err = GetLastError();
+			SET_ERRNO_FROM_WIN32_CODE(err);
+			return NULL;
+		} else if (tmp_len > len) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+			return NULL;
+		}
+
+		len = tmp_len;
+
+		tmp_buf = (wchar_t *)malloc((len)*sizeof(wchar_t));
+		if (!tmp_buf) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			return NULL;
+		}
+		buf = tmp_buf;
+	}
+	
+	if (!GetCurrentDirectoryW(len, buf)) {
+		err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+	}
+
+	return buf;
+}/*}}}*/
+
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
