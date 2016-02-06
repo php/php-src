@@ -25,11 +25,11 @@ mkdir($d0);
 
 get_basename_with_cp($d0, 65001);
 
-touch("$d0\\test0.txt");
+touch("$d0\\ı.txt");
 
 var_dump(count(stat("$d0\\ı.txt")) > 0);
 
-unlink("$d0\\test0.txt");
+unlink("$d0\\ı.txt");
 
 rmdir($d0);
 
@@ -42,9 +42,7 @@ Active code page: 65001
 getting basename of %s\ı
 string(2) "ı"
 bool(true)
-string(%d) "%s\testBug70903\ı"
-Active code page: %d
-
-Warning: stat(): stat failed for C:\php-sdk\phpmaster\vc14\x64\weltling_streams_refactor3\ext\standard\tests\file\windows_mb_path\testBug70903\ı\ı.txt in C:\php-sdk\phpmaster\vc14\x64\weltling_streams_refactor3\ext\standard\tests\file\windows_mb_path\bug70903.php on line 19
+string(%d) "%s\ı"
+Active code page: 437
 bool(true)
 ===DONE===
