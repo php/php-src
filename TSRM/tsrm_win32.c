@@ -567,15 +567,19 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	if (asuser) {
 		if (use_w) {
 			res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		} else {
 			res = CreateProcessAsUserA(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+#endif
 		}
 		CloseHandle(token_user);
 	} else {
 		if (use_w) {
 			res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		} else {
 			res = CreateProcessA(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+#endif
 		}
 	}
 	free(cmd);

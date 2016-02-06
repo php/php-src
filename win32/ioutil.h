@@ -276,10 +276,12 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 
 	if (oldnamew && newnamew) {
 		ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
+		err = GetLastError();
 		free(oldnamew);
 		free(newnamew);
 	} else {
 		ret = php_win32_ioutil_rename_a(oldnamea, newnamea);
+		err = GetLastError();
 	}
 
 	if (0 > ret) {

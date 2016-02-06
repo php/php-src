@@ -642,6 +642,9 @@ PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 	if (!RemoveDirectoryW(path)) {
 		err = GetLastError();
 		ret = -1;
+	}
+
+	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
@@ -657,6 +660,9 @@ PW32IO int php_win32_ioutil_chdir_a(const char *path)
 	if (!SetCurrentDirectoryA(path)) {
 		err = GetLastError();
 		ret = -1;
+	}
+
+	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
@@ -672,6 +678,9 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 	if (!SetCurrentDirectoryW(path)) {
 		err = GetLastError();
 		ret = -1;
+	}
+
+	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
@@ -683,10 +692,13 @@ PW32IO int php_win32_ioutil_rename_a(const char *oldname, const char *newname)
 {
 	int ret = 0;
 	DWORD err = 0;
-	
+
 	if (!MoveFileExA(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
 		err = GetLastError();
 		ret = -1;
+	}
+
+	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
@@ -702,6 +714,9 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 	if (!MoveFileExW(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
 		err = GetLastError();
 		ret = -1;
+	}
+
+	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
