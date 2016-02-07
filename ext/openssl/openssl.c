@@ -5584,7 +5584,9 @@ PHP_FUNCTION(openssl_encrypt)
 	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
 		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
+		if (!EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len)) {
+			php_openssl_store_errors();
+		}
 	}
 	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
@@ -5608,6 +5610,7 @@ PHP_FUNCTION(openssl_encrypt)
 			RETVAL_STR(base64_str);
 		}
 	} else {
+		php_openssl_store_errors();
 		zend_string_release(outbuf);
 		RETVAL_FALSE;
 	}
@@ -5680,7 +5683,9 @@ PHP_FUNCTION(openssl_decrypt)
 	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
 		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
+		if (!EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len)) {
+			php_openssl_store_errors();
+		}
 	}
 	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
@@ -5694,6 +5699,7 @@ PHP_FUNCTION(openssl_decrypt)
 		ZSTR_LEN(outbuf) = outlen;
 		RETVAL_STR(outbuf);
 	} else {
+		php_openssl_store_errors();
 		zend_string_release(outbuf);
 		RETVAL_FALSE;
 	}
