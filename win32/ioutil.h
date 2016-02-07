@@ -52,7 +52,9 @@
 #include "win32/winutil.h"
 
 /* Defining to 1 will force the APIs old behaviors as a fallback. */
+#ifndef PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 #define PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE 1
+#endif
 
 #ifdef PHP_EXPORTS
 # define PW32IO __declspec(dllexport)
@@ -84,6 +86,7 @@ PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr);
    path to unicode. It returns NULL on fail. */
 __forceinline wchar_t *php_win32_ioutil_any_to_w(const char* in)
 {
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	const char *idx = in, *end = in + strlen(in);
 
 	while (idx != end) {
@@ -98,7 +101,7 @@ __forceinline wchar_t *php_win32_ioutil_any_to_w(const char* in)
 	if (idx == end) {
 		return NULL;
 	}
-
+#endif
 	/* Otherwise, go try to convert to multibyte. If it is failed, still
 	   NULL is delivered, indicating an ANSI IO function should be used.
 	   That still might not work with every ANSI string when the current
@@ -131,6 +134,8 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_open(const char *path, int flags, ...);
 #endif
 
+/* A boolean use_w has to be defined for this to work. */
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	const char *patha = path; \
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
@@ -141,9 +146,28 @@ PW32IO int php_win32_ioutil_open(const char *path, int flags, ...);
 		free(pathw); \
 	}
 
-/* A boolean use_w has to be defined for this to work. */
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 #define php_win32_ioutil_access_cond(path, mode) (use_w) ? _waccess(pathw, mode) : _access(patha, mode) 
+#define php_win32_ioutil_unlink_cond(path) (use_w) ? php_win32_ioutil_unlink_w(path) : php_win32_ioutil_unlink_a(path);
+#define php_win32_ioutil_rmdir_cond(path) (use_w) ? php_win32_ioutil_rmdir_w(path) : php_win32_ioutil_rmdir_a(path);
+
+#else
+
+#define PHP_WIN32_IOUTIL_INIT_W(path) \
+	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
+	BOOL use_w = 1;
+
+#define PHP_WIN32_IOUTIL_CLEANUP_W() \
+	if (pathw) { \
+		free(pathw); \
+	}
+
+#define php_win32_ioutil_access_cond(path, mode) _waccess(pathw, mode)
+#define php_win32_ioutil_unlink_cond(path) php_win32_ioutil_unlink_w(pathw)
+#define php_win32_ioutil_rmdir_cond(path) php_win32_ioutil_rmdir_w(pathw)
+
+#endif
+
+/* #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE */
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {
 	PHP_WIN32_IOUTIL_INIT_W(path);
@@ -152,8 +176,10 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 	if (use_w) {
 		ret = _waccess(pathw, mode);
 		PHP_WIN32_IOUTIL_CLEANUP_W();
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		ret = _access(patha, mode);
+#endif
 	}
 
 	return ret;
@@ -176,8 +202,10 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 	if (use_w) {
 		ret = php_win32_ioutil_open_w(pathw, flags, mode);
 		PHP_WIN32_IOUTIL_CLEANUP_W();
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		ret = php_win32_ioutil_open_a(patha, flags, mode);
+#endif
 	}
 
 	if (0 > ret) {
@@ -188,7 +216,6 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 	return ret;
 }
 
-#define php_win32_ioutil_unlink_cond(path) (use_w) ? php_win32_ioutil_unlink_w(path) : php_win32_ioutil_unlink_a(path);
 __forceinline static int php_win32_ioutil_unlink(const char *path)
 {
 	PHP_WIN32_IOUTIL_INIT_W(path);
@@ -201,11 +228,13 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 			ret = -1;
 		}
 		PHP_WIN32_IOUTIL_CLEANUP_W();
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		if (!DeleteFileA(patha)) {
 			err = GetLastError();
 			ret = -1;
 		}
+#endif
 	}
 
 	if (0 > ret) {
@@ -215,7 +244,6 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 	return ret;
 }
 
-#define php_win32_ioutil_rmdir_cond(path) (use_w) ? php_win32_ioutil_rmdir_w(path) : php_win32_ioutil_rmdir_a(path);
 __forceinline static int php_win32_ioutil_rmdir(const char *path)
 {
 	PHP_WIN32_IOUTIL_INIT_W(path);
@@ -227,11 +255,13 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 			err = GetLastError();
 			ret = -1;
 		}
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		if (!RemoveDirectoryA(patha)) {
 			err = GetLastError();
 			ret = -1;
 		}
+#endif
 	}
 
 	PHP_WIN32_IOUTIL_CLEANUP_W();
@@ -258,9 +288,11 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 		_get_errno(&err);
 		free(pathw);
 		free(modew);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		ret = fopen(patha, modea);
 		_get_errno(&err);
+#endif
 	}
 
 	if (0 > ret) {
@@ -281,9 +313,11 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 		err = GetLastError();
 		free(oldnamew);
 		free(newnamew);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		ret = php_win32_ioutil_rename_a(oldnamea, newnamea);
 		err = GetLastError();
+#endif
 	}
 
 	if (0 > ret) {
@@ -303,9 +337,11 @@ __forceinline static int php_win32_ioutil_chdir(const char *patha)
 		ret = php_win32_ioutil_chdir_w(pathw);
 		err = GetLastError();
 		free(pathw);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		ret = php_win32_ioutil_chdir_a(patha);
 		err = GetLastError();
+#endif
 	}
 
 	if (0 > ret) {
@@ -330,7 +366,11 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 
 	tmp_bufa = php_win32_ioutil_w_to_utf8(tmp_bufw);
 	if (!tmp_bufa) {
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		buf = php_win32_ioutil_getcwd_a(buf, len);
+#else
+		buf = NULL;
+#endif
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return buf;
@@ -363,9 +403,11 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 		ret = _wchmod(pathw, mode);
 		_get_errno(&err);
 		free(pathw);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		ret = _chmod(patha, mode);
 		_get_errno(&err);
+#endif
 	}
 
 	if (0 > ret) {
@@ -374,10 +416,8 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 	return ret;
 }
 
-#else /* no ANSI compat mode */
-#define php_win32_ioutil_access_cond _waccess
-#define php_win32_ioutil_access _waccess
-#define php_win32_ioutil_sys_stat_ex_cond php_win32_ioutil_sys_stat_ex_w
+//#else /* no ANSI compat mode */
+/*#define php_win32_ioutil_access _waccess
 #define php_win32_ioutil_sys_stat_ex php_win32_ioutil_sys_stat_ex_w
 #define php_win32_ioutil_open php_win32_ioutil_open_w
 #define php_win32_ioutil_unlink_cond php_win32_ioutil_unlink_w
@@ -388,7 +428,8 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 #define php_win32_ioutil_rename php_win32_ioutil_rename_w
 #define php_win32_ioutil_chdir php_win32_ioutil_chdir_w
 #define php_win32_ioutil_chmod _wchmod
-#endif
+#define php_win32_ioutil_getcwd php_win32_ioutil_getcwd_w
+#endif*/
 
 
 #if 0
