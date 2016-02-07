@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "¥Æ¥¹¥È¥Ş¥ë¥Á¥Ğ¥¤¥È¡¦¥Ñ¥¹33"; // EUCJP string
+$prefix = create_data("dir_eucjp");
+$fn = $prefix . DIRECTORY_SEPARATOR . "¥Æ¥¹¥È¥Ş¥ë¥Á¥Ğ¥¤¥È¡¦¥Ñ¥¹33"; // EUCJP string
 $fnw = iconv('eucjp', 'utf-8', $fn);
 
 $f = fopen($fnw, 'w');
@@ -32,7 +33,7 @@ var_dump(file_get_contents($fnw));
 
 get_basename_with_cp($fnw, 65001);
 
-var_dump(unlink($fnw));
+remove_data("dir_eucjp");
 
 ?>
 ===DONE===
@@ -47,5 +48,4 @@ string(38) "ãƒ†ã‚¹ãƒˆãƒãƒ«ãƒãƒã‚¤ãƒˆãƒ»ãƒ‘ã‚¹33"
 bool(true)
 string(%d) "%s\ãƒ†ã‚¹ãƒˆãƒãƒ«ãƒãƒã‚¤ãƒˆãƒ»ãƒ‘ã‚¹33"
 Active code page: %d
-bool(true)
 ===DONE===

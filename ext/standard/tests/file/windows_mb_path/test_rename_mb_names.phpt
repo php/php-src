@@ -22,15 +22,16 @@ skip_if_not_win();
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 
+$prefix = create_data("file2_mb");
 
-$fw_orig = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "Ελλάδα.txt";
-
-
-
-$fw_copied = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "Ελλάδα_copy.txt";
+$fw_orig = $prefix . DIRECTORY_SEPARATOR . "Ελλάδα.txt";
 
 
-$fw_renamed = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "測試多字節路徑17.txt";
+
+$fw_copied = $prefix . DIRECTORY_SEPARATOR . "Ελλάδα_copy.txt";
+
+
+$fw_renamed = $prefix . DIRECTORY_SEPARATOR . "測試多字節路徑17.txt";
 
 
 
@@ -54,6 +55,7 @@ var_dump(unlink($fw_renamed));
 
 set_active_cp($old_cp);
 
+remove_data("file2_mb");
 
 ?>
 ===DONE===

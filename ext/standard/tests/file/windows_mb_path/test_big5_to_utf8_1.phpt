@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$path = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "測試多字節路徑5"; // BIG5 string
+$prefix = create_data("dir_big5");
+$path = $prefix . DIRECTORY_SEPARATOR . "測試多字節路徑5"; // BIG5 string
 $pathw = iconv('big5', 'utf-8', $path);
 
 $subpath = $path . DIRECTORY_SEPARATOR . "測試多字節路徑4";
@@ -32,6 +33,7 @@ var_dump(file_exists($subpathw));
 get_basename_with_cp($subpathw, 65001);
 
 var_dump(rmdir($subpathw));
+remove_data("dir_big5");
 
 ?>
 ===DONE===

@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$path = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "tschüß3"; // cp1252 string
+$prefix = create_data("dir_cp1252");
+$path = $prefix . DIRECTORY_SEPARATOR . "tschüß3"; // cp1252 string
 $pathw = iconv('cp1252', 'utf-8', $path);
 
 $subpath = $path . DIRECTORY_SEPARATOR . "tschüß4";
@@ -32,6 +33,7 @@ var_dump(file_exists($subpathw));
 get_basename_with_cp($subpathw, 65001);
 
 var_dump(rmdir($subpathw));
+remove_data("dir_cp1252");
 
 ?>
 ===DONE===

@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "\テストマルチバイト・パス"; // EUCJP string
+$prefix = create_data("file_eucjp");
+$fn = $prefix . DIRECTORY_SEPARATOR . "\テストマルチバイト・パス"; // EUCJP string
 $fnw = iconv('eucjp', 'utf-8', $fn);
 
 $f = fopen($fnw, 'r');
@@ -28,11 +29,13 @@ if ($f) {
 	echo "open utf8 failed\n";
 } 
 
+remove_data("file_eucjp");
+
 ?>
 ===DONE===
 --EXPECTF--	
-resource(6) of type (stream)
-string(33) "reading file wihh eucjp filename
+resource(%d) of type (stream)
+string(34) "reading file wihh eucjp filename
 "
 bool(true)
 ===DONE===

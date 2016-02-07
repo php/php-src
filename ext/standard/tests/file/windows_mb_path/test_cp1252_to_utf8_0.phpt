@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "tschüß"; // cp1252 string
+$prefix = create_data("file_cp1252");
+$fn = $prefix . DIRECTORY_SEPARATOR . "tschüß"; // cp1252 string
 $fnw = iconv('cp1252', 'utf-8', $fn);
 
 $f = fopen($fnw, 'r');
@@ -28,11 +29,13 @@ if ($f) {
 	echo "open utf8 failed\n";
 } 
 
+remove_data("file_cp1252");
+
 ?>
 ===DONE===
 --EXPECTF--	
-resource(6) of type (stream)
-string(6) "hallo
+resource(%d) of type (stream)
+string(%d) "hallo
 "
 bool(true)
 ===DONE===

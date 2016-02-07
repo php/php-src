@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "測試多字節路徑"; // BIG5 string
+$prefix = create_data("file_big5");
+$fn = $prefix . DIRECTORY_SEPARATOR . "測試多字節路徑"; // BIG5 string
 $fnw = iconv('big5', 'utf-8', $fn);
 
 $f = fopen($fnw, 'r');
@@ -28,10 +29,12 @@ if ($f) {
 	echo "open utf8 failed\n";
 } 
 
+remove_data("file_big5");
+
 ?>
 ===DONE===
 --EXPECTF--	
-resource(6) of type (stream)
+resource(%d) of type (stream)
 string(35) "read from a file with big5 filename"
 bool(true)
 ===DONE===
