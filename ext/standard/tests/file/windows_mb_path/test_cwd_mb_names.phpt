@@ -50,7 +50,7 @@ set_active_cp($old_cp);
 --EXPECTF--
 Active code page: 65001
 bool(true)
-string(140) "%s\テストマルチバイト・パス42"
+string(%d) "%s\テストマルチバイト・パス42"
 bool(true)
 Active code page: 437
 ===DONE===
