@@ -51,6 +51,10 @@
 
 #include "win32/winutil.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Defining to 1 will force the APIs old behaviors as a fallback. */
 #ifndef PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 #define PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE 1
@@ -281,7 +285,7 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 	FILE *ret;
 	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
 	wchar_t *modew = php_win32_ioutil_mb_to_w(modea);
-	DWORD err = 0;
+	int err = 0;
 
 	if (pathw && modew) {
 		ret = _wfopen(pathw, modew);
@@ -396,7 +400,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 {
 	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
-	DWORD err = 0;
+	int err = 0;
 	int ret;
 
 	if (pathw) {
@@ -437,6 +441,10 @@ zend_always_inline static HANDLE php_win32_ioutil_get_file_handle(char *path, WI
 {
 		HANDLE ret = FindFirstFileA(path, data);
 
+}
+#endif
+
+#ifdef __cplusplus
 }
 #endif
 
