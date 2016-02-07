@@ -41,13 +41,14 @@ function skip_if_wrong_cp($cp)
 	}
 }
 
-function skip_if_no_required_exts(array $exts = array())
+function skip_if_no_required_exts()
 {
+	$exts = func_get_args();
 	$exts[] = "iconv";
 
 	foreach ($exts as $ext) {
-		if (!extension_loaded("iconv")) {
-			die("skip iconv is not loaded");
+		if (!extension_loaded($ext)) {
+			die("skip $ext is not loaded");
 		}
 	}
 }
