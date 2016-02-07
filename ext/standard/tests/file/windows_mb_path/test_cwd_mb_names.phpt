@@ -52,5 +52,5 @@ Active code page: 65001
 bool(true)
 string(%d) "%s\テストマルチバイト・パス42"
 bool(true)
-Active code page: 437
+Active code page: %d
 ===DONE===
