@@ -20,7 +20,7 @@ $outputfile = $fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "\\data\\Röd_Stati
 $testfile_zip = iconv("ISO-8859-1", "UTF-8", $testfile);
 $outputfile_zip = iconv("ISO-8859-1", "UTF-8", $outputfile);
 
-var_dump(file_exists($testfile));
+var_dump(file_exists($testfile_zip));
 
 $zipfile = new ZipArchive;
 
