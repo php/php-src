@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "привет"; // cp1251 string
+$prefix = create_data("file_cp1251");
+$fn = $prefix . DIRECTORY_SEPARATOR . "привет"; // cp1251 string
 $fnw = iconv('cp1251', 'utf-8', $fn);
 
 $f = fopen($fnw, 'r');
@@ -28,10 +29,12 @@ if ($f) {
 	echo "open utf8 failed\n";
 } 
 
+remove_data("file_cp1251");
+
 ?>
 ===DONE===
 --EXPECTF--	
-resource(6) of type (stream)
+resource(%d) of type (stream)
 string(35) "opened an utf8 filename for reading"
 bool(true)
 ===DONE===

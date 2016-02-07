@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "tschüß7"; // cp1252 string
+$prefix = create_data("dir_cp1252");
+$fn = $prefix . DIRECTORY_SEPARATOR . "tschüß7"; // cp1252 string
 $fnw = iconv('cp1252', 'utf-8', $fn);
 
 $f = fopen($fnw, 'w');
@@ -33,6 +34,7 @@ var_dump(file_get_contents($fnw));
 get_basename_with_cp($fnw, 65001);
 
 var_dump(unlink($fnw));
+remove_data("dir_cp1252");
 
 ?>
 ===DONE===

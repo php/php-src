@@ -21,21 +21,14 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-
-
-$dirw = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "テストマルチバイト・パス42";
-
-
+$prefix = create_data("dir_mb");
+$dirw = $prefix . DIRECTORY_SEPARATOR . "テストマルチバイト・パス42";
+touch($dirw . DIRECTORY_SEPARATOR . "dummy.txt");
 
 $old_cp = get_active_cp();
-
 set_active_cp(65001);
 
-
-
-
-
-
+$oldcwd = getcwd();
 var_dump(chdir($dirw));
 var_dump(getcwd());
 
@@ -43,6 +36,8 @@ var_dump(file_exists("dummy.txt"));
 
 set_active_cp($old_cp);
 
+chdir($oldcwd);
+remove_data("dir_mb");
 
 ?>
 ===DONE===

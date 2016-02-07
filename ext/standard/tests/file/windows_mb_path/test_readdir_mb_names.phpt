@@ -13,11 +13,29 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$dirw = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR;
+$prefix = create_data("mb_names");
+$content = "";
+create_verify_file($prefix, "českýtestování.inc", $content);
+create_verify_file($prefix, "Röd_Statistics.txt", $content);
+create_verify_file($prefix, "š.txt", "");
+create_verify_file($prefix, "tschüß", $content);
+create_verify_file($prefix, "Voláçao", "hola");
+create_verify_file($prefix, "Ελλάδα.txt", "");
+create_verify_file($prefix, "привет", "opened an utf8 filename for reading");
+create_verify_file($prefix, "テストマルチバイト・パス", $content);
+create_verify_file($prefix, "測試多字節路徑", $content);
+create_verify_dir($prefix, "tschüß3");
+create_verify_dir($prefix, "Voláçao3");
+create_verify_dir($prefix, "привет3");
+create_verify_dir($prefix, "テストマルチバイト・パス42");
+create_verify_dir($prefix, "測試多字節路徑5");
+
+
+$dirw = $prefix . DIRECTORY_SEPARATOR;
 
 $old_cp = get_active_cp();
 set_active_cp(65001);
-setlocale(LC_ALL, "UTF-8");
+
 if (is_dir($dirw)) {
     if ($dh = opendir($dirw)) {
         while (($file = readdir($dh)) !== false) {
@@ -29,6 +47,8 @@ if (is_dir($dirw)) {
 	echo "is_dir failed\n";
 }
 set_active_cp($old_cp);
+
+remove_data("mb_names");
 
 ?>
 ===DONE===

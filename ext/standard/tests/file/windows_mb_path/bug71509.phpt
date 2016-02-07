@@ -14,8 +14,9 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$testfile = $fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "\\data\\Röd_Statistics.txt"; // cp1252
-$outputfile = $fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "\\data\\Röd_Statistics.zip"; // cp1252
+$prefix = create_data("bug71509");
+$testfile = $prefix . DIRECTORY_SEPARATOR . "Röd_Statistics.txt"; // cp1252
+$outputfile = $prefix . DIRECTORY_SEPARATOR . "Röd_Statistics.zip"; // cp1252
 
 $testfile_zip = iconv("ISO-8859-1", "UTF-8", $testfile);
 $outputfile_zip = iconv("ISO-8859-1", "UTF-8", $outputfile);
@@ -34,8 +35,8 @@ $return_code = $zipfile->close();
 if ($return_code != true) die("Failed to close archive: " . $zipfile->getStatusString());
 
 var_dump(file_exists($outputfile_zip));
-unlink($outputfile_zip);
 
+remove_data("bug71509");
 ?>
 ===DONE===
 --EXPECT--

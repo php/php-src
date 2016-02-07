@@ -17,7 +17,8 @@ skip_if_not_win();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "測試多字節路徑25"; // BIG5 string
+$prefix = create_data("file_big5");
+$fn = $prefix . DIRECTORY_SEPARATOR . "測試多字節路徑25"; // BIG5 string
 $fnw = iconv('big5', 'utf-8', $fn);
 
 $f = fopen($fnw, 'w');
@@ -33,6 +34,8 @@ var_dump(file_get_contents($fnw));
 get_basename_with_cp($fnw, 65001);
 
 var_dump(unlink($fnw));
+
+remove_data("file_big5");
 
 ?>
 ===DONE===
