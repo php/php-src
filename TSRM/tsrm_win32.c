@@ -512,9 +512,9 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	}
 
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
-	cmdw = php_win32_ioutil_any_to_w(cmd);
+	cmdw = php_win32_ioutil_mb_to_w(cmd);
 	if (cwd) {
-		cwdw = php_win32_ioutil_any_to_w(cwd);
+		cwdw = php_win32_ioutil_mb_to_w(cwd);
 	}
 	/* cwd can be NULL, it is a valid case if NULL was passed. */
 	if (cmdw && !cwd || cmdw && cwdw) {
