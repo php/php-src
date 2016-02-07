@@ -24,17 +24,29 @@
 extern "C" {
 #endif
 
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+#define IS_W dp->is_w
+#else
+#define IS_W 1
+#endif
+
 /* typedef DIR - not the same as Unix */
 struct DIR_W32 {
 	HANDLE handle;				/* _findfirst/_findnext handle */
 	int offset;					/* offset into directory */
 	short finished;				/* 1 if there are not more files */
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	short is_w;
+#endif
 	struct {
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		WIN32_FIND_DATAA a;
+#endif
 		WIN32_FIND_DATAW w;
 	} fileinfo;    /* from _findfirst/_findnext */
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	char *dira;		/* the dir we are reading */
+#endif
 	wchar_t *dirw;		/* the dir we are reading */
 	struct dirent dent;			/* the dirent to return */
 };
@@ -42,7 +54,9 @@ struct DIR_W32 {
 DIR *opendir(const char *dir)
 {
 	DIR *dp;
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	char *filespec;
+#endif
 	wchar_t *filespecw, *resolvedw;
 	HANDLE handle;
 	int index;
@@ -85,9 +99,10 @@ DIR *opendir(const char *dir)
 			}
 		}
 		dp->dirw = _wcsdup(resolvedw);
-		dp->dira = NULL;
 		free(filespecw);
 		free(resolvedw);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+		dp->dira = NULL;
 		dp->is_w = 1;
 	} else {
 		filespec = (char *)malloc(strlen(resolved_path_buff) + 2 + 1);
@@ -116,6 +131,7 @@ DIR *opendir(const char *dir)
 		free(filespec);
 
 		dp->is_w = 0;
+#endif
 	}
 	dp->handle = handle;
 	dp->offset = 0;
@@ -130,19 +146,21 @@ struct dirent *readdir(DIR *dp)
 		return NULL;
 
 	if (dp->offset != 0) {
-		if (dp->is_w) {
+		if (IS_W) {
 			if (FindNextFileW(dp->handle, &(dp->fileinfo.w)) == 0) {
 				dp->finished = 1;
 				return NULL;
 			}
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		} else {
 			if (FindNextFileA(dp->handle, &(dp->fileinfo.a)) == 0) {
 				dp->finished = 1;
 				return NULL;
 			}
+#endif
 		}
 	}
-	if (dp->is_w) {
+	if (IS_W) {
 		char *_tmp;
 
 		_tmp = php_win32_ioutil_w_to_utf8(dp->fileinfo.w.cFileName);
@@ -153,9 +171,11 @@ struct dirent *readdir(DIR *dp)
 		strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME+1);
 		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 		free(_tmp);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		strlcpy(dp->dent.d_name, dp->fileinfo.a.cFileName, _MAX_FNAME+1);
 		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
+#endif
 	}
 	dp->offset++;
 
@@ -173,22 +193,24 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 	}
 
 	if (dp->offset != 0) {
-		if (dp->is_w) {
+		if (IS_W) {
 			if (FindNextFileW(dp->handle, &(dp->fileinfo.w)) == 0) {
 				dp->finished = 1;
 				*result = NULL;
 				return 0;
 			}
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		} else {
 			if (FindNextFileA(dp->handle, &(dp->fileinfo.a)) == 0) {
 				dp->finished = 1;
 				*result = NULL;
 				return 0;
 			}
+#endif
 		}
 	}
 
-	if (dp->is_w) {
+	if (IS_W) {
 		char *_tmp;
 		_tmp = php_win32_ioutil_w_to_utf8(dp->fileinfo.w.cFileName);
 		if (!_tmp) {
@@ -199,9 +221,11 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 		strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME+1);
 		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 		free(_tmp);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		strlcpy(dp->dent.d_name, dp->fileinfo.a.cFileName, _MAX_FNAME+1);
 		dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
+#endif
 	}
 	dp->offset++;
 
@@ -224,8 +248,10 @@ int closedir(DIR *dp)
 	if (dp->handle != INVALID_HANDLE_VALUE) {
 		FindClose(dp->handle);
 	}
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	if (dp->dira)
 		free(dp->dira);
+#endif
 	if (dp->dirw)
 		free(dp->dirw);
 	if (dp)
@@ -247,7 +273,7 @@ int rewinddir(DIR *dp)
 	dp->offset = 0;
 	dp->finished = 0;
 
-	if (dp->is_w) {
+	if (IS_W) {
 		filespecw = (wchar_t *)malloc((wcslen((wchar_t *)dp->dirw) + 2 + 1)*sizeof(wchar_t));
 		if (filespecw == NULL) {
 			return -1;
@@ -265,6 +291,7 @@ int rewinddir(DIR *dp)
 		}
 
 		free(filespecw);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
 		filespec = (char *)malloc(strlen((char *)dp->dira) + 2 + 1);
 		if (filespec == NULL) {
@@ -283,6 +310,7 @@ int rewinddir(DIR *dp)
 		}
 
 		free(filespec);
+#endif
 	}
 	dp->handle = handle;
 
