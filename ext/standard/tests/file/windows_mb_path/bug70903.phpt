@@ -43,6 +43,6 @@ getting basename of %s\ı
 string(2) "ı"
 bool(true)
 string(%d) "%s\ı"
-Active code page: 437
+Active code page: %d
 bool(true)
 ===DONE===
