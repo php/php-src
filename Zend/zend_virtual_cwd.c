@@ -246,7 +246,10 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 #endif
 	}
 	if( hFile == INVALID_HANDLE_VALUE) {
-			return -1;
+		if (linkw) {
+			free(linkw);
+		}
+		return -1;
 	}
 
 	/* Despite MSDN has documented it won't to, the length returned by
@@ -263,10 +266,13 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 #endif
 	}
 	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
+		if (linkw) {
+			free(linkw);
+		}
 		return -1;
 	}
 	if (linkw) {
-		char *_tmp = php_win32_ioutil_w_to_utf8(targetw);
+		char *_tmp = php_win32_ioutil_w_to_any(targetw);
 		if (!_tmp) {
 			free(linkw);
 			return -1;
@@ -276,6 +282,9 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	}
 
 	CloseHandle(hFile);
+	if (linkw) {
+		free(linkw);
+	}
 
 	if(dwRet > 4) {
 		/* Skip first 4 characters if they are "\??\" */
