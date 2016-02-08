@@ -196,12 +196,6 @@ op2_use:
 					}
 					DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->result.var));
 				}
-				if ((opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) && opline->result_type == IS_TMP_VAR) {
-					if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(next->result.var))) {
-						DFG_SET(def, set_size, j, EX_VAR_TO_NUM(next->result.var));
-					}
-					DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(next->result.var));
-				}
 			}
 		}
 	}
