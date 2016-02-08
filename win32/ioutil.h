@@ -379,6 +379,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return buf;
 	} else if (strlen(tmp_bufa) > len) {
+		free(tmp_bufa);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
 		return NULL;
 	}
