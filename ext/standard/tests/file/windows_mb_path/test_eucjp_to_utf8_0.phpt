@@ -35,7 +35,7 @@ remove_data("file_eucjp");
 ===DONE===
 --EXPECTF--	
 resource(%d) of type (stream)
-string(34) "reading file wihh eucjp filename
+string(33) "reading file wihh eucjp filename
 "
 bool(true)
 ===DONE===
