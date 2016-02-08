@@ -5776,6 +5776,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 		ZSTR_VAL(data)[len] = 0;
 		RETVAL_STR(data);
 	} else {
+		php_openssl_store_errors();
 		zend_string_release(data);
 		RETVAL_FALSE;
 	}
