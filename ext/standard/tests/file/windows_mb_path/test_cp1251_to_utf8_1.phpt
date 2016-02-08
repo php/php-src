@@ -4,8 +4,9 @@ Test mkdir/rmdir CP1251 to UTF-8 path
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-skip_if_no_required_exts();
 skip_if_not_win();
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+skip_if_no_required_exts();
 
 ?>
 --FILE--

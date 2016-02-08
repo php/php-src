@@ -4,8 +4,9 @@ Bug #71509 Zip problem with swedish letters in filename.
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-skip_if_no_required_exts("zip");
 skip_if_not_win();
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+skip_if_no_required_exts("zip");
 
 ?>
 --FILE--
