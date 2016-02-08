@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
     while curl_multi_exec). (Laruence)
+  . Fixed memory leak in curl_getinfo(). (Leigh)
 
 - Fileinfo:
   . Fixed bug #71434 (finfo throws notice for specific python file). (Laruence)
