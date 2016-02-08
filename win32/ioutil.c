@@ -52,6 +52,7 @@
 #include <stdio.h>
 
 #include "php.h"
+#include "SAPI.h"
 #include "win32/winutil.h"
 #include "win32/time.h"
 #include "win32/ioutil.h"
@@ -87,6 +88,33 @@ PW32IO wchar_t *php_win32_ioutil_mb_to_w(const char* path)
 	return ret;
 }/*}}}*/
 
+PW32IO wchar_t *php_win32_ioutil_thread_to_w(const char* path)
+{/*{{{*/
+	wchar_t *ret;
+	int ret_len, tmp_len;
+
+	if (!path) {
+		return NULL;
+	}
+
+    ret_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, NULL, 0);
+    if (ret_len == 0) {
+		return NULL;
+    }
+
+	ret = malloc(ret_len * sizeof(wchar_t));
+	if (!ret) {
+		return NULL;
+	}
+
+	tmp_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, ret, ret_len);
+
+    /* assert(tmp_len == ret_len); */
+
+	return ret;
+
+}/*}}}*/
+
 PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr)
 {/*{{{*/
 	int r;
@@ -113,6 +141,31 @@ PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr)
 	return target;
 }/*}}}*/
 
+PW32IO char *php_win32_ioutil_w_to_thread(wchar_t* w_source_ptr)
+{/*{{{*/
+	int r;
+	int target_len;
+	char* target;
+
+
+	target_len = WideCharToMultiByte(CP_THREAD_ACP, 0, w_source_ptr, -1, NULL, 0, NULL, NULL);
+	if (target_len == 0) {
+		return NULL;
+	}
+
+	target = malloc(target_len);
+	if (target == NULL) {
+		SetLastError(ERROR_OUTOFMEMORY);
+		_set_errno(ENOMEM);
+		return NULL;
+	}
+
+	r = WideCharToMultiByte(CP_THREAD_ACP, 0, w_source_ptr, -1, target, target_len, NULL, NULL);
+
+	/*assert(r == target_len);*/
+
+	return target;
+}/*}}}*/
 
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts)
 {/*{{{*/
@@ -758,8 +811,39 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
-	return buf;
+	return (wchar_t *)buf;
 }/*}}}*/
+
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+PW32IO BOOL php_win32_ioutil_use_unicode(void)
+{/*{{{*/
+	char *enc = NULL;
+	size_t len = 0;
+	const zend_encoding *zenc;
+
+	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
+		enc = PG(internal_encoding);
+	} else if (SG(default_charset) && SG(default_charset)[0] ) {
+		enc = SG(default_charset);
+	} else {
+		zenc = zend_multibyte_get_internal_encoding();
+		if (zenc) {
+			enc = (char *)zend_multibyte_get_encoding_name(zenc);
+		}
+	}
+
+	if (NULL == enc) {
+		return 1;
+	}
+
+	if ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len &&
+		(zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0)) {
+		return 1;
+	}
+
+	return 0;
+}/*}}}*/
+#endif
 
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0

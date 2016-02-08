@@ -83,13 +83,22 @@ typedef enum {
 	PHP_WIN32_IOUTIL_IS_UTF8
 } php_win32_ioutil_encoding;
 
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+PW32IO BOOL php_win32_ioutil_use_unicode(void);
+#else
+#define php_win32_ioutil_use_unicode() 1
+#endif
 PW32IO wchar_t *php_win32_ioutil_mb_to_w(const char* path);
+PW32IO wchar_t *php_win32_ioutil_thread_to_w(const char* path);
 PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr);
+PW32IO char *php_win32_ioutil_w_to_thread(wchar_t* w_source_ptr);
 /* This function tries to make the best guess to convert any
    given string to a wide char, also prefering the fastest code
    path to unicode. It returns NULL on fail. */
 __forceinline wchar_t *php_win32_ioutil_any_to_w(const char* in)
 {
+	wchar_t *ret;
+
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	const char *idx = in, *end = in + strlen(in);
 
@@ -101,17 +110,44 @@ __forceinline wchar_t *php_win32_ioutil_any_to_w(const char* in)
 	}
 
 	/* This means we've got an ASCII path, an ANSI function can be used
-		safely. This is the fastest way to do the thing. */
+		safely. This is the fastest way to do the thing. Still we might
+		need to convert to wide chars when the string is longer than
+		MAXPATHLEN and long paths got supported. */
 	if (idx == end) {
 		return NULL;
 	}
 #endif
 	/* Otherwise, go try to convert to multibyte. If it is failed, still
-	   NULL is delivered, indicating an ANSI IO function should be used.
-	   That still might not work with every ANSI string when the current
-	   system locale is incompatible. Then, it is up to the high level to
-	   convert the path to a multibyte string before. */
-	return php_win32_ioutil_mb_to_w(in);
+	   NULL is delivered, then we retry with the current thread locale.
+	   If still no cussesss, it indicates that an ANSI IO function should
+	   be used. That still might not work with every ANSI string when the
+	   current system locale is incompatible. Then, it is up to the high
+	   level to convert the path to a multibyte string before. */
+	ret = php_win32_ioutil_mb_to_w(in);
+
+	if (!ret) {
+		ret = php_win32_ioutil_thread_to_w(in);
+	}
+
+	return ret;
+}
+
+/* This function converts from unicode function output back to PHP. If
+	the PHP's current charset is not compatible with unicode, so the current
+	thread CP will be used. The latter is the default behavior in PHP < 7.1,
+	as only ANSI complaint functions was used previously. */
+__forceinline static char *php_win32_ioutil_w_to_any(wchar_t* w_source_ptr)
+{
+	if (php_win32_ioutil_use_unicode()) {
+		return php_win32_ioutil_w_to_utf8(w_source_ptr);
+#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
+	} else {
+		return php_win32_ioutil_w_to_thread(w_source_ptr);
+#endif
+	}
+
+	/* Never happens. */
+	return NULL;
 }
 
 PW32IO int php_win32_ioutil_close(int fd);
@@ -368,7 +404,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		return NULL;
 	}
 
-	tmp_bufa = php_win32_ioutil_w_to_utf8(tmp_bufw);
+	tmp_bufa = php_win32_ioutil_w_to_any(tmp_bufw);
 	if (!tmp_bufa) {
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 		buf = php_win32_ioutil_getcwd_a(buf, len);
