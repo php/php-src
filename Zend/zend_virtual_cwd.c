@@ -967,7 +967,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				use_w = 1;
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 			} else {
-				hFind = FindFirstFile(path, &data);
+				hFind = FindFirstFileA(path, &data);
 #endif
 			}
 			if (INVALID_HANDLE_VALUE == hFind) {
