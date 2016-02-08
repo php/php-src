@@ -526,6 +526,12 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	security.lpSecurityDescriptor	= NULL;
 
 	if (!type_len || !CreatePipe(&in, &out, &security, 2048L)) {
+		if (cmdw) {
+			free(cmdw);
+		}
+		if (cwdw) {
+			free(cwdw);
+		}
 		return NULL;
 	}
 
