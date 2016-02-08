@@ -70,6 +70,9 @@ PHP                                                                        NEWS
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
     reference to CURLFile). (Laruence)
 
+- GD:
+  . Improved fix for bug #70976. (Remi)
+
 - Interbase:
   . Fixed Bug #71305 (Crash when optional resource is omitted).
   (Laruence, Anatol)
