@@ -3,6 +3,7 @@ Bug #52931 (strripos not overloaded with function overloading enabled)
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
+error_reporting=E_ALL ^ E_DEPRECATED
 mbstring.func_overload = 7
 mbstring.internal_encoding = utf-8
 --FILE--
