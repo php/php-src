@@ -210,6 +210,9 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BOOL fAccess = FALSE;
 
 	PHP_WIN32_IOUTIL_INIT_W(pathname);
+	if (!pathw) {
+		return -1;
+	}
 
 	realpath_cache_bucket * bucket = NULL;
 	char * real_path = NULL;
@@ -217,13 +220,9 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	if (mode == 1 /*X_OK*/) {
 		DWORD type;
 		int ret;
-		if (use_w) {
-			ret = GetBinaryTypeW(pathw, &type) ? 0 : -1;
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-		} else {
-			ret = GetBinaryTypeA(patha, &type) ? 0 : -1;
-#endif
-		}
+
+		ret = GetBinaryTypeW(pathw, &type) ? 0 : -1;
+
 		PHP_WIN32_IOUTIL_CLEANUP_W();
 
 		return ret;
@@ -571,22 +570,10 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	}
 
 	if (asuser) {
-		if (use_w) {
-			res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-		} else {
-			res = CreateProcessAsUserA(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
-#endif
-		}
+		res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
 		CloseHandle(token_user);
 	} else {
-		if (use_w) {
-			res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-		} else {
-			res = CreateProcessA(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
-#endif
-		}
+		res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
 	}
 	free(cmd);
 	if (cmdw) {
@@ -800,15 +787,12 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	HANDLE hFile;
 	PHP_WIN32_IOUTIL_INIT_W(filename);
 
-	if (use_w) {
-		hFile = CreateFileW(pathw, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
-					 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-	} else {
-		hFile = CreateFileA(patha, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
-					 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-#endif
+	if (!pathw) {
+		return -1;
 	}
+
+	hFile = CreateFileW(pathw, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 
 	PHP_WIN32_IOUTIL_CLEANUP_W();
 

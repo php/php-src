@@ -222,29 +222,21 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	DWORD dwRet;
 	wchar_t *linkw = php_win32_ioutil_any_to_w(link), targetw[MAXPATHLEN];
 
+	if (!linkw) {
+		return -1;
+	}
+
 	if (!target_len) {
 		return -1;
 	}
 
-	if (linkw) {
-		hFile = CreateFileW(linkw,            // file to open
-					 GENERIC_READ,          // open for reading
-					 FILE_SHARE_READ,       // share for reading
-					 NULL,                  // default security
-					 OPEN_EXISTING,         // existing file only
-					 FILE_FLAG_BACKUP_SEMANTICS, // normal file
-					 NULL);                 // no attr. template
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-	} else {
-		hFile = CreateFileA(link,            // file to open
-					 GENERIC_READ,          // open for reading
-					 FILE_SHARE_READ,       // share for reading
-					 NULL,                  // default security
-					 OPEN_EXISTING,         // existing file only
-					 FILE_FLAG_BACKUP_SEMANTICS, // normal file
-					 NULL);                 // no attr. template
-#endif
-	}
+	hFile = CreateFileW(linkw,            // file to open
+				 GENERIC_READ,          // open for reading
+				 FILE_SHARE_READ,       // share for reading
+				 NULL,                  // default security
+				 OPEN_EXISTING,         // existing file only
+				 FILE_FLAG_BACKUP_SEMANTICS, // normal file
+				 NULL);                 // no attr. template
 	if( hFile == INVALID_HANDLE_VALUE) {
 		if (linkw) {
 			free(linkw);
@@ -258,13 +250,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		with VS2012 and earlier, and seems not to be fixed till
 		now. Thus, correcting target_len so it's suddenly don't
 		overflown. */
-	if (linkw) {
-		dwRet = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-	} else {
-		dwRet = GetFinalPathNameByHandleA(hFile, target, target_len - 1, VOLUME_NAME_DOS);
-#endif
-	}
+	dwRet = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
 	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
 		if (linkw) {
 			free(linkw);
@@ -282,9 +268,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	}
 
 	CloseHandle(hFile);
-	if (linkw) {
-		free(linkw);
-	}
+	free(linkw);
 
 	if(dwRet > 4) {
 		/* Skip first 4 characters if they are "\??\" */
@@ -318,24 +302,20 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	ALLOCA_FLAG(use_heap_large);
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
 
-	if (pathw) {
-		if (!GetFileAttributesExW(pathw, GetFileExInfoStandard, &data)) {
-			int ret;
-#if ZEND_ENABLE_ZVAL_LONG64
-			ret = _wstat64(pathw, buf);
-#else
-			ret = _wstat(pathw, buf);
-#endif
-			free(pathw);
+	if (!pathw) {
+		return -1;
+	}
 
-			return ret;
-		}
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-	} else {
-		if (!GetFileAttributesExA(path, GetFileExInfoStandard, &data)) {
-			return zend_stat(path, buf);
-		}
+	if (!GetFileAttributesExW(pathw, GetFileExInfoStandard, &data)) {
+		int ret;
+#if ZEND_ENABLE_ZVAL_LONG64
+		ret = _wstat64(pathw, buf);
+#else
+		ret = _wstat(pathw, buf);
 #endif
+		free(pathw);
+
+		return ret;
 	}
 
 	if (path_len >= 1 && path[1] == ':') {
@@ -347,67 +327,33 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	} else if (IS_UNC_PATH(path, path_len)) {
 		buf->st_dev = buf->st_rdev = 0;
 	} else {
-		if (pathw) {
-			wchar_t cur_path[MAXPATHLEN+1];
-			DWORD len = sizeof(cur_path);
-			wchar_t *tmp = cur_path;
+		wchar_t cur_path[MAXPATHLEN+1];
+		DWORD len = sizeof(cur_path);
+		wchar_t *tmp = cur_path;
 
-			while(1) {
-				DWORD r = GetCurrentDirectoryW(len, tmp);
-				if (r < len) {
-					if (tmp[1] == L':') {
-						if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
-							buf->st_dev = buf->st_rdev = pathw[0] - L'A';
-						} else {
-							buf->st_dev = buf->st_rdev = pathw[0] - L'a';
-						}
+		while(1) {
+			DWORD r = GetCurrentDirectoryW(len, tmp);
+			if (r < len) {
+				if (tmp[1] == L':') {
+					if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
+						buf->st_dev = buf->st_rdev = pathw[0] - L'A';
 					} else {
-						buf->st_dev = buf->st_rdev = -1;
+						buf->st_dev = buf->st_rdev = pathw[0] - L'a';
 					}
-					break;
-				} else if (!r) {
-					buf->st_dev = buf->st_rdev = -1;
-					break;
 				} else {
-					len = r+1;
-					tmp = (wchar_t*)malloc(len*sizeof(wchar_t));
-				}
-			}
-			if (tmp != cur_path) {
-				free(tmp);
-			}
-
-		} else {
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-			char  cur_path[MAXPATHLEN+1];
-			DWORD len = sizeof(cur_path);
-			char *tmp = cur_path;
-
-			while(1) {
-				DWORD r = GetCurrentDirectoryA(len, tmp);
-				if (r < len) {
-					if (tmp[1] == ':') {
-						if (path[0] >= 'A' && path[0] <= 'Z') {
-							buf->st_dev = buf->st_rdev = path[0] - 'A';
-						} else {
-							buf->st_dev = buf->st_rdev = path[0] - 'a';
-						}
-					} else {
-						buf->st_dev = buf->st_rdev = -1;
-					}
-					break;
-				} else if (!r) {
 					buf->st_dev = buf->st_rdev = -1;
-					break;
-				} else {
-					len = r+1;
-					tmp = (char*)malloc(len);
 				}
+				break;
+			} else if (!r) {
+				buf->st_dev = buf->st_rdev = -1;
+				break;
+			} else {
+				len = r+1;
+				tmp = (wchar_t*)malloc(len*sizeof(wchar_t));
 			}
-			if (tmp != cur_path) {
-				free(tmp);
-			}
-#endif
+		}
+		if (tmp != cur_path) {
+			free(tmp);
 		}
 	}
 
@@ -419,17 +365,9 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		REPARSE_DATA_BUFFER * pbuffer;
 		DWORD retlength = 0;
 
-		if (pathw) {
-			hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-		} else {
-			hLink = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
-#endif
-		}
+		hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		if(hLink == INVALID_HANDLE_VALUE) {
-			if (pathw) {
-				free(pathw);
-			}
+			free(pathw);
 			return -1;
 		}
 
@@ -437,9 +375,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
 			free_alloca(pbuffer, use_heap_large);
 			CloseHandle(hLink);
-			if (pathw) {
-				free(pathw);
-			}
+			free(pathw);
 			return -1;
 		}
 
@@ -484,9 +420,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	buf->st_ctime = FileTimeToUnixTime(&data.ftCreationTime);
 	buf->st_mtime = FileTimeToUnixTime(&data.ftLastWriteTime);
 
-	if (pathw) {
-		free(pathw);
-	}
+	free(pathw);
 
 	return 0;
 }
@@ -866,19 +800,12 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 	int i, j, save;
 	int directory = 0;
 #ifdef ZEND_WIN32
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-	WIN32_FIND_DATA data;
-#endif
 	WIN32_FIND_DATAW dataw;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	ALLOCA_FLAG(use_heap_large)
 	wchar_t *pathw = NULL;
-	BOOL use_w = 0;
 #define FREE_PATHW() \
-	if (pathw) { \
-		free(pathw); \
-		pathw = NULL; \
-	}
+	free(pathw);
 
 #else
 	zend_stat_t st;
@@ -974,14 +901,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #ifdef ZEND_WIN32
 		if (save) {
 			pathw = php_win32_ioutil_any_to_w(path);
-			if (pathw) {
-				hFind = FindFirstFileW(pathw, &dataw);
-				use_w = 1;
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-			} else {
-				hFind = FindFirstFileA(path, &data);
-#endif
+			if (!pathw) {
+				return -1;
 			}
+			hFind = FindFirstFileW(pathw, &dataw);
 			if (INVALID_HANDLE_VALUE == hFind) {
 				if (use_realpath == CWD_REALPATH) {
 					/* file not found */
@@ -1002,11 +925,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 		if(save &&
 				!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-                               (use_w ? (dataw.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) : (data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT))
-#else
                                (dataw.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
-#endif
 				) {
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
@@ -1025,13 +944,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 
-			if (use_w) {
-				hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-			} else {
-				hLink = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
-#endif
-			}
+			hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 			if(hLink == INVALID_HANDLE_VALUE) {
 				FREE_PATHW();
 				return -1;
@@ -1187,11 +1100,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				}
 			}
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-			directory =  use_w ? (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) : (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
-#else
 			directory = (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
-#endif
 
 			if(link_is_dir) {
 				*link_is_dir = directory;
@@ -1199,11 +1108,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		}
 		else {
 			if (save) {
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-				directory = use_w ? (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 : (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-#else
 				directory = (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-#endif
 				if (is_dir && !directory) {
 					/* not a directory */
 					FREE_PATHW();
@@ -1287,17 +1192,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 			if (save) {
-				if (use_w) {
-					char *tmp_path = php_win32_ioutil_w_to_utf8(dataw.cFileName);
-					i = (int)strlen(tmp_path);
-					memcpy(path+j, tmp_path, i+1);
-					free(tmp_path);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-				} else {
-					i = (int)strlen(data.cFileName);
-					memcpy(path+j, data.cFileName, i+1);
-#endif
-				}
+				char *tmp_path = php_win32_ioutil_w_to_utf8(dataw.cFileName);
+				i = (int)strlen(tmp_path);
+				memcpy(path+j, tmp_path, i+1);
+				free(tmp_path);
 				j += i;
 			} else {
 				/* use the original file or directory name as it wasn't found */

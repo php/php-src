@@ -115,6 +115,32 @@ PW32IO wchar_t *php_win32_ioutil_thread_to_w(const char* path)
 
 }/*}}}*/
 
+PW32IO wchar_t *php_win32_ioutil_ascii_to_w(const char* path)
+{/*{{{*/
+	wchar_t *ret = NULL;
+	size_t len = strlen(path);
+	const char *idx = path, *end = path + len;
+
+	while (idx != end) {
+		if (!__isascii(*idx)) {
+			break;
+		}
+		idx++;
+	}
+
+	if (idx == end) {
+		ret = malloc((len+1)*sizeof(wchar_t));
+		if (!ret) {
+			return NULL;
+		}
+		if (-1 == swprintf(ret, len+1, L"%hs", path)) {
+			return NULL;
+		}
+	}
+
+	return ret;
+}/*}}}*/
+
 PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr)
 {/*{{{*/
 	int r;
@@ -597,23 +623,16 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 	DWORD err = 0;
 
 	/* TODO extend with mode usage */
-	if (pathw) {
-		if (!CreateDirectoryW(pathw, NULL)) {
-			err = GetLastError();
-			ret = -1;
-		}
-		free(pathw);
-	} else {
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-		if (!CreateDirectoryA(path, NULL)) {
-			ret = -1;
-			err = GetLastError();
-		}
-#else
+	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return ret;
-#endif
+		return -1;
 	}
+
+	if (!CreateDirectoryW(pathw, NULL)) {
+		err = GetLastError();
+		ret = -1;
+	}
+	free(pathw);
 
 	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
@@ -814,7 +833,6 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	return (wchar_t *)buf;
 }/*}}}*/
 
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 PW32IO BOOL php_win32_ioutil_use_unicode(void)
 {/*{{{*/
 	char *enc = NULL;
@@ -843,7 +861,6 @@ PW32IO BOOL php_win32_ioutil_use_unicode(void)
 
 	return 0;
 }/*}}}*/
-#endif
 
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0
