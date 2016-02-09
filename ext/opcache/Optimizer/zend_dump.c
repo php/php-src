@@ -957,10 +957,17 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		if (op_array->last_live_range) {
 			fprintf(stderr, "LIVE RANGES:\n");
 			for (i = 0; i < op_array->last_live_range; i++) {
-				fprintf(stderr, "        %u: BB%u - BB%u ",
-					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
-					cfg->map[op_array->live_range[i].start],
-					cfg->map[op_array->live_range[i].end]);
+				if (cfg->split_at_live_ranges) {
+					fprintf(stderr, "        %u: BB%u - BB%u ",
+						EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
+						cfg->map[op_array->live_range[i].start],
+						cfg->map[op_array->live_range[i].end]);
+				} else {
+					fprintf(stderr, "        %u: L%u - L%u ",
+						EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
+						op_array->live_range[i].start,
+						op_array->live_range[i].end);
+				}
 				switch (op_array->live_range[i].var & ZEND_LIVE_MASK) {
 					case ZEND_LIVE_TMPVAR:
 						fprintf(stderr, "(tmp/var)\n");
