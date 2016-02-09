@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
+- Zip:
+  . Fixed bug #71561 (NULL pointer dereference in Zip::ExtractTo). (Laruence)
+
 04 Feb 2016, PHP 5.6.18
 
 - Core:
