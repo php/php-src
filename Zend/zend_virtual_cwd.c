@@ -320,12 +320,15 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 
 	if (pathw) {
 		if (!GetFileAttributesExW(pathw, GetFileExInfoStandard, &data)) {
-			free(pathw);
+			int ret;
 #if ZEND_ENABLE_ZVAL_LONG64
-			return _wstat64(pathw, buf);
+			ret = _wstat64(pathw, buf);
 #else
-			return _wstat(pathw, buf);
+			ret = _wstat(pathw, buf);
 #endif
+			free(pathw);
+
+			return ret;
 		}
 #if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
 	} else {
