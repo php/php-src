@@ -139,13 +139,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 			}
 		}
 
-		/* Skip OP_DATA */
-		if (opline->opcode == ZEND_OP_DATA &&
-		    (opline-1)->opcode == ZEND_ASSIGN_DIM) {
-		    opline--;
-		    continue;
-		}
-
 		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
 			currT = VAR_NUM(ZEND_OP2(opline).var) - offset;
 			if (!zend_bitset_in(valid_T, currT)) {
@@ -154,19 +147,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 				zend_bitset_incl(valid_T, currT);
 			}
 			ZEND_OP2(opline).var = NUM_VAR(map_T[currT] + offset);
-		}
-
-		/* Allocate OP_DATA->op2 after "operands", but before "result" */
-		if (opline->opcode == ZEND_ASSIGN_DIM &&
-		    (opline + 1)->opcode == ZEND_OP_DATA &&
-		    ZEND_OP2_TYPE(opline + 1) & (IS_VAR | IS_TMP_VAR)) {
-			currT = VAR_NUM(ZEND_OP2(opline + 1).var) - offset;
-			GET_AVAILABLE_T();
-			map_T[currT] = i;
-			zend_bitset_incl(valid_T, currT);
-			zend_bitset_excl(taken_T, i);
-			ZEND_OP2(opline + 1).var = NUM_VAR(i + offset);
-			var_to_free = i;
 		}
 
 		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
