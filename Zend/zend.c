@@ -967,6 +967,10 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	shutdown_executor();
 
 	zend_try {
+		zend_ini_deactivate();
+	} zend_end_try();
+
+	zend_try {
 		shutdown_compiler();
 	} zend_end_try();
 
@@ -984,10 +988,6 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	fprintf(stderr, "      --------  --------  -----------  ------\n");
 	fprintf(stderr, "ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
 #endif
-
-	zend_try {
-		zend_ini_deactivate();
-	} zend_end_try();
 }
 /* }}} */
 

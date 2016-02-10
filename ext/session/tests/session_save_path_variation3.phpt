@@ -33,12 +33,8 @@ ob_end_flush();
 string(5) "/blah"
 
 Warning: session_start(): open(%s, O_RDWR) failed: No such file or directory (2) in %s on line %d
-
-Warning: session_start(): Failed to read session data: files (path: %sblah) in %s on line %d
-bool(false)
+bool(true)
 string(5) "/blah"
-
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+bool(true)
 string(5) "/blah"
 Done

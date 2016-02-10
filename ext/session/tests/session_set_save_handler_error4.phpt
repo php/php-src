@@ -24,7 +24,7 @@ session_set_save_handler("callback", "callback", "callback", "echo", "callback",
 session_set_save_handler("callback", "callback", "callback", "callback", "echo", "callback");
 session_set_save_handler("callback", "callback", "callback", "callback", "callback", "echo");
 session_set_save_handler("callback", "callback", "callback", "callback", "callback", "callback");
-var_dump(session_start());
+session_start();
 ob_end_flush();
 ?>
 --EXPECTF--
@@ -39,6 +39,3 @@ Warning: session_set_save_handler(): Argument 4 is not a valid callback in %s on
 Warning: session_set_save_handler(): Argument 5 is not a valid callback in %s on line %d
 
 Warning: session_set_save_handler(): Argument 6 is not a valid callback in %s on line %d
-
-Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
-bool(false)

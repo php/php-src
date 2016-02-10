@@ -2,25 +2,69 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.4
 
+- Core:
+  . Fixed bug (Low probability segfault in zend_arena). (Laruence)
+  . Fixed bug #71485 (Return typehint on interanal func causes Fatal error
+    when it throws exception). (Laruence)
+  . Fixed bug #71474 (Crash because of VM stack corruption on Magento2).
+    (Dmitry)
+  . Fixed bug #71450 (An integer overflow bug in php_str_to_str_ex()). (Stas)
+  . Fixed bug #71449 (An integer overflow bug in php_implode()). (Stas)
+  . Fixed bug #71443 (Segfault using built-in webserver with intl using
+    symfony). (Laruence)
+  . Fixed bug #71442 (forward_static_call crash). (Laruence)
+  . Fixed bug #71441 (Typehinted Generator with return in try/finally crashes).
+    (Bob)
+  . Fixed bug #71529 (Variable references on array elements don't work when
+    using count). (Nikita)
 
+- PCRE:
+  . Fixed bug #71537 (PCRE segfault from Opcache). (Laruence)
+
+- CURL:
+  . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
+    while curl_multi_exec). (Laruence)
+  . Fixed memory leak in curl_getinfo(). (Leigh)
+
+- Fileinfo:
+  . Fixed bug #71434 (finfo throws notice for specific python file). (Laruence)
+
+- FPM:
+  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
+    setup). (Matt Haught, Remi)
+
+- Standard:
+  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+
+- XMLRPC:
+  . Fixed bug #71501 (xmlrpc_encode_request ignores encoding option). (Hieu Le)
+
+- Zip:
+  . Fixed bug #71561 (NULL pointer dereference in Zip::ExtractTo). (Laruence)
 
 04 Feb 2016 PHP 7.0.3
 
 - Core:
-  . Fixed bug #71336 (Wrong is_ref on properties as exposed via
-    get_object_vars()). (Laruence)
-  . Fixed bug #71248 (Wrong interface is enforced). (Dmitry)
-  . Fixed bug #71300 (Segfault in zend_fetch_string_offset). (Laruence)
+  . Added support for new HTTP 451 code. (Julien)
+  . Fixed bug #71039 (exec functions ignore length but look for NULL
+    termination). (Anatol)
+  . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
+  . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Fixed bug #71221 (Null pointer deref (segfault) in get_defined_vars via
     ob_start). (hugh at allthethings dot co dot nz)
-  . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
-  . Added support for new HTTP 451 code. (Julien)
-  . Fixed Bug #71275 (Bad method called on cloning an object having a trait).
-    (Bob)
+  . Fixed bug #71248 (Wrong interface is enforced). (Dmitry)
   . Fixed bug #71273 (A wrong ext directory setup in php.ini leads to crash).
     (Anatol)
+  . Fixed Bug #71275 (Bad method called on cloning an object having a trait).
+    (Bob)
   . Fixed bug #71297 (Memory leak with consecutive yield from). (Bob)
+  . Fixed bug #71300 (Segfault in zend_fetch_string_offset). (Laruence)
   . Fixed bug #71314 (var_export(INF) prints INF.0). (Andrea)
+  . Fixed bug #71323 (Output of stream_get_meta_data can be falsified by its 
+    input). (Leo Gaspard)
+  . Fixed bug #71336 (Wrong is_ref on properties as exposed via
+    get_object_vars()). (Laruence)
+  . Fixed bug #71459 (Integer overflow in iptcembed()). (Stas)
 
 - Apache2handler:
   . Fix >2G Content-Length headers in apache2handler. (Adam Harvey)
@@ -30,6 +74,9 @@ PHP                                                                        NEWS
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
     reference to CURLFile). (Laruence)
 
+- GD:
+  . Improved fix for bug #70976. (Remi)
+
 - Interbase:
   . Fixed Bug #71305 (Crash when optional resource is omitted).
   (Laruence, Anatol)
@@ -38,8 +85,20 @@ PHP                                                                        NEWS
   . Fixed bug #71249 (ldap_mod_replace/ldap_mod_add store value as string
     "Array"). (Laruence)
 
-- mbsgring:
+- mbstring:
   . Fixed bug #71397 (mb_send_mail segmentation fault). (Andrea, Yasuo)
+
+- OpenSSL:
+  . Fixed bug #71475 (openssl_seal() uninitialized memory usage). (Stas)
+
+- PCRE:
+  . Upgraded pcrelib to 8.38.
+
+- Phar:
+  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
+  . Fixed bug #71391 (NULL Pointer Dereference in phar_tar_setupmetadata()).
+    (Stas)
+  . Fixed bug #71488 (Stack overflow when decompressing tar archives). (Stas)
 
 - SOAP:
   . Fixed bug #70979 (crash with bad soap request). (Anatol)
@@ -49,16 +108,10 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #71202 (Autoload function registered by another not activated
     immediately). (Laruence)
-
-- Session:
-  . Improved fix for bug #68063 (Empty session IDs do still start sessions). (Yasuo)
-  . Fixed bug #69111 (Crash in SessionHandler::read()) (Yasuo)
-  . Fixed bug #71038 (session_start() returns TRUE on failure).
-    Session save handlers must return 'string' always for successful read.
-    i.e. Non-existing session read must return empty string. PHP 7.0 is made
-    not to tolerate buggy return value. (Yasuo)
-  . Fixed bug #71394 (session_regenerate_id() must close opened session on errors).
-    (Yasuo)
+  . Fixed bug #71311 (Use-after-free vulnerability in SPL(ArrayObject,
+    unserialize)). (Sean Heelan)
+  . Fixed bug #71313 (Use-after-free vulnerability in SPL(SplObjectStorage,
+    unserialize)). (Sean Heelan)
 
 - Standard:
   . Fixed bug #71287 (Error message contains hexadecimal instead of decimal
@@ -73,8 +126,10 @@ PHP                                                                        NEWS
     array to strings). (Laruence)
   . Fixed bug #71188 (str_replace converts integers in original $search array
     to strings). (Laruence)
-  . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
   . Fixed bug #71132, #71197 (range() segfaults). (Thomas Punt)
+
+- WDDX:
+  . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
 
 07 Jan 2016 PHP 7.0.2
 
@@ -110,16 +165,16 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
-- GD:
-  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
-    Out of Bounds). (emmanuel dot law at gmail dot com).
-
 - FPM:
   . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
+
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com)
 
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
@@ -150,12 +205,12 @@ PHP                                                                        NEWS
     (emmanuel dot law at gmail dot com)
 
 - WDDX:
-  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
-    (taoguangchen at icloud dot com)
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet
+    Deserialization). (taoguangchen at icloud dot com)
   . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
     Vulnerability). (taoguangchen at icloud dot com)
 
-- XMLRPC
+- XMLRPC:
   . Fixed bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker).
     (Julien)
 

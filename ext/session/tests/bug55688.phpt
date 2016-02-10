@@ -12,4 +12,4 @@ $x = new SessionHandler;
 $x->gc(1);
 ?>
 --EXPECTF--
-Warning: SessionHandler::gc(): Session is not active in %s on line %d
+Warning: SessionHandler::gc(): Parent session handler is not open in %s on line %d
