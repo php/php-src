@@ -1736,7 +1736,7 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 
 #define PASSES 3
 
-void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_cfg cfg;
 	zend_basic_block *blocks, *end, *b;
@@ -1749,7 +1749,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, 0, &cfg, NULL) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg, NULL) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}

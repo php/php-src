@@ -11,7 +11,7 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *ex)
 	LOAD_OPLINE();
 
 	while (1) {
-    {%ZEND_VM_CONTINUE_LABEL%}
+		{%ZEND_VM_CONTINUE_LABEL%}
 		{%ZEND_VM_DISPATCH%} {
 			{%INTERNAL_EXECUTOR%}
 		}
@@ -45,5 +45,5 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 
 void {%INITIALIZER_NAME%}(void)
 {
-  {%EXTERNAL_LABELS%}
+	{%EXTERNAL_LABELS%}
 }

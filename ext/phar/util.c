@@ -199,13 +199,6 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 			entry.tmp = estrndup(filename, filename_len);
 		}
 	}
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && !is_phar && (!php_checkuid(entry.tmp, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		efree(entry.tmp);
-		efree(entry.filename);
-		return FAILURE;
-	}
-#endif
 	filename = entry.tmp;
 
 	/* only check openbasedir for files, not for phar streams */
@@ -1184,7 +1177,7 @@ char * phar_compress_filter(phar_entry_info * entry, int return_unknown) /* {{{ 
  */
 char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{{ */
 {
-	php_uint32 flags;
+	uint32_t flags;
 
 	if (entry->is_modified) {
 		flags = entry->old_flags;
@@ -1480,7 +1473,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 /* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error) /* {{{ */
+int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error) /* {{{ */
 {
 	int read_size, len;
 	zend_off_t read_len;

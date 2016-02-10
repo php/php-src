@@ -37,12 +37,10 @@ const zend_function_entry pdo_odbc_functions[] = {
 /* }}} */
 
 /* {{{ pdo_odbc_deps[] */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_odbc_module_entry */

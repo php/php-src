@@ -248,7 +248,7 @@ END_EXTERN_C()
 
 static zend_always_inline int _zend_handle_numeric_str(const char *key, size_t length, zend_ulong *idx)
 {
-	register const char *tmp = key;
+	const char *tmp = key;
 
 	if (*tmp > '9') {
 		return 0;

@@ -25,11 +25,11 @@
 
 /* GOST context */
 typedef struct {
-	php_hash_uint32 state[16];
-	php_hash_uint32 count[2];
+	uint32_t state[16];
+	uint32_t count[2];
 	unsigned char length;
 	unsigned char buffer[32];
-	const php_hash_uint32 (*tables)[4][256];
+	const uint32_t (*tables)[4][256];
 } PHP_GOST_CTX;
 
 PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *);

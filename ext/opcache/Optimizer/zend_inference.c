@@ -2204,23 +2204,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 	zend_class_entry *ce;
 	int j;
 
-	if (opline->opcode == ZEND_OP_DATA &&
-	    ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-	     (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
-	     (opline-1)->opcode == ZEND_ASSIGN_ADD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SUB ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MUL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_DIV ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MOD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_CONCAT ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_OR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_AND ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_XOR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_POW ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_R ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_RW)) {
+	if (opline->opcode == ZEND_OP_DATA) {
 		opline--;
 		i--;
 	}
@@ -3097,6 +3081,25 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			break;
+		case ZEND_YIELD:
+			if (ssa_ops[i].op1_def >= 0) {
+				tmp = t1 | MAY_BE_RC1 | MAY_BE_RCN;
+				if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+					tmp |= MAY_BE_REF;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+				if ((t1 & MAY_BE_OBJECT) && ssa_var_info[ssa_ops[i].op1_use].ce) {
+					UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_ops[i].op1_use].ce, ssa_var_info[ssa_ops[i].op1_use].is_instanceof, ssa_ops[i].op1_def);
+				} else {
+					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].op1_def);
+				}
+			}
+			if (ssa_ops[i].result_def >= 0) {
+				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+					| MAY_BE_RC1 | MAY_BE_RCN;
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+			}
+			break;
 		case ZEND_SEND_VAR_EX:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_REF:
@@ -3408,24 +3411,22 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
-			if (opline->result_type == IS_TMP_VAR) {
-				if (ssa_ops[i].result_def >= 0) {
-					tmp = MAY_BE_RC1;
-					if (t1 & MAY_BE_OBJECT) {
-						tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-					} else if (t1 & MAY_BE_ARRAY) {
-						if (t1 & MAY_BE_ARRAY_KEY_LONG) {
-							tmp |= MAY_BE_LONG;
-						}
-						if (t1 & MAY_BE_ARRAY_KEY_STRING) {
-							tmp |= MAY_BE_STRING;
-						}
-						if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
-							tmp |= MAY_BE_NULL;
-						}
+			if (ssa_ops[i].result_def >= 0) {
+				tmp = MAY_BE_RC1;
+				if (t1 & MAY_BE_OBJECT) {
+					tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+				} else if (t1 & MAY_BE_ARRAY) {
+					if (t1 & MAY_BE_ARRAY_KEY_LONG) {
+						tmp |= MAY_BE_LONG;
 					}
-					UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+					if (t1 & MAY_BE_ARRAY_KEY_STRING) {
+						tmp |= MAY_BE_STRING;
+					}
+					if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
+						tmp |= MAY_BE_NULL;
+					}
 				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
 //		case ZEND_CATCH:

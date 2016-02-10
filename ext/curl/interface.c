@@ -157,7 +157,8 @@ static void _php_curl_close(zend_resource *rsrc);
 #define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s) - 1, (zend_long) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s) - 1, (double) v);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s) - 1, (char *) (v ? v : ""));
-#define CAASTR(s, v) add_assoc_str_ex(return_value, s, sizeof(s) - 1, v ? v : ZSTR_EMPTY_ALLOC());
+#define CAASTR(s, v) add_assoc_str_ex(return_value, s, sizeof(s) - 1, \
+		v ? zend_string_copy(v) : ZSTR_EMPTY_ALLOC());
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s) -1 , (zval *) v);
 
 #if defined(PHP_WIN32) || defined(__GNUC__)
@@ -1751,7 +1752,7 @@ static php_curl *alloc_curl_handle()
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
 	zend_llist_init(&ch->to_free->str,   sizeof(char *),          (llist_dtor_func_t)curl_free_string, 0);
-	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost), (llist_dtor_func_t)curl_free_post,   0);
+	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
 
 	ch->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -2475,7 +2476,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				}
 			} ZEND_HASH_FOREACH_END();
 
-			zend_hash_index_update_ptr(ch->to_free->slist, option, slist);
+			if ((*ch->clone) == 1) {
+				zend_hash_index_update_ptr(ch->to_free->slist, option, slist);
+			} else {
+				zend_hash_next_index_insert_ptr(ch->to_free->slist, slist);
+			}
 
 			error = curl_easy_setopt(ch->cp, option, slist);
 
@@ -3032,7 +3037,7 @@ PHP_FUNCTION(curl_getinfo)
 		}
 #endif
 		if (ch->header.str) {
-			CAASTR("request_header", zend_string_copy(ch->header.str));
+			CAASTR("request_header", ch->header.str);
 		}
 	} else {
 		switch (option) {

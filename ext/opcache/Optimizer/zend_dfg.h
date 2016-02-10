@@ -44,7 +44,7 @@ typedef struct _zend_dfg {
 
 BEGIN_EXTERN_C()
 
-int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg);
+int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags);
 
 END_EXTERN_C()
 

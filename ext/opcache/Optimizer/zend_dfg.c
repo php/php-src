@@ -20,7 +20,7 @@
 #include "zend_compile.h"
 #include "zend_dfg.h"
 
-int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg) /* {{{ */
+int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags) /* {{{ */
 {
 	int set_size;
 	zend_basic_block *blocks = cfg->blocks;
@@ -55,40 +55,32 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op1.var));
 						}
 					}
-					if (next->op2_type == IS_CV) {
+					if (next->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 						if (!DFG_ISSET(def, set_size, j,EX_VAR_TO_NUM(next->op2.var))) {
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op2.var));
-						}
-					} else if (next->op2_type == IS_VAR ||
-							   next->op2_type == IS_TMP_VAR) {
-						/* ZEND_ASSIGN_??? use the second operand
-						   of the following OP_DATA instruction as
-						   a temporary variable */
-						switch (opline->opcode) {
-							case ZEND_ASSIGN_DIM:
-							case ZEND_ASSIGN_OBJ:
-							case ZEND_ASSIGN_ADD:
-							case ZEND_ASSIGN_SUB:
-							case ZEND_ASSIGN_MUL:
-							case ZEND_ASSIGN_DIV:
-							case ZEND_ASSIGN_MOD:
-							case ZEND_ASSIGN_SL:
-							case ZEND_ASSIGN_SR:
-							case ZEND_ASSIGN_CONCAT:
-							case ZEND_ASSIGN_BW_OR:
-							case ZEND_ASSIGN_BW_AND:
-							case ZEND_ASSIGN_BW_XOR:
-							case ZEND_ASSIGN_POW:
-								break;
-							default:
-								if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(next->op2.var))) {
-									DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op2.var));
-								}
 						}
 					}
 				}
 				if (opline->op1_type == IS_CV) {
 					switch (opline->opcode) {
+					case ZEND_ADD_ARRAY_ELEMENT:
+					case ZEND_INIT_ARRAY:
+						if ((build_flags & ZEND_SSA_RC_INFERENCE)
+								|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
+							goto op1_def;
+						}
+						goto op1_use;
+					case ZEND_FE_RESET_R:
+						if (build_flags & ZEND_SSA_RC_INFERENCE) {
+							goto op1_def;
+						}
+						goto op1_use;
+					case ZEND_YIELD:
+						if ((build_flags & ZEND_SSA_RC_INFERENCE)
+								|| (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+							goto op1_def;
+						}
+						goto op1_use;
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_BIND_GLOBAL:
@@ -96,11 +88,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
-					case ZEND_FE_RESET_R:
 					case ZEND_FE_RESET_RW:
-					case ZEND_ADD_ARRAY_ELEMENT:
-					case ZEND_INIT_ARRAY:
-					case ZEND_BIND_LEXICAL:
+op1_def:
 						if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var))) {
 							// FIXME: include into "use" to ...?
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
@@ -141,6 +130,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_OBJ_UNSET:
 						DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
 					default:
+op1_use:
 						if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(opline->op1.var))) {
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
 						}
@@ -154,9 +144,19 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 				if (opline->op2_type == IS_CV) {
 					switch (opline->opcode) {
 						case ZEND_ASSIGN:
+							if (build_flags & ZEND_SSA_RC_INFERENCE) {
+								goto op2_def;
+							}
+							goto op2_use;
+						case ZEND_BIND_LEXICAL:
+							if ((build_flags & ZEND_SSA_RC_INFERENCE) || opline->extended_value) {
+								goto op2_def;
+							}
+							goto op2_use;
 						case ZEND_ASSIGN_REF:
 						case ZEND_FE_FETCH_R:
 						case ZEND_FE_FETCH_RW:
+op2_def:
 							if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var))) {
 								// FIXME: include into "use" to ...?
 								DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
@@ -165,6 +165,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
 							break;
 						default:
+op2_use:
 							if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(opline->op2.var))) {
 								DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
 							}
@@ -194,12 +195,6 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 						DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->result.var));
 					}
 					DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->result.var));
-				}
-				if ((opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) && opline->result_type == IS_TMP_VAR) {
-					if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(next->result.var))) {
-						DFG_SET(def, set_size, j, EX_VAR_TO_NUM(next->result.var));
-					}
-					DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(next->result.var));
 				}
 			}
 		}

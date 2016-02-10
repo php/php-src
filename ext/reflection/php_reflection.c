@@ -3029,6 +3029,7 @@ ZEND_METHOD(reflection_type, __toString)
 		case _IS_BOOL:    RETURN_STRINGL("bool", sizeof("bool") - 1);
 		case IS_LONG:     RETURN_STRINGL("int", sizeof("int") - 1);
 		case IS_DOUBLE:   RETURN_STRINGL("float", sizeof("float") - 1);
+		case IS_VOID:     RETURN_STRINGL("void", sizeof("void") - 1);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }

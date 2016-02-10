@@ -2668,7 +2668,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 
 		for (i = 0; i < filecount; i++) {
 			char *file = (char*)zip_get_name(intern, i, ZIP_FL_UNCHANGED);
-			if (!php_zip_extract_file(intern, pathto, file, strlen(file))) {
+			if (!file || !php_zip_extract_file(intern, pathto, file, strlen(file))) {
 					RETURN_FALSE;
 			}
 		}

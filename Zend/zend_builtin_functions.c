@@ -31,6 +31,12 @@
 
 #undef ZEND_TEST_EXCEPTIONS
 
+#if ZEND_DEBUG
+static zend_class_entry *zend_test_interface;
+static zend_class_entry *zend_test_class;
+static zend_object_handlers zend_test_class_handlers;
+#endif
+
 static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
 static ZEND_FUNCTION(func_get_arg);
@@ -257,6 +263,51 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
+#if ZEND_DEBUG
+static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
+	zend_object *obj = zend_objects_new(class_type);
+	obj->handlers = &zend_test_class_handlers;
+	return obj;
+}
+/* }}} */
+
+static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) /* {{{ */ {
+	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
+	fptr->type = ZEND_OVERLOADED_FUNCTION_TEMPORARY;
+	fptr->num_args = 1;
+	fptr->arg_info = NULL;
+	fptr->scope = (*object)->ce;
+	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
+	fptr->function_name = zend_string_copy(name);
+	fptr->handler = ZEND_FN(zend_test_func);
+	zend_set_function_arg_flags((zend_function*)fptr);
+
+	return (zend_function*)fptr;
+}
+/* }}} */
+
+static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, zend_string *name) /* {{{ */ {
+	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
+	fptr->type = ZEND_OVERLOADED_FUNCTION;
+	fptr->num_args = 1;
+	fptr->arg_info = NULL;
+	fptr->scope = ce;
+	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
+	fptr->function_name = name;
+	fptr->handler = ZEND_FN(zend_test_func);
+	zend_set_function_arg_flags((zend_function*)fptr);
+
+	return (zend_function*)fptr;
+}
+/* }}} */
+
+static int zend_test_class_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
+	RETVAL_STR(zend_string_copy(method));
+	return 0;
+}
+/* }}} */
+#endif
+
 static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_version,		arginfo_zend__void)
 	ZEND_FE(func_num_args,		arginfo_zend__void)
@@ -338,6 +389,21 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_standard_class_def = zend_register_internal_class(&class_entry);
 
 	zend_register_default_classes();
+
+#if ZEND_DEBUG
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestInterface", NULL);
+	zend_test_interface = zend_register_internal_interface(&class_entry);
+	zend_declare_class_constant_long(zend_test_interface, ZEND_STRL("DUMMY"), 0);
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestClass", NULL);
+	zend_test_class = zend_register_internal_class_ex(&class_entry, NULL);
+	zend_class_implements(zend_test_class, 1, zend_test_interface);
+	zend_test_class->create_object = zend_test_class_new;
+	zend_test_class->get_static_method = zend_test_class_static_method_get;
+
+	memcpy(&zend_test_class_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	zend_test_class_handlers.get_method = zend_test_class_method_get;
+	zend_test_class_handlers.call_method = zend_test_class_call_method;
+#endif
 
 	return SUCCESS;
 }
@@ -2045,7 +2111,6 @@ ZEND_FUNCTION(zend_test_func2)
 
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
-
 
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
