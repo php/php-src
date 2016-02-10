@@ -173,7 +173,10 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 
 	ZEND_ASSERT_VM_STACK_GLOBAL;
 
-	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
+	if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_GENERATOR)) {
+		call = (zend_execute_data*)emalloc(used_stack);
+		ZEND_SET_CALL_INFO(call, call_info | ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED);
+	} else if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
 		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
 		ZEND_SET_CALL_INFO(call, call_info | ZEND_CALL_ALLOCATED);
 	} else {
@@ -259,6 +262,13 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 	ZEND_ASSERT_VM_STACK_GLOBAL;
 
 	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
+		if (!call->func) {
+			/* Generator with unused return value */
+			efree(call);
+			return;
+		} else if (call->func->common.fn_flags & ZEND_ACC_GENERATOR) {
+			return;
+		}
 		zend_vm_stack p = EG(vm_stack);
 
 		zend_vm_stack prev = p->prev;
@@ -267,7 +277,6 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 		EG(vm_stack_end) = prev->end;
 		EG(vm_stack) = prev;
 		efree(p);
-
 	} else {
 		EG(vm_stack_top) = (zval*)call;
 	}

@@ -3834,6 +3834,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
 					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
 				}
+				call->func = NULL;
 				zend_vm_stack_free_args(call);
 			}
 		} else {
