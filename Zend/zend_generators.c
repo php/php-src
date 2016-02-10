@@ -193,6 +193,15 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {{{ */
+{
+	zend_generator *generator = (zend_generator*) Z_OBJ_P(object);
+	*table = &generator->value;
+	*n = 3;
+	return NULL;
+}
+/* }}} */
+
 static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ */
 {
 	zend_generator *generator;
@@ -1128,6 +1137,7 @@ void zend_register_generator_ce(void) /* {{{ */
 	memcpy(&zend_generator_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_generator_handlers.free_obj = zend_generator_free_storage;
 	zend_generator_handlers.dtor_obj = zend_generator_dtor_storage;
+	zend_generator_handlers.get_gc = zend_generator_get_gc;
 	zend_generator_handlers.clone_obj = NULL;
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 
