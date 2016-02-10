@@ -2370,6 +2370,11 @@ static void accel_deactivate(void)
 	 */
 	TSRMLS_FETCH();
 
+	if (ZCG(cwd)) {
+		efree(ZCG(cwd));
+		ZCG(cwd) = NULL;
+	}
+
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
@@ -2383,12 +2388,6 @@ static void accel_deactivate(void)
 		zend_accel_fast_shutdown(TSRMLS_C);
 	}
 #endif
-
-	if (ZCG(cwd)) {
-		efree(ZCG(cwd));
-		ZCG(cwd) = NULL;
-	}
-
 }
 
 static int accelerator_remove_cb(zend_extension *element1, zend_extension *element2)
