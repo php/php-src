@@ -238,9 +238,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 				 FILE_FLAG_BACKUP_SEMANTICS, // normal file
 				 NULL);                 // no attr. template
 	if( hFile == INVALID_HANDLE_VALUE) {
-		if (linkw) {
-			free(linkw);
-		}
+		free(linkw);
 		return -1;
 	}
 
@@ -1192,7 +1190,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 			if (save) {
-				char *tmp_path = php_win32_ioutil_w_to_utf8(dataw.cFileName);
+				char *tmp_path = php_win32_ioutil_any_to_utf8(dataw.cFileName);
 				i = (int)strlen(tmp_path);
 				memcpy(path+j, tmp_path, i+1);
 				free(tmp_path);

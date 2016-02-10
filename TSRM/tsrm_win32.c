@@ -482,7 +482,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	process_pair *proc;
 	char *cmd;
 	wchar_t *cmdw, *cwdw = NULL;
-	int i, use_w = 0;
+	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
@@ -511,13 +511,18 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	}
 
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
-	cmdw = php_win32_ioutil_mb_to_w(cmd);
-	if (cwd) {
-		cwdw = php_win32_ioutil_mb_to_w(cwd);
+	cmdw = php_win32_ioutil_any_to_w(cmd);
+	if (!cmdw) {
+		free(cmd);
+		return NULL;
 	}
-	/* cwd can be NULL, it is a valid case if NULL was passed. */
-	if (cmdw && !cwd || cmdw && cwdw) {
-		use_w = 1;
+
+	if (cwd) {
+		cwdw = php_win32_ioutil_any_to_w(cwd);
+		if (!cmdw) {
+			free(cmd);
+			return NULL;
+		}
 	}
 
 	security.nLength				= sizeof(SECURITY_ATTRIBUTES);
