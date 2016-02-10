@@ -1190,7 +1190,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 			if (save) {
-				char *tmp_path = php_win32_ioutil_any_to_utf8(dataw.cFileName);
+				char *tmp_path = php_win32_ioutil_w_to_any(dataw.cFileName);
 				i = (int)strlen(tmp_path);
 				memcpy(path+j, tmp_path, i+1);
 				free(tmp_path);
