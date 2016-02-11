@@ -98,6 +98,12 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			OBJ_RELEASE((zend_object *) EX(func)->common.prototype);
 		}
 
+		/* Free GC buffer. GC for closed generators doesn't need an allocated buffer */
+		if (generator->gc_buffer) {
+			efree(generator->gc_buffer);
+			generator->gc_buffer = NULL;
+		}
+
 		efree(generator->stack);
 		generator->execute_data = NULL;
 	}
@@ -188,11 +194,63 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
+{
+	uint32_t size = 4; /* value, key, retval, values */
+	if (generator->execute_data) {
+		zend_execute_data *execute_data = generator->execute_data;
+		zend_op_array *op_array = &EX(func)->op_array;
+
+		size += op_array->last_var; /* CVs */
+		size += Z_OBJ(execute_data->This) != NULL; /* $this */
+		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
+	}
+	return size;
+}
+/* }}} */
+
 static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) Z_OBJ_P(object);
-	*table = &generator->value;
-	*n = 3;
+	zend_execute_data *execute_data = generator->execute_data;
+	zval *gc_buffer;
+	uint32_t gc_buffer_size;
+
+	if (!execute_data) {
+		/* If the generator has been closed, it can only hold on to three values: The value, key
+		 * and retval. These three zvals are stored sequentially starting at &generator->value. */
+		*table = &generator->value;
+		*n = 3;
+		return NULL;
+	}
+
+	gc_buffer_size = calc_gc_buffer_size(generator);
+	if (!generator->gc_buffer) {
+		generator->gc_buffer = safe_emalloc(sizeof(zval), gc_buffer_size, 0);
+	}
+
+	*n = gc_buffer_size;
+	*table = gc_buffer = generator->gc_buffer;
+
+	ZVAL_COPY_VALUE(gc_buffer++, &generator->value);
+	ZVAL_COPY_VALUE(gc_buffer++, &generator->key);
+	ZVAL_COPY_VALUE(gc_buffer++, &generator->retval);
+	ZVAL_COPY_VALUE(gc_buffer++, &generator->values);
+
+	{
+		uint32_t i, num_cvs = EX(func)->op_array.last_var;
+		for (i = 0; i < num_cvs; i++) {
+			ZVAL_COPY_VALUE(gc_buffer++, EX_VAR_NUM(i));
+		}
+	}
+
+	if (Z_OBJ(execute_data->This)) {
+		ZVAL_OBJ(gc_buffer++, Z_OBJ(execute_data->This));
+	}
+	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
+		ZVAL_OBJ(gc_buffer++, (zend_object *) EX(func)->common.prototype);
+	}
+
 	return NULL;
 }
 /* }}} */

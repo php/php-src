@@ -82,7 +82,7 @@ struct _zend_generator {
 	 * by-value foreach. */
 	zval values;
 
-	/* Node of waiting generators when multiple "yield *" expressions
+	/* Node of waiting generators when multiple "yield from" expressions
 	 * are nested. */
 	zend_generator_node node;
 
@@ -91,6 +91,8 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
+
+	zval *gc_buffer;
 };
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
