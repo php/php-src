@@ -393,9 +393,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	fprintf(stderr, "%*c", 8-len, ' ');
 
 	if (!ssa || !ssa->ops || ssa->ops[opline - op_array->opcodes].result_use < 0) {
-		if (opline->result_type == IS_CV ||
-		    opline->result_type == IS_VAR ||
-		    opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa && ssa->ops) {
 				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_def;
 				ZEND_ASSERT(ssa_var_num >= 0);
@@ -567,9 +565,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 
 	if (opline->op1_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op1, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
-	} else if (opline->op1_type == IS_CV ||
-	           opline->op1_type == IS_VAR ||
-	           opline->op1_type == IS_TMP_VAR) {
+	} else if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa && ssa->ops) {
 			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_use;
 			if (ssa_var_num >= 0) {
@@ -605,9 +601,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 
 	if (opline->op2_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
-	} else if (opline->op2_type == IS_CV ||
-	           opline->op2_type == IS_VAR ||
-	           opline->op2_type == IS_TMP_VAR) {
+	} else if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa && ssa->ops) {
 			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op2_use;
 			if (ssa_var_num >= 0) {
@@ -653,9 +647,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	if (opline->result_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
 	} else if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_use >= 0) {
-		if (opline->result_type == IS_CV ||
-		    opline->result_type == IS_VAR ||
-		    opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa && ssa->ops) {
 				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_use;
 				if (ssa_var_num >= 0) {

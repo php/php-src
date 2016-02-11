@@ -135,8 +135,7 @@ op1_use:
 							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
 						}
 					}
-				} else if (opline->op1_type == IS_VAR ||
-						   opline->op1_type == IS_TMP_VAR) {
+				} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(opline->op1.var))) {
 						DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
 					}
@@ -171,8 +170,7 @@ op2_use:
 							}
 							break;
 					}
-				} else if (opline->op2_type == IS_VAR ||
-						   opline->op2_type == IS_TMP_VAR) {
+				} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
 					if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
 						if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var))) {
 							DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
@@ -189,8 +187,7 @@ op2_use:
 						DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->result.var));
 					}
 					DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->result.var));
-				} else if (opline->result_type == IS_VAR ||
-						   opline->result_type == IS_TMP_VAR) {
+				} else if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 					if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->result.var))) {
 						DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->result.var));
 					}

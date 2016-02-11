@@ -749,7 +749,7 @@ optimize_const_unary_op:
 		}
 
 		/* get variable source */
-		if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 			SET_VAR_SOURCE(opline);
 		}
 		opline++;
@@ -1504,7 +1504,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 		}
 
 		while (opline<end) {
-			if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
+			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 				var_num = VAR_NUM(opline->op1.var);
 				if (!zend_bitset_in(defined_here, var_num)) {
 					zend_bitset_incl(used_ext, var_num);
@@ -1670,7 +1670,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 				zend_bitset_incl(usage, VAR_NUM(opline->op2.var));
 			}
 
-			if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
+			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 				zend_bitset_incl(usage, VAR_NUM(opline->op1.var));
 			}
 

@@ -3834,7 +3834,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 		} else {
 			zend_op *opline;
 
-			ZEND_ASSERT(loop_var->var_type == IS_VAR || loop_var->var_type == IS_TMP_VAR);
+			ZEND_ASSERT(loop_var->var_type & (IS_VAR|IS_TMP_VAR));
 			opline = get_next_op(CG(active_op_array));
 			opline->opcode = loop_var->opcode;
 			opline->op1_type = loop_var->var_type;
@@ -4363,7 +4363,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_end_loop(get_next_op_number(CG(active_op_array)), &expr_node);
 
-	if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
+	if (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) {
 		/* don't use emit_op() to prevent automatic live-range construction */
 		opline = get_next_op(CG(active_op_array));
 		opline->opcode = ZEND_FREE;
