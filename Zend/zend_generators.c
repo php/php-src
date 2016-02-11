@@ -39,21 +39,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 		/* -1 required because we want the last run opcode, not the next to-be-run one. */
 		uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
 
-		/* There may be calls to zend_vm_stack_free_call_frame(), which modifies the VM stack
-		 * globals, so need to load/restore those. */
-		zend_vm_stack original_stack = EG(vm_stack);
-		original_stack->top = EG(vm_stack_top);
-		EG(vm_stack_top) = generator->stack->top;
-		EG(vm_stack_end) = generator->stack->end;
-		EG(vm_stack) = generator->stack;
-
 		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
-
-		generator->stack = EG(vm_stack);
-		generator->stack->top = EG(vm_stack_top);
-		EG(vm_stack_top) = original_stack->top;
-		EG(vm_stack_end) = original_stack->end;
-		EG(vm_stack) = original_stack;
 	}
 }
 /* }}} */
@@ -98,7 +84,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			OBJ_RELEASE((zend_object *) EX(func)->common.prototype);
 		}
 
-		efree(generator->stack);
+		efree(generator->execute_data);
 		generator->execute_data = NULL;
 	}
 }
@@ -228,9 +214,6 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	zend_generator *generator;
 	zend_execute_data *current_execute_data;
 	zend_execute_data *execute_data;
-	zend_vm_stack current_stack = EG(vm_stack);
-
-	current_stack->top = EG(vm_stack_top);
 
 	/* Create new execution context. We have to back up and restore  EG(current_execute_data) here. */
 	current_execute_data = EG(current_execute_data);
@@ -246,14 +229,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	/* Save execution context in generator object. */
 	generator = (zend_generator *) Z_OBJ_P(return_value);
 	generator->execute_data = execute_data;
-	generator->stack = EG(vm_stack);
-	generator->stack->top = EG(vm_stack_top);
-	EG(vm_stack_top) = current_stack->top;
-	EG(vm_stack_end) = current_stack->end;
-	EG(vm_stack) = current_stack;
 
 	/* EX(return_value) keeps pointer to zend_object (not a real zval) */
-	execute_data->return_value = (zval*)generator;
+	EX(return_value) = (zval*)generator;
 
 	memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
 	Z_OBJ(generator->execute_fake.This) = (zend_object *) generator;
@@ -661,15 +639,10 @@ try_again:
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_class_entry *original_scope = EG(scope);
-		zend_vm_stack original_stack = EG(vm_stack);
-		original_stack->top = EG(vm_stack_top);
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(scope) = generator->execute_data->func->common.scope;
-		EG(vm_stack_top) = generator->stack->top;
-		EG(vm_stack_end) = generator->stack->end;
-		EG(vm_stack) = generator->stack;
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
@@ -688,18 +661,9 @@ try_again:
 		zend_execute_ex(generator->execute_data);
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
-		/* Unlink generator call_frame from the caller and backup vm_stack_top */
-		if (EXPECTED(generator->execute_data)) {
-			generator->stack = EG(vm_stack);
-			generator->stack->top = EG(vm_stack_top);
-		}
-
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
-		EG(vm_stack_top) = original_stack->top;
-		EG(vm_stack_end) = original_stack->end;
-		EG(vm_stack) = original_stack;
 
 		/* If an exception was thrown in the generator we have to internally
 		 * rethrow it in the parent scope.
