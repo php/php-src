@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
     setup). (Matt Haught, Remi)
 
+- phpdbg:
+  . Fixed inherited functions from unspecified files being included in
+    phpdbg_get_executable(). (Bob)
+
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
