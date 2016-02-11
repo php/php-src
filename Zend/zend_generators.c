@@ -35,11 +35,6 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 {
 	zend_execute_data *execute_data = generator->execute_data;
 
-	if (generator->send_target) {
-		Z_TRY_DELREF_P(generator->send_target);
-		generator->send_target = NULL;
-	}
-
 	if (execute_data->opline != execute_data->func->op_array.opcodes) {
 		/* -1 required because we want the last run opcode, not the next to-be-run one. */
 		uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
@@ -882,7 +877,6 @@ ZEND_METHOD(Generator, send)
 	root = zend_generator_get_current(generator);
 	/* Put sent value in the target VAR slot, if it is used */
 	if (root->send_target) {
-		Z_TRY_DELREF_P(root->send_target);
 		ZVAL_COPY(root->send_target, value);
 	}
 

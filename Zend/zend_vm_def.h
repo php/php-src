@@ -7678,6 +7678,9 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
+	/* This generator has no send target (though the generator we delegate to might have one) */
+	generator->send_target = NULL;
+
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
 	ZEND_VM_INC_OPCODE();
