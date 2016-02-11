@@ -2506,9 +2506,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 
 			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 				if (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR) {
-					if (!(ZEND_CALL_INFO(call) & ZEND_CALL_CTOR_RESULT_UNUSED)) {
-						GC_REFCOUNT(Z_OBJ(call->This))--;
-					}
+					GC_REFCOUNT(Z_OBJ(call->This))--;
 					if (GC_REFCOUNT(Z_OBJ(call->This)) == 1) {
 						zend_object_store_ctor_failed(Z_OBJ(call->This));
 					}

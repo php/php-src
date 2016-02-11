@@ -2471,13 +2471,10 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			object = Z_OBJ(old_execute_data->This);
 #if 0
 			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
-				if (!(EX(opline)->op1.num & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 #else
 			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-				if (!(call_info & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 #endif
-					GC_REFCOUNT(object)--;
-				}
+				GC_REFCOUNT(object)--;
 				if (GC_REFCOUNT(object) == 1) {
 					zend_object_store_ctor_failed(object);
 				}
@@ -3966,13 +3963,10 @@ ZEND_VM_C_LABEL(fcall_end_change_scope):
 		object = Z_OBJ(call->This);
 #if 0
 		if (UNEXPECTED(EG(exception) != NULL) && (opline->op1.num & ZEND_CALL_CTOR)) {
-			if (!(opline->op1.num & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 #else
 		if (UNEXPECTED(EG(exception) != NULL) && (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR)) {
-			if (!(ZEND_CALL_INFO(call) & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 #endif
-				GC_REFCOUNT(object)--;
-			}
+			GC_REFCOUNT(object)--;
 			if (GC_REFCOUNT(object) == 1) {
 				zend_object_store_ctor_failed(object);
 			}
@@ -5004,7 +4998,7 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, JMP_ADDR, NUM)
 {
 	USE_OPLINE
-	zval object_zval;
+	zval *result;
 	zend_function *constructor;
 	zend_class_entry *ce;
 
@@ -5027,33 +5021,26 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, JMP_ADDR, NUM)
 	} else {
 		ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
-	if (UNEXPECTED(object_init_ex(&object_zval, ce) != SUCCESS)) {
+
+	result = EX_VAR(opline->result.var);
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		HANDLE_EXCEPTION();
 	}
-	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval));
 
+	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
 	if (constructor == NULL) {
-		if (EXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &object_zval);
-		} else {
-			OBJ_RELEASE(Z_OBJ(object_zval));
-		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 	} else {
 		/* We are not handling overloaded classes right now */
 		zend_execute_data *call = zend_vm_stack_push_call_frame(
-				ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_CTOR |
-				(EXPECTED(RETURN_VALUE_USED(opline)) ? 0 : ZEND_CALL_CTOR_RESULT_UNUSED),
+			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_CTOR,
 			constructor,
 			opline->extended_value,
 			ce,
-			Z_OBJ(object_zval));
+			Z_OBJ_P(result));
 		call->prev_execute_data = EX(call);
 		EX(call) = call;
-
-		if (EXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
-		}
+		Z_ADDREF_P(result);
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}

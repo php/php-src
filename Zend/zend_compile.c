@@ -756,12 +756,7 @@ void zend_do_free(znode *op1) /* {{{ */
 				if (opline->result_type==IS_VAR
 					&& opline->result.var == op1->u.op.var) {
 					if (opline->opcode == ZEND_NEW) {
-						opline->result_type = IS_UNUSED;
-						opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
-						while (opline->opcode != ZEND_DO_FCALL || opline->op1.num != ZEND_CALL_CTOR) {
-							opline--;
-						}
-						opline->op1.num |= ZEND_CALL_CTOR_RESULT_UNUSED;
+						zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 					}
 					break;
 				}
