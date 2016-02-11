@@ -554,7 +554,7 @@ static PHP_FUNCTION(phpdbg_get_executable)
 		if (ce->type == ZEND_USER_CLASS) {
 			if (zend_hash_exists(files, ce->info.user.filename)) {
 				ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
-					if (func->type == ZEND_USER_FUNCTION) {
+					if (func->type == ZEND_USER_FUNCTION && zend_hash_exists(files, func->op_array.filename)) {
 						insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
 
 						if (by_function) {
