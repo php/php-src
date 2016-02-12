@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
+  . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)

@@ -93,6 +93,7 @@ struct _zend_generator {
 	zend_uchar flags;
 
 	zval *gc_buffer;
+	uint32_t gc_buffer_size;
 };
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;

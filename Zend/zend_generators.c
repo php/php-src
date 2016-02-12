@@ -201,9 +201,25 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = &EX(func)->op_array;
 
-		size += op_array->last_var; /* CVs */
+		/* Compiled variables */
+		if (!execute_data->symbol_table) {
+			size += op_array->last_var;
+		}
+		/* Extra args */
+		if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
+			size += EX_NUM_ARGS() - op_array->num_args;
+		}
 		size += Z_OBJ(execute_data->This) != NULL; /* $this */
 		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
+
+		/* Yield from root references */
+		if (generator->node.children == 0) {
+			zend_generator *root = generator->node.ptr.root;
+			while (root != generator) {
+				size++;
+				root = zend_generator_get_child(&root->node, generator);
+			}
+		}
 	}
 	return size;
 }
@@ -213,6 +229,7 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 {
 	zend_generator *generator = (zend_generator*) Z_OBJ_P(object);
 	zend_execute_data *execute_data = generator->execute_data;
+	zend_op_array *op_array;
 	zval *gc_buffer;
 	uint32_t gc_buffer_size;
 
@@ -224,9 +241,11 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 		return NULL;
 	}
 
+	op_array = &EX(func)->op_array;
 	gc_buffer_size = calc_gc_buffer_size(generator);
-	if (!generator->gc_buffer) {
-		generator->gc_buffer = safe_emalloc(sizeof(zval), gc_buffer_size, 0);
+	if (generator->gc_buffer_size < gc_buffer_size) {
+		generator->gc_buffer = safe_erealloc(generator->gc_buffer, sizeof(zval), gc_buffer_size, 0);
+		generator->gc_buffer_size = gc_buffer_size;
 	}
 
 	*n = gc_buffer_size;
@@ -237,10 +256,18 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 	ZVAL_COPY_VALUE(gc_buffer++, &generator->retval);
 	ZVAL_COPY_VALUE(gc_buffer++, &generator->values);
 
-	{
+	if (!execute_data->symbol_table) {
 		uint32_t i, num_cvs = EX(func)->op_array.last_var;
 		for (i = 0; i < num_cvs; i++) {
 			ZVAL_COPY_VALUE(gc_buffer++, EX_VAR_NUM(i));
+		}
+	}
+
+	if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
+		zval *zv = EX_VAR_NUM(op_array->last_var + op_array->T);
+		zval *end = zv + (EX_NUM_ARGS() - op_array->num_args);
+		while (zv != end) {
+			ZVAL_COPY_VALUE(gc_buffer++, zv++);
 		}
 	}
 
@@ -251,7 +278,15 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 		ZVAL_OBJ(gc_buffer++, (zend_object *) EX(func)->common.prototype);
 	}
 
-	return NULL;
+	if (generator->node.children == 0) {
+		zend_generator *root = generator->node.ptr.root;
+		while (root != generator) {
+			ZVAL_OBJ(gc_buffer++, &root->std);
+			root = zend_generator_get_child(&root->node, generator);
+		}
+	}
+
+	return execute_data->symbol_table;
 }
 /* }}} */
 
