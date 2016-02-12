@@ -6294,6 +6294,11 @@ void zend_compile_yield_from(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_mark_function_as_generator();
 
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use \"yield from\" inside a by-reference generator");
+	}
+
 	zend_compile_expr(&expr_node, expr_ast);
 	zend_emit_op_tmp(result, ZEND_YIELD_FROM, &expr_node, NULL);
 }
