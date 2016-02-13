@@ -1,5 +1,5 @@
 --TEST--
-Bug #70389 (PDO constructor changes unrelated variables)
+Bug #71569 (#70389 fix causes segmentation fault)
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
