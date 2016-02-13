@@ -1960,6 +1960,7 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 	while (def != CG(active_op_array)->opcodes) {
 		def--;
 		if (def->result_type == type && def->result.var == var) {
+			uint32_t var;
 			if (def->opcode == ZEND_ADD_ARRAY_ELEMENT ||
 			    def->opcode == ZEND_ROPE_ADD) {
 			    /* not a real definition */
@@ -1980,7 +1981,10 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 			} else if (def->opcode == ZEND_FAST_CALL) {
 				/* fast_calls don't have to be destroyed */
 				break;
-			} else if (def->opcode == ZEND_NEW) {
+			}
+
+			var = def->result.var;
+			if (def->opcode == ZEND_NEW) {
 				/* Objects created via ZEND_NEW are only fully initialized
 				 * after the DO_FCALL (constructor call) */
 				def = CG(active_op_array)->opcodes + def->op2.opline_num - 1;
@@ -1988,11 +1992,12 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 					break;
 				}
 			}
+
 	        zend_end_live_range(CG(active_op_array),
 				zend_start_live_range_ex(CG(active_op_array),
 					def + 1 - CG(active_op_array)->opcodes),
 				opline - CG(active_op_array)->opcodes,
-				ZEND_LIVE_TMPVAR, def->result.var);
+				ZEND_LIVE_TMPVAR, var);
 		    break;
 		}
 	}
