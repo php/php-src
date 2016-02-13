@@ -658,31 +658,31 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		init_cmd = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_INIT_COMMAND, NULL TSRMLS_CC);
 		if (init_cmd) {
 			if (mysql_options(H->server, MYSQL_INIT_COMMAND, (const char *)init_cmd)) {
-				efree(init_cmd);
+				str_efree(init_cmd);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			efree(init_cmd);
+			str_efree(init_cmd);
 		}
 #ifndef PDO_USE_MYSQLND		
 		default_file = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_FILE, NULL TSRMLS_CC);
 		if (default_file) {
 			if (mysql_options(H->server, MYSQL_READ_DEFAULT_FILE, (const char *)default_file)) {
-				efree(default_file);
+				str_efree(default_file);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			efree(default_file);
+			str_efree(default_file);
 		}
 		
 		default_group= pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_GROUP, NULL TSRMLS_CC);
 		if (default_group) {
 			if (mysql_options(H->server, MYSQL_READ_DEFAULT_GROUP, (const char *)default_group)) {
-				efree(default_group);
+				str_efree(default_group);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			efree(default_group);
+			str_efree(default_group);
 		}
 #endif
 		compress = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_COMPRESS, 0 TSRMLS_CC);
@@ -702,19 +702,19 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher) {
 			mysql_ssl_set(H->server, ssl_key, ssl_cert, ssl_ca, ssl_capath, ssl_cipher);
 			if (ssl_key) {
-				efree(ssl_key);
+				str_efree(ssl_key);
 			}
 			if (ssl_cert) {
-				efree(ssl_cert);
+				str_efree(ssl_cert);
 			}
 			if (ssl_ca) {
-				efree(ssl_ca);
+				str_efree(ssl_ca);
 			}
 			if (ssl_capath) {
-				efree(ssl_capath);
+				str_efree(ssl_capath);
 			}
 			if (ssl_cipher) {
-				efree(ssl_cipher);
+				str_efree(ssl_cipher);
 			}
 		}
 
@@ -724,10 +724,10 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			if (public_key) {
 				if (mysql_options(H->server, MYSQL_SERVER_PUBLIC_KEY, public_key)) {
 					pdo_mysql_error(dbh);
-					efree(public_key);
+					str_efree(public_key);
 					goto cleanup;
 				}
-				efree(public_key);
+				str_efree(public_key);
 			}
 		}
 #endif
