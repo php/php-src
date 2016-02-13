@@ -1960,7 +1960,6 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 	while (def != CG(active_op_array)->opcodes) {
 		def--;
 		if (def->result_type == type && def->result.var == var) {
-			uint32_t var;
 			if (def->opcode == ZEND_ADD_ARRAY_ELEMENT ||
 			    def->opcode == ZEND_ROPE_ADD) {
 			    /* not a real definition */
@@ -1981,10 +1980,7 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 			} else if (def->opcode == ZEND_FAST_CALL) {
 				/* fast_calls don't have to be destroyed */
 				break;
-			}
-
-			var = def->result.var;
-			if (def->opcode == ZEND_NEW) {
+			} else if (def->opcode == ZEND_NEW) {
 				/* Objects created via ZEND_NEW are only fully initialized
 				 * after the DO_FCALL (constructor call) */
 				def = CG(active_op_array)->opcodes + def->op2.opline_num - 1;
