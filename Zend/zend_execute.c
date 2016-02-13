@@ -1169,8 +1169,10 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *value, zval *result)
 {
 	zend_string *old_str;
+	zend_uchar c;
+	size_t string_len;
 
-	if (offset < 0) {
+	if (offset < 0) {	/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
 		zend_string_release(Z_STR_P(str));
 		if (result) {
@@ -1179,8 +1181,29 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		return;
 	}
 
+	if (Z_TYPE_P(value) != IS_STRING) {
+		/* Convert to string, just the time to pick the 1st byte */
+		zend_string *tmp = zval_get_string(value);
+
+		string_len = ZSTR_LEN(tmp);
+		c = (zend_uchar)ZSTR_VAL(tmp)[0];
+		zend_string_release(tmp);
+	} else {
+		string_len = Z_STRLEN_P(value);
+		c = (zend_uchar)Z_STRVAL_P(value)[0];
+	}
+
+	if (string_len == 0) {	/* Error on empty input string */
+		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
+		zend_string_release(Z_STR_P(str));
+		if (result) {
+			ZVAL_NULL(result);
+		}
+		return;
+	}
+
 	old_str = Z_STR_P(str);
-	if ((size_t)offset >= Z_STRLEN_P(str)) {
+	if ((size_t)offset >= Z_STRLEN_P(str)) { /* Extend string if needed */
 		zend_long old_len = Z_STRLEN_P(str);
 		Z_STR_P(str) = zend_string_extend(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
@@ -1191,27 +1214,19 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	}
 
-	if (Z_TYPE_P(value) != IS_STRING) {
-		zend_string *tmp = zval_get_string(value);
+	Z_STRVAL_P(str)[offset] = c;
 
-		Z_STRVAL_P(str)[offset] = ZSTR_VAL(tmp)[0];
-		zend_string_release(tmp);
-	} else {
-		Z_STRVAL_P(str)[offset] = Z_STRVAL_P(value)[0];
-	}
 	/*
 	 * the value of an assignment to a string offset is undefined
 	T(result->u.var).var = &T->str_offset.str;
 	*/
 
 	zend_string_release(old_str);
-	if (result) {
-		zend_uchar c = (zend_uchar)Z_STRVAL_P(str)[offset];
-
+	if (result) { /* Return the new character */
 		if (CG(one_char_string)[c]) {
 			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
 		} else {
-			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(str) + offset, 1, 0));
+			ZVAL_NEW_STR(result, zend_string_init((char *)(&c), 1, 0));
 		}
 	}
 }
