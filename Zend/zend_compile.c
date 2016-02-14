@@ -6237,7 +6237,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static inline zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	if (!(opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_DIV
 		|| opcode == ZEND_POW || opcode == ZEND_MOD || opcode == ZEND_SL || opcode == ZEND_SR
