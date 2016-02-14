@@ -49,7 +49,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 						/* don't optimise if it should produce a runtime numeric string error */
-						if (!is_numeric_string(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), NULL, NULL, 0)) {
+						if (is_numeric_string(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), NULL, NULL, 0)) {
 							convert_scalar_to_number(&ZEND_OP1_LITERAL(opline));
 						}
 					}
@@ -67,7 +67,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 						/* don't optimise if it should produce a runtime numeric string error */
-						if (!is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0)) {
+						if (is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0)) {
 							convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
 						}
 					}
