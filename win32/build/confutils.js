@@ -1445,13 +1445,10 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 	dir = dir.replace(new RegExp("/", "g"), "\\");
 	var objs_line = "";
+	var srcs_line = "";
 
 	var sub_build = "$(BUILD_DIR)\\";
 
-	var srcs_line = "";
-	var objs_line = "";
-
-	
 	var srcs_by_dir = {};
 
 	/* Parse the file list to create an aggregated structure based on the subdirs passed. */
