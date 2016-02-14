@@ -5827,6 +5827,8 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 			ZVAL_FALSE(zstrong_result_returned);
 		}
 		RETURN_FALSE;
+	} else {
+		php_openssl_store_errors();
 	}
 #endif
 
