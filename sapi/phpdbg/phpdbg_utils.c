@@ -484,11 +484,11 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 						key = ZSTR_VAL(strkey);
 						keylen = ZSTR_LEN(strkey);
 					} else {
-						keylen = spprintf(&key, 0, "%llu", numkey);
+						keylen = spprintf(&key, 0, ZEND_ULONG_FMT, numkey);
 					}
 					propkey = phpdbg_get_property_key(key);
 					name = emalloc(i + keylen + 2);
-					namelen = sprintf(name, "%.*s%.*s%s", (int) i, input, keylen - (propkey - key), propkey, input[len - 1] == ']'?"]":"");
+					namelen = sprintf(name, "%.*s%.*s%s", (int) i, input, (int) (keylen - (propkey - key)), propkey, input[len - 1] == ']'?"]":"");
 					if (!strkey) {
 						efree(key);
 					}
@@ -597,7 +597,7 @@ static int phpdbg_xml_array_element_dump(zval *zv, zend_string *key, zend_ulong 
 
 	phpdbg_try_access {
 		if (key) { /* string key */
-			phpdbg_xml(" name=\"%.*s\"", ZSTR_LEN(key), ZSTR_VAL(key));
+			phpdbg_xml(" name=\"%.*s\"", (int) ZSTR_LEN(key), ZSTR_VAL(key));
 		} else { /* numeric key */
 			phpdbg_xml(" name=\"%ld\"", num);
 		}
@@ -631,7 +631,7 @@ static int phpdbg_xml_object_property_dump(zval *zv, zend_string *key, zend_ulon
 					phpdbg_xml(" class=\"%s\" protection=\"private\"", class_name);
 				}
 			} else {
-				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", ZSTR_LEN(key), ZSTR_VAL(key));
+				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", (int) ZSTR_LEN(key), ZSTR_VAL(key));
 			}
 		} else { /* numeric key */
 			phpdbg_xml(" name=\"%ld\" protection=\"public\"", num);
@@ -683,7 +683,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				phpdbg_xml("<float refstatus=\"%s\" value=\"%.*G\" />", COMMON, (int) EG(precision), Z_DVAL_P(zv));
 				break;
 			case IS_STRING:
-				phpdbg_xml("<string refstatus=\"%s\" length=\"%d\" value=\"%.*s\" />", COMMON, Z_STRLEN_P(zv), Z_STRLEN_P(zv), Z_STRVAL_P(zv));
+				phpdbg_xml("<string refstatus=\"%s\" length=\"%zd\" value=\"%.*s\" />", COMMON, Z_STRLEN_P(zv), (int) Z_STRLEN_P(zv), Z_STRVAL_P(zv));
 				break;
 			case IS_ARRAY:
 				myht = Z_ARRVAL_P(zv);
@@ -705,7 +705,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				}
 
 				class_name = Z_OBJ_HANDLER_P(zv, get_class_name)(Z_OBJ_P(zv));
-				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, ZSTR_LEN(class_name), ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
+				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, (int) ZSTR_LEN(class_name), ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
 				zend_string_release(class_name);
 
 				element_dump_func = phpdbg_xml_object_property_dump;
@@ -729,7 +729,7 @@ head_done:
 				break;
 			case IS_RESOURCE: {
 				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(zv));
-				phpdbg_xml("<resource refstatus=\"%s\" id=\"%pd\" type=\"%ld\" />", COMMON, Z_RES_P(zv)->handle, type_name ? type_name : "unknown");
+				phpdbg_xml("<resource refstatus=\"%s\" id=\"%pd\" type=\"%s\" />", COMMON, Z_RES_P(zv)->handle, type_name ? type_name : "unknown");
 				break;
 			}
 			default:

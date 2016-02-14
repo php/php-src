@@ -331,7 +331,7 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 		}
 
 		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
-			php_error_docref(NULL, E_WARNING, "remove_path string is too long (max: %i, %i given)",
+			php_error_docref(NULL, E_WARNING, "remove_path string is too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, Z_STRLEN_P(option));
 			return -1;
 		}
@@ -351,7 +351,7 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 		}
 
 		if (Z_STRLEN_P(option) >= MAXPATHLEN) {
-			php_error_docref(NULL, E_WARNING, "add_path string too long (max: %i, %i given)",
+			php_error_docref(NULL, E_WARNING, "add_path string too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, Z_STRLEN_P(option));
 			return -1;
 		}
