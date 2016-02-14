@@ -2323,31 +2323,25 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, OP_DATA_TYPE, (opline+1)->op1, execute_data);
 			FREE_OP2();
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
-			if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-				if (OP2_TYPE == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
-					FREE_UNFETCHED_OP_DATA();
-					FREE_OP1_VAR_PTR();
-					HANDLE_EXCEPTION();
-				} else {
-					zend_long offset;
-
-					dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-					offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-					FREE_OP2();
-					value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
-					zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-					FREE_OP_DATA();
-				}
+			if (OP2_TYPE == IS_UNUSED) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP_DATA();
+				FREE_OP1_VAR_PTR();
+				HANDLE_EXCEPTION();
 			} else {
-				zval_ptr_dtor_nogc(object_ptr);
-ZEND_VM_C_LABEL(assign_dim_convert_to_array):
-				ZVAL_NEW_ARR(object_ptr);
-				zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
-				ZEND_VM_C_GOTO(try_assign_dim_array);
+				zend_long offset;
+
+				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				FREE_OP2();
+				value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP_DATA();
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			ZEND_VM_C_GOTO(assign_dim_convert_to_array);
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			ZEND_VM_C_GOTO(try_assign_dim_array);
 		} else if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(object_ptr))) {
 			ZEND_VM_C_GOTO(assign_dim_clean);
 		} else {
