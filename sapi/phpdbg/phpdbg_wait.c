@@ -231,7 +231,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 			} else if (mode > 0) {
 				// not loaded module
 				if (!sapi_module.name || strcmp(sapi_module.name, Z_STRVAL_P(module))) {
-					phpdbg_notice("wait", "missingmodule=\"%.*s\"", "The module %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/module/%.*s.so", Z_STRLEN_P(module), Z_STRVAL_P(module), Z_STRLEN_P(module), Z_STRVAL_P(module));
+					phpdbg_notice("wait", "missingmodule=\"%.*s\"", "The module %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/module/%.*s.so", (int) Z_STRLEN_P(module), Z_STRVAL_P(module), (int) Z_STRLEN_P(module), Z_STRVAL_P(module));
 				}
 			}
 		} while (module);
@@ -292,7 +292,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zvp), name) {
 			if (Z_TYPE_P(name) == IS_STRING) {
-				phpdbg_notice("wait", "missingextension=\"%.*s\"", "The Zend extension %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/extension.so", Z_STRLEN_P(name), Z_STRVAL_P(name));
+				phpdbg_notice("wait", "missingextension=\"%.*s\"", "The Zend extension %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/extension.so", (int) Z_STRLEN_P(name), Z_STRVAL_P(name));
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

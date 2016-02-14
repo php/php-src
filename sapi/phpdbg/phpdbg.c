@@ -558,7 +558,7 @@ static PHP_FUNCTION(phpdbg_get_executable)
 						insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
 
 						if (by_function) {
-							zend_string *fn_name = strpprintf(ZSTR_LEN(name) + ZSTR_LEN(func->op_array.function_name) + 2, "%.*s::%.*s", ZSTR_LEN(name), ZSTR_VAL(name), ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
+							zend_string *fn_name = strpprintf(ZSTR_LEN(name) + ZSTR_LEN(func->op_array.function_name) + 2, "%.*s::%.*s", (int) ZSTR_LEN(name), ZSTR_VAL(name), (int) ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
 							insert_ht = phpdbg_add_empty_array(insert_ht, fn_name);
 							zend_string_release(fn_name);
 						}
@@ -654,7 +654,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 					if (last_scope == NULL) {
 						fn_name = zend_string_copy(last_function);
 					} else {
-						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name), ZSTR_LEN(last_function), ZSTR_VAL(last_function));
+						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", (int) ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name), (int) ZSTR_LEN(last_function), ZSTR_VAL(last_function));
 					}
 					insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), fn_name);
 					zend_string_release(fn_name);
@@ -896,7 +896,7 @@ static inline size_t php_sapi_phpdbg_ub_write(const char *message, size_t length
 	if (PHPDBG_G(socket_fd) != -1 && !(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 		send(PHPDBG_G(socket_fd), message, length, 0);
 	}
-	return phpdbg_script(P_STDOUT, "%.*s", length, message);
+	return phpdbg_script(P_STDOUT, "%.*s", (int) length, message);
 } /* }}} */
 
 /* beginning of struct, see main/streams/plain_wrapper.c line 111 */
