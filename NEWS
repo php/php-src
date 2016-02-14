@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
     while curl_multi_exec). (Laruence)
 
+- CLI server:
+  . Bug #71559 (Built-in HTTP server, we can download file in web by bug).
+    (Johannes, Anatol)
+
 - Date:
   . Fixed bug #68078 (Datetime comparisons ignore microseconds). (Willem-Jan
     Zijderveld)
