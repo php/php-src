@@ -2319,7 +2319,7 @@ PHP_FUNCTION(pg_last_notice)
 	zval *pgsql_link = NULL;
 	zval *notice, *notices;
 	PGconn *pg_link;
-	long option = PGSQL_NOTICE_LAST;
+	zend_long option = PGSQL_NOTICE_LAST;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pgsql_link, &option) == FAILURE) {
 		return;
@@ -2358,7 +2358,8 @@ PHP_FUNCTION(pg_last_notice)
 			RETURN_TRUE;
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid option specified (%d)", option);
+			php_error_docref(NULL, E_WARNING,
+				"Invalid option specified (" ZEND_LONG_FMT ")", option);
 	}
 	RETURN_FALSE;
 }
