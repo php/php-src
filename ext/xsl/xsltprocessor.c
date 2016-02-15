@@ -231,6 +231,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	/* Reverse order to pop values off ctxt stack */
 	for (i = nargs - 2; i >= 0; i--) {
 		obj = valuePop(ctxt);
+		if (obj == NULL) {
+			ZVAL_NULL(&args[i]);
+			continue;
+		}
 		switch (obj->type) {
 			case XPATH_STRING:
 				ZVAL_STRING(&args[i], (char *)obj->stringval);
