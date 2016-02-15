@@ -962,6 +962,7 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(cwd_str));
 						if (str == cwd_str) {
+							zend_string_release(str);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
