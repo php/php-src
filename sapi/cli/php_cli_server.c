@@ -2058,6 +2058,19 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		return php_cli_server_send_error_page(server, client, 400 TSRMLS_CC);
 	}
 
+#ifdef PHP_WIN32
+	/* The win32 namespace will cut off trailing dots and spaces. Since the
+	   VCWD functionality isn't used here, a sophisticated functionality
+	   would have to be reimplemented to know ahead there are no files
+	   with invalid names there. The simplest is just to forbid invalid
+	   filenames, which is done here. */
+	if (client->request.path_translated &&
+		('.' == client->request.path_translated[client->request.path_translated_len-1] ||
+		 ' ' == client->request.path_translated[client->request.path_translated_len-1])) {
+		return php_cli_server_send_error_page(server, client, 500);
+	}
+#endif
+
 	fd = client->request.path_translated ? open(client->request.path_translated, O_RDONLY): -1;
 	if (fd < 0) {
 		return php_cli_server_send_error_page(server, client, 404 TSRMLS_CC);

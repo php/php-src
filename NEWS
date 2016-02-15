@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
     while curl_multi_exec). (Laruence)
 
+- CLI server:
+  . Bug #71559 (Built-in HTTP server, we can download file in web by bug).
+    (Johannes, Anatol)
+
 - Date:
   . Fixed bug #68078 (Datetime comparisons ignore microseconds). (Willem-Jan
     Zijderveld)
@@ -16,6 +20,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
     setup). (Matt Haught, Remi)
+
+- PDO MySQL:
+  . Fixed bug #71569 (#70389 fix causes segmentation fault). (Nikita)
 
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
