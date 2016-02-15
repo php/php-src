@@ -1,5 +1,7 @@
 --TEST--
 Bug #71525 (Calls to date_modify will mutate timelib_rel_time, causing date_date_set issues)
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 $date = new DateTime('2011-12-25 00:00:00');
