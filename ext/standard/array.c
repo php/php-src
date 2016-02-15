@@ -1776,7 +1776,7 @@ PHP_FUNCTION(extract)
 	zval var_array;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|lz/", &var_array_param, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
 #else
