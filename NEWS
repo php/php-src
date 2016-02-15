@@ -17,6 +17,7 @@ PHP                                                                        NEWS
     (Bob)
   . Fixed bug #71529 (Variable references on array elements don't work when
     using count). (Nikita)
+  . Fixed bug #71601 (finally block not executed after yield from). (Bob)
 
 - CLI server:
   . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
@@ -27,10 +28,10 @@ PHP                                                                        NEWS
     causing date_date_set issues). (Sean DuBois)
 
 - FPM:
-  . Fixed  #71269 (php-fpm dumped core). (Mickaël)
+  . Fixed bug #71269 (php-fpm dumped core). (Mickaël)
 
 - Opcache:
-  . Fixed bug  #71584 (Possible use-after-free of ZCG(cwd) in Zend Opcache).
+  . Fixed bug #71584 (Possible use-after-free of ZCG(cwd) in Zend Opcache).
     (Yussuf Khalil)
 
 - PCRE:
