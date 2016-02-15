@@ -3033,7 +3033,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			RETVAL_LONG(PQgetlength(pgsql_result, pgsql_row, field_offset));
 			break;
 		case PHP_PG_DATA_ISNULL:
-			RETVAL_LONG(PQgetisnull(pgsql_result, pgsql_row, field_offset))
+			RETVAL_LONG(PQgetisnull(pgsql_result, pgsql_row, field_offset));
 			break;
 	}
 }
