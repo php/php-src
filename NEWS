@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
     setup). (Matt Haught, Remi)
 
+- Opcache:
+  . Fixed bug  #71584 (Possible use-after-free of ZCG(cwd) in Zend Opcache).
+    (Yussuf Khalil)
+
 - PDO MySQL:
   . Fixed bug #71569 (#70389 fix causes segmentation fault). (Nikita)
 
