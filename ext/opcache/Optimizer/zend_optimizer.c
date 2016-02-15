@@ -379,6 +379,10 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 				}
 				opline++;
 			}
+			if (j == 0) {
+				efree(op_array->live_range);
+				op_array->live_range = NULL;
+			}
 		}
 		free_alloca(map, use_heap);
 	}
