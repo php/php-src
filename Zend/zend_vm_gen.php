@@ -856,7 +856,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 }
 
 // Generates opcode handler
-function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $extra_spec = null, &$switch_labels = []) {
+function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $extra_spec = null, &$switch_labels = array()) {
 	global $definition_file, $prefix, $typecode, $opnames;
 
 	if (ZEND_VM_LINES) {
@@ -932,7 +932,7 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 }
 
 // Generates array of opcode handlers (specialized or unspecialized)
-function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = []) {
+function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()) {
 	global $opcodes, $op_types, $prefix;
 
 	$next = 0;
@@ -945,17 +945,17 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = []) {
 			$specs[$num] = "$label";
 			$spec_op1 = $spec_op2 = $spec_extra = false;
 			$next = $num + 1;
-			$diff = array_diff_key(array_flip($op_types), isset($dsc["op1"]) ? $dsc["op1"] : []);
+			$diff = array_diff_key(array_flip($op_types), isset($dsc["op1"]) ? $dsc["op1"] : array());
 			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op1"]["TMPVAR"])) {
 				$spec_op1 = true;
 				$specs[$num] .= " | SPEC_RULE_OP1";
 			}
-			$diff = array_diff_key(array_flip($op_types), isset($dsc["op2"]) ? $dsc["op2"] : []);
+			$diff = array_diff_key(array_flip($op_types), isset($dsc["op2"]) ? $dsc["op2"] : array());
 			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op2"]["TMPVAR"])) {
 				$spec_op2 = true;
 				$specs[$num] .= " | SPEC_RULE_OP2";
 			}
-			$spec_extra = call_user_func_array("array_merge", extra_spec_handler($dsc) ?: [[]]);
+			$spec_extra = call_user_func_array("array_merge", extra_spec_handler($dsc) ?: array(array()));
 			$flags = extra_spec_flags($spec_extra);
 			if ($flags) {
 				$specs[$num] .= " | ".implode("|", $flags);
@@ -998,7 +998,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = []) {
 				};
 			};
 			$foreach_op_data = function($do) use ($dsc, $op_types) {
-				return function($op1, $op2, $extra_spec = []) use ($do, $dsc, $op_types) {
+				return function($op1, $op2, $extra_spec = array()) use ($do, $dsc, $op_types) {
 					// For each op_data.op_type except ANY
 					foreach($op_types as $op_data) {
 						if ($op_data != "ANY") {
@@ -1010,19 +1010,19 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = []) {
 									$op_data = "ANY";
 								}
 							}
-							$do($op1, $op2, ["op_data" => $op_data] + $extra_spec);
+							$do($op1, $op2, array("op_data" => $op_data) + $extra_spec);
 						}
 					}
 				};
 			};
 			$foreach_extra_spec = function($do, $spec) use ($dsc) {
-				return function($op1, $op2, $extra_spec = []) use ($do, $spec, $dsc) {
+				return function($op1, $op2, $extra_spec = array()) use ($do, $spec, $dsc) {
 					foreach ($dsc["spec"][$spec] as $val) {
-						$do($op1, $op2, [$spec => $val] + $extra_spec);
+						$do($op1, $op2, array($spec => $val) + $extra_spec);
 					}
 				};
 			};
-			$generate = function ($op1, $op2, $extra_spec = []) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label) {
+			$generate = function ($op1, $op2, $extra_spec = array()) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label) {
 				global $typecode;
 
 				// Check if specialized handler is defined
@@ -1203,7 +1203,7 @@ function extra_spec_name($extra_spec) {
 }
 
 function extra_spec_flags($extra_spec) {
-	$s = [];
+	$s = array();
 	if (isset($extra_spec["op_data"])) {
 		$s[] = "SPEC_RULE_OP_DATA";
 	}
@@ -1226,7 +1226,7 @@ function extra_spec_handler($dsc) {
 
 	if (isset($specs["op_data"])) {
 		$op_data_specs = $specs["op_data"];
-		$specs["op_data"] = [];
+		$specs["op_data"] = array();
 		foreach($op_types_ex as $op_data) {
 			if (isset($dsc["spec"]["op_data"][$op_data])) {
 				$specs["op_data"][] = $op_data;
@@ -1240,12 +1240,12 @@ function extra_spec_handler($dsc) {
 		if ($specs) {
 			$next = $f($specs);
 		} else {
-			$next = [[]];
+			$next = array(array());
 		}
-		$ret = [];
+		$ret = array();
 		foreach ($next as $existing) {
 			foreach ($top as $mode) {
-				$ret[] = [$spec => $mode] + $existing;
+				$ret[] = array($spec => $mode) + $existing;
 			}
 		}
 		return $ret;
@@ -1254,7 +1254,7 @@ function extra_spec_handler($dsc) {
 }
 
 // Generates all opcode handlers and helpers (specialized or unspecilaized)
-function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = []) {
+function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array()) {
 	global $list, $opcodes, $helpers, $op_types_ex;
 
 	if ($spec) {
@@ -1345,7 +1345,7 @@ function skip_blanks($f, $prolog, $epilog) {
 function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name) {
 	global $params, $skeleton_file, $line_no;
 
-	$switch_labels = [];
+	$switch_labels = array();
 	$lineno = 0;
 	foreach ($skl as $line) {
 	  // Skeleton file contains special markers in form %NAME% those are
@@ -1707,10 +1707,10 @@ function parse_spec_rules($def, $lineno, $str) {
 		} else {
 			switch ($rule) {
 				case "RETVAL":
-					$ret["retval"] = [0, 1];
+					$ret["retval"] = array(0, 1);
 					break;
 				case "QUICK_ARG":
-					$ret["quick_arg"] = [0, 1];
+					$ret["quick_arg"] = array(0, 1);
 					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
