@@ -3143,6 +3143,7 @@ static int php_date_modify(zval *object, char *modify, int modify_len TSRMLS_DC)
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 	dateobj->time->have_relative = 0;
+	memset(&dateobj->time->relative, 0, sizeof(dateobj->time->relative));
 	
 	return 1;
 }
