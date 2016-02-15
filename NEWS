@@ -19,8 +19,12 @@ PHP                                                                        NEWS
     using count). (Nikita)
 
 - CLI server:
-  . Bug #71559 (Built-in HTTP server, we can download file in web by bug).
+  . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
     (Johannes, Anatol)
+
+- Date:
+  . Fixed bug #71525 (Calls to date_modify will mutate timelib_rel_time,
+    causing date_date_set issues). (Sean DuBois)
 
 - FPM:
   . Fixed  #71269 (php-fpm dumped core). (Mickaël)
