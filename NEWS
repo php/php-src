@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Bug #71559 (Built-in HTTP server, we can download file in web by bug).
     (Johannes, Anatol)
 
+- FPM:
+  . Fixed  #71269 (php-fpm dumped core). (Mickaël)
+
 - Opcache:
   . Fixed bug  #71584 (Possible use-after-free of ZCG(cwd) in Zend Opcache).
     (Yussuf Khalil)
