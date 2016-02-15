@@ -954,17 +954,20 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		}
 
 		if (i != j) {
-			zend_op *opline = new_opcodes;
-			zend_op *end = opline + len;
-
-			op_array->last_live_range = j;
-			while (opline != end) {
-				if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-				    opline->extended_value == ZEND_FREE_ON_RETURN) {
-					ZEND_ASSERT(opline->op2.num < (uint32_t) i);
-					opline->op2.num = map[opline->op2.num];
+			if ((op_array->last_live_range = j)) {
+				zend_op *opline = new_opcodes;
+				zend_op *end = opline + len;
+				while (opline != end) {
+					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
+							opline->extended_value == ZEND_FREE_ON_RETURN) {
+						ZEND_ASSERT(opline->op2.num < (uint32_t) i);
+						opline->op2.num = map[opline->op2.num];
+					}
+					opline++;
 				}
-				opline++;
+			} else {
+				efree(op_array->live_range);
+				op_array->live_range = NULL;
 			}
 		}
 		free_alloca(map, use_heap);
