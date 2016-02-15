@@ -368,18 +368,18 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 			i++;
 		} while (i < op_array->last_live_range);
 		if (i != j) {
-			zend_op *opline = op_array->opcodes;
-			zend_op *end = opline + op_array->last;
+			if ((op_array->last_live_range = j)) {
+				zend_op *opline = op_array->opcodes;
+				zend_op *end = opline + op_array->last;
 
-			op_array->last_live_range = j;
-			while (opline != end) {
-				if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-				    opline->extended_value == ZEND_FREE_ON_RETURN) {
-					opline->op2.num = map[opline->op2.num];
+				while (opline != end) {
+					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
+							opline->extended_value == ZEND_FREE_ON_RETURN) {
+						opline->op2.num = map[opline->op2.num];
+					}
+					opline++;
 				}
-				opline++;
-			}
-			if (j == 0) {
+			} else {
 				efree(op_array->live_range);
 				op_array->live_range = NULL;
 			}
