@@ -304,7 +304,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 
 
 	obj = valuePop(ctxt);
-	if (obj->stringval == NULL) {
+	if (obj == NULL || obj->stringval == NULL) {
 		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
 		xmlXPathFreeObject(obj);
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
