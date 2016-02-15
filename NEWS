@@ -31,6 +31,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
+- XSL:
+  . Fixed bug #71540 (NULL pointer dereference in xsl_ext_function_php()).
+    (Stas)
+
 - Zip:
   . Fixed bug #71561 (NULL pointer dereference in Zip::ExtractTo). (Laruence)
 

@@ -239,6 +239,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	for (i = nargs - 2; i >= 0; i--) {
 		obj = valuePop(ctxt);
 		MAKE_STD_ZVAL(args[i]);
+		if (obj == NULL) {
+			ZVAL_NULL(args[i]);
+			continue;
+		}
 		switch (obj->type) {
 			case XPATH_STRING:
 				ZVAL_STRING(args[i],  obj->stringval, 1);
