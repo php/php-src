@@ -12,6 +12,7 @@ tl_config.WriteLine("#include \"config.w32.h\"");
 tl_config.WriteLine("#include <php_stdint.h>");
 tl_config.WriteLine("#include \"win32/php_inttypes.h\"");
 tl_config.WriteLine("#define TIMELIB_OMIT_STDINT 1");
+tl_config.WriteLine("#define TIMELIB_FORCE_LONG32 1");
 tl_config.Close();
 
 PHP_INSTALL_HEADERS("ext/date/", "php_date.h lib/timelib.h lib/timelib_structs.h lib/timelib_config.h");
