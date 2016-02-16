@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include "zend_ssa.h"
 
 /* func flags */
-#define ZEND_FUNC_TOO_DYNAMIC              (1<<0)
+#define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)
 #define ZEND_FUNC_HAS_CALLS                (1<<1)
 #define ZEND_FUNC_VARARG                   (1<<2)
 #define ZEND_FUNC_NO_LOOPS                 (1<<3)

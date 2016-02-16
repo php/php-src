@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Call Graph                                              |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -251,7 +251,7 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 				call_info->recursive = 1;
 				func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_DIRECTLY;
 			} else {
-				memset(visited, 0, sizeof(uint32_t) * set_len);
+				memset(visited, 0, sizeof(zend_ulong) * set_len);
 				if (zend_is_indirectly_recursive(op_array, call_info->caller_op_array, visited)) {
 					call_info->recursive = 1;
 					func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_INDIRECTLY;

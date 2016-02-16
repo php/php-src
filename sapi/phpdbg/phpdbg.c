@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -554,11 +554,11 @@ static PHP_FUNCTION(phpdbg_get_executable)
 		if (ce->type == ZEND_USER_CLASS) {
 			if (zend_hash_exists(files, ce->info.user.filename)) {
 				ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
-					if (func->type == ZEND_USER_FUNCTION) {
+					if (func->type == ZEND_USER_FUNCTION && zend_hash_exists(files, func->op_array.filename)) {
 						insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
 
 						if (by_function) {
-							zend_string *fn_name = strpprintf(ZSTR_LEN(name) + ZSTR_LEN(func->op_array.function_name) + 2, "%.*s::%.*s", ZSTR_LEN(name), ZSTR_VAL(name), ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
+							zend_string *fn_name = strpprintf(ZSTR_LEN(name) + ZSTR_LEN(func->op_array.function_name) + 2, "%.*s::%.*s", (int) ZSTR_LEN(name), ZSTR_VAL(name), (int) ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
 							insert_ht = phpdbg_add_empty_array(insert_ht, fn_name);
 							zend_string_release(fn_name);
 						}
@@ -654,7 +654,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 					if (last_scope == NULL) {
 						fn_name = zend_string_copy(last_function);
 					} else {
-						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name), ZSTR_LEN(last_function), ZSTR_VAL(last_function));
+						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", (int) ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name), (int) ZSTR_LEN(last_function), ZSTR_VAL(last_function));
 					}
 					insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), fn_name);
 					zend_string_release(fn_name);
@@ -896,7 +896,7 @@ static inline size_t php_sapi_phpdbg_ub_write(const char *message, size_t length
 	if (PHPDBG_G(socket_fd) != -1 && !(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 		send(PHPDBG_G(socket_fd), message, length, 0);
 	}
-	return phpdbg_script(P_STDOUT, "%.*s", length, message);
+	return phpdbg_script(P_STDOUT, "%.*s", (int) length, message);
 } /* }}} */
 
 /* beginning of struct, see main/streams/plain_wrapper.c line 111 */
@@ -1297,7 +1297,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool init_file_default;
 	char *oplog_file;
 	size_t oplog_file_len;
-	zend_ulong flags;
+	uint64_t flags;
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = -1;
@@ -1520,7 +1520,7 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				printf(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2015 The PHP Group\n%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2016 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,

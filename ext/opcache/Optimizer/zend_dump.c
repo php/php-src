@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Bytecode Visualisation                                  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -88,6 +88,28 @@ static void zend_dump_class_fetch_type(uint32_t fetch_type)
 	}
 }
 
+static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t flags) {
+	if (ZEND_VM_OP_NUM == (flags & ZEND_VM_OP_MASK)) {
+		fprintf(stderr, " %u", op.num);
+	} else if (ZEND_VM_OP_TRY_CATCH == (flags & ZEND_VM_OP_MASK)) {
+		if (opline->opcode != ZEND_FAST_RET || opline->extended_value) {
+			fprintf(stderr, " try-catch(%u)", op.num);
+		}
+	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
+		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
+			fprintf(stderr, " live-range(%u)", op.num);
+		}
+	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
+		fprintf(stderr, " THIS");
+	} else if (ZEND_VM_OP_NEXT == (flags & ZEND_VM_OP_MASK)) {
+		fprintf(stderr, " NEXT");
+	} else if (ZEND_VM_OP_CLASS_FETCH == (flags & ZEND_VM_OP_MASK)) {
+		zend_dump_class_fetch_type(op.num);
+	} else if (ZEND_VM_OP_CONSTRUCTOR == (flags & ZEND_VM_OP_MASK)) {
+		fprintf(stderr, " CONSTRUCTOR");
+	}
+}
+
 void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num)
 {
 	if (var_type == IS_CV && var_num < op_array->last_var) {
@@ -127,10 +149,6 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 	if (info & MAY_BE_UNDEF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
-	}
-	if (info & MAY_BE_DEF) {
-		if (first) first = 0; else fprintf(stderr, ", ");
-		fprintf(stderr, "def");
 	}
 	if (info & MAY_BE_REF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
@@ -309,8 +327,14 @@ void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int s
 	}
 }
 
-static void zend_dump_pi_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_pi_range *r)
+static void zend_dump_pi_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_pi_constraint *r)
 {
+	if (r->type_mask != (uint32_t) -1) {
+		fprintf(stderr, " TYPE");
+		zend_dump_type_info(r->type_mask, NULL, 0);
+		return;
+	}
+
 	if (r->range.underflow && r->range.overflow) {
 		return;
 	}
@@ -369,9 +393,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	fprintf(stderr, "%*c", 8-len, ' ');
 
 	if (!ssa || !ssa->ops || ssa->ops[opline - op_array->opcodes].result_use < 0) {
-		if (opline->result_type == IS_CV ||
-		    opline->result_type == IS_VAR ||
-		    opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa && ssa->ops) {
 				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_def;
 				ZEND_ASSERT(ssa_var_num >= 0);
@@ -380,10 +402,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				zend_dump_var(op_array, opline->result_type, EX_VAR_TO_NUM(opline->result.var));
 			}
 			fprintf(stderr, " = ");
-		} else if (!(dump_flags & ZEND_DUMP_HIDE_UNUSED_VARS) &&
-		    (opline->result_type & IS_VAR) &&
-		    (opline->result_type & EXT_TYPE_UNUSED)) {
-			fprintf(stderr, "U%u = ", EX_VAR_TO_NUM(opline->result.var));
 		}
 	}
 
@@ -514,14 +532,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				case ZEND_FETCH_LOCAL:
 					fprintf(stderr, " (local)");
 					break;
-				case ZEND_FETCH_STATIC:
-					fprintf(stderr, " (static)");
-					break;
 				case ZEND_FETCH_GLOBAL_LOCK:
 					fprintf(stderr, " (global+lock)");
-					break;
-				case ZEND_FETCH_LEXICAL:
-					fprintf(stderr, " (lexical)");
 					break;
 			}
 		}
@@ -550,30 +562,18 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			}
 		}
 	}
-	if (ZEND_VM_OP1_JMP_ADDR == (flags & ZEND_VM_OP1_MASK)) {
-		if (b) {
-			fprintf(stderr, " BB%d", b->successors[n++]);
-		} else {
-			fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes));
-		}
-	} else if (ZEND_VM_OP1_NUM == (flags & ZEND_VM_OP1_MASK)) {
-		fprintf(stderr, " %u", opline->op1.num);
-	} else if (ZEND_VM_OP1_TRY_CATCH == (flags & ZEND_VM_OP1_MASK)) {
-		fprintf(stderr, " try-catch(%u)", opline->op1.num);
-	} else if (ZEND_VM_OP1_LIVE_RANGE == (flags & ZEND_VM_OP1_MASK)) {
-		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			fprintf(stderr, " live-range(%u)", opline->op1.num);
-		}
-	} else if (opline->op1_type == IS_CONST) {
+
+	if (opline->op1_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op1, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
-	} else if (opline->op1_type == IS_CV ||
-	           opline->op1_type == IS_VAR ||
-	           opline->op1_type == IS_TMP_VAR) {
+	} else if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa && ssa->ops) {
 			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_use;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
+			} else if (ssa->ops[opline - op_array->opcodes].op1_def < 0) {
+				fprintf(stderr, " ");
+				zend_dump_var(op_array, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
 			}
 		} else {
 			fprintf(stderr, " ");
@@ -586,39 +586,30 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
 			}
 		}
-	} else if (ZEND_VM_OP1_THIS == (flags & ZEND_VM_OP1_MASK)) {
-		fprintf(stderr, " THIS");
-	} else if (ZEND_VM_OP1_NEXT == (flags & ZEND_VM_OP1_MASK)) {
-		fprintf(stderr, " NEXT");
-	} else if (ZEND_VM_OP1_CLASS_FETCH == (flags & ZEND_VM_OP1_MASK)) {
-		zend_dump_class_fetch_type(opline->op1.num);
-	} else if (ZEND_VM_OP1_CONSTRUCTOR == (flags & ZEND_VM_OP1_MASK)) {
-		fprintf(stderr, " CONSTRUCTOR");
-	}
-	if (ZEND_VM_OP2_JMP_ADDR == (flags & ZEND_VM_OP2_MASK)) {
-		if (b) {
-			fprintf(stderr, " BB%d", b->successors[n++]);
+	} else {
+		uint32_t op1_flags = ZEND_VM_OP1_FLAGS(flags);
+		if (ZEND_VM_OP_JMP_ADDR == (op1_flags & ZEND_VM_OP_MASK)) {
+			if (b) {
+				fprintf(stderr, " BB%d", b->successors[n++]);
+			} else {
+				fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes));
+			}
 		} else {
-			fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+			zend_dump_unused_op(opline, opline->op1, op1_flags);
 		}
-	} else if (ZEND_VM_OP2_NUM == (flags & ZEND_VM_OP2_MASK)) {
-		fprintf(stderr, " %u", opline->op2.num);
-	} else if (ZEND_VM_OP2_TRY_CATCH == (flags & ZEND_VM_OP2_MASK)) {
-		fprintf(stderr, " try-catch(%u)", opline->op2.num);
-	} else if (ZEND_VM_OP2_LIVE_RANGE == (flags & ZEND_VM_OP2_MASK)) {
-		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			fprintf(stderr, " live-range(%u)", opline->op2.num);
-		}
-	} else if (opline->op2_type == IS_CONST) {
+	}
+
+	if (opline->op2_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
-	} else if (opline->op2_type == IS_CV ||
-	           opline->op2_type == IS_VAR ||
-	           opline->op2_type == IS_TMP_VAR) {
+	} else if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa && ssa->ops) {
 			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op2_use;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
+			} else if (ssa->ops[opline - op_array->opcodes].op2_def < 0) {
+				fprintf(stderr, " ");
+				zend_dump_var(op_array, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
 			}
 		} else {
 			fprintf(stderr, " ");
@@ -631,15 +622,19 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
 			}
 		}
-	} else if (ZEND_VM_OP2_THIS == (flags & ZEND_VM_OP2_MASK)) {
-		fprintf(stderr, " THIS");
-	} else if (ZEND_VM_OP2_NEXT == (flags & ZEND_VM_OP2_MASK)) {
-		fprintf(stderr, " NEXT");
-	} else if (ZEND_VM_OP2_CLASS_FETCH == (flags & ZEND_VM_OP2_MASK)) {
-		zend_dump_class_fetch_type(opline->op2.num);
-	} else if (ZEND_VM_OP2_CONSTRUCTOR == (flags & ZEND_VM_OP2_MASK)) {
-		fprintf(stderr, " CONSTRUCTOR");
+	} else {
+		uint32_t op2_flags = ZEND_VM_OP2_FLAGS(flags);
+		if (ZEND_VM_OP_JMP_ADDR == (op2_flags & ZEND_VM_OP_MASK)) {
+			if (b) {
+				fprintf(stderr, " BB%d", b->successors[n++]);
+			} else {
+				fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+			}
+		} else {
+			zend_dump_unused_op(opline, opline->op2, op2_flags);
+		}
 	}
+
 	if (ZEND_VM_EXT_JMP_ADDR == (flags & ZEND_VM_EXT_MASK)) {
 		if (opline->opcode != ZEND_CATCH || !opline->result.num) {
 			if (b) {
@@ -648,15 +643,11 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			}
 		}
-	} else if (ZEND_VM_EXT_VAR == (flags & ZEND_VM_EXT_MASK)) {
-		fprintf(stderr, " V%u", EX_VAR_TO_NUM(opline->extended_value));
 	}
 	if (opline->result_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
 	} else if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_use >= 0) {
-		if (opline->result_type == IS_CV ||
-		    opline->result_type == IS_VAR ||
-		    opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa && ssa->ops) {
 				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_use;
 				if (ssa_var_num >= 0) {
@@ -797,7 +788,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 				fprintf(stderr, " = Pi(");
 				zend_dump_ssa_var(op_array, ssa, p->sources[0], 0, p->var);
 				fprintf(stderr, " &");
-				zend_dump_pi_range(op_array, ssa, &p->constraint);
+				zend_dump_pi_constraint(op_array, ssa, &p->constraint);
 				fprintf(stderr, ")\n");
 			}
 			p = p->next;
@@ -858,6 +849,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	fprintf(stderr, ", vars=%d, tmps=%d", op_array->last_var, op_array->T);
 	if (ssa) {
 		fprintf(stderr, ", ssa_vars=%d", ssa->vars_count);
+	}
+	if (func_flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) {
+		fprintf(stderr, ", dynamic");
 	}
 	if (func_flags & ZEND_FUNC_RECURSIVE) {
 		fprintf(stderr, ", recursive");
@@ -951,10 +945,17 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		if (op_array->last_live_range) {
 			fprintf(stderr, "LIVE RANGES:\n");
 			for (i = 0; i < op_array->last_live_range; i++) {
-				fprintf(stderr, "        %u: BB%u - BB%u ",
-					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
-					cfg->map[op_array->live_range[i].start],
-					cfg->map[op_array->live_range[i].end]);
+				if (cfg->split_at_live_ranges) {
+					fprintf(stderr, "        %u: BB%u - BB%u ",
+						EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
+						cfg->map[op_array->live_range[i].start],
+						cfg->map[op_array->live_range[i].end]);
+				} else {
+					fprintf(stderr, "        %u: L%u - L%u ",
+						EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
+						op_array->live_range[i].start,
+						op_array->live_range[i].end);
+				}
 				switch (op_array->live_range[i].var & ZEND_LIVE_MASK) {
 					case ZEND_LIVE_TMPVAR:
 						fprintf(stderr, "(tmp/var)\n");
@@ -1007,7 +1008,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		if (op_array->last_live_range) {
 			fprintf(stderr, "LIVE RANGES:\n");
 			for (i = 0; i < op_array->last_live_range; i++) {
-				fprintf(stderr, "        %u: L%u - L%u\n",
+				fprintf(stderr, "        %u: L%u - L%u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
 					op_array->live_range[i].start,
 					op_array->live_range[i].end);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -517,7 +517,7 @@ static void php_cli_usage(char *argv0)
 				"  -a               Run interactively\n"
 #endif
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
-				"  -n               No php.ini file will be used\n"
+				"  -n               No configuration (ini) files will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 				"  -e               Generate extended information for debugger/profiler\n"
 				"  -f <file>        Parse and execute <file>.\n"
@@ -682,7 +682,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2015 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2016 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZTS
 					"ZTS "

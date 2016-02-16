@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@
 #define ZEND_OPTIMIZER_PASS_4		(1<<3)   /* INIT_FCALL_BY_NAME -> DO_FCALL */
 #define ZEND_OPTIMIZER_PASS_5		(1<<4)   /* CFG based optimization       */
 #define ZEND_OPTIMIZER_PASS_6		(1<<5)   /* DFA based optimization       */
-#define ZEND_OPTIMIZER_PASS_7		(1<<6)
+#define ZEND_OPTIMIZER_PASS_7		(1<<6)   /* CALL GRAPH optimization      */
 #define ZEND_OPTIMIZER_PASS_8		(1<<7)
 #define ZEND_OPTIMIZER_PASS_9		(1<<8)   /* TMP VAR usage                */
 #define ZEND_OPTIMIZER_PASS_10		(1<<9)   /* NOP removal                 */
@@ -39,10 +39,11 @@
 #define ZEND_OPTIMIZER_PASS_12		(1<<11)  /* Adjust used stack           */
 #define ZEND_OPTIMIZER_PASS_13		(1<<12)
 #define ZEND_OPTIMIZER_PASS_14		(1<<13)
+#define ZEND_OPTIMIZER_PASS_15		(1<<14)  /* Collect constants */
 
-#define ZEND_OPTIMIZER_ALL_PASSES	0xFFFFFFFF
+#define ZEND_OPTIMIZER_ALL_PASSES	0x7FFFFFFF
 
-#define DEFAULT_OPTIMIZATION_LEVEL  "0xFFFFFFFF"
+#define DEFAULT_OPTIMIZATION_LEVEL  "0x7FFFBFFF"
 
 
 #define ZEND_DUMP_AFTER_PASS_1		ZEND_OPTIMIZER_PASS_1

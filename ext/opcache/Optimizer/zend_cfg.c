@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, CFG - Control Flow Graph                                |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,33 +91,35 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 		do {
 			changed = 0;
 
-			/* Add brk/cont paths */
-			for (j = 0; j < op_array->last_live_range; j++) {
-				if (op_array->live_range[j].var == (uint32_t)-1) {
-					/* this live range already removed */
-					continue;
-				}
-				b = blocks + block_map[op_array->live_range[j].start];
-				if (b->flags & ZEND_BB_REACHABLE) {
-					while (op_array->opcodes[b->start].opcode == ZEND_NOP && b->start != b->end) {
-						b->start++;
-					}
-					if (op_array->opcodes[b->start].opcode == ZEND_NOP &&
-					    b->start == b->end &&
-					    b->successors[0] == block_map[op_array->live_range[j].end]) {
-						/* mark as removed (empty live range) */
-						op_array->live_range[j].var = (uint32_t)-1;
+			if (cfg->split_at_live_ranges) {
+				/* Add live range paths */
+				for (j = 0; j < op_array->last_live_range; j++) {
+					if (op_array->live_range[j].var == (uint32_t)-1) {
+						/* this live range already removed */
 						continue;
 					}
-					b->flags |= ZEND_BB_GEN_VAR;
-					b = blocks + block_map[op_array->live_range[j].end];
-					b->flags |= ZEND_BB_KILL_VAR;
-					if (!(b->flags & ZEND_BB_REACHABLE)) {
-						changed = 1;
-						zend_mark_reachable(op_array->opcodes, blocks, b);
+					b = blocks + block_map[op_array->live_range[j].start];
+					if (b->flags & ZEND_BB_REACHABLE) {
+						while (op_array->opcodes[b->start].opcode == ZEND_NOP && b->start != b->end) {
+							b->start++;
+						}
+						if (op_array->opcodes[b->start].opcode == ZEND_NOP &&
+							b->start == b->end &&
+							b->successors[0] == block_map[op_array->live_range[j].end]) {
+							/* mark as removed (empty live range) */
+							op_array->live_range[j].var = (uint32_t)-1;
+							continue;
+						}
+						b->flags |= ZEND_BB_GEN_VAR;
+						b = blocks + block_map[op_array->live_range[j].end];
+						b->flags |= ZEND_BB_KILL_VAR;
+						if (!(b->flags & ZEND_BB_REACHABLE)) {
+							changed = 1;
+							zend_mark_reachable(op_array->opcodes, blocks, b);
+						}
+					} else {
+						ZEND_ASSERT(!(blocks[block_map[op_array->live_range[j].end]].flags & ZEND_BB_REACHABLE));
 					}
-				} else {
-					ZEND_ASSERT(!(blocks[block_map[op_array->live_range[j].end]].flags & ZEND_BB_REACHABLE));
 				}
 			}
 
@@ -244,6 +246,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	zend_basic_block *blocks;
 	zval *zv;
 
+	cfg->split_at_live_ranges = (build_flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES) != 0;
 	cfg->map = block_map = zend_arena_calloc(arena, op_array->last, sizeof(uint32_t));
 	if (!block_map) {
 		return FAILURE;
@@ -251,10 +254,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	/* Build CFG, Step 1: Find basic blocks starts, calculate number of blocks */
 	BB_START(0);
-	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->static_variables) {
-		// FIXME: Really we should try to perform variable initialization
-		flags |= ZEND_FUNC_TOO_DYNAMIC;
-	}
 	for (i = 0; i < op_array->last; i++) {
 		zend_op *opline = op_array->opcodes + i;
 		switch(opline->opcode) {
@@ -268,9 +267,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				}
 				break;
 			case ZEND_INCLUDE_OR_EVAL:
+				flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
-				flags |= ZEND_FUNC_TOO_DYNAMIC;
 				if (build_flags & ZEND_CFG_STACKLESS) {
 					BB_START(i + 1);
 				}
@@ -287,52 +286,44 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				flags |= ZEND_FUNC_HAS_CALLS;
 				break;
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
 				zv = CRT_CONSTANT(opline->op2);
+				if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+					/* The third literal is the lowercased unqualified name */
+					zv += 2;
+				}
 				if ((fn = zend_hash_find_ptr(EG(function_table), Z_STR_P(zv))) != NULL) {
 					if (fn->type == ZEND_INTERNAL_FUNCTION) {
-						if (Z_STRLEN_P(zv) == sizeof("extract")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "extract", sizeof("extract")-1) == 0) {
-							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("compact")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "compact", sizeof("compact")-1) == 0) {
-							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("parse_str")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "parse_str", sizeof("parse_str")-1) == 0) {
-							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("mb_parse_str")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "mb_parse_str", sizeof("mb_parse_str")-1) == 0) {
-							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("get_defined_vars")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "get_defined_vars", sizeof("get_defined_vars")-1) == 0) {
-							flags |= ZEND_FUNC_TOO_DYNAMIC;
-						} else if (Z_STRLEN_P(zv) == sizeof("func_num_args")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "func_num_args", sizeof("func_num_args")-1) == 0) {
+						if (zend_string_equals_literal(Z_STR_P(zv), "extract")) {
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "compact")) {
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "parse_str") &&
+						           opline->extended_value == 1) {
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "mb_parse_str") &&
+						           opline->extended_value == 1) {
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "get_defined_vars")) {
+							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_num_args")) {
 							flags |= ZEND_FUNC_VARARG;
-						} else if (Z_STRLEN_P(zv) == sizeof("func_get_arg")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "func_get_arg", sizeof("func_get_arg")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_get_arg")) {
 							flags |= ZEND_FUNC_VARARG;
-						} else if (Z_STRLEN_P(zv) == sizeof("func_get_args")-1 &&
-						    memcmp(Z_STRVAL_P(zv), "func_get_args", sizeof("func_get_args")-1) == 0) {
+						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_get_args")) {
 							flags |= ZEND_FUNC_VARARG;
 						}
 					}
 				}
 				break;
 			case ZEND_FAST_CALL:
-				flags |= ZEND_FUNC_TOO_DYNAMIC;
 				BB_START(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
 			case ZEND_FAST_RET:
-				flags |= ZEND_FUNC_TOO_DYNAMIC;
 				if (i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
-				break;
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				BB_START(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes);
-				BB_START(i + 1);
 				break;
 			case ZEND_JMP:
 				BB_START(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes);
@@ -358,12 +349,13 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(i + 1);
 				break;
 			case ZEND_CATCH:
-				flags |= ZEND_FUNC_TOO_DYNAMIC;
 				if (!opline->result.num) {
 					BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 				}
 				BB_START(i + 1);
 				break;
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
@@ -375,27 +367,15 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
-			case ZEND_DECLARE_LAMBDA_FUNCTION: {
-//???					zend_op_array *lambda_op_array;
-//???
-//???					zv = CRT_CONSTANT(opline->op1);
-//???					if (ctx->main_script &&
-//???					    (lambda_op_array = zend_hash_find_ptr(&ctx->main_script->function_table, Z_STR_P(zv))) != NULL) {
-//???						if (lambda_op_array->type == ZEND_USER_FUNCTION &&
-//???						    lambda_op_array->static_variables) {
-//???							// FIXME: Really we should try to perform alias
-//???							// analysis on variables used by the closure
-//???							info->flags |= ZEND_FUNC_TOO_DYNAMIC;
-//???						}
-//???					} else {
-//???						// FIXME: how to find the lambda function?
-						flags |= ZEND_FUNC_TOO_DYNAMIC;
-//???					}
-				}
-				break;
 			case ZEND_UNSET_VAR:
-				if (!(opline->extended_value & ZEND_QUICK_SET)) {
-					flags |= ZEND_FUNC_TOO_DYNAMIC;
+			case ZEND_ISSET_ISEMPTY_VAR:
+				if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) &&
+				    !(opline->extended_value & ZEND_QUICK_SET)) {
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
+				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
+				           !op_array->function_name) {
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 				break;
 			case ZEND_FETCH_R:
@@ -405,19 +385,23 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_FETCH_IS:
 			case ZEND_FETCH_UNSET:
 				if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) {
-					flags |= ZEND_FUNC_TOO_DYNAMIC;
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
 				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
 				           !op_array->function_name) {
-					flags |= ZEND_FUNC_TOO_DYNAMIC;
+					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 				break;
 		}
 	}
-	for (j = 0; j < op_array->last_live_range; j++) {
-		BB_START(op_array->live_range[j].start);
-		BB_START(op_array->live_range[j].end);
+
+	if (cfg->split_at_live_ranges) {
+		for (j = 0; j < op_array->last_live_range; j++) {
+			BB_START(op_array->live_range[j].start);
+			BB_START(op_array->live_range[j].end);
+		}
 	}
+
 	if (op_array->last_try_catch) {
 		for (j = 0; j < op_array->last_try_catch; j++) {
 			BB_START(op_array->try_catch_array[j].try_op);
@@ -478,11 +462,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_EXIT:
 			case ZEND_THROW:
 				break;
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				record_successor(blocks, j, 0, block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes]);
-				record_successor(blocks, j, 1, j + 1);
-				break;
 			case ZEND_JMP:
 				record_successor(blocks, j, 0, block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes]);
 				break;
@@ -508,6 +487,8 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 					record_successor(blocks, j, 0, j + 1);
 				}
 				break;
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				record_successor(blocks, j, 0, block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
@@ -561,7 +542,7 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 			if (b->successors[0] >= 0) {
 				edges++;
 				blocks[b->successors[0]].predecessors_count++;
-				if (b->successors[1] >= 0) {
+				if (b->successors[1] >= 0 && b->successors[1] != b->successors[0]) {
 					edges++;
 					blocks[b->successors[1]].predecessors_count++;
 				}
@@ -590,7 +571,8 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 				zend_basic_block *b = blocks + blocks[j].successors[0];
 				predecessors[b->predecessor_offset + b->predecessors_count] = j;
 				b->predecessors_count++;
-				if (blocks[j].successors[1] >= 0) {
+				if (blocks[j].successors[1] >= 0
+						&& blocks[j].successors[1] != blocks[j].successors[0]) {
 					zend_basic_block *b = blocks + blocks[j].successors[1];
 					predecessors[b->predecessor_offset + b->predecessors_count] = j;
 					b->predecessors_count++;

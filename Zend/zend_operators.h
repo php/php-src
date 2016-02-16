@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -185,7 +185,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
-	register const unsigned char *e;
+	const unsigned char *e;
 	if (n <= 0) {
 		return NULL;
 	}

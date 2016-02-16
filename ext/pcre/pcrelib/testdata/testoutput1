@@ -9411,4 +9411,27 @@ No match
     aa]]
  0: aa]]
 
+/(?:((abcd))|(((?:(?:(?:(?:abc|(?:abcdef))))b)abcdefghi)abc)|((*ACCEPT)))/
+    1234abcd
+ 0: 
+ 1: <unset>
+ 2: <unset>
+ 3: <unset>
+ 4: <unset>
+ 5: 
+
+/(\2)(\1)/
+
+"Z*(|d*){216}"
+
+"(?1)(?#?'){8}(a)"
+    baaaaaaaaac
+ 0: aaaaaaaaa
+ 1: a
+
+"(?|(\k'Pm')|(?'Pm'))"
+    abcd
+ 0: 
+ 1: 
+
 /-- End of testinput1 --/

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,8 +36,8 @@
 
 /* SHA1 context. */
 typedef struct {
-	php_hash_uint32 state[5];		/* state (ABCD) */
-	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 */
+	uint32_t state[5];		/* state (ABCD) */
+	uint32_t count[2];		/* number of bits, modulo 2^64 */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA1_CTX;
 
@@ -52,8 +52,8 @@ PHP_FUNCTION(sha1_file);
 
 /* SHA224 context. */
 typedef struct {
-	php_hash_uint32 state[8];		/* state */
-	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 */
+	uint32_t state[8];		/* state */
+	uint32_t count[2];		/* number of bits, modulo 2^64 */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA224_CTX;
 
@@ -63,8 +63,8 @@ PHP_HASH_API void PHP_SHA224Final(unsigned char[28], PHP_SHA224_CTX *);
 
 /* SHA256 context. */
 typedef struct {
-	php_hash_uint32 state[8];		/* state */
-	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 */
+	uint32_t state[8];		/* state */
+	uint32_t count[2];		/* number of bits, modulo 2^64 */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA256_CTX;
 
@@ -74,8 +74,8 @@ PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
 
 /* SHA384 context */
 typedef struct {
-	php_hash_uint64 state[8];	/* state */
-	php_hash_uint64 count[2];	/* number of bits, modulo 2^128 */
+	uint64_t state[8];	/* state */
+	uint64_t count[2];	/* number of bits, modulo 2^128 */
 	unsigned char buffer[128];	/* input buffer */
 } PHP_SHA384_CTX;
 
@@ -85,8 +85,8 @@ PHP_HASH_API void PHP_SHA384Final(unsigned char[48], PHP_SHA384_CTX *);
 
 /* SHA512 context */
 typedef struct {
-	php_hash_uint64 state[8];	/* state */
-	php_hash_uint64 count[2];	/* number of bits, modulo 2^128 */
+	uint64_t state[8];	/* state */
+	uint64_t count[2];	/* number of bits, modulo 2^128 */
 	unsigned char buffer[128];	/* input buffer */
 } PHP_SHA512_CTX;
 

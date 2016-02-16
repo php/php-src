@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,7 +108,7 @@ again:
 			php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
 			break;
 		case IS_STRING:
-			php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_P(struc));
+			php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
 			PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
 			PUTS("\"\n");
 			break;
@@ -278,7 +278,7 @@ again:
 		php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
 		break;
 	case IS_STRING:
-		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_P(struc));
+		php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
 		PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
 		php_printf("\" refcount(%u)\n", Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) : 1);
 		break;
@@ -336,7 +336,7 @@ again:
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
-		php_printf("%sresource(" ZEND_LONG_FMT ") of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
+		php_printf("%sresource(%d) of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
 		break;
 	}
 	case IS_REFERENCE:
@@ -460,6 +460,15 @@ again:
 		case IS_DOUBLE:
 			tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_P(struc));
 			smart_str_appendl(buf, tmp_str, tmp_len);
+			/* Without a decimal point, PHP treats a number literal as an int.
+			 * This check even works for scientific notation, because the
+			 * mantissa always contains a decimal point.
+			 * We need to check for finiteness, because INF, -INF and NAN
+			 * must not have a decimal point added.
+			 */
+			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
+				smart_str_appendl(buf, ".0", 2);
+			}
 			efree(tmp_str);
 			break;
 		case IS_STRING:
@@ -1036,7 +1045,8 @@ PHP_FUNCTION(unserialize)
 		}
 		zval_ptr_dtor(return_value);
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %d bytes", (zend_long)((char*)p - buf), buf_len);
+			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
+				(zend_long)((char*)p - buf), buf_len);
 		}
 		RETURN_FALSE;
 	}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -530,8 +530,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				switch (opline->opcode) {
 					case ZEND_JMP:
 					case ZEND_FAST_CALL:
-					case ZEND_DECLARE_ANON_CLASS:
-					case ZEND_DECLARE_ANON_INHERITED_CLASS:
 						opline->op1.jmp_addr = &new_opcodes[opline->op1.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_JMPZNZ:
@@ -549,6 +547,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_ASSERT_CHECK:
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
+					case ZEND_DECLARE_ANON_CLASS:
+					case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
 						/* relative extended_value don't have to be changed */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,7 +61,7 @@
 #define USED_RET() \
 	(!EX(prev_execute_data) || \
 	 !ZEND_USER_CODE(EX(prev_execute_data)->func->common.type) || \
-	 !(EX(prev_execute_data)->opline->result_type & EXT_TYPE_UNUSED))
+	 (EX(prev_execute_data)->opline->result_type != IS_UNUSED))
 
 #ifdef ZEND_ENABLE_STATIC_TSRMLS_CACHE
 #define ZEND_TSRMG TSRMG_STATIC

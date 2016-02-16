@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -418,7 +418,7 @@ continue_jmpznz_optimization:
 						ZEND_OP1(next_op).var == ZEND_RESULT(opline).var) {
 						MAKE_NOP(next_op);
 						opline->opcode -= 2;
-						ZEND_RESULT_TYPE(opline) = IS_VAR | EXT_TYPE_UNUSED;
+						ZEND_RESULT_TYPE(opline) = IS_UNUSED;
 					}
 				}
 				break;

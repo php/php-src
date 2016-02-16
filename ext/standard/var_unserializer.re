@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -553,6 +553,10 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 
 	id = parse_iv(start + 2) - 1;
 	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
+		return 0;
+	}
+
+	if (rval_ref == rval) {
 		return 0;
 	}
 

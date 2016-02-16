@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -392,8 +392,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					SERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
@@ -411,6 +409,8 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_ASSERT_CHECK:
 					SERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					/* relative extended_value don't have to be changed */
@@ -969,8 +969,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					UNSERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
@@ -988,6 +986,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_ASSERT_CHECK:
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					/* relative extended_value don't have to be changed */
@@ -1087,7 +1087,7 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		c = Z_PTR_P(zv);
 
-		zend_file_cache_unserialize_class_constant(&c->value, script, buf);
+		zend_file_cache_unserialize_zval(&c->value, script, buf);
 		if (c->ce && !IS_UNSERIALIZED(c->ce)) {
 			UNSERIALIZE_PTR(c->ce);
 		}

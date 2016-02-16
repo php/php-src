@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -242,6 +242,19 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
+		/* check for invalid chars inside login/pass */
+		pp = s;
+		while (pp < p) {
+			if (!isalnum(*pp) && *pp != ':' && *pp != ';' && *pp != '=' && !(*pp >= '!' && *pp <= ',')) {
+				if (ret->scheme) {
+					efree(ret->scheme);
+				}
+				efree(ret);
+				return NULL;
+			}
+			pp++;
+		}
+
 		if ((pp = memchr(s, ':', (p-s)))) {
 			ret->user = estrndup(s, (pp-s));
 			php_replace_controlchars_ex(ret->user, (pp - s));

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -103,12 +103,6 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #define SQLT_CFILEE 115
 #endif
 
-#if ZEND_MODULE_API_NO > 20020429
-#define ONUPDATELONGFUNC OnUpdateLong
-#else
-#define ONUPDATELONGFUNC OnUpdateInt
-#endif
-
 #ifdef ZTS
 #define PHP_OCI_INIT_MODE (OCI_DEFAULT | OCI_OBJECT | OCI_THREADED | OCI_NO_MUTEX)
 #else
@@ -143,8 +137,6 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh);
 ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
-
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 
 /* {{{ Function arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_define_by_name, 0, 0, 3)
@@ -641,118 +633,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim_method, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-#else /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
-/* {{{ Keep the old arginfo behavior when building with PHP 4 */
-
-static unsigned char arginfo_ocifetchinto[]  = { 2, BYREF_NONE, BYREF_FORCE };
-static unsigned char arginfo_oci_fetch_all[] = { 2, BYREF_NONE, BYREF_FORCE };
-static unsigned char arginfo_oci_define_by_name[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-static unsigned char arginfo_oci_bind_by_name[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-static unsigned char arginfo_oci_bind_array_by_name[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-
-#define arginfo_oci_free_descriptor						NULL
-#define arginfo_oci_lob_save							NULL
-#define arginfo_oci_lob_import							NULL
-#define arginfo_oci_lob_load							NULL
-#define arginfo_oci_lob_read							NULL
-#define arginfo_oci_lob_eof								NULL
-#define arginfo_oci_lob_tell							NULL
-#define arginfo_oci_lob_rewind							NULL
-#define arginfo_oci_lob_seek							NULL
-#define arginfo_oci_lob_size							NULL
-#define arginfo_oci_lob_write							NULL
-#define arginfo_oci_lob_append							NULL
-#define arginfo_oci_lob_truncate						NULL
-#define arginfo_oci_lob_erase							NULL
-#define arginfo_oci_lob_flush							NULL
-#define arginfo_ocisetbufferinglob						NULL
-#define arginfo_ocigetbufferinglob						NULL
-#define arginfo_oci_lob_copy							NULL
-#define arginfo_oci_lob_is_equal						NULL
-#define arginfo_oci_lob_export							NULL
-#define arginfo_oci_new_descriptor						NULL
-#define arginfo_oci_rollback							NULL
-#define arginfo_oci_commit								NULL
-#define arginfo_oci_field_name							NULL
-#define arginfo_oci_field_size							NULL
-#define arginfo_oci_field_scale							NULL
-#define arginfo_oci_field_precision						NULL
-#define arginfo_oci_field_type							NULL
-#define arginfo_oci_field_type_raw						NULL
-#define arginfo_oci_field_is_null						NULL
-#define arginfo_oci_internal_debug						NULL
-#define arginfo_oci_execute								NULL
-#define arginfo_oci_cancel								NULL
-#define arginfo_oci_fetch								NULL
-#define arginfo_oci_fetch_object						NULL
-#define arginfo_oci_fetch_row							NULL
-#define arginfo_oci_fetch_assoc							NULL
-#define arginfo_oci_fetch_array							NULL
-#define arginfo_oci_free_statement						NULL
-#define arginfo_oci_close								NULL
-#define arginfo_oci_new_connect							NULL
-#define arginfo_oci_connect								NULL
-#define arginfo_oci_pconnect							NULL
-#define arginfo_oci_error								NULL
-#define arginfo_oci_num_fields							NULL
-#define arginfo_oci_parse								NULL
-#define arginfo_oci_get_implicit_resultset				NULL
-#define arginfo_oci_set_prefetch						NULL
-#define arginfo_oci_set_client_identifier				NULL
-#define arginfo_oci_set_edition							NULL
-#define arginfo_oci_set_module_name						NULL
-#define arginfo_oci_set_action							NULL
-#define arginfo_oci_set_client_info						NULL
-#ifdef WAITIING_ORACLE_BUG_16695981_FIX
-#define arginfo_oci_set_db_operation					NULL
-#endif
-#define arginfo_oci_password_change						NULL
-#define arginfo_oci_new_cursor							NULL
-#define arginfo_oci_result								NULL
-#define arginfo_oci_client_version						NULL
-#define arginfo_oci_server_version						NULL
-#define arginfo_oci_statement_type						NULL
-#define arginfo_oci_num_rows							NULL
-#define arginfo_oci_free_collection						NULL
-#define arginfo_oci_collection_append					NULL
-#define arginfo_oci_collection_element_get				NULL
-#define arginfo_oci_collection_assign					NULL
-#define arginfo_oci_collection_element_assign			NULL
-#define arginfo_oci_collection_size						NULL
-#define arginfo_oci_collection_max						NULL
-#define arginfo_oci_collection_trim						NULL
-#define arginfo_oci_new_collection						NULL
-#define arginfo_oci_lob_size_method						NULL
-#define arginfo_oci_lob_getbuffering_method				NULL
-#define arginfo_oci_lob_close_method					NULL
-#define arginfo_oci_lob_save_method						NULL
-#define arginfo_oci_lob_import_method					NULL
-#define arginfo_oci_lob_read_method						NULL
-#define arginfo_oci_lob_seek_method						NULL
-#define arginfo_oci_lob_write_method					NULL
-#define arginfo_oci_lob_append_method					NULL
-#define arginfo_oci_lob_truncate_method					NULL
-#define arginfo_oci_lob_erase_method					NULL
-#define arginfo_oci_lob_flush_method					NULL
-#define arginfo_oci_lob_setbuffering_method				NULL
-#define arginfo_oci_lob_export_method					NULL
-#define arginfo_oci_lob_write_temporary_method			NULL
-#define arginfo_oci_lob_load_method						NULL
-#define arginfo_oci_lob_tell_method						NULL
-#define arginfo_oci_lob_rewind_method					NULL
-#define arginfo_oci_lob_eof_method						NULL
-#define arginfo_oci_free_descriptor_method				NULL
-#define arginfo_oci_collection_append_method			NULL
-#define arginfo_oci_collection_element_get_method		NULL
-#define arginfo_oci_collection_assign_method			NULL
-#define arginfo_oci_collection_size_method				NULL
-#define arginfo_oci_collection_element_assign_method	NULL
-#define arginfo_oci_collection_max_method				NULL
-#define arginfo_oci_collection_trim_method				NULL
-#define arginfo_oci_collection_free_method				NULL
-/* }}} */
-#endif /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
-
 /* {{{ extension function prototypes
 */
 PHP_FUNCTION(oci_bind_by_name);
@@ -839,12 +719,7 @@ PHP_FUNCTION(oci_collection_trim);
 
 /* {{{ extension definition structures
 */
-static
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 2) || (PHP_MAJOR_VERSION > 5)
-/* This "if" allows PECL builds from this file to be portable to older PHP releases */
-const
-#endif
-zend_function_entry php_oci_functions[] = {
+static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_define_by_name,			arginfo_oci_define_by_name)
 	PHP_FE(oci_bind_by_name,			arginfo_oci_bind_by_name)
 	PHP_FE(oci_bind_array_by_name,		arginfo_oci_bind_array_by_name)
@@ -970,19 +845,10 @@ zend_function_entry php_oci_functions[] = {
 	PHP_FALIAS(ocicollsize,			oci_collection_size,	arginfo_oci_collection_size)
 	PHP_FALIAS(ocicollmax,			oci_collection_max,		arginfo_oci_collection_max)
 	PHP_FALIAS(ocicolltrim,			oci_collection_trim,	arginfo_oci_collection_trim)
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION >= 7) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 4) || (PHP_MAJOR_VERSION > 5)
 	PHP_FE_END
-#else
-	{NULL,NULL,NULL}
-#endif
 };
 
-static
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 2) || (PHP_MAJOR_VERSION > 5)
-/* This "if" allows PECL builds from this file to be portable to older PHP releases */
-const
-#endif
-zend_function_entry php_oci_lob_class_functions[] = {
+static const zend_function_entry php_oci_lob_class_functions[] = {
 	PHP_FALIAS(load,		oci_lob_load,			arginfo_oci_lob_load_method)
 	PHP_FALIAS(tell,		oci_lob_tell,			arginfo_oci_lob_tell_method)
 	PHP_FALIAS(truncate,	oci_lob_truncate,		arginfo_oci_lob_truncate_method)
@@ -1005,19 +871,10 @@ zend_function_entry php_oci_lob_class_functions[] = {
 	PHP_FALIAS(save,		oci_lob_save,			arginfo_oci_lob_save_method)
 	PHP_FALIAS(savefile,	oci_lob_import,			arginfo_oci_lob_import_method)
 	PHP_FALIAS(free,		oci_free_descriptor,	arginfo_oci_free_descriptor_method)
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION >= 7) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 4) || (PHP_MAJOR_VERSION > 5)
 	PHP_FE_END
-#else
-	{NULL,NULL,NULL}
-#endif
 };
 
-static
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 2) || (PHP_MAJOR_VERSION > 5)
-/* This "if" allows PECL builds from this file to be portable to older PHP releases */
-const
-#endif
-zend_function_entry php_oci_coll_class_functions[] = {
+static const zend_function_entry php_oci_coll_class_functions[] = {
 	PHP_FALIAS(append,		  oci_collection_append,			arginfo_oci_collection_append_method)
 	PHP_FALIAS(getelem,		  oci_collection_element_get,		arginfo_oci_collection_element_get_method)
 	PHP_FALIAS(assignelem,	  oci_collection_element_assign,	arginfo_oci_collection_element_assign_method)
@@ -1026,11 +883,7 @@ zend_function_entry php_oci_coll_class_functions[] = {
 	PHP_FALIAS(max,			  oci_collection_max,				arginfo_oci_collection_max_method)
 	PHP_FALIAS(trim,		  oci_collection_trim,				arginfo_oci_collection_trim_method)
 	PHP_FALIAS(free,		  oci_free_collection,				arginfo_oci_collection_free_method)
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION >= 7) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 4) || (PHP_MAJOR_VERSION > 5)
 	PHP_FE_END
-#else
-	{NULL,NULL,NULL}
-#endif
 };
 
 zend_module_entry oci8_module_entry = {
@@ -1053,12 +906,12 @@ zend_module_entry oci8_module_entry = {
 
 /* {{{ PHP_INI */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY(	"oci8.max_persistent",			"-1",	PHP_INI_SYSTEM,	ONUPDATELONGFUNC,	max_persistent,			zend_oci_globals,	oci_globals)
-	STD_PHP_INI_ENTRY(	"oci8.persistent_timeout",		"-1",	PHP_INI_SYSTEM,	ONUPDATELONGFUNC,	persistent_timeout,		zend_oci_globals,	oci_globals)
-	STD_PHP_INI_ENTRY(	"oci8.ping_interval",			"60",	PHP_INI_SYSTEM,	ONUPDATELONGFUNC,	ping_interval,			zend_oci_globals,	oci_globals)
+	STD_PHP_INI_ENTRY(	"oci8.max_persistent",			"-1",	PHP_INI_SYSTEM,	OnUpdateLong,	max_persistent,			zend_oci_globals,	oci_globals)
+	STD_PHP_INI_ENTRY(	"oci8.persistent_timeout",		"-1",	PHP_INI_SYSTEM,	OnUpdateLong,	persistent_timeout,		zend_oci_globals,	oci_globals)
+	STD_PHP_INI_ENTRY(	"oci8.ping_interval",			"60",	PHP_INI_SYSTEM,	OnUpdateLong,	ping_interval,			zend_oci_globals,	oci_globals)
 	STD_PHP_INI_BOOLEAN("oci8.privileged_connect",		"0",	PHP_INI_SYSTEM,	OnUpdateBool,		privileged_connect,		zend_oci_globals,	oci_globals)
-	STD_PHP_INI_ENTRY(	"oci8.statement_cache_size",	"20",	PHP_INI_SYSTEM,	ONUPDATELONGFUNC,	statement_cache_size,	zend_oci_globals,	oci_globals)
-	STD_PHP_INI_ENTRY(	"oci8.default_prefetch",		"100",	PHP_INI_SYSTEM,	ONUPDATELONGFUNC,	default_prefetch,		zend_oci_globals,	oci_globals)
+	STD_PHP_INI_ENTRY(	"oci8.statement_cache_size",	"20",	PHP_INI_SYSTEM,	OnUpdateLong,	statement_cache_size,	zend_oci_globals,	oci_globals)
+	STD_PHP_INI_ENTRY(	"oci8.default_prefetch",		"100",	PHP_INI_SYSTEM,	OnUpdateLong,	default_prefetch,		zend_oci_globals,	oci_globals)
 	STD_PHP_INI_BOOLEAN("oci8.old_oci_close_semantics",	"0",	PHP_INI_SYSTEM,	OnUpdateBool,		old_oci_close_semantics,zend_oci_globals,	oci_globals)
 #if (OCI_MAJOR_VERSION >= 11)
 	STD_PHP_INI_ENTRY(	"oci8.connection_class",		"",		PHP_INI_ALL,	OnUpdateString,		connection_class,		zend_oci_globals,	oci_globals)
@@ -1839,13 +1692,6 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				php_error_docref(NULL, E_WARNING, "Privileged connect is disabled. Enable oci8.privileged_connect to be able to connect as SYSOPER or SYSDBA");
 				return NULL;
 			}
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
-			/* Safe mode has been removed in PHP 5.4 */
-			if (PG(safe_mode)) {
-				php_error_docref(NULL, E_WARNING, "Privileged connect is disabled in Safe Mode");
-				return NULL;
-			}
-#endif
 		}
 	}
 

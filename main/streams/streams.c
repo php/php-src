@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2244,9 +2244,8 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 			return FAILURE;
 		}
 	}
-	if (Z_REFCOUNTED_P(optionvalue)) {
-		Z_ADDREF_P(optionvalue);
-	}
+	ZVAL_DEREF(optionvalue);
+	Z_TRY_ADDREF_P(optionvalue);
 	return zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue) ? SUCCESS : FAILURE;
 }
 /* }}} */

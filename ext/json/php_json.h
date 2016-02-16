@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -67,6 +67,7 @@ typedef enum {
 #define PHP_JSON_UNESCAPED_UNICODE       (1<<8)
 #define PHP_JSON_PARTIAL_OUTPUT_ON_ERROR (1<<9)
 #define PHP_JSON_PRESERVE_ZERO_FRACTION  (1<<10)
+#define PHP_JSON_UNESCAPED_LINE_TERMINATORS (1<<11)
 
 /* json_decode() options */
 #define PHP_JSON_OBJECT_AS_ARRAY         (1<<0)

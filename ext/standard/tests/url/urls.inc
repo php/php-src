@@ -48,7 +48,6 @@ $urls = array(
 'http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
 'http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
 'http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
-'http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
 'http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
 'nntp://news.php.net',
 'ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz',
@@ -68,7 +67,6 @@ $urls = array(
 'scheme:',
 'foo+bar://baz@bang/bla',
 'gg:9130731',
-'http://user:@pass@host/path?argument?value#etc',
 'http://10.10.10.10/:80',
 'http://x:?',
 'x:blah.com',
@@ -106,6 +104,9 @@ $urls = array(
 'http://:?',
 'http://blah.com:123456',
 'http://blah.com:abcdef',
+'http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'http://user:@pass@host/path?argument?value#etc',
+'http://foo.com\\@bar.com'
 );
 
 

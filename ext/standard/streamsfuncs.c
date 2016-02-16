@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -507,6 +507,12 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	array_init(return_value);
 
+	if (!php_stream_populate_meta_data(stream, return_value)) {
+		add_assoc_bool(return_value, "timed_out", 0);
+		add_assoc_bool(return_value, "blocked", 1);
+		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
+	}
+
 	if (!Z_ISUNDEF(stream->wrapperdata)) {
 		Z_ADDREF_P(&stream->wrapperdata);
 		add_assoc_zval(return_value, "wrapper_data", &stream->wrapperdata);
@@ -540,11 +546,6 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_string(return_value, "uri", stream->orig_path);
 	}
 
-	if (!php_stream_populate_meta_data(stream, return_value)) {
-		add_assoc_bool(return_value, "timed_out", 0);
-		add_assoc_bool(return_value, "blocked", 1);
-		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
-	}
 }
 /* }}} */
 
@@ -881,8 +882,8 @@ static int parse_context_options(php_stream_context *context, zval *options)
 	int ret = SUCCESS;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), wkey, wval) {
-		if (wkey && Z_TYPE_P(wval) == IS_ARRAY) {
-
+		ZVAL_DEREF(wval);
+		if (Z_TYPE_P(wval) == IS_ARRAY) {
 		    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
 				if (okey) {
 					php_stream_context_set_option(context, ZSTR_VAL(wkey), ZSTR_VAL(okey), oval);

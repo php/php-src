@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@
 
 PHPAPI void php_srand(zend_long seed);
 PHPAPI zend_long php_rand(void);
-PHPAPI void php_mt_srand(php_uint32 seed);
-PHPAPI php_uint32 php_mt_rand(void);
+PHPAPI void php_mt_srand(uint32_t seed);
+PHPAPI uint32_t php_mt_rand(void);
 
 #endif	/* PHP_RAND_H */

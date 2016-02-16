@@ -96,6 +96,15 @@
 #define SLJIT_EXECUTABLE_ALLOCATOR 1
 #endif
 
+/* Force cdecl calling convention even if a better calling
+   convention (e.g. fastcall) is supported by the C compiler.
+   If this option is enabled, C functions without
+   SLJIT_CALL can also be called from JIT code. */
+#ifndef SLJIT_USE_CDECL_CALLING_CONVENTION
+/* Disabled by default */
+#define SLJIT_USE_CDECL_CALLING_CONVENTION 0
+#endif
+
 /* Return with error when an invalid argument is passed. */
 #ifndef SLJIT_ARGUMENT_CHECKS
 /* Disabled by default */

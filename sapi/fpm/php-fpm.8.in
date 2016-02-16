@@ -1,4 +1,4 @@
-.TH PHP-FPM 8 "2009" "The PHP Group" "Scripting Language"
+.TH PHP-FPM 8 "2016" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
 php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
@@ -213,7 +213,7 @@ contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp-fpm\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2009 The PHP Group
+Copyright \(co 1997\-2016 The PHP Group
 .PD 0
 .P
 Copyright (c) 2007-2009, Andrei Nigmatulin

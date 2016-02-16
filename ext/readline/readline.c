@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -251,7 +251,9 @@ PHP_FUNCTION(readline_info)
 		array_init(return_value);
 		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer));
 		add_assoc_long(return_value,"point",rl_point);
+#ifndef PHP_WIN32
 		add_assoc_long(return_value,"end",rl_end);
+#endif
 #ifdef HAVE_LIBREADLINE
 		add_assoc_long(return_value,"mark",rl_mark);
 		add_assoc_long(return_value,"done",rl_done);
@@ -262,7 +264,9 @@ PHP_FUNCTION(readline_info)
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
+#ifndef PHP_WIN32
 		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version));
+#endif
 		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name));
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
@@ -276,8 +280,10 @@ PHP_FUNCTION(readline_info)
 			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (!strcasecmp(what, "point")) {
 			RETVAL_LONG(rl_point);
+#ifndef PHP_WIN32
 		} else if (!strcasecmp(what, "end")) {
 			RETVAL_LONG(rl_end);
+#endif
 #ifdef HAVE_LIBREADLINE
 		} else if (!strcasecmp(what, "mark")) {
 			RETVAL_LONG(rl_mark);
@@ -309,8 +315,10 @@ PHP_FUNCTION(readline_info)
 			}
 			RETVAL_LONG(oldval);
 #endif
+#ifndef PHP_WIN32
 		} else if (!strcasecmp(what,"library_version")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_library_version));
+#endif
 		} else if (!strcasecmp(what, "readline_name")) {
 			oldstr = (char*)rl_readline_name;
 			if (value) {

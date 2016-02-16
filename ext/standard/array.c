@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,9 +46,7 @@
 #include "php_string.h"
 #include "php_rand.h"
 #include "zend_smart_str.h"
-#ifdef HAVE_SPL
 #include "ext/spl/spl_array.h"
-#endif
 
 /* {{{ defines */
 #define EXTR_OVERWRITE			0
@@ -81,8 +79,6 @@
 #define INTERSECT_COMP_DATA_USER     1
 #define INTERSECT_COMP_KEY_INTERNAL  0
 #define INTERSECT_COMP_KEY_USER      1
-
-#define DOUBLE_DRIFT_FIX	0.000000000000001
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
@@ -272,7 +268,7 @@ static int php_array_key_compare_string(const void *a, const void *b) /* {{{ */
 		l2 = s->key->len;
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
-		l2 = buf2 + sizeof(buf2) - 1 - s1;
+		l2 = buf2 + sizeof(buf2) - 1 - s2;
 	}
 	return zend_binary_strcmp(s1, l1, s2, l2);
 }
@@ -823,9 +819,7 @@ PHP_FUNCTION(count)
 			RETURN_LONG(cnt);
 			break;
 		case IS_OBJECT: {
-#ifdef HAVE_SPL
 			zval retval;
-#endif
 			/* first, we check if the handler is defined */
 			if (Z_OBJ_HT_P(array)->count_elements) {
 				RETVAL_LONG(1);
@@ -833,7 +827,6 @@ PHP_FUNCTION(count)
 					return;
 				}
 			}
-#ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
 			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable)) {
 				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
@@ -843,7 +836,6 @@ PHP_FUNCTION(count)
 				}
 				return;
 			}
-#endif
 		}
 		default:
 			RETURN_LONG(1);
@@ -1773,7 +1765,7 @@ PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, size_t
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
-	zval *var_array, *prefix = NULL;
+	zval *var_array_param, *prefix = NULL;
 	zend_long extract_type = EXTR_OVERWRITE;
 	zval *entry;
 	zend_string *var_name;
@@ -1781,14 +1773,15 @@ PHP_FUNCTION(extract)
 	int var_exists, count = 0;
 	int extract_refs = 0;
 	zend_array *symbol_table;
+	zval var_array;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|lz/", &var_array_param, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_ARRAY(var_array)
+		Z_PARAM_ARRAY(var_array_param)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(extract_type)
 		Z_PARAM_ZVAL_EX(prefix, 0, 1)
@@ -1797,7 +1790,7 @@ PHP_FUNCTION(extract)
 
 	extract_refs = (extract_type & EXTR_REFS);
 	if (extract_refs) {
-		SEPARATE_ZVAL(var_array);
+		SEPARATE_ZVAL(var_array_param);
 	}
 	extract_type &= 0xff;
 
@@ -1827,7 +1820,11 @@ PHP_FUNCTION(extract)
 	}
 #endif
 
-	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(var_array), num_key, var_name, entry) {
+	/* The array might be stored in a local variable that will be overwritten. To avoid losing the
+	 * reference in that case we work on a copy. */
+	ZVAL_COPY(&var_array, var_array_param);
+
+	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(var_array), num_key, var_name, entry) {
 		zval final_name;
 
 		ZVAL_NULL(&final_name);
@@ -1928,6 +1925,7 @@ PHP_FUNCTION(extract)
 		}
 		zval_dtor(&final_name);
 	} ZEND_HASH_FOREACH_END();
+	zval_ptr_dtor(&var_array);
 
 	RETURN_LONG(count);
 }
@@ -1940,6 +1938,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
+			ZVAL_DEREF(value_ptr);
 			ZVAL_COPY(&data, value_ptr);
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		}
@@ -1975,6 +1974,10 @@ PHP_FUNCTION(compact)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
+
+	if (UNEXPECTED(symbol_table == NULL)) {
+		return;
+	}
 
 	/* compact() is probably most used with a single array of var_names
 	   or multiple string names, rather than a combination of both.
@@ -2057,13 +2060,25 @@ PHP_FUNCTION(array_fill_keys)
 }
 /* }}} */
 
-#define RANGE_CHECK_INIT_ARRAY(start, end) do { \
+#define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		double __calc_size = ((start - end) / step) + 1; \
-		if (fabs(__calc_size) >= (double)HT_MAX_SIZE) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", start > end ? end : start, start > end ? start : end); \
+		if (__calc_size >= (double)HT_MAX_SIZE) { \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
 			RETURN_FALSE; \
 		} \
-		array_init_size(return_value, (uint32_t)fabs(__calc_size)); \
+		size = (uint32_t)__calc_size; \
+		array_init_size(return_value, size); \
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
+	} while (0)
+
+#define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
+		zend_ulong __calc_size = (start - end) / lstep; \
+		if (__calc_size >= HT_MAX_SIZE - 1) { \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", end, start); \
+			RETURN_FALSE; \
+		} \
+		size = (uint32_t)(__calc_size + 1); \
+		array_init_size(return_value, size); \
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
 	} while (0)
 
@@ -2163,12 +2178,11 @@ PHP_FUNCTION(range)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
-		double low, high, value;
-		zend_long i;
+		double low, high;
+		uint32_t i, size;
 double_str:
 		low = zval_get_double(zlow);
 		high = zval_get_double(zhigh);
-		i = 0;
 
 		if (zend_isinf(high) || zend_isinf(low)) {
 			php_error_docref(NULL, E_WARNING, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
@@ -2182,12 +2196,13 @@ double_str:
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(low, high);
+			RANGE_CHECK_DOUBLE_INIT_ARRAY(low, high);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			for (value = low; value >= (high - DOUBLE_DRIFT_FIX); value = low - (++i * step)) {
-				Z_DVAL(tmp) = value;
-				ZEND_HASH_FILL_ADD(&tmp);
-			}
+				for (i = 0; i < size; ++i) {
+					Z_DVAL(tmp) = low - (i * step);
+					ZEND_HASH_FILL_ADD(&tmp);
+				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < step || step <= 0) {
@@ -2195,10 +2210,11 @@ double_str:
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(high, low);
+			RANGE_CHECK_DOUBLE_INIT_ARRAY(high, low);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
-					Z_DVAL(tmp) = value;
+				for (i = 0; i < size; ++i) {
+					Z_DVAL(tmp) = low + (i * step);
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
 			} ZEND_HASH_FILL_END();
@@ -2208,43 +2224,53 @@ double_str:
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else {
-		double low, high;
-		zend_long lstep;
+		zend_long low, high;
+		/* lstep is a ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
+		zend_ulong lstep;
+		uint32_t i, size;
 long_str:
-		low = zval_get_double(zlow);
-		high = zval_get_double(zhigh);
-		lstep = (zend_long) step;
+		low = zval_get_long(zlow);
+		high = zval_get_long(zhigh);
+
+		if (step <= 0) {
+			err = 1;
+			goto err;
+		}
+
+		lstep = step;
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
-			if (low - high < lstep || lstep <= 0) {
+			if (low - high < lstep) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(low, high);
+			RANGE_CHECK_LONG_INIT_ARRAY(low, high);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low >= high; low -= lstep) {
-					Z_LVAL(tmp) = (zend_long)low;
+				for (i = 0; i < size; ++i) {
+					Z_LVAL(tmp) = low - (i * lstep);
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			if (high - low < lstep || lstep <= 0) {
+			if (high - low < lstep) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(high, low);
+			RANGE_CHECK_LONG_INIT_ARRAY(high, low);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low <= high; low += lstep) {
-					Z_LVAL(tmp) = (zend_long)low;
+				for (i = 0; i < size; ++i) {
+					Z_LVAL(tmp) = low + (i * lstep);
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
 			array_init(return_value);
-			Z_LVAL(tmp) = (zend_long)low;
+			Z_LVAL(tmp) = low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
@@ -2256,7 +2282,8 @@ err:
 }
 /* }}} */
 
-#undef RANGE_CHECK_INIT_ARRAY
+#undef RANGE_CHECK_DOUBLE_INIT_ARRAY
+#undef RANGE_CHECK_LONG_INIT_ARRAY
 
 static void php_array_data_shuffle(zval *array) /* {{{ */
 {

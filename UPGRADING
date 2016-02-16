@@ -22,6 +22,10 @@ PHP 7.1 UPGRADE NOTES
   . 'void' can no longer be used as the name of a class, interface, or trait.
     This applies to declarations, class_alias() and use statements.
 
+- JSON:
+  . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
+    U+2029 are escaped.
+
 ========================================
 2. New Features
 ========================================
@@ -45,7 +49,20 @@ PHP 7.1 UPGRADE NOTES
 - The first $varname argument for getenv() is no longer mandatory, the
   current environment variables will be returned as an associative array
   when omitted.
-- long2ip accepts integer as parameter now
+- json_encode() accepts new option JSON_UNESCAPED_LINE_TERMINATORS that
+  disables escaping of U+2028 and U+2029 characters when
+  JSON_UNESCAPED_UNICODE is supplied.
+- long2ip() accepts integer as parameter now
+- pg_last_notice() accepts optional long parameter to specify operation.
+  PGSQL_NOTICE_LAST - Get last notice (Default)
+  PGSQL_NOTICE_ALL - Get all stored notices
+  PGSQL_NOTICE_CLEAR - Remove all stored notices
+  It returns empty string or array on successful PGSQL_NOTICE_LAST/ALL calls.
+  It returned FALSE for empty notice previously.
+- pg_fetch_all() accepts 2nd optional result type parameter like
+  pg_fetch_row().
+- pg_select() accepts 4th optional result type parameter like pg_fetch_row().
+- parse_url() is more restrictive now and supports RFC3986.
 
 ========================================
 6. New Functions
@@ -62,10 +79,20 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+- SQLite3:
+  . Upgraded bundled SQLite lib to 3.9.2
 
 ========================================
 10. New Global Constants
 ========================================
+
+- JSON:
+  . JSON_UNESCAPED_LINE_TERMINATORS
+
+- Pgsql:
+  PGSQL_NOTICE_LAST
+  PGSQL_NOTICE_ALL
+  PGSQL_NOTICE_CLEAR
 
 ========================================
 11. Changes to INI File Handling
@@ -77,6 +104,21 @@ PHP 7.1 UPGRADE NOTES
 
 - Core:
   . Support for ftok()
+
+- FCGI
+  . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,
+    the first php-fcgi.exe process will exec the specified number of children.
+    Those will share the same TCP socket. 
+
+- readline:
+  . The readline extension is supported through the WinEditLine library
+    (http://mingweditline.sourceforge.net/). Thereby, the interactive CLI
+    shell is supported as well (php.exe -a).
+
+    It is well known, but nevertheless is worth mentioning again, that
+    the readline extension is not thread safe and will never be. Thus,
+    the usage of it with any true thread safe SAPI (like Apache mod_winnt) is
+    strongely discouraged.
 
 ========================================
 13. Other Changes

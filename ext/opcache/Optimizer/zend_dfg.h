@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DFG - Data Flow Graph                                   |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ typedef struct _zend_dfg {
 
 BEGIN_EXTERN_C()
 
-int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg);
+int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags);
 
 END_EXTERN_C()
 

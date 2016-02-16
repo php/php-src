@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -215,10 +215,6 @@ extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
 extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype);
-
-#ifdef HAVE_SPL
-extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
-#endif
 
 #define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \

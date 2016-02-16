@@ -15,7 +15,7 @@
 #define PEAR_INSTALLDIR "@PREFIX@\\pear"
 #define PHP_BINDIR "@PREFIX@"
 #define PHP_DATADIR "@PREFIX@"
-#define PHP_EXTENSION_DIR "@PREFIX@"
+#define PHP_EXTENSION_DIR "@PREFIX@\\ext"
 #define PHP_INCLUDE_PATH	".;@PREFIX@\\pear"
 #define PHP_LIBDIR "@PREFIX@"
 #define PHP_LOCALSTATEDIR "@PREFIX@"

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -651,7 +651,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 
 	phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
 	zend_string_release(file);
-	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", ZSTR_VAL(msg));
+	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", "%s", ZSTR_VAL(msg));
 	zend_string_release(msg);
 
 	if (EG(prev_exception)) {
@@ -1518,7 +1518,11 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
 			msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("message"), 1, &rv));
 
-			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line, ZSTR_LEN(msg) < 80 ? ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
+			phpdbg_error("exception",
+				"name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"",
+				"Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s",
+				ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line,
+				ZSTR_LEN(msg) < 80 ? (int) ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
 			zend_string_release(msg);
 			zend_string_release(file);
 
@@ -1627,7 +1631,7 @@ next:
 		     execute_data->call->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
-		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		
+		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);
 		zend_execute_ex = phpdbg_execute_ex;
 
 		if (PHPDBG_G(vmret) != 0) {

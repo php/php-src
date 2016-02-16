@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -39,24 +39,18 @@ const zend_function_entry pdo_dblib_functions[] = {
 	PHP_FE_END
 };
 
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 
 #if PDO_DBLIB_IS_MSSQL
 zend_module_entry pdo_mssql_module_entry = {
 #else
 zend_module_entry pdo_dblib_module_entry = {
 #endif
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_dblib_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 #if PDO_DBLIB_IS_MSSQL
 	"pdo_mssql",
 #elif defined(PHP_WIN32)

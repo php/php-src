@@ -2170,7 +2170,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 	   images can be done at a later point.
 	*/
 	if (src->trueColor == 0) {
-		if (bgcolor >= 0) {
+		if (bgcolor < gdMaxColors) {
 			bgcolor =  gdTrueColorAlpha(src->red[bgcolor], src->green[bgcolor], src->blue[bgcolor], src->alpha[bgcolor]);
 		}
 		gdImagePaletteToTrueColor(src);

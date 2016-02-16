@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -275,7 +275,7 @@ typedef struct _zend_oparray_context {
 /* class has magic methods __get/__set/__unset/__isset that use guards */
 #define ZEND_ACC_USE_GUARDS				0x1000000
 
-/* function has arguments with type hinting */
+/* function has typed arguments */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
 /* op_array has finally blocks */
@@ -284,7 +284,7 @@ typedef struct _zend_oparray_context {
 /* internal function is allocated at arena */
 #define ZEND_ACC_ARENA_ALLOCATED		0x20000000
 
-/* Function has a return type hint (or class has such non-private function) */
+/* Function has a return type (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
 /* op_array uses strict mode types */
@@ -339,7 +339,7 @@ typedef struct _zend_arg_info {
 /* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
- * It's also used for return type hinting.
+ * It's also used for the return type.
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
@@ -470,7 +470,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_TOP                (1 << 1)
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
+/* Unused flag (1 << 4) */
 #define ZEND_CALL_CLOSURE            (1 << 5)
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)
@@ -683,8 +683,6 @@ struct _zend_execute_data {
 #define IS_UNUSED	(1<<3)	/* Unused variable */
 #define IS_CV		(1<<4)	/* Compiled variable */
 
-#define EXT_TYPE_UNUSED	(1<<5)
-
 #include "zend_globals.h"
 
 BEGIN_EXTERN_C()
@@ -890,9 +888,7 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 /* global/local fetches */
 #define ZEND_FETCH_GLOBAL			0x00000000
 #define ZEND_FETCH_LOCAL			0x10000000
-#define ZEND_FETCH_STATIC			0x20000000
 #define ZEND_FETCH_GLOBAL_LOCK		0x40000000
-#define ZEND_FETCH_LEXICAL			0x50000000
 
 #define ZEND_FETCH_TYPE_MASK		0x70000000
 

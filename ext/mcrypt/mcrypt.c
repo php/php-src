@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -564,7 +564,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memset(iv_s, 0, iv_size + 1);
 
 	if (key_len > max_key_size) {
-		php_error_docref(NULL, E_WARNING, "Key size too large; supplied length: %d, max: %d", key_len, max_key_size);
+		php_error_docref(NULL, E_WARNING, "Key size too large; supplied length: %zd, max: %d", key_len, max_key_size);
 		key_size = max_key_size;
 	} else {
 		key_size = (int)key_len;
@@ -572,7 +572,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memcpy(key_s, key, key_len);
 
 	if (iv_len != iv_size) {
-		php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %d, needed: %d", iv_len, iv_size);
+		php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %zd, needed: %d", iv_len, iv_size);
 		if (iv_len > iv_size) {
 			iv_len = iv_size;
 		}

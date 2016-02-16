@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,7 +157,8 @@ static void _php_curl_close(zend_resource *rsrc);
 #define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s) - 1, (zend_long) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s) - 1, (double) v);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s) - 1, (char *) (v ? v : ""));
-#define CAASTR(s, v) add_assoc_str_ex(return_value, s, sizeof(s) - 1, v ? v : ZSTR_EMPTY_ALLOC());
+#define CAASTR(s, v) add_assoc_str_ex(return_value, s, sizeof(s) - 1, \
+		v ? zend_string_copy(v) : ZSTR_EMPTY_ALLOC());
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s) -1 , (zval *) v);
 
 #if defined(PHP_WIN32) || defined(__GNUC__)
@@ -1751,7 +1752,7 @@ static php_curl *alloc_curl_handle()
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
 	zend_llist_init(&ch->to_free->str,   sizeof(char *),          (llist_dtor_func_t)curl_free_string, 0);
-	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost), (llist_dtor_func_t)curl_free_post,   0);
+	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
 
 	ch->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -1851,7 +1852,9 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
+#if !defined(ZTS)
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
+#endif
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
 
@@ -2017,6 +2020,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 	CURLcode error = CURLE_OK;
 	zend_long lval;
 
+	ZVAL_DEREF(zvalue);
 	switch (option) {
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
@@ -2183,6 +2187,12 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 					return 1;
 			}
 #endif
+# if defined(ZTS)
+			if (option == CURLOPT_DNS_USE_GLOBAL_CACHE) {
+				php_error_docref(NULL, E_WARNING, "CURLOPT_DNS_USE_GLOBAL_CACHE cannot be activated when thread safety is enabled");
+				return 1;
+			}
+# endif
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 		case CURLOPT_SAFE_UPLOAD:
@@ -2456,6 +2466,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			}
 
 			ZEND_HASH_FOREACH_VAL(ph, current) {
+				ZVAL_DEREF(current);
 				val = zval_get_string(current);
 				slist = curl_slist_append(slist, ZSTR_VAL(val));
 				zend_string_release(val);
@@ -2465,7 +2476,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				}
 			} ZEND_HASH_FOREACH_END();
 
-			zend_hash_index_update_ptr(ch->to_free->slist, option, slist);
+			if ((*ch->clone) == 1) {
+				zend_hash_index_update_ptr(ch->to_free->slist, option, slist);
+			} else {
+				zend_hash_next_index_insert_ptr(ch->to_free->slist, slist);
+			}
 
 			error = curl_easy_setopt(ch->cp, option, slist);
 
@@ -2523,6 +2538,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						zend_string_addref(string_key);
 					}
 
+					ZVAL_DEREF(current);
 					if (Z_TYPE_P(current) == IS_OBJECT &&
 							instanceof_function(Z_OBJCE_P(current), curl_CURLFile_class)) {
 						/* new-style file upload */
@@ -3021,7 +3037,7 @@ PHP_FUNCTION(curl_getinfo)
 		}
 #endif
 		if (ch->header.str) {
-			CAASTR("request_header", zend_string_copy(ch->header.str));
+			CAASTR("request_header", ch->header.str);
 		}
 	} else {
 		switch (option) {

@@ -23,7 +23,7 @@
 **
 ** The official C-language API documentation for SQLite is derived
 ** from comments in this file.  This file is the authoritative source
-** on how SQLite interfaces are suppose to operate.
+** on how SQLite interfaces are supposed to operate.
 **
 ** The name of this file under configuration management is "sqlite.h.in".
 ** The makefile makes some minor changes to this file (such as inserting
@@ -111,9 +111,9 @@ extern "C" {
 ** [sqlite3_libversion_number()], [sqlite3_sourceid()],
 ** [sqlite_version()] and [sqlite_source_id()].
 */
-#define SQLITE_VERSION        "3.8.10.2"
-#define SQLITE_VERSION_NUMBER 3008010
-#define SQLITE_SOURCE_ID      "2015-05-20 18:17:19 2ef4f3a5b1d1d0c4338f8243d40a2452cc1f7fe4"
+#define SQLITE_VERSION        "3.9.2"
+#define SQLITE_VERSION_NUMBER 3009002
+#define SQLITE_SOURCE_ID      "2015-11-02 18:31:45 bda77dda9697c463c3d0704014d51627fceee328"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -124,7 +124,7 @@ extern "C" {
 ** but are associated with the library instead of the header file.  ^(Cautious
 ** programmers might include assert() statements in their application to
 ** verify that values returned by these interfaces match the macros in
-** the header, and thus insure that the application is
+** the header, and thus ensure that the application is
 ** compiled with matching library and header files.
 **
 ** <blockquote><pre>
@@ -374,7 +374,7 @@ typedef int (*sqlite3_callback)(void*,int,char**, char**);
 ** Restrictions:
 **
 ** <ul>
-** <li> The application must insure that the 1st parameter to sqlite3_exec()
+** <li> The application must ensure that the 1st parameter to sqlite3_exec()
 **      is a valid and open [database connection].
 ** <li> The application must not close the [database connection] specified by
 **      the 1st parameter to sqlite3_exec() while sqlite3_exec() is running.
@@ -477,6 +477,7 @@ SQLITE_API int SQLITE_STDCALL sqlite3_exec(
 #define SQLITE_IOERR_MMAP              (SQLITE_IOERR | (24<<8))
 #define SQLITE_IOERR_GETTEMPPATH       (SQLITE_IOERR | (25<<8))
 #define SQLITE_IOERR_CONVPATH          (SQLITE_IOERR | (26<<8))
+#define SQLITE_IOERR_VNODE             (SQLITE_IOERR | (27<<8))
 #define SQLITE_LOCKED_SHAREDCACHE      (SQLITE_LOCKED |  (1<<8))
 #define SQLITE_BUSY_RECOVERY           (SQLITE_BUSY   |  (1<<8))
 #define SQLITE_BUSY_SNAPSHOT           (SQLITE_BUSY   |  (2<<8))
@@ -963,6 +964,14 @@ struct sqlite3_io_methods {
 ** circumstances in order to fix a problem with priority inversion.
 ** Applications should <em>not</em> use this file-control.
 **
+** <li>[[SQLITE_FCNTL_ZIPVFS]]
+** The [SQLITE_FCNTL_ZIPVFS] opcode is implemented by zipvfs only. All other
+** VFS should return SQLITE_NOTFOUND for this opcode.
+**
+** <li>[[SQLITE_FCNTL_RBU]]
+** The [SQLITE_FCNTL_RBU] opcode is implemented by the special VFS used by
+** the RBU extension only.  All other VFS should return SQLITE_NOTFOUND for
+** this opcode.  
 ** </ul>
 */
 #define SQLITE_FCNTL_LOCKSTATE               1
@@ -988,6 +997,8 @@ struct sqlite3_io_methods {
 #define SQLITE_FCNTL_COMMIT_PHASETWO        22
 #define SQLITE_FCNTL_WIN32_SET_HANDLE       23
 #define SQLITE_FCNTL_WAL_BLOCK              24
+#define SQLITE_FCNTL_ZIPVFS                 25
+#define SQLITE_FCNTL_RBU                    26
 
 /* deprecated names */
 #define SQLITE_GET_LOCKPROXYFILE      SQLITE_FCNTL_GET_LOCKPROXYFILE
@@ -1356,9 +1367,11 @@ SQLITE_API int SQLITE_STDCALL sqlite3_os_end(void);
 ** applications and so this routine is usually not necessary.  It is
 ** provided to support rare applications with unusual needs.
 **
-** The sqlite3_config() interface is not threadsafe.  The application
-** must insure that no other SQLite interfaces are invoked by other
-** threads while sqlite3_config() is running.  Furthermore, sqlite3_config()
+** <b>The sqlite3_config() interface is not threadsafe. The application
+** must ensure that no other SQLite interfaces are invoked by other
+** threads while sqlite3_config() is running.</b>
+**
+** The sqlite3_config() interface
 ** may only be invoked prior to library initialization using
 ** [sqlite3_initialize()] or after shutdown by [sqlite3_shutdown()].
 ** ^If sqlite3_config() is called after [sqlite3_initialize()] and before
@@ -3363,7 +3376,8 @@ SQLITE_API int SQLITE_STDCALL sqlite3_stmt_readonly(sqlite3_stmt *pStmt);
 **
 ** ^The sqlite3_stmt_busy(S) interface returns true (non-zero) if the
 ** [prepared statement] S has been stepped at least once using 
-** [sqlite3_step(S)] but has not run to completion and/or has not 
+** [sqlite3_step(S)] but has neither run to completion (returned
+** [SQLITE_DONE] from [sqlite3_step(S)]) nor
 ** been reset using [sqlite3_reset(S)].  ^The sqlite3_stmt_busy(S)
 ** interface returns false if S is a NULL pointer.  If S is not a 
 ** NULL pointer and is not a pointer to a valid [prepared statement]
@@ -3390,7 +3404,9 @@ SQLITE_API int SQLITE_STDCALL sqlite3_stmt_busy(sqlite3_stmt*);
 ** Some interfaces require a protected sqlite3_value.  Other interfaces
 ** will accept either a protected or an unprotected sqlite3_value.
 ** Every interface that accepts sqlite3_value arguments specifies
-** whether or not it requires a protected sqlite3_value.
+** whether or not it requires a protected sqlite3_value.  The
+** [sqlite3_value_dup()] interface can be used to construct a new 
+** protected sqlite3_value from an unprotected sqlite3_value.
 **
 ** The terms "protected" and "unprotected" refer to whether or not
 ** a mutex is held.  An internal mutex is held for a protected
@@ -3550,6 +3566,7 @@ SQLITE_API int SQLITE_STDCALL sqlite3_bind_text64(sqlite3_stmt*, int, const char
                          void(*)(void*), unsigned char encoding);
 SQLITE_API int SQLITE_STDCALL sqlite3_bind_value(sqlite3_stmt*, int, const sqlite3_value*);
 SQLITE_API int SQLITE_STDCALL sqlite3_bind_zeroblob(sqlite3_stmt*, int, int n);
+SQLITE_API int SQLITE_STDCALL sqlite3_bind_zeroblob64(sqlite3_stmt*, int, sqlite3_uint64);
 
 /*
 ** CAPI3REF: Number Of SQL Parameters
@@ -3613,7 +3630,7 @@ SQLITE_API const char *SQLITE_STDCALL sqlite3_bind_parameter_name(sqlite3_stmt*,
 **
 ** See also: [sqlite3_bind_blob|sqlite3_bind()],
 ** [sqlite3_bind_parameter_count()], and
-** [sqlite3_bind_parameter_index()].
+** [sqlite3_bind_parameter_name()].
 */
 SQLITE_API int SQLITE_STDCALL sqlite3_bind_parameter_index(sqlite3_stmt*, const char *zName);
 
@@ -3893,8 +3910,6 @@ SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt);
 ** KEYWORDS: {column access functions}
 ** METHOD: sqlite3_stmt
 **
-** These routines form the "result set" interface.
-**
 ** ^These routines return information about a single column of the current
 ** result row of a query.  ^In every case the first argument is a pointer
 ** to the [prepared statement] that is being evaluated (the [sqlite3_stmt*]
@@ -3954,13 +3969,14 @@ SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt);
 ** even empty strings, are always zero-terminated.  ^The return
 ** value from sqlite3_column_blob() for a zero-length BLOB is a NULL pointer.
 **
-** ^The object returned by [sqlite3_column_value()] is an
-** [unprotected sqlite3_value] object.  An unprotected sqlite3_value object
-** may only be used with [sqlite3_bind_value()] and [sqlite3_result_value()].
+** <b>Warning:</b> ^The object returned by [sqlite3_column_value()] is an
+** [unprotected sqlite3_value] object.  In a multithreaded environment,
+** an unprotected sqlite3_value object may only be used safely with
+** [sqlite3_bind_value()] and [sqlite3_result_value()].
 ** If the [unprotected sqlite3_value] object returned by
 ** [sqlite3_column_value()] is used in any other way, including calls
 ** to routines like [sqlite3_value_int()], [sqlite3_value_text()],
-** or [sqlite3_value_bytes()], then the behavior is undefined.
+** or [sqlite3_value_bytes()], the behavior is not threadsafe.
 **
 ** These routines attempt to convert the value where appropriate.  ^For
 ** example, if the internal representation is FLOAT and a text result
@@ -3991,12 +4007,6 @@ SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt);
 ** </table>
 ** </blockquote>)^
 **
-** The table above makes reference to standard C library functions atoi()
-** and atof().  SQLite does not really use these functions.  It has its
-** own equivalent internal routines.  The atoi() and atof() names are
-** used in the table for brevity and because they are familiar to most
-** C programmers.
-**
 ** Note that when type conversions occur, pointers returned by prior
 ** calls to sqlite3_column_blob(), sqlite3_column_text(), and/or
 ** sqlite3_column_text16() may be invalidated.
@@ -4021,7 +4031,7 @@ SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt);
 ** of conversion are done in place when it is possible, but sometimes they
 ** are not possible and in those cases prior pointers are invalidated.
 **
-** The safest and easiest to remember policy is to invoke these routines
+** The safest policy is to invoke these routines
 ** in one of the following ways:
 **
 ** <ul>
@@ -4041,7 +4051,7 @@ SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt);
 ** ^The pointers returned are valid until a type conversion occurs as
 ** described above, or until [sqlite3_step()] or [sqlite3_reset()] or
 ** [sqlite3_finalize()] is called.  ^The memory space used to hold strings
-** and BLOBs is freed automatically.  Do <b>not</b> pass the pointers returned
+** and BLOBs is freed automatically.  Do <em>not</em> pass the pointers returned
 ** from [sqlite3_column_blob()], [sqlite3_column_text()], etc. into
 ** [sqlite3_free()].
 **
@@ -4291,12 +4301,12 @@ SQLITE_API SQLITE_DEPRECATED int SQLITE_STDCALL sqlite3_memory_alarm(void(*)(voi
 #endif
 
 /*
-** CAPI3REF: Obtaining SQL Function Parameter Values
+** CAPI3REF: Obtaining SQL Values
 ** METHOD: sqlite3_value
 **
 ** The C-language implementation of SQL functions and aggregates uses
 ** this set of interface routines to access the parameter values on
-** the function or aggregate.
+** the function or aggregate.  
 **
 ** The xFunc (for scalar functions) or xStep (for aggregates) parameters
 ** to [sqlite3_create_function()] and [sqlite3_create_function16()]
@@ -4348,6 +4358,39 @@ SQLITE_API const void *SQLITE_STDCALL sqlite3_value_text16le(sqlite3_value*);
 SQLITE_API const void *SQLITE_STDCALL sqlite3_value_text16be(sqlite3_value*);
 SQLITE_API int SQLITE_STDCALL sqlite3_value_type(sqlite3_value*);
 SQLITE_API int SQLITE_STDCALL sqlite3_value_numeric_type(sqlite3_value*);
+
+/*
+** CAPI3REF: Finding The Subtype Of SQL Values
+** METHOD: sqlite3_value
+**
+** The sqlite3_value_subtype(V) function returns the subtype for
+** an [application-defined SQL function] argument V.  The subtype
+** information can be used to pass a limited amount of context from
+** one SQL function to another.  Use the [sqlite3_result_subtype()]
+** routine to set the subtype for the return value of an SQL function.
+**
+** SQLite makes no use of subtype itself.  It merely passes the subtype
+** from the result of one [application-defined SQL function] into the
+** input of another.
+*/
+SQLITE_API unsigned int SQLITE_STDCALL sqlite3_value_subtype(sqlite3_value*);
+
+/*
+** CAPI3REF: Copy And Free SQL Values
+** METHOD: sqlite3_value
+**
+** ^The sqlite3_value_dup(V) interface makes a copy of the [sqlite3_value]
+** object D and returns a pointer to that copy.  ^The [sqlite3_value] returned
+** is a [protected sqlite3_value] object even if the input is not.
+** ^The sqlite3_value_dup(V) interface returns NULL if V is NULL or if a
+** memory allocation fails.
+**
+** ^The sqlite3_value_free(V) interface frees an [sqlite3_value] object
+** previously obtained from [sqlite3_value_dup()].  ^If V is a NULL pointer
+** then sqlite3_value_free(V) is a harmless no-op.
+*/
+SQLITE_API SQLITE_EXPERIMENTAL sqlite3_value *SQLITE_STDCALL sqlite3_value_dup(const sqlite3_value*);
+SQLITE_API SQLITE_EXPERIMENTAL void SQLITE_STDCALL sqlite3_value_free(sqlite3_value*);
 
 /*
 ** CAPI3REF: Obtain Aggregate Function Context
@@ -4512,9 +4555,9 @@ typedef void (*sqlite3_destructor_type)(void*);
 ** to by the second parameter and which is N bytes long where N is the
 ** third parameter.
 **
-** ^The sqlite3_result_zeroblob() interfaces set the result of
-** the application-defined function to be a BLOB containing all zero
-** bytes and N bytes in size, where N is the value of the 2nd parameter.
+** ^The sqlite3_result_zeroblob(C,N) and sqlite3_result_zeroblob64(C,N)
+** interfaces set the result of the application-defined function to be
+** a BLOB containing all zero bytes and N bytes in size.
 **
 ** ^The sqlite3_result_double() interface sets the result from
 ** an application-defined function to be a floating point value specified
@@ -4596,7 +4639,7 @@ typedef void (*sqlite3_destructor_type)(void*);
 ** from [sqlite3_malloc()] before it returns.
 **
 ** ^The sqlite3_result_value() interface sets the result of
-** the application-defined function to be a copy the
+** the application-defined function to be a copy of the
 ** [unprotected sqlite3_value] object specified by the 2nd parameter.  ^The
 ** sqlite3_result_value() interface makes a copy of the [sqlite3_value]
 ** so that the [sqlite3_value] specified in the parameter may change or
@@ -4629,6 +4672,22 @@ SQLITE_API void SQLITE_STDCALL sqlite3_result_text16le(sqlite3_context*, const v
 SQLITE_API void SQLITE_STDCALL sqlite3_result_text16be(sqlite3_context*, const void*, int,void(*)(void*));
 SQLITE_API void SQLITE_STDCALL sqlite3_result_value(sqlite3_context*, sqlite3_value*);
 SQLITE_API void SQLITE_STDCALL sqlite3_result_zeroblob(sqlite3_context*, int n);
+SQLITE_API int SQLITE_STDCALL sqlite3_result_zeroblob64(sqlite3_context*, sqlite3_uint64 n);
+
+
+/*
+** CAPI3REF: Setting The Subtype Of An SQL Function
+** METHOD: sqlite3_context
+**
+** The sqlite3_result_subtype(C,T) function causes the subtype of
+** the result from the [application-defined SQL function] with 
+** [sqlite3_context] C to be the value T.  Only the lower 8 bits 
+** of the subtype T are preserved in current versions of SQLite;
+** higher order bits are discarded.
+** The number of subtype bytes preserved by SQLite might increase
+** in future releases of SQLite.
+*/
+SQLITE_API void SQLITE_STDCALL sqlite3_result_subtype(sqlite3_context*,unsigned int);
 
 /*
 ** CAPI3REF: Define New Collating Sequences
@@ -5575,13 +5634,31 @@ struct sqlite3_module {
 ** ^The estimatedRows value is an estimate of the number of rows that
 ** will be returned by the strategy.
 **
+** The xBestIndex method may optionally populate the idxFlags field with a 
+** mask of SQLITE_INDEX_SCAN_* flags. Currently there is only one such flag -
+** SQLITE_INDEX_SCAN_UNIQUE. If the xBestIndex method sets this flag, SQLite
+** assumes that the strategy may visit at most one row. 
+**
+** Additionally, if xBestIndex sets the SQLITE_INDEX_SCAN_UNIQUE flag, then
+** SQLite also assumes that if a call to the xUpdate() method is made as
+** part of the same statement to delete or update a virtual table row and the
+** implementation returns SQLITE_CONSTRAINT, then there is no need to rollback
+** any database changes. In other words, if the xUpdate() returns
+** SQLITE_CONSTRAINT, the database contents must be exactly as they were
+** before xUpdate was called. By contrast, if SQLITE_INDEX_SCAN_UNIQUE is not
+** set and xUpdate returns SQLITE_CONSTRAINT, any database changes made by
+** the xUpdate method are automatically rolled back by SQLite.
+**
 ** IMPORTANT: The estimatedRows field was added to the sqlite3_index_info
 ** structure for SQLite version 3.8.2. If a virtual table extension is
 ** used with an SQLite version earlier than 3.8.2, the results of attempting 
 ** to read or write the estimatedRows field are undefined (but are likely 
 ** to included crashing the application). The estimatedRows field should
 ** therefore only be used if [sqlite3_libversion_number()] returns a
-** value greater than or equal to 3008002.
+** value greater than or equal to 3008002. Similarly, the idxFlags field
+** was added for version 3.9.0. It may therefore only be used if
+** sqlite3_libversion_number() returns a value greater than or equal to
+** 3009000.
 */
 struct sqlite3_index_info {
   /* Inputs */
@@ -5609,7 +5686,14 @@ struct sqlite3_index_info {
   double estimatedCost;           /* Estimated cost of using this index */
   /* Fields below are only available in SQLite 3.8.2 and later */
   sqlite3_int64 estimatedRows;    /* Estimated number of rows returned */
+  /* Fields below are only available in SQLite 3.9.0 and later */
+  int idxFlags;              /* Mask of SQLITE_INDEX_SCAN_* flags */
 };
+
+/*
+** CAPI3REF: Virtual Table Scan Flags
+*/
+#define SQLITE_INDEX_SCAN_UNIQUE      1     /* Scan visits at most 1 row */
 
 /*
 ** CAPI3REF: Virtual Table Constraint Operator Codes
@@ -5872,7 +5956,7 @@ SQLITE_API int SQLITE_STDCALL sqlite3_blob_open(
 **
 ** ^This function sets the database handle error code and message.
 */
-SQLITE_API SQLITE_EXPERIMENTAL int SQLITE_STDCALL sqlite3_blob_reopen(sqlite3_blob *, sqlite3_int64);
+SQLITE_API int SQLITE_STDCALL sqlite3_blob_reopen(sqlite3_blob *, sqlite3_int64);
 
 /*
 ** CAPI3REF: Close A BLOB Handle
@@ -6068,6 +6152,9 @@ SQLITE_API int SQLITE_STDCALL sqlite3_vfs_unregister(sqlite3_vfs*);
 ** <li>  SQLITE_MUTEX_STATIC_APP1
 ** <li>  SQLITE_MUTEX_STATIC_APP2
 ** <li>  SQLITE_MUTEX_STATIC_APP3
+** <li>  SQLITE_MUTEX_STATIC_VFS1
+** <li>  SQLITE_MUTEX_STATIC_VFS2
+** <li>  SQLITE_MUTEX_STATIC_VFS3
 ** </ul>
 **
 ** ^The first two constants (SQLITE_MUTEX_FAST and SQLITE_MUTEX_RECURSIVE)
@@ -6269,6 +6356,9 @@ SQLITE_API int SQLITE_STDCALL sqlite3_mutex_notheld(sqlite3_mutex*);
 #define SQLITE_MUTEX_STATIC_APP1      8  /* For use by application */
 #define SQLITE_MUTEX_STATIC_APP2      9  /* For use by application */
 #define SQLITE_MUTEX_STATIC_APP3     10  /* For use by application */
+#define SQLITE_MUTEX_STATIC_VFS1     11  /* For use by built-in VFS */
+#define SQLITE_MUTEX_STATIC_VFS2     12  /* For use by extension VFS */
+#define SQLITE_MUTEX_STATIC_VFS3     13  /* For use by application VFS */
 
 /*
 ** CAPI3REF: Retrieve the mutex for a database connection
@@ -7682,7 +7772,7 @@ SQLITE_API int SQLITE_STDCALL sqlite3_vtab_on_conflict(sqlite3 *);
 **
 ** See also: [sqlite3_stmt_scanstatus_reset()]
 */
-SQLITE_API SQLITE_EXPERIMENTAL int SQLITE_STDCALL sqlite3_stmt_scanstatus(
+SQLITE_API int SQLITE_STDCALL sqlite3_stmt_scanstatus(
   sqlite3_stmt *pStmt,      /* Prepared statement for which info desired */
   int idx,                  /* Index of loop to report on */
   int iScanStatusOp,        /* Information desired.  SQLITE_SCANSTAT_* */
@@ -7698,7 +7788,7 @@ SQLITE_API SQLITE_EXPERIMENTAL int SQLITE_STDCALL sqlite3_stmt_scanstatus(
 ** This API is only available if the library is built with pre-processor
 ** symbol [SQLITE_ENABLE_STMT_SCANSTATUS] defined.
 */
-SQLITE_API SQLITE_EXPERIMENTAL void SQLITE_STDCALL sqlite3_stmt_scanstatus_reset(sqlite3_stmt*);
+SQLITE_API void SQLITE_STDCALL sqlite3_stmt_scanstatus_reset(sqlite3_stmt*);
 
 
 /*
@@ -7813,6 +7903,8 @@ struct sqlite3_rtree_query_info {
   int eParentWithin;                /* Visibility of parent node */
   int eWithin;                      /* OUT: Visiblity */
   sqlite3_rtree_dbl rScore;         /* OUT: Write the score here */
+  /* The following fields are only available in 3.8.11 and later */
+  sqlite3_value **apSqlParam;       /* Original SQL values of parameters */
 };
 
 /*
@@ -7828,4 +7920,524 @@ struct sqlite3_rtree_query_info {
 #endif
 
 #endif  /* ifndef _SQLITE3RTREE_H_ */
+
+/*
+** 2014 May 31
+**
+** The author disclaims copyright to this source code.  In place of
+** a legal notice, here is a blessing:
+**
+**    May you do good and not evil.
+**    May you find forgiveness for yourself and forgive others.
+**    May you share freely, never taking more than you give.
+**
+******************************************************************************
+**
+** Interfaces to extend FTS5. Using the interfaces defined in this file, 
+** FTS5 may be extended with:
+**
+**     * custom tokenizers, and
+**     * custom auxiliary functions.
+*/
+
+
+#ifndef _FTS5_H
+#define _FTS5_H
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*************************************************************************
+** CUSTOM AUXILIARY FUNCTIONS
+**
+** Virtual table implementations may overload SQL functions by implementing
+** the sqlite3_module.xFindFunction() method.
+*/
+
+typedef struct Fts5ExtensionApi Fts5ExtensionApi;
+typedef struct Fts5Context Fts5Context;
+typedef struct Fts5PhraseIter Fts5PhraseIter;
+
+typedef void (*fts5_extension_function)(
+  const Fts5ExtensionApi *pApi,   /* API offered by current FTS version */
+  Fts5Context *pFts,              /* First arg to pass to pApi functions */
+  sqlite3_context *pCtx,          /* Context for returning result/error */
+  int nVal,                       /* Number of values in apVal[] array */
+  sqlite3_value **apVal           /* Array of trailing arguments */
+);
+
+struct Fts5PhraseIter {
+  const unsigned char *a;
+  const unsigned char *b;
+};
+
+/*
+** EXTENSION API FUNCTIONS
+**
+** xUserData(pFts):
+**   Return a copy of the context pointer the extension function was 
+**   registered with.
+**
+** xColumnTotalSize(pFts, iCol, pnToken):
+**   If parameter iCol is less than zero, set output variable *pnToken
+**   to the total number of tokens in the FTS5 table. Or, if iCol is
+**   non-negative but less than the number of columns in the table, return
+**   the total number of tokens in column iCol, considering all rows in 
+**   the FTS5 table.
+**
+**   If parameter iCol is greater than or equal to the number of columns
+**   in the table, SQLITE_RANGE is returned. Or, if an error occurs (e.g.
+**   an OOM condition or IO error), an appropriate SQLite error code is 
+**   returned.
+**
+** xColumnCount(pFts):
+**   Return the number of columns in the table.
+**
+** xColumnSize(pFts, iCol, pnToken):
+**   If parameter iCol is less than zero, set output variable *pnToken
+**   to the total number of tokens in the current row. Or, if iCol is
+**   non-negative but less than the number of columns in the table, set
+**   *pnToken to the number of tokens in column iCol of the current row.
+**
+**   If parameter iCol is greater than or equal to the number of columns
+**   in the table, SQLITE_RANGE is returned. Or, if an error occurs (e.g.
+**   an OOM condition or IO error), an appropriate SQLite error code is 
+**   returned.
+**
+** xColumnText:
+**   This function attempts to retrieve the text of column iCol of the
+**   current document. If successful, (*pz) is set to point to a buffer
+**   containing the text in utf-8 encoding, (*pn) is set to the size in bytes
+**   (not characters) of the buffer and SQLITE_OK is returned. Otherwise,
+**   if an error occurs, an SQLite error code is returned and the final values
+**   of (*pz) and (*pn) are undefined.
+**
+** xPhraseCount:
+**   Returns the number of phrases in the current query expression.
+**
+** xPhraseSize:
+**   Returns the number of tokens in phrase iPhrase of the query. Phrases
+**   are numbered starting from zero.
+**
+** xInstCount:
+**   Set *pnInst to the total number of occurrences of all phrases within
+**   the query within the current row. Return SQLITE_OK if successful, or
+**   an error code (i.e. SQLITE_NOMEM) if an error occurs.
+**
+** xInst:
+**   Query for the details of phrase match iIdx within the current row.
+**   Phrase matches are numbered starting from zero, so the iIdx argument
+**   should be greater than or equal to zero and smaller than the value
+**   output by xInstCount().
+**
+**   Returns SQLITE_OK if successful, or an error code (i.e. SQLITE_NOMEM) 
+**   if an error occurs.
+**
+** xRowid:
+**   Returns the rowid of the current row.
+**
+** xTokenize:
+**   Tokenize text using the tokenizer belonging to the FTS5 table.
+**
+** xQueryPhrase(pFts5, iPhrase, pUserData, xCallback):
+**   This API function is used to query the FTS table for phrase iPhrase
+**   of the current query. Specifically, a query equivalent to:
+**
+**       ... FROM ftstable WHERE ftstable MATCH $p ORDER BY rowid
+**
+**   with $p set to a phrase equivalent to the phrase iPhrase of the
+**   current query is executed. For each row visited, the callback function
+**   passed as the fourth argument is invoked. The context and API objects 
+**   passed to the callback function may be used to access the properties of
+**   each matched row. Invoking Api.xUserData() returns a copy of the pointer
+**   passed as the third argument to pUserData.
+**
+**   If the callback function returns any value other than SQLITE_OK, the
+**   query is abandoned and the xQueryPhrase function returns immediately.
+**   If the returned value is SQLITE_DONE, xQueryPhrase returns SQLITE_OK.
+**   Otherwise, the error code is propagated upwards.
+**
+**   If the query runs to completion without incident, SQLITE_OK is returned.
+**   Or, if some error occurs before the query completes or is aborted by
+**   the callback, an SQLite error code is returned.
+**
+**
+** xSetAuxdata(pFts5, pAux, xDelete)
+**
+**   Save the pointer passed as the second argument as the extension functions 
+**   "auxiliary data". The pointer may then be retrieved by the current or any
+**   future invocation of the same fts5 extension function made as part of
+**   of the same MATCH query using the xGetAuxdata() API.
+**
+**   Each extension function is allocated a single auxiliary data slot for
+**   each FTS query (MATCH expression). If the extension function is invoked 
+**   more than once for a single FTS query, then all invocations share a 
+**   single auxiliary data context.
+**
+**   If there is already an auxiliary data pointer when this function is
+**   invoked, then it is replaced by the new pointer. If an xDelete callback
+**   was specified along with the original pointer, it is invoked at this
+**   point.
+**
+**   The xDelete callback, if one is specified, is also invoked on the
+**   auxiliary data pointer after the FTS5 query has finished.
+**
+**   If an error (e.g. an OOM condition) occurs within this function, an
+**   the auxiliary data is set to NULL and an error code returned. If the
+**   xDelete parameter was not NULL, it is invoked on the auxiliary data
+**   pointer before returning.
+**
+**
+** xGetAuxdata(pFts5, bClear)
+**
+**   Returns the current auxiliary data pointer for the fts5 extension 
+**   function. See the xSetAuxdata() method for details.
+**
+**   If the bClear argument is non-zero, then the auxiliary data is cleared
+**   (set to NULL) before this function returns. In this case the xDelete,
+**   if any, is not invoked.
+**
+**
+** xRowCount(pFts5, pnRow)
+**
+**   This function is used to retrieve the total number of rows in the table.
+**   In other words, the same value that would be returned by:
+**
+**        SELECT count(*) FROM ftstable;
+**
+** xPhraseFirst()
+**   This function is used, along with type Fts5PhraseIter and the xPhraseNext
+**   method, to iterate through all instances of a single query phrase within
+**   the current row. This is the same information as is accessible via the
+**   xInstCount/xInst APIs. While the xInstCount/xInst APIs are more convenient
+**   to use, this API may be faster under some circumstances. To iterate 
+**   through instances of phrase iPhrase, use the following code:
+**
+**       Fts5PhraseIter iter;
+**       int iCol, iOff;
+**       for(pApi->xPhraseFirst(pFts, iPhrase, &iter, &iCol, &iOff);
+**           iOff>=0;
+**           pApi->xPhraseNext(pFts, &iter, &iCol, &iOff)
+**       ){
+**         // An instance of phrase iPhrase at offset iOff of column iCol
+**       }
+**
+**   The Fts5PhraseIter structure is defined above. Applications should not
+**   modify this structure directly - it should only be used as shown above
+**   with the xPhraseFirst() and xPhraseNext() API methods.
+**
+** xPhraseNext()
+**   See xPhraseFirst above.
+*/
+struct Fts5ExtensionApi {
+  int iVersion;                   /* Currently always set to 1 */
+
+  void *(*xUserData)(Fts5Context*);
+
+  int (*xColumnCount)(Fts5Context*);
+  int (*xRowCount)(Fts5Context*, sqlite3_int64 *pnRow);
+  int (*xColumnTotalSize)(Fts5Context*, int iCol, sqlite3_int64 *pnToken);
+
+  int (*xTokenize)(Fts5Context*, 
+    const char *pText, int nText, /* Text to tokenize */
+    void *pCtx,                   /* Context passed to xToken() */
+    int (*xToken)(void*, int, const char*, int, int, int)       /* Callback */
+  );
+
+  int (*xPhraseCount)(Fts5Context*);
+  int (*xPhraseSize)(Fts5Context*, int iPhrase);
+
+  int (*xInstCount)(Fts5Context*, int *pnInst);
+  int (*xInst)(Fts5Context*, int iIdx, int *piPhrase, int *piCol, int *piOff);
+
+  sqlite3_int64 (*xRowid)(Fts5Context*);
+  int (*xColumnText)(Fts5Context*, int iCol, const char **pz, int *pn);
+  int (*xColumnSize)(Fts5Context*, int iCol, int *pnToken);
+
+  int (*xQueryPhrase)(Fts5Context*, int iPhrase, void *pUserData,
+    int(*)(const Fts5ExtensionApi*,Fts5Context*,void*)
+  );
+  int (*xSetAuxdata)(Fts5Context*, void *pAux, void(*xDelete)(void*));
+  void *(*xGetAuxdata)(Fts5Context*, int bClear);
+
+  void (*xPhraseFirst)(Fts5Context*, int iPhrase, Fts5PhraseIter*, int*, int*);
+  void (*xPhraseNext)(Fts5Context*, Fts5PhraseIter*, int *piCol, int *piOff);
+};
+
+/* 
+** CUSTOM AUXILIARY FUNCTIONS
+*************************************************************************/
+
+/*************************************************************************
+** CUSTOM TOKENIZERS
+**
+** Applications may also register custom tokenizer types. A tokenizer 
+** is registered by providing fts5 with a populated instance of the 
+** following structure. All structure methods must be defined, setting
+** any member of the fts5_tokenizer struct to NULL leads to undefined
+** behaviour. The structure methods are expected to function as follows:
+**
+** xCreate:
+**   This function is used to allocate and inititalize a tokenizer instance.
+**   A tokenizer instance is required to actually tokenize text.
+**
+**   The first argument passed to this function is a copy of the (void*)
+**   pointer provided by the application when the fts5_tokenizer object
+**   was registered with FTS5 (the third argument to xCreateTokenizer()). 
+**   The second and third arguments are an array of nul-terminated strings
+**   containing the tokenizer arguments, if any, specified following the
+**   tokenizer name as part of the CREATE VIRTUAL TABLE statement used
+**   to create the FTS5 table.
+**
+**   The final argument is an output variable. If successful, (*ppOut) 
+**   should be set to point to the new tokenizer handle and SQLITE_OK
+**   returned. If an error occurs, some value other than SQLITE_OK should
+**   be returned. In this case, fts5 assumes that the final value of *ppOut 
+**   is undefined.
+**
+** xDelete:
+**   This function is invoked to delete a tokenizer handle previously
+**   allocated using xCreate(). Fts5 guarantees that this function will
+**   be invoked exactly once for each successful call to xCreate().
+**
+** xTokenize:
+**   This function is expected to tokenize the nText byte string indicated 
+**   by argument pText. pText may or may not be nul-terminated. The first
+**   argument passed to this function is a pointer to an Fts5Tokenizer object
+**   returned by an earlier call to xCreate().
+**
+**   The second argument indicates the reason that FTS5 is requesting
+**   tokenization of the supplied text. This is always one of the following
+**   four values:
+**
+**   <ul><li> <b>FTS5_TOKENIZE_DOCUMENT</b> - A document is being inserted into
+**            or removed from the FTS table. The tokenizer is being invoked to
+**            determine the set of tokens to add to (or delete from) the
+**            FTS index.
+**
+**       <li> <b>FTS5_TOKENIZE_QUERY</b> - A MATCH query is being executed 
+**            against the FTS index. The tokenizer is being called to tokenize 
+**            a bareword or quoted string specified as part of the query.
+**
+**       <li> <b>(FTS5_TOKENIZE_QUERY | FTS5_TOKENIZE_PREFIX)</b> - Same as
+**            FTS5_TOKENIZE_QUERY, except that the bareword or quoted string is
+**            followed by a "*" character, indicating that the last token
+**            returned by the tokenizer will be treated as a token prefix.
+**
+**       <li> <b>FTS5_TOKENIZE_AUX</b> - The tokenizer is being invoked to 
+**            satisfy an fts5_api.xTokenize() request made by an auxiliary
+**            function. Or an fts5_api.xColumnSize() request made by the same
+**            on a columnsize=0 database.  
+**   </ul>
+**
+**   For each token in the input string, the supplied callback xToken() must
+**   be invoked. The first argument to it should be a copy of the pointer
+**   passed as the second argument to xTokenize(). The third and fourth
+**   arguments are a pointer to a buffer containing the token text, and the
+**   size of the token in bytes. The 4th and 5th arguments are the byte offsets
+**   of the first byte of and first byte immediately following the text from
+**   which the token is derived within the input.
+**
+**   The second argument passed to the xToken() callback ("tflags") should
+**   normally be set to 0. The exception is if the tokenizer supports 
+**   synonyms. In this case see the discussion below for details.
+**
+**   FTS5 assumes the xToken() callback is invoked for each token in the 
+**   order that they occur within the input text.
+**
+**   If an xToken() callback returns any value other than SQLITE_OK, then
+**   the tokenization should be abandoned and the xTokenize() method should
+**   immediately return a copy of the xToken() return value. Or, if the
+**   input buffer is exhausted, xTokenize() should return SQLITE_OK. Finally,
+**   if an error occurs with the xTokenize() implementation itself, it
+**   may abandon the tokenization and return any error code other than
+**   SQLITE_OK or SQLITE_DONE.
+**
+** SYNONYM SUPPORT
+**
+**   Custom tokenizers may also support synonyms. Consider a case in which a
+**   user wishes to query for a phrase such as "first place". Using the 
+**   built-in tokenizers, the FTS5 query 'first + place' will match instances
+**   of "first place" within the document set, but not alternative forms
+**   such as "1st place". In some applications, it would be better to match
+**   all instances of "first place" or "1st place" regardless of which form
+**   the user specified in the MATCH query text.
+**
+**   There are several ways to approach this in FTS5:
+**
+**   <ol><li> By mapping all synonyms to a single token. In this case, the 
+**            In the above example, this means that the tokenizer returns the
+**            same token for inputs "first" and "1st". Say that token is in
+**            fact "first", so that when the user inserts the document "I won
+**            1st place" entries are added to the index for tokens "i", "won",
+**            "first" and "place". If the user then queries for '1st + place',
+**            the tokenizer substitutes "first" for "1st" and the query works
+**            as expected.
+**
+**       <li> By adding multiple synonyms for a single term to the FTS index.
+**            In this case, when tokenizing query text, the tokenizer may 
+**            provide multiple synonyms for a single term within the document.
+**            FTS5 then queries the index for each synonym individually. For
+**            example, faced with the query:
+**
+**   <codeblock>
+**     ... MATCH 'first place'</codeblock>
+**
+**            the tokenizer offers both "1st" and "first" as synonyms for the
+**            first token in the MATCH query and FTS5 effectively runs a query 
+**            similar to:
+**
+**   <codeblock>
+**     ... MATCH '(first OR 1st) place'</codeblock>
+**
+**            except that, for the purposes of auxiliary functions, the query
+**            still appears to contain just two phrases - "(first OR 1st)" 
+**            being treated as a single phrase.
+**
+**       <li> By adding multiple synonyms for a single term to the FTS index.
+**            Using this method, when tokenizing document text, the tokenizer
+**            provides multiple synonyms for each token. So that when a 
+**            document such as "I won first place" is tokenized, entries are
+**            added to the FTS index for "i", "won", "first", "1st" and
+**            "place".
+**
+**            This way, even if the tokenizer does not provide synonyms
+**            when tokenizing query text (it should not - to do would be
+**            inefficient), it doesn't matter if the user queries for 
+**            'first + place' or '1st + place', as there are entires in the
+**            FTS index corresponding to both forms of the first token.
+**   </ol>
+**
+**   Whether it is parsing document or query text, any call to xToken that
+**   specifies a <i>tflags</i> argument with the FTS5_TOKEN_COLOCATED bit
+**   is considered to supply a synonym for the previous token. For example,
+**   when parsing the document "I won first place", a tokenizer that supports
+**   synonyms would call xToken() 5 times, as follows:
+**
+**   <codeblock>
+**       xToken(pCtx, 0, "i",                      1,  0,  1);
+**       xToken(pCtx, 0, "won",                    3,  2,  5);
+**       xToken(pCtx, 0, "first",                  5,  6, 11);
+**       xToken(pCtx, FTS5_TOKEN_COLOCATED, "1st", 3,  6, 11);
+**       xToken(pCtx, 0, "place",                  5, 12, 17);
+**</codeblock>
+**
+**   It is an error to specify the FTS5_TOKEN_COLOCATED flag the first time
+**   xToken() is called. Multiple synonyms may be specified for a single token
+**   by making multiple calls to xToken(FTS5_TOKEN_COLOCATED) in sequence. 
+**   There is no limit to the number of synonyms that may be provided for a
+**   single token.
+**
+**   In many cases, method (1) above is the best approach. It does not add 
+**   extra data to the FTS index or require FTS5 to query for multiple terms,
+**   so it is efficient in terms of disk space and query speed. However, it
+**   does not support prefix queries very well. If, as suggested above, the
+**   token "first" is subsituted for "1st" by the tokenizer, then the query:
+**
+**   <codeblock>
+**     ... MATCH '1s*'</codeblock>
+**
+**   will not match documents that contain the token "1st" (as the tokenizer
+**   will probably not map "1s" to any prefix of "first").
+**
+**   For full prefix support, method (3) may be preferred. In this case, 
+**   because the index contains entries for both "first" and "1st", prefix
+**   queries such as 'fi*' or '1s*' will match correctly. However, because
+**   extra entries are added to the FTS index, this method uses more space
+**   within the database.
+**
+**   Method (2) offers a midpoint between (1) and (3). Using this method,
+**   a query such as '1s*' will match documents that contain the literal 
+**   token "1st", but not "first" (assuming the tokenizer is not able to
+**   provide synonyms for prefixes). However, a non-prefix query like '1st'
+**   will match against "1st" and "first". This method does not require
+**   extra disk space, as no extra entries are added to the FTS index. 
+**   On the other hand, it may require more CPU cycles to run MATCH queries,
+**   as separate queries of the FTS index are required for each synonym.
+**
+**   When using methods (2) or (3), it is important that the tokenizer only
+**   provide synonyms when tokenizing document text (method (2)) or query
+**   text (method (3)), not both. Doing so will not cause any errors, but is
+**   inefficient.
+*/
+typedef struct Fts5Tokenizer Fts5Tokenizer;
+typedef struct fts5_tokenizer fts5_tokenizer;
+struct fts5_tokenizer {
+  int (*xCreate)(void*, const char **azArg, int nArg, Fts5Tokenizer **ppOut);
+  void (*xDelete)(Fts5Tokenizer*);
+  int (*xTokenize)(Fts5Tokenizer*, 
+      void *pCtx,
+      int flags,            /* Mask of FTS5_TOKENIZE_* flags */
+      const char *pText, int nText, 
+      int (*xToken)(
+        void *pCtx,         /* Copy of 2nd argument to xTokenize() */
+        int tflags,         /* Mask of FTS5_TOKEN_* flags */
+        const char *pToken, /* Pointer to buffer containing token */
+        int nToken,         /* Size of token in bytes */
+        int iStart,         /* Byte offset of token within input text */
+        int iEnd            /* Byte offset of end of token within input text */
+      )
+  );
+};
+
+/* Flags that may be passed as the third argument to xTokenize() */
+#define FTS5_TOKENIZE_QUERY     0x0001
+#define FTS5_TOKENIZE_PREFIX    0x0002
+#define FTS5_TOKENIZE_DOCUMENT  0x0004
+#define FTS5_TOKENIZE_AUX       0x0008
+
+/* Flags that may be passed by the tokenizer implementation back to FTS5
+** as the third argument to the supplied xToken callback. */
+#define FTS5_TOKEN_COLOCATED    0x0001      /* Same position as prev. token */
+
+/*
+** END OF CUSTOM TOKENIZERS
+*************************************************************************/
+
+/*************************************************************************
+** FTS5 EXTENSION REGISTRATION API
+*/
+typedef struct fts5_api fts5_api;
+struct fts5_api {
+  int iVersion;                   /* Currently always set to 2 */
+
+  /* Create a new tokenizer */
+  int (*xCreateTokenizer)(
+    fts5_api *pApi,
+    const char *zName,
+    void *pContext,
+    fts5_tokenizer *pTokenizer,
+    void (*xDestroy)(void*)
+  );
+
+  /* Find an existing tokenizer */
+  int (*xFindTokenizer)(
+    fts5_api *pApi,
+    const char *zName,
+    void **ppContext,
+    fts5_tokenizer *pTokenizer
+  );
+
+  /* Create a new auxiliary function */
+  int (*xCreateFunction)(
+    fts5_api *pApi,
+    const char *zName,
+    void *pContext,
+    fts5_extension_function xFunction,
+    void (*xDestroy)(void*)
+  );
+};
+
+/*
+** END OF REGISTRATION API
+*************************************************************************/
+
+#ifdef __cplusplus
+}  /* end of the 'extern "C"' block */
+#endif
+
+#endif /* _FTS5_H */
+
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,15 @@
 
 #include <sys/stat.h>
 
+#ifdef PHP_WIN32
+# include "win32/php_stdint.h"
+#else
+# if HAVE_INTTYPES_H
+#  include <inttypes.h>
+# elif HAVE_STDINT_H
+#  include <stdint.h>
+# endif
+#endif
 
 /* some defines for the different JPEG block types */
 #define M_SOF0  0xC0            /* Start Of Frame N */
@@ -196,6 +205,11 @@ PHP_FUNCTION(iptcembed)
 		RETURN_FALSE;
 	}
 
+	if (iptcdata_len >= SIZE_MAX - sizeof(psheader) - 1025) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "IPTC data too large");
+		RETURN_FALSE;
+	}
+
 	if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {
 		php_error_docref(NULL, E_WARNING, "Unable to open %s", jpeg_file);
 		RETURN_FALSE;
@@ -204,7 +218,7 @@ PHP_FUNCTION(iptcembed)
 	if (spool < 2) {
 		zend_fstat(fileno(fp), &sb);
 
-		spoolbuf = zend_string_alloc(iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 0);
+		spoolbuf = zend_string_safe_alloc(1, iptcdata_len + sizeof(psheader) + 1024 + 1, sb.st_size, 0);
 		poi = (unsigned char*)ZSTR_VAL(spoolbuf);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
 	}

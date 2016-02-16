@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -252,8 +252,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					    src->opcode != ZEND_FETCH_R &&
 					    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
 					    src->opcode != ZEND_FETCH_DIM_R &&
-					    src->opcode != ZEND_FETCH_OBJ_R) {
-						ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
+					    src->opcode != ZEND_FETCH_OBJ_R &&
+					    src->opcode != ZEND_NEW) {
+						if (opline->extended_value & ZEND_FREE_ON_RETURN) {
+							/* mark as removed (empty live range) */
+							op_array->live_range[opline->op2.num].var = (uint32_t)-1;
+						}
+						ZEND_RESULT_TYPE(src) = IS_UNUSED;
 						MAKE_NOP(opline);
 					}
 				}
@@ -745,7 +750,7 @@ optimize_const_unary_op:
 		}
 
 		/* get variable source */
-		if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
+		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 			SET_VAR_SOURCE(opline);
 		}
 		opline++;
@@ -836,8 +841,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		switch (opline->opcode) {
 			case ZEND_FAST_CALL:
 			case ZEND_JMP:
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op1, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_JMPZNZ:
@@ -860,6 +863,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
 				}
 				break;
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
@@ -949,17 +954,20 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		}
 
 		if (i != j) {
-			zend_op *opline = new_opcodes;
-			zend_op *end = opline + len;
-
-			op_array->last_live_range = j;
-			while (opline != end) {
-				if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-				    opline->extended_value == ZEND_FREE_ON_RETURN) {
-					ZEND_ASSERT(opline->op2.num < (uint32_t) i);
-					opline->op2.num = map[opline->op2.num];
+			if ((op_array->last_live_range = j)) {
+				zend_op *opline = new_opcodes;
+				zend_op *end = opline + len;
+				while (opline != end) {
+					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
+							opline->extended_value == ZEND_FREE_ON_RETURN) {
+						ZEND_ASSERT(opline->op2.num < (uint32_t) i);
+						opline->op2.num = map[opline->op2.num];
+					}
+					opline++;
 				}
-				opline++;
+			} else {
+				efree(op_array->live_range);
+				op_array->live_range = NULL;
 			}
 		}
 		free_alloca(map, use_heap);
@@ -1500,7 +1508,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 		}
 
 		while (opline<end) {
-			if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
+			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 				var_num = VAR_NUM(opline->op1.var);
 				if (!zend_bitset_in(defined_here, var_num)) {
 					zend_bitset_incl(used_ext, var_num);
@@ -1608,7 +1616,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_DO_ICALL:
 						case ZEND_DO_UCALL:
 						case ZEND_DO_FCALL_BY_NAME:
-							opline->result_type |= EXT_TYPE_UNUSED;
+							opline->result_type = IS_UNUSED;
 							break;
 					}
 				} else {
@@ -1620,7 +1628,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
 							opline->opcode -= 2;
-							opline->result_type = IS_VAR | EXT_TYPE_UNUSED;
+							opline->result_type = IS_UNUSED;
 							break;
 						case ZEND_QM_ASSIGN:
 						case ZEND_BOOL:
@@ -1666,7 +1674,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 				zend_bitset_incl(usage, VAR_NUM(opline->op2.var));
 			}
 
-			if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
+			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 				zend_bitset_incl(usage, VAR_NUM(opline->op1.var));
 			}
 
@@ -1732,7 +1740,7 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 
 #define PASSES 3
 
-void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_cfg cfg;
 	zend_basic_block *blocks, *end, *b;
@@ -1745,7 +1753,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, 0, &cfg, NULL) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg, NULL) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}

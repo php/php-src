@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,12 @@
 #include "zend_vm.h"
 #include "zend_cfg.h"
 #include "zend_func_info.h"
+#include "zend_call_graph.h"
 #include "zend_dump.h"
+
+#ifndef HAVE_DFA_PASS
+# define HAVE_DFA_PASS 0
+#endif
 
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
@@ -90,11 +95,6 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 			}
 			if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
 				opline->result.var += sizeof(zval);
-			}
-			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
-			    opline->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
-			    opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-				opline->extended_value += sizeof(zval);
 			}
 			opline++;
 		}
@@ -307,26 +307,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}
 			break;
-		case ZEND_OP_DATA:
-			if ((opline-1)->opcode != ZEND_ASSIGN_DIM &&
-				((opline-1)->extended_value != ZEND_ASSIGN_DIM ||
-				 ((opline-1)->opcode != ZEND_ASSIGN_ADD &&
-				 (opline-1)->opcode != ZEND_ASSIGN_SUB &&
-				 (opline-1)->opcode != ZEND_ASSIGN_MUL &&
-				 (opline-1)->opcode != ZEND_ASSIGN_DIV &&
-				 (opline-1)->opcode != ZEND_ASSIGN_POW &&
-				 (opline-1)->opcode != ZEND_ASSIGN_MOD &&
-				 (opline-1)->opcode != ZEND_ASSIGN_SL &&
-				 (opline-1)->opcode != ZEND_ASSIGN_SR &&
-				 (opline-1)->opcode != ZEND_ASSIGN_CONCAT &&
-				 (opline-1)->opcode != ZEND_ASSIGN_BW_OR &&
-				 (opline-1)->opcode != ZEND_ASSIGN_BW_AND &&
-				 (opline-1)->opcode != ZEND_ASSIGN_BW_XOR))
-			) {
-				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-				break;
-			}
-			/* break missing intentionally */
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_INIT_ARRAY:
@@ -388,16 +368,20 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 			i++;
 		} while (i < op_array->last_live_range);
 		if (i != j) {
-			zend_op *opline = op_array->opcodes;
-			zend_op *end = opline + op_array->last;
+			if ((op_array->last_live_range = j)) {
+				zend_op *opline = op_array->opcodes;
+				zend_op *end = opline + op_array->last;
 
-			op_array->last_live_range = j;
-			while (opline != end) {
-				if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-				    opline->extended_value == ZEND_FREE_ON_RETURN) {
-					opline->op2.num = map[opline->op2.num];
+				while (opline != end) {
+					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
+							opline->extended_value == ZEND_FREE_ON_RETURN) {
+						opline->op2.num = map[opline->op2.num];
+					}
+					opline++;
 				}
-				opline++;
+			} else {
+				efree(op_array->live_range);
+				op_array->live_range = NULL;
 			}
 		}
 		free_alloca(map, use_heap);
@@ -595,7 +579,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - INIT_FCALL_BY_NAME -> DO_FCALL
 	 */
 	if (ZEND_OPTIMIZER_PASS_4 & ctx->optimization_level) {
-		optimize_func_calls(op_array, ctx);
+		zend_optimize_func_calls(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_4) {
 			zend_dump_op_array(op_array, 0, "after pass 1", NULL);
 		}
@@ -605,27 +589,30 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - CFG optimization
 	 */
 	if (ZEND_OPTIMIZER_PASS_5 & ctx->optimization_level) {
-		optimize_cfg(op_array, ctx);
+		zend_optimize_cfg(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_5) {
 			zend_dump_op_array(op_array, 0, "after pass 5", NULL);
 		}
 	}
 
+#if HAVE_DFA_PASS
 	/* pass 6:
 	 * - DFA optimization
 	 */
-	if (ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) {
-		optimize_dfa(op_array, ctx);
+	if ((ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) &&
+	    !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
+		zend_optimize_dfa(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_6) {
 			zend_dump_op_array(op_array, 0, "after pass 6", NULL);
 		}
 	}
+#endif
 
 	/* pass 9:
 	 * - Optimize temp variables usage
 	 */
 	if (ZEND_OPTIMIZER_PASS_9 & ctx->optimization_level) {
-		optimize_temporary_variables(op_array, ctx);
+		zend_optimize_temporary_variables(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_9) {
 			zend_dump_op_array(op_array, 0, "after pass 9", NULL);
 		}
@@ -656,12 +643,10 @@ static void zend_optimize(zend_op_array      *op_array,
 	}
 }
 
-static void zend_optimize_op_array(zend_op_array      *op_array,
-                                   zend_optimizer_ctx *ctx)
+static void zend_revert_pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
 
-	/* Revert pass_two() */
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -673,11 +658,12 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 		}
 		opline++;
 	}
+}
 
-	/* Do actual optimizations */
-	zend_optimize(op_array, ctx);
+static void zend_redo_pass_two(zend_op_array *op_array)
+{
+	zend_op *opline, *end;
 
-	/* Redo pass_two() */
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -690,6 +676,19 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
+}
+
+static void zend_optimize_op_array(zend_op_array      *op_array,
+                                   zend_optimizer_ctx *ctx)
+{
+	/* Revert pass_two() */
+	zend_revert_pass_two(op_array);
+
+	/* Do actual optimizations */
+	zend_optimize(op_array, ctx);
+
+	/* Redo pass_two() */
+	zend_redo_pass_two(op_array);
 }
 
 static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer_ctx *ctx)
@@ -712,13 +711,32 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 	}
 }
 
+static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
+{
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+
+	if (func_info) {
+		zend_call_info *call_info =func_info->callee_info;
+
+		while (call_info) {
+			zend_op *opline = call_info->caller_init_opline;
+
+			if (opline && call_info->callee_func) {
+				ZEND_ASSERT(opline->opcode == ZEND_INIT_FCALL);
+				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, call_info->callee_func);
+			}
+			call_info = call_info->next_callee;
+		}
+	}
+}
+
 int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
-	uint idx, j;
-	Bucket *p, *q;
 	zend_class_entry *ce;
 	zend_op_array *op_array;
+	zend_string *name;
 	zend_optimizer_ctx ctx;
+	zend_call_graph call_graph;
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
@@ -728,64 +746,96 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 
 	zend_optimize_op_array(&script->main_op_array, &ctx);
 
-	for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
-		p = script->function_table.arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		op_array = (zend_op_array*)Z_PTR(p->val);
+	ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
 		zend_optimize_op_array(op_array, &ctx);
-	}
+	} ZEND_HASH_FOREACH_END();
 
-	for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
-		p = script->class_table.arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		ce = (zend_class_entry*)Z_PTR(p->val);
-		for (j = 0; j < ce->function_table.nNumUsed; j++) {
-			q = ce->function_table.arData + j;
-			if (Z_TYPE(q->val) == IS_UNDEF) continue;
-			op_array = (zend_op_array*)Z_PTR(q->val);
+	ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
 			if (op_array->scope == ce) {
 				zend_optimize_op_array(op_array, &ctx);
 			} else if (op_array->type == ZEND_USER_FUNCTION) {
 				zend_op_array *orig_op_array;
-				if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, q->key)) != NULL) {
+				if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, name)) != NULL) {
 					HashTable *ht = op_array->static_variables;
 					*op_array = *orig_op_array;
 					op_array->static_variables = ht;
 				}
 			}
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
+
+#if HAVE_DFA_PASS
+	if ((ZEND_OPTIMIZER_PASS_6 & optimization_level) &&
+	    (ZEND_OPTIMIZER_PASS_7 & optimization_level) &&
+	    zend_build_call_graph(&ctx.arena, script, ZEND_RT_CONSTANTS, &call_graph) == SUCCESS) {
+		/* Optimize using call-graph */
+		void *checkpoint = zend_arena_checkpoint(ctx.arena);
+		int i;
+		zend_func_info *func_info;
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			zend_revert_pass_two(call_graph.op_arrays[i]);
 		}
-	}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (func_info) {
+				zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa, &func_info->flags);
+			}
+		}
+
+		//TODO: perform inner-script inference???
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (func_info) {
+				zend_dfa_optimize_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa);
+			}
+		}
+
+		if (debug_level & ZEND_DUMP_AFTER_PASS_7) {
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 7", NULL);
+			}
+		}
+
+		if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				zend_adjust_fcall_stack_size_graph(call_graph.op_arrays[i]);
+			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			zend_redo_pass_two(call_graph.op_arrays[i]);
+			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+		}
+
+		zend_arena_release(&ctx.arena, checkpoint);
+	} else
+#endif
 
 	if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
 		zend_adjust_fcall_stack_size(&script->main_op_array, &ctx);
 
-		for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
-			p = script->function_table.arData + idx;
-			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			op_array = (zend_op_array*)Z_PTR(p->val);
+		ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
 			zend_adjust_fcall_stack_size(op_array, &ctx);
-		}
+		} ZEND_HASH_FOREACH_END();
 
-		for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
-			p = script->class_table.arData + idx;
-			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			ce = (zend_class_entry*)Z_PTR(p->val);
-			for (j = 0; j < ce->function_table.nNumUsed; j++) {
-				q = ce->function_table.arData + j;
-				if (Z_TYPE(q->val) == IS_UNDEF) continue;
-				op_array = (zend_op_array*)Z_PTR(q->val);
+		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
 				if (op_array->scope == ce) {
 					zend_adjust_fcall_stack_size(op_array, &ctx);
 				} else if (op_array->type == ZEND_USER_FUNCTION) {
 					zend_op_array *orig_op_array;
-					if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, q->key)) != NULL) {
+					if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, name)) != NULL) {
 						HashTable *ht = op_array->static_variables;
 						*op_array = *orig_op_array;
 						op_array->static_variables = ht;
 					}
 				}
-			}
-		}
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (ctx.constants) {

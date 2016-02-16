@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, e-SSA based Type & Range Inference                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,14 +60,13 @@
 
 #define MAY_BE_IN_REG               (1<<25) /* value allocated in CPU register */
 
-//TODO: remome MAY_BE_DEF, MAY_BE_RC1, MAY_BE_RCN???
-#define MAY_BE_DEF                  (1<<26)
+//TODO: remome MAY_BE_RC1, MAY_BE_RCN???
 #define MAY_BE_RC1                  (1<<27) /* may be non-reference with refcount == 1 */
 #define MAY_BE_RCN                  (1<<28) /* may be non-reference with refcount > 1  */
 
 
 #define DEFINE_SSA_OP_HAS_RANGE(opN) \
-	static zend_always_inline long _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline->opN, ssa->rt_constants); \
@@ -83,7 +82,7 @@
 	}
 
 #define DEFINE_SSA_OP_MIN_RANGE(opN) \
-	static zend_always_inline long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline->opN, ssa->rt_constants); \
@@ -103,11 +102,11 @@
 		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
 			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.min; \
 		} \
-		return LONG_MIN; \
+		return ZEND_LONG_MIN; \
 	}
 
 #define DEFINE_SSA_OP_MAX_RANGE(opN) \
-	static zend_always_inline long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline->opN, ssa->rt_constants); \
@@ -127,7 +126,7 @@
 		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
 			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.max; \
 		} \
-		return LONG_MAX; \
+		return ZEND_LONG_MAX; \
 	}
 
 #define DEFINE_SSA_OP_RANGE_UNDERFLOW(opN) \
@@ -190,12 +189,12 @@ DEFINE_SSA_OP_RANGE_OVERFLOW(op2)
 
 static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 	if (Z_TYPE_P(zv) == IS_CONSTANT) {
-		return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
+		return MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 	} else if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
-		return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
+		return MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(zv);
-		uint32_t tmp = MAY_BE_ARRAY | MAY_BE_DEF | MAY_BE_RC1;
+		uint32_t tmp = MAY_BE_ARRAY | MAY_BE_RC1 | MAY_BE_RCN;
 
 		zend_string *str;
 		zval *val;
@@ -209,7 +208,7 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 		} ZEND_HASH_FOREACH_END();
 		return tmp;
 	} else {
-		return (1 << Z_TYPE_P(zv)) | MAY_BE_DEF | MAY_BE_RC1;
+		return (1 << Z_TYPE_P(zv)) | MAY_BE_RC1 | MAY_BE_RCN;
 	}
 }
 
@@ -218,7 +217,7 @@ static zend_always_inline uint32_t get_ssa_var_info(const zend_ssa *ssa, int ssa
 	if (ssa->var_info && ssa_var_num >= 0) {
 		return ssa->var_info[ssa_var_num].type;
 	} else {
-		return MAY_BE_DEF | MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ERROR;
+		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ERROR;
 	}
 }
 
@@ -267,7 +266,7 @@ int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const 
 uint32_t zend_array_element_type(uint32_t t1, int write, int insert);
 
 int  zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp);
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, long min, long max, zend_bool overflow);
+void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow);
 int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 void zend_inference_check_recursive_dependencies(zend_op_array *op_array);

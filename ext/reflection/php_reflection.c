@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -386,7 +386,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		string_printf(str, "%s%s", indent, ce->info.user.doc_comment);
+		string_printf(str, "%s%s", indent, ZSTR_VAL(ce->info.user.doc_comment));
 		string_write(str, "\n", 1);
 	}
 
@@ -3029,6 +3029,7 @@ ZEND_METHOD(reflection_type, __toString)
 		case _IS_BOOL:    RETURN_STRINGL("bool", sizeof("bool") - 1);
 		case IS_LONG:     RETURN_STRINGL("int", sizeof("int") - 1);
 		case IS_DOUBLE:   RETURN_STRINGL("float", sizeof("float") - 1);
+		case IS_VOID:     RETURN_STRINGL("void", sizeof("void") - 1);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }

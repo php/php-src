@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <zend.h>
 
-static const char *zend_vm_opcodes_names[182] = {
+static const char *zend_vm_opcodes_names[184] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -204,9 +204,11 @@ static const char *zend_vm_opcodes_names[182] = {
 	"ZEND_UNSET_STATIC_PROP",
 	"ZEND_ISSET_ISEMPTY_STATIC_PROP",
 	"ZEND_FETCH_CLASS_CONSTANT",
+	"ZEND_BIND_LEXICAL",
+	"ZEND_BIND_STATIC",
 };
 
-static uint32_t zend_vm_opcodes_flags[182] = {
+static uint32_t zend_vm_opcodes_flags[184] = {
 	0x00000000,
 	0x00000707,
 	0x00000707,
@@ -268,7 +270,7 @@ static uint32_t zend_vm_opcodes_flags[182] = {
 	0x00000001,
 	0x01000300,
 	0x00000000,
-	0x01000300,
+	0x01000310,
 	0x00000003,
 	0x00000010,
 	0x00000310,
@@ -347,12 +349,12 @@ static uint32_t zend_vm_opcodes_flags[182] = {
 	0x00000000,
 	0x00007305,
 	0x00000000,
-	0x02000000,
+	0x00000100,
 	0x00000000,
 	0x00000003,
 	0x00000303,
 	0x00000300,
-	0x02000000,
+	0x00000100,
 	0x00000000,
 	0x00006701,
 	0x00020757,
@@ -378,8 +380,8 @@ static uint32_t zend_vm_opcodes_flags[182] = {
 	0x00000301,
 	0x00002003,
 	0x00000707,
-	0x00000020,
-	0x02000020,
+	0x03000000,
+	0x03000100,
 	0x00007307,
 	0x00007307,
 	0x00007307,
@@ -389,6 +391,8 @@ static uint32_t zend_vm_opcodes_flags[182] = {
 	0x00007307,
 	0x00027307,
 	0x00000373,
+	0x00100101,
+	0x00100301,
 };
 
 ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {

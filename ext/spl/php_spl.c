@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -417,11 +417,15 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 
 	if (SPL_G(autoload_functions)) {
+		HashPosition pos;
+		zend_ulong num_idx;
 		int l_autoload_running = SPL_G(autoload_running);
 		SPL_G(autoload_running) = 1;
 		lc_name = zend_string_alloc(Z_STRLEN_P(class_name), 0);
 		zend_str_tolower_copy(ZSTR_VAL(lc_name), Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
-		ZEND_HASH_FOREACH_STR_KEY_PTR(SPL_G(autoload_functions), func_name, alfi) {
+		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
+		while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {
+			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &pos);
 			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
 			zend_exception_save();
 			if (retval) {
@@ -431,7 +435,8 @@ PHP_FUNCTION(spl_autoload_call)
 			if (zend_hash_exists(EG(class_table), lc_name)) {
 				break;
 			}
-		} ZEND_HASH_FOREACH_END();
+			zend_hash_move_forward_ex(SPL_G(autoload_functions), &pos);
+		}
 		zend_exception_restore();
 		zend_string_free(lc_name);
 		SPL_G(autoload_running) = l_autoload_running;
@@ -654,10 +659,14 @@ PHP_FUNCTION(spl_autoload_unregister)
 	if (SPL_G(autoload_functions)) {
 		if (ZSTR_LEN(lc_name) == sizeof("spl_autoload_call") - 1 && !strcmp(ZSTR_VAL(lc_name), "spl_autoload_call")) {
 			/* remove all */
-			zend_hash_destroy(SPL_G(autoload_functions));
-			FREE_HASHTABLE(SPL_G(autoload_functions));
-			SPL_G(autoload_functions) = NULL;
-			EG(autoload_func) = NULL;
+			if (!SPL_G(autoload_running)) {
+				zend_hash_destroy(SPL_G(autoload_functions));
+				FREE_HASHTABLE(SPL_G(autoload_functions));
+				SPL_G(autoload_functions) = NULL;
+				EG(autoload_func) = NULL;
+			} else {
+				zend_hash_clean(SPL_G(autoload_functions));
+			}
 			success = SUCCESS;
 		} else {
 			/* remove specific */
@@ -768,7 +777,7 @@ PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
 	}
 
 	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)Z_OBJ_HANDLE_P(obj);
-	hash_handlers = SPL_G(hash_mask_handlers)^(intptr_t)Z_OBJ_HT_P(obj);
+	hash_handlers = SPL_G(hash_mask_handlers);
 
 	return strpprintf(32, "%016lx%016lx", hash_handle, hash_handlers);
 }
