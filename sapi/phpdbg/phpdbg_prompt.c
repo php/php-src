@@ -48,7 +48,7 @@
 #error "phpdbg can only be built with CALL zend vm kind"
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 extern int phpdbg_startup_run;
 
 #ifdef HAVE_LIBDL

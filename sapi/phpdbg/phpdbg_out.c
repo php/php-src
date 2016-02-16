@@ -30,7 +30,7 @@
 #	include "win32/time.h"
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* copied from php-src/main/snprintf.c and slightly modified */
 /*
