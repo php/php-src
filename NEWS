@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.4
+18 Feb 2016 PHP 7.0.4RC1
 
 - Core:
   . Fixed bug (Low probability segfault in zend_arena). (Laruence)
