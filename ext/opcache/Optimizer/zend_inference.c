@@ -2204,23 +2204,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 	zend_class_entry *ce;
 	int j;
 
-	if (opline->opcode == ZEND_OP_DATA &&
-	    ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-	     (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
-	     (opline-1)->opcode == ZEND_ASSIGN_ADD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SUB ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MUL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_DIV ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MOD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_CONCAT ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_OR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_AND ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_XOR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_POW ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_R ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_RW)) {
+	if (opline->opcode == ZEND_OP_DATA) {
 		opline--;
 		i--;
 	}

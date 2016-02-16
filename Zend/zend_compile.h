@@ -470,7 +470,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_TOP                (1 << 1)
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
+/* Unused flag (1 << 4) */
 #define ZEND_CALL_CLOSURE            (1 << 5)
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)
@@ -682,8 +682,6 @@ struct _zend_execute_data {
 #define IS_VAR		(1<<2)
 #define IS_UNUSED	(1<<3)	/* Unused variable */
 #define IS_CV		(1<<4)	/* Compiled variable */
-
-#define EXT_TYPE_UNUSED	(1<<5)
 
 #include "zend_globals.h"
 

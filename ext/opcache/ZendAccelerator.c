@@ -962,6 +962,7 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(cwd_str));
 						if (str == cwd_str) {
+							zend_string_release(str);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
@@ -2284,6 +2285,11 @@ static void accel_deactivate(void)
 	 * the script is aborted abnormally, they may become messed up.
 	 */
 
+	if (ZCG(cwd)) {
+		zend_string_release(ZCG(cwd));
+		ZCG(cwd) = NULL;
+	}
+
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
@@ -2297,12 +2303,6 @@ static void accel_deactivate(void)
 		zend_accel_fast_shutdown();
 	}
 #endif
-
-	if (ZCG(cwd)) {
-		zend_string_release(ZCG(cwd));
-		ZCG(cwd) = NULL;
-	}
-
 }
 
 static int accelerator_remove_cb(zend_extension *element1, zend_extension *element2)

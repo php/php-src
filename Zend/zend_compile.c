@@ -743,7 +743,7 @@ void zend_do_free(znode *op1) /* {{{ */
 				   their selves */
 				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 			} else {
-				opline->result_type |= EXT_TYPE_UNUSED;
+				opline->result_type = IS_UNUSED;
 			}
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
@@ -756,12 +756,7 @@ void zend_do_free(znode *op1) /* {{{ */
 				if (opline->result_type==IS_VAR
 					&& opline->result.var == op1->u.op.var) {
 					if (opline->opcode == ZEND_NEW) {
-						opline->result_type |= EXT_TYPE_UNUSED;
-						opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
-						while (opline->opcode != ZEND_DO_FCALL || opline->op1.num != ZEND_CALL_CTOR) {
-							opline--;
-						}
-						opline->op1.num |= ZEND_CALL_CTOR_RESULT_UNUSED;
+						zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 					}
 					break;
 				}
@@ -1993,11 +1988,12 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 					break;
 				}
 			}
+
 	        zend_end_live_range(CG(active_op_array),
 				zend_start_live_range_ex(CG(active_op_array),
 					def + 1 - CG(active_op_array)->opcodes),
 				opline - CG(active_op_array)->opcodes,
-				ZEND_LIVE_TMPVAR, def->result.var);
+				ZEND_LIVE_TMPVAR, var);
 		    break;
 		}
 	}
@@ -2904,9 +2900,6 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
-	if (!result) {
-		opline->result_type |= EXT_TYPE_UNUSED;
-	}
 
 	if (zend_is_call(source_ast)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;
@@ -3837,7 +3830,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 		} else {
 			zend_op *opline;
 
-			ZEND_ASSERT(loop_var->var_type == IS_VAR || loop_var->var_type == IS_TMP_VAR);
+			ZEND_ASSERT(loop_var->var_type & (IS_VAR|IS_TMP_VAR));
 			opline = get_next_op(CG(active_op_array));
 			opline->opcode = loop_var->opcode;
 			opline->op1_type = loop_var->var_type;
@@ -4366,7 +4359,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_end_loop(get_next_op_number(CG(active_op_array)), &expr_node);
 
-	if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
+	if (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) {
 		/* don't use emit_op() to prevent automatic live-range construction */
 		opline = get_next_op(CG(active_op_array));
 		opline->opcode = ZEND_FREE;
@@ -6623,6 +6616,11 @@ void zend_compile_yield_from(znode *result, zend_ast *ast) /* {{{ */
 	znode expr_node;
 
 	zend_mark_function_as_generator();
+
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use \"yield from\" inside a by-reference generator");
+	}
 
 	zend_compile_expr(&expr_node, expr_ast);
 	zend_emit_op_tmp(result, ZEND_YIELD_FROM, &expr_node, NULL);

@@ -23,7 +23,7 @@
 #include "zend_dfg.h"
 
 #define ZEND_DUMP_HIDE_UNREACHABLE     (1<<0)
-#define ZEND_DUMP_HIDE_UNUSED_VARS     (1<<1)
+/* Unused flag (1<<1) */
 #define ZEND_DUMP_CFG                  (1<<2)
 #define ZEND_DUMP_SSA                  (1<<3)
 #define ZEND_DUMP_RT_CONSTANTS         ZEND_RT_CONSTANTS

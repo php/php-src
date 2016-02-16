@@ -56,7 +56,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_CFG) {
-		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNUSED_VARS, "dfa cfg", &ssa->cfg);
+		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "dfa cfg", &ssa->cfg);
 	}
 
 	/* Compute Dominators Tree */
@@ -85,7 +85,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_SSA) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "before dfa pass", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "before dfa pass", ssa);
 	}
 
 
@@ -115,7 +115,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "before dfa pass", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "before dfa pass", ssa);
 	}
 
 	if (ssa->var_info) {
@@ -217,7 +217,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_DFA_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "after dfa pass", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after dfa pass", ssa);
 	}
 }
 
