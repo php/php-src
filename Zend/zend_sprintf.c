@@ -30,13 +30,14 @@
 #if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...)
 {
+	int len;
 	va_list args;
 
 	va_start(args, format);
-	vsprintf(buffer, format, args);
+	len = vsprintf(buffer, format, args);
 	va_end(args);
 
-	return strlen(buffer);
+	return len;
 }
 #endif
 
