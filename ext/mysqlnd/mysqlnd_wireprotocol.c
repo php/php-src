@@ -315,6 +315,7 @@ mysqlnd_read_header(MYSQLND_NET * net, MYSQLND_PACKET_HEADER * header,
 }
 /* }}} */
 
+#define MARIADB_RPL_VERSION_HACK "5.5.5-"
 
 /* {{{ php_mysqlnd_greet_read */
 static enum_func_status
@@ -361,6 +362,11 @@ php_mysqlnd_greet_read(void * _packet, MYSQLND_CONN_DATA * conn)
 		}
 		DBG_RETURN(PASS);
 	}
+
+        /* MariaDB always sends 5.5.5 before version string: 5.5.5 was never released,
+           so just ignore it */
+        if (!strncmp(p, MARIADB_RPL_VERSION_HACK, sizeof(MARIADB_RPL_VERSION_HACK) - 1))
+          p+= sizeof(MARIADB_RPL_VERSION_HACK) - 1;
 
 	packet->server_version = estrdup((char *)p);
 	p+= strlen(packet->server_version) + 1; /* eat the '\0' */
