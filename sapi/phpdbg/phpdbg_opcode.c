@@ -25,7 +25,7 @@
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 static inline const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 {

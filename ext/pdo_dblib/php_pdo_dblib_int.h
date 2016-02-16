@@ -137,7 +137,7 @@ ZEND_END_MODULE_GLOBALS(dblib)
 # define DBLIB_G(v) (dblib_globals.v)
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(dblib);
+ZEND_EXTERN_MODULE_GLOBALS(dblib)
 
 #endif
 

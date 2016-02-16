@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (setlocale)). (Anatol)
   . Fixed bug #71535 (Integer overflow in zend_mm_alloc_heap()). (Dmitry)
   . Fixed bug #71470 (Leaked 1 hashtable iterators). (Nikita)
+  . Fixed bug #71575 (ISO C does not allow extra ‘;’ outside of a function).
+    (asgrim)
 
 - Curl:
   . Fixed bug #71694 (Support constant CURLM_ADDED_ALREADY). (mpyw)

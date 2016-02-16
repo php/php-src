@@ -38,7 +38,7 @@
 # endif
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ color structures */
 const static phpdbg_color_t colors[] = {
