@@ -1938,6 +1938,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
+			ZVAL_DEREF(value_ptr);
 			ZVAL_COPY(&data, value_ptr);
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		}
