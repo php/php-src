@@ -54,6 +54,7 @@ PHP                                                                        NEWS
     phpdbg_get_executable(). (Bob)
 
 - Standard:
+  . Fixed bug #71603 (compact() maintains references in php7). (Laruence)
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
 
 - XMLRPC:
