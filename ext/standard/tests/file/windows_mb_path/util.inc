@@ -87,10 +87,13 @@ function create_data($id)
 {
 	$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . $id;
 
+	$zend_mb = ini_get("zend.multibyte");
+
 	if (!is_dir($prefix)) {
 		mkdir($prefix);
 	}
 
+	/* Using a UTF-8 encoded filenames if !zend.multibyte, otherwise files in retrospective charset. */
 	switch ($id) {
 
 		case "file_mb3":
@@ -125,7 +128,11 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "file_cp1251":
-			create_verify_file($prefix, "привет", "opened an utf8 filename for reading");
+			if ($zend_mb) {
+				create_verify_file($prefix, "������", "opened an utf8 filename for reading");
+			} else {
+				create_verify_file($prefix, "привет", "opened an utf8 filename for reading");
+			}
 			break;
 
 		case "file_eucjp":
@@ -149,7 +156,11 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "dir_cp1251":
-			create_verify_dir($prefix, "привет3");
+			if ($zend_mb) {
+				create_verify_dir($prefix, "������3");
+			} else {
+				create_verify_dir($prefix, "привет3");
+			}
 			break;
 
 		case "dir_mb":
