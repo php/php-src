@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.5
 
+- phpdbg:
+  . Fixed crash when advancing (except step) inside an internal function. (Bob)
 
 ?? ??? 2016 PHP 7.0.4
 
