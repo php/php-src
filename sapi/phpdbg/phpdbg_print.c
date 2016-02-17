@@ -42,7 +42,7 @@ const phpdbg_command_t phpdbg_print_commands[] = {
 PHPDBG_PRINT(opline) /* {{{ */
 {
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
-		phpdbg_print_opline(EG(current_execute_data), 1);
+		phpdbg_print_opline(phpdbg_user_execute_data(EG(current_execute_data)), 1);
 	} else {
 		phpdbg_error("inactive", "type=\"execution\"", "Not Executing!");
 	}
@@ -124,7 +124,7 @@ return SUCCESS;
 PHPDBG_PRINT(stack) /* {{{ */
 {
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
-		zend_op_array *ops = &EG(current_execute_data)->func->op_array;
+		zend_op_array *ops = &phpdbg_user_execute_data(EG(current_execute_data))->func->op_array;
 		if (ops->function_name) {
 			if (ops->scope) {
 				phpdbg_notice("printinfo", "method=\"%s::%s\" num=\"%d\"", "Stack in %s::%s() (%d ops)", ZSTR_VAL(ops->scope->name), ZSTR_VAL(ops->function_name), ops->last);

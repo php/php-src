@@ -518,13 +518,14 @@ PHPDBG_COMMAND(continue) /* {{{ */
 } /* }}} */
 
 int phpdbg_skip_line_helper() /* {{{ */ {
-	const zend_op_array *op_array = &EG(current_execute_data)->func->op_array;
+	zend_execute_data *ex = phpdbg_user_execute_data(EG(current_execute_data));
+	const zend_op_array *op_array = &ex->func->op_array;
 	const zend_op *opline = op_array->opcodes;
 
 	PHPDBG_G(flags) |= PHPDBG_IN_UNTIL;
-	PHPDBG_G(seek_ex) = EG(current_execute_data);
+	PHPDBG_G(seek_ex) = ex;
 	do {
-		if (opline->lineno != EG(current_execute_data)->opline->lineno
+		if (opline->lineno != ex->opline->lineno
 		 || opline->opcode == ZEND_RETURN
 		 || opline->opcode == ZEND_FAST_RET
 		 || opline->opcode == ZEND_GENERATOR_RETURN
@@ -562,10 +563,11 @@ PHPDBG_COMMAND(next) /* {{{ */
 } /* }}} */
 
 static void phpdbg_seek_to_end(void) /* {{{ */ {
-	const zend_op_array *op_array = &EG(current_execute_data)->func->op_array;
+	zend_execute_data *ex = phpdbg_user_execute_data(EG(current_execute_data));
+	const zend_op_array *op_array = &ex->func->op_array;
 	const zend_op *opline = op_array->opcodes;
 
-	PHPDBG_G(seek_ex) = EG(current_execute_data);
+	PHPDBG_G(seek_ex) = ex;
 	do {
 		switch (opline->opcode) {
 			case ZEND_RETURN:
@@ -588,7 +590,7 @@ PHPDBG_COMMAND(finish) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) EG(current_execute_data)->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 	} else {
 		PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
@@ -605,7 +607,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) EG(current_execute_data)->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 		phpdbg_notice("leave", "type=\"end\"", "Already at the end of the function");
 		return SUCCESS;
