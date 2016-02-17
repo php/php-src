@@ -2278,6 +2278,19 @@ static void zend_accel_fast_shutdown(void)
 }
 #endif
 
+int accel_post_deactivate(void)
+{
+	if (!ZCG(enabled) || !accel_startup_ok) {
+		return SUCCESS;
+	}
+
+	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
+	accel_unlock_all();
+	ZCG(counted) = 0;
+
+	return SUCCESS;
+}
+
 static void accel_deactivate(void)
 {
 	/* ensure that we restore function_table and class_table
@@ -2293,10 +2306,6 @@ static void accel_deactivate(void)
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
-
-	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
-	accel_unlock_all();
-	ZCG(counted) = 0;
 
 #if !ZEND_DEBUG
 	if (ZCG(accel_directives).fast_shutdown && is_zend_mm()) {
