@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #71596 (Segmentation fault on ZTS with date function
     (setlocale)). (Anatol)
 
+- Phar:
+  . Fixed bug #71625 (Crash in php7.dll with bad phar filename).
+    (Anatol)
+
 - phpdbg:
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
 
