@@ -474,7 +474,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			break;
 
 		case XPATH_NUMBER:
-			RETVAL_DOUBLE(xpathobjp->floatval)
+			RETVAL_DOUBLE(xpathobjp->floatval);
 			break;
 
 		case XPATH_STRING:
