@@ -206,7 +206,7 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (iptcdata_len >= SIZE_MAX - sizeof(psheader) - 1025) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "IPTC data too large");
+		php_error_docref(NULL, E_WARNING, "IPTC data too large");
 		RETURN_FALSE;
 	}
 
