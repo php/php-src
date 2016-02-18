@@ -3164,6 +3164,9 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 
 		function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 		if (OP2_TYPE != IS_CONST) {
+			if (OP2_TYPE & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(function_name);
+			}
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
 				if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
 					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
