@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #71622 (Strings used in pass-as-reference cannot be used to
     invoke C::$callable()). (Bob)
+  . Fixed bug #71596 (Segmentation fault on ZTS with date function
+    (setlocale)). (Anatol)
 
 - phpdbg:
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
