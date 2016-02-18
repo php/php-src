@@ -13,8 +13,8 @@ meaningful error messages.
 Prototypes
 ----------
 /* Implemented. */
-int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...);
-int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...);
+int zend_parse_parameters(int num_args, char *type_spec, ...);
+int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...);
 
 The zend_parse_parameters() function takes the number of parameters
 passed to the extension function, the type specifier string, and the
@@ -30,7 +30,7 @@ resources cannot be auto-converted.
 
 PHP 5.5 includes a new function:
 
-int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, const char *spec, ...);
+int zend_parse_parameter(int flags, int arg_num, zval **arg, const char *spec, ...);
 
 This function behaves like zend_parse_parameters_ex() except that instead of
 reading the arguments from the stack, it receives a single zval to convert
@@ -97,11 +97,11 @@ Both mistakes might cause memory corruptions and segfaults:
 1)
   char *str;
   long str_len; /* XXX THIS IS WRONG!! Use size_t instead. */
-  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len)
+  zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len)
 
 2)
   int num; /* XXX THIS IS WRONG!! Use zend_long instead. */
-  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num)
+  zend_parse_parameters(ZEND_NUM_ARGS(), "l", &num)
 
 If you're in doubt, use check_parameters.php script to the parameters 
 and their types (it can be found in ./scripts/dev/ directory of PHP sources):
@@ -116,7 +116,7 @@ zend_long l;
 char *s;
 size_t s_len;
 zval *param;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "lsz",
                           &l, &s, &s_len, &param) == FAILURE) {
     return;
 }
@@ -126,7 +126,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
 zval *obj;
 double d = 0.5;
 zend_class_entry *my_ce;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|d",
                           &obj, my_ce, &d) == FAILURE) {
     return;
 }
@@ -136,7 +136,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
    If null is passed for object, obj will be set to NULL. */
 zval *obj;
 zval *arr;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!a",
                           &obj, &arr) == FAILURE) {
     return;
 }
@@ -144,7 +144,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a",
 
 /* Gets a separated array which can also be null. */
 zval *arr;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/!",
                           &arr) == FAILURE) {
     return;
 }
@@ -161,10 +161,10 @@ char *s;
  */
 size_t length;
 
-if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
                              "lll", &l1, &l2, &l3) == SUCCESS) {
     /* manipulate longs */
-} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
                                     "s", &s, &length) == SUCCESS) {
     /* manipulate string */
 } else {
@@ -180,7 +180,7 @@ int i, num_varargs;
 zval *varargs = NULL;
 
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &varargs, &num_varargs) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &varargs, &num_varargs) == FAILURE) {
     return;
 }
 
@@ -200,7 +200,7 @@ size_t str_len;
 int i, num_varargs;
 zval *varargs = NULL;
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
     return;
 }
 
@@ -214,7 +214,7 @@ zval *array;
 int i, num_varargs;
 zval *varargs = NULL;
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
     return;
 }
 
