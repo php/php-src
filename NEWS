@@ -2,10 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.5
 
+- Core:
+  . Fixed bug #71622 (Strings used in pass-as-reference cannot be used to
+    invoke C::$callable()). (Bob)
+
 - phpdbg:
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
 
-?? ??? 2016 PHP 7.0.4
+?? Mar 2016 PHP 7.0.4
 
 - Core:
   . Fixed bug (Low probability segfault in zend_arena). (Laruence)
