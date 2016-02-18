@@ -28,11 +28,21 @@ PHP                                                                        NEWS
   . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
     (Johannes, Anatol)
 
+- CURL:
+  . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
+    while curl_multi_exec). (Laruence)
+  . Fixed memory leak in curl_getinfo(). (Leigh)
+
 - Date:
   . Fixed bug #71525 (Calls to date_modify will mutate timelib_rel_time,
     causing date_date_set issues). (Sean DuBois)
 
+- Fileinfo:
+  . Fixed bug #71434 (finfo throws notice for specific python file). (Laruence)
+
 - FPM:
+  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
+    setup). (Matt Haught, Remi)
   . Fixed bug #71269 (php-fpm dumped core). (Mickaël)
 
 - Opcache:
@@ -41,18 +51,6 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fixed bug #71537 (PCRE segfault from Opcache). (Laruence)
-
-- CURL:
-  . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
-    while curl_multi_exec). (Laruence)
-  . Fixed memory leak in curl_getinfo(). (Leigh)
-
-- Fileinfo:
-  . Fixed bug #71434 (finfo throws notice for specific python file). (Laruence)
-
-- FPM:
-  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
-    setup). (Matt Haught, Remi)
 
 - phpdbg:
   . Fixed inherited functions from unspecified files being included in
