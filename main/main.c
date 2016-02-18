@@ -1566,6 +1566,9 @@ int php_request_startup(void)
 #endif /* HAVE_DTRACE */
 
 #ifdef PHP_WIN32
+# if defined(ZTS)
+	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+# endif
 	PG(com_initialized) = 0;
 #endif
 
