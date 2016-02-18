@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 5.6.20
-
-03 Mar 2016, PHP 5.6.19
+18 Feb 2016, PHP 5.6.19RC1
 
 - CLI server:
   . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
