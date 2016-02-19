@@ -2740,7 +2740,8 @@ PHP_FUNCTION(quotemeta)
 /* }}} */
 
 /* {{{ proto int ord(string character)
-   Returns ASCII value of character */
+   Returns ASCII value of character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
 PHP_FUNCTION(ord)
 {
 	char   *str;
@@ -2761,7 +2762,8 @@ PHP_FUNCTION(ord)
 /* }}} */
 
 /* {{{ proto string chr(int ascii)
-   Converts ASCII code to a character */
+   Converts ASCII code to a character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant integer argument */
 PHP_FUNCTION(chr)
 {
 	zend_long c;
