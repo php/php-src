@@ -386,7 +386,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 # endif /* HAVE_HASH_EXT */
 			}
 		}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405)
+#elif HAVE_DECL_ARC4RANDOM_BUF && (defined(__OpenBSD__) && OpenBSD >= 201405)
 		unsigned char rbuf[2048];
 		int n;
 		int to_read = PS(entropy_length);
@@ -409,6 +409,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 					break;
 # endif /* HAVE_HASH_EXT */
 			}
+
 			to_read -= n;
 		}
 #else
