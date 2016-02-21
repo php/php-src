@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
 
+- SPL:
+  . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
+    (Nikita)
+
 ?? Mar 2016 PHP 7.0.4
 
 - Core:
