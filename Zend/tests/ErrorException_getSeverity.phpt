@@ -22,9 +22,9 @@ function exception_error_handler($severity) {
            $err->getPrevious(), 
            $err->getFile(), 
            $err->getLine(), 
-           $err->getTrace(),
            $err->getTraceAsString()
-        );  
+        );
+        print(is_array($err->getTrace()) ? ("array();") : ("method fail"));
     }
     
 }
@@ -39,96 +39,5 @@ int(%d)
 NULL
 string(%d) "%s"
 int(%d)
-array(%d) {
-  [%i]=>
-  array(%d) {
-    ["function"]=>
-    string(%d) "%s"
-    ["args"]=>
-    array(%d) {
-      [%d]=>
-      &int(%d)
-      [%d]=>
-      &string(%d) "%s"
-      [%d]=>
-      &string(%d) "%s"
-      [%d]=>
-      &int(%d)
-      [%d]=>
-      &array(%d) {
-        ["_GET"]=>
-        array(%i) {
-        }
-        ["_POST"]=>
-        array(%i) {
-        }
-        ["_COOKIE"]=>
-        array(%i) {
-        }
-        ["_FILES"]=>
-        array(%i) {
-        }
-        ["argv"]=>
-        array(%d) {
-          [%i]=>
-          string(%d) "%s"
-        }
-        ["argc"]=>
-        int(%d)
-        ["_ENV"]=>
-        array(%i) {
-        }
-        ["_REQUEST"]=>
-        array(%i) {
-        }
-        ["_SERVER"]=>
-        array(%d) {
-          ["SCRIPT_FILENAME"]=>
-          string(%d) "%s"
-          ["PWD"]=>
-          string(%d) "%s"
-          ["REDIRECT_STATUS"]=>
-          string(%d) "%s"
-          ["PATH_TRANSLATED"]=>
-          string(%d) "%s"
-          ["SHLVL"]=>
-          string(%d) "%s"
-          ["REQUEST_METHOD"]=>
-          string(%d) "GET"
-          ["_"]=>
-          string(%d) "%s"
-          ["PHP_SELF"]=>
-          string(%d) "%s"
-          ["SCRIPT_NAME"]=>
-          string(%d) "%s"
-          ["DOCUMENT_ROOT"]=>
-          string(%i) ""
-          ["REQUEST_TIME_FLOAT"]=>
-          float(%f)
-          ["REQUEST_TIME"]=>
-          int(%i)
-          ["argv"]=>
-          array(%d) {
-            [%i]=>
-            string(%d) "%s"
-          }
-          ["argc"]=>
-          int(%d)
-        }
-      }
-    }
-  }
-  [%d]=>
-  array(%d) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(%d)
-    ["function"]=>
-    string(%d) "%s"
-    ["args"]=>
-    array(%i) {
-    }
-  }
-}
 string(%d) "%s"
+array();
