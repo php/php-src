@@ -1229,8 +1229,15 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 				size_t prop_name_len;
 				if (zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len) == SUCCESS) {
 					zend_string *pname = zend_string_init(prop_name, prop_name_len, 0);
+					zend_class_entry *prev_scope = EG(scope);
+					if (class_name && class_name[0] != '*') {
+						zend_string *cname = zend_string_init(class_name, strlen(class_name), 0);
+						EG(scope) = zend_lookup_class(cname);
+						zend_string_release(cname);
+					}
 					property_info = zend_get_property_info(object->ce, pname, 1);
 					zend_string_release(pname);
+					EG(scope) = prev_scope;
 				} else {
 					property_info = ZEND_WRONG_PROPERTY_INFO;
 				}
