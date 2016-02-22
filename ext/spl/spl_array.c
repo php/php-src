@@ -92,7 +92,7 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int 
 		return intern->std.properties;
 	} else if (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
-		return spl_array_get_hash_table(other, check_std_props);
+		return spl_array_get_hash_table(other, 0);
 	} else {
 		return HASH_OF(&intern->array);
 	}
