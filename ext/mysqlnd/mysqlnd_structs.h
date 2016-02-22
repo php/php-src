@@ -59,7 +59,6 @@ typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIS
 struct st_mysqlnd_memory_pool
 {
 	zend_uchar *arena;
-	unsigned int refcount;
 	unsigned int arena_size;
 	unsigned int free_size;
 
