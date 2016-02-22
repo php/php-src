@@ -510,8 +510,8 @@ class_modifier:
 
 trait_declaration_statement:
 		T_TRAIT { $<num>$ = CG(zend_lineno); }
-		T_STRING backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL); }
+		T_STRING implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL); }
 ;
 
 interface_declaration_statement:
