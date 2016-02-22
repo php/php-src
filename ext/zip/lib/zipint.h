@@ -3,7 +3,7 @@
 
 /*
   zipint.h -- internal declarations.
-  Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2016 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -37,7 +37,9 @@
 #ifdef PHP_WIN32
 # include "php_zip_config.w32.h"
 #else
-# include "config.h"
+# ifdef HAVE_CONFIG_H
+#  include "config.h"
+# endif
 #endif
 
 /* to have *_MAX definitions for all types when compiling with g++ */
@@ -65,6 +67,22 @@ typedef char bool;
 #define false   0
 #endif
 
+#include <errno.h>
+
+/* at least MinGW does not provide EOPNOTSUPP, see
+ * http://sourceforge.net/p/mingw/bugs/263/
+ */
+#ifndef EOPNOTSUPP
+#define EOPNOTSUPP EINVAL
+#endif
+
+/* at least MinGW does not provide EOVERFLOW, see
+ * http://sourceforge.net/p/mingw/bugs/242/
+ */
+#ifndef EOVERFLOW
+#define EOVERFLOW EFBIG
+#endif
+
 #ifdef _WIN32
 #if defined(HAVE__CLOSE)
 #define close		_close
@@ -76,7 +94,7 @@ typedef char bool;
 #if defined(HAVE__FDOPEN)
 #define fdopen		_fdopen
 #endif
-#if defined(HAVE__FILENO)
+#if !defined(HAVE_FILENO) && defined(HAVE__FILENO)
 #define fileno		_fileno
 #endif
 /* Windows' open() doesn't understand Unix permissions */
@@ -91,6 +109,9 @@ typedef char bool;
 #undef strdup
 #define strdup		_strdup
 #endif
+#endif
+#if !defined(HAVE__SETMODE) && defined(HAVE_SETMODE)
+#define _setmode	setmode
 #endif
 #endif
 
@@ -110,6 +131,8 @@ int _zip_mkstemp(char *);
 #if !defined(HAVE_STRCASECMP)
 #if defined(HAVE__STRICMP)
 #define strcasecmp	_stricmp
+#elif defined(HAVE_STRICMP)
+#define strcasecmp	stricmp
 #endif
 #endif
 
@@ -129,12 +152,10 @@ int _zip_mkstemp(char *);
 #if defined(HAVE_FTELLO) && defined(HAVE_FSEEKO)
 #define ZIP_FSEEK_MAX ZIP_OFF_MAX
 #define ZIP_FSEEK_MIN ZIP_OFF_MIN
-#elif SIZEOF_LONG >= 8
-#define ZIP_FSEEK_MAX (long)ZIP_INT64_MAX
-#define ZIP_FSEEK_MIN (long)ZIP_INT64_MIN
 #else
-#define ZIP_FSEEK_MAX (long)ZIP_INT32_MAX
-#define ZIP_FSEEK_MIN (long)ZIP_INT32_MIN
+#include <limits.h>
+#define ZIP_FSEEK_MAX LONG_MAX
+#define ZIP_FSEEK_MIN LONG_MIN
 #endif
 
 #ifndef SIZE_MAX
@@ -255,13 +276,19 @@ enum zip_encoding_type {
 
 typedef enum zip_encoding_type zip_encoding_type_t;
 
+#ifndef ZIP_HASH_TABLE_SIZE
+#define ZIP_HASH_TABLE_SIZE 8192
+#endif
+
+struct zip_hash;
+
 typedef struct zip_cdir zip_cdir_t;
 typedef struct zip_dirent zip_dirent_t;
 typedef struct zip_entry zip_entry_t;
 typedef struct zip_extra_field zip_extra_field_t;
 typedef struct zip_string zip_string_t;
 typedef struct zip_buffer zip_buffer_t;
-
+typedef struct zip_hash zip_hash_t;
 
 /* zip archive, part of API */
 
@@ -276,7 +303,7 @@ struct zip {
     char *default_password;		/* password used when no other supplied */
 
     zip_string_t *comment_orig;         /* archive comment */
-    zip_string_t *comment_changes;  /* changed archive comment */
+    zip_string_t *comment_changes;	/* changed archive comment */
     bool comment_changed;		/* whether archive comment was changed */
 
     zip_uint64_t nentry;		/* number of entries */
@@ -286,6 +313,8 @@ struct zip {
     unsigned int nopen_source;		/* number of open sources using archive */
     unsigned int nopen_source_alloc;	/* number of sources allocated */
     zip_source_t **open_source;         /* open sources using archive */
+
+    zip_hash_t *names;			/* hash table for name lookup */
     
     char *tempdir;                      /* custom temp dir (needed e.g. for OS X sandboxing) */
 };
@@ -312,7 +341,7 @@ struct zip_file {
 struct zip_dirent {
     zip_uint32_t changed;
     bool local_extra_fields_read;	/*      whether we already read in local header extra fields */
-    bool cloned;                         /*      whether this instance is cloned, and thus shares non-changed strings */
+    bool cloned;                        /*      whether this instance is cloned, and thus shares non-changed strings */
 
     zip_uint16_t version_madeby;	/* (c)  version of creator */
     zip_uint16_t version_needed;	/* (cl) version needed to extract */
@@ -415,7 +444,7 @@ struct zip_buffer {
 
 struct zip_filelist {
     zip_uint64_t idx;
-// TODO    const char *name;
+/* TODO    const char *name; */
 };
 
 typedef struct zip_filelist zip_filelist_t;
@@ -453,6 +482,7 @@ int _zip_buffer_put_16(zip_buffer_t *buffer, zip_uint16_t i);
 int _zip_buffer_put_32(zip_buffer_t *buffer, zip_uint32_t i);
 int _zip_buffer_put_64(zip_buffer_t *buffer, zip_uint64_t i);
 int _zip_buffer_put_8(zip_buffer_t *buffer, zip_uint8_t i);
+int _zip_buffer_skip(zip_buffer_t *buffer, zip_uint64_t length);
 int _zip_buffer_set_offset(zip_buffer_t *buffer, zip_uint64_t offset);
 zip_uint64_t _zip_buffer_size(zip_buffer_t *buffer);
 
@@ -478,7 +508,7 @@ void _zip_ef_free(zip_extra_field_t *);
 const zip_uint8_t *_zip_ef_get_by_id(const zip_extra_field_t *, zip_uint16_t *, zip_uint16_t, zip_uint16_t, zip_flags_t, zip_error_t *);
 zip_extra_field_t *_zip_ef_merge(zip_extra_field_t *, zip_extra_field_t *);
 zip_extra_field_t *_zip_ef_new(zip_uint16_t, zip_uint16_t, const zip_uint8_t *, zip_flags_t);
-zip_extra_field_t *_zip_ef_parse(const zip_uint8_t *, zip_uint16_t, zip_flags_t, zip_error_t *);
+bool _zip_ef_parse(const zip_uint8_t *, zip_uint16_t, zip_flags_t, zip_extra_field_t **, zip_error_t *);
 zip_extra_field_t *_zip_ef_remove_internal(zip_extra_field_t *);
 zip_uint16_t _zip_ef_size(const zip_extra_field_t *, zip_flags_t);
 int _zip_ef_write(zip_t *za, const zip_extra_field_t *ef, zip_flags_t flags);
@@ -504,6 +534,13 @@ zip_dirent_t *_zip_get_dirent(zip_t *, zip_uint64_t, zip_flags_t, zip_error_t *)
 
 enum zip_encoding_type _zip_guess_encoding(zip_string_t *, enum zip_encoding_type);
 zip_uint8_t *_zip_cp437_to_utf8(const zip_uint8_t * const, zip_uint32_t, zip_uint32_t *, zip_error_t *);
+
+bool _zip_hash_add(zip_hash_t *hash, const zip_uint8_t *name, zip_uint64_t index, zip_flags_t flags, zip_error_t *error);
+bool _zip_hash_delete(zip_hash_t *hash, const zip_uint8_t *key, zip_error_t *error);
+void _zip_hash_free(zip_hash_t *hash);
+zip_int64_t _zip_hash_lookup(zip_hash_t *hash, const zip_uint8_t *name, zip_flags_t flags, zip_error_t *error);
+zip_hash_t *_zip_hash_new(zip_uint16_t hash_size, zip_error_t *error);
+void _zip_hash_revert(zip_hash_t *hash);
 
 zip_t *_zip_open(zip_source_t *, unsigned int, zip_error_t *);
 
