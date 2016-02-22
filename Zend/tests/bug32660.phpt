@@ -39,4 +39,4 @@ Notice: Indirect modification of overloaded property A::$whatever has no effect 
 Fatal error: Uncaught Error: Cannot assign by reference to overloaded object in %sbug32660.php:23
 Stack trace:
 #0 {main}
-  thrown in %sbug32660.php on line 23
+  instantiated in %sbug32660.php on line 23

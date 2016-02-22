@@ -30,4 +30,4 @@ Fatal error: Uncaught Error: Cannot yield from finally in a force-closed generat
 Stack trace:
 #0 %s(%d): gen()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

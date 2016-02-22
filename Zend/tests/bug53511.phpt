@@ -30,4 +30,4 @@ Stack trace:
 #0 %sbug53511.php(12): Foo->__destruct()
 #1 %sbug53511.php(17): test()
 #2 {main}
-  thrown in %sbug53511.php on line 4
+  instantiated in %sbug53511.php on line 4

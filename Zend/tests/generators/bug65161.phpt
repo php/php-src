@@ -23,4 +23,4 @@ Stack trace:
 #1 %s(%d): spl_autoload_call('SyntaxError')
 #2 %s(%d): testGenerator()
 #3 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

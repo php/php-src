@@ -21,4 +21,4 @@ Fatal error: Uncaught Error: Access to undeclared static property: A::$this in %
 Stack trace:
 #0 %s(%d): B->go()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

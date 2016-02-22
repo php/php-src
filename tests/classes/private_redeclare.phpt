@@ -39,4 +39,4 @@ Fatal error: Uncaught Error: Call to private method base::show() from context 'd
 Stack trace:
 #0 %s(%d): derived->test()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

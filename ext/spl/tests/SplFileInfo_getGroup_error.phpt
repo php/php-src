@@ -25,4 +25,4 @@ Fatal error: Uncaught RuntimeException: SplFileInfo::getGroup(): stat failed for
 Stack trace:
 #0 %s: SplFileInfo->getGroup()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

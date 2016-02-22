@@ -25,4 +25,4 @@ Stack trace:
 #0 %s(7): __autoload('Bar')
 #1 %s(13): __autoload('Foo')
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

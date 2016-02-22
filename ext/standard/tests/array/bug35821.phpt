@@ -29,4 +29,4 @@ Stack trace:
 #1 [internal function]: Element::CallBack(Object(Element))
 #2 %s(%d): array_map(Array, Array)
 #3 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

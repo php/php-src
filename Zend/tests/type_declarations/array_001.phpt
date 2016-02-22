@@ -16,4 +16,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be of the type 
 Stack trace:
 #0 %s(%d): foo(123)
 #1 {main}
-  thrown in %s on line 2
+  instantiated in %s on line 2

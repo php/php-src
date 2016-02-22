@@ -89,4 +89,4 @@ Expecting fatal error:
 Fatal error: Uncaught Error: Undefined class constant 'c19' in %s:53
 Stack trace:
 #0 {main}
-  thrown in %s on line 53
+  instantiated in %s on line 53

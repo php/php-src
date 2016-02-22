@@ -8,4 +8,4 @@ Static property access on constexpr class evaluating to integer
 Fatal error: Uncaught Error: Class name must be a valid object or a string in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

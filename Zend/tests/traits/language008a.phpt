@@ -23,4 +23,4 @@ $o->sayHello();
 Fatal error: Uncaught Error: Call to protected method MyClass::sayHello() from context '' in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -38,4 +38,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_roll() must be an 
 Stack trace:
 #0 %s(%d): intlcal_roll(1, 2, 3)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

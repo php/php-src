@@ -31,4 +31,4 @@ Fatal error: Uncaught Error: Cannot call abstract method fail::show() in %s:%d
 Stack trace:
 #0 %s(%d): pass->error()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

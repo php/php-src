@@ -36,4 +36,4 @@ Fatal error: Uncaught Error: Call to private method pass::show() from context 'f
 Stack trace:
 #0 %s(%d): fail->do_show()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

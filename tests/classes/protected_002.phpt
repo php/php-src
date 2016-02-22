@@ -36,4 +36,4 @@ Fatal error: Uncaught Error: Call to protected method pass::show() from context 
 Stack trace:
 #0 %s(%d): fail::show()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

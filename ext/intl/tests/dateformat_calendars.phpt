@@ -45,4 +45,4 @@ Fatal error: Uncaught IntlException: IntlDateFormatter::__construct(): datefmt_c
 Stack trace:
 #0 %sdateformat_calendars.php(%d): IntlDateFormatter->__construct('en_US@calendar=...', 0, 0, 'GMT+05:12', -1)
 #1 {main}
-  thrown in %sdateformat_calendars.php on line %d
+  instantiated in %sdateformat_calendars.php on line %d

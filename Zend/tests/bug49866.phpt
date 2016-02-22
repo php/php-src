@@ -10,4 +10,4 @@ echo $a;
 Fatal error: Uncaught Error: Cannot create references to/from string offsets in %sbug49866.php:3
 Stack trace:
 #0 {main}
-  thrown in %sbug49866.php on line 3
+  instantiated in %sbug49866.php on line 3

@@ -45,4 +45,4 @@ Stack trace:
 #2 %sbug45805.php(%d): ReflectionMethod->invoke(Object(B))
 #3 %sbug45805.php(%d): B->bar()
 #4 {main}
-  thrown in %sbug45805.php on line %d
+  instantiated in %sbug45805.php on line %d

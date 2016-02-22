@@ -18,4 +18,4 @@ Stack trace:
 #0 [internal function]: unknown()
 #1 %s(%d): Phar::webPhar('whatever', 'index.php', '404.php', Array)
 #2 {main}
-  thrown in phar://%sfatalerror.phps on line 1
+  instantiated in phar://%sfatalerror.phps on line 1

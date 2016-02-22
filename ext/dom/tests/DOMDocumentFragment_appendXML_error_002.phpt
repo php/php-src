@@ -16,4 +16,4 @@ Fatal error: Uncaught DOMException: No Modification Allowed Error in %s:%d
 Stack trace:
 #0 %s(%d): DOMDocumentFragment->appendXML('<bait>crankbait...')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

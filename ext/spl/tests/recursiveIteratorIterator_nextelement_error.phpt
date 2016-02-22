@@ -33,4 +33,4 @@ Stack trace:
 #0 [internal function]: MyRecursiveIteratorIterator->nextelement()
 #1 %s: RecursiveIteratorIterator->next()
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

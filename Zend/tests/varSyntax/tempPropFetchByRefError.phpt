@@ -11,4 +11,4 @@ $fn([0, 1]->prop);
 Fatal error: Uncaught Error: Cannot use temporary expression in write context in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

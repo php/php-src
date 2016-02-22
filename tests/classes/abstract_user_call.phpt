@@ -30,4 +30,4 @@ test::func()
 Fatal error: Uncaught Error: Cannot call abstract method test_base::func() in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

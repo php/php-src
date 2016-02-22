@@ -88,7 +88,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 		}
 		return $res;
 	}
-	
+
 	function callGetChildren()
 	{
 		if ($this->over == 2)

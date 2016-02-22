@@ -32,4 +32,4 @@ Stack trace:
 #0 [internal function]: MyHeap->count()
 #1 %s count(Object(MyHeap))
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

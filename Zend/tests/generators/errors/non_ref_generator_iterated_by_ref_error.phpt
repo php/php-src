@@ -13,5 +13,5 @@ foreach ($gen as &$value) { }
 Fatal error: Uncaught Exception: You can only iterate a generator by-reference if it declared that it yields by-reference in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

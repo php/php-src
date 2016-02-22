@@ -16,4 +16,4 @@ Fatal error: Uncaught IntlException: IntlDateFormatter::__construct(): datefmt_c
 Stack trace:
 #0 %sbug62081.php(4): IntlDateFormatter->__construct('en', 1, 1)
 #1 {main}
-  thrown in %sbug62081.php on line 4
+  instantiated in %sbug62081.php on line 4

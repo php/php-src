@@ -14,4 +14,4 @@ Fatal error: Uncaught TypeError: Return value of foo() must be an instance of Da
 Stack trace:
 #0 %s(%d): foo()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

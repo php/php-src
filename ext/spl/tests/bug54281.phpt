@@ -16,4 +16,4 @@ Fatal error: Uncaught LogicException: The object is in an invalid state as the p
 Stack trace:
 #0 %s%ebug54281.php(8): RecursiveIteratorIterator->rewind()
 #1 {main}
-  thrown in %s%ebug54281.php on line 8
+  instantiated in %s%ebug54281.php on line 8

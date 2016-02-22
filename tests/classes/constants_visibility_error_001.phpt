@@ -13,4 +13,4 @@ var_dump(A::privateConst);
 Fatal error: Uncaught Error: Cannot access private const A::privateConst in %s:6
 Stack trace:
 #0 {main}
-  thrown in %s on line 6
+  instantiated in %s on line 6

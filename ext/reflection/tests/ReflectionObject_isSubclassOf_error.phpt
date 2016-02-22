@@ -21,4 +21,4 @@ Fatal error: Uncaught ReflectionException: Class X does not exist in %s:7
 Stack trace:
 #0 %s(7): ReflectionClass->isSubclassOf('X')
 #1 {main}
-  thrown in %s on line 7
+  instantiated in %s on line 7

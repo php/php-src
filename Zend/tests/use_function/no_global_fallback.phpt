@@ -13,4 +13,4 @@ var_dump(baz());
 Fatal error: Uncaught Error: Call to undefined function foo\bar\baz() in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

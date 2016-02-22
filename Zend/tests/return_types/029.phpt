@@ -20,4 +20,4 @@ Fatal error: Uncaught TypeError: Return value of foo() must be of the type array
 Stack trace:
 #0 %s(%d): foo()
 #1 {main}
-  thrown in %s029.php on line %d
+  instantiated in %s029.php on line %d

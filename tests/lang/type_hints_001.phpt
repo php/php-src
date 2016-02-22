@@ -27,4 +27,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to type_hint_foo() must be an
 Stack trace:
 #0 %s(%d): type_hint_foo(Object(Bar))
 #1 {main}
-  thrown in %s on line 9
+  instantiated in %s on line 9

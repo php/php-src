@@ -59,4 +59,4 @@ Warning: PDO::prepare(): SQLSTATE[42S02]: Base table or view not found: 1146 Tab
 Fatal error: Uncaught Error: Call to a member function execute() on boolean in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -14,4 +14,4 @@ bar();
 Fatal error: Uncaught Error: Call to undefined function bar() in %sbug36268.php:8
 Stack trace:
 #0 {main}
-  thrown in %sbug36268.php on line 8
+  instantiated in %sbug36268.php on line 8

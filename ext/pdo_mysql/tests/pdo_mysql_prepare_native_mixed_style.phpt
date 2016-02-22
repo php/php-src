@@ -39,4 +39,4 @@ Warning: PDO::prepare(): SQLSTATE[HY093]: Invalid parameter number in %s on line
 Fatal error: Uncaught Error: Call to a member function execute() on boolean in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

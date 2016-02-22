@@ -25,4 +25,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to transliterator_get_error_c
 Stack trace:
 #0 %s(%d): transliterator_get_error_code(Array)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

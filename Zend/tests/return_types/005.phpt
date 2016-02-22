@@ -19,4 +19,4 @@ Fatal error: Uncaught TypeError: Return value of qux::foo() must be an instance 
 Stack trace:
 #0 %s(%d): qux->foo()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

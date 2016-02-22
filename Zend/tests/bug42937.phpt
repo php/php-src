@@ -43,4 +43,4 @@ Fatal error: Uncaught Error: Call to undefined method C::test6() in %sbug42937.p
 Stack trace:
 #0 %s(%d): B->test()
 #1 {main}
-  thrown in %sbug42937.php on line 21
+  instantiated in %sbug42937.php on line 21

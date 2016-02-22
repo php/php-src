@@ -43,4 +43,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_is_set() must be a
 Stack trace:
 #0 %s(%d): intlcal_is_set(1, 2)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

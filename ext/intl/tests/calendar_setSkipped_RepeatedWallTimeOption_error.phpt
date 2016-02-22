@@ -83,4 +83,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set_repeated_wall_
 Stack trace:
 #0 %s(%d): intlcal_set_repeated_wall_time_option(1, 1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

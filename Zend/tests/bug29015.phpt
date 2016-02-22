@@ -11,4 +11,4 @@ var_dump($a);
 Fatal error: Uncaught Error: Cannot access empty property in %sbug29015.php:4
 Stack trace:
 #0 {main}
-  thrown in %sbug29015.php on line 4
+  instantiated in %sbug29015.php on line 4

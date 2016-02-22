@@ -25,4 +25,4 @@ array(1) {
 Fatal error: Uncaught Error: Undefined constant 'unknown' in %sns_076.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sns_076.php on line %d
+  instantiated in %sns_076.php on line %d

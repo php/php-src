@@ -16,4 +16,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to foobar\foo::bar() must be 
 Stack trace:
 #0 %s(%d): foobar\foo->bar(Object(stdClass))
 #1 {main}
-  thrown in %sbug43332_1.php on line 5
+  instantiated in %sbug43332_1.php on line 5

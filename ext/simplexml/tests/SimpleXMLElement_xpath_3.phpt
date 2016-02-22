@@ -18,4 +18,4 @@ Warning: simplexml_load_string() expects parameter 3 to be integer, float given 
 Fatal error: Uncaught Error: Call to a member function xpath() on null in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

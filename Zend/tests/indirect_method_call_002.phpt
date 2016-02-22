@@ -32,4 +32,4 @@ NULL
 Fatal error: Uncaught Error: Call to undefined method foo::www() in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

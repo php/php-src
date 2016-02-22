@@ -26,4 +26,4 @@ Fatal error: Uncaught Exception: exception before timeout in %s:%d
 Stack trace:
 #0 %s(%d): f(%d)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

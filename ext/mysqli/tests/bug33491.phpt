@@ -30,4 +30,4 @@ Fatal error: Uncaught Error: Call to a member function fetch_row() on boolean in
 Stack trace:
 #0 %s(%d): DB->query_single('SELECT DATE()')
 #1 {main}
-  thrown in %sbug33491.php on line %d
+  instantiated in %sbug33491.php on line %d

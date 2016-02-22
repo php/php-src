@@ -14,4 +14,4 @@ Fatal error: Uncaught PharException: No values passed to Phar::mungServer(), exp
 Stack trace:
 #0 %sfrontcontroller18.phar.php(2): Phar::mungServer(Array)
 #1 {main}
-  thrown in %sfrontcontroller18.phar.php on line 2
+  instantiated in %sfrontcontroller18.phar.php on line 2

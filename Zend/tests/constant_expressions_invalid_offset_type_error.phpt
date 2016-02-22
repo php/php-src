@@ -11,4 +11,4 @@ const C2 = [C1, [] => 1];
 Fatal error: Uncaught Error: Illegal offset type in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

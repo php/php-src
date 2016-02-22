@@ -303,4 +303,4 @@ Fatal error: Uncaught Error: Undefined constant 'foo\foo\unknown' in %sbug42819.
 Stack trace:
 #0 %s(%d): foo\oops()
 #1 {main}
-  thrown in %sbug42819.php on line %d
+  instantiated in %sbug42819.php on line %d

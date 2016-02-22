@@ -18,4 +18,4 @@ Stack trace:
 #0 %sexception_012.php(%d) : runtime-created function(%d): assert(false, 'assert(false)')
 #1 %sexception_012.php(%d): __lambda_func()
 #2 {main}
-  thrown in %sexception_012.php(%d) : runtime-created function on line %d
+  instantiated in %sexception_012.php(%d) : runtime-created function on line %d

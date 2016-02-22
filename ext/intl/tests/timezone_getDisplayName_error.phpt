@@ -46,4 +46,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_display_name() 
 Stack trace:
 #0 %s(%d): intltz_get_display_name(NULL, 1, false, 'pt_PT')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

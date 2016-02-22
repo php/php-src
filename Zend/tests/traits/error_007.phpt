@@ -13,4 +13,4 @@ new abc;
 Fatal error: Uncaught Error: Cannot instantiate trait abc in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

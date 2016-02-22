@@ -81,4 +81,4 @@ Unset a private property, and attempt to recreate at global scope (expecting fai
 Fatal error: Uncaught Error: Cannot access private property C::$p in %s:46
 Stack trace:
 #0 {main}
-  thrown in %s on line 46
+  instantiated in %s on line 46

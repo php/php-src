@@ -30,4 +30,4 @@ ok
 Fatal error: Uncaught Error: Cannot call constructor in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

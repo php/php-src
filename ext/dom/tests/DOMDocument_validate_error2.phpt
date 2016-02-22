@@ -15,4 +15,4 @@ DOMDocument::validate();
 Fatal error: Uncaught Error: Non-static method DOMDocument::validate() cannot be called statically in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

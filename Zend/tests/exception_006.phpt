@@ -10,4 +10,4 @@ throw 1;
 Fatal error: Uncaught Error: Can only throw objects in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

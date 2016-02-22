@@ -25,4 +25,4 @@ Warning: call_user_func_array() expects parameter 1 to be a valid callback, cann
 Fatal error: Uncaught Error: Call to private method foo::bar() from context '' in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

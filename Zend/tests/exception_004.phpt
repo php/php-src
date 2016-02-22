@@ -18,4 +18,4 @@ try {
 Fatal error: Uncaught Error: Cannot throw objects that do not implement Throwable in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

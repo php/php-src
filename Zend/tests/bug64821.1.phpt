@@ -19,4 +19,4 @@ throw new a;
 Fatal error: Uncaught a in %s:0
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

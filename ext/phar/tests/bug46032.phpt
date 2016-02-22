@@ -31,4 +31,4 @@ Fatal error: Uncaught UnexpectedValueException: Cannot create phar '000000000000
 Stack trace:
 #0 %sbug46032.php(%d): PharData->__construct('000000000000000...')
 #1 {main}
-  thrown in %sbug46032.php on line %d
+  instantiated in %sbug46032.php on line %d

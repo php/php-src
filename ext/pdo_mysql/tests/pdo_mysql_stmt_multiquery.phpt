@@ -103,4 +103,4 @@ Fatal error: Uncaught Error: Call to a member function errorInfo() on boolean in
 Stack trace:
 #0 %s(%d): mysql_stmt_multiquery_wrong_usage(Object(PDO))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

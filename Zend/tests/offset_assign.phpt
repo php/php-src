@@ -13,4 +13,4 @@ Warning: Illegal string offset 'x' in %soffset_assign.php on line %d
 Fatal error: Uncaught Error: Cannot use string offset as an array in %soffset_assign.php:%d
 Stack trace:
 #0 {main}
-  thrown in %soffset_assign.php on line %d
+  instantiated in %soffset_assign.php on line %d

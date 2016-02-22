@@ -89,4 +89,4 @@ Test static invocation:
 Fatal error: Uncaught Error: Non-static method ReflectionClass::isIterateable() cannot be called statically in %s:43
 Stack trace:
 #0 {main}
-  thrown in %s on line 43
+  instantiated in %s on line 43

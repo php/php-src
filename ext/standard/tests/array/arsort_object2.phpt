@@ -94,4 +94,4 @@ echo "Done\n";
 Fatal error: Uncaught Error: Class 'for_integer_asort' not found in %sarsort_object2.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sarsort_object2.php on line %d
+  instantiated in %sarsort_object2.php on line %d

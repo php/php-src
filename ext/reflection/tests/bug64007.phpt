@@ -20,4 +20,4 @@ Fatal error: Uncaught Error: The "Generator" class is reserved for internal use 
 Stack trace:
 #0 %s(%d): ReflectionClass->newInstance()
 #1 {main}
-  thrown in %sbug64007.php on line %d
+  instantiated in %sbug64007.php on line %d

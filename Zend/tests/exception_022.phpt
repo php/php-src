@@ -11,4 +11,4 @@ Fatal error: Uncaught Error: Wrong parameters for Error([string $message [, long
 Stack trace:
 #0 %sexception_022.php(%d): Error->__construct(Object(stdClass))
 #1 {main}
-  thrown in %sexception_022.php on line %d
+  instantiated in %sexception_022.php on line %d

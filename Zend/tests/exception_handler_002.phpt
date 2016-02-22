@@ -24,4 +24,4 @@ Fatal error: Uncaught Exception in %sexception_handler_002.php:7
 Stack trace:
 #0 [internal function]: foo(Object(test))
 #1 {main}
-  thrown in %sexception_handler_002.php on line %d
+  instantiated in %sexception_handler_002.php on line %d

@@ -8,4 +8,4 @@ md5(0)[]--;
 Fatal error: Uncaught Error: [] operator not supported for strings in %sbug69905.php:2
 Stack trace:
 #0 {main}
-  thrown in %sbug69905.php on line 2
+  instantiated in %sbug69905.php on line 2

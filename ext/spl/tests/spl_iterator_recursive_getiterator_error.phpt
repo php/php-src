@@ -17,4 +17,4 @@ Fatal error: Uncaught Error: An iterator cannot be used with foreach by referenc
 Stack trace:
 #0 %s(%d): p(Object(IteratorIterator))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

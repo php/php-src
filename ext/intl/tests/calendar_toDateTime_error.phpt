@@ -42,4 +42,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_to_date_time() mus
 Stack trace:
 #0 %s(%d): intlcal_to_date_time(3)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

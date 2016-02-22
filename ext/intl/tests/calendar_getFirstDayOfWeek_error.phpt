@@ -33,4 +33,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_first_day_of_w
 Stack trace:
 #0 %s(%d): intlcal_get_first_day_of_week(1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

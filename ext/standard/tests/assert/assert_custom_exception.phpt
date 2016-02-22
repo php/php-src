@@ -12,4 +12,4 @@ assert(false, new CustomException('Exception message'));
 Fatal error: Uncaught CustomException: Exception message in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

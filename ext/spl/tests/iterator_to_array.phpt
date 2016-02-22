@@ -26,4 +26,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to iterator_to_array() must i
 Stack trace:
 #0 %s(%d): iterator_to_array('test', 'test')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

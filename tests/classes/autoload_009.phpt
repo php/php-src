@@ -18,4 +18,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to f() must be an instance of
 Stack trace:
 #0 %s(%d): f(Object(stdClass))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -61,4 +61,4 @@ Fatal error: Uncaught Error: Class 'NotExists' not found in %sbug65784.php:%d
 Stack trace:
 #0 %s(%d): foo3()
 #1 {main}
-  thrown in %sbug65784.php on line %d
+  instantiated in %sbug65784.php on line %d

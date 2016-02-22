@@ -22,4 +22,4 @@ Test
 Fatal error: Uncaught Error: Trying to clone an uncloneable object of class XMLReader in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -19,4 +19,4 @@ Stack trace:
 #0 [internal function]: ReflectionParameter->__construct('ReflectionParam...', 'incorrect_param...')
 #1 %s.php(%d): ReflectionParameter::export('ReflectionParam...', 'incorrect_param...')
 #2 {main}
-  thrown in %s.php on line %d
+  instantiated in %s.php on line %d

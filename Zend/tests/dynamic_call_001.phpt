@@ -19,4 +19,4 @@ Deprecated: Methods with the same name as their class will not be constructors i
 Fatal error: Uncaught Error: Non-static method foo::foo() cannot be called statically in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

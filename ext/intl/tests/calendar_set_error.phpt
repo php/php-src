@@ -42,4 +42,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set() must be an i
 Stack trace:
 #0 %s(%d): intlcal_set(1, 2, 3)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

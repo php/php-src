@@ -10,4 +10,4 @@ C::$p =& $a;
 Fatal error: Uncaught Error: Access to undeclared static property: C::$p in %s:4
 Stack trace:
 #0 {main}
-  thrown in %s on line 4
+  instantiated in %s on line 4

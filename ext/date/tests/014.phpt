@@ -41,4 +41,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to timezone_offset_get() must
 Stack trace:
 #0 %s(%d): timezone_offset_get(Object(DateTime), Object(DateTimeZone))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

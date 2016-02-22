@@ -13,4 +13,4 @@ echo "BUG\n";
 Fatal error: Uncaught Error: Class '../BUG' not found in %sautoload_021.php:6
 Stack trace:
 #0 {main}
-  thrown in %sautoload_021.php on line 6
+  instantiated in %sautoload_021.php on line 6

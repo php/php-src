@@ -191,4 +191,4 @@ Stack trace:
 #0 %s(%d): ReflectionClassConstant->__construct(Object(TestClass), 'BAD_CONST')
 #1 %s(%d): reflectClassConstant(Object(TestClass), 'BAD_CONST')
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

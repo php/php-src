@@ -27,4 +27,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to MyTestClass::__construct()
 Stack trace:
 #0 %s(%d): MyTestClass->__construct()
 #1 {main}
-  thrown in %sinterfaces_003.php on line %d
+  instantiated in %sinterfaces_003.php on line %d

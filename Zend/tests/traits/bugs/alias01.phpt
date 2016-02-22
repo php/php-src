@@ -26,4 +26,4 @@ T:m2
 Fatal error: Uncaught Error: Call to undefined method C1::a2() in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

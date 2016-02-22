@@ -43,7 +43,7 @@ string(%d) "
 <b>Fatal error</b>:  Uncaught Error: Cannot access private property test::$pri in %s004.test.php:8
 Stack trace:
 #0 {main}
-  thrown in <b>%s004.test.php</b> on line <b>8</b><br />
+  instantiated in <b>%s004.test.php</b> on line <b>8</b><br />
 "
 string(25) "No input file specified.
 "

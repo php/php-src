@@ -18,4 +18,4 @@ Fatal error: Uncaught Error: Non-static method ArrayIterator::current() cannot b
 Stack trace:
 #0 %s(%d): test->method()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

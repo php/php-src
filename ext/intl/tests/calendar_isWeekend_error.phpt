@@ -40,4 +40,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_is_weekend() must 
 Stack trace:
 #0 %s(%d): intlcal_is_weekend(1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

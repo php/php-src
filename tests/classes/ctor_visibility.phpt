@@ -71,4 +71,4 @@ Stack trace:
 #0 %s(%d): DerivedPriv->__construct()
 #1 %s(%d): DerivedPriv::f()
 #2 {main}
-  thrown in %sctor_visibility.php on line %d
+  instantiated in %sctor_visibility.php on line %d

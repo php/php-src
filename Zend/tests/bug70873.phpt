@@ -31,4 +31,4 @@ Fatal error: Uncaught Error: Cannot access  property B::$x in %sbug70873.php:%d
 Stack trace:
 #0 %sbug70873.php(%d): B->bar()
 #1 {main}
-  thrown in %sbug70873.php on line %d
+  instantiated in %sbug70873.php on line %d

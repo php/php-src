@@ -19,4 +19,4 @@ int(1)
 Fatal error: Uncaught Error: Access to undeclared static property: Closure::$x in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

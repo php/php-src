@@ -11,6 +11,6 @@ Stack trace:
 #0 [internal function]: ArrayObject->unserialize('x:i:0;r:3;X')
 #1 %s%ebug71311.php(2): unserialize('%s')
 #2 {main}
-  thrown in %s%ebug71311.php on line 2
+  instantiated in %s%ebug71311.php on line 2
 
 

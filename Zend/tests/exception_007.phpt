@@ -33,4 +33,4 @@ Stack trace:
 Next Exception: Third in %sexception_007.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sexception_007.php on line %d
+  instantiated in %sexception_007.php on line %d

@@ -111,4 +111,4 @@ Stack trace:
 #0 [internal function]: VariableStream->__construct()
 #1 %s(%d): fopen('var://myvar', 'r+')
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

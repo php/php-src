@@ -21,4 +21,4 @@ Exception: Cannot access private property C::$p in %sexception_014.php on line %
 Fatal error: Uncaught Error: Cannot access private property C::$p in %sexception_014.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sexception_014.php on line %d
+  instantiated in %sexception_014.php on line %d

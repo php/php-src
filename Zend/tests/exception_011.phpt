@@ -17,4 +17,4 @@ Fatal error: Uncaught AssertionError: assert(false) in %sexception_011.php:%d
 Stack trace:
 #0 %sexception_011.php(%d): assert(false, 'assert(false)')
 #1 {main}
-  thrown in %sexception_011.php on line %d
+  instantiated in %sexception_011.php on line %d

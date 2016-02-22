@@ -29,4 +29,4 @@ string(6) "secret"
 Fatal error: Uncaught Error: Cannot access private property C::$x in %s:19
 Stack trace:
 #0 {main}
-  thrown in %s on line 19
+  instantiated in %s on line 19

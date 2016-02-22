@@ -14,4 +14,4 @@ Fatal error: Uncaught Exception: DateTimeZone::__construct(): Timezone must not 
 Stack trace:
 #0 %sbug70277.php(%d): DateTimeZone->__construct('Europe/Zurich\x00F...')
 #1 {main}
-  thrown in %sbug70277.php on line %d
+  instantiated in %sbug70277.php on line %d

@@ -24,4 +24,4 @@ echo "end\n";
 Fatal error: Uncaught Exception in %stemporary_cleaning_009.php:12
 Stack trace:
 #0 {main}
-  thrown in %stemporary_cleaning_009.php on line 12
+  instantiated in %stemporary_cleaning_009.php on line 12

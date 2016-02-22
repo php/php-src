@@ -8,4 +8,4 @@ echo namespace\bar."\n";
 Fatal error: Uncaught Error: Undefined constant 'bar' in %sbug43344_10.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sbug43344_10.php on line %d
+  instantiated in %sbug43344_10.php on line %d

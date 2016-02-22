@@ -11,4 +11,4 @@ Stack trace:
 #0 [internal function]: SplObjectStorage->unserialize('%s')
 #1 %s%ebug71313.php(2): unserialize('%s')
 #2 {main}
-  thrown in %s%ebug71313.php on line 2
+  instantiated in %s%ebug71313.php on line 2

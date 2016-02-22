@@ -22,4 +22,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to transliterator_create_inve
 Stack trace:
 #0 %s(%d): transliterator_create_inverse('jj')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -13,4 +13,4 @@ Fatal error: Uncaught AssertionError: assert(false) in %sexpect_002.php:%d
 Stack trace:
 #0 %sexpect_002.php(%d): assert(false, 'assert(false)')
 #1 {main}
-  thrown in %sexpect_002.php on line %d
+  instantiated in %sexpect_002.php on line %d

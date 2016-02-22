@@ -25,4 +25,4 @@ Stack trace:
 #0 [internal function]: PDORow->__construct()
 #1 %spdo_036.php(8): ReflectionClass->newInstance()
 #2 {main}
-  thrown in %spdo_036.php on line 8
+  instantiated in %spdo_036.php on line 8

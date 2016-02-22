@@ -25,4 +25,4 @@ Fatal error: Uncaught RuntimeException: SplFileInfo::getPerms(): stat failed for
 Stack trace:
 #0 %s: SplFileInfo->getPerms()
 #1 {main}
-  thrown in %s
+  instantiated in %s

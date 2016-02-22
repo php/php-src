@@ -21,7 +21,7 @@ Fatal error: Uncaught ErrorException: Undefined variable: undefined in %sbug6176
 Stack trace:
 #0 %sbug61767.php(%d): {closure}(%s, 'Undefined varia...', '%s', %d, Array)
 #1 {main}
-  thrown in %sbug61767.php on line %d
+  instantiated in %sbug61767.php on line %d
 Shutting down
 Array
 (

@@ -103,11 +103,11 @@ error_reporting=E_ALL
 		}
 
 		if ($e->getLine() !== $line)
-			printf("[019] Exception has been thrown in line %d, exception object reports line %d\n",
+			printf("[019] Exception has been instantiated in line %d, exception object reports line %d\n",
 				$line, $e->getLine());
 
 		if ($e->getFile() !== __FILE__)
-			printf("[020] Exception has been thrown in file '%s', exception object reports file '%s'\n",
+			printf("[020] Exception has been instantiated in file '%s', exception object reports file '%s'\n",
 				__FILE__, $e->getFile());
 
 	}
@@ -141,11 +141,11 @@ error_reporting=E_ALL
 		}
 
 		if ($e->getLine() !== $line)
-			printf("[027] Exception has been thrown in line %d, exception object reports line %d\n",
+			printf("[027] Exception has been instantiated in line %d, exception object reports line %d\n",
 				$line, $e->getLine());
 
 		if ($e->getFile() !== __FILE__)
-			printf("[028] Exception has been thrown in file '%s', exception object reports file '%s'\n",
+			printf("[028] Exception has been instantiated in file '%s', exception object reports file '%s'\n",
 				__FILE__, $e->getFile());
 
 		if (get_class($e) != 'PDOException')

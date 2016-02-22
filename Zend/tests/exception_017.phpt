@@ -36,4 +36,4 @@ Exception: Cannot call abstract method C::foo()
 Fatal error: Uncaught Error: Cannot call abstract method C::foo() in %sexception_017.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sexception_017.php on line %d
+  instantiated in %sexception_017.php on line %d

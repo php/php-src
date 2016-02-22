@@ -17,4 +17,4 @@ Fatal error: Uncaught PharException: Unknown mime type specifier used (not a str
 Stack trace:
 #0 %sfrontcontroller13.phar.php(2): Phar::webPhar('whatever', 'index.php', '', Array)
 #1 {main}
-  thrown in %sfrontcontroller13.phar.php on line 2
+  instantiated in %sfrontcontroller13.phar.php on line 2

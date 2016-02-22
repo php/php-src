@@ -12,4 +12,4 @@ Fatal error: Uncaught Error: Undefined constant 'bar' in %sbug43344_11.php:%d
 Stack trace:
 #0 %s(%d): f()
 #1 {main}
-  thrown in %sbug43344_11.php on line %d
+  instantiated in %sbug43344_11.php on line %d

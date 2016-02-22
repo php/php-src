@@ -35,5 +35,5 @@ Fatal error: Uncaught Exception: Failed loading class://non.existent.Class in %s
 Stack trace:
 #0 %s(%d): CL->load('class://non.exi...')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

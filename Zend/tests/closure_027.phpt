@@ -32,4 +32,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to test() must be an instance
 Stack trace:
 #0 %s(%d): test(Object(stdClass))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -1,5 +1,5 @@
 --TEST--
-SPL: RecursiveIteratorIterator - Exception thrown in beginchildren which should be handled in next()
+SPL: RecursiveIteratorIterator - Exception instantiated in beginchildren which should be handled in next()
 --FILE--
 <?php 
 
@@ -33,4 +33,4 @@ Stack trace:
 #0 [internal function]: MyRecursiveIteratorIterator->beginchildren()
 #1 %s: RecursiveIteratorIterator->next()
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

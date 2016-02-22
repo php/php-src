@@ -26,4 +26,4 @@ Fatal error: Uncaught Error: Call to private X::__construct() from context 'Y' i
 Stack trace:
 #0 %s(%d): Y::cheat(5)
 #1 {main}
-  thrown in %sbug44141.php on line 15
+  instantiated in %sbug44141.php on line 15

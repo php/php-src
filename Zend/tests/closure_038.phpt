@@ -64,4 +64,4 @@ Next Error: Cannot access private property B::$x in %s:%d
 Stack trace:
 #0 %s(%d): Closure->{closure}()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

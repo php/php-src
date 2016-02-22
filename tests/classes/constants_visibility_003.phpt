@@ -27,4 +27,4 @@ Fatal error: Uncaught Error: Cannot access private const A::privateConst in %s:1
 Stack trace:
 #0 %s(14): constant('A::privateConst')
 #1 {main}
-  thrown in %s on line 14
+  instantiated in %s on line 14

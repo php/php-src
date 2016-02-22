@@ -34,4 +34,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to foo\bar::__construct() mus
 Stack trace:
 #0 %s(%d): foo\bar->__construct(Object(stdClass))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

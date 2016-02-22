@@ -46,6 +46,6 @@ Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
 #1 %s(%d): session_start()
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 
 Fatal error: session_start(): Failed to initialize storage module: %s in %s%esession_module_name_variation3.php on line %d

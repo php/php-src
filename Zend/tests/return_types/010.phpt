@@ -15,4 +15,4 @@ Fatal error: Uncaught TypeError: Return value of foo() must be of the type array
 Stack trace:
 #0 %s(%d): foo(Array)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

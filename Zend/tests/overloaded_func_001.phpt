@@ -12,4 +12,4 @@ var_dump(_ZendTestClass::test());
 Fatal error: Uncaught Error: Cannot call overloaded function for non-object in %soverloaded_func_001.php:%d
 Stack trace:
 #0 {main}
-  thrown in %soverloaded_func_001.php on line %d
+  instantiated in %soverloaded_func_001.php on line %d

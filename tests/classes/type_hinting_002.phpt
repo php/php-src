@@ -17,4 +17,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to Foo::a() must be an instan
 Stack trace:
 #0 %s(%d): Foo->a(Object(Foo))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

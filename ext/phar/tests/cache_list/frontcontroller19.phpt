@@ -15,4 +15,4 @@ Fatal error: Uncaught PharException: Too many values passed to Phar::mungServer(
 Stack trace:
 #0 %sfrontcontroller19.php(2): Phar::mungServer(Array)
 #1 {main}
-  thrown in %sfrontcontroller19.php on line 2
+  instantiated in %sfrontcontroller19.php on line 2

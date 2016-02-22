@@ -31,4 +31,4 @@ Stack trace:
 #0 %s(%d): impl->__get('counter')
 #1 %s(%d): impl->__construct()
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

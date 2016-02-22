@@ -58,4 +58,4 @@ Stack trace:
 #0 [internal function]: typehint(1, 1)
 #1 %s(%d): array_walk(Array, 'typehint')
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

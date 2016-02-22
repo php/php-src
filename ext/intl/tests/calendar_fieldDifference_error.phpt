@@ -43,4 +43,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_field_difference()
 Stack trace:
 #0 %s(%d): intlcal_field_difference(1, 0, 1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

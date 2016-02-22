@@ -12,4 +12,4 @@ echo "Done\n";
 Fatal error: Uncaught Error: Cannot use string offset as an object in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

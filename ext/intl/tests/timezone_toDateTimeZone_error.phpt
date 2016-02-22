@@ -39,4 +39,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intltz_to_date_time_zone()
 Stack trace:
 #0 %s(%d): intltz_to_date_time_zone(1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -48,4 +48,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_skipped_wall_t
 Stack trace:
 #0 %s(%d): intlcal_get_skipped_wall_time_option(1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

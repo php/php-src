@@ -24,4 +24,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_raw_offset() mu
 Stack trace:
 #0 %s(%d): intltz_get_raw_offset(NULL)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

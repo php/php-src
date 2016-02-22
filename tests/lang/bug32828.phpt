@@ -18,4 +18,4 @@ Stack trace:
 #0 [internal function]: output_handler('', %d)
 #1 %s(%d): ob_end_clean()
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

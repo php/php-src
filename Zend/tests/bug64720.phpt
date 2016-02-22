@@ -49,4 +49,4 @@ Fatal error: Uncaught Error: Access to undeclared static property: Stat::$reques
 Stack trace:
 #0 [internal function]: Stat->__destruct()
 #1 {main}
-  thrown in %sbug64720.php on line 12
+  instantiated in %sbug64720.php on line 12

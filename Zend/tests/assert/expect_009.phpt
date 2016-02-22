@@ -22,4 +22,4 @@ Stack trace:
 #0 %sexpect_009.php(%d): assert(false, 'assert(false)')
 #1 %sexpect_009.php(%d): Two->__construct()
 #2 {main}
-  thrown in %sexpect_009.php on line %d
+  instantiated in %sexpect_009.php on line %d

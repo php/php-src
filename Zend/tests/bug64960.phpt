@@ -37,4 +37,4 @@ Stack trace:
 #1 %sbug64960.php(9): ob_end_clean()
 #2 [internal function]: ExceptionHandler->__invoke(Object(Exception))
 #3 {main}
-  thrown in %sbug64960.php on line 19
+  instantiated in %sbug64960.php on line 19

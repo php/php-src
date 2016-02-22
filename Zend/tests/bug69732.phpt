@@ -27,5 +27,5 @@ Notice: Indirect modification of overloaded property wpq::$interesting has no ef
 Fatal error: Uncaught Error: Cannot assign by reference to overloaded object in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

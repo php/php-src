@@ -36,5 +36,5 @@ Fatal error: Uncaught TypeError: Argument 1 passed to a() must be of the type ar
 Stack trace:
 #0 %s(%d): a(NULL)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

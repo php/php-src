@@ -12,5 +12,5 @@ var_dump(A::FOO);
 Fatal error: Uncaught Error: Cannot declare self-referencing constant 'self::FOO' in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

@@ -22,4 +22,4 @@ Fatal error: Uncaught UnexpectedValueException: Cannot create phar 'A:A:.phar', 
 Stack trace:
 #0 %sbug71625.php(%d): Phar->__construct('A:A:.phar')
 #1 {main}
-  thrown in %sbug71625.php on line %d
+  instantiated in %sbug71625.php on line %d

@@ -47,5 +47,5 @@ Fatal error: Uncaught Error: Call to undefined function undefined_function() in 
 Stack trace:
 #0 [internal function]: write(%s, '')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 close: goodbye cruel world

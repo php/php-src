@@ -24,4 +24,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_error_code() mu
 Stack trace:
 #0 %s(%d): intltz_get_error_code(NULL)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

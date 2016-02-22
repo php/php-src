@@ -35,4 +35,4 @@ Func   - Foo\Bar
 Fatal error: Uncaught Error: Call to undefined function Foo\Foo\Bar() in %sns_026.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sns_026.php on line %d
+  instantiated in %sns_026.php on line %d

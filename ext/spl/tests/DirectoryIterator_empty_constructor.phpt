@@ -12,4 +12,4 @@ Fatal error: Uncaught RuntimeException: Directory name must not be empty. in %s:
 Stack trace:
 #0 %s(%d): DirectoryIterator->__construct('')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

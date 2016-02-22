@@ -75,4 +75,4 @@ Fatal error: Uncaught Error: Using $this when not in object context in %sclosure
 Stack trace:
 #0 %s(%d): A::{closure}()
 #1 {main}
-  thrown in %sclosure_005.php on line 28
+  instantiated in %sclosure_005.php on line 28

@@ -58,4 +58,4 @@ Fatal error: Uncaught ReflectionException: Class A does not have a property name
 Stack trace:
 #0 %sReflectionClass_setStaticPropertyValue_001_2_4.php(%d): ReflectionClass->setStaticPropertyValue('\x00A\x00privateOverr...', 'new value 1')
 #1 {main}
-  thrown in %sReflectionClass_setStaticPropertyValue_001_2_4.php on line %d
+  instantiated in %sReflectionClass_setStaticPropertyValue_001_2_4.php on line %d

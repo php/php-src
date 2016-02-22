@@ -39,4 +39,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to FooBar::a() must implement
 Stack trace:
 #0 %s(%d): FooBar->a(Object(Blort))
 #1 {main}
-  thrown in %s on line 12
+  instantiated in %s on line 12

@@ -15,4 +15,4 @@ Fatal error: Uncaught OutOfRangeException: Offset invalid or out of range in %s
 Stack trace:
 #0 %s
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

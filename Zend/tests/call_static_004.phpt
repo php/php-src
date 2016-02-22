@@ -21,4 +21,4 @@ string(3) "AaA"
 Fatal error: Uncaught Error: Function name must be a string in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

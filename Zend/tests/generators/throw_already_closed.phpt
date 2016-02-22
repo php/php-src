@@ -20,4 +20,4 @@ bool(false)
 Fatal error: Uncaught Exception: test in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

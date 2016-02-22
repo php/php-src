@@ -19,4 +19,4 @@ foo
 Fatal error: Uncaught Error: Class 'B' not found in %s042.php:%d
 Stack trace:
 #0 {main}
-  thrown in %s042.php on line %d
+  instantiated in %s042.php on line %d

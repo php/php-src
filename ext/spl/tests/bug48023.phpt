@@ -12,4 +12,4 @@ new Foo;
 Fatal error: Uncaught Error: Class 'Foo' not found in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

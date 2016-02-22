@@ -21,4 +21,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to ReflectionClass::newInstan
 Stack trace:
 #0 %s(%d): ReflectionClass->newInstanceArgs('x')
 #1 {main}
-  thrown in %s on line 8
+  instantiated in %s on line 8

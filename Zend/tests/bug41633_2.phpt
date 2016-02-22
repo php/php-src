@@ -11,4 +11,4 @@ echo Foo::A."\n";
 Fatal error: Uncaught Error: Undefined class constant 'self::B' in %sbug41633_2.php:5
 Stack trace:
 #0 {main}
-  thrown in %sbug41633_2.php on line 5
+  instantiated in %sbug41633_2.php on line 5

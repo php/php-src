@@ -19,4 +19,4 @@ assert (preg_match("~^([a-zA-Z0-9-]+)$~", $data["key"]), new HeaderMalfunctionEr
 Fatal error: Uncaught HeaderMalfunctionError: malformed key found at 1 "X-HTTP " in %sexpect_007.php:10
 Stack trace:
 #0 {main}
-  thrown in %sexpect_007.php on line 10
+  instantiated in %sexpect_007.php on line 10

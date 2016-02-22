@@ -96,4 +96,4 @@ Warning: PDO::prepare(): SQLSTATE[42S22]: Column not found: 1054 Unknown column 
 Fatal error: Uncaught Error: Call to a member function execute() on boolean in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

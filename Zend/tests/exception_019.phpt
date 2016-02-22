@@ -11,4 +11,4 @@ Fatal error: Uncaught Error: Wrong parameters for Exception([string $message [, 
 Stack trace:
 #0 %sexception_019.php(%d): Exception->__construct(Object(stdClass))
 #1 {main}
-  thrown in %sexception_019.php on line %d
+  instantiated in %sexception_019.php on line %d

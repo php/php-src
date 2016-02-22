@@ -13,4 +13,4 @@ Fatal error: Uncaught Exception: Serialization of 'class@%s' is not allowed in %
 Stack trace:
 #0 %sbug69761.php(%d): serialize(Object(class@anonymous))
 #1 {main}
-  thrown in %sbug69761.php on line %d
+  instantiated in %sbug69761.php on line %d

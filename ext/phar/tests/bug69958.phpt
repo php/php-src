@@ -13,4 +13,4 @@ Fatal error: Uncaught exception 'BadMethodCallException' with message 'phar "%s/
 Stack trace:
 #0 %s/bug69958.php(%d): PharData->convertToData(%d)
 #1 {main}
-  thrown in %s/bug69958.php on line %d
+  instantiated in %s/bug69958.php on line %d

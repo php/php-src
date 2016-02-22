@@ -22,4 +22,4 @@ Stack trace:
 Next Error: Cannot access protected property C::$y in %s:8
 Stack trace:
 #0 {main}
-  thrown in %s on line 8
+  instantiated in %s on line 8

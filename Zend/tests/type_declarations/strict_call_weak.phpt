@@ -17,5 +17,5 @@ Fatal error: Uncaught TypeError: Argument 1 passed to function_declared_in_weak_
 Stack trace:
 #0 %s(%d): function_declared_in_weak_mode(1)
 #1 {main}
-  thrown in %sstrict_call_weak_2.inc on line 5
+  instantiated in %sstrict_call_weak_2.inc on line 5
 

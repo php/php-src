@@ -41,4 +41,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to foo\test5() must be an ins
 Stack trace:
 #0 %s(%d): foo\test5(Object(foo\bar))
 #1 {main}
-  thrown in %sbug42802.php on line %d
+  instantiated in %sbug42802.php on line %d

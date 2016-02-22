@@ -21,4 +21,4 @@ Fatal error: Uncaught Error: Non-static method Foo::__construct() cannot be call
 Stack trace:
 #0 %s(%d): Foo::get()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

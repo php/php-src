@@ -26,4 +26,4 @@ Stack trace:
 #0 %sbug64966.php(13): test('iterator_apply')
 #1 %sbug64966.php(18): A->b()
 #2 {main}
-  thrown in %sbug64966.php on line 6
+  instantiated in %sbug64966.php on line 6

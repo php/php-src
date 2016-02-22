@@ -42,4 +42,4 @@ Fatal error: Uncaught Error: Cannot access private property ChildClass::$private
 Stack trace:
 #0 %s(%d): BaseClass->printVars()
 #1 {main}
-  thrown in %sbug29674.php on line %d
+  instantiated in %sbug29674.php on line %d

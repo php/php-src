@@ -136,4 +136,4 @@ Fatal error: Uncaught Error: Call to protected C4::__construct() from context 'B
 Stack trace:
 #0 %s(%d): B4::doTest()
 #1 {main}
-  thrown in %sbug37632.php on line %d
+  instantiated in %sbug37632.php on line %d

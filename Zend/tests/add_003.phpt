@@ -29,4 +29,4 @@ Notice: Object of class stdClass could not be converted to int in %s on line %d
 Fatal error: Uncaught Error: Unsupported operand types in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

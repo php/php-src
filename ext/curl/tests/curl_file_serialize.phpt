@@ -17,5 +17,5 @@ Stack trace:
 #0 [internal function]: CURLFile->__wakeup()
 #1 %s
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

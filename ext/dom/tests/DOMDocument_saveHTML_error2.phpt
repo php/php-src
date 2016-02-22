@@ -15,4 +15,4 @@ DOMDocument::saveHTML(true);
 Fatal error: Uncaught Error: Non-static method DOMDocument::saveHTML() cannot be called statically in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

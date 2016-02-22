@@ -40,4 +40,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to foo::testFoo() must be an 
 Stack trace:
 #0 %s(%d): foo->testFoo(Object(stdClass))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

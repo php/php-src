@@ -15,4 +15,4 @@ Fatal error: Uncaught TypeError: Return value of get_config() must be of the typ
 Stack trace:
 #0 %s(%d): get_config()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

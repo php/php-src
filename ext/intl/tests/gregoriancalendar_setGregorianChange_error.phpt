@@ -43,4 +43,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlgregcal_set_gregorian_
 Stack trace:
 #0 %s(%d): intlgregcal_set_gregorian_change(1, 4)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

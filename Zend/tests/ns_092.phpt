@@ -67,4 +67,4 @@ Foo\Bar\buz
 Fatal error: Uncaught Error: Call to undefined function Foo\Bar\A() in %sns_092.php:45
 Stack trace:
 #0 {main}
-  thrown in %sns_092.php on line 45
+  instantiated in %sns_092.php on line 45

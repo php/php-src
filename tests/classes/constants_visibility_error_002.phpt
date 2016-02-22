@@ -13,4 +13,4 @@ var_dump(A::protectedConst);
 Fatal error: Uncaught Error: Cannot access protected const A::protectedConst in %s:6
 Stack trace:
 #0 {main}
-  thrown in %s on line 6
+  instantiated in %s on line 6

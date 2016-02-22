@@ -29,4 +29,4 @@ Stack trace:
 #0 %s(%d): do_throw()
 #1 %s(%d): aa->dosome()
 #2 {main}
-  thrown in %s
+  instantiated in %s

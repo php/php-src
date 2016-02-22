@@ -33,4 +33,4 @@ Stack trace:
 #0 %s(%d): a->test()
 #1 %s(%d): c->__construct()
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -20,4 +20,4 @@ Fatal error: Uncaught TypeError: Return value of foo::{closure}() must be of the
 Stack trace:
 #0 %s(%d): foo->{closure}()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

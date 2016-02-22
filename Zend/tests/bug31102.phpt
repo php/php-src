@@ -49,4 +49,4 @@ Fatal error: Uncaught Error: Class 'Test3' not found in %sbug31102.php(%d) : eva
 Stack trace:
 #0 %s(%d): eval()
 #1 {main}
-  thrown in %sbug31102.php(%d) : eval()'d code on line 1
+  instantiated in %sbug31102.php(%d) : eval()'d code on line 1

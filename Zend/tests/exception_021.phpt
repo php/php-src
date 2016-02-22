@@ -12,4 +12,4 @@ Fatal error: Uncaught Error: Wrong parameters for Hello([string $message [, long
 Stack trace:
 #0 %sexception_021.php(%d): Error->__construct(Object(stdClass))
 #1 {main}
-  thrown in %sexception_021.php on line %d
+  instantiated in %sexception_021.php on line %d

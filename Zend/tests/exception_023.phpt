@@ -13,4 +13,4 @@ Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 %s(%d): {closure}(Object(class@anonymous))
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

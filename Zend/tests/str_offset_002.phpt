@@ -9,4 +9,4 @@ $x = array(&$a[1]);
 Fatal error: Uncaught Error: Cannot create references to/from string offsets in %sstr_offset_002.php:3
 Stack trace:
 #0 {main}
-  thrown in %sstr_offset_002.php on line 3
+  instantiated in %sstr_offset_002.php on line 3

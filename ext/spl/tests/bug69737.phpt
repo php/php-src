@@ -18,4 +18,4 @@ Stack trace:
 #0 [internal function]: SplMinHeap1->compare(1, 6)
 #1 %s%ebug69737.php(%d): SplHeap->insert(6)
 #2 {main}
-  thrown in %s%ebug69737.php on line %d
+  instantiated in %s%ebug69737.php on line %d

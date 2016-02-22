@@ -13,4 +13,4 @@ Fatal error: Uncaught Error: Undefined constant 'Foo\bar' in %sbug43344_8.php:%d
 Stack trace:
 #0 %s(%d): Foo\f()
 #1 {main}
-  thrown in %sbug43344_8.php on line %d
+  instantiated in %sbug43344_8.php on line %d

@@ -66,4 +66,4 @@ Fatal error: Uncaught DOMException: Hierarchy Request Error in %sdom003.php:%d
 Stack trace:
 #0 %sdom003.php(%d): DOMNode->appendChild(Object(DOMElement))
 #1 {main}
-  thrown in %sdom003.php on line %d
+  instantiated in %sdom003.php on line %d

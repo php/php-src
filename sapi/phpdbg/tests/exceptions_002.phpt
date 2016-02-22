@@ -19,7 +19,7 @@ Stack trace:
 #0 %s(16): unknown()
 #1 %s(20): {closure}()
 #2 {main}
-  thrown in eval()'d code on line 1
+  instantiated in eval()'d code on line 1
 prompt> [Uncaught Error in %s on line 16]
 Error: Call to undefined function foo() in %s:16
 Stack trace:

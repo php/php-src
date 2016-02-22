@@ -21,5 +21,5 @@ Fatal error: Uncaught Error: Cannot use "parent" when current class scope has no
 Stack trace:
 #0 %s(%d): C->f()
 #1 {main}
-  thrown in %s on line 5
+  instantiated in %s on line 5
 

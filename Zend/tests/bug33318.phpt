@@ -8,4 +8,4 @@ throw 1;
 Fatal error: Uncaught Error: Can only throw objects in %sbug33318.php:2
 Stack trace:
 #0 {main}
-  thrown in %sbug33318.php on line 2
+  instantiated in %sbug33318.php on line 2

@@ -9,5 +9,5 @@ Fatal error: Uncaught UnexpectedValueException: Failed to open directory "" in %
 Stack trace:
 #0 %s(%d): DirectoryIterator->__construct('\x00/abc')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

@@ -1,5 +1,5 @@
 --TEST--
-ZE2 catch exception thrown in destructor
+ZE2 catch exception instantiated in destructor
 --FILE--
 <?php
 

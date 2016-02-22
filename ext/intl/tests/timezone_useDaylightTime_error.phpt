@@ -23,4 +23,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intltz_use_daylight_time()
 Stack trace:
 #0 %s(%d): intltz_use_daylight_time(NULL)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

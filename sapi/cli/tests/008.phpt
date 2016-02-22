@@ -39,7 +39,7 @@ string(%d) "
 Fatal error: Uncaught Error: Cannot access private property test::$pri in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 "
 string(33) "Could not open input file: wrong
 "

@@ -16,5 +16,5 @@ Fatal error: Uncaught Exception: foo in %s:%d
 Stack trace:
 #0 %s(%d): gen()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

@@ -19,4 +19,4 @@ Fatal error: Uncaught Exception: ex %s
 Stack trace:
 #0 %stry_finally_001.php(%d): foo('finally')
 #1 {main}
-  thrown in %stry_finally_001.php on line %d
+  instantiated in %stry_finally_001.php on line %d

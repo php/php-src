@@ -36,4 +36,4 @@ Notice: Indirect modification of overloaded element of ArrayAccessImpl has no ef
 Fatal error: Uncaught Error: Cannot assign by reference to overloaded object in %sarray_access_012.php:24
 Stack trace:
 #0 {main}
-  thrown in %sarray_access_012.php on line 24
+  instantiated in %sarray_access_012.php on line 24

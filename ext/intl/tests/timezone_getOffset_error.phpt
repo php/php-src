@@ -34,4 +34,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_offset() must b
 Stack trace:
 #0 %s(%d): intltz_get_offset(NULL, %d, false, NULL, NULL)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -16,4 +16,4 @@ new $a;
 Fatal error: Uncaught Error: Cannot instantiate abstract class foo in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

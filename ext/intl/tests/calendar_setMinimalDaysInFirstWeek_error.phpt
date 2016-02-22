@@ -40,5 +40,5 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set_minimal_days_i
 Stack trace:
 #0 %s(%d): intlcal_set_minimal_days_in_first_week(1, 2)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
 

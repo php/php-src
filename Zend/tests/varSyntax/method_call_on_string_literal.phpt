@@ -8,4 +8,4 @@ Method call on string literal
 Fatal error: Uncaught Error: Call to a member function length() on string in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

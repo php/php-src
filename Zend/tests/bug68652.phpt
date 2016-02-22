@@ -42,5 +42,5 @@ Stack trace:
 #0 %s(%d): Bar::getInstance()
 #1 [internal function]: Foo->__destruct()
 #2 {main}
-  thrown in %sbug68652.php on line %d
+  instantiated in %sbug68652.php on line %d
 

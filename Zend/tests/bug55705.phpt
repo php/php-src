@@ -10,4 +10,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to f() must be callable, none
 Stack trace:
 #0 %s(%d): f()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -20,4 +20,4 @@ Fatal error: Uncaught DOMException: Index Size Error in %s:%d
 Stack trace:
 #0 %s(%d): DOMCharacterData->deleteData(5, 1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

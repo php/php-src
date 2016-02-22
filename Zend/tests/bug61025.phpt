@@ -27,4 +27,4 @@ Bar
 Fatal error: Uncaught Error: Call to private method Bar::__invoke() from context '' in %sbug61025.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sbug61025.php on line %d
+  instantiated in %sbug61025.php on line %d

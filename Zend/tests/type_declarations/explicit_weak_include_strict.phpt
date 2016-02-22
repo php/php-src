@@ -16,4 +16,4 @@ Stack trace:
 #0 %s(%d): takes_int(1)
 #1 %s(%d): require('%s')
 #2 {main}
-  thrown in %sweak_include_strict_2.inc on line 5
+  instantiated in %sweak_include_strict_2.inc on line 5

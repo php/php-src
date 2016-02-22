@@ -26,4 +26,4 @@ Stack trace:
 #0 [internal function]: wrapper->stream_eof()
 #1 %s(%d): feof(Resource id #%d)
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

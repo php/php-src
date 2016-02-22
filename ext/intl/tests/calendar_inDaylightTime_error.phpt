@@ -33,4 +33,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_in_daylight_time()
 Stack trace:
 #0 %s(%d): intlcal_in_daylight_time(1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

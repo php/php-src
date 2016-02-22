@@ -27,4 +27,4 @@ Fatal error: Uncaught Error: Cannot access protected const A::protectedConst in 
 Stack trace:
 #0 %s(14): constant('A::protectedCon...')
 #1 {main}
-  thrown in %s on line 14
+  instantiated in %s on line 14

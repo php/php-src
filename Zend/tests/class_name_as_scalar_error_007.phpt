@@ -10,4 +10,4 @@ var_dump(self::class);
 Fatal error: Uncaught Error: Cannot use "self" when no class scope is active in %s:3
 Stack trace:
 #0 {main}
-  thrown in %s on line 3
+  instantiated in %s on line 3

@@ -13,4 +13,4 @@ Fatal error: Uncaught PharException: Non-string value passed to Phar::mungServer
 Stack trace:
 #0 %sfrontcontroller20.php(2): Phar::mungServer(Array)
 #1 {main}
-  thrown in %sfrontcontroller20.php on line 2
+  instantiated in %sfrontcontroller20.php on line 2

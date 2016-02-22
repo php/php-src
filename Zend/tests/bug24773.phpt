@@ -9,4 +9,4 @@ Bug #24773 (unset() of integers treated as arrays causes a crash)
 Fatal error: Uncaught Error: Cannot use string offset as an array in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

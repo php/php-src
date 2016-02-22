@@ -12,4 +12,4 @@ Fatal error: Uncaught UnexpectedValueException: phar error: "%s%ebug71331.tar" i
 Stack trace:
 #0 %s%ebug71331.php(2): PharData->__construct('%s')
 #1 {main}
-  thrown in %s%ebug71331.php on line 2
+  instantiated in %s%ebug71331.php on line 2

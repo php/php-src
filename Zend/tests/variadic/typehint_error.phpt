@@ -37,4 +37,4 @@ Fatal error: Uncaught TypeError: Argument 3 passed to test() must be of the type
 Stack trace:
 #0 %s(%d): test(Array, Array, 2)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

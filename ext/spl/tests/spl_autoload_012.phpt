@@ -62,4 +62,4 @@ Stack trace:
 #1 [internal function]: spl_autoload_call('ThisClassDoesNo...')
 #2 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
 #3 {main}
-  thrown in %sspl_autoload_012.php on line %d
+  instantiated in %sspl_autoload_012.php on line %d

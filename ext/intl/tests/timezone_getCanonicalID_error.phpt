@@ -32,4 +32,4 @@ bool(false)
 Fatal error: Uncaught Error: Cannot pass parameter 2 by reference in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -27,4 +27,4 @@ Fatal error: Uncaught Exception in %s
 Stack trace:
 #0 %s(%d): C->generate(0)
 #1 {main}
-  thrown in %s
+  instantiated in %s

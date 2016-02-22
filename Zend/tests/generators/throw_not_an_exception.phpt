@@ -17,4 +17,4 @@ Stack trace:
 #0 [internal function]: gen()
 #1 %s(%d): Generator->throw(Object(stdClass))
 #2 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

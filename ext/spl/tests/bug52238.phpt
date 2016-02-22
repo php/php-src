@@ -21,4 +21,4 @@ Stack trace:
 #1 [internal function]: Foo->getIterator()
 #2 %s: iterator_to_array(Object(Foo))
 #3 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

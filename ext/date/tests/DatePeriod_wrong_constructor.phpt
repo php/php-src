@@ -14,4 +14,4 @@ Fatal error: Uncaught Exception: DatePeriod::__construct(): This constructor acc
 Stack trace:
 #0 %s(%d): DatePeriod->__construct()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

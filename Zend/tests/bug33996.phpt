@@ -30,4 +30,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to FooTest() must be an insta
 Stack trace:
 #0 %s(%d): FooTest()
 #1 {main}
-  thrown in %sbug33996.php on line %d
+  instantiated in %sbug33996.php on line %d

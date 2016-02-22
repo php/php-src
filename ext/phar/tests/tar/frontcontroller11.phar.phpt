@@ -18,4 +18,4 @@ Fatal error: Uncaught PharException: Key of MIME type overrides array must be a 
 Stack trace:
 #0 %sfrontcontroller11.phar.php(2): Phar::webPhar('whatever', 'index.php', '', Array)
 #1 {main}
-  thrown in %sfrontcontroller11.phar.php on line 2
+  instantiated in %sfrontcontroller11.phar.php on line 2

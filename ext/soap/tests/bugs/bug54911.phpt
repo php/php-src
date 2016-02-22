@@ -18,4 +18,4 @@ Stack trace:
 #0 [internal function]: XSoapClient->__doRequest('<?xml version="...', '', '#', 1, 0)
 #1 %sbug54911.php(8): SoapClient->__soapCall('', Array)
 #2 {main}
-  thrown in %sbug54911.php on line 4
+  instantiated in %sbug54911.php on line 4

@@ -16,4 +16,4 @@ throw new a;
 Fatal error: Uncaught a in :%d
 Stack trace:
 #0 {main}
-  thrown in Unknown on line %d
+  instantiated in Unknown on line %d

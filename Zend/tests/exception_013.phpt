@@ -36,4 +36,4 @@ Exception: Attempt to unset static property C::$a in %sexception_013.php on line
 Fatal error: Uncaught Error: Access to undeclared static property: C::$a in %sexception_013.php:24
 Stack trace:
 #0 {main}
-  thrown in %sexception_013.php on line 24
+  instantiated in %sexception_013.php on line 24

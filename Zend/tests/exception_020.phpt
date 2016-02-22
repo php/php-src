@@ -12,4 +12,4 @@ Fatal error: Uncaught Error: Wrong parameters for MyErrorException([string $mess
 Stack trace:
 #0 %sexception_020.php(%d): ErrorException->__construct(Object(stdClass))
 #1 {main}
-  thrown in %sexception_020.php on line %d
+  instantiated in %sexception_020.php on line %d

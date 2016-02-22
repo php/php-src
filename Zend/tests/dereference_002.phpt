@@ -79,4 +79,4 @@ Notice: Undefined offset: 3 in %s on line %d
 Fatal error: Uncaught Error: Call to a member function bar() on null in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

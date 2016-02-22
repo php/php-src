@@ -20,4 +20,4 @@ Fatal error: Uncaught Error: Cannot access empty property in %s:%d
 Stack trace:
 #0 %s(%d): A->__get('')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -156,4 +156,4 @@ Fatal error: Uncaught Error: Cannot instantiate abstract class mystatement6 in %
 Stack trace:
 #0 %s(%d): PDO->query('SELECT id, labe...')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

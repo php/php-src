@@ -35,4 +35,4 @@ Fatal error: Uncaught ReflectionException: Class Generator is an internal class 
 Stack trace:
 #0 %sReflectionClass_newInstanceWithoutConstructor.php(%d): ReflectionClass->newInstanceWithoutConstructor()
 #1 {main}
-  thrown in %sReflectionClass_newInstanceWithoutConstructor.php on line %d
+  instantiated in %sReflectionClass_newInstanceWithoutConstructor.php on line %d

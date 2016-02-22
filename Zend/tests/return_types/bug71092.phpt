@@ -20,4 +20,4 @@ Fatal error: Uncaught TypeError: Return value of boom() must be of the type arra
 Stack trace:
 #0 %s(%d): boom()
 #1 {main}
-  thrown in %sbug71092.php on line %d
+  instantiated in %sbug71092.php on line %d

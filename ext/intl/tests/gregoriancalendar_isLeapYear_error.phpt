@@ -49,4 +49,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlgregcal_is_leap_year()
 Stack trace:
 #0 %s(%d): intlgregcal_is_leap_year(1, 2)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

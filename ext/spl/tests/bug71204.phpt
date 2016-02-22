@@ -16,4 +16,4 @@ new A();
 Fatal error: Uncaught Error: Class 'A' not found in %sbug71204.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sbug71204.php on line %d
+  instantiated in %sbug71204.php on line %d

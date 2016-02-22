@@ -20,4 +20,4 @@ $a = clone $c->b[1];
 Fatal error: Uncaught Error: Cannot use object of type foo as array in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

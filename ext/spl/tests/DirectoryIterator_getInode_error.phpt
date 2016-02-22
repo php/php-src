@@ -25,4 +25,4 @@ Fatal error: Uncaught RuntimeException: SplFileInfo::getInode(): stat failed for
 Stack trace:
 #0 %s: SplFileInfo->getInode()
 #1 {main}
-  thrown in %s
+  instantiated in %s

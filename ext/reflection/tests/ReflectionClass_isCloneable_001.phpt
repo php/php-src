@@ -71,4 +71,4 @@ bool(false)
 Fatal error: Uncaught Error: Trying to clone an uncloneable object of class XMLWriter in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

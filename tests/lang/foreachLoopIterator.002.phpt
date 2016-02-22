@@ -24,4 +24,4 @@ foreach ($f as $k=>&$v) {
 Fatal error: Uncaught Error: An iterator cannot be used with foreach by reference in %s:13
 Stack trace:
 #0 {main}
-  thrown in %s on line 13
+  instantiated in %s on line 13

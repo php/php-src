@@ -27,4 +27,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to iterator_count() must impl
 Stack trace:
 #0 %s(%d): iterator_count('1')
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

@@ -40,4 +40,4 @@ Fatal error: Uncaught Error: Using $this when not in object context in %s:%d
 Stack trace:
 #0 %s(%d): D::m()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

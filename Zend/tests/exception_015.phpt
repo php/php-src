@@ -17,4 +17,4 @@ Exception: [] operator not supported for strings in %sexception_015.php on line 
 Fatal error: Uncaught Error: [] operator not supported for strings in %sexception_015.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sexception_015.php on line %d
+  instantiated in %sexception_015.php on line %d

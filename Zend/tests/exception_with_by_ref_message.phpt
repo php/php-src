@@ -18,4 +18,4 @@ throw new MyException($msg);
 Fatal error: Uncaught MyException: Message in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

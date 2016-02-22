@@ -17,4 +17,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to int_val() must be of the t
 Stack trace:
 #0 %s(%d): int_val()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

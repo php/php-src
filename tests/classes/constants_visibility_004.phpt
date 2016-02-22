@@ -25,4 +25,4 @@ Fatal error: Uncaught Error: Undefined class constant 'Z' in %s:11
 Stack trace:
 #0 %s(15): B::checkConstants()
 #1 {main}
-  thrown in %s on line 11
+  instantiated in %s on line 11

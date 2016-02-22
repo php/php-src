@@ -11,4 +11,4 @@ $str[] += $str;
 Fatal error: Uncaught Error: [] operator not supported for strings in %sbug70182.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sbug70182.php on line %d
+  instantiated in %sbug70182.php on line %d

@@ -43,4 +43,4 @@ Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_locale() must 
 Stack trace:
 #0 %s(%d): intlcal_get_locale(1)
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

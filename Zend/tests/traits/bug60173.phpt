@@ -13,4 +13,4 @@ Fatal error: Uncaught Error: Cannot instantiate trait foo in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->newInstance()
 #1 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d

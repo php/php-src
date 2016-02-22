@@ -30,4 +30,4 @@ Hello World!Hello World!
 Fatal error: Uncaught Error: Call to private method MyClass::sayHelloWorld() from context '' in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
+  instantiated in %s on line %d
