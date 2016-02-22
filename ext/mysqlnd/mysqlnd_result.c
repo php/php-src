@@ -166,7 +166,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 	if (unbuf->last_row_buffer) {
 		DBG_INF("Freeing last row buffer");
 		/* Nothing points to this buffer now, free it */
-		unbuf->last_row_buffer->free_chunk(unbuf->last_row_buffer);
+		unbuf->result_set_memory_pool->free_chunk(
+			unbuf->result_set_memory_pool, unbuf->last_row_buffer);
 		unbuf->last_row_buffer = NULL;
 	}
 
@@ -253,6 +254,7 @@ static void
 MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * const set)
 {
 	int64_t row;
+	MYSQLND_MEMORY_POOL * pool;
 
 	DBG_ENTER("mysqlnd_result_buffered::free_result");
 	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
@@ -263,9 +265,10 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 		MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)((MYSQLND_RES_BUFFERED_C *) set);
 	}
 
+	pool = set->result_set_memory_pool;
 	for (row = set->row_count - 1; row >= 0; row--) {
 		MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
-		current_buffer->free_chunk(current_buffer);
+		pool->free_chunk(pool, current_buffer);
 	}
 
 	if (set->lengths) {

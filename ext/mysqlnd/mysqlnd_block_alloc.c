@@ -28,9 +28,8 @@
 
 /* {{{ mysqlnd_mempool_free_chunk */
 static void
-mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk)
+mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk)
 {
-	MYSQLND_MEMORY_POOL * pool = chunk->pool;
 	DBG_ENTER("mysqlnd_mempool_free_chunk");
 	if (chunk->from_pool) {
 		/* Try to back-off and guess if this is the last block allocated */
@@ -52,11 +51,10 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk)
 
 /* {{{ mysqlnd_mempool_resize_chunk */
 static enum_func_status
-mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size)
+mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size)
 {
 	DBG_ENTER("mysqlnd_mempool_resize_chunk");
 	if (chunk->from_pool) {
-		MYSQLND_MEMORY_POOL * pool = chunk->pool;
 		/* Try to back-off and guess if this is the last block allocated */
 		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
 			/*
@@ -115,20 +113,17 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 
 	chunk = mnd_emalloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
 	if (chunk) {
-		chunk->free_chunk = mysqlnd_mempool_free_chunk;
-		chunk->resize_chunk = mysqlnd_mempool_resize_chunk;
 		chunk->size = size;
 		/*
 		  Should not go over MYSQLND_MAX_PACKET_SIZE, since we
 		  expect non-arena memory in mysqlnd_wireprotocol.c . We
 		  realloc the non-arena memory.
 		*/
-		chunk->pool = pool;
 		if (size > pool->free_size) {
 			chunk->from_pool = FALSE;
 			chunk->ptr = mnd_emalloc(size);
 			if (!chunk->ptr) {
-				chunk->free_chunk(chunk);
+				pool->free_chunk(pool, chunk);
 				chunk = NULL;
 			}
 		} else {
@@ -152,6 +147,8 @@ mysqlnd_mempool_create(size_t arena_size)
 	DBG_ENTER("mysqlnd_mempool_create");
 	if (ret) {
 		ret->get_chunk = mysqlnd_mempool_get_chunk;
+		ret->free_chunk = mysqlnd_mempool_free_chunk;
+		ret->resize_chunk = mysqlnd_mempool_resize_chunk;
 		ret->free_size = ret->arena_size = arena_size ? arena_size : 0;
 		/* OOM ? */
 		ret->arena = mnd_emalloc(ret->arena_size);
