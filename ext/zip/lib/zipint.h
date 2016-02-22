@@ -37,9 +37,7 @@
 #ifdef PHP_WIN32
 # include "php_zip_config.w32.h"
 #else
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
+# include "config.h"
 #endif
 
 /* to have *_MAX definitions for all types when compiling with g++ */
