@@ -22,7 +22,7 @@
 #include "php.h"
 #include "ext/standard/base64.h"
 
-PHPAPI int php_url_decode(char *str, int len);
+PHPAPI size_t php_url_decode(char *str, size_t len);
 
 /* Memory streams use a dynamic memory buffer to emulate a stream.
  * You can use php_stream_memory_open to create a readonly stream
@@ -730,7 +730,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		ilen = (int)ZSTR_LEN(base64_comma);
 	} else {
 		comma = estrndup(comma, dlen);
-		dlen = php_url_decode(comma, (int)dlen);
+		dlen = php_url_decode(comma, dlen);
 		ilen = (int)dlen;
 	}
 
