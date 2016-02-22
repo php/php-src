@@ -39,5 +39,5 @@ int(%d)
 NULL
 string(%d) "%s"
 int(%d)
-string(%d) "%s"
+string(%d) "%a"
 array();
