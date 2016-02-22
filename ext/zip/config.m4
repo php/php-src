@@ -122,6 +122,7 @@ if test "$PHP_ZIP" != "no"; then
 			lib/zip_get_archive_comment.c lib/zip_get_archive_flag.c lib/zip_get_compression_implementation.c\
 			lib/zip_get_encryption_implementation.c lib/zip_get_file_comment.c lib/zip_get_name.c lib/zip_get_num_entries.c \
 			lib/zip_get_num_files.c lib/zip_memdup.c lib/zip_name_locate.c lib/zip_new.c lib/zip_open.c lib/zip_rename.c lib/zip_replace.c\
+			lib/zip_hash.c \
 			lib/zip_set_archive_comment.c lib/zip_set_archive_flag.c lib/zip_set_default_password.c lib/zip_set_file_comment.c\
 			lib/zip_set_file_compression.c lib/zip_set_name.c lib/zip_source_buffer.c lib/zip_source_close.c lib/zip_source_crc.c\
 			lib/zip_source_deflate.c lib/zip_source_error.c lib/zip_source_file.c lib/zip_source_filep.c lib/zip_source_free.c\
