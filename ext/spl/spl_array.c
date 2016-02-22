@@ -170,7 +170,8 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 				ZVAL_ARR(&intern->array, zend_array_dup(HASH_OF(&other->array)));
 			} else {
 				ZEND_ASSERT(Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator);
-				ZVAL_COPY(&intern->array, &other->array);
+				ZVAL_COPY(&intern->array, orig);
+				intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 			}
 		} else {
 			ZVAL_COPY(&intern->array, orig);
