@@ -1437,7 +1437,7 @@ void fastcgi_cleanup(int signal)
 	}
 }
 #else
-BOOL fastcgi_cleanup(DWORD sig)
+BOOL WINAPI fastcgi_cleanup(DWORD sig)
 {
 	int i = kids;
 
