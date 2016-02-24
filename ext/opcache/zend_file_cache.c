@@ -132,8 +132,13 @@ static int zend_file_cache_flock(int fd, int type)
 			} else { \
 				ZEND_ASSERT(IS_SERIALIZED(ptr)); \
 				(ptr) = (void*)((char*)buf + (size_t)(ptr)); \
-				GC_FLAGS(ptr) |= IS_STR_INTERNED; \
-				GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
+				/* script->corrupted shows if the script in SHM or not */ \
+				if (EXPECTED(!script->corrupted)) { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED | IS_STR_PERMANENT; \
+				} else { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
+					GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
+				} \
 			} \
 		} \
 	} while (0)
@@ -223,8 +228,7 @@ static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
 		ret = accel_new_interned_string(str);
 		if (ret == str) {
 			/* String wasn't interned but we will use it as interned anyway */
-			GC_FLAGS(ret) |= IS_STR_INTERNED;
-			GC_FLAGS(ret) &= ~IS_STR_PERMANENT;
+			GC_FLAGS(ret) |= IS_STR_INTERNED | IS_STR_PERMANENT;
 		}
 	} else {
 		ret = str;
