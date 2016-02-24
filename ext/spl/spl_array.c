@@ -275,7 +275,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 		return &EG(uninitialized_zval);
 	}
 
-	if ((type == BP_VAR_W || type == BP_VAR_RW) && (ht->u.v.nApplyCount > 0)) {
+	if ((type == BP_VAR_W || type == BP_VAR_RW) && intern->nApplyCount > 0) {
 		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return &EG(error_zval);
 	}
@@ -434,16 +434,8 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
-	if (!offset) {
-		ht = spl_array_get_hash_table(intern);
-		if (ht->u.v.nApplyCount > 0) {
-			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-			return;
-		}
-		if (Z_REFCOUNTED_P(value)) {
-			Z_ADDREF_P(value);
-		}
-		zend_hash_next_index_insert(ht, value);
+	if (intern->nApplyCount > 0) {
+		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -451,14 +443,16 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		Z_ADDREF_P(value);
 	}
 
+	if (!offset) {
+		ht = spl_array_get_hash_table(intern);
+		zend_hash_next_index_insert(ht, value);
+		return;
+	}
+
 try_again:
 	switch (Z_TYPE_P(offset)) {
 		case IS_STRING:
 			ht = spl_array_get_hash_table(intern);
-			if (ht->u.v.nApplyCount > 0) {
-				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-				return;
-			}
 			zend_symtable_update_ind(ht, Z_STR_P(offset), value);
 			return;
 		case IS_DOUBLE:
@@ -477,18 +471,10 @@ try_again:
 			index = Z_LVAL_P(offset);
 num_index:
 			ht = spl_array_get_hash_table(intern);
-			if (ht->u.v.nApplyCount > 0) {
-				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-				return;
-			}
 			zend_hash_index_update(ht, index, value);
 			return;
 		case IS_NULL:
 			ht = spl_array_get_hash_table(intern);
-			if (ht->u.v.nApplyCount > 0) {
-				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-				return;
-			}
 			zend_hash_next_index_insert(ht, value);
 			return;
 		case IS_REFERENCE:
@@ -496,6 +482,7 @@ num_index:
 			goto try_again;
 		default:
 			zend_error(E_WARNING, "Illegal offset type");
+			zval_ptr_dtor(value);
 			return;
 	}
 } /* }}} */
@@ -518,14 +505,15 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
+	if (intern->nApplyCount > 0) {
+		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		return;
+	}
+
 try_again:
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
 		ht = spl_array_get_hash_table(intern);
-		if (ht->u.v.nApplyCount > 0) {
-			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-			return;
-		}
 		if (ht == &EG(symbol_table)) {
 			if (zend_delete_global_variable(Z_STR_P(offset))) {
 				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
@@ -571,10 +559,6 @@ try_again:
 		index = Z_LVAL_P(offset);
 num_index:
 		ht = spl_array_get_hash_table(intern);
-		if (ht->u.v.nApplyCount > 0) {
-			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-			return;
-		}
 		if (zend_hash_index_del(ht, index) == FAILURE) {
 			zend_error(E_NOTICE,"Undefined offset: %pd", index);
 		}
@@ -798,11 +782,6 @@ SPL_METHOD(Array, getArrayCopy)
 static HashTable *spl_array_get_properties(zval *object) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	HashTable *result;
-
-	if (intern->nApplyCount > 1) {
-		php_error_docref(NULL, E_ERROR, "Nesting level too deep - recursive dependency?");
-	}
 
 	if (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) {
 		if (!intern->std.properties) {
@@ -811,10 +790,7 @@ static HashTable *spl_array_get_properties(zval *object) /* {{{ */
 		return intern->std.properties;
 	}
 
-	intern->nApplyCount++;
-	result = spl_array_get_hash_table(intern);
-	intern->nApplyCount--;
-	return result;
+	return spl_array_get_hash_table(intern);
 } /* }}} */
 
 static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
@@ -1447,9 +1423,9 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	ZVAL_ARR(Z_REFVAL(params[0]), aht);
 
 	if (!use_arg) {
-		aht->u.v.nApplyCount++;
+		intern->nApplyCount++;
 		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 1, params, 1, NULL);
-		aht->u.v.nApplyCount--;
+		intern->nApplyCount--;
 	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects one argument at most", 0);
@@ -1458,18 +1434,18 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		if (arg) {
 			ZVAL_COPY_VALUE(&params[1], arg);
 		}
-		aht->u.v.nApplyCount++;
+		intern->nApplyCount++;
 		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, arg ? 2 : 1, params, 1, NULL);
-		aht->u.v.nApplyCount--;
+		intern->nApplyCount--;
 	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0);
 			goto exit;
 		}
 		ZVAL_COPY_VALUE(&params[1], arg);
-		aht->u.v.nApplyCount++;
+		intern->nApplyCount++;
 		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 2, params, 1, NULL);
-		aht->u.v.nApplyCount--;
+		intern->nApplyCount--;
 	}
 
 exit:
@@ -1735,7 +1711,6 @@ SPL_METHOD(Array, unserialize)
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval *members, *zflags;
-	HashTable *aht;
 	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
@@ -1746,8 +1721,7 @@ SPL_METHOD(Array, unserialize)
 		return;
 	}
 
-	aht = spl_array_get_hash_table(intern);
-	if (aht->u.v.nApplyCount > 0) {
+	if (intern->nApplyCount > 0) {
 		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
