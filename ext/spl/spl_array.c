@@ -83,6 +83,7 @@ static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
 #define Z_SPLARRAY_P(zv)  spl_array_from_obj(Z_OBJ_P((zv)))
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /* {{{ */
+	//??? TODO: Delay duplication for arrays; only duplicate for write operations
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		if (!intern->std.properties) {
 			rebuild_object_properties(&intern->std);
@@ -91,8 +92,19 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /*
 	} else if (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
 		return spl_array_get_hash_table(other);
+	} else if (Z_TYPE(intern->array) == IS_ARRAY) {
+		return Z_ARRVAL(intern->array);
 	} else {
-		return HASH_OF(&intern->array);
+		zend_object *obj = Z_OBJ(intern->array);
+		if (!obj->properties) {
+			rebuild_object_properties(obj);
+		} else if (GC_REFCOUNT(obj->properties) > 1) {
+			if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(obj->properties)--;
+			}
+			obj->properties = zend_array_dup(obj->properties);
+		}
+		return obj->properties;
 	}
 } /* }}} */
 
@@ -1082,13 +1094,13 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		return;
 	}
 
-	zval_ptr_dtor(&intern->array);
-
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		//??? TODO: try to avoid array duplication
+		zval_ptr_dtor(&intern->array);
 		ZVAL_DUP(&intern->array, array);
 	} else {
 		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
+			zval_ptr_dtor(&intern->array);
 			if (just_array)	{
 				spl_array_object *other = Z_SPLARRAY_P(array);
 				ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
@@ -1102,18 +1114,13 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
-			if (handler != std_object_handlers.get_properties
-				|| !spl_array_get_hash_table(intern)) {
-				ZVAL_UNDEF(&intern->array);
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
+			if (handler != std_object_handlers.get_properties) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+					"Overloaded object of type %s is not compatible with %s",
+					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				return;
 			}
-			//??? TODO: try to avoid array duplication
-			if (Z_OBJ_P(array)->properties && GC_REFCOUNT(Z_OBJ_P(array)->properties) > 1) {
-				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array)->properties)--;
-				}
-				Z_OBJ_P(array)->properties = zend_array_dup(Z_OBJ_P(array)->properties);
-			}
+			zval_ptr_dtor(&intern->array);
 			ZVAL_COPY(&intern->array, array);
 		}
 	}
@@ -1264,6 +1271,11 @@ SPL_METHOD(Array, exchangeArray)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
+		return;
+	}
+
+	if (intern->nApplyCount > 0) {
+		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
