@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     (setlocale)). (Anatol)
   . Fixed bug #71535 (Integer overflow in zend_mm_alloc_heap()). (Dmitry)
 
+- ODBC:
+  . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
+    for the first two statements). (einavitamar at gmail dot com, Anatol)
+
 - Phar:
   . Fixed bug #71625 (Crash in php7.dll with bad phar filename).
     (Anatol)
