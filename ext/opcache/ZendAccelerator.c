@@ -1992,7 +1992,7 @@ static void accel_reset_pcre_cache(void)
 
 	ZEND_HASH_FOREACH_BUCKET(&PCRE_G(pcre_cache), p) {
 		/* Remove PCRE cache entries with inconsistent keys */
-		if (ZSTR_IS_INTERNED(p->key)) {
+		if (zend_accel_in_shm(p->key)) {
 			p->key = NULL;
 			zend_hash_del_bucket(&PCRE_G(pcre_cache), p);
 		}
