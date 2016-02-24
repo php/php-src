@@ -442,6 +442,9 @@ static void _free_odbc_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 			 * zend_list_delete(res->conn_ptr->id);
 			 */
 		}
+		if (res->param_info) {
+			efree(res->param_info);
+		}
 		efree(res);
 	}
 }
@@ -1183,6 +1186,7 @@ PHP_FUNCTION(odbc_prepare)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	RETCODE rc;
+	int i;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLUINTEGER      scrollopts;
 #endif
@@ -1196,6 +1200,7 @@ PHP_FUNCTION(odbc_prepare)
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	result->numparams = 0;
+	result->param_info = NULL;
 	
 	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -1252,6 +1257,19 @@ PHP_FUNCTION(odbc_prepare)
 	zend_list_addref(conn->id);
 	result->conn_ptr = conn;
 	result->fetched = 0;
+
+	result->param_info = (odbc_param_info *) safe_emalloc(sizeof(odbc_param_info), result->numparams, 0);
+	for (i=0;i<result->numparams;i++) {
+		rc = SQLDescribeParam(result->stmt, (SQLUSMALLINT)(i+1), &result->param_info[i].sqltype, &result->param_info[i].precision,
+													&result->param_info[i].scale, &result->param_info[i].nullable);
+		if (rc == SQL_ERROR) {
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLDescribeParameter");
+			SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
+			efree(result->param_info);
+			efree(result);
+			RETURN_FALSE;
+		}
+	}
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);  
 }
 /* }}} */
@@ -1272,9 +1290,7 @@ PHP_FUNCTION(odbc_execute)
 	params_t *params = NULL;
 	char *filename;
 	unsigned char otype;
-   	SQLSMALLINT sqltype, ctype, scale;
-	SQLSMALLINT nullable;
-	SQLULEN precision;
+	SQLSMALLINT ctype;
    	odbc_result *result;
 	int numArgs, i, ne;
 	RETCODE rc;
@@ -1332,22 +1348,10 @@ PHP_FUNCTION(odbc_execute)
 				RETURN_FALSE;
 			}
 			
-			rc = SQLDescribeParam(result->stmt, (SQLUSMALLINT)i, &sqltype, &precision, &scale, &nullable);
 			params[i-1].vallen = Z_STRLEN_PP(tmp);
 			params[i-1].fp = -1;
-			if (rc == SQL_ERROR) {
-				odbc_sql_error(result->conn_ptr, result->stmt, "SQLDescribeParameter");	
-				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-				for (i = 0; i < result->numparams; i++) {
-					if (params[i].fp != -1) {
-						close(params[i].fp);
-					}
-				}
-				efree(params);
-				RETURN_FALSE;
-			}
 
-			if (IS_SQL_BINARY(sqltype)) {
+			if (IS_SQL_BINARY(result->param_info[i-1].sqltype)) {
 				ctype = SQL_C_BINARY;
 			} else {
 				ctype = SQL_C_CHAR;
@@ -1394,7 +1398,7 @@ PHP_FUNCTION(odbc_execute)
 				params[i-1].vallen = SQL_LEN_DATA_AT_EXEC(0);
 
 				rc = SQLBindParameter(result->stmt, (SQLUSMALLINT)i, SQL_PARAM_INPUT,
-									  ctype, sqltype, precision, scale,
+									  ctype, result->param_info[i-1].sqltype, result->param_info[i-1].precision, result->param_info[i-1].scale,
 									  (void *)params[i-1].fp, 0,
 									  &params[i-1].vallen);
 			} else {
@@ -1406,7 +1410,7 @@ PHP_FUNCTION(odbc_execute)
 				}
 
 				rc = SQLBindParameter(result->stmt, (SQLUSMALLINT)i, SQL_PARAM_INPUT,
-									  ctype, sqltype, precision, scale,
+									  ctype, result->param_info[i-1].sqltype, result->param_info[i-1].precision, result->param_info[i-1].scale,
 									  Z_STRVAL_PP(tmp), 0,
 									  &params[i-1].vallen);
 			}
