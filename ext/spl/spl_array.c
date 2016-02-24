@@ -798,11 +798,6 @@ SPL_METHOD(Array, getArrayCopy)
 static HashTable *spl_array_get_properties(zval *object) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	HashTable *result;
-
-	if (intern->nApplyCount > 1) {
-		php_error_docref(NULL, E_ERROR, "Nesting level too deep - recursive dependency?");
-	}
 
 	if (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) {
 		if (!intern->std.properties) {
@@ -811,10 +806,7 @@ static HashTable *spl_array_get_properties(zval *object) /* {{{ */
 		return intern->std.properties;
 	}
 
-	intern->nApplyCount++;
-	result = spl_array_get_hash_table(intern);
-	intern->nApplyCount--;
-	return result;
+	return spl_array_get_hash_table(intern);
 } /* }}} */
 
 static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
