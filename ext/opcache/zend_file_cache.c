@@ -132,13 +132,8 @@ static int zend_file_cache_flock(int fd, int type)
 			} else { \
 				ZEND_ASSERT(IS_SERIALIZED(ptr)); \
 				(ptr) = (void*)((char*)buf + (size_t)(ptr)); \
-				/* script->corrupted shows if the script in SHM or not */ \
-				if (EXPECTED(!script->corrupted)) { \
-					GC_FLAGS(ptr) |= IS_STR_INTERNED | IS_STR_PERMANENT; \
-				} else { \
-					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
-					GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
-				} \
+				GC_FLAGS(ptr) |= IS_STR_INTERNED; \
+				GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
 			} \
 		} \
 	} while (0)
@@ -224,15 +219,17 @@ static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
 	zend_string *ret;
 
 	str = (zend_string*)((char*)ZCG(mem) + ((size_t)(str) & ~Z_UL(1)));
-	ret = accel_new_interned_string(str);
-	if (ret == str) {
-		/* String wasn't interned but we will use it as interned anyway */
-		if (in_shm) {
-			GC_FLAGS(ret) |= IS_STR_INTERNED | IS_STR_PERMANENT;
-		} else {
+	if (in_shm) {
+		ret = accel_new_interned_string(str);
+		if (ret == str) {
+			/* String wasn't interned but we will use it as interned anyway */
 			GC_FLAGS(ret) |= IS_STR_INTERNED;
 			GC_FLAGS(ret) &= ~IS_STR_PERMANENT;
 		}
+	} else {
+		ret = str;
+		GC_FLAGS(ret) |= IS_STR_INTERNED;
+		GC_FLAGS(ret) &= ~IS_STR_PERMANENT;
 	}
 	return ret;
 }
@@ -1345,7 +1342,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		return NULL;
 	}
 
-	if (!ZCG(accel_directives).file_cache_only) {
+	if (!ZCG(accel_directives).file_cache_only &&
+	    !ZCSG(restart_in_progress) &&
+	    accelerator_shm_read_lock() == SUCCESS) {
 		/* exclusive lock */
 		zend_shared_alloc_lock();
 
@@ -1399,6 +1398,7 @@ use_process_mem:
 
 	if (cache_it) {
 		script->dynamic_members.checksum = zend_accel_script_checksum(script);
+		script->dynamic_members.last_used = ZCG(request_time);
 
 		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->script.filename), ZSTR_LEN(script->script.filename), 0, script);
 
