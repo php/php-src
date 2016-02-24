@@ -1353,6 +1353,10 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	/* special handling for zero-size allocation */
 	size = MAX(size, 1);
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+	if (UNEXPECTED(size < real_size)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+		return NULL;
+	}
 #endif
 	if (size <= ZEND_MM_MAX_SMALL_SIZE) {
 		ptr = zend_mm_alloc_small(heap, size, ZEND_MM_SMALL_SIZE_TO_BIN(size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);

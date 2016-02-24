@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     invoke C::$callable()). (Bob)
   . Fixed bug #71596 (Segmentation fault on ZTS with date function
     (setlocale)). (Anatol)
+  . Fixed bug #71535 (Integer overflow in zend_mm_alloc_heap()). (Dmitry)
 
 - Phar:
   . Fixed bug #71625 (Crash in php7.dll with bad phar filename).
