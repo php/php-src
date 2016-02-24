@@ -1267,6 +1267,11 @@ SPL_METHOD(Array, exchangeArray)
 		return;
 	}
 
+	if (intern->nApplyCount > 0) {
+		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		return;
+	}
+
 	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
 	spl_array_set_array(object, intern, array, 0L, 1);
 }
