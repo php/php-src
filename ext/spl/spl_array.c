@@ -1094,13 +1094,13 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		return;
 	}
 
-	zval_ptr_dtor(&intern->array);
-
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		//??? TODO: try to avoid array duplication
+		zval_ptr_dtor(&intern->array);
 		ZVAL_DUP(&intern->array, array);
 	} else {
 		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
+			zval_ptr_dtor(&intern->array);
 			if (just_array)	{
 				spl_array_object *other = Z_SPLARRAY_P(array);
 				ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
@@ -1114,11 +1114,13 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
-			if (handler != std_object_handlers.get_properties
-				|| !spl_array_get_hash_table(intern)) {
-				ZVAL_UNDEF(&intern->array);
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
+			if (handler != std_object_handlers.get_properties) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+					"Overloaded object of type %s is not compatible with %s",
+					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				return;
 			}
+			zval_ptr_dtor(&intern->array);
 			ZVAL_COPY(&intern->array, array);
 		}
 	}
