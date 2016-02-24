@@ -439,17 +439,14 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
-	if (!offset) {
-		ht = spl_array_get_hash_table(intern);
-		if (Z_REFCOUNTED_P(value)) {
-			Z_ADDREF_P(value);
-		}
-		zend_hash_next_index_insert(ht, value);
-		return;
-	}
-
 	if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
+	}
+
+	if (!offset) {
+		ht = spl_array_get_hash_table(intern);
+		zend_hash_next_index_insert(ht, value);
+		return;
 	}
 
 try_again:
@@ -485,6 +482,7 @@ num_index:
 			goto try_again;
 		default:
 			zend_error(E_WARNING, "Illegal offset type");
+			zval_ptr_dtor(value);
 			return;
 	}
 } /* }}} */
