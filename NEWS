@@ -27,7 +27,6 @@ PHP                                                                        NEWS
     (Nikita)
 
 - Zip:
-  . Fixed bug #71561 (NULL pointer dereference in Zip::ExtractTo). (Laruence)
   . Update bundled libzip to 1.1.2. (Remi, Anatol)
 
 ?? Mar 2016 PHP 7.0.4
@@ -87,6 +86,9 @@ PHP                                                                        NEWS
 
 - XMLRPC:
   . Fixed bug #71501 (xmlrpc_encode_request ignores encoding option). (Hieu Le)
+
+- Zip:
+  . Fixed bug #71561 (NULL pointer dereference in Zip::ExtractTo). (Laruence)
 
 04 Feb 2016 PHP 7.0.3
 
