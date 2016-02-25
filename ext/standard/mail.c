@@ -52,8 +52,8 @@
 #endif
 
 #ifdef NETWARE
-#define EX_OK           0       /* successful termination */
-#define EX_TEMPFAIL     75      /* temp failure; user is invited to retry */
+#define EX_OK			0		/* successful termination */
+#define EX_TEMPFAIL		75		/* temp failure; user is invited to retry */
 #endif
 
 #define SKIP_LONG_HEADER_SEP(str, pos)																	\
@@ -331,16 +331,16 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		MAIL_RET(0);
 	}
 
-    mail_module *transport = _php_find_mail_module(INI_STR("mail.transport"));
-    if (!transport) {
-        php_error_docref(NULL, E_WARNING, "Cannot find mail transport handler '%s'", INI_STR("mail.transport"));
-        MAIL_RET(0);
-    }
+	mail_module *transport = _php_find_mail_module(INI_STR("mail.transport"));
+	if (!transport) {
+		php_error_docref(NULL, E_WARNING, "Cannot find mail transport handler '%s'", INI_STR("mail.transport"));
+		MAIL_RET(0);
+	}
 
-    if (transport->send(to, subject, message, hdr, extra_cmd)) {
-        MAIL_RET(1);
-    }
-    MAIL_RET(0);
+	if (transport->send(to, subject, message, hdr, extra_cmd)) {
+		MAIL_RET(1);
+	}
+	MAIL_RET(0);
 }
 /* }}} */
 
@@ -462,8 +462,8 @@ int php_mail_sendmail(char *to, char *subject, char *message, char *hdr, char *e
 #define MAX_MODULES 32
 
 mail_module mail_module_sendmail = {
-    "sendmail",
-    php_mail_sendmail
+	"sendmail",
+	php_mail_sendmail
 };
 
 static mail_module *mail_modules[MAX_MODULES + 1] = {
@@ -490,7 +490,7 @@ PHPAPI int php_mail_register_module(mail_module *ptr) /* {{{ */
 */
 PHP_MINIT_FUNCTION(mail)
 {
-    return SUCCESS;
+	return SUCCESS;
 }
 /* }}} */
 
