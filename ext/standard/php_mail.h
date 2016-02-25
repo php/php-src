@@ -28,7 +28,6 @@ typedef struct mail_module_struct {
 
 PHP_FUNCTION(mail);
 PHP_MINFO_FUNCTION(mail);
-PHP_MINIT_FUNCTION(mail);
 
 PHP_FUNCTION(ezmlm_hash);
 PHPAPI extern int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd);

@@ -454,6 +454,25 @@ int php_mail_sendmail(char *to, char *subject, char *message, char *hdr, char *e
 	return 1; /* never reached */
 }
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(mail)
+{
+	char *sendmail_path = INI_STR("sendmail_path");
+	char *transport_name = INI_STR("mail.transport");
+
+#ifdef PHP_WIN32
+	if (!sendmail_path) {
+		php_info_print_table_row(2, "Internal Sendmail Support for Windows", "enabled");
+	} else {
+		php_info_print_table_row(2, "Path to sendmail", sendmail_path);
+	}
+#else
+	php_info_print_table_row(2, "Path to sendmail", sendmail_path);
+#endif
+	php_info_print_table_row(2, "Mail Transport", transport_name);
+}
+/* }}} */
 
 /* *********************
    * Transport Modules *
@@ -483,34 +502,6 @@ PHPAPI int php_mail_register_module(mail_module *ptr) /* {{{ */
 		}
 	}
 	return ret;
-}
-/* }}} */
-
-/* {{{ PHP_MINIT_FUNCTION
-*/
-PHP_MINIT_FUNCTION(mail)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MINFO_FUNCTION
- */
-PHP_MINFO_FUNCTION(mail)
-{
-	char *sendmail_path = INI_STR("sendmail_path");
-	char *transport_name = INI_STR("mail.transport");
-
-#ifdef PHP_WIN32
-	if (!sendmail_path) {
-		php_info_print_table_row(2, "Internal Sendmail Support for Windows", "enabled");
-	} else {
-		php_info_print_table_row(2, "Path to sendmail", sendmail_path);
-	}
-#else
-	php_info_print_table_row(2, "Path to sendmail", sendmail_path);
-#endif
-	php_info_print_table_row(2, "Mail Transport", transport_name);
 }
 /* }}} */
 
