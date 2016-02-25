@@ -1,5 +1,5 @@
 --TEST--
-PDO_DBLIB: Set query timeouts
+PDO_DBLIB: Emulate how mssql extension names "computed" columns
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
