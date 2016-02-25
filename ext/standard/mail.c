@@ -331,9 +331,15 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		MAIL_RET(0);
 	}
 
-	if (php_mail_sendmail(to, subject, message, hdr, extra_cmd)) {
-	   MAIL_RET(1);
-	}
+    mail_module *transport = _php_find_mail_module(INI_STR("mail.transport"));
+    if (!transport) {
+        php_error_docref(NULL, E_WARNING, "Cannot find mail transport handler '%s'", INI_STR("mail.transport"));
+        MAIL_RET(0);
+    }
+
+    if (transport->send(to, subject, message, hdr, extra_cmd)) {
+        MAIL_RET(1);
+    }
     MAIL_RET(0);
 }
 /* }}} */
@@ -455,7 +461,13 @@ int php_mail_sendmail(char *to, char *subject, char *message, char *hdr, char *e
 
 #define MAX_MODULES 32
 
+mail_module mail_module_sendmail = {
+    "sendmail",
+    php_mail_sendmail
+};
+
 static mail_module *mail_modules[MAX_MODULES + 1] = {
+	&mail_module_sendmail
 };
 
 PHPAPI int php_mail_register_module(mail_module *ptr) /* {{{ */
@@ -478,7 +490,6 @@ PHPAPI int php_mail_register_module(mail_module *ptr) /* {{{ */
 */
 PHP_MINIT_FUNCTION(mail)
 {
-    fprintf( stdout, ">>>> hello world\n" );
     return SUCCESS;
 }
 /* }}} */
@@ -488,6 +499,7 @@ PHP_MINIT_FUNCTION(mail)
 PHP_MINFO_FUNCTION(mail)
 {
 	char *sendmail_path = INI_STR("sendmail_path");
+	char *transport_name = INI_STR("mail.transport");
 
 #ifdef PHP_WIN32
 	if (!sendmail_path) {
@@ -498,6 +510,23 @@ PHP_MINFO_FUNCTION(mail)
 #else
 	php_info_print_table_row(2, "Path to sendmail", sendmail_path);
 #endif
+	php_info_print_table_row(2, "Mail Transport", transport_name);
+}
+/* }}} */
+
+PHPAPI mail_module *_php_find_mail_module(char *name) /* {{{ */
+{
+	mail_module *ret = NULL;
+	mail_module **mod;
+	int i;
+
+	for (i = 0, mod = mail_modules; i < MAX_MODULES; i++, mod++) {
+		if (*mod && !strcasecmp(name, (*mod)->name)) {
+			ret = *mod;
+			break;
+		}
+	}
+	return ret;
 }
 /* }}} */
 
