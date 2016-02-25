@@ -103,18 +103,12 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 	/* Cancel any pending results */
 	dbcancel(H->link);
 	
-	efree(stmt->columns); 
-	stmt->columns = NULL;
-	
 	return 1;
 }
 
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
-
-	efree(stmt->columns); 
-	stmt->columns = NULL;
 
 	efree(S);
 		
@@ -203,6 +197,10 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
 	}
+
+	if (colno == 0) {
+		S->computed_column_name_count = 0;
+	}
 	
 	col = &stmt->columns[colno];
 	fname = (char*)dbcolname(H->link, colno+1);
@@ -211,7 +209,14 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		col->name = estrdup(fname);
 		col->namelen = strlen(col->name);
 	} else {
-		col->namelen = spprintf(&col->name, NULL, "computed%d", colno);
+		if (S->computed_column_name_count > 0) {
+			col->namelen = spprintf(&col->name, 0, "computed%d", S->computed_column_name_count);
+		} else {
+			col->name = estrdup("computed");
+			col->namelen = strlen("computed");
+		}
+
+		S->computed_column_name_count++;
 	}
 	col->maxlen = dbcollen(H->link, colno+1);
 	col->param_type = PDO_PARAM_STR;
