@@ -269,10 +269,6 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	int tsm_err;
 	char *tsm_errmsg = NULL;
 #endif
-	FILE *sendmail;
-	int ret;
-	char *sendmail_path = INI_STR("sendmail_path");
-	char *sendmail_cmd = NULL;
 	char *mail_log = INI_STR("mail.log");
 	char *hdr = headers;
 #if PHP_SIGCHILD
@@ -335,6 +331,19 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		MAIL_RET(0);
 	}
 
+	if (php_mail_sendmail(to, subject, message, hdr, extra_cmd)) {
+	   MAIL_RET(1);
+	}
+    MAIL_RET(0);
+}
+/* }}} */
+
+int php_mail_sendmail(char *to, char *subject, char *message, char *hdr, char *extra_cmd) {
+	FILE *sendmail;
+	int ret;
+	char *sendmail_path = INI_STR("sendmail_path");
+	char *sendmail_cmd = NULL;
+
 	if (!sendmail_path) {
 #if (defined PHP_WIN32 || defined NETWARE)
 		/* handle old style win smtp sending */
@@ -345,11 +354,11 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			} else {
 				php_error_docref(NULL, E_WARNING, "%s", GetSMErrorText(tsm_err));
 			}
-			MAIL_RET(0);
+			return 0;
 		}
-		MAIL_RET(1);
+		return 1;
 #else
-		MAIL_RET(0);
+		return 0;
 #endif
 	}
 	if (extra_cmd != NULL) {
@@ -393,7 +402,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 				signal(SIGCHLD, sig_handler);
 			}
 #endif
-			MAIL_RET(0);
+			return 0;
 		}
 #endif
 		fprintf(sendmail, "To: %s\n", to);
@@ -422,9 +431,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #endif
 #endif
 		{
-			MAIL_RET(0);
+			return 0;
 		} else {
-			MAIL_RET(1);
+			return 1;
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
@@ -433,10 +442,44 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			signal(SIGCHLD, sig_handler);
 		}
 #endif
-		MAIL_RET(0);
+		return 0;
 	}
 
-	MAIL_RET(1); /* never reached */
+	return 1; /* never reached */
+}
+
+
+/* *********************
+   * Transport Modules *
+   ********************* */
+
+#define MAX_MODULES 32
+
+static mail_module *mail_modules[MAX_MODULES + 1] = {
+};
+
+PHPAPI int php_mail_register_module(mail_module *ptr) /* {{{ */
+{
+	int ret = FAILURE;
+	int i;
+
+	for (i = 0; i < MAX_MODULES; i++) {
+		if (!mail_modules[i]) {
+			mail_modules[i] = ptr;
+			ret = SUCCESS;
+			break;
+		}
+	}
+	return ret;
+}
+/* }}} */
+
+/* {{{ PHP_MINIT_FUNCTION
+*/
+PHP_MINIT_FUNCTION(mail)
+{
+    fprintf( stdout, ">>>> hello world\n" );
+    return SUCCESS;
 }
 /* }}} */
 
