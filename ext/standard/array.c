@@ -3498,6 +3498,10 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
 		}
 	}
 
+	if (prop) {
+		ZVAL_DEREF(prop);
+	}
+
 	return prop;
 }
 
