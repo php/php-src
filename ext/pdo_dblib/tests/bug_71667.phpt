@@ -19,16 +19,16 @@ array(1) {
   [0]=>
   array(6) {
     ["computed"]=>
-    int(1)
+    string(1) "1"
     [0]=>
-    int(1)
+    string(1) "1"
     ["named"]=>
-    int(2)
+    string(1) "2"
     [1]=>
-    int(2)
+    string(1) "2"
     ["computed1"]=>
-    int(3)
+    string(1) "3"
     [2]=>
-    int(3)
+    string(1) "3"
   }
 }
