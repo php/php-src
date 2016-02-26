@@ -59,8 +59,6 @@ array(3) {
   float(123.456)
 }
 
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately %s on line %d
-
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)
 Done

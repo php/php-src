@@ -19,4 +19,9 @@ $sh->write("foo", "bar");
 var_dump($sh->read(@$id));
 ?>
 --EXPECTF--
+Warning: SessionHandler::open(): Session is not active in %s on line %d
+
+Warning: SessionHandler::write(): Session is not active in %s on line %d
+
+Warning: SessionHandler::read(): Session is not active in %s on line %d
 bool(false)

@@ -100,43 +100,27 @@ ob_end_flush();
 bool(true)
 
 -- Iteration 2 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 3 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 4 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 5 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 6 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 7 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 8 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 9 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 10 --
@@ -146,16 +130,12 @@ bool(true)
 bool(true)
 
 -- Iteration 12 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 13 --
 bool(true)
 
 -- Iteration 14 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 15 --
@@ -168,18 +148,12 @@ bool(true)
 bool(true)
 
 -- Iteration 18 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 19 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 20 --
-
-Notice: session_destroy(): Immediate session data removal may cause random lost sessions. It is advised not to delete immediately in %s on line %d
 bool(true)
 
 -- Iteration 21 --
@@ -189,7 +163,7 @@ NULL
 
 -- Iteration 22 --
 
-Notice: A session had already been started - ignoring session_start() in %s on line 82
+Notice: A session had already been started - ignoring session_start() in %s on line %d
 bool(true)
 
 -- Iteration 23 --

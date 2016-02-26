@@ -184,6 +184,8 @@ static int php_session_destroy(zend_bool immediate) /* {{{ */
 		/* NULL PSDK_NEW_SID indicates no descendant session. i.e. simply destroyed */
 		ZVAL_NULL(&tmp);
 		zend_hash_str_add(Z_ARRVAL(PS(internal_data)), PSDK_NEW_SID, sizeof(PSDK_NEW_SID)-1, &tmp);
+		/* Remove all user session data */
+		zend_hash_clean(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))));
 		php_session_save_current_state(1);
 	}
 
@@ -2834,11 +2836,8 @@ static PHP_FUNCTION(session_destroy)
 		return;
 	}
 
-	if (immediate) {
-		/* Immediate destroy may cause random lost session by server side race condition. */
-		php_error_docref(NULL, E_NOTICE, "Immediate session data removal may cause random lost sessions. It is advised not to delete immediately");
-	}
-
+	/* Immediate destroy may cause random lost session by server side race condition.
+	   This should be documented in the manual. */
 	RETURN_BOOL(php_session_destroy(immediate) == SUCCESS);
 }
 /* }}} */
