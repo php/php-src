@@ -23,7 +23,7 @@ var_dump(ini_get("session.cache_expire"));
 var_dump(session_start());
 var_dump(session_cache_expire());
 var_dump(ini_get("session.cache_expire"));
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump(session_cache_expire());
 var_dump(ini_get("session.cache_expire"));
 

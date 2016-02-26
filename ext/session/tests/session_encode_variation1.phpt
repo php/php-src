@@ -22,7 +22,7 @@ var_dump(session_write_close());
 var_dump(session_encode());
 var_dump(session_start());
 var_dump(session_encode());
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump(session_encode());
 
 echo "Done";

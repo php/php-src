@@ -20,9 +20,9 @@ var_dump(session_destroy());
 var_dump(session_destroy());
 var_dump(session_destroy());
 var_dump(session_destroy());
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump(session_start());
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 
 echo "Done";
 ob_end_flush();
@@ -40,6 +40,8 @@ bool(false)
 
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)
 bool(true)
 bool(true)

@@ -17,7 +17,7 @@ PHPSESSID=session-id-by-cookie
 session_start();
 var_dump(session_id());
 var_dump($_GET, $_POST, $_COOKIE, $_ENV['REQUEST_METHOD'], $_SESSION, session_status() === PHP_SESSION_ACTIVE);
-@session_destroy(true);
+session_destroy(true);
 ?>
 --EXPECTF--
 string(20) "session-id-by-cookie"

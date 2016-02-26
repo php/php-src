@@ -26,7 +26,7 @@ $_SESSION["arr"][3]->method();
 
 var_dump($_SESSION["baz"]);
 var_dump($_SESSION["arr"]);
-@session_destroy(true);
+session_destroy(true);
 --EXPECT--
 object(foo)#1 (2) {
   ["bar"]=>

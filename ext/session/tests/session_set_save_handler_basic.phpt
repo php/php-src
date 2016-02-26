@@ -50,7 +50,7 @@ session_write_close();
 echo "Cleanup..\n";
 session_id($session_id);
 session_start();
-@session_destroy(true);
+session_destroy(true);
 
 ob_end_flush();
 ?>

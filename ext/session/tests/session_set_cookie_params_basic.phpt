@@ -18,7 +18,7 @@ echo "*** Testing session_set_cookie_params() : basic functionality ***\n";
 var_dump(session_set_cookie_params(3600));
 var_dump(session_start());
 var_dump(session_set_cookie_params(1800));
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump(session_set_cookie_params(1234567890));
 
 echo "Done";

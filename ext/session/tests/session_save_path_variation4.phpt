@@ -35,7 +35,7 @@ ini_set("session.save_path", $initdir);
 var_dump(session_save_path());
 var_dump(session_start());
 var_dump(session_save_path());
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump(session_save_path());
 var_dump(rmdir($sessions));
 

@@ -22,7 +22,7 @@ $_SESSION["foo"] = &$array;
 $_SESSION["guff"] = &$array;
 $_SESSION["blah"] = &$array;
 var_dump(session_encode());
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 
 echo "Done";
 ob_end_flush();

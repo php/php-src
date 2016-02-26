@@ -16,7 +16,7 @@ session_id("abtest");
 
 ### Phase 1 cleanup
 session_start();
-@session_destroy(true);
+session_destroy(true);
 
 ### Phase 2 $_SESSION["c"] does not contain any value
 session_id("abtest");
@@ -37,7 +37,7 @@ session_write_close();
 
 session_start();
 var_dump($_SESSION);
-@session_destroy(true);
+session_destroy(true);
 ?>
 --EXPECT--
 array(0) {

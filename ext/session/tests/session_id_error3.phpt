@@ -19,37 +19,37 @@ echo "*** Testing session_id() : error functionality ***\n";
 var_dump(session_id());
 var_dump(session_id("!"));
 var_dump(session_id());
-@@session_destroy(true);
+@session_destroy(true);
 
 @session_start();
 var_dump(session_id());
 var_dump(session_id("?><"));
 var_dump(session_id());
-@@session_destroy(true);
+@session_destroy(true);
 
 @session_start();
 var_dump(session_id());
 var_dump(session_id("£$%^&*()"));
 var_dump(session_id());
-@@session_destroy(true);
+@session_destroy(true);
 
 @session_start();
 var_dump(session_id());
 var_dump(session_id("\r\n"));
 var_dump(session_id());
-@@session_destroy(true);
+@session_destroy(true);
 
 @session_start();
 var_dump(session_id());
 var_dump(session_id("\0"));
 var_dump(session_id());
-@@session_destroy(true);
+@session_destroy(true);
 
 @session_start();
 var_dump(session_id());
 var_dump(session_id("¬``@~:{>?><,./[]+--"));
 var_dump(session_id());
-@@session_destroy(true);
+@session_destroy(true);
 
 echo "Done";
 ob_end_flush();

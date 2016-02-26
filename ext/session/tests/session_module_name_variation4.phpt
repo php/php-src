@@ -33,10 +33,10 @@ var_dump($_SESSION);
 var_dump(session_write_close());
 session_start();
 var_dump($_SESSION);
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 session_start();
 var_dump($_SESSION);
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 
 ob_end_flush();
 ?>

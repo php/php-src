@@ -58,8 +58,8 @@ var_dump(
 );
 
 // Cleanup
-@session_destroy(true);
-session_commit();
+session_start();
+session_destroy(true);
 ?>
 --EXPECTF--
 *** Testing timestamp : basic feature

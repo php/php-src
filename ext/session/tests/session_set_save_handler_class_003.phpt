@@ -65,7 +65,7 @@ session_unset();
 var_dump(session_id(), $_SESSION, $handler->i);
 
 session_start();
-@session_destroy(true);
+session_destroy(true);
 
 --EXPECTF--
 *** Testing session_set_save_handler() : inheritance ***

@@ -23,10 +23,10 @@ session_set_save_handler(new CustomReadHandler(), true);
 //Cleanup first
 session_id('mycustomsession'.PHP_VERSION_ID);
 session_start();
-@session_destroy(true);
+session_destroy(true);
 session_id('otherid'.PHP_VERSION_ID);
 session_start();
-@session_destroy(true);
+session_destroy(true);
 
 //Testing
 session_id('mycustomsession'.PHP_VERSION_ID);
@@ -41,10 +41,10 @@ var_dump($_SESSION);
 var_dump(session_id());
 
 //Cleanup
-@session_destroy(true);
+session_destroy(true);
 session_id('mycustomsession'.PHP_VERSION_ID);
 session_start();
-@session_destroy(true);
+session_destroy(true);
 ?>
 --EXPECTF--
 string(%d) "mycustomsession%d"

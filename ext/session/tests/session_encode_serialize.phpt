@@ -15,7 +15,7 @@ var_dump(session_encode());
 session_write_close();
 
 session_start();
-@session_destroy(true);
+session_destroy(true);
 // Should finish without errors
 echo 'Done'.PHP_EOL;
 ?>

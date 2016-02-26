@@ -29,7 +29,7 @@ session_commit();
 
 // Cleanup
 session_start();
-@session_destroy(true);
+session_destroy(true);
 ?>
 --EXPECTF--
 *** Testing timestamp : basic feature

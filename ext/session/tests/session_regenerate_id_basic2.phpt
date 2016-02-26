@@ -29,7 +29,7 @@ var_dump(session_id(), $_SESSION);
 var_dump(session_regenerate_id());
 $sids[] = session_id();
 var_dump(session_id(), $_SESSION);
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump(session_id(), $_SESSION);
 
 // Check SID uniquness

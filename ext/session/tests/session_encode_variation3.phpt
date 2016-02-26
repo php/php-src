@@ -20,7 +20,7 @@ var_dump(session_start());
 $array = array(1,2,3);
 $_SESSION["foo"] = &$array;
 var_dump(session_encode());
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 
 echo "Done";
 ob_end_flush();

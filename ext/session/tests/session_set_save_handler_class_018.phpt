@@ -42,7 +42,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function destroy($id) {
-		@unlink($this->path . $id);
+		return @unlink($this->path . $id);
 	}
 
 	public function gc($maxlifetime) {
@@ -82,7 +82,7 @@ session_unset();
 
 //Cleanup
 session_start();
-@session_destroy(true);
+session_destroy(true);
 
 --EXPECTF--
 *** Testing session_set_save_handler() function: class with validate_sid ***

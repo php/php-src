@@ -31,7 +31,7 @@ session_reset();
 
 var_dump($_SESSION); // Should only have 'foo'
 
-@session_destroy(true);
+session_destroy(true);
 
 echo "Done".PHP_EOL;
 

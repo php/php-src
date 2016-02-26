@@ -20,7 +20,7 @@ $_SESSION["foo"] = "Hello World!";
 var_dump($_SESSION);
 var_dump(session_unset());
 var_dump($_SESSION);
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump($_SESSION);
 
 echo "Done";

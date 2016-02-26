@@ -33,7 +33,7 @@ var_dump(session_name());
 var_dump(session_name(""));
 var_dump(session_start());
 var_dump(session_name());
-var_dump(@session_destroy(true));
+var_dump(session_destroy(true));
 var_dump(session_name());
 
 echo "Done";
