@@ -122,7 +122,7 @@ int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
 END_EXTERN_C()
 
-static zend_always_inline int zend_ssa_next_use(zend_ssa_op *ssa_op, int var, int use)
+static zend_always_inline int zend_ssa_next_use(const zend_ssa_op *ssa_op, int var, int use)
 {
 	ssa_op += use;
 	if (ssa_op->result_use == var) {
@@ -131,7 +131,7 @@ static zend_always_inline int zend_ssa_next_use(zend_ssa_op *ssa_op, int var, in
 	return (ssa_op->op1_use == var) ? ssa_op->op1_use_chain : ssa_op->op2_use_chain;
 }
 
-static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(zend_ssa *ssa, int var, zend_ssa_phi *p)
+static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ssa, int var, const zend_ssa_phi *p)
 {
 	if (p->pi >= 0) {
 		return p->use_chains[0];

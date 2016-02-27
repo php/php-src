@@ -182,11 +182,13 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			if (first) first = 0; else fprintf(stderr, ", ");
 			fprintf(stderr, "null");
 		}
-		if (info & MAY_BE_FALSE) {
+		if ((info & MAY_BE_FALSE) && (info & MAY_BE_TRUE)) {
+			if (first) first = 0; else fprintf(stderr, ", ");
+			fprintf(stderr, "bool");
+		} else if (info & MAY_BE_FALSE) {
 			if (first) first = 0; else fprintf(stderr, ", ");
 			fprintf(stderr, "false");
-		}
-		if (info & MAY_BE_TRUE) {
+		} else if (info & MAY_BE_TRUE) {
 			if (first) first = 0; else fprintf(stderr, ", ");
 			fprintf(stderr, "true");
 		}
@@ -788,7 +790,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 				}
 				fprintf(stderr, ")\n");
 			} else {
-				fprintf(stderr, " = Pi(");
+				fprintf(stderr, " = Pi<BB%d>(", p->pi);
 				zend_dump_ssa_var(op_array, ssa, p->sources[0], 0, p->var, dump_flags);
 				fprintf(stderr, " &");
 				zend_dump_pi_constraint(op_array, ssa, &p->constraint, dump_flags);
