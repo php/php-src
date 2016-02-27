@@ -106,7 +106,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_SSA_VARS) {
-		zend_dump_ssa_variables(op_array, ssa);
+		zend_dump_ssa_variables(op_array, ssa, 0);
 	}
 
 	return SUCCESS;
