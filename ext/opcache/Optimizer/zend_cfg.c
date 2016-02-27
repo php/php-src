@@ -585,16 +585,45 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 }
 /* }}} */
 
+/* Computes a postorder numbering of the CFG */
+static void compute_postnum_recursive(
+		int *postnum, int *cur, const zend_cfg *cfg, int block_num) /* {{{ */
+{
+	zend_basic_block *block = &cfg->blocks[block_num];
+	if (postnum[block_num] != -1) {
+		return;
+	}
+
+	postnum[block_num] = -2; /* Marker for "currently visiting" */
+	if (block->successors[0] >= 0) {
+		compute_postnum_recursive(postnum, cur, cfg, block->successors[0]);
+		if (block->successors[1] >= 0) {
+			compute_postnum_recursive(postnum, cur, cfg, block->successors[1]);
+		}
+	}
+	postnum[block_num] = (*cur)++;
+}
+/* }}} */
+
+/* Computes dominator tree using algorithm from "A Simple, Fast Dominance Algorithm" by
+ * Cooper, Harvey and Kennedy. */
 int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
 	int j, k, changed;
 
+	ALLOCA_FLAG(use_heap)
+	int *postnum = do_alloca(sizeof(int) * cfg->blocks_count, use_heap);
+	memset(postnum, -1, sizeof(int) * cfg->blocks_count);
+	j = 0;
+	compute_postnum_recursive(postnum, &j, cfg, 0);
+
 	/* FIXME: move declarations */
 	blocks[0].idom = 0;
 	do {
 		changed = 0;
+		/* Iterating in RPO here would converge faster */
 		for (j = 1; j < blocks_count; j++) {
 			int idom = -1;
 
@@ -612,8 +641,8 @@ int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cf
 
 				if (blocks[pred].idom >= 0) {
 					while (idom != pred) {
-						while (pred > idom) pred = blocks[pred].idom;
-						while (idom > pred) idom = blocks[idom].idom;
+						while (postnum[pred] < postnum[idom]) pred = blocks[pred].idom;
+						while (postnum[idom] < postnum[pred]) idom = blocks[idom].idom;
 					}
 				}
 			}
@@ -664,6 +693,7 @@ int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cf
 		blocks[j].level = level;
 	}
 
+	free_alloca(postnum, use_heap);
 	return SUCCESS;
 }
 /* }}} */
