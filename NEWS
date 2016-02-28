@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #71535 (Integer overflow in zend_mm_alloc_heap()). (Dmitry)
   . Fixed bug #71470 (Leaked 1 hashtable iterators). (Nikita)
 
+- libxml:
+  . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
+
 - ODBC:
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
     for the first two statements). (einavitamar at gmail dot com, Anatol)
