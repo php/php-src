@@ -512,6 +512,10 @@ int zend_accel_in_shm(void *ptr)
 {
 	int i;
 
+	if (!smm_shared_globals) {
+		return 0;
+	}
+
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		if ((char*)ptr >= (char*)ZSMMG(shared_segments)[i]->p &&
 		    (char*)ptr < (char*)ZSMMG(shared_segments)[i]->p + ZSMMG(shared_segments)[i]->size) {
