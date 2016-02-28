@@ -5628,7 +5628,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (extends_ast) {
-		if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0) && !zend_is_const_default_class_ref(extends_ast)) {
+		if ((decl->flags & ZEND_ACC_ANON_CLASS) == 0 && !zend_is_const_default_class_ref(extends_ast)) {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(extends_name));
