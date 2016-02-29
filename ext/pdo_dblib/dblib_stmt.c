@@ -103,8 +103,10 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 	/* Cancel any pending results */
 	dbcancel(H->link);
 	
-	efree(stmt->columns); 
-	stmt->columns = NULL;
+	if (stmt->columns) {
+		efree(stmt->columns); 
+		stmt->columns = NULL;
+	}
 	
 	return 1;
 }
