@@ -102,6 +102,17 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 
 	/* Cancel any pending results */
 	dbcancel(H->link);
+	
+	if (stmt->columns) {
+		int i = 0;
+		for (; i < stmt->column_count; i++) {
+			if (stmt->columns[i].name) {
+				zend_string_release(stmt->columns[i].name);
+			}
+		}
+		efree(stmt->columns); 
+		stmt->columns = NULL;
+	}
 
 	return 1;
 }
@@ -109,6 +120,17 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+
+	if (stmt->columns) {
+		int i = 0;
+		for (; i < stmt->column_count; i++) {
+			if (stmt->columns[i].name) {
+				zend_string_release(stmt->columns[i].name);
+			}
+		}
+		efree(stmt->columns); 
+		stmt->columns = NULL;
+	}
 
 	efree(S);
 
