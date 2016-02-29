@@ -244,6 +244,33 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len T
 	return id;
 }
 
+static int dblib_handle_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+{
+        pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	switch (attr) {
+		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
+			H->skip_empty_rowsets = zval_is_true(val);
+			return 1;
+		default:
+                        return 0;
+	}
+}
+
+static int pdo_dblib_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
+	switch (attr) {
+		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
+			ZVAL_BOOL(return_value, H->skip_empty_rowsets);
+			break;
+		default:
+			return 0;
+	}
+
+	return 1;
+}
+
 static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
@@ -252,10 +279,10 @@ static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_begin, /* begin */
 	dblib_handle_commit, /* commit */
 	dblib_handle_rollback, /* rollback */
-	NULL, /*set attr */
+	dblib_handle_set_attr, /*set attr */
 	dblib_handle_last_id, /* last insert id */
 	dblib_fetch_error, /* fetch error */
-	NULL, /* get attr */
+	pdo_dblib_get_attribute, /* get attr */
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */

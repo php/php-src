@@ -127,12 +127,13 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret;
         int num_fields;
-
-        do {
-            ret = dbresults(H->link);            
-        } while ((num_fields = dbnumcols(H->link)) <= 0 && ret == SUCCEED);
         
-	if (num_fields <= 0) {
+        do {
+            ret = dbresults(H->link);
+            num_fields = dbnumcols(H->link);
+        } while (H->skip_empty_rowsets && num_fields <= 0 && ret == SUCCEED);
+    
+        if (H->skip_empty_rowsets && num_fields <= 0) {
             return 0;
         }
 	

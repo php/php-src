@@ -9,6 +9,12 @@ require dirname(__FILE__) . '/config.inc';
 <?php
 require dirname(__FILE__) . '/config.inc';
 
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS)); // disabled by default
+
+$db->setAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS, true);
+
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS));
+
 $sql = '
     SET NOCOUNT ON
     SELECT 0 AS [result]
@@ -20,6 +26,8 @@ var_dump($stmt->nextRowset()); // expected: bool(false), actual: bool(true)
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC)); // expected: array(), actual: array(result => 0)
 ?>
 --EXPECT--
+bool(false)
+bool(true)
 array(1) {
   [0]=>
   array(1) {
@@ -30,4 +38,3 @@ array(1) {
 bool(false)
 array(0) {
 }
-
