@@ -268,6 +268,25 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			*ptr = tmp_ptr;
 			break;
 		}
+		case SQLDATETIM4:
+		case SQLDATETIME: {
+			DBDATETIME dt;
+			DBDATEREC di;
+
+			dbconvert(H->link, coltype, (BYTE*) *ptr, -1, SQLDATETIME, (LPBYTE) &dt, -1);
+			dbdatecrack(H->link, &di, &dt);
+
+			*len = spprintf((char**) &tmp_ptr, 20, "%d-%02d-%02d %02d:%02d:%02d",
+#ifdef PHP_DBLIB_IS_MSSQL || MSDBLIB
+					di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
+#else
+					di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
+#endif
+				);
+
+			*ptr = (char*) tmp_ptr;
+			break;
+		}
 		default:
 			if (dbwillconvert(coltype, SQLCHAR)) {
 				tmp_len = 32 + (2 * (*len)); /* FIXME: We allocate more than we need here */
