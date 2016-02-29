@@ -410,7 +410,7 @@ PHP_FUNCTION(readline_read_history)
 		return;
 	}
 
-	if (arg && php_check_open_basedir(arg)) {
+	if (!arg || php_check_open_basedir(arg) != 0) {
 		RETURN_FALSE;
 	}
 
