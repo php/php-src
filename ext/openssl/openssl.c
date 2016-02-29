@@ -5322,7 +5322,7 @@ PHP_FUNCTION(openssl_sign)
 	zend_resource *keyresource = NULL;
 	char * data;
 	size_t data_len;
-	EVP_MD_CTX md_ctx;
+	EVP_MD_CTX *md_ctx;
 	zval *method = NULL;
 	zend_long signature_algo = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
@@ -5355,9 +5355,11 @@ PHP_FUNCTION(openssl_sign)
 	siglen = EVP_PKEY_size(pkey);
 	sigbuf = zend_string_alloc(siglen, 0);
 
-	if (EVP_SignInit(&md_ctx, mdtype) &&
-			EVP_SignUpdate(&md_ctx, data, data_len) &&
-			EVP_SignFinal(&md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, pkey)) {
+	md_ctx = EVP_MD_CTX_create();
+	if (md_ctx != NULL &&
+			EVP_SignInit(md_ctx, mdtype) &&
+			EVP_SignUpdate(md_ctx, data, data_len) &&
+			EVP_SignFinal(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, pkey)) {
 		zval_dtor(signature);
 		ZSTR_VAL(sigbuf)[siglen] = '\0';
 		ZSTR_LEN(sigbuf) = siglen;
@@ -5368,7 +5370,7 @@ PHP_FUNCTION(openssl_sign)
 		efree(sigbuf);
 		RETVAL_FALSE;
 	}
-	EVP_MD_CTX_cleanup(&md_ctx);
+	EVP_MD_CTX_destroy(md_ctx);
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
 	}
@@ -5382,7 +5384,7 @@ PHP_FUNCTION(openssl_verify)
 	zval *key;
 	EVP_PKEY *pkey;
 	int err = 0;
-	EVP_MD_CTX md_ctx;
+	EVP_MD_CTX *md_ctx;
 	const EVP_MD *mdtype;
 	zend_resource *keyresource = NULL;
 	char * data;
@@ -5420,12 +5422,14 @@ PHP_FUNCTION(openssl_verify)
 		RETURN_FALSE;
 	}
 
-	if (!EVP_VerifyInit (&md_ctx, mdtype) ||
-			!EVP_VerifyUpdate (&md_ctx, data, data_len) ||
-			(err = EVP_VerifyFinal(&md_ctx, (unsigned char *)signature, (unsigned int)signature_len, pkey)) < 0) {
+	md_ctx = EVP_MD_CTX_create();
+	if (md_ctx == NULL ||
+			!EVP_VerifyInit (md_ctx, mdtype) ||
+			!EVP_VerifyUpdate (md_ctx, data, data_len) ||
+			(err = EVP_VerifyFinal(md_ctx, (unsigned char *)signature, (unsigned int)signature_len, pkey)) < 0) {
 		php_openssl_store_errors();
 	}
-	EVP_MD_CTX_cleanup(&md_ctx);
+	EVP_MD_CTX_destroy(md_ctx);
 
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
