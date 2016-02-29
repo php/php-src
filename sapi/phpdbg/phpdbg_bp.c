@@ -563,12 +563,14 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break) /* {
 		} else {
 			zend_execute_data *execute_data = EG(current_execute_data);
 			do {
-				zend_op_array *op_array = &execute_data->func->op_array;
-				if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == ZSTR_LEN(op_array->filename) && !memcmp(ZSTR_VAL(op_array->filename), new_break->class_name, new_break->class_len)) {
-					if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
-						return SUCCESS;
-					} else {
-						return 2;
+				if (ZEND_USER_CODE(execute_data->func->common.type)) {
+					zend_op_array *op_array = &execute_data->func->op_array;
+					if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == ZSTR_LEN(op_array->filename) && !memcmp(ZSTR_VAL(op_array->filename), new_break->class_name, new_break->class_len)) {
+						if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
+							return SUCCESS;
+						} else {
+							return 2;
+						}
 					}
 				}
 			} while ((execute_data = execute_data->prev_execute_data) != NULL);

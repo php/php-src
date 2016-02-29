@@ -29,7 +29,7 @@
 # endif
 #endif
 
-static inline php_hash_uint64 rol64(php_hash_uint64 v, unsigned char b) {
+static inline uint64_t rol64(uint64_t v, unsigned char b) {
 	return (v << b) | (v >> (64 - b));
 }
 static inline unsigned char idx(unsigned char x, unsigned char y) {
@@ -37,36 +37,36 @@ static inline unsigned char idx(unsigned char x, unsigned char y) {
 }
 
 #ifdef WORDS_BIGENDIAN
-static inline php_hash_uint64 load64(const unsigned char* x) {
+static inline uint64_t load64(const unsigned char* x) {
 	unsigned char i;
-	php_hash_uint64 ret = 0;
+	uint64_t ret = 0;
 	for (i = 7; i >= 0; --i) {
 		ret <<= 8;
 		ret |= x[i];
 	}
 	return ret;
 }
-static inline void store64(unsigned char* x, php_hash_uint64 val) {
+static inline void store64(unsigned char* x, uint64_t val) {
 	unsigned char i;
 	for (i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
-static inline void xor64(unsigned char* x, php_hash_uint64 val) {
+static inline void xor64(unsigned char* x, uint64_t val) {
 	unsigned char i;
 	for (i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;
 	}
 }
-# define readLane(x, y)     load64(ctx->state+sizeof(php_hash_uint64)*idx(x, y))
-# define writeLane(x, y, v) store64(ctx->state+sizeof(php_hash_uint64)*idx(x, y), v)
-# define XORLane(x, y, v)   xor64(ctx->state+sizeof(php_hash_uint64)*idx(x, y), v)
+# define readLane(x, y)     load64(ctx->state+sizeof(uint64_t)*idx(x, y))
+# define writeLane(x, y, v) store64(ctx->state+sizeof(uint64_t)*idx(x, y), v)
+# define XORLane(x, y, v)   xor64(ctx->state+sizeof(uint64_t)*idx(x, y), v)
 #else
-# define readLane(x, y)     (((php_hash_uint64*)ctx->state)[idx(x,y)])
-# define writeLane(x, y, v) (((php_hash_uint64*)ctx->state)[idx(x,y)] = v)
-# define XORLane(x, y, v)   (((php_hash_uint64*)ctx->state)[idx(x,y)] ^= v)
+# define readLane(x, y)     (((uint64_t*)ctx->state)[idx(x,y)])
+# define writeLane(x, y, v) (((uint64_t*)ctx->state)[idx(x,y)] = v)
+# define XORLane(x, y, v)   (((uint64_t*)ctx->state)[idx(x,y)] ^= v)
 #endif
 
 static inline char LFSR86540(unsigned char* pLFSR)
@@ -89,7 +89,7 @@ static void permute(PHP_SHA3_CTX* ctx) {
 
 	for (round = 0; round < 24; ++round) {
 		{ // Theta step (see [Keccak Reference, Section 2.3.2])
-			php_hash_uint64 C[5], D;
+			uint64_t C[5], D;
 			unsigned char x, y;
 			for (x = 0; x < 5; ++x) {
 				C[x] = readLane(x, 0) ^ readLane(x, 1) ^
@@ -105,11 +105,11 @@ static void permute(PHP_SHA3_CTX* ctx) {
 
 		{ // p and Pi steps (see [Keccak Reference, Sections 2.3.3 and 2.3.4])
 			unsigned char x = 1, y = 0, t;
-			php_hash_uint64 current = readLane(x, y);
+			uint64_t current = readLane(x, y);
 			for (t = 0; t < 24; ++t) {
 				unsigned char r = ((t + 1) * (t + 2) / 2) % 64;
 				unsigned char Y = (2*x + 3*y) % 5;
-				php_hash_uint64 temp;
+				uint64_t temp;
 				x = y;
 				y = Y;
 				temp = readLane(x, y);
@@ -121,7 +121,7 @@ static void permute(PHP_SHA3_CTX* ctx) {
 		{ // X step (see [Keccak Reference, Section 2.3.1])
 			unsigned char x, y;
 			for (y = 0; y < 5; ++y) {
-				php_hash_uint64 temp[5];
+				uint64_t temp[5];
 				for (x = 0; x < 5; ++x) {
 					temp[x] = readLane(x, y);
 				}
@@ -135,8 +135,8 @@ static void permute(PHP_SHA3_CTX* ctx) {
 			unsigned char j;
 			for (j = 0; j < 7; ++j) {
 				if (LFSR86540(&LFSRstate)) {
-					php_hash_uint64 bitPos = (1<<j) - 1;
-					XORLane(0, 0, (php_hash_uint64)1 << bitPos);
+					uint64_t bitPos = (1<<j) - 1;
+					XORLane(0, 0, (uint64_t)1 << bitPos);
 				}
 			}
 		}

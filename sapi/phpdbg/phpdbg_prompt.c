@@ -518,13 +518,14 @@ PHPDBG_COMMAND(continue) /* {{{ */
 } /* }}} */
 
 int phpdbg_skip_line_helper() /* {{{ */ {
-	const zend_op_array *op_array = &EG(current_execute_data)->func->op_array;
+	zend_execute_data *ex = phpdbg_user_execute_data(EG(current_execute_data));
+	const zend_op_array *op_array = &ex->func->op_array;
 	const zend_op *opline = op_array->opcodes;
 
 	PHPDBG_G(flags) |= PHPDBG_IN_UNTIL;
-	PHPDBG_G(seek_ex) = EG(current_execute_data);
+	PHPDBG_G(seek_ex) = ex;
 	do {
-		if (opline->lineno != EG(current_execute_data)->opline->lineno
+		if (opline->lineno != ex->opline->lineno
 		 || opline->opcode == ZEND_RETURN
 		 || opline->opcode == ZEND_FAST_RET
 		 || opline->opcode == ZEND_GENERATOR_RETURN
@@ -562,10 +563,11 @@ PHPDBG_COMMAND(next) /* {{{ */
 } /* }}} */
 
 static void phpdbg_seek_to_end(void) /* {{{ */ {
-	const zend_op_array *op_array = &EG(current_execute_data)->func->op_array;
+	zend_execute_data *ex = phpdbg_user_execute_data(EG(current_execute_data));
+	const zend_op_array *op_array = &ex->func->op_array;
 	const zend_op *opline = op_array->opcodes;
 
-	PHPDBG_G(seek_ex) = EG(current_execute_data);
+	PHPDBG_G(seek_ex) = ex;
 	do {
 		switch (opline->opcode) {
 			case ZEND_RETURN:
@@ -588,7 +590,7 @@ PHPDBG_COMMAND(finish) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) EG(current_execute_data)->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 	} else {
 		PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
@@ -605,7 +607,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) EG(current_execute_data)->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 		phpdbg_notice("leave", "type=\"end\"", "Already at the end of the function");
 		return SUCCESS;
@@ -651,7 +653,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 
 	phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
 	zend_string_release(file);
-	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", ZSTR_VAL(msg));
+	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", "%s", ZSTR_VAL(msg));
 	zend_string_release(msg);
 
 	if (EG(prev_exception)) {
@@ -1518,7 +1520,11 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
 			msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("message"), 1, &rv));
 
-			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line, ZSTR_LEN(msg) < 80 ? ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
+			phpdbg_error("exception",
+				"name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"",
+				"Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s",
+				ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line,
+				ZSTR_LEN(msg) < 80 ? (int) ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
 			zend_string_release(msg);
 			zend_string_release(file);
 
@@ -1627,7 +1633,7 @@ next:
 		     execute_data->call->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
-		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		
+		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);
 		zend_execute_ex = phpdbg_execute_ex;
 
 		if (PHPDBG_G(vmret) != 0) {

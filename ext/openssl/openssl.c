@@ -1328,6 +1328,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 	EVP_cleanup();
 
+#if OPENSSL_VERSION_NUMBER >= 0x00090805f
+	ERR_free_strings();
+#endif
+
 	php_unregister_url_stream_wrapper("https");
 	php_unregister_url_stream_wrapper("ftps");
 
@@ -4949,6 +4953,7 @@ PHP_FUNCTION(openssl_seal)
 	memset(eks, 0, sizeof(*eks) * nkeys);
 	key_resources = safe_emalloc(nkeys, sizeof(zend_resource*), 0);
 	memset(key_resources, 0, sizeof(zend_resource*) * nkeys);
+	memset(pkeys, 0, sizeof(*pkeys) * nkeys);
 
 	/* get the public keys we are using to seal this data */
 	i = 0;
@@ -5010,7 +5015,7 @@ PHP_FUNCTION(openssl_seal)
 
 clean_exit:
 	for (i=0; i<nkeys; i++) {
-		if (key_resources[i] == NULL) {
+		if (key_resources[i] == NULL && pkeys[i] != NULL) {
 			EVP_PKEY_free(pkeys[i]);
 		}
 		if (eks[i]) {
@@ -5269,7 +5274,7 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 
 	if (*piv_len < iv_required_len) {
 		php_error_docref(NULL, E_WARNING,
-				"IV passed is only %d bytes long, cipher expects an IV of precisely %d bytes, padding with \\0",
+				"IV passed is only %zd bytes long, cipher expects an IV of precisely %zd bytes, padding with \\0",
 				*piv_len, iv_required_len);
 		memcpy(iv_new, *piv, *piv_len);
 		*piv_len = iv_required_len;
@@ -5279,7 +5284,7 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 	}
 
 	php_error_docref(NULL, E_WARNING,
-			"IV passed is %d bytes long which is longer than the %d expected by selected cipher, truncating",
+			"IV passed is %zd bytes long which is longer than the %zd expected by selected cipher, truncating",
 			*piv_len, iv_required_len);
 	memcpy(iv_new, *piv, iv_required_len);
 	*piv_len = iv_required_len;

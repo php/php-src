@@ -176,7 +176,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		}
 #endif
 	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region", err);
+		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_callback directives for more convenient Opcache usage", err);
 		return ALLOC_FAILURE;
    	}
 

@@ -16,7 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 
 #ifndef PHP_ZIP_H
 #define PHP_ZIP_H
@@ -38,24 +37,9 @@ extern zend_module_entry zip_module_entry;
 #define ZIP_OVERWRITE ZIP_TRUNCATE
 #endif
 
-#define PHP_ZIP_VERSION "1.13.0"
+#define PHP_ZIP_VERSION "1.13.2"
 
-#ifndef  Z_SET_REFCOUNT_P
-# if PHP_MAJOR_VERSION < 6 && (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
-#  define Z_SET_REFCOUNT_P(pz, rc)  pz->refcount = rc
-#  define Z_UNSET_ISREF_P(pz) pz->is_ref = 0
-# endif
-#endif
-
-/* {{{ ZIP_OPENBASEDIR_CHECKPATH(filename) */
-#if PHP_API_VERSION < 20100412
-# define ZIP_OPENBASEDIR_CHECKPATH(filename) \
-	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename)
-#else
-#define ZIP_OPENBASEDIR_CHECKPATH(filename) \
-	php_check_open_basedir(filename)
-#endif
-/* }}} */
+#define ZIP_OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
 
 typedef struct _ze_zip_rsrc {
 	struct zip *za;

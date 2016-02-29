@@ -3493,8 +3493,8 @@ PHPAPI double php_get_nan(void) /* {{{ */
 	return HUGE_VAL + -HUGE_VAL;
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val = 0.0;
-	((php_uint32*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
-	((php_uint32*)&val)[0] = 0;
+	((uint32_t*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
+	((uint32_t*)&val)[0] = 0;
 	return val;
 #elif HAVE_ATOF_ACCEPTS_NAN
 	return atof("NAN");
@@ -3510,8 +3510,8 @@ PHPAPI double php_get_inf(void) /* {{{ */
 	return HUGE_VAL;
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val = 0.0;
-	((php_uint32*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
-	((php_uint32*)&val)[0] = 0;
+	((uint32_t*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
+	((uint32_t*)&val)[0] = 0;
 	return val;
 #elif HAVE_ATOF_ACCEPTS_INF
 	return atof("INF");
@@ -3659,6 +3659,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 	BASIC_MINIT_SUBMODULE(proc_open)
 #endif
+	BASIC_MINIT_SUBMODULE(exec)
 
 	BASIC_MINIT_SUBMODULE(user_streams)
 	BASIC_MINIT_SUBMODULE(imagetypes)
@@ -4839,7 +4840,7 @@ PHP_FUNCTION(forward_static_call)
 	fci.retval = &retval;
 
 	called_scope = zend_get_called_scope(execute_data);
-	if (called_scope &&
+	if (called_scope && fci_cache.calling_scope &&
 		instanceof_function(called_scope, fci_cache.calling_scope)) {
 			fci_cache.called_scope = called_scope;
 	}
@@ -4867,7 +4868,7 @@ PHP_FUNCTION(forward_static_call_array)
 	fci.retval = &retval;
 
 	called_scope = zend_get_called_scope(execute_data);
-	if (called_scope &&
+	if (called_scope && fci_cache.calling_scope &&
 		instanceof_function(called_scope, fci_cache.calling_scope)) {
 			fci_cache.called_scope = called_scope;
 	}

@@ -418,7 +418,7 @@ continue_jmpznz_optimization:
 						ZEND_OP1(next_op).var == ZEND_RESULT(opline).var) {
 						MAKE_NOP(next_op);
 						opline->opcode -= 2;
-						ZEND_RESULT_TYPE(opline) = IS_VAR | EXT_TYPE_UNUSED;
+						ZEND_RESULT_TYPE(opline) = IS_UNUSED;
 					}
 				}
 				break;

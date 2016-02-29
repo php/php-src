@@ -86,6 +86,7 @@ typedef struct _zend_cfg {
 	zend_basic_block *blocks;             /* array of basic blocks       */
 	int              *predecessors;
 	uint32_t         *map;
+	unsigned int      split_at_live_ranges : 1;
 } zend_cfg;
 
 /* Build Flags */
@@ -94,6 +95,7 @@ typedef struct _zend_cfg {
 #define ZEND_SSA_DEBUG_LIVENESS        (1<<29)
 #define ZEND_SSA_DEBUG_PHI_PLACEMENT   (1<<28)
 #define ZEND_SSA_RC_INFERENCE          (1<<27)
+#define ZEND_CFG_SPLIT_AT_LIVE_RANGES  (1<<26)
 
 #define CRT_CONSTANT_EX(op_array, node, rt_constants) \
 	((rt_constants) ? \
@@ -106,7 +108,7 @@ typedef struct _zend_cfg {
 	CRT_CONSTANT_EX(op_array, node, (build_flags & ZEND_RT_CONSTANTS))
 
 #define RETURN_VALUE_USED(opline) \
-	(!((opline)->result_type & EXT_TYPE_UNUSED))
+	((opline)->result_type != IS_UNUSED)
 
 BEGIN_EXTERN_C()
 

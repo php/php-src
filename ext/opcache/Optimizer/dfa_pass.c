@@ -34,6 +34,11 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 {
 	uint32_t build_flags;
 
+	if (op_array->last_try_catch) {
+		/* TODO: we can't analyze functions with try/catch/finally ??? */
+		return FAILURE;
+	}
+
     /* Build SSA */
 	memset(ssa, 0, sizeof(zend_ssa));
 
@@ -41,7 +46,8 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 		return FAILURE;
 	}
 
-	if (*flags & ZEND_FUNC_TOO_DYNAMIC) {
+	if (*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) {
+		/* TODO: we can't analyze functions with indirect variable access ??? */
 		return FAILURE;
 	}
 
@@ -50,7 +56,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_CFG) {
-		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNUSED_VARS, "dfa cfg", &ssa->cfg);
+		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "dfa cfg", &ssa->cfg);
 	}
 
 	/* Compute Dominators Tree */
@@ -79,7 +85,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_SSA) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "before dfa pass", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "before dfa pass", ssa);
 	}
 
 
@@ -100,7 +106,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_SSA_VARS) {
-		zend_dump_ssa_variables(op_array, ssa);
+		zend_dump_ssa_variables(op_array, ssa, 0);
 	}
 
 	return SUCCESS;
@@ -109,7 +115,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "before dfa pass", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "before dfa pass", ssa);
 	}
 
 	if (ssa->var_info) {
@@ -119,9 +125,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		// 1: #1.T  = OP_Y                                |  #3.CV = OP_Y
 		// 2: ASSIGN #2.CV [undef,scalar] -> #3.CV, #1.T  |  NOP
 		// --
-		// 2: ASSIGN #2.CV [undef,scalar] -> #3.CV, C     |  3.CV = QM_ASSIGN C
-		// --
-		// 2: ASSIGN #2.CV [undef,scalar] -> #3.CV, #1.CV |  3.CV = QM_ASSIGN #1.CV
+		// 2: ASSIGN #2.CV [undef,scalar] -> #3.CV, X     |  3.CV = QM_ASSIGN X
 
 		for (i = 0; i < ssa->vars_count; i++) {
 			int op2 = ssa->vars[i].definition;
@@ -137,47 +141,46 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				 && !(ssa->var_info[var2].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
 				) {
 
-					if (op_array->opcodes[op2].op2_type & (IS_TMP_VAR|IS_VAR)) {
+					if ((op_array->opcodes[op2].op2_type & (IS_TMP_VAR|IS_VAR))
+					 && ssa->ops[op2].op2_use >= 0
+					 && !(ssa->var_info[ssa->ops[op2].op2_use].type & MAY_BE_REF)
+					 && ssa->vars[ssa->ops[op2].op2_use].definition >= 0
+					 && ssa->ops[ssa->vars[ssa->ops[op2].op2_use].definition].result_def == ssa->ops[op2].op2_use
+					 && ssa->ops[ssa->vars[ssa->ops[op2].op2_use].definition].result_use < 0
+					 && ssa->vars[ssa->ops[op2].op2_use].use_chain == op2
+					 && ssa->ops[op2].op2_use_chain < 0
+					 && !ssa->vars[ssa->ops[op2].op2_use].phi_use_chain
+					 && !ssa->vars[ssa->ops[op2].op2_use].sym_use_chain
+					 /* see Zend/tests/generators/aborted_yield_during_new.phpt */
+					 && op_array->opcodes[ssa->vars[ssa->ops[op2].op2_use].definition].opcode != ZEND_NEW
+					) {
 						int var1 = ssa->ops[op2].op2_use;
+						int op1 = ssa->vars[var1].definition;
+						int var3 = i;
 
-						if (var1 >= 0
-						 && !(ssa->var_info[var1].type & MAY_BE_REF)
-						 && ssa->vars[var1].definition >= 0
-						 && ssa->ops[ssa->vars[var1].definition].result_def == var1
-						 && ssa->ops[ssa->vars[var1].definition].result_use < 0
-						 && ssa->vars[var1].use_chain == op2
-						 && ssa->ops[op2].op2_use_chain < 0
-						 && !ssa->vars[var1].phi_use_chain
-						 && !ssa->vars[var1].sym_use_chain
-						) {
-							int op1 = ssa->vars[var1].definition;
-							int var3 = i;
+						if (zend_ssa_unlink_use_chain(ssa, op2, var2)) {
+							/* Reconstruct SSA */
+							ssa->vars[var3].definition = op1;
+							ssa->ops[op1].result_def = var3;
 
-							if (zend_ssa_unlink_use_chain(ssa, op2, var2)) {
-								/* Reconstruct SSA */
-								ssa->vars[var3].definition = op1;
-								ssa->ops[op1].result_def = var3;
+							ssa->vars[var1].definition = -1;
+							ssa->vars[var1].use_chain = -1;
 
-								ssa->vars[var1].definition = -1;
-								ssa->vars[var1].use_chain = -1;
+							ssa->ops[op2].op1_use = -1;
+							ssa->ops[op2].op2_use = -1;
+							ssa->ops[op2].op1_def = -1;
+							ssa->ops[op2].op1_use_chain = -1;
 
-								ssa->ops[op2].op1_use = -1;
-								ssa->ops[op2].op2_use = -1;
-								ssa->ops[op2].op1_def = -1;
-								ssa->ops[op2].op1_use_chain = -1;
-
-								/* Update opcodes */
-								op_array->opcodes[op1].result_type = op_array->opcodes[op2].op1_type;
-								op_array->opcodes[op1].result.var = op_array->opcodes[op2].op1.var;
-								MAKE_NOP(&op_array->opcodes[op2]);
-								remove_nops = 1;
-							}
+							/* Update opcodes */
+							op_array->opcodes[op1].result_type = op_array->opcodes[op2].op1_type;
+							op_array->opcodes[op1].result.var = op_array->opcodes[op2].op1.var;
+							MAKE_NOP(&op_array->opcodes[op2]);
+							remove_nops = 1;
 						}
 					} else if (op_array->opcodes[op2].op2_type == IS_CONST
-					 || (op_array->opcodes[op2].op2_type == IS_CV
+					 || ((op_array->opcodes[op2].op2_type & (IS_TMP_VAR|IS_VAR|IS_CV))
 					     && ssa->ops[op2].op2_use >= 0
-					     && ssa->ops[op2].op2_def < 0
-					     && !(ssa->var_info[ssa->ops[op2].op2_use].type & MAY_BE_REF))
+					     && ssa->ops[op2].op2_def < 0)
 					) {
 						int var3 = i;
 
@@ -209,11 +212,11 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_DFA_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "after dfa pass", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after dfa pass", ssa);
 	}
 }
 
-void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 	uint32_t flags = 0;

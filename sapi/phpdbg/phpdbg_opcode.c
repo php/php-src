@@ -36,7 +36,8 @@ static inline const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 	return "UNKNOWN";
 } /* }}} */
 
-static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type) /* {{{ */
+static inline char *phpdbg_decode_op(
+		zend_op_array *ops, const znode_op *op, uint32_t type) /* {{{ */
 {
 	char *decode = NULL;
 
@@ -49,10 +50,10 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 		} break;
 
 		case IS_VAR:
-			spprintf(&decode, 0, "@%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
+			spprintf(&decode, 0, "@%u", EX_VAR_TO_NUM(op->var) - ops->last_var);
 		break;
 		case IS_TMP_VAR:
-			spprintf(&decode, 0, "~%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
+			spprintf(&decode, 0, "~%u", EX_VAR_TO_NUM(op->var) - ops->last_var);
 		break;
 		case IS_CONST: {
 			zval *literal = RT_CONSTANT(ops, *op);
@@ -62,91 +63,72 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 	return decode;
 } /* }}} */
 
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
+char *phpdbg_decode_input_op(
+		zend_op_array *ops, const zend_op *opline, znode_op op, zend_uchar op_type,
+		uint32_t flags) {
+	char *result = NULL;
+	if (op_type != IS_UNUSED) {
+		result = phpdbg_decode_op(ops, &op, op_type);
+	} else if (ZEND_VM_OP_JMP_ADDR == (flags & ZEND_VM_OP_MASK)) {
+		spprintf(&result, 0, "J%td", OP_JMP_ADDR(opline, op) - ops->opcodes);
+	} else if (ZEND_VM_OP_NUM == (flags & ZEND_VM_OP_MASK)) {
+		spprintf(&result, 0, "%" PRIu32, op.num);
+	} else if (ZEND_VM_OP_TRY_CATCH == (flags & ZEND_VM_OP_MASK)) {
+		if (opline->opcode != ZEND_FAST_RET || opline->extended_value) {
+			spprintf(&result, 0, "try-catch(%" PRIu32 ")", op.num);
+		}
+	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
+		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
+			spprintf(&result, 0, "live-range(%" PRIu32 ")", op.num);
+		}
+	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
+		result = estrdup("THIS");
+	} else if (ZEND_VM_OP_NEXT == (flags & ZEND_VM_OP_MASK)) {
+		result = estrdup("NEXT");
+	} else if (ZEND_VM_OP_CLASS_FETCH == (flags & ZEND_VM_OP_MASK)) {
+		//zend_dump_class_fetch_type(op.num);
+	} else if (ZEND_VM_OP_CONSTRUCTOR == (flags & ZEND_VM_OP_MASK)) {
+		result = estrdup("CONSTRUCTOR");
+	}
+	return result;
+}
+
+char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 {
-	const char *opcode_name = phpdbg_decode_opcode(op->opcode);
+	const char *opcode_name = phpdbg_decode_opcode(opline->opcode);
+	uint32_t flags = zend_get_opcode_flags(opline->opcode);
 	char *result, *decode[4] = {NULL, NULL, NULL, NULL};
 
 	/* EX */
-	switch (op->opcode) {
+	switch (opline->opcode) {
 	case ZEND_FAST_CALL:
-		if (op->extended_value == ZEND_FAST_CALL_FROM_FINALLY) {
+		if (opline->extended_value == ZEND_FAST_CALL_FROM_FINALLY) {
 			decode[0] = estrdup("FAST_CALL<FROM_FINALLY>");
 		}
 		break;
 	case ZEND_FAST_RET:
-		if (op->extended_value != 0) {
+		if (opline->extended_value != 0) {
 			spprintf(&decode[0], 0, "FAST_RET<%s>",
-				op->extended_value == ZEND_FAST_RET_TO_CATCH ? "TO_CATCH" : "TO_FINALLY");
+				opline->extended_value == ZEND_FAST_RET_TO_CATCH ? "TO_CATCH" : "TO_FINALLY");
 		}
 		break;
 	}
 
 	/* OP1 */
-	switch (op->opcode) {
-	case ZEND_JMP:
-	case ZEND_FAST_CALL:
-		spprintf(&decode[1], 0, "J%td", OP_JMP_ADDR(op, op->op1) - ops->opcodes);
-		break;
-
-	case ZEND_INIT_FCALL:
-	case ZEND_RECV:
-	case ZEND_RECV_INIT:
-	case ZEND_RECV_VARIADIC:
-		spprintf(&decode[1], 0, "%" PRIu32, op->op1.num);
-		break;
-
-	default:
-		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type);
-		break;
-	}
+	decode[1] = phpdbg_decode_input_op(
+		ops, opline, opline->op1, opline->op1_type, ZEND_VM_OP1_FLAGS(flags));
 
 	/* OP2 */
-	switch (op->opcode) {
-	case ZEND_JMPZNZ:
-		spprintf(&decode[2], 0, "J%td or J%td",
-			OP_JMP_ADDR(op, op->op2) - ops->opcodes,
-			ZEND_OFFSET_TO_OPLINE(op, op->extended_value) - ops->opcodes);
-		break;
-
-	case ZEND_JMPZ:
-	case ZEND_JMPNZ:
-	case ZEND_JMPZ_EX:
-	case ZEND_JMPNZ_EX:
-	case ZEND_JMP_SET:
-	case ZEND_ASSERT_CHECK:
-		spprintf(&decode[2], 0, "J%td", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
-		break;
-
-	case ZEND_FAST_CALL:
-	case ZEND_FAST_RET:
-		if (op->extended_value != 0) {
-			spprintf(&decode[2], 0, "%" PRIu32, op->op2.num);
-		}
-		break;
-
-	case ZEND_SEND_VAL:
-	case ZEND_SEND_VAL_EX:
-	case ZEND_SEND_VAR:
-	case ZEND_SEND_VAR_NO_REF:
-	case ZEND_SEND_REF:
-	case ZEND_SEND_VAR_EX:
-	case ZEND_SEND_USER:
-		spprintf(&decode[2], 0, "%" PRIu32, op->op2.num);
-		break;
-
-	default:
-		decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type);
-		break;
-	}
+	decode[2] = phpdbg_decode_input_op(
+		ops, opline, opline->op2, opline->op2_type, ZEND_VM_OP2_FLAGS(flags));
 
 	/* RESULT */
-	switch (op->opcode) {
+	switch (opline->opcode) {
 	case ZEND_CATCH:
-		spprintf(&decode[3], 0, "%" PRIu32, op->result.num);
+		spprintf(&decode[3], 0, "%" PRIu32, opline->result.num);
 		break;
 	default:
-		decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type);
+		decode[3] = phpdbg_decode_op(ops, &opline->result, opline->result_type);
 		break;
 	}
 

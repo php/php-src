@@ -32,6 +32,9 @@
 #define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
 
+#define MYSQLND_CLASS_METHODS_INSTANCE_NAME(class)		mysqlnd_##class##_methods_ptr
+#define MYSQLND_CLASS_METHODS_INSTANCE_DECLARE(class)	extern const MYSQLND_CLASS_METHODS_TYPE(class) * MYSQLND_CLASS_METHODS_INSTANCE_NAME(class)
+#define MYSQLND_CLASS_METHODS_INSTANCE_DEFINE(class)	const MYSQLND_CLASS_METHODS_TYPE(class) * MYSQLND_CLASS_METHODS_INSTANCE_NAME(class) = & MYSQLND_CLASS_METHOD_TABLE_NAME(class)
 
 typedef struct st_mysqlnd_string
 {
@@ -56,20 +59,18 @@ typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIS
 struct st_mysqlnd_memory_pool
 {
 	zend_uchar *arena;
-	unsigned int refcount;
 	unsigned int arena_size;
 	unsigned int free_size;
 
 	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size);
+	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
+	void				(*free_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk);
 };
 
 struct st_mysqlnd_memory_pool_chunk
 {
 	size_t				app;
-	MYSQLND_MEMORY_POOL	*pool;
 	zend_uchar			*ptr;
-	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
-	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk);
 	unsigned int		size;
 	zend_bool			from_pool;
 };
@@ -154,6 +155,7 @@ struct st_mysqlnd_error_info
 	unsigned int error_no;
 	zend_llist * error_list;
 
+	zend_bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *m;
 };
 
@@ -474,7 +476,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND
 typedef size_t				(*func_mysqlnd_conn_data__negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const size_t flags);
 typedef size_t				(*func_mysqlnd_conn_data__get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn);
 
-typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe);
+typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe);
 
 
 

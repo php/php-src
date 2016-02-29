@@ -67,12 +67,13 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 	}
 
 
-enum_func_status mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent);
+PHPAPI enum_func_status mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const zend_bool persistent);
+PHPAPI void	mysqlnd_error_info_free_contents(MYSQLND_ERROR_INFO * const info);
 
 #define GET_CONNECTION_STATE(state_struct)		(state_struct)->m->get((state_struct))
 #define SET_CONNECTION_STATE(state_struct, s)	(state_struct)->m->set((state_struct), (s))
 
-void mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state);
+PHPAPI void mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state);
 
 #endif /* MYSQLND_CONNECTION_H */
 

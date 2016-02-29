@@ -1458,7 +1458,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 						MYSQLND_VIO * vio,
 						MYSQLND_STATS * stats,
 						MYSQLND_ERROR_INFO * error_info,
-						MYSQLND_MEMORY_POOL * result_set_memory_pool,
+						MYSQLND_MEMORY_POOL * pool,
 						MYSQLND_MEMORY_POOL_CHUNK ** buffer,
 						size_t * data_size, zend_bool persistent_alloc,
 						unsigned int prealloc_more_bytes)
@@ -1489,7 +1489,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size);
+			*buffer = pool->get_chunk(pool, *data_size);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1504,7 +1504,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 			/*
 			  We have to realloc the buffer.
 			*/
-			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size)) {
+			if (FAIL == pool->resize_chunk(pool, *buffer, *data_size)) {
 				SET_OOM_ERROR(error_info);
 				ret = FAIL;
 				break;
@@ -1524,7 +1524,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		}
 	}
 	if (ret == FAIL && *buffer) {
-		(*buffer)->free_chunk((*buffer));
+		pool->free_chunk(pool, *buffer);
 		*buffer = NULL;
 	}
 	*data_size -= prealloc_more_bytes;
@@ -1915,7 +1915,7 @@ php_mysqlnd_rowp_free_mem(void * _packet, zend_bool stack_allocation)
 	DBG_ENTER("php_mysqlnd_rowp_free_mem");
 	p = (MYSQLND_PACKET_ROW *) _packet;
 	if (p->row_buffer) {
-		p->row_buffer->free_chunk(p->row_buffer);
+		p->result_set_memory_pool->free_chunk(p->result_set_memory_pool, p->row_buffer);
 		p->row_buffer = NULL;
 	}
 	DBG_INF_FMT("stack_allocation=%u persistent=%u", (int)stack_allocation, (int)p->header.persistent);

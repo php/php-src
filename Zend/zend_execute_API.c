@@ -130,7 +130,7 @@ void init_executor(void) /* {{{ */
 	zend_init_fpu();
 
 	ZVAL_NULL(&EG(uninitialized_zval));
-	ZVAL_NULL(&EG(error_zval));
+	ZVAL_ERROR(&EG(error_zval));
 /* destroys stack frame, therefore makes core dumps worthless */
 #if 0&&ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
@@ -398,7 +398,7 @@ void shutdown_executor(void) /* {{{ */
 	zend_shutdown_fpu();
 
 #ifdef ZEND_DEBUG
-	if (EG(ht_iterators_used)) {
+	if (EG(ht_iterators_used) && !CG(unclean_shutdown)) {
 		zend_error(E_WARNING, "Leaked %" PRIu32 " hashtable iterators", EG(ht_iterators_used));
 	}
 #endif

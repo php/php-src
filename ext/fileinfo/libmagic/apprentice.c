@@ -3005,7 +3005,6 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 {
 	static const size_t nm = sizeof(*map->nmagic) * MAGIC_SETS;
 	static const size_t m = sizeof(**map->magic);
-	int fd = -1;
 	size_t len;
 	char *dbname;
 	int rv = -1;

@@ -845,8 +845,8 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_compiler_verbose(struct sljit_compiler *comp
 	}
 
 static SLJIT_CONST char* op0_names[] = {
-	(char*)"breakpoint", (char*)"nop",
-	(char*)"lumul", (char*)"lsmul", (char*)"ludiv", (char*)"lsdiv",
+	(char*)"breakpoint", (char*)"nop", (char*)"lumul", (char*)"lsmul",
+	(char*)"udivmod", (char*)"sdivmod", (char*)"udivi", (char*)"sdivi"
 };
 
 static SLJIT_CONST char* op1_names[] = {
@@ -1036,7 +1036,7 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op0(struct sljit_compiler
 {
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	CHECK_ARGUMENT((op >= SLJIT_BREAKPOINT && op <= SLJIT_LSMUL)
-		|| ((op & ~SLJIT_INT_OP) >= SLJIT_LUDIV && (op & ~SLJIT_INT_OP) <= SLJIT_LSDIV));
+		|| ((op & ~SLJIT_INT_OP) >= SLJIT_UDIVMOD && (op & ~SLJIT_INT_OP) <= SLJIT_SDIVI));
 	CHECK_ARGUMENT(op < SLJIT_LUMUL || compiler->scratches >= 2);
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
@@ -1447,6 +1447,8 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_op_flags(struct sljit_com
 
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_get_local_base(struct sljit_compiler *compiler, sljit_si dst, sljit_sw dstw, sljit_sw offset)
 {
+	SLJIT_UNUSED_ARG(offset);
+
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	FUNCTION_CHECK_DST(dst, dstw);
 #endif
@@ -1462,6 +1464,8 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_get_local_base(struct sljit_co
 
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_const(struct sljit_compiler *compiler, sljit_si dst, sljit_sw dstw, sljit_sw init_value)
 {
+	SLJIT_UNUSED_ARG(init_value);
+
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	FUNCTION_CHECK_DST(dst, dstw);
 #endif
