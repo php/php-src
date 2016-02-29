@@ -211,7 +211,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		col->name = estrdup(fname);
 		col->namelen = strlen(col->name);
 	} else {
-		col->namelen = spprintf(&col->name, NULL, "computed%d", colno);
+		col->namelen = spprintf(&col->name, 0, "computed%d", colno);
 	}
 	col->maxlen = dbcollen(H->link, colno+1);
 	col->param_type = PDO_PARAM_STR;
