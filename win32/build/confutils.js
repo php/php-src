@@ -1472,10 +1472,16 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		 * is not a problem as buildconf only checks for pecl
 		 * as either a child or a sibling */
 		if (obj_dir == null) {
-			var build_dir = (dirname ? (dir + "\\" + dirname) : dir).replace(new RegExp("^..\\\\"), "");
+			if (MODE_PHPIZE) {
+				/* In the phpize mode, the subdirs are always relative to BUID_DIR.
+					No need to differentiate by extension, only one gets built. */
+				var build_dir = (dirname ? dirname : "").replace(new RegExp("^..\\\\"), "");
+			} else {
+				var build_dir = (dirname ? (dir + "\\" + dirname) : dir).replace(new RegExp("^..\\\\"), "");
+			}
 		}
 		else {
-			var build_dir = obj_dir.replace(new RegExp("^..\\\\"), "");
+			var build_dir = (dirname ? obj_dir + "\\" + dirname : obj_dir).replace(new RegExp("^..\\\\"), "");
 		}
 
 		obj = sub_build + build_dir + "\\" + filename.replace(re, ".obj"); 
@@ -2141,7 +2147,16 @@ function ADD_FLAG(name, flags, target)
 	if (configure_subst.Exists(name)) {
 		var curr_flags = configure_subst.Item(name);
 
-		if (curr_flags.indexOf(flags) >= 0) {
+		/* Prefix with a space, thus making sure the
+		   current flag is not a substring of some
+		   other. It's still not a complete check if
+		   some flags with spaces got added. 
+
+		   TODO rework to use an array, so direct
+		        match can be done. This will also
+			help to normalize flags and to not
+			to insert duplicates. */
+		if (curr_flags.indexOf(" " + flags) >= 0) {
 			return;
 		}
 		
