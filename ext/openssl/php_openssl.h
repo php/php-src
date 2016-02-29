@@ -132,6 +132,10 @@ PHP_FUNCTION(openssl_get_cert_locations);
 
 #endif
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_PKEY_get0_RSA(_pkey) _pkey->pkey.rsa
+#endif
+
 #endif
 
 /*
