@@ -231,6 +231,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	/* Reverse order to pop values off ctxt stack */
 	for (i = nargs - 2; i >= 0; i--) {
 		obj = valuePop(ctxt);
+		if (obj == NULL) {
+			ZVAL_NULL(&args[i]);
+			continue;
+		}
 		switch (obj->type) {
 			case XPATH_STRING:
 				ZVAL_STRING(&args[i], (char *)obj->stringval);
@@ -300,7 +304,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 
 
 	obj = valuePop(ctxt);
-	if (obj->stringval == NULL) {
+	if (obj == NULL || obj->stringval == NULL) {
 		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
 		xmlXPathFreeObject(obj);
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));

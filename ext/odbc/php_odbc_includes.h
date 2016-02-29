@@ -233,6 +233,13 @@ typedef struct odbc_result_value {
 	SQLLEN coltype;
 } odbc_result_value;
 
+typedef struct odbc_param_info {
+	SQLSMALLINT sqltype;
+	SQLSMALLINT scale;
+	SQLSMALLINT nullable;
+	SQLULEN precision;
+} odbc_param_info;
+
 typedef struct odbc_result {
 	ODBC_SQL_STMT_T stmt;
 	odbc_result_value *values;
@@ -244,6 +251,7 @@ typedef struct odbc_result {
 	zend_long longreadlen;
 	int binmode;
 	int fetched;
+	odbc_param_info * param_info;
 	odbc_connection *conn_ptr;
 } odbc_result;
 

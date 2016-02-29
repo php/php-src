@@ -2589,14 +2589,17 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	znode target_node, source_node;
 	zend_op *opline;
+	uint32_t offset;
 
 	if (is_this_fetch(target_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 	}
 	zend_ensure_writable_variable(target_ast);
 
-	zend_compile_var(&target_node, target_ast, BP_VAR_W);
-	zend_compile_var(&source_node, source_ast, BP_VAR_REF);
+	offset = zend_delayed_compile_begin();
+	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W);
+	zend_delayed_compile_var(&source_node, source_ast, BP_VAR_REF);
+	zend_delayed_compile_end(offset);
 
 	if (source_node.op_type != IS_VAR && zend_is_call(source_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use result of built-in function in write context");
@@ -6290,6 +6293,11 @@ void zend_compile_yield_from(znode *result, zend_ast *ast) /* {{{ */
 	znode expr_node;
 
 	zend_mark_function_as_generator();
+
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use \"yield from\" inside a by-reference generator");
+	}
 
 	zend_compile_expr(&expr_node, expr_ast);
 	zend_emit_op_tmp(result, ZEND_YIELD_FROM, &expr_node, NULL);

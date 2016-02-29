@@ -99,6 +99,14 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen);
 
 PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex, zend_object *exception);
 
+static zend_always_inline zend_execute_data *phpdbg_user_execute_data(zend_execute_data *ex) {
+	while (!ex->func || !ZEND_USER_CODE(ex->func->common.type)) {
+		ex = ex->prev_execute_data;
+		ZEND_ASSERT(ex);
+	}
+	return ex;
+}
+
 #ifdef ZTS
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	zend_output_globals *output_globals_ptr; \
