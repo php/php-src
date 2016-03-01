@@ -2645,6 +2645,46 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_INHERITED_CLASS_S
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_NEW_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_class_entry *ce, *parent_ce, *result_ce;
+	zend_string *name, *lc_name;
+	size_t name_length;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+
+	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op1)));
+	parent_ce = Z_CE_P(EX_VAR(opline->op2.var));
+
+	/* Create unique name by appending what `static` resolved to */
+	name_length = ZSTR_LEN(ce->name) + ZSTR_LEN(parent_ce->name);
+	name = zend_string_alloc(name_length, 1);
+	memcpy(ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
+	memcpy(ZSTR_VAL(name) + ZSTR_LEN(ce->name), ZSTR_VAL(parent_ce->name), ZSTR_LEN(parent_ce->name));
+
+	lc_name = zend_string_tolower(name);
+	result_ce = zend_hash_find_ptr(EG(class_table), lc_name);
+	if (NULL == result_ce) {
+
+		/* Copy class */
+		result_ce = malloc(sizeof(zend_class_entry));
+		*result_ce = *ce;
+		result_ce->name = zend_string_copy(name);
+
+		zend_do_inheritance(result_ce, parent_ce);
+		zend_hash_add_ptr(EG(class_table), lc_name, result_ce);
+	}
+
+	zend_string_release(name);
+	zend_string_release(lc_name);
+
+	Z_CE_P(EX_VAR(opline->result.var)) = result_ce;
+	ZEND_ASSERT(result_ce != NULL);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -57139,6 +57179,11 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_DECLARE_ANON_NEW_CLASS_SPEC_VAR_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER
 	};
 	static const uint32_t specs[] = {
@@ -57183,7 +57228,7 @@ void zend_init_opcodes_handlers(void)
 		776 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
 		826 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		851 | SPEC_RULE_OP1,
-		2920,
+		2925,
 		856,
 		857 | SPEC_RULE_OP1,
 		862 | SPEC_RULE_OP1,
@@ -57191,9 +57236,9 @@ void zend_init_opcodes_handlers(void)
 		872 | SPEC_RULE_OP1,
 		877 | SPEC_RULE_OP1,
 		882 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2920,
-		2920,
-		2920,
+		2925,
+		2925,
+		2925,
 		907 | SPEC_RULE_OP1,
 		912 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		937 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -57242,7 +57287,7 @@ void zend_init_opcodes_handlers(void)
 		1646 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1671 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1696 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2920,
+		2925,
 		1721,
 		1722,
 		1723,
@@ -57326,7 +57371,8 @@ void zend_init_opcodes_handlers(void)
 		2845 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2870 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2895 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2920
+		2920 | SPEC_RULE_OP2,
+		2925
 	};
 	zend_opcode_handlers = labels;
 	zend_spec_handlers = specs;
