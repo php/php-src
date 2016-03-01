@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #71535 (Integer overflow in zend_mm_alloc_heap()). (Dmitry)
   . Fixed bug #71470 (Leaked 1 hashtable iterators). (Nikita)
 
+- Curl:
+  . Fixed bug #71694 (Support constant CURLM_ADDED_ALREADY). (mpyw)
+
 - libxml:
   . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
 
