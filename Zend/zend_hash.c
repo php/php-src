@@ -1864,7 +1864,6 @@ ZEND_API void ZEND_FASTCALL _zend_hash_merge(HashTable *target, HashTable *sourc
     uint32_t idx;
 	Bucket *p;
 	zval *t;
-	uint32_t mode = (overwrite?HASH_UPDATE:HASH_ADD);
 
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
@@ -1874,12 +1873,25 @@ ZEND_API void ZEND_FASTCALL _zend_hash_merge(HashTable *target, HashTable *sourc
 		p = source->arData + idx;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		if (p->key) {
-			t = _zend_hash_add_or_update(target, p->key, &p->val, mode ZEND_FILE_LINE_RELAY_CC);
-			if (t && pCopyConstructor) {
-				pCopyConstructor(t);
+			if (EXPECTED((t = zend_hash_find_ind(target, p->key)) == NULL)) {
+				t = zend_hash_update_ind(target, p->key, &p->val);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			} else {
+				if (!overwrite) {
+					continue;
+				}
+				if (target->pDestructor) {
+					target->pDestructor(t);
+				}
+				ZVAL_COPY_VALUE(t, &p->val);
+				if (pCopyConstructor) {
+					pCopyConstructor(t);
+				}
 			}
 		} else {
-			if ((mode==HASH_UPDATE || !zend_hash_index_exists(target, p->h))) {
+			if ((overwrite || !zend_hash_index_exists(target, p->h))) {
 			 	t = zend_hash_index_update(target, p->h, &p->val);
 			 	if (t && pCopyConstructor) {
 					pCopyConstructor(t);

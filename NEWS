@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.5
 
 - Core:
+  . Fixed bug #71695 (Global variables are reserved before execution).
+    (Laruence)
   . Fixed bug #71629 (Out-of-bounds access in php_url_decode in context
     php_stream_url_wrap_rfc2397). (mt at debian dot org)
   . Fixed bug #71622 (Strings used in pass-as-reference cannot be used to
