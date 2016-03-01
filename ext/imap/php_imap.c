@@ -1315,8 +1315,6 @@ PHP_FUNCTION(imap_append)
 	zend_string* regex;
 	pcre_cache_entry *pce;				/* Compiled regex */
 	zval *subpats = NULL;				/* Parts (not used) */
-	long regex_flags = 0;				/* Flags (not used) */
-	long start_offset = 0;				/* Start offset (not used) */
 	int global = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|SS", &streamind, &folder, &message, &flags, &internal_date) == FAILURE) {
@@ -1334,7 +1332,7 @@ PHP_FUNCTION(imap_append)
 
 		zend_string_free(regex);
 		php_pcre_match_impl(pce, ZSTR_VAL(internal_date), ZSTR_LEN(internal_date), return_value, subpats, global,
-			0, regex_flags, start_offset);
+			0, Z_L(0), Z_L(0));
 
 		if (!Z_LVAL_P(return_value)) {
 			php_error_docref(NULL, E_WARNING, "internal date not correctly formatted");
