@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #71535 (Integer overflow in zend_mm_alloc_heap()). (Dmitry)
   . Fixed bug #71470 (Leaked 1 hashtable iterators). (Nikita)
 
+- LDAP:
+  . Merged PR #1765 adding support for LDAP_OPT_X_TLS_REQUIRE_CERT option in
+    ldap_set_option and ldap_get_option. (Côme)
+
 - libxml:
   . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
 
