@@ -522,7 +522,7 @@ interface_declaration_statement:
 
 extends_from:
 		/* empty */		{ $$ = NULL; }
-	|	T_EXTENDS name	{ $$ = $2; }
+	|	T_EXTENDS class_name	{ $$ = $2; }
 ;
 
 interface_extends_list:
