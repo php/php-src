@@ -102,7 +102,7 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 
 	/* Cancel any pending results */
 	dbcancel(H->link);
-
+	
 	return 1;
 }
 
@@ -266,6 +266,25 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			php_strtoupper(tmp_ptr, *len);
 			tmp_ptr[36] = '\0';
 			*ptr = tmp_ptr;
+			break;
+		}
+		case SQLDATETIM4:
+		case SQLDATETIME: {
+			DBDATETIME dt;
+			DBDATEREC di;
+
+			dbconvert(H->link, coltype, (BYTE*) *ptr, -1, SQLDATETIME, (LPBYTE) &dt, -1);
+			dbdatecrack(H->link, &di, &dt);
+
+			*len = spprintf((char**) &tmp_ptr, 20, "%d-%02d-%02d %02d:%02d:%02d",
+#ifdef PHP_DBLIB_IS_MSSQL || MSDBLIB
+					di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
+#else
+					di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
+#endif
+				);
+
+			*ptr = (char*) tmp_ptr;
 			break;
 		}
 		default:
