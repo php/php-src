@@ -7118,6 +7118,46 @@ ZEND_VM_HANDLER(172, ZEND_DECLARE_ANON_INHERITED_CLASS, ANY, VAR, JMP_ADDR)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(184, ZEND_DECLARE_ANON_NEW_CLASS, ANY, VAR, JMP_ADDR)
+{
+	zend_class_entry *ce, *parent_ce, *result_ce;
+	zend_string *name, *lc_name;
+	size_t name_length;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+
+	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op1)));
+	parent_ce = Z_CE_P(EX_VAR(opline->op2.var));
+
+	/* Create unique name by appending what `static` resolved to */
+	name_length = ZSTR_LEN(ce->name) + ZSTR_LEN(parent_ce->name);
+	name = zend_string_alloc(name_length, 1);
+	memcpy(ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
+	memcpy(ZSTR_VAL(name) + ZSTR_LEN(ce->name), ZSTR_VAL(parent_ce->name), ZSTR_LEN(parent_ce->name));
+
+	lc_name = zend_string_tolower(name);
+	result_ce = zend_hash_find_ptr(EG(class_table), lc_name);
+	if (NULL == result_ce) {
+
+		/* Copy class */
+		result_ce = malloc(sizeof(zend_class_entry));
+		*result_ce = *ce;
+		result_ce->name = zend_string_copy(name);
+
+		zend_do_inheritance(result_ce, parent_ce);
+		zend_hash_add_ptr(EG(class_table), lc_name, result_ce);
+	}
+
+	zend_string_release(name);
+	zend_string_release(lc_name);
+
+	Z_CE_P(EX_VAR(opline->result.var)) = result_ce;
+	ZEND_ASSERT(result_ce != NULL);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(141, ZEND_DECLARE_FUNCTION, ANY, ANY)
 {
 	USE_OPLINE

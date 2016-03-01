@@ -687,6 +687,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				break;
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
+			case ZEND_DECLARE_ANON_NEW_CLASS:
 			case ZEND_CATCH:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:

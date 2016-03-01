@@ -1974,7 +1974,8 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 			           def->opcode == ZEND_DECLARE_INHERITED_CLASS ||
 			           def->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED ||
 			           def->opcode == ZEND_DECLARE_ANON_CLASS ||
-			           def->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS) {
+			           def->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
+			           def->opcode == ZEND_DECLARE_ANON_NEW_CLASS) {
 				/* classes don't have to be destroyed */
 				break;
 			} else if (def->opcode == ZEND_FAST_CALL) {
@@ -5571,6 +5572,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_string *name, *lcname, *import_name = NULL;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
+	uint32_t opcode;
 	znode declare_node, extends_node;
 
 	zend_class_entry *original_ce = CG(active_class_entry);
@@ -5602,9 +5604,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 
 		name = zend_new_interned_string(name);
+		opcode = ZEND_DECLARE_CLASS;
 	} else {
 		name = zend_generate_anon_class_name(decl->lex_pos);
 		lcname = zend_string_tolower(name);
+		opcode = ZEND_DECLARE_ANON_CLASS;
 	}
 	lcname = zend_new_interned_string(lcname);
 
@@ -5628,7 +5632,17 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (extends_ast) {
-		if ((decl->flags & ZEND_ACC_ANON_CLASS) == 0 && !zend_is_const_default_class_ref(extends_ast)) {
+		uint32_t fetch_type = zend_get_class_fetch_type_ast(extends_ast);
+
+		if (decl->flags & ZEND_ACC_ANON_CLASS) {
+			if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
+				opcode = ZEND_DECLARE_ANON_NEW_CLASS;
+			} else {
+				opcode = ZEND_DECLARE_ANON_INHERITED_CLASS;
+			}
+		} else if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
+			opcode = ZEND_DECLARE_INHERITED_CLASS;
+		} else {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(extends_name));
@@ -5639,6 +5653,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	opline = get_next_op(CG(active_op_array));
 	zend_make_var_result(&declare_node, opline);
+	opline->opcode = opcode;
+
+	if (extends_ast) {
+		SET_NODE(opline->op2, &extends_node);
+	}
 
 	GET_NODE(&FC(implementing_class), opline->result);
 
@@ -5646,23 +5665,9 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	LITERAL_STR(opline->op1, lcname);
 
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
-		if (extends_ast) {
-			opline->opcode = ZEND_DECLARE_ANON_INHERITED_CLASS;
-			SET_NODE(opline->op2, &extends_node);
-		} else {
-			opline->opcode = ZEND_DECLARE_ANON_CLASS;
-		}
-
 		zend_hash_update_ptr(CG(class_table), lcname, ce);
 	} else {
 		zend_string *key;
-
-		if (extends_ast) {
-			opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
-			SET_NODE(opline->op2, &extends_node);
-		} else {
-			opline->opcode = ZEND_DECLARE_CLASS;
-		}
 
 		key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
 		/* RTD key is placed after lcname literal in op1 */

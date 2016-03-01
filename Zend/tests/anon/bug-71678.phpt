@@ -30,11 +30,17 @@ var_dump($parent, get_parent_class(get_class($parent)));
 $self= Test::newSelf();
 var_dump($self, get_parent_class(get_class($self)));
 
+$static= Test::newStatic();
+var_dump($static, get_parent_class(get_class($static)));
+
+$parent= Extension::newParent();
+var_dump($parent, get_parent_class(get_class($parent)));
+
 $self= Extension::newSelf();
 var_dump($self, get_parent_class(get_class($self)));
 
-$ext= Extension::newStatic();
-var_dump($ext, get_parent_class(get_class($ext)));
+$static= Extension::newStatic();
+var_dump($static, get_parent_class(get_class($static)));
 --EXPECTF--
 object(class@%s)#%d (0) {
 }
@@ -42,6 +48,12 @@ string(4) "Base"
 object(class@%s)#%d (0) {
 }
 string(4) "Test"
+object(class@%s)#%d (0) {
+}
+string(4) "Test"
+object(class@%s)#%d (0) {
+}
+string(4) "Base"
 object(class@%s)#%d (0) {
 }
 string(4) "Test"
