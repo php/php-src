@@ -5414,7 +5414,6 @@ PHP_FUNCTION(array_map)
 PHP_FUNCTION(array_key_exists)
 {
 	zval *key;					/* key to check for */
-	zval *val;					/* val to check for */
 	HashTable *array;			/* array to check in */
 
 #ifndef FAST_ZPP
@@ -5430,7 +5429,7 @@ PHP_FUNCTION(array_key_exists)
 
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
-			if ((val = zend_symtable_find_ind(array, Z_STR_P(key)))) {
+			if (zend_symtable_find_ind(array, Z_STR_P(key))) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
