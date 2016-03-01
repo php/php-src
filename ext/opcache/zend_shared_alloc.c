@@ -496,6 +496,10 @@ void zend_accel_shared_protect(int mode)
 #ifdef HAVE_MPROTECT
 	int i;
 
+	if (!smm_shared_globals) {
+		return;
+	}
+
 	if (mode) {
 		mode = PROT_READ;
 	} else {
