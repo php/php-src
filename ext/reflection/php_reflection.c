@@ -1430,7 +1430,6 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
-	fci.symbol_table = NULL;
 	fci.object = Z_OBJ(reflector);
 	fci.retval = &retval;
 	fci.param_count = ctor_argc;
@@ -1965,7 +1964,6 @@ ZEND_METHOD(reflection_function, invoke)
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
-	fci.symbol_table = NULL;
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = num_args;
@@ -2025,7 +2023,6 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
-	fci.symbol_table = NULL;
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = argc;
@@ -3257,7 +3254,6 @@ ZEND_METHOD(reflection_method, invoke)
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
-	fci.symbol_table = NULL;
 	fci.object = object;
 	fci.retval = &retval;
 	fci.param_count = num_args - 1;
@@ -3364,7 +3360,6 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
-	fci.symbol_table = NULL;
 	fci.object = object ? Z_OBJ_P(object) : NULL;
 	fci.retval = &retval;
 	fci.param_count = argc;
@@ -4897,7 +4892,6 @@ ZEND_METHOD(reflection_class, newInstance)
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
 		ZVAL_UNDEF(&fci.function_name);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ_P(return_value);
 		fci.retval = &retval;
 		fci.param_count = num_args;
@@ -5001,7 +4995,6 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
 		ZVAL_UNDEF(&fci.function_name);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ_P(return_value);
 		fci.retval = &retval;
 		fci.param_count = argc;

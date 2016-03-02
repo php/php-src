@@ -122,7 +122,6 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 			fci.size = sizeof(zend_fcall_info);
 			fci.function_table = &PHPDBG_G(registered);
 			//???fci.symbol_table = zend_rebuild_symbol_table();
-			fci.symbol_table = NULL;
 			fci.object = NULL;
 			fci.retval = &fretval;
 			fci.no_separation = 1;

@@ -3427,7 +3427,6 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 	fci->param_count = 0;
 	fci->params = NULL;
 	fci->no_separation = 1;
-	fci->symbol_table = NULL;
 
 	return SUCCESS;
 }

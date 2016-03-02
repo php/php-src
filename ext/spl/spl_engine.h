@@ -65,7 +65,6 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 	fci.function_table = &pce->function_table;
 	ZVAL_STR(&fci.function_name, func->common.function_name);
 	fci.object = Z_OBJ_P(retval);
-	fci.symbol_table = NULL;
 	fci.retval = &dummy;
 	fci.param_count = argc;
 	fci.params = argv;

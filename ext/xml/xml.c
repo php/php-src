@@ -485,7 +485,6 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
 		ZVAL_COPY_VALUE(&fci.function_name, handler);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ(parser->object);
 		fci.retval = retval;
 		fci.param_count = argc;
