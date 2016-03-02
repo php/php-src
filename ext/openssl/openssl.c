@@ -2128,6 +2128,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	char * tmpstr;
 	zval subitem;
 	X509_EXTENSION *extension;
+	X509_NAME *subject_name;
+	char *cert_name;
 	char *extname;
 	BIO *bio_out;
 	BUF_MEM *bio_buf;
@@ -2142,12 +2144,12 @@ PHP_FUNCTION(openssl_x509_parse)
 	}
 	array_init(return_value);
 
-	if (cert->name) {
-		add_assoc_string(return_value, "name", cert->name);
-	}
-/*	add_assoc_bool(return_value, "valid", cert->valid); */
+	subject_name = X509_get_subject_name(cert);
+	cert_name = X509_NAME_oneline(subject_name, NULL, 0);
+	add_assoc_string(return_value, "name", cert_name);
+	OPENSSL_free(cert_name);
 
-	add_assoc_name_entry(return_value, "subject", 		X509_get_subject_name(cert), useshortnames);
+	add_assoc_name_entry(return_value, "subject", 		subject_name, useshortnames);
 	/* hash as used in CA directories to lookup cert by subject name */
 	{
 		char buf[32];
@@ -2171,7 +2173,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		add_assoc_string(return_value, "alias", tmpstr);
 	}
 
-	sig_nid = OBJ_obj2nid((cert)->sig_alg->algorithm);
+	sig_nid = X509_get_signature_nid(cert);
 	add_assoc_string(return_value, "signatureTypeSN", (char*)OBJ_nid2sn(sig_nid));
 	add_assoc_string(return_value, "signatureTypeLN", (char*)OBJ_nid2ln(sig_nid));
 	add_assoc_long(return_value, "signatureTypeNID", sig_nid);
