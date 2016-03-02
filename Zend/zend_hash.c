@@ -571,12 +571,25 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			zval *data;
 
 			if (flag & HASH_ADD) {
-				return NULL;
-			}
-			ZEND_ASSERT(&p->val != pData);
-			data = &p->val;
-			if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
-				data = Z_INDIRECT_P(data);
+				if (!(flag & HASH_UPDATE_INDIRECT)) {
+					return NULL;
+				}
+				ZEND_ASSERT(&p->val != pData);
+				data = &p->val;
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+					if (Z_TYPE_P(data) != IS_UNDEF) {
+						return NULL;
+					}
+				} else {
+					return NULL;
+				}
+			} else {
+				ZEND_ASSERT(&p->val != pData);
+				data = &p->val;
+				if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+				}
 			}
 			HANDLE_BLOCK_INTERRUPTIONS();
 			if (ht->pDestructor) {
@@ -1869,31 +1882,42 @@ ZEND_API void ZEND_FASTCALL _zend_hash_merge(HashTable *target, HashTable *sourc
 	IS_CONSISTENT(target);
 	HT_ASSERT(GC_REFCOUNT(target) == 1);
 
-	for (idx = 0; idx < source->nNumUsed; idx++) {
-		p = source->arData + idx;
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-		if (p->key) {
-			if (EXPECTED((t = zend_hash_find_ind(target, p->key)) == NULL)) {
-				t = zend_hash_update_ind(target, p->key, &p->val);
+	if (overwrite) {
+		for (idx = 0; idx < source->nNumUsed; idx++) {
+			p = source->arData + idx;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
+			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
+			    continue;
+			}
+			if (p->key) {
+				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
 				if (t && pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			} else {
-				if (!overwrite) {
-					continue;
-				}
-				if (target->pDestructor) {
-					target->pDestructor(t);
-				}
-				ZVAL_COPY_VALUE(t, &p->val);
-				if (pCopyConstructor) {
+				t = zend_hash_index_update(target, p->h, &p->val);
+				if (t && pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			}
-		} else {
-			if ((overwrite || !zend_hash_index_exists(target, p->h))) {
-			 	t = zend_hash_index_update(target, p->h, &p->val);
-			 	if (t && pCopyConstructor) {
+		}
+	} else {
+		for (idx = 0; idx < source->nNumUsed; idx++) {
+			p = source->arData + idx;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
+			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
+			    continue;
+			}
+			if (p->key) {
+				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_ADD | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			} else {
+				t = zend_hash_index_add(target, p->h, &p->val);
+				if (t && pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			}
