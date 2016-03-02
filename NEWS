@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-18 Feb 2016, PHP 5.6.19RC1
+03 Mar 2016, PHP 5.6.19
 
 - CLI server:
   . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
@@ -30,8 +30,14 @@ PHP                                                                        NEWS
 - PDO MySQL:
   . Fixed bug #71569 (#70389 fix causes segmentation fault). (Nikita)
 
+- Phar:
+  . Fixed bug #71498 (Out-of-Bound Read in phar_parse_zipfile()). (Stas)
+
 - Standard:
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+
+- WDDX:
+  . Fixed bug #71587 (Use-After-Free / Double-Free in WDDX Deserialize). (Stas)
 
 - XSL:
   . Fixed bug #71540 (NULL pointer dereference in xsl_ext_function_php()).
