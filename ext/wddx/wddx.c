@@ -877,7 +877,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		!strcmp((char *)name, EL_DATETIME)) {
 		wddx_stack_top(stack, (void**)&ent1);
 
-		if (!ent1->data) {
+		if (Z_TYPE(ent1->data) == IS_UNDEF) {
 			if (stack->top > 1) {
 				stack->top--;
 			} else {
@@ -1020,7 +1020,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 					if (ent->varname) {
 						efree(ent->varname);
 					}
-					ent->data = NULL;
+					ZVAL_UNDEF(&ent->data);
 				}
 				break;
 
