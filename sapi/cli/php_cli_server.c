@@ -1964,7 +1964,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 	if (client->request.path_translated &&
 		('.' == client->request.path_translated[client->request.path_translated_len-1] ||
 		 ' ' == client->request.path_translated[client->request.path_translated_len-1])) {
-		return php_cli_server_send_error_page(server, client, 500);
+		return php_cli_server_send_error_page(server, client, 500 TSRMLS_CC);
 	}
 #endif
 
