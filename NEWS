@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
 
+??? 2016, PHP 5.5.34
+
+
+
 03 Mar 2016, PHP 5.5.33
 
 - Phar:
