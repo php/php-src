@@ -380,6 +380,18 @@ static zend_always_inline int zend_symtable_exists(HashTable *ht, zend_string *k
 	if (ZEND_HANDLE_NUMERIC(key, idx)) {
 		return zend_hash_index_exists(ht, idx);
 	} else {
+		return zend_hash_exists(ht, key);
+	}
+}
+
+
+static zend_always_inline int zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+{
+	zend_ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_exists(ht, idx);
+	} else {
 		return zend_hash_exists_ind(ht, key);
 	}
 }
