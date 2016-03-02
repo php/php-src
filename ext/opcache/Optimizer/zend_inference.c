@@ -199,6 +199,18 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 }
 /* }}} */
 
+static inline zend_bool is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
+{
+	if (opline->opcode == ZEND_ASSIGN ||
+			(opline->opcode == ZEND_UNSET_VAR && (opline->extended_value & ZEND_QUICK_SET))) {
+		return ssa_op->op1_use == var && ssa_op->op2_use != var;
+	}
+	if (opline->opcode == ZEND_FE_FETCH_R) {
+		return ssa_op->op2_use == var && ssa_op->op1_use != var;
+	}
+	return 0;
+}
+
 int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
@@ -220,9 +232,7 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 		ssa_vars[i].no_val = 1; /* mark as unused */
 		use = ssa->vars[i].use_chain;
 		while (use >= 0) {
-			if (op_array->opcodes[use].opcode != ZEND_ASSIGN ||
-				ssa->ops[use].op1_use != i ||
-				ssa->ops[use].op2_use == i) {
+			if (!is_no_val_use(&op_array->opcodes[use], &ssa->ops[use], i)) {
 				ssa_vars[i].no_val = 0; /* used directly */
 				zend_bitset_incl(worklist, i);
 			}
