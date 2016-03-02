@@ -833,8 +833,10 @@ try_again:
 						    Z_TYPE_P(value) == IS_STRING) {
 						  zval *tmp;
 						  if (((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 1)) == NULL ||
+							   Z_TYPE_P(tmp) != IS_STRING ||
 						       strncmp(phpurl->path?phpurl->path:"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0) &&
 						      ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
+							   Z_TYPE_P(tmp) != IS_STRING ||
 						       in_domain(phpurl->host,Z_STRVAL_P(tmp))) &&
 						      (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
 								smart_str_append(&soap_headers, key);
