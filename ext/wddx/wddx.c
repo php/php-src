@@ -877,6 +877,16 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		!strcmp((char *)name, EL_DATETIME)) {
 		wddx_stack_top(stack, (void**)&ent1);
 
+		if (!ent1->data) {
+			if (stack->top > 1) {
+				stack->top--;
+			} else {
+				stack->done = 1;
+			}
+			efree(ent1);
+			return;
+		}
+
 		if (!strcmp((char *)name, EL_BINARY)) {
 			zend_string *new_str = php_base64_decode(
 				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
@@ -964,6 +974,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		}
 	} else if (!strcmp((char *)name, EL_VAR) && stack->varname) {
 		efree(stack->varname);
+		stack->varname = NULL;
 	} else if (!strcmp((char *)name, EL_FIELD)) {
 		st_entry *ent;
 		wddx_stack_top(stack, (void **)&ent);
@@ -1005,11 +1016,11 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				} else if (!strcmp((char *)s, "false")) {
 					Z_LVAL(ent->data) = 0;
 				} else {
-					stack->top--;
 					zval_ptr_dtor(&ent->data);
-					if (ent->varname)
+					if (ent->varname) {
 						efree(ent->varname);
-					efree(ent);
+					}
+					ent->data = NULL;
 				}
 				break;
 

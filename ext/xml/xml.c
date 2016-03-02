@@ -581,7 +581,7 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 	}
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
-	str = zend_string_alloc(len * 4, 0);
+	str = zend_string_safe_alloc(len, 4, 0, 0);
 	ZSTR_LEN(str) = 0;
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
