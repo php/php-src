@@ -851,6 +851,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
 	}
 
+	/* PHP-7 doesn't support symbol_table substitution for functions */
+	ZEND_ASSERT(fci->symbol_table == NULL);
+
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 		EG(scope) = func->common.scope;
