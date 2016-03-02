@@ -1,7 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
-?? ??? 2016, PHP 5.5.33
+
+03 Mar 2016, PHP 5.5.33
+
+- Phar:
+  . Fixed bug #71498 (Out-of-Bound Read in phar_parse_zipfile()). (Stas)
+
+- WDDX:
+  . Fixed bug #71587 (Use-After-Free / Double-Free in WDDX Deserialize). (Stas)
 
 04 Feb 2016, PHP 5.5.32
 
