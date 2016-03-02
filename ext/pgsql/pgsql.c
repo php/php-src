@@ -1258,7 +1258,7 @@ PHP_MINFO_FUNCTION(pgsql)
 #else
 	php_info_print_table_row(2, "Multibyte character support", "disabled");
 #endif
-#ifdef USE_SSL
+#if defined(USE_SSL) || defined(USE_OPENSSL)
 	php_info_print_table_row(2, "SSL support", "enabled");
 #else
 	php_info_print_table_row(2, "SSL support", "disabled");
