@@ -47,24 +47,26 @@ PHP                                                                        NEWS
 - Zip:
   . Update bundled libzip to 1.1.2. (Remi, Anatol)
 
-?? Mar 2016 PHP 7.0.4
+03 Mar 2016 PHP 7.0.4
 
 - Core:
   . Fixed bug (Low probability segfault in zend_arena). (Laruence)
-  . Fixed bug #71485 (Return typehint on internal func causes Fatal error
-    when it throws exception). (Laruence)
-  . Fixed bug #71474 (Crash because of VM stack corruption on Magento2).
-    (Dmitry)
-  . Fixed bug #71450 (An integer overflow bug in php_str_to_str_ex()). (Stas)
-  . Fixed bug #71449 (An integer overflow bug in php_implode()). (Stas)
-  . Fixed bug #71443 (Segfault using built-in webserver with intl using
-    symfony). (Laruence)
-  . Fixed bug #71442 (forward_static_call crash). (Laruence)
   . Fixed bug #71441 (Typehinted Generator with return in try/finally crashes).
     (Bob)
+  . Fixed bug #71442 (forward_static_call crash). (Laruence)
+  . Fixed bug #71443 (Segfault using built-in webserver with intl using
+    symfony). (Laruence)
+  . Fixed bug #71449 (An integer overflow bug in php_implode()). (Stas)
+  . Fixed bug #71450 (An integer overflow bug in php_str_to_str_ex()). (Stas)
+  . Fixed bug #71474 (Crash because of VM stack corruption on Magento2).
+    (Dmitry)
+  . Fixed bug #71485 (Return typehint on internal func causes Fatal error
+    when it throws exception). (Laruence)
   . Fixed bug #71529 (Variable references on array elements don't work when
     using count). (Nikita)
   . Fixed bug #71601 (finally block not executed after yield from). (Bob)
+  . Fixed bug #71637 (Multiple Heap Overflow due to integer overflows in 
+    xml/filter_url/addcslashes). (Stas)
 
 - CLI server:
   . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
@@ -97,6 +99,10 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed inherited functions from unspecified files being included in
     phpdbg_get_executable(). (Bob)
+
+- SOAP:
+  . Fixed bug #71610 (Type Confusion Vulnerability - SOAP /
+    make_http_soap_request()). (Stas)
 
 - Standard:
   . Fixed bug #71603 (compact() maintains references in php7). (Laruence)
