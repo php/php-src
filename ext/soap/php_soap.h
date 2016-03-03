@@ -192,7 +192,7 @@ ZEND_EXTERN_MODULE_GLOBALS(soap)
 #define SOAP_GLOBAL(v) ZEND_MODULE_GLOBALS_ACCESSOR(soap, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_SOAP)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 extern zend_class_entry* soap_var_class_entry;

@@ -89,7 +89,7 @@ PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)
 #define JSON_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(json, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_JSON)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options);

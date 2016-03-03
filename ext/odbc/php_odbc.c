@@ -412,7 +412,7 @@ zend_module_entry odbc_module_entry = {
 
 #ifdef COMPILE_DL_ODBC
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(odbc)
 #endif

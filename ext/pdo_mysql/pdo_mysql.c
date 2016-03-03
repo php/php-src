@@ -33,7 +33,7 @@
 
 #ifdef COMPILE_DL_PDO_MYSQL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(pdo_mysql)
 #endif
