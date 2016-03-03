@@ -69,11 +69,23 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 #include <crypt.h>
 #endif
 
-main() {
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+int main(void)
+{
 #if HAVE_CRYPT
-    exit (strcmp((char *)crypt("rasmuslerdorf","rl"),"rl.3StKT.4T8M"));
+	char *p = crypt("rasmuslerdorf", "rl");
+	if (!p)
+		exit(1);
+	exit(strcmp(p, "rl.3StKT.4T8M"));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_des=yes
@@ -93,11 +105,23 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 #include <crypt.h>
 #endif
 
-main() {
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+int main(void)
+{
 #if HAVE_CRYPT
-  exit (strcmp((char *)crypt("rasmuslerdorf","_J9..rasm"),"_J9..rasmBYk8r9AiWNc"));
+	char *p = crypt("rasmuslerdorf", "_J9..rasm");
+	if (!p)
+		exit(1);
+	exit(strcmp(p, "_J9..rasmBYk8r9AiWNc"));
 #else
-  exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_ext_des=yes
@@ -117,20 +141,33 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
-#if HAVE_CRYPT
-    char salt[15], answer[40];
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
-    salt[0]='$'; salt[1]='1'; salt[2]='$'; 
-    salt[3]='r'; salt[4]='a'; salt[5]='s';
-    salt[6]='m'; salt[7]='u'; salt[8]='s';
-    salt[9]='l'; salt[10]='e'; salt[11]='$';
-    salt[12]='\0';
-    strcpy(answer,salt);
-    strcat(answer,"rISCgZzpwk3UhDidwXvin0");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+int main(void)
+{
+#if HAVE_CRYPT
+	char salt[15], answer[40];
+	char *p;
+
+	salt[0]='$'; salt[1]='1'; salt[2]='$';
+	salt[3]='r'; salt[4]='a'; salt[5]='s';
+	salt[6]='m'; salt[7]='u'; salt[8]='s';
+	salt[9]='l'; salt[10]='e'; salt[11]='$';
+	salt[12]='\0';
+	strcpy(answer, salt);
+	strcat(answer, "rISCgZzpwk3UhDidwXvin0");
+	p = crypt("rasmuslerdorf", salt);
+	if (!p)
+		exit(1);
+	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_md5=yes
@@ -150,17 +187,30 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+int main(void)
+{
 #if HAVE_CRYPT
-    char salt[30], answer[70];
-    
-    salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
-    strcat(salt,"rasmuslerd............");
-    strcpy(answer,salt);
-    strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+	char salt[30], answer[70];
+	char *p;
+
+	salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
+	strcat(salt, "rasmuslerd............");
+	strcpy(answer, salt);
+	strcpy(&answer[29], "nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
+	p = crypt("rasmuslerdorf", salt);
+	if (!p)
+		exit(1);
+	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_blowfish=yes
@@ -180,16 +230,29 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
-#if HAVE_CRYPT
-    char salt[21], answer[21+86];
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
-    strcpy(salt,"\$6\$rasmuslerdorf\$");
-    strcpy(answer, salt);
-    strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+int main(void)
+{
+#if HAVE_CRYPT
+	char salt[21], answer[21+86];
+	char *p;
+
+	strcpy(salt, "\$6\$rasmuslerdorf\$");
+	strcpy(answer, salt);
+	strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
+	p = crypt("rasmuslerdorf", salt);
+	if (!p)
+		exit(1);
+	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_sha512=yes
@@ -209,17 +272,29 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+int main(void)
+{
 #if HAVE_CRYPT
-    char salt[21], answer[21+43];
+	char salt[21], answer[21+43];
+	char *p;
 
-    strcpy(salt,"\$5\$rasmuslerdorf\$");
-    strcpy(answer, salt);
-    strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
-
+	strcpy(salt, "\$5\$rasmuslerdorf\$");
+	strcpy(answer, salt);
+	strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
+	p = crypt("rasmuslerdorf", salt);
+	if (!p)
+		exit(1);
+	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_sha256=yes
