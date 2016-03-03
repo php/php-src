@@ -3829,30 +3829,30 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 }
 /* }}} */
 
-#define OPENSSL_GET_BN(_array, _bn, _name) do {						\
-		if (_bn != NULL) {							\
-			int len = BN_num_bytes(_bn);					\
-			zend_string *str = zend_string_alloc(len, 0);			\
-			BN_bn2bin(_bn, (unsigned char*)ZSTR_VAL(str));			\
-			ZSTR_VAL(str)[len] = 0;						\
-			add_assoc_str(&_array, #_name, str);				\
-		}									\
+#define OPENSSL_GET_BN(_array, _bn, _name) do { \
+		if (_bn != NULL) { \
+			int len = BN_num_bytes(_bn); \
+			zend_string *str = zend_string_alloc(len, 0); \
+			BN_bn2bin(_bn, (unsigned char*)ZSTR_VAL(str)); \
+			ZSTR_VAL(str)[len] = 0; \
+			add_assoc_str(&_array, #_name, str); \
+		} \
 	} while (0);
 
-#define OPENSSL_PKEY_GET_BN(_type, _name) do {						\
-		if (pkey->pkey._type->_name != NULL) {					\
-			OPENSSL_GET_BN(_type, pkey->pkey._type->_name, _name);		\
-		}									\
+#define OPENSSL_PKEY_GET_BN(_type, _key, _name) do { \
+		if (_key->_name != NULL) { \
+			OPENSSL_GET_BN(_type, _key->_name, _name); \
+		} \
 	} while (0);
 
-#define OPENSSL_PKEY_SET_BN(_ht, _type, _name) do {					\
-		zval *bn;								\
+#define OPENSSL_PKEY_SET_BN(_ht, _type, _name) do { \
+		zval *bn; \
 		if ((bn = zend_hash_str_find(_ht, #_name, sizeof(#_name)-1)) != NULL && \
-				Z_TYPE_P(bn) == IS_STRING) {				\
-			_type->_name = BN_bin2bn(					\
-				(unsigned char*)Z_STRVAL_P(bn),				\
-				(int)Z_STRLEN_P(bn), NULL);				\
-		}										\
+				Z_TYPE_P(bn) == IS_STRING) { \
+			_type->_name = BN_bin2bn( \
+				(unsigned char*)Z_STRVAL_P(bn), \
+				(int)Z_STRLEN_P(bn), NULL); \
+		} \
 	} while (0);
 
 /* {{{ php_openssl_pkey_init_dsa */
@@ -4387,62 +4387,68 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	switch (EVP_PKEY_base_id(pkey)) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
-			ktype = OPENSSL_KEYTYPE_RSA;
+			{
+				RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+				ktype = OPENSSL_KEYTYPE_RSA;
 
-			if (pkey->pkey.rsa != NULL) {
-				zval rsa;
+				if (rsa != NULL) {
+					zval z_rsa;
 
-				array_init(&rsa);
-				OPENSSL_PKEY_GET_BN(rsa, n);
-				OPENSSL_PKEY_GET_BN(rsa, e);
-				OPENSSL_PKEY_GET_BN(rsa, d);
-				OPENSSL_PKEY_GET_BN(rsa, p);
-				OPENSSL_PKEY_GET_BN(rsa, q);
-				OPENSSL_PKEY_GET_BN(rsa, dmp1);
-				OPENSSL_PKEY_GET_BN(rsa, dmq1);
-				OPENSSL_PKEY_GET_BN(rsa, iqmp);
-				add_assoc_zval(return_value, "rsa", &rsa);
+					array_init(&z_rsa);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, n);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, e);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, d);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, p);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, q);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, dmp1);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, dmq1);
+					OPENSSL_PKEY_GET_BN(z_rsa, rsa, iqmp);
+					add_assoc_zval(return_value, "rsa", &z_rsa);
+				}
 			}
-
 			break;
 		case EVP_PKEY_DSA:
 		case EVP_PKEY_DSA2:
 		case EVP_PKEY_DSA3:
 		case EVP_PKEY_DSA4:
-			ktype = OPENSSL_KEYTYPE_DSA;
+			{
+				DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+				ktype = OPENSSL_KEYTYPE_DSA;
 
-			if (pkey->pkey.dsa != NULL) {
-				zval dsa;
+				if (dsa != NULL) {
+					zval z_dsa;
 
-				array_init(&dsa);
-				OPENSSL_PKEY_GET_BN(dsa, p);
-				OPENSSL_PKEY_GET_BN(dsa, q);
-				OPENSSL_PKEY_GET_BN(dsa, g);
-				OPENSSL_PKEY_GET_BN(dsa, priv_key);
-				OPENSSL_PKEY_GET_BN(dsa, pub_key);
-				add_assoc_zval(return_value, "dsa", &dsa);
+					array_init(&z_dsa);
+					OPENSSL_PKEY_GET_BN(z_dsa, dsa, p);
+					OPENSSL_PKEY_GET_BN(z_dsa, dsa, q);
+					OPENSSL_PKEY_GET_BN(z_dsa, dsa, g);
+					OPENSSL_PKEY_GET_BN(z_dsa, dsa, priv_key);
+					OPENSSL_PKEY_GET_BN(z_dsa, dsa, pub_key);
+					add_assoc_zval(return_value, "dsa", &z_dsa);
+				}
 			}
 			break;
 		case EVP_PKEY_DH:
+			{
+				DH *dh = EVP_PKEY_get0_DH(pkey);
+				ktype = OPENSSL_KEYTYPE_DH;
 
-			ktype = OPENSSL_KEYTYPE_DH;
+				if (dh != NULL) {
+					zval z_dh;
 
-			if (pkey->pkey.dh != NULL) {
-				zval dh;
-
-				array_init(&dh);
-				OPENSSL_PKEY_GET_BN(dh, p);
-				OPENSSL_PKEY_GET_BN(dh, g);
-				OPENSSL_PKEY_GET_BN(dh, priv_key);
-				OPENSSL_PKEY_GET_BN(dh, pub_key);
-				add_assoc_zval(return_value, "dh", &dh);
+					array_init(&z_dh);
+					OPENSSL_PKEY_GET_BN(z_dh, dh, p);
+					OPENSSL_PKEY_GET_BN(z_dh, dh, g);
+					OPENSSL_PKEY_GET_BN(z_dh, dh, priv_key);
+					OPENSSL_PKEY_GET_BN(z_dh, dh, pub_key);
+					add_assoc_zval(return_value, "dh", &z_dh);
+				}
 			}
-
 			break;
 #ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			ktype = OPENSSL_KEYTYPE_EC;
-			if (pkey->pkey.ec != NULL) {
+			if (EVP_PKEY_get0_EC_KEY(pkey) != NULL) {
 				zval ec;
 				const EC_GROUP *ec_group;
 				const EC_POINT *pub;
