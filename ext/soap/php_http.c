@@ -700,16 +700,6 @@ try_again:
 						PHP_MD5Update(&md5ctx, (unsigned char*)phpurl->query, strlen(phpurl->query));
 					}
 
-					/* TODO: Support for qop="auth-int" */
-/*
-					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
-					    Z_TYPE_PP(tmp) == IS_STRING &&
-					    Z_STRLEN_PP(tmp) == sizeof("auth-int")-1 &&
-					    stricmp(Z_STRVAL_PP(tmp), "auth-int") == 0) {
-						PHP_MD5Update(&md5ctx, ":", 1);
-						PHP_MD5Update(&md5ctx, HEntity, HASHHEXLEN);
-					}
-*/
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(HA2, hash);
 
