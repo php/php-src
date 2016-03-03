@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.5
 
+- CLI Server:
+  . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
+
 - Core:
   . Fixed bug #71695 (Global variables are reserved before execution).
     (Laruence)
