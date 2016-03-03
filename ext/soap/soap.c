@@ -467,7 +467,7 @@ zend_module_entry soap_module_entry = {
 
 #ifdef COMPILE_DL_SOAP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(soap)
 #endif

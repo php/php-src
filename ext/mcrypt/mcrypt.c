@@ -273,7 +273,7 @@ zend_module_entry mcrypt_module_entry = {
 
 #ifdef COMPILE_DL_MCRYPT
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(mcrypt)
 #endif

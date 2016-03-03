@@ -591,7 +591,7 @@ static sapi_post_entry php_post_entries[] = {
 
 #ifdef COMPILE_DL_MBSTRING
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(mbstring)
 #endif

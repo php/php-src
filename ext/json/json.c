@@ -176,7 +176,7 @@ zend_module_entry json_module_entry = {
 
 #ifdef COMPILE_DL_JSON
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(json)
 #endif

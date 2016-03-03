@@ -128,7 +128,7 @@ zend_module_entry bcmath_module_entry = {
 
 #ifdef COMPILE_DL_BCMATH
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(bcmath)
 #endif

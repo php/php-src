@@ -130,7 +130,7 @@ enum php_interbase_option {
 #define IBG(v) ZEND_MODULE_GLOBALS_ACCESSOR(ibase, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_INTERBASE)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #define BLOB_ID_LEN		18

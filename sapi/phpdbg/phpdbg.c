@@ -53,7 +53,7 @@
 #endif
 
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);

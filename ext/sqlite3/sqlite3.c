@@ -2293,7 +2293,7 @@ zend_module_entry sqlite3_module_entry = {
 
 #ifdef COMPILE_DL_SQLITE3
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(sqlite3)
 #endif

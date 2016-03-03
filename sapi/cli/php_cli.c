@@ -103,7 +103,7 @@ PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 #ifndef O_BINARY

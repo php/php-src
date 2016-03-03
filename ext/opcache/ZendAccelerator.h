@@ -286,7 +286,7 @@ extern zend_accel_shared_globals *accel_shared_globals;
 # define ZCG(v)	ZEND_TSRMG(accel_globals_id, zend_accel_globals *, v)
 extern int accel_globals_id;
 # ifdef COMPILE_DL_OPCACHE
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 # endif
 #else
 # define ZCG(v) (accel_globals.v)

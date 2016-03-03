@@ -72,7 +72,7 @@ typedef struct {
 
 #ifdef ZTS
 # define TWG(v) TSRMG_STATIC(win32_globals_id, tsrm_win32_globals *, v)
-TSRMLS_CACHE_EXTERN();
+TSRMLS_CACHE_EXTERN()
 #else
 # define TWG(v) (win32_globals.v)
 #endif

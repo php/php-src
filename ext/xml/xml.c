@@ -63,7 +63,7 @@ ZEND_DECLARE_MODULE_GLOBALS(xml)
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_XML
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(xml)
 #endif /* COMPILE_DL_XML */

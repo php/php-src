@@ -24,7 +24,7 @@
 #include "phpdbg_frame.h"
 #include "phpdbg_list.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 void phpdbg_restore_frame(void) /* {{{ */
 {

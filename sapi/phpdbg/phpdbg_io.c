@@ -45,7 +45,7 @@
 #include <poll.h>
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* is easy to generalize ... but not needed for now */
 PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
