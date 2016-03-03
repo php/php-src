@@ -4074,7 +4074,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL, Z_STRVAL_PP(p_name), E_NOTICE, "done");
+	php_error_docref1(NULL, p_name, E_NOTICE, "done");
 #endif
 }
 /* }}} */
