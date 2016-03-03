@@ -3776,13 +3776,15 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 {
 	assert(pkey != NULL);
 
-	switch (pkey->type) {
+	switch (EVP_PKEY_id(pkey)) {
 #ifndef NO_RSA
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
-			assert(pkey->pkey.rsa != NULL);
-			if (pkey->pkey.rsa != NULL && (NULL == pkey->pkey.rsa->p || NULL == pkey->pkey.rsa->q)) {
-				return 0;
+			{
+				RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+				if (rsa != NULL && (rsa->p == NULL || rsa->q == NULL)) {
+					return 0;
+				}
 			}
 			break;
 #endif
@@ -3792,30 +3794,32 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 		case EVP_PKEY_DSA2:
 		case EVP_PKEY_DSA3:
 		case EVP_PKEY_DSA4:
-			assert(pkey->pkey.dsa != NULL);
-
-			if (NULL == pkey->pkey.dsa->p || NULL == pkey->pkey.dsa->q || NULL == pkey->pkey.dsa->priv_key){
-				return 0;
+			{
+				DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+				if (dsa != NULL && (dsa->p == NULL || dsa->q == NULL || dsa->priv_key == NULL)) {
+					return 0;
+				}
 			}
 			break;
 #endif
 #ifndef NO_DH
 		case EVP_PKEY_DH:
-			assert(pkey->pkey.dh != NULL);
-
-			if (NULL == pkey->pkey.dh->p || NULL == pkey->pkey.dh->priv_key) {
-				return 0;
+			{
+				DH *dh = EVP_PKEY_get0_DH(pkey);
+				if (dh != NULL && (NULL == dh->p || dh->priv_key == NULL)) {
+					return 0;
+				}
 			}
 			break;
 #endif
 #ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
-			assert(pkey->pkey.ec != NULL);
-
-			if ( NULL == EC_KEY_get0_private_key(pkey->pkey.ec)) {
-				return 0;
+			{
+				EC_KEY *ec = EVP_PKEY_get0_EC_KEY(pkey);
+				if (ec != NULL && NULL == EC_KEY_get0_private_key(ec)) {
+					return 0;
+				}
 			}
-			break;
 #endif
 		default:
 			php_error_docref(NULL, E_WARNING, "key type not supported in this PHP build!");
