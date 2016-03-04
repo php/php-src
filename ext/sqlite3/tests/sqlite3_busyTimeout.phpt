@@ -24,7 +24,7 @@ bool(true)
 Warning: SQLite3::busyTimeout() expects exactly %i parameter, %i given in %s on line %i
 NULL
 
-Warning: SQLite3::busyTimeout() expects parameter %i to be integer, string given in %s on line %i
+Warning: SQLite3::busyTimeout() expects parameter %i to be %s, %s given in %s on line %i
 NULL
 bool(true)
 bool(true)
