@@ -299,6 +299,8 @@ typedef struct _zend_property_info {
 	zend_string *name;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
+	zend_uchar type;
+	zend_string *type_name;
 } zend_property_info;
 
 #define OBJ_PROP(obj, offset) \

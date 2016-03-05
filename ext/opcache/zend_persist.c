@@ -714,6 +714,10 @@ static void zend_persist_property_info(zval *zv)
 			prop->doc_comment = NULL;
 		}
 	}
+
+	if (prop->type_name) {
+		zend_accel_store_string(prop->type_name);
+	}
 }
 
 static void zend_persist_class_constant(zval *zv)

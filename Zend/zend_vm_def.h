@@ -1880,6 +1880,19 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		HANDLE_EXCEPTION();
 	}
 
+	/* not sure about this, sometimes container is reference to object */
+	if (Z_TYPE_P(container) == IS_OBJECT) {
+		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+		if (prop_info && prop_info->type) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"fetching reference to %s::$%s is disallowed",
+				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -2040,6 +2053,18 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	}
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
+	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+		if (prop_info && prop_info->type) {
+			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+				"%s::$%s must not be unset",
+				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
+	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	FREE_OP2();
@@ -2250,6 +2275,22 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		}
 	} else if (OP_DATA_TYPE != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
+	}
+
+	if (Z_TYPE_P(property_name) == IS_STRING) {
+		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+
+		if (prop_info && prop_info->type) {
+			if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
+					"%s::$%s must be %s", 
+					ZSTR_VAL(prop_info->ce->name),					
+					Z_STRVAL_P(property_name), 
+					(prop_info->type != IS_OBJECT) ? 
+						zend_get_type_by_const(prop_info->type) : ZSTR_VAL(prop_info->type_name));
+				HANDLE_EXCEPTION();
+			}
+		}
 	}
 
 	Z_OBJ_HT_P(object)->write_property(object, property_name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL);
@@ -5845,6 +5886,19 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 				break;
 			}
 		}
+
+		if (Z_TYPE_P(offset) == IS_STRING) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"%s::$%s must not be unset",
+					ZSTR_VAL(Z_OBJCE_P(container)->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			}
+		}
+
 		if (Z_OBJ_HT_P(container)->unset_property) {
 			Z_OBJ_HT_P(container)->unset_property(container, offset, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 		} else {

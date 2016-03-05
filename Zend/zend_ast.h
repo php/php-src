@@ -140,12 +140,12 @@ enum _zend_ast_kind {
 	ZEND_AST_TRY,
 	ZEND_AST_CATCH,
 	ZEND_AST_PARAM,
-	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
+	ZEND_AST_PROP_ELEM,
 };
 
 typedef uint16_t zend_ast_kind;

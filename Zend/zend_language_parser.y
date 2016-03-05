@@ -798,10 +798,10 @@ property_list:
 ;
 
 property:
-		T_VARIABLE backup_doc_comment
-			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str($2) : NULL)); }
-	|	T_VARIABLE '=' expr backup_doc_comment
-			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
+		optional_type T_VARIABLE backup_doc_comment
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $2, NULL, ($3 ? zend_ast_create_zval_from_str($3) : NULL)); }
+	|	optional_type T_VARIABLE '=' expr backup_doc_comment
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $2, $4, ($5 ? zend_ast_create_zval_from_str($5) : NULL)); }
 ;
 
 class_const_list:

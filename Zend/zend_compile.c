@@ -5298,6 +5298,40 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+
+/*
+static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info)
+{
+	if (ast->kind == ZEND_AST_TYPE) {
+		arg_info->type_hint = ast->attr;
+	} else {
+		zend_string *class_name = zend_ast_get_str(ast);
+		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
+
+		if (type != 0) {
+			if (ast->attr != ZEND_NAME_NOT_FQ) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Scalar type declaration '%s' must be unqualified",
+					ZSTR_VAL(zend_string_tolower(class_name)));
+			}
+			arg_info->type_hint = type;
+		} else {
+			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
+			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+				class_name = zend_resolve_class_name_ast(ast);
+				zend_assert_valid_class_name(class_name);
+			} else {
+				zend_ensure_valid_class_fetch_type(fetch_type);
+				zend_string_addref(class_name);
+			}
+
+			arg_info->type_hint = IS_OBJECT;
+			arg_info->class_name = class_name;
+		}
+	}
+}
+*/
+
 void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -5315,13 +5349,46 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < children; ++i) {
 		zend_ast *prop_ast = list->child[i];
-		zend_ast *name_ast = prop_ast->child[0];
-		zend_ast *value_ast = prop_ast->child[1];
-		zend_ast *doc_comment_ast = prop_ast->child[2];
+		zend_ast *type_ast = prop_ast->child[0];
+		zend_ast *name_ast = prop_ast->child[1];
+		zend_ast *value_ast = prop_ast->child[2];
+		zend_ast *doc_comment_ast = prop_ast->child[3];
 		zend_string *name = zend_ast_get_str(name_ast);
 		zend_string *doc_comment = NULL;
 		zval value_zv;
+		zend_uchar optional_type = 0;
+		zend_string *optional_type_name = NULL;
 
+		if (type_ast) {
+			if (type_ast->kind == ZEND_AST_TYPE) {
+				optional_type = type_ast->attr;
+			} else {
+				zend_string *class_name = zend_ast_get_str(type_ast);
+				zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
+
+				if (type != 0) {
+					if (type_ast->attr != ZEND_NAME_NOT_FQ) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Scalar type declaration '%s' must be unqualified",
+							ZSTR_VAL(zend_string_tolower(class_name)));
+					}
+					optional_type = type;
+				} else {
+					uint32_t fetch_type = zend_get_class_fetch_type_ast(type_ast);
+					if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+						class_name = zend_resolve_class_name_ast(type_ast);
+						zend_assert_valid_class_name(class_name);
+					} else {
+						zend_ensure_valid_class_fetch_type(fetch_type);
+						zend_string_addref(class_name);
+					}
+
+					optional_type = IS_OBJECT;
+					optional_type_name = class_name;
+				}
+			}
+		}
+		
 		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */
 		if (doc_comment_ast) {
 			doc_comment = zend_string_copy(zend_ast_get_str(doc_comment_ast));
@@ -5345,7 +5412,9 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		}
 
 		name = zend_new_interned_string_safe(name);
-		zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment);
+		if (optional_type) {
+			zend_declare_typed_property_ex(ce, name, &value_zv, flags, doc_comment, optional_type, optional_type_name);
+		} else zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment);
 	}
 }
 /* }}} */
