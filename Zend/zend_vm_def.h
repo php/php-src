@@ -1880,7 +1880,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		HANDLE_EXCEPTION();
 	}
 
-	/* not sure about this, sometimes container is reference to object */
+	/* TODO(krakjoe) deref container ? */
 	if (Z_TYPE_P(container) == IS_OBJECT) {
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -2278,16 +2278,33 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 	}
 
 	if (Z_TYPE_P(property_name) == IS_STRING) {
+		/* TODO(krakjoe) needs a cache slot */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 		if (prop_info && prop_info->type) {
-			if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+			if (prop_info->type == IS_OBJECT) {
+				/* TODO(krakjoe) needs a cache slot */
+				zend_class_entry *ce = zend_lookup_class(prop_info->type_name);
+
+				/* TODO(krakjoe) check instanceof is sound */
+				if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+					
+					/* TODO(krakjoe) check wording of error message */
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
+					"%s::$%s must be an instance of %s",
+						ZSTR_VAL(prop_info->ce->name),		
+						Z_STRVAL_P(property_name),
+						ZSTR_VAL(prop_info->type_name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+
+				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
 					"%s::$%s must be %s", 
-					ZSTR_VAL(prop_info->ce->name),					
-					Z_STRVAL_P(property_name), 
-					(prop_info->type != IS_OBJECT) ? 
-						zend_get_type_by_const(prop_info->type) : ZSTR_VAL(prop_info->type_name));
+					ZSTR_VAL(prop_info->ce->name),			
+					Z_STRVAL_P(property_name),
+					zend_get_type_by_const(prop_info->type));
 				HANDLE_EXCEPTION();
 			}
 		}
