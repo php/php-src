@@ -1179,7 +1179,7 @@ static int set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 /* }}} */
 #endif
 
-#ifdef HAVE_ECDH
+#if defined(HAVE_ECDH) && OPENSSL_VERSION_NUMBER < 0x10100000L
 static int set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zvcurve;
@@ -1222,7 +1222,7 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 	zval *zv;
 	long ssl_ctx_options = SSL_CTX_get_options(ctx);
 
-#ifdef HAVE_ECDH
+#if defined(HAVE_ECDH) && OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (set_server_ecdh_curve(stream, ctx) == FAILURE) {
 		return FAILURE;
 	}
