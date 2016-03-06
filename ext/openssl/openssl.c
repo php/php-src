@@ -4514,6 +4514,53 @@ PHP_FUNCTION(openssl_pkey_get_details)
 }
 /* }}} */
 
+/* {{{ proto string openssl_dh_compute_key(string pub_key, resource dh_key)
+   Computes shared secret for public value of remote DH key and local DH key */
+PHP_FUNCTION(openssl_dh_compute_key)
+{
+	zval *key;
+	char *pub_str;
+	size_t pub_len;
+	DH *dh;
+	EVP_PKEY *pkey;
+	BIGNUM *pub;
+	zend_string *data;
+	int len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sr", &pub_str, &pub_len, &key) == FAILURE) {
+		return;
+	}
+	if ((pkey = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(key), "OpenSSL key", le_key)) == NULL) {
+		RETURN_FALSE;
+	}
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH) {
+		RETURN_FALSE;
+	}
+	dh = EVP_PKEY_get0_DH(pkey);
+	if (dh == NULL) {
+		RETURN_FALSE;
+	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(pub_len, pub_key);
+	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
+
+	data = zend_string_alloc(DH_size(dh), 0);
+	len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, dh);
+
+	if (len >= 0) {
+		ZSTR_LEN(data) = len;
+		ZSTR_VAL(data)[len] = 0;
+		RETVAL_STR(data);
+	} else {
+		php_openssl_store_errors();
+		zend_string_release(data);
+		RETVAL_FALSE;
+	}
+
+	BN_free(pub);
+}
+/* }}} */
+
 /* }}} */
 
 /* {{{ proto string openssl_pbkdf2(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
@@ -6185,48 +6232,6 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 }
 /* }}} */
 
-
-/* {{{ proto string openssl_dh_compute_key(string pub_key, resource dh_key)
-   Computes shared secret for public value of remote DH key and local DH key */
-PHP_FUNCTION(openssl_dh_compute_key)
-{
-	zval *key;
-	char *pub_str;
-	size_t pub_len;
-	EVP_PKEY *pkey;
-	BIGNUM *pub;
-	zend_string *data;
-	int len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sr", &pub_str, &pub_len, &key) == FAILURE) {
-		return;
-	}
-	if ((pkey = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(key), "OpenSSL key", le_key)) == NULL) {
-		RETURN_FALSE;
-	}
-	if (EVP_PKEY_type(pkey->type) != EVP_PKEY_DH || !pkey->pkey.dh) {
-		RETURN_FALSE;
-	}
-
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(pub_len, pub_key);
-	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
-
-	data = zend_string_alloc(DH_size(pkey->pkey.dh), 0);
-	len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, pkey->pkey.dh);
-
-	if (len >= 0) {
-		ZSTR_LEN(data) = len;
-		ZSTR_VAL(data)[len] = 0;
-		RETVAL_STR(data);
-	} else {
-		php_openssl_store_errors();
-		zend_string_release(data);
-		RETVAL_FALSE;
-	}
-
-	BN_free(pub);
-}
-/* }}} */
 
 /* {{{ proto string openssl_random_pseudo_bytes(integer length [, &bool returned_strong_result])
    Returns a string of the length specified filled with random pseudo bytes */
