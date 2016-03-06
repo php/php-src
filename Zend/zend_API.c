@@ -3606,7 +3606,7 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_declare_typed_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_uchar optional_type, zend_string *optional_type_name) /* {{{ */
+ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_uchar optional_type, zend_string *optional_type_name) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
 
@@ -3692,7 +3692,7 @@ ZEND_API int zend_declare_typed_property_ex(zend_class_entry *ce, zend_string *n
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
-	return zend_declare_typed_property_ex(ce, name, property, access_type, doc_comment, 0, NULL);
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, 0, NULL);
 }
 /* }}} */
 
