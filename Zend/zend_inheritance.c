@@ -41,6 +41,10 @@ static zend_property_info *zend_duplicate_property_info(zend_property_info *prop
 	if (new_property_info->doc_comment) {
 		zend_string_addref(new_property_info->doc_comment);
 	}
+	if (new_property_info->type_name) {
+		zend_string_addref(new_property_info->type_name);
+	}
+
 	return new_property_info;
 }
 /* }}} */
@@ -50,6 +54,10 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
 	zend_string_addref(new_property_info->name);
+	if (new_property_info->type_name) {
+		zend_string_addref(new_property_info->type_name);
+	}
+
 	return new_property_info;
 }
 /* }}} */

@@ -1849,6 +1849,7 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR
 ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 			zend_error(E_NOTICE, "Trying to get property of non-object");
 			ZVAL_NULL(EX_VAR(opline->result.var));
+			ZEND_VM_C_GOTO(fetch_obj_r_exit);
 		} else {
 			retval = zobj->handlers->read_property(container, offset, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline->result.var));
 
@@ -1859,7 +1860,8 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 	} while (0);
 
 	/* TODO(krakjoe) ce flags ? */
-	if (Z_TYPE_P(offset) == IS_STRING) {
+	if (OP2_TYPE == IS_CONST && 
+		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 
 		/* TODO(krakjoe) needs cache slot */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
@@ -1867,13 +1869,15 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 		if (prop_info && prop_info->type && 
 			Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s accessed before initialization",
+				"%s::$%s accessed before initialization (%s)",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
-				Z_STRVAL_P(offset));
+				Z_STRVAL_P(offset),
+				zend_get_type_by_const(prop_info->type));
 			HANDLE_EXCEPTION();
 		}
 	}
 
+ZEND_VM_C_LABEL(fetch_obj_r_exit):
 	FREE_OP2();
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -2293,7 +2297,8 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		ZVAL_DEREF(value);
 	}
 
-	if (Z_TYPE_P(property_name) == IS_STRING) {
+	if (OP2_TYPE == IS_CONST &&
+		UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		/* TODO(krakjoe) needs a cache slot */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
@@ -2318,7 +2323,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
 					"%s::$%s must be %s", 
-					ZSTR_VAL(prop_info->ce->name),			
+					ZSTR_VAL(prop_info->ce->name),	
 					Z_STRVAL_P(property_name),
 					zend_get_type_by_const(prop_info->type));
 				HANDLE_EXCEPTION();
