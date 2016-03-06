@@ -14,4 +14,8 @@ echo "ok\n";
 --EXPECTF--
 Warning: session_start(): user session functions not defined in %s on line 3
 
-Catchable fatal error: session_start(): Failed to initialize storage module: user (path:%s) in %s on line 3
+Fatal error: Uncaught Exception: Failed to initialize storage module: user (path: ) in %s:3
+Stack trace:
+#0 %s(3): session_start()
+#1 {main}
+  thrown in %s on line 3

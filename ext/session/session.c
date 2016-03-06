@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#include <zend_exceptions.h>
 
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
@@ -704,8 +705,7 @@ static void php_session_initialize(void) /* {{{ */
 	/* This could be ZEND_ASSERT */
 	if (!PS(mod)) {
 		PS(session_status) = php_session_disabled;
-		php_error_docref(NULL, E_RECOVERABLE_ERROR,
-						 "No storage module chosen - failed to initialize session");
+		zend_throw_exception(NULL, "No storage module chosen - failed to initialize session", 0);
 		return;
 	}
 
@@ -713,8 +713,7 @@ retry:
 	/* Be protective. Should not happen. */
 	if (retry_count++ > 3) {
 		php_session_abort();
-		php_error_docref(NULL, E_RECOVERABLE_ERROR,
-						 "Too many session ID reset retries");
+		zend_throw_exception(NULL, "Too many session ID reset retries", 0);
 		return;
 	}
 
@@ -723,9 +722,8 @@ retry:
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
 	) {
 		php_session_abort();
-		php_error_docref(NULL, E_RECOVERABLE_ERROR,
-						 "Failed to initialize storage module: %s (path: %s)",
-						 PS(mod)->s_name, PS(save_path));
+		zend_throw_exception_ex(NULL, 0, "Failed to initialize storage module: %s (path: %s)",
+								PS(mod)->s_name, PS(save_path));
 		return;
 	}
 
@@ -740,9 +738,8 @@ retry:
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
 			php_session_abort();
-			php_error_docref(NULL, E_RECOVERABLE_ERROR,
-							 "Failed to create session ID: %s (path: %s)",
-							 PS(mod)->s_name, PS(save_path));
+			zend_throw_exception_ex(NULL, 0, "Failed to create session ID: %s (path: %s)",
+									PS(mod)->s_name, PS(save_path));
 			return;
 		}
 		if (PS(use_cookies)) {
@@ -1939,9 +1936,8 @@ static int php_session_regenerate_id(zend_bool del_ses) /* {{{ */
 	new_sid = PS(mod)->s_create_sid(&PS(mod_data));
 	if (!new_sid) {
 		php_session_abort();
-		php_error_docref(NULL, E_RECOVERABLE_ERROR,
-						 "Failed to create new session ID: %s (path: %s) ",
-						 PS(mod)->s_name, PS(save_path));
+		zend_throw_exception_ex(NULL, 0, "Failed to create new session ID: %s (path: %s) ",
+								PS(mod)->s_name, PS(save_path));
 		return FAILURE;
 	}
 
@@ -2008,9 +2004,8 @@ static int php_session_regenerate_id(zend_bool del_ses) /* {{{ */
 	/* New session data */
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		php_session_abort();
-		php_error_docref(NULL, E_RECOVERABLE_ERROR,
-						 "Failed to create(open) session ID: %s (path: %s)",
-						 PS(mod)->s_name, PS(save_path));
+		zend_throw_exception_ex(NULL, 0, "Failed to create(open) session ID: %s (path: %s)",
+								PS(mod)->s_name, PS(save_path));
 		return FAILURE;
 	}
 	if (PS(session_vars)) {
@@ -2020,9 +2015,8 @@ static int php_session_regenerate_id(zend_bool del_ses) /* {{{ */
 	/* Read is required to make new session data at this point. */
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
 		php_session_abort();
-		php_error_docref(NULL, E_RECOVERABLE_ERROR,
-						 "Failed to create(read) session ID: %s (path: %s)",
-						 PS(mod)->s_name, PS(save_path));
+		zend_throw_exception_ex(NULL, 0, "Failed to create(read) session ID: %s (path: %s)",
+								PS(mod)->s_name, PS(save_path));
 		return FAILURE;
 	}
 	if (data) {
