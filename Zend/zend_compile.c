@@ -5298,40 +5298,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-
-/*
-static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info)
-{
-	if (ast->kind == ZEND_AST_TYPE) {
-		arg_info->type_hint = ast->attr;
-	} else {
-		zend_string *class_name = zend_ast_get_str(ast);
-		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
-
-		if (type != 0) {
-			if (ast->attr != ZEND_NAME_NOT_FQ) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Scalar type declaration '%s' must be unqualified",
-					ZSTR_VAL(zend_string_tolower(class_name)));
-			}
-			arg_info->type_hint = type;
-		} else {
-			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
-			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
-				class_name = zend_resolve_class_name_ast(ast);
-				zend_assert_valid_class_name(class_name);
-			} else {
-				zend_ensure_valid_class_fetch_type(fetch_type);
-				zend_string_addref(class_name);
-			}
-
-			arg_info->type_hint = IS_OBJECT;
-			arg_info->class_name = class_name;
-		}
-	}
-}
-*/
-
 void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
