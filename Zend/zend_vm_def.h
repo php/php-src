@@ -1859,7 +1859,6 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 		}
 	} while (0);
 
-	/* TODO(krakjoe) ce flags ? */
 	if (OP2_TYPE == IS_CONST && 
 		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 

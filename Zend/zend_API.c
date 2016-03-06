@@ -3682,7 +3682,9 @@ ZEND_API int zend_declare_typed_property_ex(zend_class_entry *ce, zend_string *n
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
 
-	ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+	if (property_info->type) {
+		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+	}
 
 	return SUCCESS;
 }
