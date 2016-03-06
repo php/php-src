@@ -1869,10 +1869,9 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 		if (prop_info && prop_info->type && 
 			Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s accessed before initialization (%s)",
+				"%s::$%s accessed before initialization",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
-				Z_STRVAL_P(offset),
-				zend_get_type_by_const(prop_info->type));
+				Z_STRVAL_P(offset));
 			HANDLE_EXCEPTION();
 		}
 	}
