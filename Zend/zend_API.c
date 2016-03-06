@@ -3677,7 +3677,6 @@ ZEND_API int zend_declare_typed_property_ex(zend_class_entry *ce, zend_string *n
 	property_info->doc_comment = doc_comment;
 	property_info->ce = ce;
 	property_info->type = optional_type;
-	/* TODO(krakjoe) this may leak, introduce dtor? */
 	property_info->type_name = optional_type_name ? 
 		zend_new_interned_string(optional_type_name) : NULL;
 
