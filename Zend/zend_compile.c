@@ -5380,7 +5380,9 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		name = zend_new_interned_string_safe(name);
 		if (optional_type) {
 			zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, optional_type, optional_type_name);
-		} else zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment);
+		} else {
+			zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment);
+		}
 	}
 }
 /* }}} */
