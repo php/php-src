@@ -4263,6 +4263,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
+		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, 0,
+				"foreach by reference over %s is disallowed",
+				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			HANDLE_EXCEPTION();
+		}
+
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
 			if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 				if (array_ptr == array_ref) {
@@ -5725,6 +5733,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CONST, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_CONST == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -9490,6 +9513,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CONST, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_CONST == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -11308,6 +11346,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CONST, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_CONST == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -12621,6 +12674,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
+		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, 0,
+				"foreach by reference over %s is disallowed",
+				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			HANDLE_EXCEPTION();
+		}
+
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
 			if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 				if (array_ptr == array_ref) {
@@ -13165,6 +13226,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_TMP_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_TMP_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -14406,6 +14482,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_TMP_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_TMP_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -14948,6 +15039,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_TMP_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_TMP_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -16163,6 +16269,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
+		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, 0,
+				"foreach by reference over %s is disallowed",
+				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			HANDLE_EXCEPTION();
+		}
+
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
 			if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 				if (array_ptr == array_ref) {
@@ -17644,17 +17758,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -17718,6 +17836,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -22196,17 +22329,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -22270,6 +22407,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -24943,17 +25095,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -25017,6 +25173,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -27475,17 +27646,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -27621,6 +27796,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -30975,17 +31165,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -31121,6 +31315,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -33417,17 +33626,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -33564,6 +33777,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -36492,6 +36720,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
+		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, 0,
+				"foreach by reference over %s is disallowed",
+				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			HANDLE_EXCEPTION();
+		}
+
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
 			if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 				if (array_ptr == array_ref) {
@@ -38437,17 +38673,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -38583,6 +38823,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -45000,17 +45255,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -45146,6 +45405,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
 		if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -48733,17 +49007,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"fetching reference to %s::$%s is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"fetching reference to %s::$%s is disallowed",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					}
+				} break;
 			}
 		}
 	}
@@ -48880,6 +49158,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 
 			HANDLE_EXCEPTION();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (Z_TYPE_P(property) == IS_STRING) {
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+
+				if (prop_info && prop_info->type) {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"fetching reference to %s::$%s is disallowed",
+						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
