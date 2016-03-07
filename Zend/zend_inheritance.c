@@ -628,6 +628,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		if (UNEXPECTED(parent_info->type)) {
 
 			/* TODO(krakjoe) comparing strings feels wrong */
+			/* TODO(krakjoe) handle self, parent, static */
 			if (parent_info->type == IS_OBJECT) {
 				if (child_info->type != IS_OBJECT || 
 					!zend_string_equals_ci(parent_info->type_name, child_info->type_name)) {
