@@ -648,7 +648,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-		if (UNEXPECTED(parent_info->type)) {
+		if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
 
 			/* TODO(krakjoe) comparing strings feels wrong */
 			if (parent_info->type == IS_OBJECT) {
