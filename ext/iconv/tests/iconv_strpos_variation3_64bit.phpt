@@ -4,7 +4,7 @@ Test iconv_strpos() function : usage variations - pass different data types as $
 <?php
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
-if (PHP_INT_SIZE != 8) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
