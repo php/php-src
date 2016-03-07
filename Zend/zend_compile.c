@@ -5374,7 +5374,7 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		if (value_ast) {
 			zend_const_expr_to_zval(&value_zv, value_ast);
 		} else {
-			ZVAL_NULL(&value_zv);
+			ZVAL_UNDEF(&value_zv);
 		}
 
 		name = zend_new_interned_string_safe(name);
