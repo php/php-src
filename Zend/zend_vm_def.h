@@ -1899,7 +1899,8 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT) {
+	if (Z_TYPE_P(container) == IS_OBJECT && 
+		(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
 		if (prop_info && prop_info->type) {
