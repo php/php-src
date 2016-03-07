@@ -3630,7 +3630,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 
 				if (zend_string_equals_literal_ci(type_name, "parent")) {
 					if (!ce->parent) {
-						zend_throw_exception_ex(zend_ce_type_error, optional_type,
+						zend_error(E_COMPILE_ERROR,
 							"Type of %s::$%s cannot be parent type, no parent scope active",
 							ZSTR_VAL(ce->name),
 							ZSTR_VAL(name));
@@ -3644,18 +3644,18 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 					type_name = ce->name;
 				}
 
-				zend_throw_exception_ex(zend_ce_type_error, optional_type, 
-					"Type of %s::$%s must be an instance of %s, %s used",
+				zend_error(E_COMPILE_ERROR, 
+					"Type of %s::$%s must be %s, %s used",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(name),
 						ZSTR_VAL(type_name),
 						Z_TYPE_P(property) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(property)->name) :
 							zend_get_type_by_const(Z_TYPE_P(property)));
-				return FAILURE;	
+				return FAILURE;
 			}
-		} else if (!ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE_P(property))) {
-			zend_throw_exception_ex(zend_ce_type_error, optional_type, 
+		} else if (Z_TYPE_P(property) != IS_UNDEF && !ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE_P(property))) {
+			zend_error(E_COMPILE_ERROR,
 				"Type of %s::$%s must be %s, %s used",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(name),
