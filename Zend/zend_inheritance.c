@@ -651,7 +651,6 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		if (UNEXPECTED(parent_info->type)) {
 
 			/* TODO(krakjoe) comparing strings feels wrong */
-			/* TODO(krakjoe) handle self, parent */
 			if (parent_info->type == IS_OBJECT) {
 				if (child_info->type != IS_OBJECT || 
 					!zend_string_equals_ci(zend_resolve_property_type(parent_info), 
@@ -699,6 +698,24 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
+		if (UNEXPECTED(parent_info->type)) {
+			if (parent_info->type == IS_OBJECT) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must be %s (as in class %s)",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key),
+					ZSTR_VAL(zend_resolve_property_type(parent_info)),
+					ZSTR_VAL(ce->parent->name));
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must be %s (as in class %s)",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key),
+					zend_get_type_by_const(parent_info->type),
+					ZSTR_VAL(ce->parent->name));
+			}
+		}
+
 		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
