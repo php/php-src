@@ -625,6 +625,29 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
+		if (UNEXPECTED(parent_info->type)) {
+
+			/* TODO(krakjoe) comparing strings feels wrong */
+			if (parent_info->type == IS_OBJECT) {
+				if (child_info->type != IS_OBJECT || 
+					!zend_string_equals_ci(parent_info->type_name, child_info->type_name)) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must be %s (as in class %s)",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(key),
+						ZSTR_VAL(parent_info->type_name),
+						ZSTR_VAL(ce->parent->name));
+				}
+			} else if (parent_info->type != child_info->type) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must be %s (as in class %s)",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key),
+					zend_get_type_by_const(parent_info->type),
+					ZSTR_VAL(ce->parent->name));
+			}
+		}
+		
 		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
