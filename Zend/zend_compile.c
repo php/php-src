@@ -4482,14 +4482,14 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		zend_ast *stmt_ast = catch_ast->child[2];
 		zval *var_name = zend_ast_get_zval(var_ast);
 		zend_bool is_last_catch = (i + 1 == catches->children);
-		
+
 		uint32_t *jmp_multicatch = safe_emalloc(sizeof(uint32_t), classes->children - 1, 0);
 		uint32_t opnum_catch;
 
 		CG(zend_lineno) = catch_ast->lineno;
 
 		for (j = 0; j < classes->children; j++) {
-	
+
 			zend_ast *class_ast = classes->child[j];
 			zend_bool is_last_class = (j + 1 == classes->children);
 
@@ -4522,7 +4522,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		for (j = 0; j < classes->children - 1; j++) {
 			zend_update_jump_target_to_next(jmp_multicatch[j]);
 		}
-		
+
 		efree(jmp_multicatch);
 
 		zend_compile_stmt(stmt_ast);
@@ -4543,7 +4543,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 	if (finally_ast) {
 		uint32_t opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;
-		
+
 		/* Pop FAST_CALL from unwind stack */
 		zend_stack_del_top(&CG(loop_var_stack));
 
