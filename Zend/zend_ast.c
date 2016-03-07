@@ -1439,6 +1439,8 @@ simple_list:
 		case ZEND_AST_PROP_ELEM:
 			smart_str_appendc(str, '$');
 			/* break missing intentionally */
+			zend_ast_export_name(str, ast->child[1], 0, indent);
+			APPEND_DEFAULT_VALUE(2);
 		case ZEND_AST_CONST_ELEM:
 			zend_ast_export_name(str, ast->child[0], 0, indent);
 			APPEND_DEFAULT_VALUE(1);
