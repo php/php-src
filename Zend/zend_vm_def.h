@@ -1898,7 +1898,8 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+	/* TODO(krakjoe) deref container ? */
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
 				case ZEND_ASSIGN_REF:
@@ -1912,7 +1913,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
-				} break;			
+				} break;
 			}
 		}
 	}
