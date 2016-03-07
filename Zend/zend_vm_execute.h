@@ -17645,16 +17645,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -22196,16 +22197,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -24942,16 +24944,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -27473,16 +27476,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -30972,16 +30976,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -33413,16 +33418,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -38432,16 +38438,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -44994,16 +45001,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -48726,16 +48734,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 	}
 
 	/* TODO(krakjoe) deref container ? */
-	if (Z_TYPE_P(container) == IS_OBJECT &&
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last] && (EX(opline) + 1)->opcode == ZEND_ASSIGN_REF) {
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		if (prop_info && prop_info->type) {
-			zend_throw_exception_ex(
-				zend_ce_type_error, prop_info->type,
-				"fetching reference to %s::$%s is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"fetching reference to %s::$%s is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
