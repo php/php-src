@@ -13,7 +13,7 @@ new class(new Dummy) {
 };
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: class@anonymous::$std must be an instance of stdClass in %s:8
+Fatal error: Uncaught TypeError: class@anonymous::$std must be an instance of stdClass, Dummy used in %s:8
 Stack trace:
 #0 %s(4): class@anonymous->__construct(Object(Dummy))
 #1 {main}

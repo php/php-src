@@ -17940,20 +17940,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -18149,20 +18155,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -18358,20 +18370,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -18567,20 +18585,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -22483,20 +22507,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -22692,20 +22722,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -22901,20 +22937,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -23110,20 +23152,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -25221,20 +25269,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -25430,20 +25484,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -25639,20 +25699,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -25848,20 +25914,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -27816,20 +27888,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -28025,20 +28103,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -28234,20 +28318,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -28443,20 +28533,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -31307,20 +31403,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -31516,20 +31618,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -31725,20 +31833,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -31934,20 +32048,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -33741,20 +33861,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -33950,20 +34076,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -34159,20 +34291,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -34368,20 +34506,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -38795,20 +38939,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -39004,20 +39154,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -39213,20 +39369,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -39422,20 +39584,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -45305,20 +45473,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -45514,20 +45688,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -45723,20 +45903,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -45932,20 +46118,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -49030,20 +49222,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -49239,20 +49437,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -49448,20 +49652,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -49657,20 +49867,26 @@ fast_assign_obj:
 
 					/* TODO(krakjoe) check wording of error message */
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be an instance of %s",
+					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name));
+						ZSTR_VAL(prop_info->type_name),
+						Z_TYPE_P(value) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 
 				/* TODO(krakjoe) check wording of error message */
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must be %s",
+					"%s::$%s must be %s, %s used",
 					ZSTR_VAL(prop_info->ce->name),
 					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type));
+					zend_get_type_by_const(prop_info->type),
+					Z_TYPE_P(value) == IS_OBJECT ?
+						ZSTR_VAL(Z_OBJCE_P(value)->name) :
+							zend_get_type_by_const(Z_TYPE_P(value)));
 				HANDLE_EXCEPTION();
 			}
 		}
