@@ -3623,7 +3623,6 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	}
 
 	if (optional_type) {
-		/* TODO(krakjoe) not sure about exceptions in [no active file] */
 		if (optional_type == IS_OBJECT) {
 			if (Z_TYPE_P(property) != IS_UNDEF) {
 				zend_string *type_name = optional_type_name;
