@@ -17940,7 +17940,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -18150,7 +18150,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -18360,7 +18360,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -18570,7 +18570,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -22487,7 +22487,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -22697,7 +22697,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -22907,7 +22907,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -23117,7 +23117,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -25229,7 +25229,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -25439,7 +25439,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -25649,7 +25649,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -25859,7 +25859,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -27828,7 +27828,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -28038,7 +28038,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -28248,7 +28248,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -28458,7 +28458,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -31323,7 +31323,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -31533,7 +31533,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -31743,7 +31743,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -31953,7 +31953,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -33761,7 +33761,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -33971,7 +33971,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -34181,7 +34181,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -34391,7 +34391,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -38819,7 +38819,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -39029,7 +39029,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -39239,7 +39239,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -39449,7 +39449,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -45333,7 +45333,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -45543,7 +45543,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -45753,7 +45753,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -45963,7 +45963,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -49062,7 +49062,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -49272,7 +49272,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -49482,7 +49482,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));
@@ -49692,7 +49692,7 @@ fast_assign_obj:
 					"%s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(prop_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(prop_info)),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
 							zend_get_type_by_const(Z_TYPE_P(value)));

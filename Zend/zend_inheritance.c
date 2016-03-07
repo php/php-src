@@ -618,6 +618,29 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 }
 /* }}} */
 
+zend_string* zend_resolve_property_type(zend_property_info *info) /* {{{ */
+{
+	zend_string *type = info->type_name;
+
+	if (!type) {
+		return NULL;
+	}
+	
+	if (zend_string_equals_literal_ci(type, "parent")) {
+		if (info && info->ce && info->ce->parent) {
+			return info->ce->parent->name;
+		}
+	}
+
+	if (zend_string_equals_literal_ci(type, "self")) {
+		if (info && info->ce) {
+			return info->ce->name;
+		}
+	}
+
+	return type;
+} /* }}} */
+
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
 	zval *child = zend_hash_find(&ce->properties_info, key);
@@ -631,12 +654,13 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			/* TODO(krakjoe) handle self, parent */
 			if (parent_info->type == IS_OBJECT) {
 				if (child_info->type != IS_OBJECT || 
-					!zend_string_equals_ci(parent_info->type_name, child_info->type_name)) {
+					!zend_string_equals_ci(zend_resolve_property_type(parent_info), 
+										   zend_resolve_property_type(child_info))) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 					"Type of %s::$%s must be %s (as in class %s)",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(key),
-						ZSTR_VAL(parent_info->type_name),
+						ZSTR_VAL(zend_resolve_property_type(parent_info)),
 						ZSTR_VAL(ce->parent->name));
 				}
 			} else if (parent_info->type != child_info->type) {
@@ -648,7 +672,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 					ZSTR_VAL(ce->parent->name));
 			}
 		}
-		
+	
 		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
