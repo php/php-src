@@ -4536,6 +4536,10 @@ PHP_METHOD(DatePeriod, getEndDate)
 
         dpobj = (php_period_obj *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
+        if (!dpobj->end) {
+                return;
+        }
+
         php_date_instantiate(dpobj->start_ce, return_value TSRMLS_CC);
         dateobj = (php_date_obj *)zend_object_store_get_object(return_value TSRMLS_CC);
         dateobj->time = timelib_time_ctor();
