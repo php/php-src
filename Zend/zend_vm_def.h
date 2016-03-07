@@ -1859,19 +1859,19 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 		}
 	} while (0);
 
-	if (OP2_TYPE == IS_CONST && 
-		UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-
-		/* TODO(krakjoe) needs cache slot */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (Z_TYPE_P(offset) == IS_STRING) {
+			/* TODO(krakjoe) needs cache slot */
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 		
-		if (prop_info && prop_info->type && 
-			Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s accessed before initialization",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
-				Z_STRVAL_P(offset));
-			HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type && 
+				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"%s::$%s accessed before initialization",
+					ZSTR_VAL(Z_OBJCE_P(container)->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -2296,37 +2296,38 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		ZVAL_DEREF(value);
 	}
 
-	if (OP2_TYPE == IS_CONST &&
-		UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		/* TODO(krakjoe) needs a cache slot */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (Z_TYPE_P(property_name) == IS_STRING) {
+			/* TODO(krakjoe) needs a cache slot */
+			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
-		if (prop_info && prop_info->type) {
-			if (prop_info->type == IS_OBJECT) {
-				/* TODO(krakjoe) needs a cache slot */
-				zend_class_entry *ce = zend_lookup_class(prop_info->type_name);
+			if (prop_info && prop_info->type) {
+				if (prop_info->type == IS_OBJECT) {
+					/* TODO(krakjoe) needs a cache slot */
+					zend_class_entry *ce = zend_lookup_class(prop_info->type_name);
 
-				if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+						zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
+						"%s::$%s must be an instance of %s, %s used",
+							ZSTR_VAL(prop_info->ce->name),
+							Z_STRVAL_P(property_name),
+							ZSTR_VAL(zend_resolve_property_type(prop_info)),
+							Z_TYPE_P(value) == IS_OBJECT ?
+								ZSTR_VAL(Z_OBJCE_P(value)->name) :
+								zend_get_type_by_const(Z_TYPE_P(value)));
+						HANDLE_EXCEPTION();
+					}
+				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
-					"%s::$%s must be an instance of %s, %s used",
+						"%s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
-						ZSTR_VAL(zend_resolve_property_type(prop_info)),
+						zend_get_type_by_const(prop_info->type),
 						Z_TYPE_P(value) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(value)->name) :
-							zend_get_type_by_const(Z_TYPE_P(value)));
+								zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
-			} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
-					"%s::$%s must be %s, %s used",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(property_name),
-					zend_get_type_by_const(prop_info->type),
-					Z_TYPE_P(value) == IS_OBJECT ?
-						ZSTR_VAL(Z_OBJCE_P(value)->name) :
-							zend_get_type_by_const(Z_TYPE_P(value)));
-				HANDLE_EXCEPTION();
 			}
 		}
 	}
