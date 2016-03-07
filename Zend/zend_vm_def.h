@@ -4252,7 +4252,10 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ADDR)
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
 	zend_exception_restore();
-	
+	if (EG(exception) == NULL) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
 	catch_ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 	if (UNEXPECTED(catch_ce == NULL)) {
 		catch_ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
