@@ -2326,7 +2326,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 				if (prop_info->type == IS_OBJECT) {
 					zend_class_entry *ce = NULL;
 					zend_string *resolved = zend_resolve_property_type(prop_info);
-					
+
 					if (!prop_info->type_ce) {
 						ce = prop_info->type_ce = zend_lookup_class(resolved);
 					} else {
@@ -2335,24 +2335,24 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
-						"Typed property %s::$%s must be an instance of %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							ZSTR_VAL(resolved),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-								zend_get_type_by_const(Z_TYPE_P(value)));
+							"Typed property %s::$%s must be an instance of %s, %s used",
+								ZSTR_VAL(prop_info->ce->name),
+								Z_STRVAL_P(property_name),
+								ZSTR_VAL(resolved),
+								Z_TYPE_P(value) == IS_OBJECT ?
+									ZSTR_VAL(Z_OBJCE_P(value)->name) :
+									zend_get_type_by_const(Z_TYPE_P(value)));
 						HANDLE_EXCEPTION();
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
 						"Typed property %s::$%s must be %s, %s used",
-						ZSTR_VAL(prop_info->ce->name),
-						Z_STRVAL_P(property_name),
-						zend_get_type_by_const(prop_info->type),
-						Z_TYPE_P(value) == IS_OBJECT ?
-							ZSTR_VAL(Z_OBJCE_P(value)->name) :
-								zend_get_type_by_const(Z_TYPE_P(value)));
+							ZSTR_VAL(prop_info->ce->name),
+							Z_STRVAL_P(property_name),
+							zend_get_type_by_const(prop_info->type),
+							Z_TYPE_P(value) == IS_OBJECT ?
+								ZSTR_VAL(Z_OBJCE_P(value)->name) :
+									zend_get_type_by_const(Z_TYPE_P(value)));
 					HANDLE_EXCEPTION();
 				}
 			}
