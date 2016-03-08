@@ -3624,14 +3624,14 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 
 	if (optional_type) {
 		if (Z_TYPE_P(property) != IS_UNDEF) {
-			switch (optional_type) {
-				case IS_OBJECT: {
-					zend_string *type_name = optional_type_name;
+			zend_string *type_name = optional_type_name;
 
-					if (zend_string_equals_literal_ci(type_name, "self")) {
-						type_name = ce->name;
-					}
+			if (type_name && zend_string_equals_literal_ci(type_name, "self")) {
+				type_name = ce->name;
+			}
 
+			if (!zend_verify_property_type(optional_type, type_name, NULL, ce, property, 0)) {
+				if (optional_type == IS_OBJECT) {
 					zend_error(E_COMPILE_ERROR,
 						"Typed property %s::$%s must be %s, %s used",
 							ZSTR_VAL(ce->name),
@@ -3639,22 +3639,15 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 							ZSTR_VAL(type_name),
 							zend_get_type_by_const(Z_TYPE_P(property)));
 					return FAILURE;
-				} break;
-
-				case IS_LONG:
-					if (Z_TYPE_P(property) == IS_DOUBLE)
-						break;
-
-				default:
-					if(!ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE_P(property))) {
-						zend_error(E_COMPILE_ERROR,
-							"Typed property %s::$%s must be %s, %s used",
-								ZSTR_VAL(ce->name),
-								ZSTR_VAL(name),
-								zend_get_type_by_const(optional_type),
-								zend_get_type_by_const(Z_TYPE_P(property)));
-						return FAILURE;
-					}
+				} else {
+					zend_error(E_COMPILE_ERROR,
+						"Typed property %s::$%s must be %s, %s used",
+							ZSTR_VAL(ce->name),
+							ZSTR_VAL(name),
+							zend_get_type_by_const(optional_type),
+							zend_get_type_by_const(Z_TYPE_P(property)));
+					return FAILURE;
+				}
 			}
 		}
 	}

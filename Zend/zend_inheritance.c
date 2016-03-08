@@ -618,23 +618,23 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 }
 /* }}} */
 
-zend_string* zend_resolve_property_type(zend_property_info *info) /* {{{ */
+zend_string* zend_resolve_property_type(zend_string *name, zend_class_entry *scope) /* {{{ */
 {
-	zend_string *type = info->type_name;
+	zend_string *type = name;
 
 	if (!type) {
 		return NULL;
 	}
 	
 	if (zend_string_equals_literal_ci(type, "parent")) {
-		if (info && info->ce && info->ce->parent) {
-			return info->ce->parent->name;
+		if (scope && scope->parent) {
+			return scope->parent->name;
 		}
 	}
 
 	if (zend_string_equals_literal_ci(type, "self")) {
-		if (info && info->ce) {
-			return info->ce->name;
+		if (scope) {
+			return scope->name;
 		}
 	}
 
@@ -653,13 +653,13 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			/* TODO(krakjoe) comparing strings feels wrong */
 			if (parent_info->type == IS_OBJECT) {
 				if (child_info->type != IS_OBJECT || 
-					!zend_string_equals_ci(zend_resolve_property_type(parent_info), 
-										   zend_resolve_property_type(child_info))) {
+					!zend_string_equals_ci(zend_resolve_property_type(parent_info->type_name, parent_info->ce), 
+										   zend_resolve_property_type(child_info->type_name, child_info->ce))) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 					"Type of %s::$%s must be %s (as in class %s)",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(key),
-						ZSTR_VAL(zend_resolve_property_type(parent_info)),
+						ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
 						ZSTR_VAL(ce->parent->name));
 				}
 			} else if (parent_info->type != child_info->type) {
@@ -704,7 +704,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 					"Type of %s::$%s must be %s (as in class %s)",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(key),
-					ZSTR_VAL(zend_resolve_property_type(parent_info)),
+					ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
 					ZSTR_VAL(ce->parent->name));
 			} else {
 				zend_error_noreturn(E_COMPILE_ERROR,

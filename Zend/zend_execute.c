@@ -776,6 +776,32 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 	return 1;
 }
 
+zend_bool zend_verify_property_type(zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zend_class_entry *scope, zval *property, zend_bool resolve) {
+	switch (type) {
+		case IS_OBJECT: {
+			zend_class_entry *pce = type_ce ? *type_ce : NULL;
+			zend_string *resolved = resolve ? zend_resolve_property_type(type_name, scope) : type_name;
+			
+			if (!pce) {
+				pce = zend_lookup_class(resolved);
+				
+				if (type_ce) {
+					*type_ce = pce;				
+				}
+			}
+
+			return Z_TYPE_P(property) == IS_OBJECT && instanceof_function(pce, Z_OBJCE_P(property));
+		} break;
+
+		case IS_LONG:
+			if (Z_TYPE_P(property) == IS_DOUBLE)
+				return 1;
+
+		default:
+			return ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property));
+	}
+}
+
 static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
