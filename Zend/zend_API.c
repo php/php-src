@@ -3711,6 +3711,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	property_info->type = optional_type;
 	property_info->type_name = optional_type_name ? 
 		zend_new_interned_string(optional_type_name) : NULL;
+	property_info->type_ce = NULL;
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
 
