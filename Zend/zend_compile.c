@@ -5326,6 +5326,7 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		zend_string *optional_type_name = NULL;
 
 		if (type_ast) {
+
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				optional_type = type_ast->attr;
 			} else {
@@ -5338,9 +5339,18 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 							"Scalar type declaration '%s' must be unqualified",
 							ZSTR_VAL(zend_string_tolower(class_name)));
 					}
+
+					if (type == IS_VOID) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Typed property %s::$%s must not be void",
+							ZSTR_VAL(ce->name),
+							ZSTR_VAL(name));
+					}
+
 					optional_type = type;
 				} else {
 					uint32_t fetch_type = zend_get_class_fetch_type_ast(type_ast);
+
 					if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 						class_name = zend_resolve_class_name_ast(type_ast);
 						zend_assert_valid_class_name(class_name);
