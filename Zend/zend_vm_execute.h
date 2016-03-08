@@ -17758,24 +17758,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_VAR == IS_CONST ||
+				(IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -18066,37 +18085,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -18283,37 +18312,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -18500,37 +18539,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -18717,37 +18766,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -22354,24 +22413,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_VAR == IS_CONST ||
+				(IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -22662,37 +22740,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -22879,37 +22967,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -23096,37 +23194,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -23313,37 +23421,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -25145,24 +25263,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_VAR == IS_CONST ||
+				(IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -25453,37 +25590,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -25670,37 +25817,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -25887,37 +26044,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -26104,37 +26271,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -27721,24 +27898,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_UNUSED == IS_CONST ||
+				(IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -28101,37 +28297,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -28318,37 +28524,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -28535,37 +28751,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -28752,37 +28978,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -31265,24 +31501,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_UNUSED == IS_CONST ||
+				(IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -31645,37 +31900,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -31862,37 +32127,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -32079,37 +32354,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -32296,37 +32581,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -33751,24 +34046,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_UNUSED == IS_CONST ||
+				(IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -34132,37 +34446,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -34349,37 +34673,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -34566,37 +34900,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -34783,37 +35127,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -38823,24 +39177,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_CV == IS_CONST ||
+				(IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -39247,37 +39620,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -39464,37 +39847,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -39681,37 +40074,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -39898,37 +40301,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -45430,24 +45843,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_CV == IS_CONST ||
+				(IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -45810,37 +46242,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -46027,37 +46469,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -46244,37 +46696,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -46461,37 +46923,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -49207,24 +49679,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		zval *obj = container;
 
-					if (prop_info && prop_info->type) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
+		do {
+			if (IS_CV == IS_CONST ||
+				(IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
+				if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
+					obj = Z_REFVAL_P(obj);
+					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
+						break;
 					}
-				} break;
+				} else {
+					break;
+				}
 			}
-		}
+
+			if (Z_TYPE_P(obj) != IS_OBJECT) {
+				break;
+			}
+
+			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
+
+						if (prop_info && prop_info->type) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must not be referenced",
+								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+				}
+			}
+		} while (0);
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -49588,37 +50079,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -49805,37 +50306,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -50022,37 +50533,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
@@ -50239,37 +50760,47 @@ fast_assign_obj:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = NULL;
-					zend_string *resolved = zend_resolve_property_type(prop_info);
+				switch (prop_info->type) {
+					case IS_OBJECT: {
+						zend_class_entry *ce = NULL;
+						zend_string *resolved = zend_resolve_property_type(prop_info);
 
-					if (!prop_info->type_ce) {
-						ce = prop_info->type_ce = zend_lookup_class(resolved);
-					} else {
-						ce = prop_info->type_ce;
-					}
+						if (!prop_info->type_ce) {
+							ce = prop_info->type_ce = zend_lookup_class(resolved);
+						} else {
+							ce = prop_info->type_ce;
+						}
 
-					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must be an instance of %s, %s used",
-								ZSTR_VAL(prop_info->ce->name),
-								Z_STRVAL_P(property_name),
-								ZSTR_VAL(resolved),
-								Z_TYPE_P(value) == IS_OBJECT ?
-									ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-						HANDLE_EXCEPTION();
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(prop_info->ce->name),
-							Z_STRVAL_P(property_name),
-							zend_get_type_by_const(prop_info->type),
-							Z_TYPE_P(value) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(value)->name) :
-									zend_get_type_by_const(Z_TYPE_P(value)));
-					HANDLE_EXCEPTION();
+						if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be an instance of %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									ZSTR_VAL(resolved),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+										zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
+					} break;
+
+					case IS_LONG:
+						/* we must allow long to overflow */
+						if (Z_TYPE_P(value) == IS_DOUBLE)
+							break;
+
+					default:
+						if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
+							zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+								"Typed property %s::$%s must be %s, %s used",
+									ZSTR_VAL(prop_info->ce->name),
+									Z_STRVAL_P(property_name),
+									zend_get_type_by_const(prop_info->type),
+									Z_TYPE_P(value) == IS_OBJECT ?
+										ZSTR_VAL(Z_OBJCE_P(value)->name) :
+											zend_get_type_by_const(Z_TYPE_P(value)));
+							HANDLE_EXCEPTION();
+						}
 				}
 			}
 		}
