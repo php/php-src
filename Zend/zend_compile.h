@@ -301,6 +301,7 @@ typedef struct _zend_property_info {
 	zend_class_entry *ce;
 	zend_uchar type;
 	zend_string *type_name;
+	zend_class_entry *type_ce;
 } zend_property_info;
 
 #define OBJ_PROP(obj, offset) \

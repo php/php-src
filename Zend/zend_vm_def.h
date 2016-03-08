@@ -2324,8 +2324,8 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 
 			if (prop_info && prop_info->type) {
 				if (prop_info->type == IS_OBJECT) {
-					/* TODO(krakjoe) needs a cache slot */
-					zend_class_entry *ce = zend_lookup_class(prop_info->type_name);
+					zend_class_entry *ce = prop_info->type_ce == NULL ?
+						(prop_info->type_ce = zend_lookup_class(prop_info->type_name)) : prop_info->type_ce;
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
