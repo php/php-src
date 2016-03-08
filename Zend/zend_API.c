@@ -3623,50 +3623,34 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	}
 
 	if (optional_type) {
-		if (optional_type == IS_OBJECT) {
-			if (Z_TYPE_P(property) != IS_UNDEF) {
+		if (Z_TYPE_P(property) != IS_UNDEF) {
+			if (optional_type == IS_OBJECT) {
 				zend_string *type_name = optional_type_name;
-
-				if (zend_string_equals_literal_ci(type_name, "parent")) {
-					if (!ce->parent) {
-						zend_error(E_COMPILE_ERROR,
-							"Type of %s::$%s cannot be parent type, no parent scope active",
-							ZSTR_VAL(ce->name),
-							ZSTR_VAL(name));
-						return FAILURE;
-					}
-
-					type_name = ce->parent->name;
-				}
-
+				
 				if (zend_string_equals_literal_ci(type_name, "self")) {
 					type_name = ce->name;
 				}
 
-				zend_error(E_COMPILE_ERROR, 
-					"Type of %s::$%s must be %s, %s used",
+				zend_error(E_COMPILE_ERROR,
+					"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(name),
 						ZSTR_VAL(type_name),
-						Z_TYPE_P(property) == IS_OBJECT ?
-							ZSTR_VAL(Z_OBJCE_P(property)->name) :
-							zend_get_type_by_const(Z_TYPE_P(property)));
+						zend_get_type_by_const(Z_TYPE_P(property)));
+				return FAILURE;
+			} else if(!ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE_P(property))) {
+				zend_error(E_COMPILE_ERROR,
+					"Typed property %s::$%s must be %s, %s used",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(name),
+						zend_get_type_by_const(optional_type),
+						zend_get_type_by_const(Z_TYPE_P(property)));
 				return FAILURE;
 			}
-		} else if (Z_TYPE_P(property) != IS_UNDEF && !ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE_P(property))) {
-			zend_error(E_COMPILE_ERROR,
-				"Type of %s::$%s must be %s, %s used",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(name),
-					zend_get_type_by_const(optional_type),
-					Z_TYPE_P(property) == IS_OBJECT ?
-						ZSTR_VAL(Z_OBJCE_P(property)->name) :
-						zend_get_type_by_const(Z_TYPE_P(property)));
-			return FAILURE;
 		}
 	}
 
-	if (Z_TYPE_P(property) == IS_UNDEF) {
+	if (Z_ISUNDEF_P(property)) {
 		ZVAL_NULL(property);
 	}
 

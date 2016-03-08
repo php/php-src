@@ -4266,7 +4266,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
-				"foreach by reference over %s is disallowed",
+				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 			HANDLE_EXCEPTION();
 		}
@@ -5622,7 +5622,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -5741,7 +5741,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -9402,7 +9402,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -9521,7 +9521,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -11234,7 +11234,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -11354,7 +11354,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -12677,7 +12677,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
-				"foreach by reference over %s is disallowed",
+				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 			HANDLE_EXCEPTION();
 		}
@@ -13187,7 +13187,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -13234,7 +13234,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -14443,7 +14443,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -14490,7 +14490,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -15000,7 +15000,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -15047,7 +15047,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -16272,7 +16272,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
-				"foreach by reference over %s is disallowed",
+				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 			HANDLE_EXCEPTION();
 		}
@@ -17727,7 +17727,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -17758,6 +17758,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -17768,7 +17769,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -17844,7 +17845,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -17885,7 +17886,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -18071,7 +18072,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -18082,7 +18083,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -18282,7 +18283,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -18293,7 +18294,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -18493,7 +18494,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -18504,7 +18505,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -18704,7 +18705,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -18715,7 +18716,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -19666,7 +19667,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -22298,7 +22299,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -22329,6 +22330,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -22339,7 +22341,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -22415,7 +22417,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -22456,7 +22458,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -22642,7 +22644,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -22653,7 +22655,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -22853,7 +22855,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -22864,7 +22866,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -23064,7 +23066,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -23075,7 +23077,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -23275,7 +23277,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -23286,7 +23288,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -24210,7 +24212,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -25064,7 +25066,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -25095,6 +25097,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -25105,7 +25108,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -25181,7 +25184,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -25222,7 +25225,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -25408,7 +25411,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -25419,7 +25422,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -25619,7 +25622,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -25630,7 +25633,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -25830,7 +25833,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -25841,7 +25844,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -26041,7 +26044,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -26052,7 +26055,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -26866,7 +26869,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -27615,7 +27618,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -27646,6 +27649,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -27656,7 +27660,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -27804,7 +27808,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -27845,7 +27849,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CO
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -28031,7 +28035,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -28042,7 +28046,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -28242,7 +28246,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -28253,7 +28257,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -28453,7 +28457,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -28464,7 +28468,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -28664,7 +28668,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -28675,7 +28679,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -29288,7 +29292,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HA
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -31134,7 +31138,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -31165,6 +31169,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -31175,7 +31180,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -31323,7 +31328,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -31364,7 +31369,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -31550,7 +31555,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -31561,7 +31566,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -31761,7 +31766,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -31772,7 +31777,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -31972,7 +31977,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -31983,7 +31988,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -32183,7 +32188,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -32194,7 +32199,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -32681,7 +32686,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDL
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -33595,7 +33600,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -33626,6 +33631,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -33636,7 +33642,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -33785,7 +33791,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -33826,7 +33832,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TM
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -34012,7 +34018,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -34023,7 +34029,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -34223,7 +34229,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -34234,7 +34240,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -34434,7 +34440,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -34445,7 +34451,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -34645,7 +34651,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -34656,7 +34662,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -35145,7 +35151,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_H
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -36723,7 +36729,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
-				"foreach by reference over %s is disallowed",
+				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 			HANDLE_EXCEPTION();
 		}
@@ -38642,7 +38648,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -38673,6 +38679,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -38683,7 +38690,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -38831,7 +38838,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -38872,7 +38879,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -39102,7 +39109,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -39113,7 +39120,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -39313,7 +39320,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -39324,7 +39331,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -39524,7 +39531,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -39535,7 +39542,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -39735,7 +39742,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -39746,7 +39753,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -40777,7 +40784,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLE
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -45224,7 +45231,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -45255,6 +45262,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -45265,7 +45273,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -45413,7 +45421,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -45454,7 +45462,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -45640,7 +45648,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -45651,7 +45659,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -45851,7 +45859,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -45862,7 +45870,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -46062,7 +46070,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -46073,7 +46081,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -46273,7 +46281,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -46284,7 +46292,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -47311,7 +47319,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(Z
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -48976,7 +48984,7 @@ fetch_obj_r_no_object:
 			if (prop_info && prop_info->type &&
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s accessed before initialization",
+					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();
@@ -49007,6 +49015,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 		HANDLE_EXCEPTION();
 	}
 
+	/* TODO(krakjoe) deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
@@ -49017,7 +49026,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 					if (prop_info && prop_info->type) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
-							"fetching reference to %s::$%s is disallowed",
+							"Typed property %s::$%s must not be referenced",
 							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
 					}
@@ -49166,7 +49175,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 				if (prop_info && prop_info->type) {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
-						"fetching reference to %s::$%s is disallowed",
+						"Typed property %s::$%s must not be referenced",
 						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
 					HANDLE_EXCEPTION();
 				}
@@ -49207,7 +49216,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 
 		if (prop_info && prop_info->type) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"%s::$%s must not be unset",
+				"Typed property %s::$%s must not be unset",
 				ZSTR_VAL(Z_OBJCE_P(container)->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
@@ -49393,7 +49402,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -49404,7 +49413,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -49604,7 +49613,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -49615,7 +49624,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -49815,7 +49824,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -49826,7 +49835,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -50026,7 +50035,7 @@ fast_assign_obj:
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be an instance of %s, %s used",
+						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
 							ZSTR_VAL(zend_resolve_property_type(prop_info)),
@@ -50037,7 +50046,7 @@ fast_assign_obj:
 					}
 				} else if (!ZEND_SAME_FAKE_TYPE(prop_info->type, Z_TYPE_P(value))) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"%s::$%s must be %s, %s used",
+						"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(prop_info->ce->name),
 						Z_STRVAL_P(property_name),
 						zend_get_type_by_const(prop_info->type),
@@ -50956,7 +50965,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDL
 
 			if (prop_info && prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"%s::$%s must not be unset",
+					"Typed property %s::$%s must not be unset",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
 					Z_STRVAL_P(offset));
 				HANDLE_EXCEPTION();

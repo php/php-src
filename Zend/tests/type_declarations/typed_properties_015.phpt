@@ -7,7 +7,7 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Type of Foo::$bar must be stdClass, null used in %s on line 3
+Fatal error: Typed property Foo::$bar must be stdClass, null used in %s on line 3
 
 
 

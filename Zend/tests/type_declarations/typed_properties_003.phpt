@@ -9,7 +9,7 @@ $thing = new class() {
 $var = &$thing->int;
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: fetching reference to class@anonymous::$int is disallowed in %s:6
+Fatal error: Uncaught TypeError: Typed property class@anonymous::$int must not be referenced in %s:6
 Stack trace:
 #0 {main}
   thrown in %s on line 6

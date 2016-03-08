@@ -7,7 +7,7 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Type of Foo::$bar must be integer, float used in %s on line 3
+Fatal error: Typed property Foo::$bar must be integer, float used in %s on line 3
 
 
 

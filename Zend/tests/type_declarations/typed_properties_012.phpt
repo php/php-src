@@ -10,7 +10,7 @@ $foo = new Foo();
 foreach ($foo as &$prop);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: foreach by reference over Foo is disallowed in %s:7
+Fatal error: Uncaught TypeError: Typed properties exist in Foo: foreach by reference is disallowed in %s:7
 Stack trace:
 #0 {main}
   thrown in %s on line 7

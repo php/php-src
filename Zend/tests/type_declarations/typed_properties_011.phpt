@@ -11,7 +11,7 @@ $foo = new Foo();
 $array = [&$foo->bar];
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: fetching reference to Foo::$bar is disallowed in %s:8
+Fatal error: Uncaught TypeError: Typed property Foo::$bar must not be referenced in %s:8
 Stack trace:
 #0 {main}
   thrown in %s on line 8
