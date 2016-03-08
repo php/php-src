@@ -1861,7 +1861,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 
 	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs cache slot */
+			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 		
 			if (prop_info && prop_info->type && 
@@ -1898,43 +1898,25 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		zval *obj = container;
+	/* TODO(krakjoe) deref container ... grrr */
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
+			switch ((EX(opline) + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					/* TODO(krakjoe) needs caching */
+					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
-		do {
-			if (OP1_TYPE == IS_CONST ||
-				(OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
-				if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
-					obj = Z_REFVAL_P(obj);
-					if (UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT)) {
-						break;
+					if (prop_info && prop_info->type) {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
 					}
-				} else {
-					break;
-				}
+				} break;
 			}
-
-			if (Z_TYPE_P(obj) != IS_OBJECT) {
-				break;
-			}
-
-			if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-				switch ((EX(opline) + 1)->opcode) {
-					case ZEND_ASSIGN_REF:
-					case ZEND_INIT_ARRAY: {
-						zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(obj)->properties_info, Z_STR_P(property));
-
-						if (prop_info && prop_info->type) {
-							zend_throw_exception_ex(
-								zend_ce_type_error, prop_info->type,
-								"Typed property %s::$%s must not be referenced",
-								ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(property));
-							HANDLE_EXCEPTION();
-						}
-					} break;
-				}
-			}
-		} while (0);
+		}
 	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -2072,6 +2054,7 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 		
 		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			if (Z_TYPE_P(property) == IS_STRING) {
+				/* TODO(krakjoe) needs caching */
 				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 				
 				if (prop_info && prop_info->type) {
@@ -2114,6 +2097,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
 		if (prop_info && prop_info->type) {
@@ -2338,7 +2322,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 
 	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs a cache slot */
+			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
@@ -5944,6 +5928,7 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		}
 
 		if (Z_TYPE_P(offset) == IS_STRING) {
+			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type) {
