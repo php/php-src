@@ -480,8 +480,8 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 	}
 }
 
-/* The macro cast string comparison tuples to zend_long arrays comparison truncating the length to multiple of
- * zend_long size. This is acceptable for hash string comparisons as the ignored trailing bytes are already
+/* The macro casts strings to be compared to zend_long arrays truncating the length to multiple of
+ * zend_long size. This is acceptable for hash string comparisons as the ignored tailing bytes are already
  * implicitly checked by hash value matching.
  * Hash value function ensures (see zend_inline_hash_func() in zend_string.h):
  * - strings with lengths < SIZEOF_ZEND_LONG will generate unique hash values
