@@ -810,9 +810,10 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 								ZSTR_VAL(Z_OBJCE_P(property)->name) :
 								zend_get_type_by_const(Z_TYPE_P(property)));
 				}
+				return 0;
 			}
 			return 1;
-		} break;
+		}
 
 		case IS_LONG:
 			if (Z_TYPE_P(property) == IS_DOUBLE)
@@ -839,6 +840,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 								ZSTR_VAL(Z_OBJCE_P(property)->name) :
 									zend_get_type_by_const(Z_TYPE_P(property)));
 				}
+				return 0;
 			}
 			return 1;
 	}
