@@ -362,7 +362,7 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 		}                                                \
 	} while (0)
 
-zend_bool zend_verify_property_type(zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zend_class_entry *scope, zval *property, zend_bool resolve);
+zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool resolve);
 
 END_EXTERN_C()
 

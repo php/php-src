@@ -3630,24 +3630,8 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 				type_name = ce->name;
 			}
 
-			if (!zend_verify_property_type(optional_type, type_name, NULL, ce, property, 0)) {
-				if (optional_type == IS_OBJECT) {
-					zend_error(E_COMPILE_ERROR,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(ce->name),
-							ZSTR_VAL(name),
-							ZSTR_VAL(type_name),
-							zend_get_type_by_const(Z_TYPE_P(property)));
-					return FAILURE;
-				} else {
-					zend_error(E_COMPILE_ERROR,
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(ce->name),
-							ZSTR_VAL(name),
-							zend_get_type_by_const(optional_type),
-							zend_get_type_by_const(Z_TYPE_P(property)));
-					return FAILURE;
-				}
+			if (!zend_verify_property_type(ce, name, optional_type, type_name, NULL, property, 0)) {
+				return FAILURE;
 			}
 		}
 	}
