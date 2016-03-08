@@ -2324,15 +2324,21 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 
 			if (prop_info && prop_info->type) {
 				if (prop_info->type == IS_OBJECT) {
-					zend_class_entry *ce = prop_info->type_ce == NULL ?
-						(prop_info->type_ce = zend_lookup_class(prop_info->type_name)) : prop_info->type_ce;
+					zend_class_entry *ce = NULL;
+					zend_string *resolved = zend_resolve_property_type(prop_info);
+					
+					if (!prop_info->type_ce) {
+						ce = prop_info->type_ce = zend_lookup_class(resolved);
+					} else {
+						ce = prop_info->type_ce;
+					}
 
 					if (Z_TYPE_P(value) != IS_OBJECT || !instanceof_function(ce, Z_OBJCE_P(value))) {
 						zend_throw_exception_ex(zend_ce_type_error, prop_info->type, 
 						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(prop_info->ce->name),
 							Z_STRVAL_P(property_name),
-							ZSTR_VAL(zend_resolve_property_type(prop_info)),
+							ZSTR_VAL(resolved),
 							Z_TYPE_P(value) == IS_OBJECT ?
 								ZSTR_VAL(Z_OBJCE_P(value)->name) :
 								zend_get_type_by_const(Z_TYPE_P(value)));
