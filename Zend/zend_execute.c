@@ -1564,6 +1564,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 		case ZEND_ASSIGN_SL:
 		case ZEND_ASSIGN_SR:
 		case ZEND_ASSIGN_CONCAT:
+		case ZEND_ASSIGN_COALESCE:
 		case ZEND_ASSIGN_BW_OR:
 		case ZEND_ASSIGN_BW_AND:
 		case ZEND_ASSIGN_BW_XOR:
@@ -1590,6 +1591,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 						case ZEND_ASSIGN_SL:
 						case ZEND_ASSIGN_SR:
 						case ZEND_ASSIGN_CONCAT:
+						case ZEND_ASSIGN_COALESCE:
 						case ZEND_ASSIGN_BW_OR:
 						case ZEND_ASSIGN_BW_AND:
 						case ZEND_ASSIGN_BW_XOR:

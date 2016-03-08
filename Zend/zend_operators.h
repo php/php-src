@@ -60,6 +60,7 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL coalesce_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API int ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2);
 
