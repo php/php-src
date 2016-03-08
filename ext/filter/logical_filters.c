@@ -789,10 +789,10 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (flags & FILTER_FLAG_NO_RES_RANGE) {
 				if (
 					(ip[0] == 0) ||
+					(ip[0] == 127) ||
 					(ip[0] == 100 && (ip[1] >= 64 && ip[1] <= 127)) ||
 					(ip[0] == 169 && ip[1] == 254) ||
 					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2) ||
-					(ip[0] == 127 && ip[1] == 0 && ip[2] == 0 && ip[3] == 1) ||
 					(ip[0] >= 224 && ip[0] <= 255)
 				) {
 					RETURN_VALIDATION_FAILED
