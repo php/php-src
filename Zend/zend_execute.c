@@ -782,7 +782,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 			zend_class_entry *pce = type_ce ? *type_ce : NULL;
 			zend_string *resolved = runtime ? zend_resolve_property_type(type_name, scope) : type_name;
 			
-			if (!pce) {
+			if (!pce && runtime) {
 				pce = zend_lookup_class(resolved);
 				
 				if (type_ce) {
@@ -790,7 +790,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 				}
 			}
 
-			if (Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(pce, Z_OBJCE_P(property))) {
+			if (Z_TYPE_P(property) != IS_OBJECT || !runtime || !instanceof_function(pce, Z_OBJCE_P(property))) {
 				if (runtime) {
 					zend_throw_exception_ex(zend_ce_type_error, type, 
 						"Typed property %s::$%s must be an instance of %s, %s used",
