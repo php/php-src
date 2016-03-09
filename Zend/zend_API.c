@@ -3624,7 +3624,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 
 	if (optional_type) {
 		switch (Z_TYPE_P(property)) {
-			case IS_UNDEF:			
+			case IS_UNDEF:
 			case IS_CONSTANT:
 			case IS_CONSTANT_AST:
 				break;
@@ -3641,6 +3641,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 				}
 			}
 		}
+		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 	}
 
 	if (Z_ISUNDEF_P(property)) {
@@ -3707,10 +3708,6 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	property_info->type_ce = NULL;
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
-
-	if (property_info->type) {
-		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-	}
 
 	return SUCCESS;
 }
