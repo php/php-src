@@ -806,9 +806,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 							ZSTR_VAL(scope->name),
 							ZSTR_VAL(name),
 							ZSTR_VAL(resolved),
-							Z_TYPE_P(property) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(property)->name) :
-								zend_get_type_by_const(Z_TYPE_P(property)));
+							zend_get_type_by_const(Z_TYPE_P(property)));
 				}
 				return 0;
 			}
@@ -836,9 +834,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 							ZSTR_VAL(scope->name),
 							ZSTR_VAL(name),
 							zend_get_type_by_const(type),
-							Z_TYPE_P(property) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(property)->name) :
-									zend_get_type_by_const(Z_TYPE_P(property)));
+							zend_get_type_by_const(Z_TYPE_P(property)));
 				}
 				return 0;
 			}
