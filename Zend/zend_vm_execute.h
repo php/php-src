@@ -4263,7 +4263,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -5620,7 +5620,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -9401,7 +9401,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -11234,7 +11234,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -12677,7 +12677,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -13188,7 +13188,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -14445,7 +14445,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -15003,7 +15003,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -16275,7 +16275,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -17731,7 +17731,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -22217,7 +22217,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -24898,7 +24898,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -27364,7 +27364,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -30798,7 +30798,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -33174,7 +33174,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -36216,7 +36216,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -38136,7 +38136,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -44633,7 +44633,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
@@ -48300,7 +48300,7 @@ fetch_obj_r_no_object:
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
 			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
+				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 					"Typed property %s::$%s must not be accessed before initialization",
 					ZSTR_VAL(Z_OBJCE_P(container)->name),
