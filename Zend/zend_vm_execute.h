@@ -19581,7 +19581,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -24040,7 +24040,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -26611,7 +26611,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -28948,7 +28948,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HA
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -32256,7 +32256,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDL
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -34635,7 +34635,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_H
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -40182,7 +40182,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLE
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -46631,7 +46631,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(Z
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
@@ -50191,7 +50191,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDL
 			}
 		}
 
-		if (Z_TYPE_P(offset) == IS_STRING) {
+		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
