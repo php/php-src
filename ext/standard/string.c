@@ -2740,7 +2740,8 @@ PHP_FUNCTION(quotemeta)
 /* }}} */
 
 /* {{{ proto int ord(string character)
-   Returns ASCII value of character */
+   Returns ASCII value of character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
 PHP_FUNCTION(ord)
 {
 	char   *str;
@@ -2761,7 +2762,8 @@ PHP_FUNCTION(ord)
 /* }}} */
 
 /* {{{ proto string chr(int ascii)
-   Converts ASCII code to a character */
+   Converts ASCII code to a character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant integer argument */
 PHP_FUNCTION(chr)
 {
 	zend_long c;
@@ -4939,7 +4941,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const cha
 				 * state == 2 (PHP). Switch back to HTML.
 				 */
 
-				if (state == 2 && p > buf+2 && strncasecmp(p-4, "<?xm", 4) == 0) {
+				if (state == 2 && p > buf+4 && strncasecmp(p-4, "<?xm", 4) == 0) {
 					state = 1; is_xml=1;
 					break;
 				}
@@ -5368,7 +5370,7 @@ PHP_FUNCTION(str_pad)
 		return;
 	}
 
-	result = zend_string_alloc(ZSTR_LEN(input) + num_pad_chars, 0);
+	result = zend_string_safe_alloc(ZSTR_LEN(input), 1, num_pad_chars, 0);
 	ZSTR_LEN(result) = 0;
 
 	/* We need to figure out the left/right padding lengths. */

@@ -220,7 +220,7 @@ extern zend_module_entry session_module_entry;
 #ifdef ZTS
 #define PS(v) ZEND_TSRMG(ps_globals_id, php_ps_globals *, v)
 #ifdef COMPILE_DL_SESSION
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 #else
 #define PS(v) (ps_globals.v)

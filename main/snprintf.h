@@ -86,7 +86,7 @@ PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap);
 PHPAPI int ap_php_asprintf(char **buf, const char *format, ...);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
-PHPAPI char * php_conv_fp(register char format, register double num,
+PHPAPI char * php_conv_fp(char format, double num,
 		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, size_t *len);
 
 END_EXTERN_C()
@@ -153,11 +153,11 @@ typedef enum {
 typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
 
-PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register size_t *len);
+PHPAPI char * ap_php_conv_10(wide_int num, bool_int is_unsigned,
+	   bool_int * is_negative, char *buf_end, size_t *len);
 
-PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits,
-		 char format, char *buf_end, register size_t *len);
+PHPAPI char * ap_php_conv_p2(u_wide_int num, int nbits,
+		 char format, char *buf_end, size_t *len);
 
 /* The maximum precision that's allowed for float conversion. Does not include
  * decimal separator, exponent, sign, terminator. Currently does not affect

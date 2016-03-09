@@ -248,7 +248,7 @@ END_EXTERN_C()
 
 static zend_always_inline int _zend_handle_numeric_str(const char *key, size_t length, zend_ulong *idx)
 {
-	register const char *tmp = key;
+	const char *tmp = key;
 
 	if (*tmp > '9') {
 		return 0;
@@ -381,6 +381,18 @@ static zend_always_inline int zend_symtable_exists(HashTable *ht, zend_string *k
 		return zend_hash_index_exists(ht, idx);
 	} else {
 		return zend_hash_exists(ht, key);
+	}
+}
+
+
+static zend_always_inline int zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+{
+	zend_ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_exists(ht, idx);
+	} else {
+		return zend_hash_exists_ind(ht, key);
 	}
 }
 

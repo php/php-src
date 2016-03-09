@@ -962,7 +962,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					op2_max = OP2_MAX_RANGE();
 
 					tmp->min = (op1_min == op1_max &&
-					           op2_min == op2_min &&
+					           op2_min == op2_max &&
 					           op1_min == op2_max);
 					tmp->max = (op1_min <= op2_max && op1_max >= op2_min);
 					return 1;
@@ -984,7 +984,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 
 					tmp->min = (op1_min > op2_max || op1_max < op2_min);
 					tmp->max = (op1_min != op1_max ||
-					           op2_min != op2_min ||
+					           op2_min != op2_max ||
 					           op1_min != op2_max);
 					return 1;
 				} else {
@@ -2204,23 +2204,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 	zend_class_entry *ce;
 	int j;
 
-	if (opline->opcode == ZEND_OP_DATA &&
-	    ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-	     (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
-	     (opline-1)->opcode == ZEND_ASSIGN_ADD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SUB ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MUL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_DIV ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MOD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_CONCAT ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_OR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_AND ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_XOR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_POW ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_R ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_RW)) {
+	if (opline->opcode == ZEND_OP_DATA) {
 		opline--;
 		i--;
 	}
@@ -2374,6 +2358,14 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			if (opline->op1_type & (IS_CV|IS_VAR)) {
 				tmp |= MAY_BE_RCN;
+			}
+			if (opline->opcode != ZEND_QM_ASSIGN) {
+				/* COALESCE and JMP_SET result can't be null */
+				tmp &= ~MAY_BE_NULL;
+				if (opline->opcode == ZEND_JMP_SET) {
+					/* JMP_SET result can't be false either */
+					tmp &= ~MAY_BE_FALSE;
+				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			if ((t1 & MAY_BE_OBJECT) && ssa_ops[i].op1_use >= 0 && ssa_var_info[ssa_ops[i].op1_use].ce) {
@@ -3427,24 +3419,22 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
-			if (opline->result_type == IS_TMP_VAR) {
-				if (ssa_ops[i].result_def >= 0) {
-					tmp = MAY_BE_RC1;
-					if (t1 & MAY_BE_OBJECT) {
-						tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-					} else if (t1 & MAY_BE_ARRAY) {
-						if (t1 & MAY_BE_ARRAY_KEY_LONG) {
-							tmp |= MAY_BE_LONG;
-						}
-						if (t1 & MAY_BE_ARRAY_KEY_STRING) {
-							tmp |= MAY_BE_STRING;
-						}
-						if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
-							tmp |= MAY_BE_NULL;
-						}
+			if (ssa_ops[i].result_def >= 0) {
+				tmp = MAY_BE_RC1;
+				if (t1 & MAY_BE_OBJECT) {
+					tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+				} else if (t1 & MAY_BE_ARRAY) {
+					if (t1 & MAY_BE_ARRAY_KEY_LONG) {
+						tmp |= MAY_BE_LONG;
 					}
-					UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+					if (t1 & MAY_BE_ARRAY_KEY_STRING) {
+						tmp |= MAY_BE_STRING;
+					}
+					if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
+						tmp |= MAY_BE_NULL;
+					}
 				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
 //		case ZEND_CATCH:
@@ -3456,6 +3446,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_FETCH_DIM_W:
 		case ZEND_FETCH_DIM_UNSET:
 		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_LIST:
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = t1;
 				if (opline->opcode == ZEND_FETCH_DIM_W ||
@@ -3538,9 +3529,11 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].op1_def);
 				}
 			}
+			/* FETCH_LIST on a string behaves like FETCH_R on null */
 			tmp = zend_array_element_type(
-				t1,
-				(opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS),
+				opline->opcode != ZEND_FETCH_LIST ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
+				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
+					&& opline->opcode != ZEND_FETCH_LIST,
 				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_W ||
 			    opline->opcode == ZEND_FETCH_DIM_RW ||

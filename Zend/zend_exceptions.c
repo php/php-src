@@ -676,7 +676,6 @@ ZEND_METHOD(exception, __toString)
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
 		ZVAL_COPY_VALUE(&fci.function_name, &fname);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ_P(exception);
 		fci.retval = &trace;
 		fci.param_count = 0;

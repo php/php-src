@@ -25,7 +25,7 @@
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 static inline const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 {
@@ -50,10 +50,10 @@ static inline char *phpdbg_decode_op(
 		} break;
 
 		case IS_VAR:
-			spprintf(&decode, 0, "@%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
+			spprintf(&decode, 0, "@%u", EX_VAR_TO_NUM(op->var) - ops->last_var);
 		break;
 		case IS_TMP_VAR:
-			spprintf(&decode, 0, "~%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
+			spprintf(&decode, 0, "~%u", EX_VAR_TO_NUM(op->var) - ops->last_var);
 		break;
 		case IS_CONST: {
 			zval *literal = RT_CONSTANT(ops, *op);

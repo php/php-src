@@ -15,7 +15,7 @@ var_dump($stmt->getColumnMeta(0));
 $stmt = null;
 ?>
 --EXPECT--
-array(8) {
+array(10) {
   ["max_length"]=>
   int(255)
   ["precision"]=>
@@ -26,6 +26,10 @@ array(8) {
   string(13) "TABLE_CATALOG"
   ["native_type"]=>
   string(4) "char"
+  ["native_type_id"]=>
+  int(47)
+  ["native_usertype_id"]=>
+  int(2)
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>

@@ -146,19 +146,19 @@ PHPAPI zend_long php_rand(void)
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
-#define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((php_uint32)(-(php_int32)(loBit(u))) & 0x9908b0dfU))
+#define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
 /* {{{ php_mt_initialize
  */
-static inline void php_mt_initialize(php_uint32 seed, php_uint32 *state)
+static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 {
 	/* Initialize generator state with seed
 	   See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
 	   In previous versions, most significant bits (MSBs) of the seed affect
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-	register php_uint32 *s = state;
-	register php_uint32 *r = state;
+	register uint32_t *s = state;
+	register uint32_t *r = state;
 	register int i = 1;
 
 	*s++ = seed & 0xffffffffU;
@@ -176,8 +176,8 @@ static inline void php_mt_reload(void)
 	/* Generate N new values in state
 	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-	register php_uint32 *state = BG(state);
-	register php_uint32 *p = state;
+	register uint32_t *state = BG(state);
+	register uint32_t *p = state;
 	register int i;
 
 	for (i = N - M; i--; ++p)
@@ -192,7 +192,7 @@ static inline void php_mt_reload(void)
 
 /* {{{ php_mt_srand
  */
-PHPAPI void php_mt_srand(php_uint32 seed)
+PHPAPI void php_mt_srand(uint32_t seed)
 {
 	/* Seed the generator with a simple uint32 */
 	php_mt_initialize(seed, BG(state));
@@ -205,12 +205,12 @@ PHPAPI void php_mt_srand(php_uint32 seed)
 
 /* {{{ php_mt_rand
  */
-PHPAPI php_uint32 php_mt_rand(void)
+PHPAPI uint32_t php_mt_rand(void)
 {
 	/* Pull a 32-bit integer from the generator state
 	   Every other access function simply transforms the numbers extracted here */
 
-	register php_uint32 s1;
+	register uint32_t s1;
 
 	if (BG(left) == 0) {
 		php_mt_reload();
