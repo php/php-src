@@ -5328,7 +5328,7 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 
 		if (type_ast) {
 			if (flags & ZEND_ACC_STATIC) {
-				zend_error_noreturn(ce->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR,
+				zend_error_noreturn(E_COMPILE_ERROR,
 				"Typed property %s::$%s must not be static",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(name));
