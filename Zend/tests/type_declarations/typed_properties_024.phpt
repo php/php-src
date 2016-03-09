@@ -1,0 +1,21 @@
+--TEST--
+Test typed properties ignore private props during inheritance
+--FILE--
+<?php
+class Foo {
+	private int $thing;
+}
+
+class Bar extends Foo {}
+
+echo "ok";
+?>
+--EXPECT--
+ok
+
+
+
+
+
+
+

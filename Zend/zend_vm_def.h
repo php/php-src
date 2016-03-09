@@ -2570,6 +2570,9 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 #else
 			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
 #endif
+				if (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+					
+				}
 				GC_REFCOUNT(object)--;
 				if (GC_REFCOUNT(object) == 1) {
 					zend_object_store_ctor_failed(object);

@@ -699,7 +699,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (UNEXPECTED(parent_info->type)) {
+		if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
 			if (parent_info->type == IS_OBJECT) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type of %s::$%s must be %s (as in class %s)",
