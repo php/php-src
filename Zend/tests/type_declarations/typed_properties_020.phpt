@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties do not allow coerced values to be used
+Test typed properties binary assign op helper test
 --FILE--
 <?php
 class Foo {
