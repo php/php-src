@@ -1,9 +1,9 @@
 --TEST--
-Test typed properties delay type check on constant
+Test typed properties delay type check on ast
 --FILE--
 <?php
 class Foo {
-	public int $bar = BAR::BAZ;
+	public int $bar = BAR::BAZ * 2;
 }
 
 $foo = new Foo();
