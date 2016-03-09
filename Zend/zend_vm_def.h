@@ -1863,7 +1863,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 		if (Z_TYPE_P(offset) == IS_STRING) {
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
-		
+
 			if (prop_info && prop_info->type && 
 				Z_TYPE_P(EX_VAR(opline->result.var)) != prop_info->type) {
 				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
@@ -1899,6 +1899,8 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	}
 
 	/* TODO(krakjoe) deref container ... grrr */
+	/* we require a deref'd var here, but fetch does not */
+	/* do we have to unconditionally deref container ? */
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
 			switch ((EX(opline) + 1)->opcode) {
