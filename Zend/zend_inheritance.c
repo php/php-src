@@ -43,6 +43,7 @@ static zend_property_info *zend_duplicate_property_info(zend_property_info *prop
 	}
 	if (new_property_info->type_name) {
 		zend_string_addref(new_property_info->type_name);
+		new_property_info->type_ce = NULL;
 	}
 
 	return new_property_info;
@@ -56,6 +57,7 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 	zend_string_addref(new_property_info->name);
 	if (new_property_info->type_name) {
 		zend_string_addref(new_property_info->type_name);
+		new_property_info->type_ce = NULL;
 	}
 
 	return new_property_info;
