@@ -2098,7 +2098,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 

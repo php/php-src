@@ -17891,7 +17891,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 
 	property = EX_CONSTANT(opline->op2);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -22377,7 +22377,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -25058,7 +25058,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -27596,7 +27596,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CO
 
 	property = EX_CONSTANT(opline->op2);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -31030,7 +31030,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -33407,7 +33407,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TM
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -38368,7 +38368,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_
 
 	property = EX_CONSTANT(opline->op2);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -44865,7 +44865,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
@@ -48533,7 +48533,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if (Z_TYPE_P(container) == IS_OBJECT && Z_TYPE_P(property) == IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
 		/* TODO(krakjoe) needs caching */
 		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
 
