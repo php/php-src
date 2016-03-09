@@ -3610,19 +3610,15 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 {
 	zend_property_info *property_info, *property_info_ptr;
 
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		property_info = pemalloc(sizeof(zend_property_info), 1);
-		if ((access_type & ZEND_ACC_STATIC) || Z_CONSTANT_P(property)) {
-			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-		}
-	} else {
-		property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
-		if (Z_CONSTANT_P(property)) {
-			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-		}
-	}
-
 	if (optional_type) {
+		if (access_type & ZEND_ACC_STATIC) {
+			zend_error(ce->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR,
+				"Typed property %s::$%s must not be static",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(name));
+			return FAILURE;
+		}
+
 		switch (Z_TYPE_P(property)) {
 			case IS_UNDEF:
 			case IS_CONSTANT:
@@ -3642,6 +3638,18 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 			}
 		}
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+	}
+
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		property_info = pemalloc(sizeof(zend_property_info), 1);
+		if ((access_type & ZEND_ACC_STATIC) || Z_CONSTANT_P(property)) {
+			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		}
+	} else {
+		property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
+		if (Z_CONSTANT_P(property)) {
+			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		}
 	}
 
 	if (Z_ISUNDEF_P(property)) {

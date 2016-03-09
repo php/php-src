@@ -801,7 +801,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 								ZSTR_VAL(Z_OBJCE_P(property)->name) :
 								zend_get_type_by_const(Z_TYPE_P(property)));
 				} else {
-					zend_error(E_COMPILE_ERROR,
+					zend_error(scope->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR,
 						"Typed property %s::$%s must be an instance of %s, %s used",
 							ZSTR_VAL(scope->name),
 							ZSTR_VAL(name),
@@ -829,7 +829,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 								ZSTR_VAL(Z_OBJCE_P(property)->name) :
 									zend_get_type_by_const(Z_TYPE_P(property)));
 				} else {
-					zend_error(E_COMPILE_ERROR, 
+					zend_error(scope->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR, 
 						"Typed property %s::$%s must be %s, %s used",
 							ZSTR_VAL(scope->name),
 							ZSTR_VAL(name),

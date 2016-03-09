@@ -5327,6 +5327,13 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		zend_string *optional_type_name = NULL;
 
 		if (type_ast) {
+			if (flags & ZEND_ACC_STATIC) {
+				zend_error_noreturn(ce->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR,
+				"Typed property %s::$%s must not be static",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(name));
+			}
+
 			use_optional_types = 1;
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				optional_type = type_ast->attr;
