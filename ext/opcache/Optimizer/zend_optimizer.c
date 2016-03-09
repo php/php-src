@@ -711,6 +711,7 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 	}
 }
 
+#if HAVE_DFA_PASS
 static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 {
 	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
@@ -729,6 +730,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 		}
 	}
 }
+#endif
 
 int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
@@ -736,7 +738,9 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 	zend_op_array *op_array;
 	zend_string *name;
 	zend_optimizer_ctx ctx;
+#if HAVE_DFA_PASS
 	zend_call_graph call_graph;
+#endif
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
@@ -786,7 +790,6 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		}
 
 		//TODO: perform inner-script inference???
-
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
