@@ -5619,13 +5619,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -9400,13 +9403,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -11233,13 +11239,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -13187,13 +13196,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -14444,13 +14456,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -15002,13 +15017,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -17730,13 +17748,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -22216,13 +22237,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -24897,13 +24921,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -27363,13 +27390,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -30797,13 +30827,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -33173,13 +33206,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -38135,13 +38171,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -44632,13 +44671,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
@@ -48299,13 +48341,16 @@ fetch_obj_r_no_object:
 			/* TODO(krakjoe) needs caching */
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
 
-			if (prop_info && prop_info->type &&
-				Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
+			if (prop_info && prop_info->type) {
+				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(Z_OBJCE_P(container)->name),
+						Z_STRVAL_P(offset));
+					HANDLE_EXCEPTION();
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+					HANDLE_EXCEPTION();
+				}
 			}
 		}
 	}
