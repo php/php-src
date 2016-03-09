@@ -5304,6 +5304,7 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 	uint32_t flags = list->attr;
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
+	zend_bool use_optional_types = 0;
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -5326,7 +5327,7 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		zend_string *optional_type_name = NULL;
 
 		if (type_ast) {
-
+			use_optional_types = 1;
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				optional_type = type_ast->attr;
 			} else {
@@ -5363,6 +5364,11 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 					optional_type_name = class_name;
 				}
 			}
+		} else if (use_optional_types) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Property %s::$%s is missing type information",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(name));
 		}
 		
 		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */
