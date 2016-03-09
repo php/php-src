@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
+  . Added support for negative string offsets in string offset syntax and
+    various string functions. (Francois)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
