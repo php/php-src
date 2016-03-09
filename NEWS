@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
     for the first two statements). (einavitamar at gmail dot com, Anatol)
 
+- PCRE:
+  . Fixed bug #71659 (segmentation fault in pcre running twig tests).
+    (nish dot aravamudan at canonical dot com)
+
 - PDO_DBlib:
   . Bug #54648 (PDO::MSSQL forces format of datetime fields).
     (steven dot lambeth at gmx dot de, Anatol)
