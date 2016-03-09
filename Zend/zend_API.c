@@ -3623,19 +3623,20 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	}
 
 	if (optional_type) {
-		if (Z_TYPE_P(property) != IS_UNDEF) {
-			zend_string *type_name = optional_type_name;
+		switch (Z_TYPE_P(property)) {
+			case IS_UNDEF:			
+			case IS_CONSTANT:
+			case IS_CONSTANT_AST:
+				break;
 
-			if (type_name && zend_string_equals_literal_ci(type_name, "self")) {
-				type_name = ce->name;
-			}
+			default: {
+				zend_string *type_name = optional_type_name;
 
-			switch (Z_TYPE_P(property)) {
-				case IS_CONSTANT:
-				case IS_CONSTANT_AST:
-					break;
+				if (type_name && zend_string_equals_literal_ci(type_name, "self")) {
+					type_name = ce->name;
+				}						
 
-				default: if (!zend_verify_property_type(ce, name, optional_type, type_name, NULL, property, 0)) {
+				if (!zend_verify_property_type(ce, name, optional_type, type_name, NULL, property, 0)) {
 					return FAILURE;
 				}
 			}
