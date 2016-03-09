@@ -1,5 +1,5 @@
 --TEST--
-Test typed disallow unset
+Test typed properties disallow unset
 --FILE--
 <?php
 class Foo {

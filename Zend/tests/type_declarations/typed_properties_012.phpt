@@ -1,5 +1,5 @@
 --TEST--
-Test typed disallow fetch reference for foreach
+Test typed properties disallow fetch reference for foreach
 --FILE--
 <?php
 class Foo {

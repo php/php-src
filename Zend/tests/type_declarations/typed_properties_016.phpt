@@ -1,5 +1,5 @@
 --TEST--
-Test typed initial values
+Test typed properties initial values
 --FILE--
 <?php
 class Foo {

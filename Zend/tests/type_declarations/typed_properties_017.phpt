@@ -1,5 +1,5 @@
 --TEST--
-Test typed no void
+Test typed properties disallow void
 --FILE--
 <?php
 class Foo {

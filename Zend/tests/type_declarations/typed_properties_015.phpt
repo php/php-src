@@ -1,5 +1,5 @@
 --TEST--
-Test typed disallow incorrect type initial value (object)
+Test typed properties disallow incorrect type initial value (object)
 --FILE--
 <?php
 class Foo {

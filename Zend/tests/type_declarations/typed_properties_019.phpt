@@ -1,5 +1,5 @@
 --TEST--
-Test typed int must be allowed to widen to float
+Test typed properties int must be allowed to widen to float
 --FILE--
 <?php
 class Foo {

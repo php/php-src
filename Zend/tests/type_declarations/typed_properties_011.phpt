@@ -1,5 +1,5 @@
 --TEST--
-Test typed disallow fetch reference for init array
+Test typed properties disallow fetch reference for init array
 --FILE--
 <?php
 class Foo {

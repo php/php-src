@@ -1,5 +1,5 @@
 --TEST--
-Test typed disallow fetch reference for func arg
+Test typed properties disallow fetch reference for func arg
 --FILE--
 <?php
 class Foo {

@@ -1,5 +1,5 @@
 --TEST--
-Test typed no mixing typed and untyped declarations
+Test typed properties disallow mixing typed and untyped declarations
 --FILE--
 <?php
 class Foo {
