@@ -1437,7 +1437,11 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_PROP_ELEM:
-			/* TODO(krakjoe) export type */
+			if (ast->child[0]) {
+				zend_ast_export_name(
+					str, ast->child[0], 0, indent);
+				smart_str_appendc(str, ' ');
+			}
 			smart_str_appendc(str, '$');
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			APPEND_DEFAULT_VALUE(2);
