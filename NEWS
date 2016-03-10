@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
 
 - Core:
+  . Fixed bug #71778 (zend_std_get_method() inconsistently increments the
+    method_name refcount). (Adam)
   . Fixed bug #71756 (Call-by-reference widens scope to uninvolved functions
     when used in switch). (Laruence)
   . Fixed bug #71729 (Possible crash in zend_bin_strtod, zend_oct_strtod,
