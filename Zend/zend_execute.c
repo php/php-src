@@ -1562,6 +1562,9 @@ num_index:
 					break;
 			}
 		}
+		if (type == BP_VAR_R) {
+			ZVAL_DEREF(retval);
+		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
 		if (dim_type != IS_CONST) {
@@ -1592,6 +1595,9 @@ str_index:
 							break;
 					}
 				}
+			}
+			if (type == BP_VAR_R) {
+				ZVAL_DEREF(retval);
 			}
 		} else {
 			switch (type) {
