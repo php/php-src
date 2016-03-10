@@ -7,8 +7,6 @@ class Foo {
 }
 
 $foo = new Foo();
-
-var_dump($foo->bar);
 ?>
 --EXPECTF--
 Fatal error: Class 'BAR' not found in %s on line 6

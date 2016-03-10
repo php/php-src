@@ -11,8 +11,6 @@ class Foo {
 }
 
 $foo = new Foo();
-
-var_dump($foo->bar);
 ?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: Typed property Foo::$bar must be string, integer used in %s:6
