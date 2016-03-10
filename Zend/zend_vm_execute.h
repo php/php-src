@@ -5858,6 +5858,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CONST_HANDLER(
 	SAVE_OPLINE();
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if ((IS_CONST & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -9646,6 +9654,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CV_HANDLER(ZEN
 	SAVE_OPLINE();
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if ((IS_CONST & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -11412,6 +11428,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_TMPVAR_HANDLER
 	SAVE_OPLINE();
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if ((IS_CONST & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -32076,6 +32100,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_CONST_HANDLER(ZEN
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if ((IS_CV & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -37152,6 +37184,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_CV_HANDLER(ZEND_O
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if ((IS_CV & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -39725,6 +39765,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_TMPVAR_HANDLER(ZE
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if ((IS_CV & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -41952,6 +42000,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_CONST_HANDLER
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -44092,6 +44148,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_CV_HANDLER(ZE
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
@@ -45231,6 +45295,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_TMPVAR_HANDLE
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && UNEXPECTED(Z_ISREF_P(op1))) {
+		/* Don't keep lock on reference, lock the value instead */
+		if (UNEXPECTED(Z_REFCOUNT_P(op1) == 1)) {
+			ZVAL_UNREF(op1);
+		} else {
+			Z_DELREF_P(op1);
+			ZVAL_COPY(op1, Z_REFVAL_P(op1));
+		}
 	}
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
