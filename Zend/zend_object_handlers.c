@@ -1065,7 +1065,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	if (UNEXPECTED(strlen(ZSTR_VAL(method_name)) != ZSTR_LEN(method_name))) {
 		func->function_name = zend_string_init(ZSTR_VAL(method_name), strlen(ZSTR_VAL(method_name)), 0);
 	} else {
-		func->function_name = zend_string_copy(method_name);
+		func->function_name = zend_string_dup(method_name, 0);
 	}
 
 	return (zend_function*)func;
