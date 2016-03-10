@@ -3,12 +3,12 @@ Test typed properties disallow mixing typed and untyped declarations
 --FILE--
 <?php
 class Foo {
-	public int $bar,
-				$qux;
+	public $bar,
+			int	$qux;
 }
 ?>
 --EXPECTF--
-Fatal error: Untyped property Foo::$qux must not be mixed with typed properties in %s on line 3
+Fatal error: Typed property Foo::$qux must not be mixed with untyped properties in %s on line 3
 
 
 

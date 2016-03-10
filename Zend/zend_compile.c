@@ -5334,6 +5334,13 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 					ZSTR_VAL(name));
 			}
 
+			if (!use_optional_types && i > 0) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Typed property %s::$%s must not be mixed with untyped properties",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(name));
+			}			
+
 			use_optional_types = 1;
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				optional_type = type_ast->attr;
@@ -5373,7 +5380,7 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 			}
 		} else if (use_optional_types) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Property %s::$%s is missing type information",
+				"Untyped property %s::$%s must not be mixed with typed properties",
 				ZSTR_VAL(ce->name),
 				ZSTR_VAL(name));
 		}
