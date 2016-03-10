@@ -1561,8 +1561,7 @@ num_index:
 					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 					break;
 			}
-		}
-		if (type == BP_VAR_R) {
+		} else if (type == BP_VAR_R) {
 			ZVAL_DEREF(retval);
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
@@ -1594,9 +1593,10 @@ str_index:
 							ZVAL_NULL(retval);
 							break;
 					}
+				} else if (type == BP_VAR_R) {
+					ZVAL_DEREF(retval);
 				}
-			}
-			if (type == BP_VAR_R) {
+			} else if (type == BP_VAR_R) {
 				ZVAL_DEREF(retval);
 			}
 		} else {
@@ -1833,7 +1833,7 @@ try_array:
 
 try_string_offset:
 		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-			switch(Z_TYPE_P(dim)) {
+			switch (Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
 				case IS_STRING:
 					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
