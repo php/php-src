@@ -174,7 +174,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	}
 
 	assert(p >= ZSTR_VAL(dest));
-	if ((len = total_len > (size_t)(p - ZSTR_VAL(dest)))) {
+	if ((len = total_len) > (size_t)(p - ZSTR_VAL(dest))) {
 		*p++ = PHP_UU_DEC(*s) << 2 | PHP_UU_DEC(*(s + 1)) >> 4;
 		if (len > 1) {
 			*p++ = PHP_UU_DEC(*(s + 1)) << 4 | PHP_UU_DEC(*(s + 2)) >> 2;
