@@ -1435,8 +1435,6 @@ num_index:
 					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 					break;
 			}
-		} else if (type == BP_VAR_R) {
-			ZVAL_DEREF(retval);
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
@@ -1467,11 +1465,7 @@ str_index:
 							ZVAL_NULL(retval);
 							break;
 					}
-				} else if (type == BP_VAR_R) {
-					ZVAL_DEREF(retval);
 				}
-			} else if (type == BP_VAR_R) {
-				ZVAL_DEREF(retval);
 			}
 		} else {
 			switch (type) {
