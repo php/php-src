@@ -1632,6 +1632,7 @@ PHPAPI void php_session_start(void) /* {{{ */
 		 * '<session-name>=<session-id>' to allow URLs of the form
 		 * http://yoursite/<session-name>=<session-id>/script.php */
 		if (PS(define_sid) && !PS(id) &&
+			!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
 			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
 			Z_TYPE_P(data) == IS_STRING &&
 			(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
