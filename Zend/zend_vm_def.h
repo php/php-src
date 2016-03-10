@@ -2067,7 +2067,8 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 			HANDLE_EXCEPTION();
 		}
 		
-		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		/* TODO(krakjoe) deref container problem again */
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			if (Z_TYPE_P(property) == IS_STRING) {
 				/* TODO(krakjoe) needs caching */
 				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
@@ -2570,9 +2571,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 #else
 			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
 #endif
-				if (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-					
-				}
 				GC_REFCOUNT(object)--;
 				if (GC_REFCOUNT(object) == 1) {
 					zend_object_store_ctor_failed(object);
