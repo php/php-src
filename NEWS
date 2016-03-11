@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug #71694 (Support constant CURLM_ADDED_ALREADY). (mpyw)
 
+- Date:
+  . Fixed bug #71635 (DatePeriod::getEndDate segfault). (Thomas Punt)
+
 - libxml:
   . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
 
