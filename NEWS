@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
 
 - Core:
+  . Fixed bug #71756 (Call-by-reference widens scope to uninvolved functions
+    when used in switch). (Laruence)
   . Fixed bug #71729 (Possible crash in zend_bin_strtod, zend_oct_strtod,
     zend_hex_strtod). (Laruence)
   . Fixed bug #71695 (Global variables are reserved before execution).
@@ -21,9 +23,16 @@ PHP                                                                        NEWS
   . Fixed bug #71575 (ISO C does not allow extra ‘;’ outside of a function).
     (asgrim)
   . Fixed bug #71724 (yield from does not count EOLs). (Nikita)
+  . Fixed bug #71767 (ReflectionMethod::getDocComment returns the wrong
+    comment). (Grigorii Sokolik)
+  . Fixed bug #71806 (php_strip_whitespace() fails on some numerical values).
+    (Nikita)
 
 - Curl:
   . Fixed bug #71694 (Support constant CURLM_ADDED_ALREADY). (mpyw)
+
+- Date:
+  . Fixed bug #71635 (DatePeriod::getEndDate segfault). (Thomas Punt)
 
 - libxml:
   . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
@@ -31,6 +40,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
     for the first two statements). (einavitamar at gmail dot com, Anatol)
+
+- PCRE:
+  . Fixed bug #71659 (segmentation fault in pcre running twig tests).
+    (nish dot aravamudan at canonical dot com)
 
 - PDO_DBlib:
   . Bug #54648 (PDO::MSSQL forces format of datetime fields).
@@ -43,6 +56,10 @@ PHP                                                                        NEWS
 
 - phpdbg:
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
+
+- Session:
+  . Fixed bug #71754 (Regression in PHP7.0: trivial script segfaults php-cgi).
+    (Laruence)
 
 - SPL:
   . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
