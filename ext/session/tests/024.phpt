@@ -74,7 +74,7 @@ session_start();
 var_dump($baz);
 var_dump($arr);
 
-session_destroy();
+session_destroy(true);
 ?>
 --EXPECTF--
 OPEN: PHPSESSID
@@ -94,7 +94,7 @@ array(1) {
     int(2)
   }
 }
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
+WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 OPEN: PHPSESSID
 READ: abtest
 object(foo)#%d (2) {

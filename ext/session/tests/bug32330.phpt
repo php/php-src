@@ -60,7 +60,7 @@ session_write_close();
 
 session_start();
 $_SESSION['C'] = 'D';
-session_destroy();
+session_destroy(true);
 
 session_start();
 $_SESSION['E'] = 'F';
@@ -69,17 +69,17 @@ $_SESSION['E'] = 'F';
 ?>
 --EXPECTF--
 open: path = /tmp, name = sid
-read: id = %s
 gc: maxlifetime = %d
-write: id = %s, data = A|s:1:"B";
+read: id = %s
+write: id = %s, data = A|s:1:"B";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 close
 open: path = /tmp, name = sid
-read: id = %s
 gc: maxlifetime = %d
+read: id = %s
 destroy: id = %s
 close
 open: path = /tmp, name = sid
-read: id = %s
 gc: maxlifetime = %d
-write: id = %s, data = E|s:1:"F";
+read: id = %s
+write: id = %s, data = E|s:1:"F";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 close

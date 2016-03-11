@@ -4,6 +4,7 @@ Bug #71186 session.hash_function - algorithm changes
 <?php include('skipif.inc'); ?>
 --INI--
 session.hash_function=sha512
+session.hash_bits_per_character=4
 session.save_handler=files
 --FILE--
 <?php

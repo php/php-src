@@ -84,6 +84,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
+	session_start();
     var_dump(session_destroy($input));
     $iterator++;
 };
@@ -96,123 +97,80 @@ ob_end_flush();
 *** Testing session_destroy() : error functionality ***
 
 -- Iteration 1 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 2 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 3 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 4 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 5 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 6 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 7 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 8 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 9 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 10 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 11 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 12 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 13 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 14 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 15 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 16 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 17 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 18 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 19 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 20 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 21 --
 
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: session_destroy() expects parameter 1 to be boolean, object given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+Notice: A session had already been started - ignoring session_start() in %s on line %d
+bool(true)
 
 -- Iteration 23 --
-
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
+bool(true)
 
 -- Iteration 24 --
 
-Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: session_destroy() expects parameter 1 to be boolean, resource given in %s on line %d
 NULL
 Done
-

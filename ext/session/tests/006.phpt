@@ -43,7 +43,7 @@ session_start();
 echo "values after session:\n";
 var_dump($a,$b);
 
-session_destroy();
+session_destroy(true);
 ?>
 --EXPECTF--
 original values:

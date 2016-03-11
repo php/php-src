@@ -28,7 +28,7 @@ class MySession2 {
 	}
 
 	public function read($id) {
-		return @file_get_contents($this->path . $id);
+		return (string)@file_get_contents($this->path . $id);
 	}
 
 	public function write($id, $data) {
@@ -50,7 +50,7 @@ class MySession2 {
 	}
 
 	public function create_sid() {
-		return 'my_sid';
+		return 'my_sid'.PHP_VERSION_ID;
 	}
 }
 
@@ -74,7 +74,7 @@ session_unset();
 
 --EXPECTF--
 *** Testing session_set_save_handler() function: create_sid ***
-string(%d) "my_sid"
+string(%d) "my_sid%d"
 string(4) "user"
 array(1) {
   ["foo"]=>

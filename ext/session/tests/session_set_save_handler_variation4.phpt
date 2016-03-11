@@ -44,7 +44,7 @@ session_set_save_handler("open", "close", "read", "write", "destroy", "noisy_gc"
 session_id($session_id);
 session_start();
 var_dump($_SESSION);
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 ob_end_flush();
 ?>
@@ -52,9 +52,9 @@ ob_end_flush();
 *** Testing session_set_save_handler() : variation ***
 
 Open [%s,PHPSESSID]
-Read [%s,%s]
 GC [0]
 1 deleted
+Read [%s,%s]
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"
@@ -63,24 +63,15 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}]
 Close [%s,PHPSESSID]
 NULL
 Open [%s,PHPSESSID]
-Read [%s,%s]
 GC [0]
 1 deleted
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
+Read [%s,%s]
+array(0) {
 }
 Destroy [%s,%s]
-
-Warning: unlink(%s): No such file or directory in %s on line %s
 Close [%s,PHPSESSID]
 bool(true)
-

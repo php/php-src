@@ -96,7 +96,7 @@ session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, 
 session_start();
 var_dump($baz); var_dump($arr); var_dump($c);
 
-session_destroy();
+session_destroy(true);
 ?>
 --EXPECTF--
 OPEN: PHPSESSID
@@ -116,7 +116,7 @@ array(1) {
     int(2)
   }
 }
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
+WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 CLOSE
 OPEN: PHPSESSID
 READ: abtest
@@ -136,7 +136,7 @@ array(1) {
   }
 }
 int(123)
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;
+WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 CLOSE
 OPEN: PHPSESSID
 READ: abtest

@@ -65,11 +65,11 @@ ob_end_flush();
 *** Testing session_set_save_handler() : manual shutdown, reopen ***
 (#1) constructor called
 (#1) finish called %s
-(#1) writing %s = foo|s:3:"bar";
+(#1) writing %s = foo|s:3:"bar";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 (#1) closing %s
 (#2) constructor called
 (#1) destructor called
 done
-(#2) writing %s = foo|s:3:"bar";abc|s:3:"xyz";
+(#2) writing %s = foo|s:3:"bar";abc|s:3:"xyz";__PHP_SESSION__|a:3:{s:7:"CREATED";i:%d;s:7:"UPDATED";i:%d;s:4:"SIDS";a:0:{}}
 (#2) closing %s
 (#2) destructor called

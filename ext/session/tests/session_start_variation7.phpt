@@ -28,7 +28,7 @@ var_dump($_SESSION);
 session_start();
 var_dump($_SESSION);
 
-session_destroy();
+session_destroy(true);
 echo "Done";
 ob_end_flush();
 ?>
@@ -45,15 +45,7 @@ array(4) {
   int(6)
 }
 bool(true)
-array(4) {
-  ["colour"]=>
-  string(5) "green"
-  ["animal"]=>
-  string(3) "cat"
-  ["person"]=>
-  string(5) "julia"
-  ["age"]=>
-  int(6)
+array(0) {
 }
 array(0) {
 }

@@ -17,11 +17,11 @@ echo "*** Testing session_destroy() : variation ***\n";
 
 var_dump(session_start());
 var_dump(session_id());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 var_dump(session_id());
 var_dump(session_start());
 var_dump(session_id());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 var_dump(session_id());
 
 echo "Done";

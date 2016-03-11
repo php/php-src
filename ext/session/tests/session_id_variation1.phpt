@@ -21,13 +21,13 @@ var_dump(ini_set("session.hash_function", 0));
 var_dump(session_id());
 var_dump(session_start());
 var_dump(session_id());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 var_dump(ini_set("session.hash_function", 1));
 var_dump(session_id());
 var_dump(session_start());
 var_dump(session_id());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 echo "Done";
 ob_end_flush();

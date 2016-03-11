@@ -26,7 +26,7 @@ var_dump($_SESSION);
 $encoded = "foo|i:1234567890;";
 var_dump(session_decode($encoded));
 var_dump($_SESSION);
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 echo "Done";
 ob_end_flush();

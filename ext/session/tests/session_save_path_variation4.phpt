@@ -35,7 +35,7 @@ ini_set("session.save_path", $initdir);
 var_dump(session_save_path());
 var_dump(session_start());
 var_dump(session_save_path());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 var_dump(session_save_path());
 var_dump(rmdir($sessions));
 
@@ -56,5 +56,9 @@ string(0) ""
 
 Warning: session_start(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
 
-Fatal error: session_start(): Failed to initialize storage module: files (path: ) in %s on line %d
+Fatal error: Uncaught Exception: Failed to initialize storage module: files (path: ) in %s:26
+Stack trace:
+#0 %s(26): session_start()
+#1 {main}
+  thrown in %s on line 26
 

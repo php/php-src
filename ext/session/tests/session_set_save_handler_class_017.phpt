@@ -42,7 +42,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function destroy($id) {
-		@unlink($this->path . $id);
+		return @unlink($this->path . $id);
 	}
 
 	public function gc($maxlifetime) {
@@ -55,7 +55,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function create_sid() {
-		return 'my_sid';
+		return 'my_sid'.PHP_VERSION_ID;
 	}
 }
 
@@ -78,7 +78,7 @@ session_unset();
 
 --EXPECTF--
 *** Testing session_set_save_handler() function: class with create_sid ***
-string(%d) "my_sid"
+string(%d) "my_sid%d"
 string(4) "user"
 array(1) {
   ["foo"]=>

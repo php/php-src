@@ -26,7 +26,7 @@ var_dump(session_decode("foo|a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}guff|R:1;blah|R:1;"))
 var_dump($_SESSION);
 var_dump(session_decode("foo|a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}guff|R:1;blah|R:1;"));
 var_dump($_SESSION);
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 echo "Done";
 ob_end_flush();

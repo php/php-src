@@ -28,7 +28,7 @@ ini_set("session.use_trans_sid","0");
 ?>
 <a href="/link">
 <?php
-session_destroy();
+session_destroy(true);
 ?>
 --EXPECTF--
 <a href="/link">

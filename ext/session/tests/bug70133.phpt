@@ -12,7 +12,7 @@ session.use_strict_mode=0
 class CustomReadHandler extends \SessionHandler {
 
     public function read($session_id) {
-        return parent::read('mycustomsession');
+        return parent::read('mycustomsession'.PHP_VERSION_ID);
     }
 }
 
@@ -20,22 +20,36 @@ ob_start();
 
 session_set_save_handler(new CustomReadHandler(), true);
 
-session_id('mycustomsession');
+//Cleanup first
+session_id('mycustomsession'.PHP_VERSION_ID);
+session_start();
+session_destroy(true);
+session_id('otherid'.PHP_VERSION_ID);
+session_start();
+session_destroy(true);
+
+//Testing
+session_id('mycustomsession'.PHP_VERSION_ID);
 session_start();
 $_SESSION['foo'] = 'hoge';
 var_dump(session_id());
 session_commit();
 
-session_id('otherid');
+session_id('otherid'.PHP_VERSION_ID);
 session_start();
 var_dump($_SESSION);
 var_dump(session_id());
 
+//Cleanup
+session_destroy(true);
+session_id('mycustomsession'.PHP_VERSION_ID);
+session_start();
+session_destroy(true);
 ?>
---EXPECT--
-string(15) "mycustomsession"
+--EXPECTF--
+string(%d) "mycustomsession%d"
 array(1) {
   ["foo"]=>
   string(4) "hoge"
 }
-string(7) "otherid"
+string(%d) "otherid%d"

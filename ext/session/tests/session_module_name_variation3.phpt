@@ -32,7 +32,7 @@ session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 var_dump(session_module_name());
 var_dump(session_start());
 var_dump(session_module_name());
-var_dump(session_destroy());
+var_dump(session_destroy(true));
 
 ob_end_flush();
 ?>
@@ -41,11 +41,14 @@ ob_end_flush();
 string(%d) "%s"
 string(4) "user"
 
-Warning: Uncaught Exception: Stop...! in %s:%d
+Fatal error: Uncaught Exception: Stop...! in %s:13
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
-#1 %s(%d): session_start()
+#1 %s(25): session_start()
 #2 {main}
-  thrown in %s on line %d
 
-Fatal error: session_start(): Failed to initialize storage module: %s in %s%esession_module_name_variation3.php on line %d
+Next Exception: Failed to initialize storage module: user (path: ) in %s:25
+Stack trace:
+#0 %s(25): session_start()
+#1 {main}
+  thrown in %s on line 25

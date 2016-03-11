@@ -33,6 +33,8 @@ session_id($session_id);
 session_start();
 var_dump($_SESSION); // Should only have 'foo'
 
+session_destroy(true);
+
 echo "Done".PHP_EOL;
 
 ?>

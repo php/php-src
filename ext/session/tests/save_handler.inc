@@ -48,18 +48,29 @@ function destroy($id) {
 
 function gc($maxlifetime) {
     global $session_save_path, $name;
+    $cnt = 0;
     $directory = opendir($session_save_path."/");
     $length = strlen(SESSION_FILE_PREFIX);
     while (($file = readdir($directory)) !== FALSE) {
         $qualified = ($session_save_path."/".$file); 
         if (is_file($qualified) === TRUE) {
+            // Since file mtime and time() value could be UTC or localtime,
+            // timestamp check is ommited.
+            /*
+            $stat = stat($qualified);
+            var_dump(time() - $maxlifetime, $stat);die();
+            if ($stat['mtime'] < time() - $maxlifetime) {
+                continue;
+            }
+            */
             if (substr($file, 0, $length) === SESSION_FILE_PREFIX) {
                 unlink($qualified);
+                $cnt++;
             }
         }
     }
     closedir($directory);
-    return true;
+    return 1; // Retuning $cnt may create test failures
 }
 
 function create_sid() {
