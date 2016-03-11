@@ -203,10 +203,19 @@ typedef struct _parameter_reference {
 	zend_function *fptr;
 } parameter_reference;
 
+typedef enum {
+	REF_INFO_ARG,
+	REF_INFO_PROP
+} reflection_info_type_t;
+
 /* Struct for type hints */
 typedef struct _type_reference {
-	struct _zend_arg_info *arg_info;
-	zend_function *fptr;
+	reflection_info_type_t type;
+	union {
+		zend_function *fptr;
+		zend_class_entry *ce;
+	} scope;
+	void *info;
 } type_reference;
 
 typedef enum {
@@ -320,7 +329,9 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			break;
 		case REF_TYPE_TYPE:
 			typ_reference = (type_reference*)intern->ptr;
-			_free_function(typ_reference->fptr);
+			if (typ_reference->type == REF_INFO_ARG) {
+				_free_function(typ_reference->scope.fptr);
+			}
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_FUNCTION:
@@ -1262,7 +1273,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 /* }}} */
 
 /* {{{ reflection_type_factory */
-static void reflection_type_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, zval *object)
+static void reflection_type_factory(void *scope, zval *closure_object, void *info, reflection_info_type_t type, zval *object)
 {
 	reflection_object *intern;
 	type_reference *reference;
@@ -1270,11 +1281,25 @@ static void reflection_type_factory(zend_function *fptr, zval *closure_object, s
 	reflection_instantiate(reflection_type_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
-	reference->arg_info = arg_info;
-	reference->fptr = fptr;
+	reference->info = info;
+	reference->type = type;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
-	intern->ce = fptr->common.scope;
+	
+	switch (type) {
+		case REF_INFO_ARG: {
+			zend_function *fptr = (zend_function*) scope;
+			
+			reference->scope.fptr = fptr;
+			intern->ce = fptr->common.scope;
+		} break;
+		
+		case REF_INFO_PROP:
+			reference->scope.ce = scope;
+			intern->ce = scope;
+		break;	
+	}
+	
 	if (closure_object) {
 		Z_ADDREF_P(closure_object);
 		ZVAL_COPY_VALUE(&intern->obj, closure_object);
@@ -2728,7 +2753,7 @@ ZEND_METHOD(reflection_parameter, getType)
 	{
 		RETURN_NULL();
 	}
-	reflection_type_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, param->arg_info, return_value);
+	reflection_type_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, param->arg_info, REF_INFO_ARG, return_value);
 }
 /* }}} */
 
@@ -2981,7 +3006,16 @@ ZEND_METHOD(reflection_type, allowsNull)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->allow_null);
+	switch (param->type) {
+		case REF_INFO_ARG: {
+			RETVAL_BOOL(((zend_arg_info*) param->info)->allow_null);
+		} break;
+			
+
+		case REF_INFO_PROP:
+			RETVAL_FALSE;
+		break;
+	}
 }
 /* }}} */
 
@@ -2997,7 +3031,15 @@ ZEND_METHOD(reflection_type, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint != IS_OBJECT);
+	switch (param->type) {
+		case REF_INFO_ARG: {
+			RETVAL_BOOL(((zend_arg_info*) param->info)->type_hint != IS_OBJECT);
+		} break;
+
+		case REF_INFO_PROP:
+			RETVAL_BOOL(((zend_property_info*) param->info)->type != IS_OBJECT);
+		break;
+	}
 }
 /* }}} */
 
@@ -3007,21 +3049,38 @@ ZEND_METHOD(reflection_type, __toString)
 {
 	reflection_object *intern;
 	type_reference *param;
-
+	zend_uchar type = IS_UNDEF;
+	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	switch (param->arg_info->type_hint) {
+	switch (param->type) {
+		case REF_INFO_ARG: {
+			type = ((zend_arg_info*)param->info)->type_hint;
+			if (type == IS_OBJECT) {
+				zend_function *fptr = param->scope.fptr;
+				
+				if (fptr->type == ZEND_INTERNAL_FUNCTION && 
+					!(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+					RETURN_STRING(((zend_internal_arg_info*) param->info)->class_name);
+				} else RETURN_STR_COPY(((zend_arg_info*)param->info)->class_name);
+			}
+		} break;
+
+		case REF_INFO_PROP: {
+			type = ((zend_property_info*)param->info)->type;
+			if (type == IS_OBJECT) {
+				RETURN_STR_COPY(((zend_property_info*)param->info)->type_name);
+			}
+		} break;
+	}
+
+	switch (type) {
 		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
 		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
-		case IS_OBJECT:
-			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-				RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
-			}
-			RETURN_STR_COPY(param->arg_info->class_name);
 		case IS_STRING:   RETURN_STRINGL("string", sizeof("string") - 1);
 		case _IS_BOOL:    RETURN_STRINGL("bool", sizeof("bool") - 1);
 		case IS_LONG:     RETURN_STRINGL("int", sizeof("int") - 1);
@@ -3574,7 +3633,7 @@ ZEND_METHOD(reflection_function, getReturnType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(_copy_function(fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, &fptr->common.arg_info[-1], return_value);
+	reflection_type_factory(_copy_function(fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, &fptr->common.arg_info[-1], REF_INFO_ARG, return_value);
 }
 /* }}} */
 
@@ -5799,6 +5858,27 @@ ZEND_METHOD(reflection_property, setAccessible)
 }
 /* }}} */
 
+/* {{{ proto public ReflectionType ReflectionProperty::getType()
+   Returns the type associated with the property */
+ZEND_METHOD(reflection_property, getType)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (!ref->prop.type) {
+		RETURN_NULL();
+	}
+	
+	reflection_type_factory(ref->prop.ce, Z_ISUNDEF(intern->obj) ? NULL : &intern->obj, &ref->prop, REF_INFO_PROP, return_value);
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
@@ -6668,6 +6748,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_property_setAccessible, 0)
+	ZEND_ME(reflection_property, getType, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

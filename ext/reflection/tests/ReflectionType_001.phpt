@@ -73,6 +73,26 @@ foreach ([
     var_dump((string)$ra);
   }
 }
+
+echo "\n*** property types\n";
+
+class PropTypeTest {
+	public int $int;
+	public string $string;
+	public array $arr;
+	public callable $callable;
+	public stdClass $std;
+	public OtherThing $other;
+}
+
+$reflector = new ReflectionClass(PropTypeTest::class);
+
+foreach ($reflector->getProperties() as $name => $property) {
+	printf("public %s $%s;\n", 
+		$property->getName(), (string)	$property->getType());
+}
+
+echo "** property types\n";
 --EXPECT--
 *** functions
 ** Function 0 - Parameter 0
@@ -183,3 +203,12 @@ bool(true)
 bool(false)
 bool(false)
 string(4) "Test"
+
+*** property types
+public int $int;
+public string $string;
+public arr $array;
+public callable $callable;
+public std $stdClass;
+public other $OtherThing;
+** property types
