@@ -215,7 +215,10 @@ typedef struct _type_reference {
 		zend_function *fptr;
 		zend_class_entry *ce;
 	} scope;
-	void *info;
+	union {
+		zend_arg_info *arg;
+		zend_property_info *prop;
+	} info;
 } type_reference;
 
 typedef enum {
@@ -1281,7 +1284,6 @@ static void reflection_type_factory(void *scope, zval *closure_object, void *inf
 	reflection_instantiate(reflection_type_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
-	reference->info = info;
 	reference->type = type;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
@@ -1292,14 +1294,17 @@ static void reflection_type_factory(void *scope, zval *closure_object, void *inf
 			
 			reference->scope.fptr = fptr;
 			intern->ce = fptr->common.scope;
+
+			reference->info.arg = info;
 		} break;
 		
 		case REF_INFO_PROP:
 			reference->scope.ce = scope;
 			intern->ce = scope;
-		break;	
+			reference->info.prop = info;
+		break;
 	}
-	
+
 	if (closure_object) {
 		Z_ADDREF_P(closure_object);
 		ZVAL_COPY_VALUE(&intern->obj, closure_object);
@@ -3008,7 +3013,7 @@ ZEND_METHOD(reflection_type, allowsNull)
 
 	switch (param->type) {
 		case REF_INFO_ARG: {
-			RETVAL_BOOL(((zend_arg_info*) param->info)->allow_null);
+			RETVAL_BOOL(param->info.arg->allow_null);
 		} break;
 			
 
@@ -3033,11 +3038,11 @@ ZEND_METHOD(reflection_type, isBuiltin)
 
 	switch (param->type) {
 		case REF_INFO_ARG: {
-			RETVAL_BOOL(((zend_arg_info*) param->info)->type_hint != IS_OBJECT);
+			RETVAL_BOOL(param->info.arg->type_hint != IS_OBJECT);
 		} break;
 
 		case REF_INFO_PROP:
-			RETVAL_BOOL(((zend_property_info*) param->info)->type != IS_OBJECT);
+			RETVAL_BOOL(param->info.prop->type != IS_OBJECT);
 		break;
 	}
 }
@@ -3059,21 +3064,21 @@ ZEND_METHOD(reflection_type, __toString)
 
 	switch (param->type) {
 		case REF_INFO_ARG: {
-			type = ((zend_arg_info*)param->info)->type_hint;
+			type = param->info.arg->type_hint;
 			if (type == IS_OBJECT) {
 				zend_function *fptr = param->scope.fptr;
-				
+
 				if (fptr->type == ZEND_INTERNAL_FUNCTION && 
 					!(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-					RETURN_STRING(((zend_internal_arg_info*) param->info)->class_name);
-				} else RETURN_STR_COPY(((zend_arg_info*)param->info)->class_name);
+					RETURN_STRING(((zend_internal_arg_info*) param->info.arg)->class_name);
+				} else RETURN_STR_COPY(param->info.arg->class_name);
 			}
 		} break;
 
 		case REF_INFO_PROP: {
-			type = ((zend_property_info*)param->info)->type;
+			type = param->info.prop->type;
 			if (type == IS_OBJECT) {
-				RETURN_STR_COPY(((zend_property_info*)param->info)->type_name);
+				RETURN_STR_COPY(param->info.prop->type_name);
 			}
 		} break;
 	}
