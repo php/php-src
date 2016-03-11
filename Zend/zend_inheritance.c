@@ -1633,9 +1633,10 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			if (Z_REFCOUNTED_P(prop_value)) Z_ADDREF_P(prop_value);
 
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
-			zend_declare_property_ex(ce, prop_name,
-									 prop_value, flags,
-								     doc_comment);
+			if (property_info->type) {
+				zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type, property_info->type_name);
+			} else zend_declare_property_ex(ce, prop_name, prop_value, flags, doc_comment);
+
 			zend_string_release(prop_name);
 		} ZEND_HASH_FOREACH_END();
 	}
