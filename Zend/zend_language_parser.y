@@ -473,10 +473,10 @@ unset_variable:
 ;
 
 function_declaration_statement:
-	function returns_ref T_STRING '(' parameter_list ')' return_type
-	backup_doc_comment '{' inner_statement_list '}'
-		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $8,
-		      zend_ast_get_str($3), $5, NULL, $10, $7); }
+	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+	'{' inner_statement_list '}'
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $4,
+		      zend_ast_get_str($3), $6, NULL, $10, $8); }
 ;
 
 is_reference:
@@ -705,10 +705,10 @@ class_statement:
 			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
-	|	method_modifiers function returns_ref identifier '(' parameter_list ')'
-		return_type backup_doc_comment method_body
-			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1, $2, $9,
-				  zend_ast_get_str($4), $6, NULL, $10, $8); }
+	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
+		return_type method_body
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1, $2, $5,
+				  zend_ast_get_str($4), $7, NULL, $10, $9); }
 ;
 
 name_list:
