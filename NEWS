@@ -58,8 +58,8 @@ PHP                                                                        NEWS
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
 
 - Session:
-  . Fixed bug #71754 (Regression in PHP7.0: trivial script segfaults php-cgi).
-    (Laruence)
+  . Fixed Bug #71683 (Null pointer dereference in zend_hash_str_find_bucket).
+    (Yasuo)
 
 - SPL:
   . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
