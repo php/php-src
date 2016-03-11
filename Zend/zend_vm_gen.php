@@ -74,7 +74,7 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_ARG_NUM"     => 1<<18,
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
 	"ZEND_VM_EXT_REF"         => 1<<20,
-	"ZEND_VM_EXT_MASK"        => 0xff000000,
+	"ZEND_VM_EXT_MASK"        => 0x0f000000,
 	"ZEND_VM_EXT_NUM"         => 0x01000000,
     // unused 0x2000000
 	"ZEND_VM_EXT_JMP_ADDR"    => 0x03000000,
@@ -87,6 +87,8 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_FAST_RET"    => 0x0a000000,
 	"ZEND_VM_EXT_SRC"         => 0x0b000000,
 	"ZEND_VM_EXT_SEND"        => 0x0c000000,
+	"ZEND_VM_NO_CONST_CONST"  => 0x40000000,
+	"ZEND_VM_COMMUTATIVE"     => 0x80000000,
 );
 
 foreach ($vm_op_flags as $name => $val) {
@@ -177,6 +179,17 @@ $typecode = array(
 	"CV"       => 4,
 	"TMPVAR"   => 0,
 	"TMPVARCV" => 0,
+);
+
+$commutative_order = array(
+	"ANY"      => 0,
+	"TMP"      => 1,
+	"VAR"      => 2,
+	"CONST"    => 0,
+	"UNUSED"   => 0,
+	"CV"       => 4,
+	"TMPVAR"   => 2,
+	"TMPVARCV" => 4,
 );
 
 $op1_type = array(
@@ -908,7 +921,21 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 
 // Generates opcode handler
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $extra_spec = null, &$switch_labels = array()) {
-	global $definition_file, $prefix, $typecode, $opnames;
+	global $definition_file, $prefix, $typecode, $opnames, $commutative_order;
+
+	if ($spec &&
+	    isset($extra_spec["NO_CONST_CONST"]) &&
+	    $op1 == "CONST" && $op2 == "CONST") {
+	    // Skip useless constant handlers
+		return;
+	}
+
+	if ($spec &&
+	    isset($extra_spec["COMMUTATIVE"]) &&
+	    $commutative_order[$op1] > $commutative_order[$op2]) {
+	    // Skip duplicate commutative handlers
+		return;
+	}
 
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
@@ -980,6 +1007,21 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 
 	// Generate helper's code
 	gen_code($f, $spec, $kind, 0, $code, $op1, $op2, $name);
+}
+
+
+function gen_null_label($f, $kind, $prolog) {
+	switch ($kind) {
+		case ZEND_VM_KIND_CALL:
+			out($f,$prolog."ZEND_NULL_HANDLER,\n");
+			break;
+		case ZEND_VM_KIND_SWITCH:
+			out($f,$prolog."(void*)(uintptr_t)-1,\n");
+			break;
+		case ZEND_VM_KIND_GOTO:
+			out($f,$prolog."(void*)&&ZEND_NULL_HANDLER,\n");
+			break;
+	}
 }
 
 // Generates array of opcode handlers (specialized or unspecialized)
@@ -1099,13 +1141,28 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 				};
 			};
 			$generate = function ($op1, $op2, $extra_spec = array()) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label) {
-				global $typecode;
+				global $typecode, $commutative_order;
 
 				// Check if specialized handler is defined
 				/* TODO: figure out better way to signal "specialized and not defined" than an extra lookup */
 				if (isset($dsc["op1"][$op1]) &&
 				    isset($dsc["op2"][$op2]) &&
 				    (!isset($extra_spec["OP_DATA"]) || isset($dsc["spec"]["OP_DATA"][$extra_spec["OP_DATA"]]))) {
+
+					if (isset($extra_spec["NO_CONST_CONST"]) &&
+					    $op1 == "CONST" && $op2 == "CONST") {
+					    // Skip useless constant handlers
+						gen_null_label($f, $kind, $prolog);
+						$label++;
+						return;
+					} else if (isset($extra_spec["COMMUTATIVE"]) &&
+					    $commutative_order[$op1] > $commutative_order[$op2]) {
+					    // Skip duplicate commutative handlers
+						gen_null_label($f, $kind, $prolog);
+						$label++;
+						return;
+					}
+					
 					// Emit pointer to specialized handler
 					$spec_name = $dsc["op"]."_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec);
 					switch ($kind) {
@@ -1124,20 +1181,8 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					}
 				} else {
 					// Emit pointer to handler of undefined opcode
-					switch ($kind) {
-						case ZEND_VM_KIND_CALL:
-							out($f,$prolog."ZEND_NULL_HANDLER,\n");
-							$label++;
-							break;
-						case ZEND_VM_KIND_SWITCH:
-							out($f,$prolog."(void*)(uintptr_t)-1,\n");
-							$label++;
-							break;
-						case ZEND_VM_KIND_GOTO:
-							out($f,$prolog."(void*)&&ZEND_NULL_HANDLER,\n");
-							$label++;
-							break;
-					}
+					gen_null_label($f, $kind, $prolog);
+					$label++;
 				}
 			};
 
@@ -1805,6 +1850,12 @@ function parse_spec_rules($def, $lineno, $str) {
 				case "SMART_BRANCH":
 					$ret["SMART_BRANCH"] = array(0, 1, 2);
 					break;
+				case "NO_CONST_CONST":
+					$ret["NO_CONST_CONST"] = array(1);
+					break;
+				case "COMMUTATIVE":
+					$ret["COMMUTATIVE"] = array(1);
+					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
 			}
@@ -1877,6 +1928,12 @@ function gen_vm($def, $skel) {
 			$opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags);
 			if (isset($m[8])) {
 				$opcodes[$code]["spec"] = parse_spec_rules($def, $lineno, $m[8]);
+				if (isset($opcodes[$code]["spec"]["NO_CONST_CONST"])) {
+					$opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_NO_CONST_CONST"];
+				}
+				if (isset($opcodes[$code]["spec"]["COMMUTATIVE"])) {
+					$opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_COMMUTATIVE"];
+				}
 			}
 			$opnames[$op] = $code;
 			$handler = $code;

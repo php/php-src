@@ -46,7 +46,7 @@
 #define ZEND_VM_EXT_ARG_NUM      0x00040000
 #define ZEND_VM_EXT_ARRAY_INIT   0x00080000
 #define ZEND_VM_EXT_REF          0x00100000
-#define ZEND_VM_EXT_MASK         0xff000000
+#define ZEND_VM_EXT_MASK         0x0f000000
 #define ZEND_VM_EXT_NUM          0x01000000
 #define ZEND_VM_EXT_JMP_ADDR     0x03000000
 #define ZEND_VM_EXT_DIM_OBJ      0x04000000
@@ -58,6 +58,8 @@
 #define ZEND_VM_EXT_FAST_RET     0x0a000000
 #define ZEND_VM_EXT_SRC          0x0b000000
 #define ZEND_VM_EXT_SEND         0x0c000000
+#define ZEND_VM_NO_CONST_CONST   0x40000000
+#define ZEND_VM_COMMUTATIVE      0x80000000
 #define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)
 #define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)
 
