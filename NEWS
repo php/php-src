@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fixed bug #71575 (ISO C does not allow extra ‘;’ outside of a function).
     (asgrim)
   . Fixed bug #71724 (yield from does not count EOLs). (Nikita)
+  . Fixed bug #71767 (ReflectionMethod::getDocComment returns the wrong
+    comment). (Grigorii Sokolik)
 
 - Curl:
   . Fixed bug #71694 (Support constant CURLM_ADDED_ALREADY). (mpyw)
