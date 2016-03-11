@@ -1634,6 +1634,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
 			if (property_info->type) {
+				if (Z_TYPE_P(prop_value) == IS_NULL) {
+					ZVAL_UNDEF(prop_value);
+				}
 				zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type, property_info->type_name);
 			} else {
 				zend_declare_property_ex(ce, prop_name, prop_value, flags, doc_comment);
