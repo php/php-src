@@ -5884,6 +5884,23 @@ ZEND_METHOD(reflection_property, getType)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionProperty::hasType()
+   Returns whether property has a type */
+ZEND_METHOD(reflection_property, hasType)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	RETVAL_BOOL(ref->prop.type != 0);
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
@@ -6754,6 +6771,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_property_setAccessible, 0)
 	ZEND_ME(reflection_property, getType, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, hasType, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

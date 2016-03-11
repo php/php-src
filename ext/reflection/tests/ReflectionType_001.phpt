@@ -83,13 +83,16 @@ class PropTypeTest {
 	public callable $callable;
 	public stdClass $std;
 	public OtherThing $other;
+	public $mixed;
 }
 
 $reflector = new ReflectionClass(PropTypeTest::class);
 
 foreach ($reflector->getProperties() as $name => $property) {
-	printf("public %s $%s;\n", 
-		$property->getType(), $property->getName());
+	if ($property->hasType()) {
+		printf("public %s $%s;\n", 
+			$property->getType(), $property->getName());
+	} else printf("public $%s;\n", $property->getName());
 }
 
 echo "** property types\n";
@@ -211,4 +214,5 @@ public array $arr;
 public callable $callable;
 public stdClass $std;
 public OtherThing $other;
+public $mixed;
 ** property types
