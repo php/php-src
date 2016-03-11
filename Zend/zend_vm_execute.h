@@ -306,12 +306,13 @@ static zend_uchar zend_user_opcodes[256] = {0,
 	241,242,243,244,245,246,247,248,249,250,251,252,253,254,255
 };
 
-#define SPEC_START_MASK     0x0000ffff
-#define SPEC_RULE_OP1       0x00010000
-#define SPEC_RULE_OP2       0x00020000
-#define SPEC_RULE_OP_DATA   0x00040000
-#define SPEC_RULE_RETVAL    0x00080000
-#define SPEC_RULE_QUICK_ARG 0x00100000
+#define SPEC_START_MASK        0x0000ffff
+#define SPEC_RULE_OP1          0x00010000
+#define SPEC_RULE_OP2          0x00020000
+#define SPEC_RULE_OP_DATA      0x00040000
+#define SPEC_RULE_RETVAL       0x00080000
+#define SPEC_RULE_QUICK_ARG    0x00100000
+#define SPEC_RULE_SMART_BRANCH 0x00200000
 
 static const uint32_t *zend_spec_handlers;
 static const void **zend_opcode_handlers;

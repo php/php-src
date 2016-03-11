@@ -551,6 +551,8 @@ $params  = array(); // parameters of helpers
 $opnames = array(); // opcode name to code mapping
 $line_no = 1;
 
+$used_extra_spec = array();
+
 // Writes $s into resulting executor
 function out($f, $s) {
 	global $line_no;
@@ -675,6 +677,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/FREE_UNFETCHED_OP_DATA\(\)/",
 			"/RETURN_VALUE_USED\(opline\)/",
 			"/arg_num <= MAX_ARG_FLAG_NUM/",
+			"/ZEND_VM_SMART_BRANCH\(\s*([^,)]*)\s*,\s*([^)]*)\s*\)/",
 		),
 		array(
 			$op1_type[$op1],
@@ -719,13 +722,19 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"#\\1if 0",
 			$export?"#\\1if 1\n":"#\\1if 0\n",
 			$export?"#\\1if 0\n":"#\\1if 1\n",
-			$op_data_type[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_get_zval_ptr[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_get_zval_ptr_deref[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_free_op[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_free_unfetched[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			isset($extra_spec['retval']) ? $extra_spec['retval'] : "RETURN_VALUE_USED(opline)",
-			isset($extra_spec['quick_arg']) ? $extra_spec['quick_arg'] : "arg_num <= MAX_ARG_FLAG_NUM",
+			$op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_free_unfetched[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
+			isset($extra_spec['QUICK_ARG']) ? $extra_spec['QUICK_ARG'] : "arg_num <= MAX_ARG_FLAG_NUM",
+			isset($extra_spec['SMART_BRANCH']) ?
+				($extra_spec['SMART_BRANCH'] == 1 ?
+						"ZEND_VM_SMART_BRANCH_JMPZ(\\1, \\2)"
+					:	($extra_spec['SMART_BRANCH'] == 2 ?
+							"ZEND_VM_SMART_BRANCH_JMPNZ(\\1, \\2)" : ""))
+				: 	"ZEND_VM_SMART_BRANCH(\\1, \\2)",
 		),
 		$code);
 
@@ -1002,15 +1011,15 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					// For each op_data.op_type except ANY
 					foreach($op_types as $op_data) {
 						if ($op_data != "ANY") {
-							if (!isset($dsc["spec"]["op_data"][$op_data])) {
-								if (($op_data == "TMP" || $op_data == "VAR") && isset($dsc["spec"]["op_data"]["TMPVAR"])) {
+							if (!isset($dsc["spec"]["OP_DATA"][$op_data])) {
+								if (($op_data == "TMP" || $op_data == "VAR") && isset($dsc["spec"]["OP_DATA"]["TMPVAR"])) {
 									$op_data = "TMPVAR";
 								} else {
 									// Try to use unspecialized handler
 									$op_data = "ANY";
 								}
 							}
-							$do($op1, $op2, array("op_data" => $op_data) + $extra_spec);
+							$do($op1, $op2, array("OP_DATA" => $op_data) + $extra_spec);
 						}
 					}
 				};
@@ -1029,7 +1038,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 				/* TODO: figure out better way to signal "specialized and not defined" than an extra lookup */
 				if (isset($dsc["op1"][$op1]) &&
 				    isset($dsc["op2"][$op2]) &&
-				    (!isset($extra_spec["op_data"]) || isset($dsc["spec"]["op_data"][$extra_spec["op_data"]]))) {
+				    (!isset($extra_spec["OP_DATA"]) || isset($dsc["spec"]["OP_DATA"][$extra_spec["OP_DATA"]]))) {
 					// Emit pointer to specialized handler
 					$spec_name = $dsc["op"]."_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec);
 					switch ($kind) {
@@ -1068,7 +1077,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 			$do = $generate;
 			if ($spec_extra) {
 				foreach ($spec_extra as $extra => $devnull) {
-					if ($extra == "op_data") {
+					if ($extra == "OP_DATA") {
 						$do = $foreach_op_data($do);
 					} else {
 						$do = $foreach_extra_spec($do, $extra);
@@ -1188,15 +1197,22 @@ function extra_spec_name($extra_spec) {
 	global $prefix;
 
 	$s = "";
-	if (isset($extra_spec["op_data"])) {
-		$s .= "_OP_DATA" . $prefix[$extra_spec["op_data"]];
+	if (isset($extra_spec["OP_DATA"])) {
+		$s .= "_OP_DATA" . $prefix[$extra_spec["OP_DATA"]];
 	}
-	if (isset($extra_spec["retval"])) {
-		$s .= "_RETVAL_".($extra_spec["retval"] ? "USED" : "UNUSED");
+	if (isset($extra_spec["RETVAL"])) {
+		$s .= "_RETVAL_".($extra_spec["RETVAL"] ? "USED" : "UNUSED");
 	}
-	if (isset($extra_spec["quick_arg"])) {
-		if ($extra_spec["quick_arg"]) {
+	if (isset($extra_spec["QUICK_ARG"])) {
+		if ($extra_spec["QUICK_ARG"]) {
 			$s .= "_QUICK";
+		}
+	}
+	if (isset($extra_spec["SMART_BRANCH"])) {
+		if ($extra_spec["SMART_BRANCH"] == 1) {
+			$s .= "_JMPZ";
+		} else if ($extra_spec["SMART_BRANCH"] == 2) {
+			$s .= "_JMPNZ";
 		}
 	}
 	return $s;
@@ -1204,14 +1220,17 @@ function extra_spec_name($extra_spec) {
 
 function extra_spec_flags($extra_spec) {
 	$s = array();
-	if (isset($extra_spec["op_data"])) {
+	if (isset($extra_spec["OP_DATA"])) {
 		$s[] = "SPEC_RULE_OP_DATA";
 	}
-	if (isset($extra_spec["retval"])) {
+	if (isset($extra_spec["RETVAL"])) {
 		$s[] = "SPEC_RULE_RETVAL";
 	}
-	if (isset($extra_spec["quick_arg"])) {
+	if (isset($extra_spec["QUICK_ARG"])) {
 		$s[] = "SPEC_RULE_QUICK_ARG";
+	}
+	if (isset($extra_spec["SMART_BRANCH"])) {
+		$s[] = "SPEC_RULE_SMART_BRANCH";
 	}
 	return $s;
 }
@@ -1224,12 +1243,12 @@ function extra_spec_handler($dsc) {
 	}
 	$specs = $dsc["spec"];
 
-	if (isset($specs["op_data"])) {
-		$op_data_specs = $specs["op_data"];
-		$specs["op_data"] = array();
+	if (isset($specs["OP_DATA"])) {
+		$op_data_specs = $specs["OP_DATA"];
+		$specs["OP_DATA"] = array();
 		foreach($op_types_ex as $op_data) {
-			if (isset($dsc["spec"]["op_data"][$op_data])) {
-				$specs["op_data"][] = $op_data;
+			if (isset($dsc["spec"]["OP_DATA"][$op_data])) {
+				$specs["OP_DATA"][] = $op_data;
 			}
 		}
 	}
@@ -1353,12 +1372,13 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 		if (preg_match("/(.*)[{][%]([A-Z_]*)[%][}](.*)/", $line, $m)) {
 			switch ($m[2]) {
 				case "DEFINES":
-					out($f,"#define SPEC_START_MASK     0x0000ffff\n");
-					out($f,"#define SPEC_RULE_OP1       0x00010000\n");
-					out($f,"#define SPEC_RULE_OP2       0x00020000\n");
-					out($f,"#define SPEC_RULE_OP_DATA   0x00040000\n");
-					out($f,"#define SPEC_RULE_RETVAL    0x00080000\n");
-					out($f,"#define SPEC_RULE_QUICK_ARG 0x00100000\n");
+					out($f,"#define SPEC_START_MASK        0x0000ffff\n");
+					out($f,"#define SPEC_RULE_OP1          0x00010000\n");
+					out($f,"#define SPEC_RULE_OP2          0x00020000\n");
+					out($f,"#define SPEC_RULE_OP_DATA      0x00040000\n");
+					out($f,"#define SPEC_RULE_RETVAL       0x00080000\n");
+					out($f,"#define SPEC_RULE_QUICK_ARG    0x00100000\n");
+					out($f,"#define SPEC_RULE_SMART_BRANCH 0x00200000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void **zend_opcode_handlers;\n");
@@ -1690,6 +1710,8 @@ function parse_ext_spec($def, $lineno, $str) {
 }
 
 function parse_spec_rules($def, $lineno, $str) {
+	global $used_extra_spec;
+
 	$ret = array();
 	$a = explode(",", $str);
 	foreach($a as $rule) {
@@ -1699,22 +1721,27 @@ function parse_spec_rules($def, $lineno, $str) {
 			$val = trim(substr($rule, $n+1));
 			switch ($id) {
 				case "OP_DATA":
-					$ret["op_data"] = parse_operand_spec($def, $lineno, $val, $devnull);
+					$ret["OP_DATA"] = parse_operand_spec($def, $lineno, $val, $devnull);
 					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
 			}
+			$used_extra_spec[$id] = 1;
 		} else {
 			switch ($rule) {
 				case "RETVAL":
-					$ret["retval"] = array(0, 1);
+					$ret["RETVAL"] = array(0, 1);
 					break;
 				case "QUICK_ARG":
-					$ret["quick_arg"] = array(0, 1);
+					$ret["QUICK_ARG"] = array(0, 1);
+					break;
+				case "SMART_BRANCH":
+					$ret["SMART_BRANCH"] = array(0, 1, 2);
 					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
 			}
+			$used_extra_spec[$rule] = 1;
 		}
 	}
 	return $ret;
@@ -1723,7 +1750,7 @@ function parse_spec_rules($def, $lineno, $str) {
 function gen_vm($def, $skel) {
 	global $definition_file, $skeleton_file, $executor_file,
 		$op_types, $list, $opcodes, $helpers, $params, $opnames,
-		$vm_op_flags;
+		$vm_op_flags, $used_extra_spec;
 
 	// Load definition file
 	$in = @file($def);
@@ -2030,9 +2057,25 @@ function gen_vm($def, $skel) {
 		out($f, "\tuint32_t offset = 0;\n");
 		out($f, "\tif (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];\n");
 		out($f, "\tif (spec & SPEC_RULE_OP2) offset = offset * 5 + zend_vm_decode[op->op2_type];\n");
-		out($f, "\tif (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
-		out($f, "\tif (spec & SPEC_RULE_RETVAL) offset = offset * 2 + (op->result_type != IS_UNUSED);\n");
-		out($f, "\tif (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);\n");
+		if (isset($used_extra_spec["OP_DATA"])) {
+			out($f, "\tif (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
+		}
+		if (isset($used_extra_spec["RETVAL"])) {
+			out($f, "\tif (spec & SPEC_RULE_RETVAL) offset = offset * 2 + (op->result_type != IS_UNUSED);\n");
+		}
+		if (isset($used_extra_spec["QUICK_ARG"])) {
+			out($f, "\tif (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);\n");
+		}
+		if (isset($used_extra_spec["SMART_BRANCH"])) {
+			out($f, "\tif (spec & SPEC_RULE_SMART_BRANCH) {\n");
+			out($f,	"\t\toffset = offset * 3;\n");
+			out($f, "\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
+			out($f,	"\t\t\toffset += 1;\n");
+			out($f, "\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+			out($f,	"\t\t\toffset += 2;\n");
+			out($f, "\t\t}\n");
+			out($f, "\t}\n");
+		}
 		out($f, "\treturn zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];\n");
 	}
 	out($f, "}\n\n");

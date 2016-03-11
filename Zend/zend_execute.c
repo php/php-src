@@ -2695,10 +2695,34 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
+		if (_result) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
+		if (!(_result)) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
 #else
 # define ZEND_VM_REPEATABLE_OPCODE
 # define ZEND_VM_REPEAT_OPCODE(_opcode)
 # define ZEND_VM_SMART_BRANCH(_result, _check)
+# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check)
+# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check)
 #endif
 
 #ifdef __GNUC__
