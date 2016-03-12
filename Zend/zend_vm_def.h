@@ -5010,12 +5010,13 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, JMP_ADDR, NUM)
+ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, ANY, NUM)
 {
 	USE_OPLINE
 	zval *result;
 	zend_function *constructor;
 	zend_class_entry *ce;
+	zend_execute_data *call;
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CONST) {
@@ -5044,21 +5045,29 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, JMP_ADDR, NUM)
 
 	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
 	if (constructor == NULL) {
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+		if (EXPECTED(opline->extended_value == 0)) {
+			/* Skip over DO_FCALL opcode */
+			ZEND_VM_NEXT_OPCODE_EX(1, 2);
+		}
+
+		/* Perform a dummy function call */
+		call = zend_vm_stack_push_call_frame(
+			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
+			opline->extended_value, NULL, NULL);
 	} else {
 		/* We are not handling overloaded classes right now */
-		zend_execute_data *call = zend_vm_stack_push_call_frame(
+		call = zend_vm_stack_push_call_frame(
 			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_CTOR,
 			constructor,
 			opline->extended_value,
 			ce,
 			Z_OBJ_P(result));
-		call->prev_execute_data = EX(call);
-		EX(call) = call;
 		Z_ADDREF_P(result);
-
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
+
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
