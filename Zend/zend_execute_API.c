@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,7 +43,7 @@ ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 
 /* true globals */
-ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0}, {{0}}, {0}}, NULL, NULL, NULL, NULL, 0, 0 };
+ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0}, {{0}}, {0}}, NULL, NULL, NULL, 0, 0 };
 ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
@@ -130,7 +130,7 @@ void init_executor(void) /* {{{ */
 	zend_init_fpu();
 
 	ZVAL_NULL(&EG(uninitialized_zval));
-	ZVAL_NULL(&EG(error_zval));
+	ZVAL_ERROR(&EG(error_zval));
 /* destroys stack frame, therefore makes core dumps worthless */
 #if 0&&ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
@@ -218,7 +218,7 @@ static void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, 
 	zend_vspprintf(&message, 0, format, va);
 
 	if (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) {
-		zend_throw_error(exception_ce, message);
+		zend_throw_error(exception_ce, "%s", message);
 	} else {
 		zend_error(E_ERROR, "%s", message);
 	}
@@ -396,6 +396,12 @@ void shutdown_executor(void) /* {{{ */
 	} zend_end_try();
 
 	zend_shutdown_fpu();
+
+#ifdef ZEND_DEBUG
+	if (EG(ht_iterators_used) && !CG(unclean_shutdown)) {
+		zend_error(E_WARNING, "Leaked %" PRIu32 " hashtable iterators", EG(ht_iterators_used));
+	}
+#endif
 
 	EG(ht_iterators_used) = 0;
 	if (EG(ht_iterators) != EG(ht_iterators_slots)) {
@@ -662,7 +668,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 }
 /* }}} */
 
-int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation, zend_array *symbol_table) /* {{{ */
+int _call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation) /* {{{ */
 {
 	zend_fcall_info fci;
 
@@ -674,7 +680,6 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = (zend_bool) no_separation;
-	fci.symbol_table = symbol_table;
 
 	return zend_call_function(&fci, NULL);
 }
@@ -848,7 +853,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 		EG(scope) = func->common.scope;
-		call->symbol_table = fci->symbol_table;
+		call->symbol_table = NULL;
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_init_execute_data(call, &func->op_array, fci->retval);
 			zend_execute_ex(call);
@@ -937,7 +942,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	zend_class_entry *ce = NULL;
 	zval args[1];
 	zval local_retval;
-	int retval;
 	zend_string *lc_name;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
@@ -1019,7 +1023,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	fcall_info.size = sizeof(fcall_info);
 	fcall_info.function_table = EG(function_table);
 	ZVAL_STR_COPY(&fcall_info.function_name, EG(autoload_func)->common.function_name);
-	fcall_info.symbol_table = NULL;
 	fcall_info.retval = &local_retval;
 	fcall_info.param_count = 1;
 	fcall_info.params = args;
@@ -1033,7 +1036,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	fcall_cache.object = NULL;
 
 	zend_exception_save();
-	retval = zend_call_function(&fcall_info, &fcall_cache);
+	if ((zend_call_function(&fcall_info, &fcall_cache) == SUCCESS) && !EG(exception)) {
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+	}
 	zend_exception_restore();
 
 	zval_ptr_dtor(&args[0]);
@@ -1043,9 +1048,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 
 	zval_ptr_dtor(&local_retval);
 
-	if (retval == SUCCESS) {
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-	}
 	if (!key) {
 		zend_string_release(lc_name);
 	}

@@ -1,6 +1,6 @@
 /*
   zip_source_supports.c -- check for supported functions
-  Copyright (C) 2014 Dieter Baron and Thomas Klausner
+  Copyright (C) 2014-2015 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -44,7 +44,7 @@ zip_source_supports(zip_source_t *src)
 }
 
 
-zip_int64_t
+ZIP_EXTERN zip_int64_t
 zip_source_make_command_bitmap(zip_source_cmd_t cmd0, ...)
 {
     zip_int64_t bitmap;

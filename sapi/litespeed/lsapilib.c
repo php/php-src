@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,7 +128,7 @@ static int s_pid_dump_debug_info = 0;
 
 LSAPI_Request g_req = { -1, -1 };
 
-static char         s_pSecret[24];
+static char         s_secret[24];
 
 
 void Flush_RespBuf_r( LSAPI_Request * pReq );
@@ -437,7 +437,7 @@ static int allocateEnvList( struct LSAPI_key_value_pair ** pEnvList,
                         int *curSize, int newSize )
 {
     struct LSAPI_key_value_pair * pBuf;
-        if ( *curSize >= newSize )
+    if ( *curSize >= newSize )
         return 0;
     if ( newSize > 8192 )
         return -1;
@@ -559,6 +559,40 @@ static void fixHeaderIndexEndian( LSAPI_Request * pReq )
     }
 }
 
+
+static int validateHeaders( LSAPI_Request * pReq )
+{
+    int totalLen = pReq->m_pHeader->m_httpHeaderLen;
+    int i;
+    for(i = 0; i < H_TRANSFER_ENCODING; ++i)
+    {
+        if ( pReq->m_pHeaderIndex->m_headerOff[i] )
+        {
+            if (pReq->m_pHeaderIndex->m_headerOff[i] > totalLen 
+                || pReq->m_pHeaderIndex->m_headerLen[i] 
+                    + pReq->m_pHeaderIndex->m_headerOff[i] > totalLen)
+                return -1;
+        }
+    }
+    if (pReq->m_pHeader->m_cntUnknownHeaders > 0)
+    {
+        struct lsapi_header_offset * pCur, *pEnd;
+        pCur = pReq->m_pUnknownHeader;
+        pEnd = pCur + pReq->m_pHeader->m_cntUnknownHeaders;
+        while( pCur < pEnd )
+        {
+            if (pCur->nameOff > totalLen 
+                || pCur->nameOff + pCur->nameLen > totalLen 
+                || pCur->valueOff > totalLen
+                || pCur->valueOff + pCur->valueLen > totalLen)
+                return -1;
+            ++pCur;
+        }
+    }
+    return 0;
+}
+
+
 static uid_t s_uid = 0;
 static uid_t s_defaultUid;  //web server need set this
 static gid_t s_defaultGid;
@@ -670,7 +704,7 @@ static int readSecret( const char * pSecretFile )
         close( fd );
         return -1;
     }
-    if ( read( fd, s_pSecret, 16 ) < 16 )
+    if ( read( fd, s_secret, 16 ) < 16 )
     {
         fprintf( stderr, "LSAPI: failed to read secret from secret file: %s\n", pSecretFile );
         close( fd );
@@ -682,7 +716,7 @@ static int readSecret( const char * pSecretFile )
 
 int LSAPI_is_suEXEC_Daemon()
 {
-    if (( !s_uid )&&( s_pSecret[0] ))
+    if (( !s_uid )&&( s_secret[0] ))
         return 1;
     else
         return 0;
@@ -877,7 +911,7 @@ static int lsapi_suexec_auth( LSAPI_Request *pReq,
     if ( len < 32 )
         return -1;
     memmove( achMD5, pAuth + 16, 16 );
-    memmove( pAuth + 16, s_pSecret, 16 );
+    memmove( pAuth + 16, s_secret, 16 );
     lsapi_MD5Init( &md5ctx );
     lsapi_MD5Update( &md5ctx, (unsigned char *)pAuth, 32 );
     lsapi_MD5Update( &md5ctx, (unsigned char *)pUgid, 8 );
@@ -999,7 +1033,18 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
     if ( parseEnv( pReq->m_pEnvList, pReq->m_pHeader->m_cntEnv,
                 &pBegin, pEnd ) == -1 )
         return -1;
-
+    if (pReq->m_pHeader->m_scriptFileOff < 0 
+        || pReq->m_pHeader->m_scriptFileOff >= totalLen 
+        || pReq->m_pHeader->m_scriptNameOff < 0
+        || pReq->m_pHeader->m_scriptNameOff >= totalLen
+        || pReq->m_pHeader->m_queryStringOff < 0
+        || pReq->m_pHeader->m_queryStringOff >= totalLen
+        || pReq->m_pHeader->m_requestMethodOff < 0 
+        || pReq->m_pHeader->m_requestMethodOff >= totalLen)
+    {
+        fprintf(stderr, "%d: bad request header - ERROR#1\n", getpid());
+        return -1;
+    }
     pReq->m_pScriptFile     = pReq->m_pReqBuf + pReq->m_pHeader->m_scriptFileOff;
     pReq->m_pScriptName     = pReq->m_pReqBuf + pReq->m_pHeader->m_scriptNameOff;
     pReq->m_pQueryString    = pReq->m_pReqBuf + pReq->m_pHeader->m_queryStringOff;
@@ -1025,6 +1070,13 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
     {
         fixHeaderIndexEndian( pReq );
     }
+    
+    if (validateHeaders(pReq) == -1)
+    {
+        fprintf(stderr, "%d: bad request header - ERROR#2\n", getpid());
+        return -1;
+    }
+    
     pReq->m_reqBodyLen = pReq->m_pHeader->m_reqBodyLen;
     if ( pReq->m_reqBodyLen == -2 )
     {
@@ -1170,8 +1222,11 @@ static int readReq( LSAPI_Request * pReq )
     pReq->m_reqState = LSAPI_ST_REQ_BODY | LSAPI_ST_RESP_HEADER;
 
     if ( !s_uid )
+    {
         if ( lsapi_changeUGid( pReq ) )
             return -1;
+        memset(s_secret, 0, sizeof(s_secret));
+    }
     pReq->m_bufProcessed = packetLen;
 
     //OPTIMIZATION
@@ -1191,7 +1246,7 @@ int LSAPI_Init(void)
     if ( !g_inited )
     {
         s_uid = geteuid();
-        s_pSecret[0] = 0;
+        s_secret[0] = 0;
         lsapi_signal(SIGPIPE, lsapi_sigpipe);
         lsapi_signal(SIGUSR1, lsapi_siguser1);
 
@@ -1444,7 +1499,7 @@ int LSAPI_ReqBodyGetLine_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen, in
     char * pBufCur = pBuf;
     char * pCur;
     char * p;
-    if (!pReq || (pReq->m_fd ==-1) ||( !pBuf )|| !getLF )
+    if (!pReq || (pReq->m_fd ==-1) ||( !pBuf )||(bufLen < 0 )|| !getLF )
         return -1;
     *getLF = 0;
     while( (left = pBufEnd - pBufCur ) > 0 )
@@ -1488,7 +1543,7 @@ ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen )
     ssize_t len;
     off_t total;
     /* char *pOldBuf = pBuf; */
-    if (!pReq || (pReq->m_fd ==-1) || ( !pBuf ))
+    if (!pReq || (pReq->m_fd ==-1) || ( !pBuf )||(bufLen < 0 ))
         return -1;
 
     total = pReq->m_reqBodyLen - pReq->m_reqBodyRead;

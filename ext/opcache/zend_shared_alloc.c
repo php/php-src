@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -496,6 +496,10 @@ void zend_accel_shared_protect(int mode)
 #ifdef HAVE_MPROTECT
 	int i;
 
+	if (!smm_shared_globals) {
+		return;
+	}
+
 	if (mode) {
 		mode = PROT_READ;
 	} else {
@@ -506,4 +510,21 @@ void zend_accel_shared_protect(int mode)
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->size, mode);
 	}
 #endif
+}
+
+int zend_accel_in_shm(void *ptr)
+{
+	int i;
+
+	if (!smm_shared_globals) {
+		return 0;
+	}
+
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
+		if ((char*)ptr >= (char*)ZSMMG(shared_segments)[i]->p &&
+		    (char*)ptr < (char*)ZSMMG(shared_segments)[i]->p + ZSMMG(shared_segments)[i]->size) {
+			return 1;
+		}
+	}
+	return 0;
 }

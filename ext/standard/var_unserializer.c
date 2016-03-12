@@ -4,7 +4,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(rval));
 #endif
 
 	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -104,7 +104,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nz
 	zend_long i;
 	var_entries *var_hash = (*var_hashx)->first;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(nzval));
+	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(nzval));
 #endif
 
 	while (var_hash) {
@@ -574,7 +574,7 @@ yy2:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == ':') goto yy95;
 yy3:
-#line 869 "ext/standard/var_unserializer.re"
+#line 873 "ext/standard/var_unserializer.re"
 	{ return 0; }
 #line 580 "ext/standard/var_unserializer.c"
 yy4:
@@ -619,7 +619,7 @@ yy13:
 	goto yy3;
 yy14:
 	++YYCURSOR;
-#line 863 "ext/standard/var_unserializer.re"
+#line 867 "ext/standard/var_unserializer.re"
 	{
 	/* this is the case where we have less data than planned */
 	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");
@@ -655,7 +655,7 @@ yy20:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 718 "ext/standard/var_unserializer.re"
+#line 722 "ext/standard/var_unserializer.re"
 	{
 	size_t len, len2, len3, maxlen;
 	zend_long elements;
@@ -825,7 +825,7 @@ yy27:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 711 "ext/standard/var_unserializer.re"
+#line 715 "ext/standard/var_unserializer.re"
 	{
     if (!var_hash) return 0;
 
@@ -853,7 +853,7 @@ yy34:
 	yych = *++YYCURSOR;
 	if (yych != '{') goto yy18;
 	++YYCURSOR;
-#line 687 "ext/standard/var_unserializer.re"
+#line 691 "ext/standard/var_unserializer.re"
 	{
 	zend_long elements = parse_iv(start + 2);
 	/* use iv() not uiv() in order to check data range */
@@ -898,7 +898,7 @@ yy41:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 659 "ext/standard/var_unserializer.re"
+#line 663 "ext/standard/var_unserializer.re"
 	{
 	size_t len, maxlen;
 	zend_string *str;
@@ -947,7 +947,7 @@ yy48:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 632 "ext/standard/var_unserializer.re"
+#line 636 "ext/standard/var_unserializer.re"
 	{
 	size_t len, maxlen;
 	char *str;
@@ -1062,7 +1062,7 @@ yy61:
 	}
 yy63:
 	++YYCURSOR;
-#line 623 "ext/standard/var_unserializer.re"
+#line 627 "ext/standard/var_unserializer.re"
 	{
 #if SIZEOF_ZEND_LONG == 4
 use_double:
@@ -1130,7 +1130,7 @@ yy73:
 	yych = *++YYCURSOR;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 607 "ext/standard/var_unserializer.re"
+#line 611 "ext/standard/var_unserializer.re"
 	{
 	*p = YYCURSOR;
 
@@ -1173,7 +1173,7 @@ yy79:
 	if (yych <= '9') goto yy79;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 581 "ext/standard/var_unserializer.re"
+#line 585 "ext/standard/var_unserializer.re"
 	{
 #if SIZEOF_ZEND_LONG == 4
 	int digits = YYCURSOR - start - 3;
@@ -1207,7 +1207,7 @@ yy83:
 	yych = *++YYCURSOR;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 575 "ext/standard/var_unserializer.re"
+#line 579 "ext/standard/var_unserializer.re"
 	{
 	*p = YYCURSOR;
 	ZVAL_BOOL(rval, parse_iv(start + 2));
@@ -1216,7 +1216,7 @@ yy83:
 #line 1217 "ext/standard/var_unserializer.c"
 yy87:
 	++YYCURSOR;
-#line 569 "ext/standard/var_unserializer.re"
+#line 573 "ext/standard/var_unserializer.re"
 	{
 	*p = YYCURSOR;
 	ZVAL_NULL(rval);
@@ -1257,6 +1257,10 @@ yy91:
 		return 0;
 	}
 
+	if (rval_ref == rval) {
+		return 0;
+	}
+
 	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
 		ZVAL_UNDEF(rval);
 		return 1;
@@ -1266,7 +1270,7 @@ yy91:
 
 	return 1;
 }
-#line 1270 "ext/standard/var_unserializer.c"
+#line 1274 "ext/standard/var_unserializer.c"
 yy95:
 	yych = *++YYCURSOR;
 	if (yych <= ',') {
@@ -1315,9 +1319,9 @@ yy97:
 
 	return 1;
 }
-#line 1319 "ext/standard/var_unserializer.c"
+#line 1323 "ext/standard/var_unserializer.c"
 }
-#line 871 "ext/standard/var_unserializer.re"
+#line 875 "ext/standard/var_unserializer.re"
 
 
 	return 0;

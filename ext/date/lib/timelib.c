@@ -65,6 +65,23 @@ timelib_time* timelib_time_clone(timelib_time *orig)
 	return tmp;
 }
 
+int timelib_time_compare(timelib_time *t1, timelib_time *t2)
+{
+	if (t1->sse == t2->sse) {
+		if (t1->f == t2->f) {
+			return 0;
+		}
+
+		if (t1->sse < 0) {
+			return (t1->f < t2->f) ? 1 : -1;
+		} else {
+			return (t1->f < t2->f) ? -1 : 1;
+		}
+	}
+
+	return (t1->sse < t2->sse) ? -1 : 1;
+}
+
 timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 {
 	timelib_rel_time *tmp = timelib_rel_time_ctor();

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -138,6 +138,7 @@ struct _zval_struct {
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
+		uint32_t     access_flags;         /* class constant access flags */
 	} u2;
 };
 
@@ -323,6 +324,7 @@ struct _zend_ast_ref {
 /* internal types */
 #define IS_INDIRECT             	15
 #define IS_PTR						17
+#define _IS_ERROR					19
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -361,6 +363,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_FE_ITER(zval)				(zval).u2.fe_iter_idx
 #define Z_FE_ITER_P(zval_p)			Z_FE_ITER(*(zval_p))
 
+#define Z_ACCESS_FLAGS(zval)		(zval).u2.access_flags
+#define Z_ACCESS_FLAGS_P(zval_p)	Z_ACCESS_FLAGS(*(zval_p))
+
 #define Z_COUNTED(zval)				(zval).value.counted
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
 
@@ -393,7 +398,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_TYPE_REFCOUNTED			(1<<2)
 #define IS_TYPE_COLLECTABLE			(1<<3)
 #define IS_TYPE_COPYABLE			(1<<4)
-#define IS_TYPE_SYMBOLTABLE			(1<<5)
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
@@ -409,8 +413,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 /* zval.u1.v.const_flags */
 #define IS_CONSTANT_UNQUALIFIED		0x010
-#define IS_LEXICAL_VAR				0x020
-#define IS_LEXICAL_REF				0x040
 #define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
 #define IS_CONSTANT_IN_NAMESPACE	0x100  /* used only in opline->extended_value */
 
@@ -470,9 +472,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_IMMUTABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_IMMUTABLE) != 0)
 #define Z_IMMUTABLE_P(zval_p)		Z_IMMUTABLE(*(zval_p))
 
-#define Z_SYMBOLTABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_SYMBOLTABLE) != 0)
-#define Z_SYMBOLTABLE_P(zval_p)		Z_SYMBOLTABLE(*(zval_p))
-
 /* the following Z_OPT_* macros make better code when Z_TYPE_INFO accessed before */
 #define Z_OPT_TYPE(zval)			(Z_TYPE_INFO(zval) & Z_TYPE_MASK)
 #define Z_OPT_TYPE_P(zval_p)		Z_OPT_TYPE(*(zval_p))
@@ -503,6 +502,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_ISNULL(zval)				(Z_TYPE(zval) == IS_NULL)
 #define Z_ISNULL_P(zval_p)			Z_ISNULL(*(zval_p))
+
+#define Z_ISERROR(zval)				(Z_TYPE(zval) == _IS_ERROR)
+#define Z_ISERROR_P(zval_p)			Z_ISERROR(*(zval_p))
 
 #define Z_LVAL(zval)				(zval).value.lval
 #define Z_LVAL_P(zval_p)			Z_LVAL(*(zval_p))
@@ -783,6 +785,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		Z_TYPE_INFO_P(z) = IS_PTR;								\
 	} while (0)
 
+#define ZVAL_ERROR(z) do {				\
+		Z_TYPE_INFO_P(z) = _IS_ERROR;	\
+	} while (0)
+
 #define Z_REFCOUNT_P(pz)			zval_refcount_p(pz)
 #define Z_SET_REFCOUNT_P(pz, rc)	zval_set_refcount_p(pz, rc)
 #define Z_ADDREF_P(pz)				zval_addref_p(pz)
@@ -809,7 +815,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TRY_DELREF(z)				Z_TRY_DELREF_P(&(z))
 
 static zend_always_inline uint32_t zval_refcount_p(zval* pz) {
-	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_IMMUTABLE_P(pz) || Z_SYMBOLTABLE_P(pz));
+	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_IMMUTABLE_P(pz));
 	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 

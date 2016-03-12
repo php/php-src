@@ -14,17 +14,19 @@ PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HU
 
 if test "$PHP_OPCACHE" != "no"; then
 
-  if test "$PHP_OPCACHE_FILE" == "yes"; then
+  if test "$PHP_OPCACHE_FILE" = "yes"; then
     AC_DEFINE(HAVE_OPCACHE_FILE_CACHE, 1, [Define to enable file based caching (experimental)])
   fi
 
-  if test "$PHP_HUGE_CODE_PAGES" == "yes"; then
+  if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
   fi
 
   AC_CHECK_FUNC(mprotect,[
     AC_DEFINE(HAVE_MPROTECT, 1, [Define if you have mprotect() function])
   ])
+
+  AC_CHECK_HEADERS([unistd.h sys/uio.h])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_TRY_RUN([
@@ -402,6 +404,12 @@ fi
 	Optimizer/nop_removal.c \
 	Optimizer/compact_literals.c \
 	Optimizer/zend_cfg.c \
+	Optimizer/zend_dfg.c \
+	Optimizer/dfa_pass.c \
+	Optimizer/zend_ssa.c \
+	Optimizer/zend_inference.c \
+	Optimizer/zend_func_info.c \
+	Optimizer/zend_call_graph.c \
 	Optimizer/zend_dump.c,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 

@@ -1,5 +1,5 @@
 --TEST--
-055: typehints in namespaces
+055: types in namespaces
 --FILE--
 <?php
 namespace test\ns1;

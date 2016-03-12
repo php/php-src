@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -518,6 +518,8 @@ typedef enum mysqlnd_collected_stats
 	STAT_MEM_STRNDUP_COUNT,
 	STAT_MEM_ESTRDUP_COUNT,
 	STAT_MEM_STRDUP_COUNT,
+	STAT_MEM_EDUP_COUNT,
+	STAT_MEM_DUP_COUNT,
 	STAT_TEXT_TYPE_FETCHED_NULL,
 	STAT_TEXT_TYPE_FETCHED_BIT,
 	STAT_TEXT_TYPE_FETCHED_INT8,

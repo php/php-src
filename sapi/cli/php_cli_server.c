@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1955,6 +1955,19 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		return php_cli_server_send_error_page(server, client, 400);
 	}
 
+#ifdef PHP_WIN32
+	/* The win32 namespace will cut off trailing dots and spaces. Since the
+	   VCWD functionality isn't used here, a sophisticated functionality
+	   would have to be reimplemented to know ahead there are no files
+	   with invalid names there. The simplest is just to forbid invalid
+	   filenames, which is done here. */
+	if (client->request.path_translated &&
+		('.' == client->request.path_translated[client->request.path_translated_len-1] ||
+		 ' ' == client->request.path_translated[client->request.path_translated_len-1])) {
+		return php_cli_server_send_error_page(server, client, 500 TSRMLS_CC);
+	}
+#endif
+
 	fd = client->request.path_translated ? open(client->request.path_translated, O_RDONLY): -1;
 	if (fd < 0) {
 		return php_cli_server_send_error_page(server, client, 404);
@@ -2050,6 +2063,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 
 	zend_try {
 		zval retval;
+
+		ZVAL_UNDEF(&retval);
 		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				decline = Z_TYPE(retval) == IS_FALSE;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -225,6 +225,16 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#if (LDAP_API_VERSION > 2000)
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_REQUIRE_CERT", LDAP_OPT_X_TLS_REQUIRE_CERT, CONST_PERSISTENT | CONST_CS);
+
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_NEVER", LDAP_OPT_X_TLS_NEVER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_HARD", LDAP_OPT_X_TLS_HARD, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_DEMAND", LDAP_OPT_X_TLS_DEMAND, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_ALLOW", LDAP_OPT_X_TLS_ALLOW, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_TRY", LDAP_OPT_X_TLS_TRY, CONST_PERSISTENT | CONST_CS);
 #endif
 
 	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_FILTER", PHP_LDAP_ESCAPE_FILTER, CONST_PERSISTENT | CONST_CS);
@@ -1460,6 +1470,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 
 		value = zend_hash_get_current_data(Z_ARRVAL_P(entry));
 
+		ZVAL_DEREF(value);
 		if (Z_TYPE_P(value) != IS_ARRAY) {
 			num_values = 1;
 		} else {
@@ -2082,6 +2093,9 @@ PHP_FUNCTION(ldap_get_option)
 #ifdef LDAP_OPT_RESTART
 	case LDAP_OPT_RESTART:
 #endif
+#ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
+	case LDAP_OPT_X_TLS_REQUIRE_CERT:
+#endif
 		{
 			int val;
 
@@ -2211,6 +2225,9 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_ERROR_NUMBER:
 #ifdef LDAP_OPT_DEBUG_LEVEL
 	case LDAP_OPT_DEBUG_LEVEL:
+#endif
+#ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
+	case LDAP_OPT_X_TLS_REQUIRE_CERT:
 #endif
 		{
 			int val;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 #include "phpdbg_frame.h"
 #include "phpdbg_list.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 void phpdbg_restore_frame(void) /* {{{ */
 {
@@ -218,7 +218,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position))) {
 		if (file) { /* userland */
 			phpdbg_out("frame #%d: ", i);
-			phpdbg_xml("<frame %r id=\"%d\" file=\"%s\" line=\"%d\"", i, Z_STRVAL_P(file), Z_LVAL_P(line));
+			phpdbg_xml("<frame %r id=\"%d\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", i, Z_STRVAL_P(file), Z_LVAL_P(line));
 			phpdbg_dump_prototype(tmp);
 			phpdbg_out(" at %s:%ld\n", Z_STRVAL_P(file), Z_LVAL_P(line));
 			i++;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,7 +82,7 @@ struct _zend_generator {
 	 * by-value foreach. */
 	zval values;
 
-	/* Node of waiting generators when multiple "yield *" expressions
+	/* Node of waiting generators when multiple "yield from" expressions
 	 * are nested. */
 	zend_generator_node node;
 
@@ -91,6 +91,9 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
+
+	zval *gc_buffer;
+	uint32_t gc_buffer_size;
 };
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;

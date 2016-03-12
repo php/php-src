@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,8 @@
 #else
 # define HT_ASSERT(c)
 #endif
+
+#define HT_POISONED_PTR ((HashTable *) (intptr_t) -1)
 
 #if ZEND_DEBUG
 /*
@@ -112,7 +114,7 @@ static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
 		   rather than using an undefined bis scan result. */
 		return nSize;
 	}
-#elif defined(__GNUC__) || __has_builtin(__builtin_clz)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_clz))  && defined(PHP_HAVE_BUILTIN_CLZ)
 	return 0x2 << (__builtin_clz(nSize - 1) ^ 0x1f);
 #else
 	nSize -= 1;
@@ -371,9 +373,34 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos(uint32_t idx, HashTab
 	if (iter->pos == HT_INVALID_IDX) {
 		return HT_INVALID_IDX;
 	} else if (UNEXPECTED(iter->ht != ht)) {
-		if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 			iter->ht->u.v.nIteratorsCount--;
 		}
+		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
+			ht->u.v.nIteratorsCount++;
+		}
+		iter->ht = ht;
+		iter->pos = ht->nInternalPointer;
+	}
+	return iter->pos;
+}
+
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval *array)
+{
+	HashTable *ht = Z_ARRVAL_P(array);
+	HashTableIterator *iter = EG(ht_iterators) + idx;
+
+	ZEND_ASSERT(idx != (uint32_t)-1);
+	if (iter->pos == HT_INVALID_IDX) {
+		return HT_INVALID_IDX;
+	} else if (UNEXPECTED(iter->ht != ht)) {
+		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+			iter->ht->u.v.nIteratorsCount--;
+		}
+		SEPARATE_ARRAY(array);
+		ht = Z_ARRVAL_P(array);
 		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
 			ht->u.v.nIteratorsCount++;
 		}
@@ -389,7 +416,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 
 	ZEND_ASSERT(idx != (uint32_t)-1);
 
-	if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+	if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+			&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 		iter->ht->u.v.nIteratorsCount--;
 	}
 	iter->ht = NULL;
@@ -406,20 +434,13 @@ static zend_never_inline void ZEND_FASTCALL _zend_hash_iterators_remove(HashTabl
 {
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
-	uint32_t idx;
 
 	while (iter != end) {
 		if (iter->ht == ht) {
-			iter->ht = NULL;
+			iter->ht = HT_POISONED_PTR;
 		}
 		iter++;
 	}
-
-	idx = EG(ht_iterators_used);
-	while (idx > 0 && EG(ht_iterators)[idx - 1].ht == NULL) {
-		idx--;
-	}
-	EG(ht_iterators_used) = idx;
 }
 
 static zend_always_inline void zend_hash_iterators_remove(HashTable *ht)
@@ -550,12 +571,25 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			zval *data;
 
 			if (flag & HASH_ADD) {
-				return NULL;
-			}
-			ZEND_ASSERT(&p->val != pData);
-			data = &p->val;
-			if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
-				data = Z_INDIRECT_P(data);
+				if (!(flag & HASH_UPDATE_INDIRECT)) {
+					return NULL;
+				}
+				ZEND_ASSERT(&p->val != pData);
+				data = &p->val;
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+					if (Z_TYPE_P(data) != IS_UNDEF) {
+						return NULL;
+					}
+				} else {
+					return NULL;
+				}
+			} else {
+				ZEND_ASSERT(&p->val != pData);
+				data = &p->val;
+				if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+				}
 			}
 			HANDLE_BLOCK_INTERRUPTIONS();
 			if (ht->pDestructor) {
@@ -1843,24 +1877,47 @@ ZEND_API void ZEND_FASTCALL _zend_hash_merge(HashTable *target, HashTable *sourc
     uint32_t idx;
 	Bucket *p;
 	zval *t;
-	uint32_t mode = (overwrite?HASH_UPDATE:HASH_ADD);
 
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
 	HT_ASSERT(GC_REFCOUNT(target) == 1);
 
-	for (idx = 0; idx < source->nNumUsed; idx++) {
-		p = source->arData + idx;
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-		if (p->key) {
-			t = _zend_hash_add_or_update(target, p->key, &p->val, mode ZEND_FILE_LINE_RELAY_CC);
-			if (t && pCopyConstructor) {
-				pCopyConstructor(t);
+	if (overwrite) {
+		for (idx = 0; idx < source->nNumUsed; idx++) {
+			p = source->arData + idx;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
+			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
+			    continue;
 			}
-		} else {
-			if ((mode==HASH_UPDATE || !zend_hash_index_exists(target, p->h))) {
-			 	t = zend_hash_index_update(target, p->h, &p->val);
-			 	if (t && pCopyConstructor) {
+			if (p->key) {
+				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			} else {
+				t = zend_hash_index_update(target, p->h, &p->val);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			}
+		}
+	} else {
+		for (idx = 0; idx < source->nNumUsed; idx++) {
+			p = source->arData + idx;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
+			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
+			    continue;
+			}
+			if (p->key) {
+				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_ADD | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			} else {
+				t = zend_hash_index_add(target, p->h, &p->val);
+				if (t && pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			}

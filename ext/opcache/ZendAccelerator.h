@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -191,6 +191,7 @@ typedef struct _zend_accel_directives {
 	zend_long           log_verbosity_level;
 
 	zend_long           optimization_level;
+	zend_long           opt_debug_level;
 	zend_long           max_file_size;
 	zend_long           interned_strings_buffer;
 	char          *restrict_api;
@@ -228,9 +229,7 @@ typedef struct _zend_accel_globals {
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	char                    system_id[32];
-#endif
 	HashTable               xlat_table;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
@@ -287,7 +286,7 @@ extern zend_accel_shared_globals *accel_shared_globals;
 # define ZCG(v)	ZEND_TSRMG(accel_globals_id, zend_accel_globals *, v)
 extern int accel_globals_id;
 # ifdef COMPILE_DL_OPCACHE
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 # endif
 #else
 # define ZCG(v) (accel_globals.v)
@@ -297,6 +296,7 @@ extern zend_accel_globals accel_globals;
 extern char *zps_api_failure_reason;
 
 void accel_shutdown(void);
+int  accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size);

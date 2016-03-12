@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1350,7 +1350,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *subject, int limit, int is_callable_replace, int *replace_count)
 {
 	zval		*regex_entry,
-				*replace_entry = NULL,
 				*replace_value,
 				 empty_replace;
 	zend_string *result;
@@ -1372,25 +1371,26 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 
 		/* For each entry in the regex array, get the entry */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(regex), regex_entry) {
+			zval replace_str;
 			/* Make sure we're dealing with strings. */
 			zend_string *regex_str = zval_get_string(regex_entry);
 
+			ZVAL_UNDEF(&replace_str);
 			/* If replace is an array and not a callable construct */
 			if (Z_TYPE_P(replace) == IS_ARRAY && !is_callable_replace) {
 				/* Get current entry */
-				replace_entry = NULL;
 				while (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
-					if (Z_TYPE(Z_ARRVAL_P(replace)->arData[replace_idx].val) != IS_UNUSED) {
-						replace_entry = &Z_ARRVAL_P(replace)->arData[replace_idx].val;
+					if (Z_TYPE(Z_ARRVAL_P(replace)->arData[replace_idx].val) != IS_UNDEF) {
+						ZVAL_COPY(&replace_str, &Z_ARRVAL_P(replace)->arData[replace_idx].val);
 						break;
 					}
 					replace_idx++;
 				}
-				if (replace_entry != NULL) {
+				if (!Z_ISUNDEF(replace_str)) {
 					if (!is_callable_replace) {
-						convert_to_string_ex(replace_entry);
+						convert_to_string(&replace_str);
 					}
-					replace_value = replace_entry;
+					replace_value = &replace_str;
 					replace_idx++;
 				} else {
 					/* We've run out of replacement strings, so use an empty one */
@@ -1413,10 +1413,12 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 			} else {
 				zend_string_release(subject_str);
 				zend_string_release(regex_str);
+				zval_dtor(&replace_str);
 				return NULL;
 			}
 
 			zend_string_release(regex_str);
+			zval_dtor(&replace_str);
 		} ZEND_HASH_FOREACH_END();
 
 		return subject_str;
@@ -1729,8 +1731,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	zend_long limit_val, zend_long flags)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
-	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
-	pcre_extra		*extra_bump = NULL;	/* Almost dummy */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
@@ -1838,29 +1838,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
-				if (pce->compile_options & PCRE_UTF8) {
-					if (re_bump == NULL) {
-						int dummy;
-						zend_string *regex = zend_string_init("/./us", sizeof("/./us")-1, 0);
-						re_bump = pcre_get_compiled_regex(regex, &extra_bump, &dummy);
-						zend_string_release(regex);
-						if (re_bump == NULL) {
-							RETURN_FALSE;
-						}
-					}
-					count = pcre_exec(re_bump, extra_bump, subject,
-							  subject_len, start_offset,
-							  exoptions, offsets, size_offsets);
-					if (count < 1) {
-						php_error_docref(NULL, E_WARNING, "Unknown error");
-						RETURN_FALSE;
-					}
-				} else {
-					offsets[0] = start_offset;
-					offsets[1] = start_offset + 1;
-				}
-			} else
+				offsets[0] = start_offset;
+				offsets[1] = start_offset + calculate_unit_length(pce, subject + start_offset);
+			} else {
 				break;
+			}
 		} else {
 			pcre_handle_exec_error(count);
 			break;

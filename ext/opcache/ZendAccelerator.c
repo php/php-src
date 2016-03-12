@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,10 +40,10 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/standard/md5.h"
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 # include "zend_file_cache.h"
-# include "ext/standard/md5.h"
 #endif
 
 #ifndef ZEND_WIN32
@@ -97,7 +97,7 @@ zend_accel_globals accel_globals;
 #else
 int accel_globals_id;
 #if defined(COMPILE_DL_OPCACHE)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 #endif
 
@@ -220,6 +220,104 @@ static ZEND_INI_MH(accel_include_path_on_modify)
 	return ret;
 }
 
+static inline void accel_restart_enter(void)
+{
+#ifdef ZEND_WIN32
+	INCREMENT(restart_in);
+#else
+	static const FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
+
+	if (fcntl(lock_file, F_SETLK, &restart_in_progress) == -1) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(+1):  %s (%d)", strerror(errno), errno);
+	}
+#endif
+	ZCSG(restart_in_progress) = 1;
+}
+
+static inline void accel_restart_leave(void)
+{
+#ifdef ZEND_WIN32
+	ZCSG(restart_in_progress) = 0;
+	DECREMENT(restart_in);
+#else
+	static const FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
+
+	ZCSG(restart_in_progress) = 0;
+	if (fcntl(lock_file, F_SETLK, &restart_finished) == -1) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(-1):  %s (%d)", strerror(errno), errno);
+	}
+#endif
+}
+
+static inline int accel_restart_is_active(void)
+{
+	if (ZCSG(restart_in_progress)) {
+#ifndef ZEND_WIN32
+		FLOCK_STRUCTURE(restart_check, F_WRLCK, SEEK_SET, 2, 1);
+
+		if (fcntl(lock_file, F_GETLK, &restart_check) == -1) {
+			zend_accel_error(ACCEL_LOG_DEBUG, "RestartC:  %s (%d)", strerror(errno), errno);
+			return FAILURE;
+		}
+		if (restart_check.l_type == F_UNLCK) {
+			ZCSG(restart_in_progress) = 0;
+			return 0;
+		} else {
+			return 1;
+		}
+#else
+		return LOCKVAL(restart_in) != 0;
+#endif
+	}
+	return 0;
+}
+
+/* Creates a read lock for SHM access */
+static inline int accel_activate_add(void)
+{
+#ifdef ZEND_WIN32
+	INCREMENT(mem_usage);
+#else
+	static const FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
+
+	if (fcntl(lock_file, F_SETLK, &mem_usage_lock) == -1) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
+		return FAILURE;
+	}
+#endif
+	return SUCCESS;
+}
+
+/* Releases a lock for SHM access */
+static inline void accel_deactivate_sub(void)
+{
+#ifdef ZEND_WIN32
+	if (ZCG(counted)) {
+		DECREMENT(mem_usage);
+		ZCG(counted) = 0;
+	}
+#else
+	static const FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
+
+	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock) == -1) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(-1):  %s (%d)", strerror(errno), errno);
+	}
+#endif
+}
+
+static inline void accel_unlock_all(void)
+{
+#ifdef ZEND_WIN32
+	accel_deactivate_sub();
+#else
+	static const FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
+
+	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock_all) == -1) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
+	}
+#endif
+}
+
 /* Interned strings support */
 static zend_string *(*orig_new_interned_string)(zend_string *str);
 static void (*orig_interned_strings_snapshot)(void);
@@ -290,6 +388,12 @@ static zend_string *accel_find_interned_string(zend_string *str)
 	if (IS_ACCEL_INTERNED(str)) {
 		/* this is already an interned string */
 		return str;
+	}
+	if (!ZCG(counted)) {
+		if (accel_activate_add() == FAILURE) {
+			return str;
+		}
+		ZCG(counted) = 1;
 	}
 
 	h = zend_string_hash_val(str);
@@ -491,102 +595,6 @@ static void accel_use_shm_interned_strings(void)
 	}
 }
 #endif
-
-static inline void accel_restart_enter(void)
-{
-#ifdef ZEND_WIN32
-	INCREMENT(restart_in);
-#else
-	static const FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
-
-	if (fcntl(lock_file, F_SETLK, &restart_in_progress) == -1) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(+1):  %s (%d)", strerror(errno), errno);
-	}
-#endif
-	ZCSG(restart_in_progress) = 1;
-}
-
-static inline void accel_restart_leave(void)
-{
-#ifdef ZEND_WIN32
-	ZCSG(restart_in_progress) = 0;
-	DECREMENT(restart_in);
-#else
-	static const FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
-
-	ZCSG(restart_in_progress) = 0;
-	if (fcntl(lock_file, F_SETLK, &restart_finished) == -1) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(-1):  %s (%d)", strerror(errno), errno);
-	}
-#endif
-}
-
-static inline int accel_restart_is_active(void)
-{
-	if (ZCSG(restart_in_progress)) {
-#ifndef ZEND_WIN32
-		FLOCK_STRUCTURE(restart_check, F_WRLCK, SEEK_SET, 2, 1);
-
-		if (fcntl(lock_file, F_GETLK, &restart_check) == -1) {
-			zend_accel_error(ACCEL_LOG_DEBUG, "RestartC:  %s (%d)", strerror(errno), errno);
-			return FAILURE;
-		}
-		if (restart_check.l_type == F_UNLCK) {
-			ZCSG(restart_in_progress) = 0;
-			return 0;
-		} else {
-			return 1;
-		}
-#else
-		return LOCKVAL(restart_in) != 0;
-#endif
-	}
-	return 0;
-}
-
-/* Creates a read lock for SHM access */
-static inline void accel_activate_add(void)
-{
-#ifdef ZEND_WIN32
-	INCREMENT(mem_usage);
-#else
-	static const FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
-
-	if (fcntl(lock_file, F_SETLK, &mem_usage_lock) == -1) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
-	}
-#endif
-}
-
-/* Releases a lock for SHM access */
-static inline void accel_deactivate_sub(void)
-{
-#ifdef ZEND_WIN32
-	if (ZCG(counted)) {
-		DECREMENT(mem_usage);
-		ZCG(counted) = 0;
-	}
-#else
-	static const FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
-
-	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock) == -1) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(-1):  %s (%d)", strerror(errno), errno);
-	}
-#endif
-}
-
-static inline void accel_unlock_all(void)
-{
-#ifdef ZEND_WIN32
-	accel_deactivate_sub();
-#else
-	static const FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
-
-	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock_all) == -1) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
-	}
-#endif
-}
 
 #ifndef ZEND_WIN32
 static inline void kill_all_lockers(struct flock *mem_usage_check)
@@ -962,6 +970,7 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(cwd_str));
 						if (str == cwd_str) {
+							zend_string_release(str);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
@@ -1157,7 +1166,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 		return new_persistent_script;
 	}
 
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level)) {
+	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		return new_persistent_script;
 	}
 
@@ -1215,7 +1224,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level)) {
+	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		return new_persistent_script;
 	}
 
@@ -1562,7 +1571,9 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 	    }
 	}
 
+	SHM_UNPROTECT();
 	persistent_script = zend_file_cache_script_load(file_handle);
+	SHM_PROTECT();
 	if (persistent_script) {
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->script.filename) {
@@ -1587,8 +1598,6 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 			}
 		}
 		zend_file_handle_dtor(file_handle);
-
-		persistent_script->dynamic_members.last_used = ZCG(request_time);
 
 	    if (persistent_script->ping_auto_globals_mask) {
 			zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask);
@@ -1708,8 +1717,15 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
      * each execution)
      */
 	if (!ZCG(counted)) {
+		if (accel_activate_add() == FAILURE) {
+#ifdef HAVE_OPCACHE_FILE_CACHE
+			if (ZCG(accel_directives).file_cache) {
+				return file_cache_compile_file(file_handle, type);
+			}
+#endif
+			return accelerator_orig_compile_file(file_handle, type);
+		}
 		ZCG(counted) = 1;
-		accel_activate_add();
 	}
 
 	SHM_UNPROTECT();
@@ -1976,7 +1992,7 @@ static void accel_reset_pcre_cache(void)
 
 	ZEND_HASH_FOREACH_BUCKET(&PCRE_G(pcre_cache), p) {
 		/* Remove PCRE cache entries with inconsistent keys */
-		if (ZSTR_IS_INTERNED(p->key)) {
+		if (zend_accel_in_shm(p->key)) {
 			p->key = NULL;
 			zend_hash_del_bucket(&PCRE_G(pcre_cache), p);
 		}
@@ -2277,6 +2293,19 @@ static void zend_accel_fast_shutdown(void)
 }
 #endif
 
+int accel_post_deactivate(void)
+{
+	if (!ZCG(enabled) || !accel_startup_ok) {
+		return SUCCESS;
+	}
+
+	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
+	accel_unlock_all();
+	ZCG(counted) = 0;
+
+	return SUCCESS;
+}
+
 static void accel_deactivate(void)
 {
 	/* ensure that we restore function_table and class_table
@@ -2284,25 +2313,20 @@ static void accel_deactivate(void)
 	 * the script is aborted abnormally, they may become messed up.
 	 */
 
+	if (ZCG(cwd)) {
+		zend_string_release(ZCG(cwd));
+		ZCG(cwd) = NULL;
+	}
+
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
-
-	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
-	accel_unlock_all();
-	ZCG(counted) = 0;
 
 #if !ZEND_DEBUG
 	if (ZCG(accel_directives).fast_shutdown && is_zend_mm()) {
 		zend_accel_fast_shutdown();
 	}
 #endif
-
-	if (ZCG(cwd)) {
-		zend_string_release(ZCG(cwd));
-		ZCG(cwd) = NULL;
-	}
-
 }
 
 static int accelerator_remove_cb(zend_extension *element1, zend_extension *element2)
@@ -2348,6 +2372,7 @@ static inline int accel_find_sapi(void)
 		"apache2filter",
 		"apache2handler",
 		"litespeed",
+		"uwsgi",
 		NULL
 	};
 	const char **sapi_name;
@@ -2459,8 +2484,6 @@ static void accel_globals_dtor(zend_accel_globals *accel_globals)
 	}
 }
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
-
 #define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_CHAR) ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
 
 static void accel_gen_system_id(void)
@@ -2489,7 +2512,6 @@ static void accel_gen_system_id(void)
 		md5str[(i * 2) + 1] = c;
 	}
 }
-#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 # ifndef _WIN32
@@ -2619,9 +2641,7 @@ static int accel_startup(zend_extension *extension)
 		return FAILURE;
 	}
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	accel_gen_system_id();
-#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 	if (ZCG(accel_directives).huge_code_pages &&
@@ -2772,6 +2792,8 @@ file_cache_fallback:
 		zend_accel_blacklist_load(&accel_blacklist, ZCG(accel_directives.user_blacklist_filename));
 	}
 
+	zend_optimizer_startup();
+
 	return SUCCESS;
 }
 
@@ -2788,6 +2810,8 @@ void accel_shutdown(void)
 {
 	zend_ini_entry *ini_entry;
 	zend_bool file_cache_only = 0;
+
+	zend_optimizer_shutdown();
 
 	zend_accel_blacklist_shutdown(&accel_blacklist);
 
@@ -2869,13 +2893,16 @@ int accelerator_shm_read_lock(void)
 	} else {
 		/* here accelerator is active but we do not hold SHM lock. This means restart was scheduled
 			or is in progress now */
-		accel_activate_add(); /* acquire usage lock */
+		if (accel_activate_add() == FAILURE) { /* acquire usage lock */
+			return FAILURE;
+		}
 		/* Now if we weren't inside restart, restart would not begin until we remove usage lock */
 		if (ZCSG(restart_in_progress)) {
 			/* we already were inside restart this means it's not safe to touch shm */
 			accel_deactivate_now(); /* drop usage lock */
 			return FAILURE;
 		}
+		ZCG(counted) = 1;
 	}
 	return SUCCESS;
 }
@@ -2894,7 +2921,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	ACCELERATOR_VERSION,					/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2015",				/* copyright */
+	"Copyright (c) 1999-2016",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */

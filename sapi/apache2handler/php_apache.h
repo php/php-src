@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,7 +80,7 @@ extern zend_module_entry apache2_module_entry;
 #ifdef ZTS
 extern int php_apache2_info_id;
 #define AP2(v) ZEND_TSRMG(php_apache2_info_id, php_apache2_info_struct *, v)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #else
 extern php_apache2_info_struct php_apache2_info;
 #define AP2(v) (php_apache2_info.v)

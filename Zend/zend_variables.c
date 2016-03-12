@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -266,59 +266,6 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zval_ptr)
 	zval_internal_ptr_dtor(zval_ptr);
 }
 #endif
-
-ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash_key *key) /* {{{ */
-{
-	zend_array *symbol_table;
-	HashTable *target = va_arg(args, HashTable*);
-	zend_bool is_ref;
-	zval tmp;
-
-	if (Z_CONST_FLAGS_P(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
-		is_ref = Z_CONST_FLAGS_P(p) & IS_LEXICAL_REF;
-
-		symbol_table = zend_rebuild_symbol_table();
-		p = zend_hash_find(symbol_table, key->key);
-		if (!p) {
-			p = &tmp;
-			ZVAL_NULL(&tmp);
-			if (is_ref) {
-				ZVAL_NEW_REF(&tmp, &tmp);
-				zend_hash_add_new(symbol_table, key->key, &tmp);
-				Z_ADDREF_P(p);
-			} else {
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(key->key));
-			}
-		} else {
-			if (Z_TYPE_P(p) == IS_INDIRECT) {
-				p = Z_INDIRECT_P(p);
-				if (Z_TYPE_P(p) == IS_UNDEF) {
-					if (!is_ref) {
-						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(key->key));
-						p = &tmp;
-						ZVAL_NULL(&tmp);
-					} else {
-						ZVAL_NULL(p);
-					}
-				}
-			}
-			if (is_ref) {
-				ZVAL_MAKE_REF(p);
-				Z_ADDREF_P(p);
-			} else if (Z_ISREF_P(p)) {
-				ZVAL_DUP(&tmp, Z_REFVAL_P(p));
-				p = &tmp;
-			} else if (Z_REFCOUNTED_P(p)) {
-				Z_ADDREF_P(p);
-			}
-		}
-	} else if (Z_REFCOUNTED_P(p)) {
-		Z_ADDREF_P(p);
-	}
-	zend_hash_add(target, key->key, p);
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
 
 /*
  * Local variables:

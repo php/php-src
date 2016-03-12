@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -77,10 +77,6 @@ extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error);
 extern void php_mysqli_report_index(const char *query, unsigned int status);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);
-
-#ifdef HAVE_SPL
-extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
-#endif
 
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 

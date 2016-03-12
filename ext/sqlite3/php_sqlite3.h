@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ ZEND_END_MODULE_GLOBALS(sqlite3)
 #ifdef ZTS
 # define SQLITE3G(v) TSRMG(sqlite3_globals_id, zend_sqlite3_globals *, v)
 # ifdef COMPILE_DL_SQLITE3
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 # endif
 #else
 # define SQLITE3G(v) (sqlite3_globals.v)

@@ -4417,7 +4417,9 @@ ZEND_API double zend_hex_strtod(const char *str, const char **endptr)
 	double value = 0;
 
 	if (strlen(str) < 2) {
-		*endptr = str;
+		if (endptr != NULL) {
+			*endptr = str;
+		}
 		return 0.0;
 	}
 
@@ -4455,7 +4457,9 @@ ZEND_API double zend_oct_strtod(const char *str, const char **endptr)
 	int any = 0;
 
 	if (strlen(str) < 1) {
-		*endptr = str;
+		if (endptr != NULL) {
+			*endptr = str;
+		}
 		return 0.0;
 	}
 
@@ -4488,7 +4492,9 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
 	int 		any = 0;
 
 	if (strlen(str) < 2) {
-		*endptr = str;
+		if (endptr != NULL) {
+			*endptr = str;
+		}
 		return 0.0;
 	}
 

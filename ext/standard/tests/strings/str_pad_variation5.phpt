@@ -31,4 +31,4 @@ var_dump( str_pad($input, $pad_length) );
 --EXPECTF--
 *** Testing str_pad() function: with large value for for 'pad_length' argument ***
 
-Fatal error: Allowed memory size of 134217728 bytes exhausted%s(tried to allocate 2147483648 bytes) in %s on line %d
+Fatal error: Allowed memory size of 134217728 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d

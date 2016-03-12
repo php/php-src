@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,19 +117,12 @@ PHP_METHOD(sqlite3, open)
 	if (strlen(filename) != filename_len) {
 		return;
 	}
-	if (memcmp(filename, ":memory:", sizeof(":memory:")) != 0) {
+	if (filename_len != sizeof(":memory:")-1 ||
+			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
 			zend_throw_exception(zend_ce_exception, "Unable to expand filepath", 0);
 			return;
 		}
-
-#if PHP_API_VERSION < 20100412
-		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			zend_throw_exception_ex(zend_ce_exception, 0, "safe_mode prohibits opening %s", fullpath);
-			efree(fullpath);
-			return;
-		}
-#endif
 
 		if (php_check_open_basedir(fullpath)) {
 			zend_throw_exception_ex(zend_ce_exception, 0, "open_basedir prohibits opening %s", fullpath);
@@ -163,11 +156,7 @@ PHP_METHOD(sqlite3, open)
 
 	db_obj->initialised = 1;
 
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
-#else
 	if (PG(open_basedir) && *PG(open_basedir)) {
-#endif
 		sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, NULL);
 	}
 
@@ -696,7 +685,6 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	fc->fci.size = sizeof(fc->fci);
 	fc->fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
-	fc->fci.symbol_table = NULL;
 	fc->fci.object = NULL;
 	fc->fci.retval = &retval;
 	fc->fci.param_count = fake_argc;
@@ -855,7 +843,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
 	collation->fci.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
-	collation->fci.fci.symbol_table = NULL;
 	collation->fci.fci.object = NULL;
 	collation->fci.fci.retval = &retval;
 	collation->fci.fci.param_count = 2;
@@ -1536,8 +1523,7 @@ PHP_METHOD(sqlite3stmt, execute)
 						}
 						buffer = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 					} else {
-						convert_to_string(parameter);
-						buffer = Z_STR_P(parameter);
+						buffer = zval_get_string(parameter);
 					}
 
 					if (buffer) {
@@ -1981,13 +1967,6 @@ static int php_sqlite3_authorizer(void *autharg, int access_type, const char *ar
 		case SQLITE_ATTACH:
 		{
 			if (memcmp(arg3, ":memory:", sizeof(":memory:")) && *arg3) {
-
-#if PHP_API_VERSION < 20100412
-				if (PG(safe_mode) && (!php_checkuid(arg3, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-					return SQLITE_DENY;
-				}
-#endif
-
 				if (php_check_open_basedir(arg3)) {
 					return SQLITE_DENY;
 				}
@@ -2314,7 +2293,7 @@ zend_module_entry sqlite3_module_entry = {
 
 #ifdef COMPILE_DL_SQLITE3
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(sqlite3)
 #endif

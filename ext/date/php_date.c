@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2142,7 +2142,7 @@ static int date_object_compare_date(zval *d1, zval *d2) /* {{{ */
 		timelib_update_ts(o2->time, o2->time->tz_info);
 	}
 
-	return (o1->time->sse == o2->time->sse) ? 0 : ((o1->time->sse < o2->time->sse) ? -1 : 1);
+	return timelib_time_compare(o1->time, o2->time);
 } /* }}} */
 
 static HashTable *date_object_get_gc(zval *object, zval **table, int *n) /* {{{ */
@@ -3054,6 +3054,7 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 	dateobj->time->have_relative = 0;
+	memset(&dateobj->time->relative, 0, sizeof(dateobj->time->relative));
 
 	return 1;
 } /* }}} */
@@ -3579,9 +3580,9 @@ PHP_FUNCTION(date_diff)
 	zval         *object1, *object2;
 	php_date_obj *dateobj1, *dateobj2;
 	php_interval_obj *interval;
-	zend_long          absolute = 0;
+	zend_bool      absolute = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|l", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|b", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj1 = Z_PHPDATE_P(object1);
@@ -4445,6 +4446,10 @@ PHP_METHOD(DatePeriod, getEndDate)
         }
 
         dpobj = Z_PHPPERIOD_P(getThis());
+
+        if (!dpobj->end) {
+                return;
+        }
 
         php_date_instantiate(dpobj->start_ce, return_value);
         dateobj = Z_PHPDATE_P(return_value);

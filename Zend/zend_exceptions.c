@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -676,7 +676,6 @@ ZEND_METHOD(exception, __toString)
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
 		ZVAL_COPY_VALUE(&fci.function_name, &fname);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ_P(exception);
 		fci.retval = &trace;
 		fci.param_count = 0;
