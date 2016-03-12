@@ -29,7 +29,7 @@
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 
-static void curlfile_ctor(char *fname, size_t fname_len, char *mime, size_t mime_len, char *postname, size_t postname_len, char *buffer, size_t buffer_len, INTERNAL_FUNCTION_PARAMETERS)
+static void curlfile_ctor(char *fname, size_t fname_len, char *mime, size_t mime_len, char *postname, size_t postname_len, char *buffer, size_t buffer_len, zval *return_value)
 {
 	zval *cf = return_value;
 
@@ -63,7 +63,7 @@ ZEND_METHOD(CURLFile, __construct)
 		return;
 	}
 
-	curlfile_ctor(fname, fname_len, mime, mime_len, postname, postname_len, buffer, buffer_len, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_ctor(fname, fname_len, mime, mime_len, postname, postname_len, buffer, buffer_len, return_value);
 }
 /* }}} */
 
@@ -80,7 +80,7 @@ PHP_FUNCTION(curl_file_create)
 		return;
 	}
 
-	curlfile_ctor(fname, fname_len, mime, mime_len, postname, postname_len, buffer, buffer_len, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_ctor(fname, fname_len, mime, mime_len, postname, postname_len, buffer, buffer_len, return_value);
 }
 /* }}} */
 
@@ -97,7 +97,7 @@ PHP_FUNCTION(curl_buffer_file_create)
 		return;
 	}
 
-	curlfile_ctor(fname, fname_len, mime, mime_len, postname, postname_len, buffer, buffer_len, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_ctor(fname, fname_len, mime, mime_len, postname, postname_len, buffer, buffer_len, return_value);
 }
 /* }}} */
 
