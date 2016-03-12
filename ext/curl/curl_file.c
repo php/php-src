@@ -68,7 +68,7 @@ ZEND_METHOD(CURLFile, __construct)
 /* }}} */
 
 /* {{{ proto CURLFile curl_file_create(string $name, [string $mimetype [, string $postfilename]])
-   Create the CURLFile object */
+   Create the CURLFile object from file */
 PHP_FUNCTION(curl_file_create)
 {
 	char *fname = NULL, *mime = NULL, *postname = NULL, *buffer = NULL;
@@ -84,8 +84,8 @@ PHP_FUNCTION(curl_file_create)
 }
 /* }}} */
 
-/* {{{ proto CURLBufferFile curl_buffer_file_create(string $buffer, string $postfilename, [string $mimetype])
-   Create the CURLBufferFile object */
+/* {{{ proto CURLFile curl_buffer_file_create(string $buffer, string $postfilename, [string $mimetype])
+   Create the CURLFile object from string buffer */
 PHP_FUNCTION(curl_buffer_file_create)
 {
 	char *fname = NULL, *mime = NULL, *postname = NULL, *buffer = NULL;
