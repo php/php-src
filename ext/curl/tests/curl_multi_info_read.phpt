@@ -26,7 +26,7 @@ do {
     $status = curl_multi_exec($mh, $active);
     $info = curl_multi_info_read($mh);
     if (false !== $info) {
-        print((is_array($info)) ? ("bool(true)\n") : ("bool(false)\n"));
+        var_dump(is_array($info));
     }
 } while ($status === CURLM_CALL_MULTI_PERFORM || $active);
 
