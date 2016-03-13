@@ -3079,6 +3079,7 @@ ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc) /* 
 			}
 		} else {
 			if (zend_execute_ex == execute_ex &&
+				!fbc->common.scope &&
 			    !(fbc->common.fn_flags & ZEND_ACC_GENERATOR)) {
 				return ZEND_DO_UCALL;
 			}
@@ -3646,6 +3647,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	znode class_node, method_node;
 	zend_op *opline;
+	zend_function *fbc = NULL;
 
 	zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
@@ -3680,7 +3682,27 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	}
 	zend_check_live_ranges(opline);
 
-	zend_compile_call_common(result, args_ast, NULL);
+	/* Check if we already know which method we're calling */
+	if (opline->op2_type == IS_CONST) {
+		zend_class_entry *ce = NULL;
+		if (opline->op1_type == IS_CONST) {
+			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op1) + 1);
+			ce = zend_hash_find_ptr(CG(class_table), lcname);
+			if (!ce && CG(active_class_entry)
+					&& zend_string_equals_ci(CG(active_class_entry)->name, lcname)) {
+				ce = CG(active_class_entry);
+			}
+		} else if (opline->op1_type == IS_UNUSED && (opline->op1.num & ZEND_FETCH_CLASS_SELF)
+				&& zend_is_scope_known()) {
+			ce = CG(active_class_entry);
+		}
+		if (ce) {
+			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op2) + 1);
+			fbc = zend_hash_find_ptr(&ce->function_table, lcname);
+		}
+	}
+
+	zend_compile_call_common(result, args_ast, fbc);
 }
 /* }}} */
 
