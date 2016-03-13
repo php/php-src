@@ -3,7 +3,7 @@ bool setrawcookie ( string $name [, string $value [, int $expire = 0 [, string $
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
-<?php # include('skipif.inc'); ?>
+<?php include('skipif.inc'); ?>
 --FILE--
 <?php
 $cookieName = "cookieRAW";
