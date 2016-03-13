@@ -13,4 +13,4 @@ if (phpversion() < "5.3.0") {
 var_dump(is_string(php_ini_scanned_files()));
 ?>
 --EXPECT--
-bool(true)
+bool(%s)
