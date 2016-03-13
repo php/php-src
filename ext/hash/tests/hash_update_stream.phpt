@@ -7,6 +7,7 @@ marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 if (phpversion() < "5.3.0") {
     die('SKIP php version so lower.');
 }
+require_once(dirname(__FILE__) . '/skip_mhash.inc'); ?>
 ?>
 --FILE--
 <?php
