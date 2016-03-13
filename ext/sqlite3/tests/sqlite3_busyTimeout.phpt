@@ -7,8 +7,6 @@ marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --FILE--
 <?php
 require_once(dirname(__FILE__) . '/new_db.inc');
-var_dump($db->busyTimeout());
-var_dump($db->busyTimeout(""));
 var_dump($db->busyTimeout(0));
 var_dump($db->busyTimeout(null));
 var_dump($db->busyTimeout(-1000));
@@ -19,12 +17,6 @@ var_dump($db->busyTimeout(1000));
 $db->close();
 ?>
 --EXPECTF--
-
-Warning: SQLite3::busyTimeout() expects exactly %i parameter, %i given in %s on line %i
-NULL
-
-Warning: SQLite3::busyTimeout() expects parameter %i to be long, string given in %s on line %i
-NULL
 bool(true)
 bool(true)
 bool(true)
