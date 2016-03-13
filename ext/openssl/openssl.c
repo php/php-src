@@ -3826,6 +3826,7 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 					return 0;
 				}
 			}
+			break;
 #endif
 		default:
 			php_error_docref(NULL, E_WARNING, "key type not supported in this PHP build!");
