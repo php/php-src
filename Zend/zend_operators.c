@@ -1559,11 +1559,11 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 }
 /* }}} */
 
-static int ZEND_FASTCALL shift_right_common(zval *result, zval *op1, zval *op2, int logical_shift) /* {{{ */
+static int ZEND_FASTCALL shift_right_common(zval *result, zval *op1, zval *op2, int op, binary_op_type op_fn) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, ZEND_SR, shift_right_function);
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, op, op_fn);
 
 	if (op1 == result) {
 		zval_dtor(result);
@@ -1585,11 +1585,11 @@ static int ZEND_FASTCALL shift_right_common(zval *result, zval *op1, zval *op2, 
 		}
 	}
 
-	if (logical_shift) {
-		ZVAL_LONG(result, (zend_ulong)op1_lval >> op2_lval);
+	if (op == ZEND_SR) {
+		ZVAL_LONG(result, op1_lval >> op2_lval);
 	}
 	else {
-		ZVAL_LONG(result, op1_lval >> op2_lval);
+		ZVAL_LONG(result, (zend_ulong)op1_lval >> op2_lval);
 	}
 
 	return SUCCESS;
@@ -1598,12 +1598,12 @@ static int ZEND_FASTCALL shift_right_common(zval *result, zval *op1, zval *op2, 
 
 ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	return shift_right_common(result, op1, op2, 0);
+	return shift_right_common(result, op1, op2, ZEND_SR, shift_right_function);
 }
 
 ZEND_API int ZEND_FASTCALL logical_shift_right_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	return shift_right_common(result, op1, op2, 1);
+	return shift_right_common(result, op1, op2, ZEND_LSR, logical_shift_right_function);
 }
 
 ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /* {{{ */
