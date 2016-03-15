@@ -410,6 +410,35 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		}
 	}
 
+	if (ssa->var_info) {
+		int i;
+		zend_op *opline, *end;
+		uint32_t op1_info, op2_info, res_info;
+		zval tmp;
+
+		/* Convert LONG constants to DOUBLE */
+		for (i = 0; i < ssa->vars_count; i++) {
+			if (ssa->var_info[i].use_as_double && ssa->vars[i].definition >= 0) {
+				int op = ssa->vars[i].definition;
+
+				opline = op_array->opcodes + op;
+				if (opline->opcode == ZEND_ASSIGN &&
+				    opline->op2_type == IS_CONST) {
+					zval *zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
+					ZEND_ASSERT(Z_TYPE_INFO_P(zv) == IS_LONG);
+					ZVAL_DOUBLE(&tmp, zval_get_double(zv));
+					opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
+				} else if (opline->opcode == ZEND_QM_ASSIGN &&
+				           opline->op1_type == IS_CONST) {
+					zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+					ZEND_ASSERT(Z_TYPE_INFO_P(zv) == IS_LONG);
+					ZVAL_DOUBLE(&tmp, zval_get_double(zv));
+					opline->op1.constant = zend_optimizer_add_literal(op_array, &tmp);
+				}
+			}
+		}
+	}
+
 	if (ctx->debug_level & ZEND_DUMP_AFTER_DFA_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after dfa pass", ssa);
 	}
