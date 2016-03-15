@@ -227,7 +227,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 				if (!fe_ce || !proto_ce ||
 						fe_ce->type == ZEND_INTERNAL_CLASS ||
 						proto_ce->type == ZEND_INTERNAL_CLASS ||
-						fe_ce != proto_ce) {
+						!instanceof_function(proto_ce, fe_ce)) {
 					zend_string_release(proto_class_name);
 					zend_string_release(fe_class_name);
 					return 0;
