@@ -27,6 +27,8 @@ PHP                                                                        NEWS
     comment). (Grigorii Sokolik)
   . Fixed bug #71806 (php_strip_whitespace() fails on some numerical values).
     (Nikita)
+  . Fixed bug #71624 (`php -R` (PHP_MODE_PROCESS_STDIN) is broken).
+    (Sean DuBois)
 
 - Curl:
   . Fixed bug #71694 (Support constant CURLM_ADDED_ALREADY). (mpyw)
