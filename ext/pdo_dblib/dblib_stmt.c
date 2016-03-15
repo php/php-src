@@ -208,7 +208,8 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		col->namelen = spprintf(&col->name, 0, "computed%d", colno);
 	}
 	col->maxlen = dbcollen(H->link, colno+1);
-	col->param_type = PDO_PARAM_STR;
+	col->namelen = strlen(col->name);
+	col->param_type = PDO_PARAM_ZVAL;
 		
 	return 1;
 }
@@ -221,82 +222,161 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	pdo_dblib_db_handle *H = S->H;
 	
 	int coltype;
-	unsigned int tmp_len;
-	char *tmp_ptr = NULL;
-	
+	char *data, *tmp_data;
+	unsigned int data_len, tmp_data_len;
+	zval *zv = NULL;
+
 	coltype = dbcoltype(H->link, colno+1);
-	
-	*len = dbdatlen(H->link, colno+1);
-	*ptr = dbdata(H->link, colno+1);
-	
-	if (*len == 0 && *ptr == NULL) {
-		return 1;
-	}
-	
-	switch (coltype) {
-		case SQLVARBINARY:
-		case SQLBINARY:
-		case SQLIMAGE:
-		case SQLTEXT:
-			/* FIXME: Above types should be returned as a stream as they can be VERY large */
-		case SQLCHAR:
-		case SQLVARCHAR:
-			tmp_ptr = emalloc(*len + 1);
-			memcpy(tmp_ptr, *ptr, *len);
-			tmp_ptr[*len] = '\0';
-			*ptr = tmp_ptr;
-			break;
-		case SQLMONEY:
-		case SQLMONEY4:
-		case SQLMONEYN: {
-			DBFLT8 money_value;
-			dbconvert(NULL, coltype, *ptr, *len, SQLFLT8, (LPBYTE)&money_value, 8);
-			*len = spprintf(&tmp_ptr, 0, "%.4f", money_value);
-			*ptr = tmp_ptr;
-			break;
-		}
-		case SQLUNIQUE: {
-			*len = 36+1;
-			tmp_ptr = emalloc(*len + 1);
+	data = dbdata(H->link, colno+1);
+	data_len = dbdatlen(H->link, colno+1);
 
-			/* uniqueidentifier is a 16-byte binary number, convert to 32 char hex string */
-			*len = dbconvert(NULL, SQLUNIQUE, *ptr, *len, SQLCHAR, tmp_ptr, *len);
-			php_strtoupper(tmp_ptr, *len);
-			*ptr = tmp_ptr;
-			break;
-		}
-		case SQLDATETIM4:
-		case SQLDATETIME: {
-			DBDATETIME dt;
-			DBDATEREC di;
+	if (data_len != 0 && data != NULL) {
+		if (stmt->dbh->stringify) {
+			switch (coltype) {
+				case SQLFLT4:
+				case SQLFLT8:
+				case SQLINT4:
+				case SQLINT2:
+				case SQLINT1:
+				case SQLBIT: {
+					if (dbwillconvert(coltype, SQLCHAR)) {
+						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
+						tmp_data = emalloc(tmp_data_len);
+						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, tmp_data, -1);
 
-			dbconvert(H->link, coltype, (BYTE*) *ptr, -1, SQLDATETIME, (LPBYTE) &dt, -1);
-			dbdatecrack(H->link, &di, &dt);
-
-			*len = spprintf((char**) &tmp_ptr, 20, "%d-%02d-%02d %02d:%02d:%02d",
-#ifdef PHP_DBLIB_IS_MSSQL || MSDBLIB
-					di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
-#else
-					di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
-#endif
-				);
-
-			*ptr = (char*) tmp_ptr;
-			break;
-		}
-		default:
-			if (dbwillconvert(coltype, SQLCHAR)) {
-				tmp_len = 32 + (2 * (*len)); /* FIXME: We allocate more than we need here */
-				tmp_ptr = emalloc(tmp_len);
-				*len = dbconvert(NULL, coltype, *ptr, *len, SQLCHAR, tmp_ptr, -1);
-				*ptr = tmp_ptr;
-			} else {
-				*len = 0; /* FIXME: Silently fails and returns null on conversion errors */
-				*ptr = NULL;
+						MAKE_STD_ZVAL(zv);
+						ZVAL_STRING(zv, tmp_data, 0);
+					}
+					break;
+				}
 			}
+		}
+
+		if (!zv) {
+			switch (coltype) {
+				case SQLCHAR:
+				case SQLVARCHAR:
+				case SQLTEXT:
+#if ilia_0
+					while (data_len>0 && data[data_len-1] == ' ') { // nuke trailing whitespace
+						data_len--;
+					}
+#endif
+				case SQLVARBINARY:
+				case SQLBINARY:
+				case SQLIMAGE: {
+					MAKE_STD_ZVAL(zv);
+					if (!data_len) {
+						ZVAL_NULL(zv);
+					} else {
+						ZVAL_STRINGL(zv, data, data_len, 1);
+					}
+
+					break;
+				}
+				case SQLDATETIME:
+				case SQLDATETIM4: {
+					int dl;
+					DBDATEREC di;
+					DBDATETIME dt;
+
+					dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
+					dbdatecrack(H->link, &di, &dt);
+
+					dl = spprintf((char**) &tmp_data, 20, "%d-%02d-%02d %02d:%02d:%02d",
+#if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
+							di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
+#else
+							di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
+#endif
+					);
+
+					MAKE_STD_ZVAL(zv);
+					ZVAL_STRINGL(zv, tmp_data, dl, 0);
+
+					break;
+				}
+				case SQLFLT4: {
+					MAKE_STD_ZVAL(zv);
+					ZVAL_DOUBLE(zv, (double) (*(DBFLT4 *) data));
+
+					break;
+				}
+				case SQLFLT8: {
+					MAKE_STD_ZVAL(zv);
+					ZVAL_DOUBLE(zv, (double) (*(DBFLT8 *) data));
+
+					break;
+				}
+				case SQLINT4: {
+					MAKE_STD_ZVAL(zv);
+					ZVAL_LONG(zv, (long) ((int) *(DBINT *) data));
+
+					break;
+				}
+				case SQLINT2: {
+					MAKE_STD_ZVAL(zv);
+					ZVAL_LONG(zv, (long) ((int) *(DBSMALLINT *) data));
+
+					break;
+				}
+				case SQLINT1:
+				case SQLBIT: {
+					MAKE_STD_ZVAL(zv);
+					ZVAL_LONG(zv, (long) ((int) *(DBTINYINT *) data));
+
+					break;
+				}
+				case SQLMONEY:
+				case SQLMONEY4:
+				case SQLMONEYN: {
+					DBFLT8 money_value;
+					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&money_value, -1);
+
+					MAKE_STD_ZVAL(zv);
+
+					if (stmt->dbh->stringify) {
+						tmp_data_len = spprintf(&tmp_data, 0, "%.4f", money_value);
+						ZVAL_STRINGL(zv, tmp_data, tmp_data_len, 0);
+					} else {
+						ZVAL_DOUBLE(zv, money_value);
+					}
+
+					break;
+				}
+#ifdef SQLUNIQUE
+				case SQLUNIQUE: {
+#else
+				case 36: { // FreeTDS hack
+#endif
+					MAKE_STD_ZVAL(zv);
+					ZVAL_STRINGL(zv, data, 16, 1); // uniqueidentifier is a 16-byte binary number
+
+					break;
+				}
+				default: {
+					if (dbwillconvert(coltype, SQLCHAR)) {
+						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
+						tmp_data = emalloc(tmp_data_len);
+						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, tmp_data, -1);
+
+						MAKE_STD_ZVAL(zv);
+						ZVAL_STRING(zv, tmp_data, 0);
+					}
+				}
+			}
+		}
 	}
 
-	*caller_frees = 1;
+	if (zv != NULL) {
+		*ptr = (char*)&zv;
+		*len = sizeof(zval);
+	} else {
+		*ptr = NULL;
+		*len = 0;
+	}
+
+	*caller_frees = 0;
 
 	return 1;
 }
@@ -312,6 +392,7 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *re
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 	DBTYPEINFO* dbtypeinfo;
+	int coltype;
 
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
@@ -320,16 +401,30 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *re
 	array_init(return_value);
 
 	dbtypeinfo = dbcoltypeinfo(H->link, colno+1);
-	
+
 	if(!dbtypeinfo) return FAILURE;
-		
+
+	coltype = dbcoltype(H->link, colno+1);
+
 	add_assoc_long(return_value, "max_length", dbcollen(H->link, colno+1) );
 	add_assoc_long(return_value, "precision", (int) dbtypeinfo->precision );
 	add_assoc_long(return_value, "scale", (int) dbtypeinfo->scale );
 	add_assoc_string(return_value, "column_source", dbcolsource(H->link, colno+1), 1);
-	add_assoc_string(return_value, "native_type", pdo_dblib_get_field_name(dbcoltype(H->link, colno+1)), 1);
-	add_assoc_long(return_value, "native_type_id", dbcoltype(H->link, colno+1));
+	add_assoc_string(return_value, "native_type", pdo_dblib_get_field_name(coltype), 1);
+	add_assoc_long(return_value, "native_type_id", coltype);
 	add_assoc_long(return_value, "native_usertype_id", dbcolutype(H->link, colno+1));
+
+	switch (coltype) {
+		case SQLBIT:
+		case SQLINT1:
+		case SQLINT2:
+		case SQLINT4:
+		  add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
+		  break;
+		default:
+		  add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+		  break;
+	}
 
 	return 1;
 }
