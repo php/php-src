@@ -814,7 +814,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 		}
 
 		case IS_LONG:
-			if (Z_TYPE_P(property) == IS_DOUBLE)
+			if (runtime && Z_TYPE_P(property) == IS_DOUBLE)
 				return 1;
 
 		default:
