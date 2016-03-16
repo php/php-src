@@ -12,5 +12,5 @@ if (phpversion() < "5.3.0") {
 <?php
 var_dump(is_string(php_ini_scanned_files()));
 ?>
---EXPECT--
+--EXPECTF--
 bool(%s)
