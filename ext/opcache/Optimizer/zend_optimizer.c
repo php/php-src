@@ -29,6 +29,7 @@
 #include "zend_cfg.h"
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
+#include "zend_inference.h"
 #include "zend_dump.h"
 
 #ifndef HAVE_DFA_PASS
@@ -678,6 +679,34 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 	}
 }
 
+#if HAVE_DFA_PASS
+static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
+{
+	zend_op *opline, *end;
+
+	opline = op_array->opcodes;
+	end = opline + op_array->last;
+	while (opline < end) {
+		zend_vm_set_opcode_handler_ex(opline,
+			opline->op1_type == IS_UNDEF ? 0 : OP1_INFO(),
+			opline->op2_type == IS_UNDEF ? 0 : OP2_INFO(),
+			(opline->opcode == ZEND_PRE_INC ||
+			 opline->opcode == ZEND_PRE_DEC ||
+			 opline->opcode == ZEND_POST_INC ||
+			 opline->opcode == ZEND_POST_DEC) ?
+				((ssa->ops[opline - op_array->opcodes].op1_def >= 0) ? OP1_DEF_INFO() : MAY_BE_ANY) :
+				(opline->result_type == IS_UNDEF ? 0 : RES_INFO()));
+		if (opline->op1_type == IS_CONST) {
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+		}
+		if (opline->op2_type == IS_CONST) {
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+		}
+		opline++;
+	}
+}
+#endif
+
 static void zend_optimize_op_array(zend_op_array      *op_array,
                                    zend_optimizer_ctx *ctx)
 {
@@ -810,8 +839,13 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
-			zend_redo_pass_two(call_graph.op_arrays[i]);
-			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (func_info && func_info->ssa.var_info) {
+				zend_redo_pass_two_ex(call_graph.op_arrays[i], &func_info->ssa);
+				ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+			} else {
+				zend_redo_pass_two(call_graph.op_arrays[i]);
+			}
 		}
 
 		zend_arena_release(&ctx.arena, checkpoint);
