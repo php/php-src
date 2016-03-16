@@ -35,13 +35,5 @@ foreach ($urls as $i => $url) {
 }
 ?>
 --EXPECTF--
-bool(%s)
-bool(%s)
-
-Warning: (null)(): %d is not a valid cURL handle resource in Unknown on line %i
-
-Warning: (null)(): %d is not a valid cURL handle resource in Unknown on line %i
-
-Warning: (null)(): %d is not a valid cURL handle resource in Unknown on line %i
-
-Warning: (null)(): %d is not a valid cURL handle resource in Unknown on line %i
+bool(true)
+bool(true)
