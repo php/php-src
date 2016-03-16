@@ -712,6 +712,11 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+			case ZEND_FETCH_LIST:
+				if (opline->extended_value != 0) {
+					opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
+				}
+				break;
 		}
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);

@@ -1177,8 +1177,9 @@ assignment_list:
 ;
 
 assignment_list_element:
-		variable						{ $$ = $1; }
-	|	T_LIST '(' assignment_list ')'	{ $$ = $3; }
+		variable						{ $$ = zend_ast_create_ex(ZEND_AST_LIST_ELEM, 0, $1, NULL); }
+	|	variable '=' expr				{ $$ = zend_ast_create_ex(ZEND_AST_LIST_ELEM, 0, $1, $3); }
+	|	T_LIST '(' assignment_list ')'	{ $$ = zend_ast_create_ex(ZEND_AST_LIST_ELEM, 0, $3, NULL); }
 	|	/* empty */						{ $$ = NULL; }
 ;
 
