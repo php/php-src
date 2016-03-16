@@ -63,6 +63,10 @@ PHP                                                                        NEWS
   . Fixed Bug #71683 (Null pointer dereference in zend_hash_str_find_bucket).
     (Yasuo)
 
+- SNMP:
+  . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
+    (andrew at jmpesp dot org)
+
 - SPL:
   . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
     (Nikita)
