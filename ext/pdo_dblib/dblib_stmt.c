@@ -277,7 +277,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			dbdatecrack(H->link, &di, &dt);
 
 			*len = spprintf((char**) &tmp_ptr, 20, "%d-%02d-%02d %02d:%02d:%02d",
-#ifdef PHP_DBLIB_IS_MSSQL || MSDBLIB
+#if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
 					di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
 #else
 					di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
