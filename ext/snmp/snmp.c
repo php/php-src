@@ -533,7 +533,7 @@ static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type,
 	}
 
 	if (object && (snmp_object->exceptions_enabled & type)) {
-		zend_throw_exception_ex(php_snmp_exception_ce, type TSRMLS_CC, snmp_object->snmp_errstr);
+		zend_throw_exception_ex(php_snmp_exception_ce, type TSRMLS_CC, "%s", snmp_object->snmp_errstr);
 	} else {
 		va_start(args, format);
 		php_verror(docref, "", E_WARNING, format, args TSRMLS_CC);
