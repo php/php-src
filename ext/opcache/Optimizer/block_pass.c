@@ -689,8 +689,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			if (src->opcode == ZEND_BOOL) {
 				if (ZEND_OP1_TYPE(src) == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(src));
+				} else if (ZEND_OP1_TYPE(src) == IS_TMP_VAR) {
+					src->opcode = ZEND_FREE;
+				} else {
+					MAKE_NOP(src);
 				}
-				MAKE_NOP(src);
 				MAKE_NOP(opline);
 			}
 		}
