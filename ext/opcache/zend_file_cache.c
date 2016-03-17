@@ -418,6 +418,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					break;
 			}
 # endif
+			zend_serialize_opcode_handler(opline);
 			opline++;
 		}
 #else
@@ -995,7 +996,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					break;
 			}
 # endif
-			ZEND_VM_SET_OPCODE_HANDLER(opline);
+			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}
 
