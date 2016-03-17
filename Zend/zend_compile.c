@@ -724,12 +724,29 @@ static inline void zend_end_loop(int cont_addr, const znode *var_node) /* {{{ */
 
 void zend_do_free(znode *op1) /* {{{ */
 {
-	if (op1->op_type==IS_TMP_VAR) {
-		zend_emit_op(NULL, ZEND_FREE, op1, NULL);
-	} else if (op1->op_type==IS_VAR) {
+	if (op1->op_type == IS_TMP_VAR) {
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
-		while (opline->opcode == ZEND_END_SILENCE || opline->opcode == ZEND_EXT_FCALL_END || opline->opcode == ZEND_OP_DATA) {
+		while (opline->opcode == ZEND_END_SILENCE) {
+			opline--;
+		}
+
+		if (opline->result_type == IS_TMP_VAR && opline->result.var == op1->u.op.var) {
+			if (opline->opcode == ZEND_BOOL || opline->opcode == ZEND_BOOL_NOT) {
+				return;
+			}
+		}
+
+		opline = get_next_op(CG(active_op_array));
+
+		opline->opcode = ZEND_FREE;
+		SET_NODE(opline->op1, op1);
+		SET_UNUSED(opline->op2);
+	} else if (op1->op_type == IS_VAR) {
+		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+		while (opline->opcode == ZEND_END_SILENCE ||
+				opline->opcode == ZEND_EXT_FCALL_END ||
+				opline->opcode == ZEND_OP_DATA) {
 			opline--;
 		}
 		if (opline->result_type == IS_VAR
@@ -753,7 +770,7 @@ void zend_do_free(znode *op1) /* {{{ */
 					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 					return;
 				}
-				if (opline->result_type==IS_VAR
+				if (opline->result_type == IS_VAR
 					&& opline->result.var == op1->u.op.var) {
 					if (opline->opcode == ZEND_NEW) {
 						zend_emit_op(NULL, ZEND_FREE, op1, NULL);
@@ -6451,7 +6468,7 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 				zval_ptr_dtor(&right_node.u.constant);
 			} else {
-				zend_emit_op(result, ZEND_BOOL, &right_node, NULL);
+				zend_emit_op_tmp(result, ZEND_BOOL, &right_node, NULL);
 			}
 		}
 
