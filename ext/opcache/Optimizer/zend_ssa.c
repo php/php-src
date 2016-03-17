@@ -759,8 +759,8 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	int *var = NULL;
 	int i, j, k, changed;
 	zend_dfg dfg;
-	ALLOCA_FLAG(dfg_use_heap);
-	ALLOCA_FLAG(var_use_heap);
+	ALLOCA_FLAG(dfg_use_heap)
+	ALLOCA_FLAG(var_use_heap)
 
 	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));

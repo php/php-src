@@ -134,20 +134,21 @@ PHP_FUNCTION(grapheme_strpos)
 		RETURN_FALSE;
 	}
 
+	if (offset >= 0) {
+		/* quick check to see if the string might be there
+		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
+		*/
+		found = php_memnstr(haystack + offset, needle, needle_len, haystack + haystack_len);
 
-	/* quick check to see if the string might be there
-	 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
-	*/
-	found = php_memnstr(haystack + offset, needle, needle_len, haystack + haystack_len);
+		/* if it isn't there the we are done */
+		if (!found) {
+			RETURN_FALSE;
+		}
 
-	/* if it isn't there the we are done */
-	if (!found) {
-		RETURN_FALSE;
-	}
-
-	/* if it is there, and if the haystack is ascii, we are all done */
-	if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
-		RETURN_LONG(found - haystack);
+		/* if it is there, and if the haystack is ascii, we are all done */
+		if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
+			RETURN_LONG(found - haystack);
+		}
 	}
 
 	/* do utf16 part of the strpos */
@@ -195,7 +196,6 @@ PHP_FUNCTION(grapheme_stripos)
 		RETURN_FALSE;
 	}
 
-
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
@@ -204,7 +204,8 @@ PHP_FUNCTION(grapheme_stripos)
 		haystack_dup = estrndup(haystack, haystack_len);
 		php_strtolower(haystack_dup, haystack_len);
 
-		found = php_memnstr(haystack_dup + offset, needle_dup, needle_len, haystack_dup + haystack_len);
+		found = php_memnstr(haystack_dup + offset + ((offset < 0) ? haystack_len : 0)
+			, needle_dup, needle_len, haystack_dup + haystack_len);
 
 		efree(haystack_dup);
 		efree(needle_dup);
@@ -800,6 +801,10 @@ PHP_FUNCTION(grapheme_extract)
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_extract: unable to parse input param", 0 );
 		RETURN_FALSE;
+	}
+
+	if (lstart < 0) {
+		lstart += str_len;
 	}
 
 	if ( NULL != next ) {

@@ -32,6 +32,9 @@ PHP 7.1 UPGRADE NOTES
 - Core
   . Added void return type, which requires that a function not return a value.
     (RFC: https://wiki.php.net/rfc/void_return_type)
+  . String offset access now supports negative references, which will be
+    counted from the end of the string.
+    (RFC: https://wiki.php.net/rfc/negative-string-offsets)
 
 ========================================
 3. Changes in SAPI modules
@@ -66,6 +69,11 @@ PHP 7.1 UPGRADE NOTES
 - unpack() accepts an additional optional $offset argument. '@' format code
   (that specifes an absolute position) is applyed to input data after
   the $offset argument.
+- strpos(), stripos(), substr_count(), grapheme_strpos(), grapheme_stripos(),
+  grapheme_extract(), iconv_strpos(), mb_strimwidth(), mb_ereg_search_setpos(),
+  mb_strpos() and mb_stripos() now accept negative string offstes.
+- substr_count() and mb_strimwidth() additionally also accept negative length.
+- file_get_contents() accepts a negative seek offset if the stream is seekable.
 
 ========================================
 6. New Functions

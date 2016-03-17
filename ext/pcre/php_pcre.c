@@ -1731,8 +1731,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	zend_long limit_val, zend_long flags)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
-	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
-	pcre_extra		*extra_bump = NULL;	/* Almost dummy */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
@@ -1840,29 +1838,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
-				if (pce->compile_options & PCRE_UTF8) {
-					if (re_bump == NULL) {
-						int dummy;
-						zend_string *regex = zend_string_init("/./us", sizeof("/./us")-1, 0);
-						re_bump = pcre_get_compiled_regex(regex, &extra_bump, &dummy);
-						zend_string_release(regex);
-						if (re_bump == NULL) {
-							RETURN_FALSE;
-						}
-					}
-					count = pcre_exec(re_bump, extra_bump, subject,
-							  subject_len, start_offset,
-							  exoptions, offsets, size_offsets);
-					if (count < 1) {
-						php_error_docref(NULL, E_WARNING, "Unknown error");
-						RETURN_FALSE;
-					}
-				} else {
-					offsets[0] = start_offset;
-					offsets[1] = start_offset + 1;
-				}
-			} else
+				offsets[0] = start_offset;
+				offsets[1] = start_offset + calculate_unit_length(pce, subject + start_offset);
+			} else {
 				break;
+			}
 		} else {
 			pcre_handle_exec_error(count);
 			break;

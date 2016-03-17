@@ -58,6 +58,7 @@ $vm_op_flags = array(
 	"ZEND_VM_OP_SPEC"         => 1<<0,
 	"ZEND_VM_OP_CONST"        => 1<<1,
 	"ZEND_VM_OP_TMPVAR"       => 1<<2,
+	"ZEND_VM_OP_TMPVARCV"     => 1<<3,
 	"ZEND_VM_OP_MASK"         => 0xf0,
 	"ZEND_VM_OP_NUM"          => 0x10,
 	"ZEND_VM_OP_JMP_ADDR"     => 0x20,
@@ -73,7 +74,7 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_ARG_NUM"     => 1<<18,
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
 	"ZEND_VM_EXT_REF"         => 1<<20,
-	"ZEND_VM_EXT_MASK"        => 0xff000000,
+	"ZEND_VM_EXT_MASK"        => 0x0f000000,
 	"ZEND_VM_EXT_NUM"         => 0x01000000,
     // unused 0x2000000
 	"ZEND_VM_EXT_JMP_ADDR"    => 0x03000000,
@@ -86,6 +87,8 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_FAST_RET"    => 0x0a000000,
 	"ZEND_VM_EXT_SRC"         => 0x0b000000,
 	"ZEND_VM_EXT_SEND"        => 0x0c000000,
+	"ZEND_VM_NO_CONST_CONST"  => 0x40000000,
+	"ZEND_VM_COMMUTATIVE"     => 0x80000000,
 );
 
 foreach ($vm_op_flags as $name => $val) {
@@ -100,6 +103,7 @@ $vm_op_decode = array(
 	"UNUSED"               => ZEND_VM_OP_SPEC,
 	"CV"                   => ZEND_VM_OP_SPEC,
 	"TMPVAR"               => ZEND_VM_OP_SPEC | ZEND_VM_OP_TMPVAR,
+	"TMPVARCV"             => ZEND_VM_OP_SPEC | ZEND_VM_OP_TMPVARCV,
 	"NUM"                  => ZEND_VM_OP_NUM,
 	"JMP_ADDR"             => ZEND_VM_OP_JMP_ADDR,
 	"TRY_CATCH"            => ZEND_VM_OP_TRY_CATCH,
@@ -152,396 +156,447 @@ $op_types_ex = array(
 	"UNUSED",
 	"CV",
 	"TMPVAR",
+	"TMPVARCV",
 );
 
 $prefix = array(
-	"ANY"    => "",
-	"TMP"    => "_TMP",
-	"VAR"    => "_VAR",
-	"CONST"  => "_CONST",
-	"UNUSED" => "_UNUSED",
-	"CV"     => "_CV",
-	"TMPVAR" => "_TMPVAR",
+	"ANY"      => "",
+	"TMP"      => "_TMP",
+	"VAR"      => "_VAR",
+	"CONST"    => "_CONST",
+	"UNUSED"   => "_UNUSED",
+	"CV"       => "_CV",
+	"TMPVAR"   => "_TMPVAR",
+	"TMPVARCV" => "_TMPVARCV",
 );
 
 $typecode = array(
-	"ANY"    => 0,
-	"TMP"    => 1,
-	"VAR"    => 2,
-	"CONST"  => 0,
-	"UNUSED" => 3,
-	"CV"     => 4,
-	"TMPVAR" => 0,
+	"ANY"      => 0,
+	"TMP"      => 1,
+	"VAR"      => 2,
+	"CONST"    => 0,
+	"UNUSED"   => 3,
+	"CV"       => 4,
+	"TMPVAR"   => 0,
+	"TMPVARCV" => 0,
+);
+
+$commutative_order = array(
+	"ANY"      => 0,
+	"TMP"      => 1,
+	"VAR"      => 2,
+	"CONST"    => 0,
+	"UNUSED"   => 0,
+	"CV"       => 4,
+	"TMPVAR"   => 2,
+	"TMPVARCV" => 4,
 );
 
 $op1_type = array(
-	"ANY"    => "opline->op1_type",
-	"TMP"    => "IS_TMP_VAR",
-	"VAR"    => "IS_VAR",
-	"CONST"  => "IS_CONST",
-	"UNUSED" => "IS_UNUSED",
-	"CV"     => "IS_CV",
-	"TMPVAR" => "(IS_TMP_VAR|IS_VAR)",
+	"ANY"      => "opline->op1_type",
+	"TMP"      => "IS_TMP_VAR",
+	"VAR"      => "IS_VAR",
+	"CONST"    => "IS_CONST",
+	"UNUSED"   => "IS_UNUSED",
+	"CV"       => "IS_CV",
+	"TMPVAR"   => "(IS_TMP_VAR|IS_VAR)",
+	"TMPVARCV" => "(IS_TMP_VAR|IS_VAR|IS_CV)",
 );
 
 $op2_type = array(
-	"ANY"    => "opline->op2_type",
-	"TMP"    => "IS_TMP_VAR",
-	"VAR"    => "IS_VAR",
-	"CONST"  => "IS_CONST",
-	"UNUSED" => "IS_UNUSED",
-	"CV"     => "IS_CV",
-	"TMPVAR" => "(IS_TMP_VAR|IS_VAR)",
+	"ANY"      => "opline->op2_type",
+	"TMP"      => "IS_TMP_VAR",
+	"VAR"      => "IS_VAR",
+	"CONST"    => "IS_CONST",
+	"UNUSED"   => "IS_UNUSED",
+	"CV"       => "IS_CV",
+	"TMPVAR"   => "(IS_TMP_VAR|IS_VAR)",
+	"TMPVARCV" => "(IS_TMP_VAR|IS_VAR|IS_CV)",
 );
 
 $op1_free = array(
-	"ANY"    => "(free_op1 != NULL)",
-	"TMP"    => "1",
-	"VAR"    => "(free_op1 != NULL)",
-	"CONST"  => "0",
-	"UNUSED" => "0",
-	"CV"     => "0",
-	"TMPVAR" => "???",
+	"ANY"      => "(free_op1 != NULL)",
+	"TMP"      => "1",
+	"VAR"      => "(free_op1 != NULL)",
+	"CONST"    => "0",
+	"UNUSED"   => "0",
+	"CV"       => "0",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op2_free = array(
-	"ANY"    => "(free_op2 != NULL)",
-	"TMP"    => "1",
-	"VAR"    => "(free_op2 != NULL)",
-	"CONST"  => "0",
-	"UNUSED" => "0",
-	"CV"     => "0",
-	"TMPVAR" => "???",
+	"ANY"      => "(free_op2 != NULL)",
+	"TMP"      => "1",
+	"VAR"      => "(free_op2 != NULL)",
+	"CONST"    => "0",
+	"UNUSED"   => "0",
+	"CV"       => "0",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_zval_ptr = array(
-	"ANY"    => "get_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
-	"VAR"    => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "EX_CONSTANT(opline->op1)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"ANY"      => "get_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
+	"VAR"      => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "EX_CONSTANT(opline->op1)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_zval_ptr = array(
-	"ANY"    => "get_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
-	"VAR"    => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "EX_CONSTANT(opline->op2)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"ANY"      => "get_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
+	"VAR"      => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "EX_CONSTANT(opline->op2)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_zval_ptr_ptr = array(
-	"ANY"    => "get_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "NULL",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_zval_ptr_ptr = array(
-	"ANY"    => "get_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "NULL",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_zval_ptr_deref = array(
-	"ANY"    => "get_zval_ptr_deref(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
-	"VAR"    => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "EX_CONSTANT(opline->op1)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_zval_ptr_deref(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
+	"VAR"      => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "EX_CONSTANT(opline->op1)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_zval_ptr_deref = array(
-	"ANY"    => "get_zval_ptr_deref(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
-	"VAR"    => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "EX_CONSTANT(opline->op2)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_zval_ptr_deref(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
+	"VAR"      => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "EX_CONSTANT(opline->op2)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_zval_ptr_undef = array(
-	"ANY"    => "get_zval_ptr_undef(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
-	"VAR"    => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "EX_CONSTANT(opline->op1)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_undef(execute_data, opline->op1.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"ANY"      => "get_zval_ptr_undef(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
+	"VAR"      => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "EX_CONSTANT(opline->op1)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_undef(execute_data, opline->op1.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"TMPVARCV" => "EX_VAR(opline->op1.var)",
 );
 
 $op2_get_zval_ptr_undef = array(
-	"ANY"    => "get_zval_ptr_undef(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
-	"VAR"    => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "EX_CONSTANT(opline->op2)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_undef(execute_data, opline->op2.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"ANY"      => "get_zval_ptr_undef(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
+	"VAR"      => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "EX_CONSTANT(opline->op2)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_undef(execute_data, opline->op2.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"TMPVARCV" => "EX_VAR(opline->op2.var)",
 );
 
 $op1_get_zval_ptr_ptr_undef = array(
-	"ANY"    => "get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "NULL",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "EX_VAR(opline->op1.var)",
 );
 
 $op2_get_zval_ptr_ptr_undef = array(
-	"ANY"    => "get_zval_ptr_ptr_undef(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "NULL",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_zval_ptr_ptr_undef(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "EX_VAR(opline->op2.var)",
 );
 
 $op1_get_obj_zval_ptr = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
-	"VAR"    => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "EX_CONSTANT(opline->op1)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"ANY"      => "get_obj_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
+	"VAR"      => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "EX_CONSTANT(opline->op1)",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_obj_zval_ptr = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
-	"VAR"    => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "EX_CONSTANT(opline->op2)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"ANY"      => "get_obj_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
+	"VAR"      => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "EX_CONSTANT(opline->op2)",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_obj_zval_ptr_undef = array(
-	"ANY"    => "get_obj_zval_ptr_undef(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
-	"VAR"    => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "EX_CONSTANT(opline->op1)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_undef(execute_data, opline->op1.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"ANY"      => "get_obj_zval_ptr_undef(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
+	"VAR"      => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "EX_CONSTANT(opline->op1)",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_undef(execute_data, opline->op1.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"TMPVARCV" => "EX_VAR(opline->op1.var)",
 );
 
 $op2_get_obj_zval_ptr_undef = array(
-	"ANY"    => "get_obj_zval_ptr_undef(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
-	"VAR"    => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "EX_CONSTANT(opline->op2)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_undef(execute_data, opline->op2.var)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"ANY"      => "get_obj_zval_ptr_undef(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
+	"VAR"      => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "EX_CONSTANT(opline->op2)",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_undef(execute_data, opline->op2.var)",
+	"TMPVAR"   => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"TMPVARCV" => "EX_VAR(opline->op2.var)",
 );
 
 $op1_get_obj_zval_ptr_deref = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
-	"VAR"    => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "EX_CONSTANT(opline->op1)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_obj_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
+	"VAR"      => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "EX_CONSTANT(opline->op1)",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_obj_zval_ptr_deref = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
-	"VAR"    => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "EX_CONSTANT(opline->op2)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_obj_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
+	"VAR"      => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "EX_CONSTANT(opline->op2)",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_obj_zval_ptr_ptr = array(
-	"ANY"    => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "NULL",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_obj_zval_ptr_ptr = array(
-	"ANY"    => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "NULL",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_obj_zval_ptr_ptr_undef = array(
-	"ANY"    => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
-	"CONST"  => "NULL",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "EX_VAR(opline->op1.var)",
 );
 
 $op2_get_obj_zval_ptr_ptr_undef = array(
-	"ANY"    => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
-	"TMP"    => "NULL",
-	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
-	"CONST"  => "NULL",
-	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
-	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"       => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op2.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "EX_VAR(opline->op2.var)",
 );
 
 $op1_free_op = array(
-	"ANY"    => "FREE_OP(free_op1)",
-	"TMP"    => "zval_ptr_dtor_nogc(free_op1)",
-	"VAR"    => "zval_ptr_dtor_nogc(free_op1)",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "zval_ptr_dtor_nogc(free_op1)",
+	"ANY"      => "FREE_OP(free_op1)",
+	"TMP"      => "zval_ptr_dtor_nogc(free_op1)",
+	"VAR"      => "zval_ptr_dtor_nogc(free_op1)",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "zval_ptr_dtor_nogc(free_op1)",
+	"TMPVARCV" => "???",
 );
 
 $op2_free_op = array(
-	"ANY"    => "FREE_OP(free_op2)",
-	"TMP"    => "zval_ptr_dtor_nogc(free_op2)",
-	"VAR"    => "zval_ptr_dtor_nogc(free_op2)",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "zval_ptr_dtor_nogc(free_op2)",
+	"ANY"      => "FREE_OP(free_op2)",
+	"TMP"      => "zval_ptr_dtor_nogc(free_op2)",
+	"VAR"      => "zval_ptr_dtor_nogc(free_op2)",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "zval_ptr_dtor_nogc(free_op2)",
+	"TMPVARCV" => "???",
 );
 
 $op1_free_op_if_var = array(
-	"ANY"    => "if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(free_op1);}",
-	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor_nogc(free_op1)",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "???",
+	"ANY"      => "if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(free_op1);}",
+	"TMP"      => "",
+	"VAR"      => "zval_ptr_dtor_nogc(free_op1)",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op2_free_op_if_var = array(
-	"ANY"    => "if (opline->op2_type == IS_VAR) {zval_ptr_dtor_nogc(free_op2);}",
-	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor_nogc(free_op2)",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "???",
+	"ANY"      => "if (opline->op2_type == IS_VAR) {zval_ptr_dtor_nogc(free_op2);}",
+	"TMP"      => "",
+	"VAR"      => "zval_ptr_dtor_nogc(free_op2)",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op1_free_op_var_ptr = array(
-	"ANY"    => "if (free_op1) {zval_ptr_dtor_nogc(free_op1);}",
-	"TMP"    => "",
-	"VAR"    => "if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);}",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "???",
+	"ANY"      => "if (free_op1) {zval_ptr_dtor_nogc(free_op1);}",
+	"TMP"      => "",
+	"VAR"      => "if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);}",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op2_free_op_var_ptr = array(
-	"ANY"    => "if (free_op2) {zval_ptr_dtor_nogc(free_op2);}",
-	"TMP"    => "",
-	"VAR"    => "if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);}",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "???",
+	"ANY"      => "if (free_op2) {zval_ptr_dtor_nogc(free_op2);}",
+	"TMP"      => "",
+	"VAR"      => "if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);}",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op1_free_unfetched = array(
-	"ANY"    => "FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var)",
-	"TMP"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
-	"VAR"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
+	"ANY"      => "FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var)",
+	"TMP"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
+	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
+	"TMPVARCV" => "???",
 );
 
 $op2_free_unfetched = array(
-	"ANY"    => "FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var)",
-	"TMP"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
-	"VAR"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
+	"ANY"      => "FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var)",
+	"TMP"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
+	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
+	"TMPVARCV" => "???",
 );
 
 $op_data_type = array(
-	"ANY"    => "(opline+1)->op1_type",
-	"TMP"    => "IS_TMP_VAR",
-	"VAR"    => "IS_VAR",
-	"CONST"  => "IS_CONST",
-	"UNUSED" => "IS_UNUSED",
-	"CV"     => "IS_CV",
-	"TMPVAR" => "(IS_TMP_VAR|IS_VAR)",
+	"ANY"      => "(opline+1)->op1_type",
+	"TMP"      => "IS_TMP_VAR",
+	"VAR"      => "IS_VAR",
+	"CONST"    => "IS_CONST",
+	"UNUSED"   => "IS_UNUSED",
+	"CV"       => "IS_CV",
+	"TMPVAR"   => "(IS_TMP_VAR|IS_VAR)",
+	"TMPVARCV" => "(IS_TMP_VAR|IS_VAR|IS_CV)",
 );
 
 $op_data_get_zval_ptr = array(
-	"ANY"    => "get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data)",
-	"VAR"    => "_get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data)",
-	"CONST"  => "EX_CONSTANT((opline+1)->op1)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, (opline+1)->op1.var)",
-	"TMPVAR" => "_get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data)",
+	"ANY"      => "get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data)",
+	"VAR"      => "_get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data)",
+	"CONST"    => "EX_CONSTANT((opline+1)->op1)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, (opline+1)->op1.var)",
+	"TMPVAR"   => "_get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data)",
+	"TMPVARCV" => "???",
 );
 
 $op_data_get_zval_ptr_deref = array(
-	"ANY"    => "get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data, \\1)",
-	"TMP"    => "_get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data)",
-	"VAR"    => "_get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data)",
-	"CONST"  => "EX_CONSTANT((opline+1)->op1)",
-	"UNUSED" => "NULL",
-	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, (opline+1)->op1.var)",
-	"TMPVAR" => "???",
+	"ANY"      => "get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data, \\1)",
+	"TMP"      => "_get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data)",
+	"VAR"      => "_get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data)",
+	"CONST"    => "EX_CONSTANT((opline+1)->op1)",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_deref_\\1(execute_data, (opline+1)->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
 );
 
 $op_data_free_op = array(
-	"ANY"    => "FREE_OP(free_op_data)",
-	"TMP"    => "zval_ptr_dtor_nogc(free_op_data)",
-	"VAR"    => "zval_ptr_dtor_nogc(free_op_data)",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "zval_ptr_dtor_nogc(free_op_data)",
+	"ANY"      => "FREE_OP(free_op_data)",
+	"TMP"      => "zval_ptr_dtor_nogc(free_op_data)",
+	"VAR"      => "zval_ptr_dtor_nogc(free_op_data)",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "zval_ptr_dtor_nogc(free_op_data)",
+	"TMPVARCV" => "???",
 );
 
 $op_data_free_unfetched = array(
-	"ANY"    => "FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var)",
-	"TMP"    => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
-	"VAR"    => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
-	"CONST"  => "",
-	"UNUSED" => "",
-	"CV"     => "",
-	"TMPVAR" => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
+	"ANY"      => "FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var)",
+	"TMP"      => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
+	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
+	"TMPVARCV" => "???",
 );
 
 $list    = array(); // list of opcode handlers and helpers in original order
@@ -550,6 +605,8 @@ $helpers = array(); // opcode helpers by name
 $params  = array(); // parameters of helpers
 $opnames = array(); // opcode name to code mapping
 $line_no = 1;
+
+$used_extra_spec = array();
 
 // Writes $s into resulting executor
 function out($f, $s) {
@@ -675,6 +732,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/FREE_UNFETCHED_OP_DATA\(\)/",
 			"/RETURN_VALUE_USED\(opline\)/",
 			"/arg_num <= MAX_ARG_FLAG_NUM/",
+			"/ZEND_VM_SMART_BRANCH\(\s*([^,)]*)\s*,\s*([^)]*)\s*\)/",
 		),
 		array(
 			$op1_type[$op1],
@@ -719,13 +777,19 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"#\\1if 0",
 			$export?"#\\1if 1\n":"#\\1if 0\n",
 			$export?"#\\1if 0\n":"#\\1if 1\n",
-			$op_data_type[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_get_zval_ptr[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_get_zval_ptr_deref[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_free_op[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			$op_data_free_unfetched[isset($extra_spec['op_data']) ? $extra_spec['op_data'] : "ANY"],
-			isset($extra_spec['retval']) ? $extra_spec['retval'] : "RETURN_VALUE_USED(opline)",
-			isset($extra_spec['quick_arg']) ? $extra_spec['quick_arg'] : "arg_num <= MAX_ARG_FLAG_NUM",
+			$op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_free_unfetched[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
+			isset($extra_spec['QUICK_ARG']) ? $extra_spec['QUICK_ARG'] : "arg_num <= MAX_ARG_FLAG_NUM",
+			isset($extra_spec['SMART_BRANCH']) ?
+				($extra_spec['SMART_BRANCH'] == 1 ?
+						"ZEND_VM_SMART_BRANCH_JMPZ(\\1, \\2)"
+					:	($extra_spec['SMART_BRANCH'] == 2 ?
+							"ZEND_VM_SMART_BRANCH_JMPNZ(\\1, \\2)" : ""))
+				: 	"ZEND_VM_SMART_BRANCH(\\1, \\2)",
 		),
 		$code);
 
@@ -857,7 +921,21 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 
 // Generates opcode handler
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $extra_spec = null, &$switch_labels = array()) {
-	global $definition_file, $prefix, $typecode, $opnames;
+	global $definition_file, $prefix, $typecode, $opnames, $commutative_order;
+
+	if ($spec &&
+	    isset($extra_spec["NO_CONST_CONST"]) &&
+	    $op1 == "CONST" && $op2 == "CONST") {
+	    // Skip useless constant handlers
+		return;
+	}
+
+	if ($spec &&
+	    isset($extra_spec["COMMUTATIVE"]) &&
+	    $commutative_order[$op1] > $commutative_order[$op2]) {
+	    // Skip duplicate commutative handlers
+		return;
+	}
 
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
@@ -931,6 +1009,21 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 	gen_code($f, $spec, $kind, 0, $code, $op1, $op2, $name);
 }
 
+
+function gen_null_label($f, $kind, $prolog) {
+	switch ($kind) {
+		case ZEND_VM_KIND_CALL:
+			out($f,$prolog."ZEND_NULL_HANDLER,\n");
+			break;
+		case ZEND_VM_KIND_SWITCH:
+			out($f,$prolog."(void*)(uintptr_t)-1,\n");
+			break;
+		case ZEND_VM_KIND_GOTO:
+			out($f,$prolog."(void*)&&ZEND_NULL_HANDLER,\n");
+			break;
+	}
+}
+
 // Generates array of opcode handlers (specialized or unspecialized)
 function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()) {
 	global $opcodes, $op_types, $prefix;
@@ -946,12 +1039,12 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 			$spec_op1 = $spec_op2 = $spec_extra = false;
 			$next = $num + 1;
 			$diff = array_diff_key(array_flip($op_types), isset($dsc["op1"]) ? $dsc["op1"] : array());
-			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op1"]["TMPVAR"])) {
+			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op1"]["TMPVAR"]) || isset($dsc["op1"]["TMPVARCV"])) {
 				$spec_op1 = true;
 				$specs[$num] .= " | SPEC_RULE_OP1";
 			}
 			$diff = array_diff_key(array_flip($op_types), isset($dsc["op2"]) ? $dsc["op2"] : array());
-			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op2"]["TMPVAR"])) {
+			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op2"]["TMPVAR"]) || isset($dsc["op2"]["TMPVARCV"])) {
 				$spec_op2 = true;
 				$specs[$num] .= " | SPEC_RULE_OP2";
 			}
@@ -967,8 +1060,16 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					foreach($op_types as $op1) {
 						if ($op1 != "ANY") {
 							if (!isset($dsc["op1"][$op1])) {
-								if (($op1 == "TMP" || $op1 == "VAR") && isset($dsc["op1"]["TMPVAR"])) {
-									$op1 = "TMPVAR";
+								if ($op1 == "TMP" || $op1 == "VAR") {
+									if (isset($dsc["op1"]["TMPVAR"])) {
+										$op1 = "TMPVAR";
+									} else if (isset($dsc["op1"]["TMPVARCV"])) {
+										$op1 = "TMPVARCV";
+									} else {
+										$op1 = "ANY";
+									}
+								} else if ($op1 == "CV" && isset($dsc["op1"]["TMPVARCV"])) {
+									$op1 = "TMPVARCV";
 								} else {
 									// Try to use unspecialized handler
 									$op1 = "ANY";
@@ -985,8 +1086,16 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					foreach($op_types as $op2) {
 						if ($op2 != "ANY") {
 							if (!isset($dsc["op2"][$op2])) {
-								if (($op2 == "TMP" || $op2 == "VAR") && isset($dsc["op2"]["TMPVAR"])) {
-									$op2 = "TMPVAR";
+								if ($op2 == "TMP" || $op2 == "VAR") {
+									if (isset($dsc["op2"]["TMPVAR"])) {
+										$op2 = "TMPVAR";
+									} else if (isset($dsc["op2"]["TMPVARCV"])) {
+										$op2 = "TMPVARCV";
+									} else {
+										$op2 = "ANY";
+									}
+								} else if ($op2 == "CV" && isset($dsc["op2"]["TMPVARCV"])) {
+									$op2 = "TMPVARCV";
 								} else {
 									// Try to use unspecialized handler
 									$op2 = "ANY";
@@ -1002,15 +1111,24 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					// For each op_data.op_type except ANY
 					foreach($op_types as $op_data) {
 						if ($op_data != "ANY") {
-							if (!isset($dsc["spec"]["op_data"][$op_data])) {
-								if (($op_data == "TMP" || $op_data == "VAR") && isset($dsc["spec"]["op_data"]["TMPVAR"])) {
-									$op_data = "TMPVAR";
+							if (!isset($dsc["spec"]["OP_DATA"][$op_data])) {
+								if ($op_data == "TMP" || $op_data == "VAR") {
+									if (isset($dsc["spec"]["OP_DATA"]["TMPVAR"])) {
+										$op_data = "TMPVAR";
+									} else if (isset($dsc["spec"]["OP_DATA"]["TMPVARCV"])) {
+										$op_data = "TMPVARCV";
+									} else {
+										// Try to use unspecialized handler
+										$op_data = "ANY";
+									}
+								} else if ($op_data == "CV" && isset($dsc["OP_DATA"]["TMPVARCV"])) {
+									$op_data = "TMPVARCV";
 								} else {
 									// Try to use unspecialized handler
 									$op_data = "ANY";
 								}
 							}
-							$do($op1, $op2, array("op_data" => $op_data) + $extra_spec);
+							$do($op1, $op2, array("OP_DATA" => $op_data) + $extra_spec);
 						}
 					}
 				};
@@ -1023,13 +1141,28 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 				};
 			};
 			$generate = function ($op1, $op2, $extra_spec = array()) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label) {
-				global $typecode;
+				global $typecode, $commutative_order;
 
 				// Check if specialized handler is defined
 				/* TODO: figure out better way to signal "specialized and not defined" than an extra lookup */
 				if (isset($dsc["op1"][$op1]) &&
 				    isset($dsc["op2"][$op2]) &&
-				    (!isset($extra_spec["op_data"]) || isset($dsc["spec"]["op_data"][$extra_spec["op_data"]]))) {
+				    (!isset($extra_spec["OP_DATA"]) || isset($dsc["spec"]["OP_DATA"][$extra_spec["OP_DATA"]]))) {
+
+					if (isset($extra_spec["NO_CONST_CONST"]) &&
+					    $op1 == "CONST" && $op2 == "CONST") {
+					    // Skip useless constant handlers
+						gen_null_label($f, $kind, $prolog);
+						$label++;
+						return;
+					} else if (isset($extra_spec["COMMUTATIVE"]) &&
+					    $commutative_order[$op1] > $commutative_order[$op2]) {
+					    // Skip duplicate commutative handlers
+						gen_null_label($f, $kind, $prolog);
+						$label++;
+						return;
+					}
+					
 					// Emit pointer to specialized handler
 					$spec_name = $dsc["op"]."_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec);
 					switch ($kind) {
@@ -1048,27 +1181,15 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					}
 				} else {
 					// Emit pointer to handler of undefined opcode
-					switch ($kind) {
-						case ZEND_VM_KIND_CALL:
-							out($f,$prolog."ZEND_NULL_HANDLER,\n");
-							$label++;
-							break;
-						case ZEND_VM_KIND_SWITCH:
-							out($f,$prolog."(void*)(uintptr_t)-1,\n");
-							$label++;
-							break;
-						case ZEND_VM_KIND_GOTO:
-							out($f,$prolog."(void*)&&ZEND_NULL_HANDLER,\n");
-							$label++;
-							break;
-					}
+					gen_null_label($f, $kind, $prolog);
+					$label++;
 				}
 			};
 
 			$do = $generate;
 			if ($spec_extra) {
 				foreach ($spec_extra as $extra => $devnull) {
-					if ($extra == "op_data") {
+					if ($extra == "OP_DATA") {
 						$do = $foreach_op_data($do);
 					} else {
 						$do = $foreach_extra_spec($do, $extra);
@@ -1188,15 +1309,22 @@ function extra_spec_name($extra_spec) {
 	global $prefix;
 
 	$s = "";
-	if (isset($extra_spec["op_data"])) {
-		$s .= "_OP_DATA" . $prefix[$extra_spec["op_data"]];
+	if (isset($extra_spec["OP_DATA"])) {
+		$s .= "_OP_DATA" . $prefix[$extra_spec["OP_DATA"]];
 	}
-	if (isset($extra_spec["retval"])) {
-		$s .= "_RETVAL_".($extra_spec["retval"] ? "USED" : "UNUSED");
+	if (isset($extra_spec["RETVAL"])) {
+		$s .= "_RETVAL_".($extra_spec["RETVAL"] ? "USED" : "UNUSED");
 	}
-	if (isset($extra_spec["quick_arg"])) {
-		if ($extra_spec["quick_arg"]) {
+	if (isset($extra_spec["QUICK_ARG"])) {
+		if ($extra_spec["QUICK_ARG"]) {
 			$s .= "_QUICK";
+		}
+	}
+	if (isset($extra_spec["SMART_BRANCH"])) {
+		if ($extra_spec["SMART_BRANCH"] == 1) {
+			$s .= "_JMPZ";
+		} else if ($extra_spec["SMART_BRANCH"] == 2) {
+			$s .= "_JMPNZ";
 		}
 	}
 	return $s;
@@ -1204,14 +1332,17 @@ function extra_spec_name($extra_spec) {
 
 function extra_spec_flags($extra_spec) {
 	$s = array();
-	if (isset($extra_spec["op_data"])) {
+	if (isset($extra_spec["OP_DATA"])) {
 		$s[] = "SPEC_RULE_OP_DATA";
 	}
-	if (isset($extra_spec["retval"])) {
+	if (isset($extra_spec["RETVAL"])) {
 		$s[] = "SPEC_RULE_RETVAL";
 	}
-	if (isset($extra_spec["quick_arg"])) {
+	if (isset($extra_spec["QUICK_ARG"])) {
 		$s[] = "SPEC_RULE_QUICK_ARG";
+	}
+	if (isset($extra_spec["SMART_BRANCH"])) {
+		$s[] = "SPEC_RULE_SMART_BRANCH";
 	}
 	return $s;
 }
@@ -1224,12 +1355,12 @@ function extra_spec_handler($dsc) {
 	}
 	$specs = $dsc["spec"];
 
-	if (isset($specs["op_data"])) {
-		$op_data_specs = $specs["op_data"];
-		$specs["op_data"] = array();
+	if (isset($specs["OP_DATA"])) {
+		$op_data_specs = $specs["OP_DATA"];
+		$specs["OP_DATA"] = array();
 		foreach($op_types_ex as $op_data) {
-			if (isset($dsc["spec"]["op_data"][$op_data])) {
-				$specs["op_data"][] = $op_data;
+			if (isset($dsc["spec"]["OP_DATA"][$op_data])) {
+				$specs["OP_DATA"][] = $op_data;
 			}
 		}
 	}
@@ -1353,12 +1484,13 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 		if (preg_match("/(.*)[{][%]([A-Z_]*)[%][}](.*)/", $line, $m)) {
 			switch ($m[2]) {
 				case "DEFINES":
-					out($f,"#define SPEC_START_MASK     0x0000ffff\n");
-					out($f,"#define SPEC_RULE_OP1       0x00010000\n");
-					out($f,"#define SPEC_RULE_OP2       0x00020000\n");
-					out($f,"#define SPEC_RULE_OP_DATA   0x00040000\n");
-					out($f,"#define SPEC_RULE_RETVAL    0x00080000\n");
-					out($f,"#define SPEC_RULE_QUICK_ARG 0x00100000\n");
+					out($f,"#define SPEC_START_MASK        0x0000ffff\n");
+					out($f,"#define SPEC_RULE_OP1          0x00010000\n");
+					out($f,"#define SPEC_RULE_OP2          0x00020000\n");
+					out($f,"#define SPEC_RULE_OP_DATA      0x00040000\n");
+					out($f,"#define SPEC_RULE_RETVAL       0x00080000\n");
+					out($f,"#define SPEC_RULE_QUICK_ARG    0x00100000\n");
+					out($f,"#define SPEC_RULE_SMART_BRANCH 0x00200000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void **zend_opcode_handlers;\n");
@@ -1690,6 +1822,8 @@ function parse_ext_spec($def, $lineno, $str) {
 }
 
 function parse_spec_rules($def, $lineno, $str) {
+	global $used_extra_spec;
+
 	$ret = array();
 	$a = explode(",", $str);
 	foreach($a as $rule) {
@@ -1699,22 +1833,33 @@ function parse_spec_rules($def, $lineno, $str) {
 			$val = trim(substr($rule, $n+1));
 			switch ($id) {
 				case "OP_DATA":
-					$ret["op_data"] = parse_operand_spec($def, $lineno, $val, $devnull);
+					$ret["OP_DATA"] = parse_operand_spec($def, $lineno, $val, $devnull);
 					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
 			}
+			$used_extra_spec[$id] = 1;
 		} else {
 			switch ($rule) {
 				case "RETVAL":
-					$ret["retval"] = array(0, 1);
+					$ret["RETVAL"] = array(0, 1);
 					break;
 				case "QUICK_ARG":
-					$ret["quick_arg"] = array(0, 1);
+					$ret["QUICK_ARG"] = array(0, 1);
+					break;
+				case "SMART_BRANCH":
+					$ret["SMART_BRANCH"] = array(0, 1, 2);
+					break;
+				case "NO_CONST_CONST":
+					$ret["NO_CONST_CONST"] = array(1);
+					break;
+				case "COMMUTATIVE":
+					$ret["COMMUTATIVE"] = array(1);
 					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
 			}
+			$used_extra_spec[$rule] = 1;
 		}
 	}
 	return $ret;
@@ -1723,7 +1868,7 @@ function parse_spec_rules($def, $lineno, $str) {
 function gen_vm($def, $skel) {
 	global $definition_file, $skeleton_file, $executor_file,
 		$op_types, $list, $opcodes, $helpers, $params, $opnames,
-		$vm_op_flags;
+		$vm_op_flags, $used_extra_spec;
 
 	// Load definition file
 	$in = @file($def);
@@ -1783,6 +1928,12 @@ function gen_vm($def, $skel) {
 			$opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags);
 			if (isset($m[8])) {
 				$opcodes[$code]["spec"] = parse_spec_rules($def, $lineno, $m[8]);
+				if (isset($opcodes[$code]["spec"]["NO_CONST_CONST"])) {
+					$opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_NO_CONST_CONST"];
+				}
+				if (isset($opcodes[$code]["spec"]["COMMUTATIVE"])) {
+					$opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_COMMUTATIVE"];
+				}
 			}
 			$opnames[$op] = $code;
 			$handler = $code;
@@ -2030,9 +2181,25 @@ function gen_vm($def, $skel) {
 		out($f, "\tuint32_t offset = 0;\n");
 		out($f, "\tif (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];\n");
 		out($f, "\tif (spec & SPEC_RULE_OP2) offset = offset * 5 + zend_vm_decode[op->op2_type];\n");
-		out($f, "\tif (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
-		out($f, "\tif (spec & SPEC_RULE_RETVAL) offset = offset * 2 + (op->result_type != IS_UNUSED);\n");
-		out($f, "\tif (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);\n");
+		if (isset($used_extra_spec["OP_DATA"])) {
+			out($f, "\tif (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
+		}
+		if (isset($used_extra_spec["RETVAL"])) {
+			out($f, "\tif (spec & SPEC_RULE_RETVAL) offset = offset * 2 + (op->result_type != IS_UNUSED);\n");
+		}
+		if (isset($used_extra_spec["QUICK_ARG"])) {
+			out($f, "\tif (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);\n");
+		}
+		if (isset($used_extra_spec["SMART_BRANCH"])) {
+			out($f, "\tif (spec & SPEC_RULE_SMART_BRANCH) {\n");
+			out($f,	"\t\toffset = offset * 3;\n");
+			out($f, "\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
+			out($f,	"\t\t\toffset += 1;\n");
+			out($f, "\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+			out($f,	"\t\t\toffset += 2;\n");
+			out($f, "\t\t}\n");
+			out($f, "\t}\n");
+		}
 		out($f, "\treturn zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];\n");
 	}
 	out($f, "}\n\n");
