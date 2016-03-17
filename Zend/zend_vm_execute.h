@@ -16877,20 +16877,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -17262,34 +17260,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -17343,27 +17339,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -21244,20 +21238,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -21629,34 +21621,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -21710,27 +21700,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -23802,20 +23790,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -24189,34 +24175,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -24271,27 +24255,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -26275,20 +26257,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -26630,34 +26610,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -26711,27 +26689,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -29593,20 +29569,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -29948,34 +29922,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -30029,27 +30001,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -31850,20 +31820,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -32206,34 +32174,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -32288,27 +32254,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -36404,20 +36368,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -36789,34 +36751,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -36870,27 +36830,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -42932,20 +42890,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -43317,34 +43273,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -43398,27 +43352,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
@@ -46487,20 +46439,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-			zval zv;
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-				ZVAL_NULL(&zv);
-				zptr = &zv;
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
 			} else {
 				ZVAL_DEREF(zptr);
 				SEPARATE_ZVAL_NOREF(zptr);
-			}
-			binary_op(zptr, zptr, value);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-			}
-			if (UNEXPECTED(zptr == &zv)) {
-				zval_ptr_dtor(zptr);
+
+				binary_op(zptr, zptr, value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -46874,34 +46824,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 		}
 
 		/* here we are sure we are dealing with an object */
-
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
-				zval zv;
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					ZVAL_NULL(&zv);
-					zptr = &zv;
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					SEPARATE_ZVAL_NOREF(zptr);
-				}
 
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -46956,27 +46904,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				if (inc) {
-					fast_long_increment_function(zptr);
-				} else {
-					fast_long_decrement_function(zptr);
-				}
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
-				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
-					zptr = EX_VAR(opline->result.var);
-					ZVAL_NULL(zptr);
+				if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					if (inc) {
+						fast_long_increment_function(zptr);
+					} else {
+						fast_long_decrement_function(zptr);
+					}
 				} else {
 					ZVAL_DEREF(zptr);
 					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 					zval_opt_copy_ctor(zptr);
-				}
-				if (inc) {
-					increment_function(zptr);
-				} else {
-					decrement_function(zptr);
+					if (inc) {
+						increment_function(zptr);
+					} else {
+						decrement_function(zptr);
+					}
 				}
 			}
 		} else {
