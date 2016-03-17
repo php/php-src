@@ -364,13 +364,20 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
 			zval **zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				SEPARATE_ZVAL_IF_NOT_REF(zptr);
-
 				have_get_ptr = 1;
-				binary_op(*zptr, *zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					PZVAL_LOCK(*zptr);
-					EX_T(opline->result.var).var.ptr = *zptr;
+				if (UNEXPECTED(*zptr == &EG(error_zval))) {
+					if (RETURN_VALUE_USED(opline)) {
+						PZVAL_LOCK(&EG(uninitialized_zval));
+						EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
+					}
+				} else {
+					SEPARATE_ZVAL_IF_NOT_REF(zptr);
+
+					binary_op(*zptr, *zptr, value TSRMLS_CC);
+					if (RETURN_VALUE_USED(opline)) {
+						PZVAL_LOCK(*zptr);
+						EX_T(opline->result.var).var.ptr = *zptr;
+					}
 				}
 			}
 		}
@@ -625,13 +632,20 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			SEPARATE_ZVAL_IF_NOT_REF(zptr);
-
 			have_get_ptr = 1;
-			incdec_op(*zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				*retval = *zptr;
-				PZVAL_LOCK(*retval);
+			if (UNEXPECTED(*zptr == &EG(error_zval))) {
+				if (RETURN_VALUE_USED(opline)) {
+					PZVAL_LOCK(&EG(uninitialized_zval));
+					*retval = &EG(uninitialized_zval);
+				}
+			} else {
+				SEPARATE_ZVAL_IF_NOT_REF(zptr);
+
+				incdec_op(*zptr);
+				if (RETURN_VALUE_USED(opline)) {
+					*retval = *zptr;
+					PZVAL_LOCK(*retval);
+				}
 			}
 		}
 	}
@@ -731,13 +745,16 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
 			have_get_ptr = 1;
-			SEPARATE_ZVAL_IF_NOT_REF(zptr);
+			if (UNEXPECTED(*zptr == &EG(error_zval))) {
+				ZVAL_NULL(retval);
+			} else {
+				SEPARATE_ZVAL_IF_NOT_REF(zptr);
 
-			ZVAL_COPY_VALUE(retval, *zptr);
-			zendi_zval_copy_ctor(*retval);
+				ZVAL_COPY_VALUE(retval, *zptr);
+				zendi_zval_copy_ctor(*retval);
 
-			incdec_op(*zptr);
-
+				incdec_op(*zptr);
+			}
 		}
 	}
 
