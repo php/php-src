@@ -5,9 +5,16 @@ PHP                                                                        NEWS
 - Core: 
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
+- ODBC:
+  . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
+
 - Opcache:
   . Fixed bug #71843 (null ptr deref ZEND_RETURN_SPEC_CONST_HANDLER).
     (Laruence)
+
+- Postgres:
+  . Fixed bug #71820 (pg_fetch_object binds parameters before
+    call constructor). (Anatol)
 
 - Standard:
   . Fixed bug #71837 (Wrong arrays behaviour). (Laruence)
