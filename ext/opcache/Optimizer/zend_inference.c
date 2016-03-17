@@ -158,9 +158,9 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 	int index = 0, *dfs, *root;
 	zend_worklist_stack stack;
 	int j;
-	ALLOCA_FLAG(dfs_use_heap);
-	ALLOCA_FLAG(root_use_heap);
-	ALLOCA_FLAG(stack_use_heap);
+	ALLOCA_FLAG(dfs_use_heap)
+	ALLOCA_FLAG(root_use_heap)
+	ALLOCA_FLAG(stack_use_heap)
 
 	dfs = do_alloca(sizeof(int) * ssa->vars_count, dfs_use_heap);
 	memset(dfs, -1, sizeof(int) * ssa->vars_count);
