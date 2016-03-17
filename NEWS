@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
 
+- ODBC:
+  . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
+
 31 Marc 2016, PHP 5.6.20
 
 - CLI Server:
@@ -26,7 +29,6 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
     for the first two statements). (einavitamar at gmail dot com, Anatol)
-  . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
 
 - PDO_DBlib:
   . Bug #54648 (PDO::MSSQL forces format of datetime fields).
