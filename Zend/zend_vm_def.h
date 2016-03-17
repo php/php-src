@@ -737,13 +737,20 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
-
+			zval zv;
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				ZVAL_NULL(&zv);
+				zptr = &zv;
+			} else {
+				ZVAL_DEREF(zptr);
+				SEPARATE_ZVAL_NOREF(zptr);
+			}
 			binary_op(zptr, zptr, value);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+			}
+			if (UNEXPECTED(zptr == &zv)) {
+				zval_ptr_dtor(zptr);
 			}
 		} else {
 			zend_assign_op_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
@@ -1128,8 +1135,14 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 					fast_long_decrement_function(zptr);
 				}
 			} else {
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+				zval zv;
+				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+					ZVAL_NULL(&zv);
+					zptr = &zv;
+				} else {
+					ZVAL_DEREF(zptr);
+					SEPARATE_ZVAL_NOREF(zptr);
+				}
 
 				if (inc) {
 					increment_function(zptr);
@@ -1202,9 +1215,14 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 					fast_long_decrement_function(zptr);
 				}
 			} else {
-				ZVAL_DEREF(zptr);
-				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-				zval_opt_copy_ctor(zptr);
+				if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+					zptr = EX_VAR(opline->result.var);
+					ZVAL_NULL(zptr);
+				} else {
+					ZVAL_DEREF(zptr);
+					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+					zval_opt_copy_ctor(zptr);
+				}
 				if (inc) {
 					increment_function(zptr);
 				} else {
