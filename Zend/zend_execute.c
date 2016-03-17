@@ -776,7 +776,17 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 	return 1;
 }
 
-zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool runtime) {
+static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *property, zend_bool strict) {
+	if (EXPECTED(!strict)) {
+		if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property)))) {
+			return zend_verify_weak_scalar_type_hint(type, property);
+		}
+		return 1;
+	}
+	return ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property));
+}
+
+zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool runtime, zend_bool strict) {
 	switch (type) {
 		case IS_OBJECT: {
 			zend_class_entry *pce = type_ce ? *type_ce : NULL;
@@ -818,7 +828,7 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 				return 1;
 
 		default:
-			if (!ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property))) {
+			if (!zend_verify_scalar_property_type(type, property, strict)) {
 				if (runtime) {
 					zend_throw_exception_ex(zend_ce_type_error, type, 
 						"Typed property %s::$%s must be %s, %s used",

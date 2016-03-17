@@ -738,7 +738,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
 
 			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1)) {
+				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -1881,7 +1881,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 						ZSTR_VAL(Z_OBJCE_P(container)->name),
 						Z_STRVAL_P(offset));
 					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1)) {
+				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -2342,7 +2342,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
 
 			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1)) {
+				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
 					HANDLE_EXCEPTION();
 				}
 			}

@@ -7,7 +7,8 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Typed property Foo::$bar must be integer, string used in %s on line 3
+Fatal error: Default value for properties with integer type can only be integer in %s on line 3
+
 
 
 

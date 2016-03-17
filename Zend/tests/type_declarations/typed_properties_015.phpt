@@ -7,7 +7,8 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Typed property Foo::$bar must be an instance of stdClass, null used in %s on line 3
+Fatal error: Default value for properties with class type are disallowed in %s on line 3
+
 
 
 

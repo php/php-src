@@ -7,7 +7,7 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Typed property Foo::$bar must be array, null used in %s on line 3
+Fatal error: Default value for properties with array type can only be an array in %s on line 3
 
 
 

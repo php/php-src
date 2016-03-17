@@ -5403,6 +5403,28 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 
 		if (value_ast) {
 			zend_const_expr_to_zval(&value_zv, value_ast);
+
+			if (optional_type && !Z_CONSTANT(value_zv)) {
+				if (optional_type == IS_ARRAY) {
+					if (Z_TYPE(value_zv) != IS_ARRAY) {
+						zend_error_noreturn(E_COMPILE_ERROR, 
+							"Default value for properties with array type can only be an array");
+					}
+				} else if (optional_type == IS_CALLABLE) {
+					if (Z_TYPE(value_zv) != IS_ARRAY) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Default value for properties with callable type can only be an array");
+					}
+				} else if (optional_type == IS_OBJECT) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+							"Default value for properties with class type are disallowed");
+				} else if (!ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE(value_zv))) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+							"Default value for properties with %s type can only be %s",
+							zend_get_type_by_const(optional_type),
+							zend_get_type_by_const(optional_type));
+				}
+			}
 		} else {
 			ZVAL_UNDEF(&value_zv);
 		}
