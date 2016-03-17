@@ -8,7 +8,7 @@ class Foo {
 	public string $bar;
 
 	public function __construct() {
-		$this->bar += 1; 		/* if not strict, this is okay !!!!111!! */		
+		$this->bar += 1;
 	}
 }
 

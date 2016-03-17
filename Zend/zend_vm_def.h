@@ -720,46 +720,48 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	do {
-		value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
+	value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 
-		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			ZVAL_DEREF(object);
-			if (UNEXPECTED(!make_real_object(object))) {
-				zend_error(E_WARNING, "Attempt to assign property of non-object");
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_NULL(EX_VAR(opline->result.var));
-				}
-				break;
-			}
-		}
-
-		if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
-
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
-			}
-		}
-
-		/* here we are sure we are dealing with an object */
-		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
-
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
-
-			binary_op(zptr, zptr, value);
+	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		ZVAL_DEREF(object);
+		if (UNEXPECTED(!make_real_object(object))) {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
-		} else {
-			zend_assign_op_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			ZEND_VM_C_GOTO(exit_helper);
 		}
-	} while (0);
+	}
 
+	/* here we are sure we are dealing with an object */
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
+
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		binary_op(zptr, zptr, value);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+		}
+	} else {
+		zend_assign_op_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+	}
+
+	/* TODO(krakjoe) I can *feel* dmitry hating me ... I hate me ... */
+	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
+		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+
+		if (prop_info && prop_info->type && Z_OBJ_HT_P(object)->read_property) {
+			zval *prop = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), NULL);
+
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, prop, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
+			}
+		}
+	}
+
+ZEND_VM_C_LABEL(exit_helper):
 	FREE_OP(free_op_data1);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
