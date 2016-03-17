@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
 
+- ODBC:
+  . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
+
 31 Mar 2016 PHP 7.0.5
 
 - CLI Server:
