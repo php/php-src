@@ -56,11 +56,6 @@
 #include <sys/select.h>
 #endif
 
-/* OpenSSL 1.0.2 removes SSLv2 support entirely*/
-#if OPENSSL_VERSION_NUMBER < 0x10002000L && !defined(OPENSSL_NO_SSL2)
-#define HAVE_SSL2 1
-#endif
-
 #ifndef OPENSSL_NO_SSL3
 #define HAVE_SSL3 1
 #endif
@@ -955,13 +950,9 @@ static int set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 static const SSL_METHOD *php_select_crypto_method(zend_long method_value, int is_client) /* {{{ */
 {
 	if (method_value == STREAM_CRYPTO_METHOD_SSLv2) {
-#ifdef HAVE_SSL2
-		return is_client ? (SSL_METHOD *)SSLv2_client_method() : (SSL_METHOD *)SSLv2_server_method();
-#else
 		php_error_docref(NULL, E_WARNING,
-				"SSLv2 unavailable in the OpenSSL library against which PHP is linked");
+				"SSLv2 unavailable in this PHP version");
 		return NULL;
-#endif
 	} else if (method_value == STREAM_CRYPTO_METHOD_SSLv3) {
 #ifdef HAVE_SSL3
 		return is_client ? SSLv3_client_method() : SSLv3_server_method();
@@ -1000,11 +991,6 @@ static int php_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 {
 	int ssl_ctx_options = SSL_OP_ALL;
 
-#ifdef HAVE_SSL2
-	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv2)) {
-		ssl_ctx_options |= SSL_OP_NO_SSLv2;
-	}
-#endif
 #ifdef HAVE_SSL3
 	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv3)) {
 		ssl_ctx_options |= SSL_OP_NO_SSLv3;
@@ -1699,11 +1685,6 @@ static zend_array *capture_session_meta(SSL *ssl_handle) /* {{{ */
 			proto_str = "SSLv3";
 			break;
 #endif
-#ifdef HAVE_SSL2
-		case SSL2_VERSION:
-			proto_str = "SSLv2";
-			break;
-#endif
 		default: proto_str = "UNKNOWN";
 	}
 
@@ -2284,9 +2265,6 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 #ifdef HAVE_SSL3
 					case SSL3_VERSION: proto_str = "SSLv3"; break;
 #endif
-#ifdef HAVE_SSL2
-					case SSL2_VERSION: proto_str = "SSLv2"; break;
-#endif
 					default: proto_str = "UNKNOWN";
 				}
 
@@ -2580,14 +2558,9 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->enable_on_connect = 1;
 		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_ANY_CLIENT);
 	} else if (strncmp(proto, "sslv2", protolen) == 0) {
-#ifdef HAVE_SSL2
-		sslsock->enable_on_connect = 1;
-		sslsock->method = STREAM_CRYPTO_METHOD_SSLv2_CLIENT;
-#else
-		php_error_docref(NULL, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library against which PHP is linked");
+		php_error_docref(NULL, E_WARNING, "SSLv2 unavailable in this PHP version");
 		php_stream_close(stream);
 		return NULL;
-#endif
 	} else if (strncmp(proto, "sslv3", protolen) == 0) {
 #ifdef HAVE_SSL3
 		sslsock->enable_on_connect = 1;
