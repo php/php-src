@@ -40,7 +40,6 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_inheritance.h"
-#include "zend_type_info.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -2610,20 +2609,6 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 	cleanup_unfinished_calls(execute_data, op_num);
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
-
-static void zend_swap_operands(zend_op *op) /* {{{ */
-{
-	znode_op     tmp;
-	zend_uchar   tmp_type;
-
-	tmp          = op->op1;
-	tmp_type     = op->op1_type;
-	op->op1      = op->op2;
-	op->op1_type = op->op2_type;
-	op->op2      = tmp;
-	op->op2_type = tmp_type;
-}
-/* }}} */
 
 #ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
