@@ -991,6 +991,9 @@ static int php_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 {
 	int ssl_ctx_options = SSL_OP_ALL;
 
+#ifdef SSL_OP_NO_SSLv2
+	ssl_ctx_options |= SSL_OP_NO_SSLv2;
+#endif
 #ifdef HAVE_SSL3
 	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv3)) {
 		ssl_ctx_options |= SSL_OP_NO_SSLv3;
