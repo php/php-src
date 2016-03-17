@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     (Laruence)
 
 - Standard:
+  . Fixed bug #71837 (Wrong arrays behaviour). (Laruence)
   . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
 
 31 Mar 2016 PHP 7.0.5
