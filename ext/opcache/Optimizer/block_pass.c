@@ -681,6 +681,9 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			MAKE_NOP(src);
 		}
 
+#if 0
+	   /* This pattern is unnecessary for PHP7, 
+		* since compiler won't generate ZEND_FREE for ZEND_BOOL anymore */
        /* T = BOOL(X), FREE(T) => NOP */
 		if (opline->opcode == ZEND_FREE &&
 			ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
@@ -698,7 +701,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			}
 		}
 
-#if 0
 		/* pre-evaluate functions:
 		   constant(x)
 		   defined(x)
