@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core: 
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
+- Opcache:
+  . Fixed bug #71843 (null ptr deref ZEND_RETURN_SPEC_CONST_HANDLER).
+    (Laruence)
+
 - Standard:
   . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
 
