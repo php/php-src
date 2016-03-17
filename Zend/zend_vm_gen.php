@@ -1503,6 +1503,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void **zend_opcode_handlers;\n");
+					out($f,"static int zend_handlers_count;\n");
 					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n\n");
 					switch ($kind) {
 						case ZEND_VM_KIND_CALL:
@@ -1693,6 +1694,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						gen_specs($f, $spec, $kind, $prolog."\t", $specs);
 						out($f,$prolog."};\n");
 						out($f,$prolog."\tzend_opcode_handlers = (const void **) labels;\n");
+						out($f,$prolog."\tzend_handlers_count = sizeof(labels) / sizeof(void*);\n");
 						out($f,$prolog."\tzend_spec_handlers = (const uint32_t *) specs;\n");
 						out($f,$prolog."\treturn;\n");
 						out($f,$prolog."}\n");
@@ -1781,6 +1783,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						gen_specs($f, $spec, $kind, $prolog."\t", $specs);
 						out($f,$prolog."};\n");
 						out($f,$prolog."zend_opcode_handlers = labels;\n");
+						out($f,$prolog."\tzend_handlers_count = sizeof(labels) / sizeof(void*);\n");
 						out($f,$prolog."zend_spec_handlers = specs;\n");
 					}
 					break;

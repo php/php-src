@@ -316,6 +316,7 @@ static zend_uchar zend_user_opcodes[256] = {0,
 
 static const uint32_t *zend_spec_handlers;
 static const void **zend_opcode_handlers;
+static int zend_handlers_count;
 static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
 
 
@@ -59884,8 +59885,44 @@ void zend_init_opcodes_handlers(void)
 		3840
 	};
 	zend_opcode_handlers = labels;
+		zend_handlers_count = sizeof(labels) / sizeof(void*);
 	zend_spec_handlers = specs;
 }
+
+static HashTable *zend_handlers_table = NULL;
+
+static void init_opcode_serialiser(void)
+{
+	int i;
+	zval tmp;
+
+	zend_handlers_table = malloc(sizeof(HashTable));
+	zend_hash_init_ex(zend_handlers_table, zend_handlers_count, NULL, NULL, 1, 0);
+	zend_hash_real_init(zend_handlers_table, 0);
+	Z_TYPE_INFO(tmp) = IS_LONG;
+	for (i = 0; i < zend_handlers_count; i++) {
+		Z_LVAL(tmp) = i;
+		zend_hash_index_add(zend_handlers_table, (zend_long)(zend_uintptr_t)zend_opcode_handlers[i], &tmp);
+	}
+}
+
+ZEND_API void zend_serialize_opcode_handler(zend_op *op)
+{
+	zval *zv;
+
+	if (!zend_handlers_table) {
+		init_opcode_serialiser();
+	}
+	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(zend_uintptr_t)op->handler);
+	ZEND_ASSERT(zv != NULL);
+	op->handler = (const void *)(zend_uintptr_t)Z_LVAL_P(zv);
+}
+
+ZEND_API void zend_deserialize_opcode_handler(zend_op *op)
+{
+	op->handler = zend_opcode_handlers[(zend_uintptr_t)op->handler];
+}
+
 static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)
 {
 	static const int zend_vm_decode[] = {
