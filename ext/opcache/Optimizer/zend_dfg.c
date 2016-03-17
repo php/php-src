@@ -200,8 +200,9 @@ op2_use:
 	/* Calculate "in" and "out" sets */
 	{
 		uint32_t worklist_len = zend_bitset_len(blocks_count);
+		zend_bitset worklist;
 		ALLOCA_FLAG(use_heap);
-		zend_bitset worklist = ZEND_BITSET_ALLOCA(worklist_len, use_heap);
+		worklist = ZEND_BITSET_ALLOCA(worklist_len, use_heap);
 		memset(worklist, 0, worklist_len * ZEND_BITSET_ELM_SIZE);
 		for (j = 0; j < blocks_count; j++) {
 			zend_bitset_incl(worklist, j);
