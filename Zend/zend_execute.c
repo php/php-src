@@ -827,6 +827,16 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 			if (runtime && Z_TYPE_P(property) == IS_DOUBLE)
 				return 1;
 
+		case IS_CALLABLE: switch (Z_TYPE_P(property)) {
+			case IS_OBJECT:
+				if (instanceof_function(zend_ce_closure, Z_OBJCE_P(property)))
+					return 1;
+			
+			case IS_ARRAY:
+				if (zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL))
+					return 1;
+		}
+
 		default:
 			if (!zend_verify_scalar_property_type(type, property, strict)) {
 				if (runtime) {

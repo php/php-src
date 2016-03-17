@@ -720,48 +720,70 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
+	do {
+		value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 
-	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(!make_real_object(object))) {
-			zend_error(E_WARNING, "Attempt to assign property of non-object");
+		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			ZVAL_DEREF(object);
+			if (UNEXPECTED(!make_real_object(object))) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
+		}
+
+		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
+
+		/* here we are sure we are dealing with an object */
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-			ZEND_VM_C_GOTO(exit_helper);
-		}
-	}
 
-	/* here we are sure we are dealing with an object */
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
+			if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
+				/* TODO(krakjoe) cache this */
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
 
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
+				if (prop_info && prop_info->type) {
+					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
+						HANDLE_EXCEPTION();
+					}
+				}
+			}
+		} else {
+			zval _result,
+				  *rp = RETURN_VALUE_USED(opline) ?
+						EX_VAR(opline->result.var) : &_result;
+			
+			ZVAL_UNDEF(&_result);
+			
+			zend_assign_op_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-		binary_op(zptr, zptr, value);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-		}
-	} else {
-		zend_assign_op_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-	}
+			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
+				/* TODO(krakjoe) cache this */
+				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
 
-	/* TODO(krakjoe) I can *feel* dmitry hating me ... I hate me ... */
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (prop_info && prop_info->type) {
+					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
+						HANDLE_EXCEPTION();
+					}
+				}
+			}
 
-		if (prop_info && prop_info->type && Z_OBJ_HT_P(object)->read_property) {
-			zval *prop = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), NULL);
-
-			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, prop, 1, EX_USES_STRICT_TYPES())) {
-				HANDLE_EXCEPTION();
+			if (!RETURN_VALUE_USED(opline)) {
+				zval_ptr_dtor(&_result);
 			}
 		}
-	}
+	} while(0);
 
-ZEND_VM_C_LABEL(exit_helper):
 	FREE_OP(free_op_data1);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
