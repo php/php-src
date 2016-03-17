@@ -6067,7 +6067,7 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 				zval_ptr_dtor(&right_node.u.constant);
 			} else {
-				zend_emit_op(result, ZEND_BOOL, &right_node, NULL);
+				zend_emit_op_tmp(result, ZEND_BOOL, &right_node, NULL);
 			}
 		}
 

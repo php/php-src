@@ -7,7 +7,7 @@ opcache.optimization_level=0xFFFFBFFF
 --SKIPIF--
 <?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
 --FILE--
-<?
+<?php
 0 & ~E & ~R;
 6 && ~See
 ?>
