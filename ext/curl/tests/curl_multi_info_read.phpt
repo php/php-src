@@ -15,7 +15,6 @@ $urls = array(
 );
 
 $mh = curl_multi_init();
-
 foreach ($urls as $i => $url) {
     $conn[$i] = curl_init($url);
     curl_setopt($conn[$i], CURLOPT_RETURNTRANSFER, 1);
