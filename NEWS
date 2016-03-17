@@ -2,7 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.6
 
+- Core: 
+  . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
+- Standard:
+  . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
 
 31 Mar 2016 PHP 7.0.5
 
