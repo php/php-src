@@ -1894,8 +1894,11 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_b
 					case ZEND_BOOL_NOT:
 						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 							literal_dtor(&ZEND_OP1_LITERAL(opline));
+						} else if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
+							opline->opcode = ZEND_FREE;
+						} else {
+							MAKE_NOP(opline);
 						}
-						MAKE_NOP(opline);
 						break;
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
