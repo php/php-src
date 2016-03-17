@@ -617,6 +617,11 @@ use_double:
 		return 0;
 	}
 
+	if (*(YYCURSOR + 1) != ';') {
+		*p = YYCURSOR + 1;
+		return 0;
+	}
+
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
@@ -643,6 +648,12 @@ use_double:
 	if (*(YYCURSOR) != '"') {
 		efree(str);
 		*p = YYCURSOR;
+		return 0;
+	}
+
+	if (*(YYCURSOR + 1) != ';') {
+		efree(str);
+		*p = YYCURSOR + 1;
 		return 0;
 	}
 

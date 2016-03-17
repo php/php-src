@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 5.6.21
 
+- Standard:
+  . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
+
 31 Marc 2016, PHP 5.6.20
 
 - CLI Server:
