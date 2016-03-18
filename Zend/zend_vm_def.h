@@ -5988,19 +5988,6 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 			}
 		}
 
-		if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(offset) == IS_STRING)) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
-
-			if (prop_info && prop_info->type) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be unset",
-					ZSTR_VAL(Z_OBJCE_P(container)->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		if (Z_OBJ_HT_P(container)->unset_property) {
 			Z_OBJ_HT_P(container)->unset_property(container, offset, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 		} else {

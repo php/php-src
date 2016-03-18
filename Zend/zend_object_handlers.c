@@ -520,6 +520,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	zval tmp_member;
 	zval *retval;
 	uint32_t property_offset;
+	zend_property_info *prop_info = NULL;
 
 	zobj = Z_OBJ_P(object);
 
@@ -593,7 +594,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		}
 	}
 	if ((type != BP_VAR_IS)) {
-		zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), Z_STRVAL_P(member));
+		if (EXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) || 
+					 !(prop_info = zend_hash_find_ptr(&zobj->ce->properties_info, Z_STR_P(member))) ||
+					 !prop_info->type)) {
+			zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), Z_STRVAL_P(member));
+		}
 	}
 	retval = &EG(uninitialized_zval);
 
