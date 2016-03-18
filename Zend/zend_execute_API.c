@@ -397,7 +397,7 @@ void shutdown_executor(void) /* {{{ */
 
 	zend_shutdown_fpu();
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 	if (EG(ht_iterators_used) && !CG(unclean_shutdown)) {
 		zend_error(E_WARNING, "Leaked %" PRIu32 " hashtable iterators", EG(ht_iterators_used));
 	}
