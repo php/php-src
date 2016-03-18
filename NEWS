@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #71838 (Deserializing serialized SPLObjectStorage-Object can't
     access properties in PHP). (Nikita)
+  . Fixed bug #52339 (SPL autoloader breaks class_exists()). (Nikita)
 
 - Standard:
   . Fixed bug #71837 (Wrong arrays behaviour). (Laruence)
