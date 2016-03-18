@@ -814,6 +814,14 @@ static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *
 		}
 		return 1;
 	}
+
+	if (UNEXPECTED(type == IS_DOUBLE && Z_TYPE_P(property) == IS_LONG)) {
+		double dest = (double) Z_LVAL_P(property);
+		zval_ptr_dtor(property);
+		ZVAL_DOUBLE(property, dest);
+		return 1;
+	}
+
 	return ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property));
 }
 
@@ -853,10 +861,6 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 			}
 			return 1;
 		}
-
-		case IS_LONG:
-			if (runtime && Z_TYPE_P(property) == IS_DOUBLE)
-				return 1;
 
 		case IS_CALLABLE: switch (Z_TYPE_P(property)) {
 			case IS_OBJECT:

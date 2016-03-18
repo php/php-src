@@ -1178,12 +1178,42 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 						decrement_function(zptr);
 					}
 				}
+
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
+							HANDLE_EXCEPTION();
+						}
+					}
+				}
+
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
 		} else {
-			zend_pre_incdec_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			zval _rv;
+			zval *rv = RETURN_VALUE_USED(opline) ?
+				  EX_VAR(opline->result.var) : &_rv;
+			ZVAL_UNDEF(&_rv);
+
+			zend_pre_incdec_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, rv);
+
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+
+				if (prop_info) {
+					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+						HANDLE_EXCEPTION();
+					}
+				}
+			}
+
+			if (!RETURN_VALUE_USED(opline)) {
+				zval_ptr_dtor(&_rv);
+			}
 		}
 	} while (0);
 
@@ -1258,6 +1288,16 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 			}
 		} else {
 			zend_post_incdec_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
+		}
+
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+
+			if (prop_info) {
+				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+					HANDLE_EXCEPTION();
+				}
+			}
 		}
 	} while (0);
 
