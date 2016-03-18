@@ -777,6 +777,36 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 	return 1;
 }
 
+zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *property, void **cache) {
+	/* TODO(krakjoe) use cache */
+	do {
+		if (UNEXPECTED(Z_TYPE_P(property) != IS_STRING)) {
+			break;
+		}
+
+		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (Z_ISREF_P(object)) {
+				object = Z_REFVAL_P(object);
+				if (Z_TYPE_P(object) != IS_OBJECT)
+					break;
+			} else {
+				break;
+			}
+		}
+
+		if (EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+			zend_property_info *info = zend_hash_find_ptr(
+				&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+
+			if (UNEXPECTED(info && info->type)) {
+				return info;
+			}
+		}
+	} while (0);
+
+	return NULL;
+}
+
 static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *property, zend_bool strict) {
 	if (EXPECTED(!strict)) {
 		if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property)))) {

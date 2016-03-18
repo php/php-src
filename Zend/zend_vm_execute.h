@@ -4265,7 +4265,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -5627,21 +5627,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -5751,18 +5748,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -9423,21 +9417,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -9547,18 +9538,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -11271,21 +11259,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -11396,18 +11381,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -13181,7 +13163,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -13686,21 +13668,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -13738,18 +13717,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -14947,21 +14923,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -14999,18 +14972,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -15509,21 +15479,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -15561,18 +15528,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -16791,7 +16755,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -17607,11 +17571,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -17627,11 +17590,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -18288,21 +18250,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -18330,25 +18289,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -18414,18 +18369,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -18458,14 +18410,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 
 	property = EX_CONSTANT(opline->op2);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -18638,15 +18589,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -18826,15 +18774,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -19014,15 +18959,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -19202,15 +19144,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -22131,11 +22070,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -22151,11 +22089,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -22812,21 +22749,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -22854,25 +22788,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -22938,18 +22868,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -22982,14 +22909,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -23162,15 +23088,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -23350,15 +23273,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -23538,15 +23458,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -23726,15 +23643,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -24846,11 +24760,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -24866,11 +24779,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -25531,21 +25443,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -25573,25 +25482,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -25657,18 +25562,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -25701,14 +25603,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -25881,15 +25782,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -26069,15 +25967,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -26257,15 +26152,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -26445,15 +26337,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -27475,11 +27364,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -27495,11 +27383,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -28035,21 +27922,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -28077,25 +27961,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -28233,18 +28113,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -28277,14 +28154,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CO
 
 	property = EX_CONSTANT(opline->op2);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -28457,15 +28333,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -28645,15 +28518,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -28833,15 +28703,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -29021,15 +28888,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -30950,11 +30814,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -30970,11 +30833,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -31510,21 +31372,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -31552,25 +31411,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -31708,18 +31563,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -31752,14 +31604,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -31932,15 +31783,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -32120,15 +31968,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -32308,15 +32153,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -32496,15 +32338,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -33364,11 +33203,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -33384,11 +33222,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -33927,21 +33764,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -33969,25 +33803,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -34126,18 +33956,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -34170,14 +33997,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TM
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -34350,15 +34176,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -34538,15 +34361,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -34726,15 +34546,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -34914,15 +34731,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -36969,7 +36783,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (UNEXPECTED(Z_OBJCE_P(array_ptr)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -38082,11 +37896,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -38102,11 +37915,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -38930,21 +38742,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -38972,25 +38781,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -39128,18 +38933,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -39172,14 +38974,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_
 
 	property = EX_CONSTANT(opline->op2);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -39396,15 +39197,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -39584,15 +39382,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -39772,15 +39567,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -39960,15 +39752,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -44767,11 +44556,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -44787,11 +44575,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -45476,21 +45263,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -45518,25 +45302,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -45674,18 +45454,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -45718,14 +45495,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -45898,15 +45674,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -46086,15 +45859,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -46274,15 +46044,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -46462,15 +46229,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -48479,11 +48243,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 
-				if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-					/* TODO(krakjoe) cache this */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-					if (prop_info && prop_info->type) {
+					if (prop_info) {
 						if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, zptr, 1, EX_USES_STRICT_TYPES())) {
 							HANDLE_EXCEPTION();
 						}
@@ -48499,11 +48262,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 
 			zend_assign_op_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
-			if (UNEXPECTED(Z_TYPE_P(object) == IS_OBJECT && Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS && Z_TYPE_P(property) == IS_STRING)) {
-				/* TODO(krakjoe) cache this */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
 
-				if (prop_info && prop_info->type) {
+				if (prop_info) {
 					if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property), prop_info->type, prop_info->type_name, &prop_info->type_ce, rp, 1, EX_USES_STRICT_TYPES())) {
 						HANDLE_EXCEPTION();
 					}
@@ -49192,21 +48954,18 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(offset) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(offset));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(Z_OBJCE_P(container)->name),
-						Z_STRVAL_P(offset));
-					HANDLE_EXCEPTION();
-				} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(offset));
+				HANDLE_EXCEPTION();
+			} else if (!zend_verify_property_type(prop_info->ce, Z_STR_P(offset), prop_info->type, prop_info->type_name, &prop_info->type_ce, EX_VAR(opline->result.var), 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -49234,25 +48993,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	/* TODO(krakjoe) deref container ... grrr */
-	/* we require a deref'd var here, but fetch does not */
-	/* do we have to unconditionally deref container ? */
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last]) {
-			switch ((EX(opline) + 1)->opcode) {
-				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
-					/* TODO(krakjoe) needs caching */
-					zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-					if (prop_info && prop_info->type) {
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 						HANDLE_EXCEPTION();
-					}
-				} break;
+					} break;
+				}
 			}
 		}
 	}
@@ -49391,18 +49146,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 		}
 
 		/* TODO(krakjoe) deref container problem again */
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (Z_TYPE_P(property) == IS_STRING) {
-				/* TODO(krakjoe) needs caching */
-				zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-				if (prop_info && prop_info->type) {
-					zend_throw_exception_ex(
-						zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be referenced",
-						ZSTR_VAL(Z_OBJCE_P(container)->name), Z_STRVAL_P(property));
-					HANDLE_EXCEPTION();
-				}
+			if (prop_info) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be referenced",
+					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+				HANDLE_EXCEPTION();
 			}
 		}
 
@@ -49435,14 +49187,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT && (Z_OBJCE_P(container)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) && Z_TYPE_P(property) == IS_STRING)) {
-		/* TODO(krakjoe) needs caching */
-		zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(container)->properties_info, Z_STR_P(property));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
-		if (prop_info && prop_info->type) {
+		if (prop_info) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(Z_OBJCE_P(container)->name),
+				ZSTR_VAL(prop_info->ce->name),
 				Z_STRVAL_P(property));
 			HANDLE_EXCEPTION();
 		}
@@ -49615,15 +49366,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -49803,15 +49551,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -49991,15 +49736,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
@@ -50179,15 +49921,12 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		if (Z_TYPE_P(property_name) == IS_STRING) {
-			/* TODO(krakjoe) needs caching */
-			zend_property_info *prop_info = zend_hash_find_ptr(&Z_OBJCE_P(object)->properties_info, Z_STR_P(property_name));
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
 
-			if (prop_info && prop_info->type) {
-				if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
-					HANDLE_EXCEPTION();
-				}
+		if (prop_info) {
+			if (!zend_verify_property_type(prop_info->ce, Z_STR_P(property_name), prop_info->type, prop_info->type_name, &prop_info->type_ce, value, 1, EX_USES_STRICT_TYPES())) {
+				HANDLE_EXCEPTION();
 			}
 		}
 	}
