@@ -1541,16 +1541,16 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 {
 	struct pdo_bound_param_data param = {{{0}}};
 	zend_long param_type = PDO_PARAM_STR;
-	zval *parameter;
+	zval *parameter, *driver_params = NULL;
 
 	param.paramno = -1;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 			"lz|llz!", &param.paramno, &parameter, &param_type, &param.max_value_len,
-			&param.driver_params)) {
+			&driver_params)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|llz!", &param.name,
 				&parameter, &param_type, &param.max_value_len,
-				&param.driver_params)) {
+				&driver_params)) {
 			return 0;
 		}
 	}
@@ -1562,6 +1562,10 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	} else if (!param.name) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
 		return 0;
+	}
+
+	if (driver_params) {
+		ZVAL_COPY(&param.driver_params, driver_params);
 	}
 
 	ZVAL_COPY(&param.parameter, parameter);
