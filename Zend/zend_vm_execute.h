@@ -5754,7 +5754,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -9544,7 +9544,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -11387,7 +11387,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -13723,7 +13723,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -14978,7 +14978,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -15534,7 +15534,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -18415,7 +18415,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -22954,7 +22954,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -25688,7 +25688,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -28279,7 +28279,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -31769,7 +31769,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -34202,7 +34202,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -39219,7 +39219,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -45780,7 +45780,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
@@ -49512,7 +49512,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}

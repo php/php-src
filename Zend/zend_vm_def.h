@@ -2142,7 +2142,7 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 			if (prop_info) {
 				zend_throw_exception_ex(
 					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
+					"Typed property %s::$%s must not be passed by reference",
 					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
 				HANDLE_EXCEPTION();
 			}
