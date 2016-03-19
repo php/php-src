@@ -3192,6 +3192,9 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		src  = Z_ARRVAL_P(arg);
 		dest = Z_ARRVAL_P(return_value);
 		ZEND_HASH_FOREACH_KEY_VAL(src, idx, string_key, src_entry) {
+			if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
+				src_entry = Z_REFVAL_P(src_entry);
+			}
 			if (string_key) {
 				if (Z_REFCOUNTED_P(src_entry)) {
 					Z_ADDREF_P(src_entry);
@@ -3229,6 +3232,9 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		src  = Z_ARRVAL_P(arg);
 		dest = Z_ARRVAL_P(return_value);
 		ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
+			if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
+				src_entry = Z_REFVAL_P(src_entry);
+			}
 			if (string_key) {
 				if (Z_REFCOUNTED_P(src_entry)) {
 					Z_ADDREF_P(src_entry);
@@ -3490,6 +3496,10 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
 		} else if (Z_TYPE_P(name) == IS_LONG) {
 			prop = zend_hash_index_find(Z_ARRVAL_P(data), Z_LVAL_P(name));
 		}
+	}
+
+	if (prop) {
+		ZVAL_DEREF(prop);
 	}
 
 	return prop;
@@ -5419,7 +5429,7 @@ PHP_FUNCTION(array_key_exists)
 
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
-			if (zend_symtable_exists(array, Z_STR_P(key))) {
+			if (zend_symtable_exists_ind(array, Z_STR_P(key))) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
@@ -5429,7 +5439,7 @@ PHP_FUNCTION(array_key_exists)
 			}
 			RETURN_FALSE;
 		case IS_NULL:
-			if (zend_hash_exists(array, ZSTR_EMPTY_ALLOC())) {
+			if (zend_hash_exists_ind(array, ZSTR_EMPTY_ALLOC())) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;

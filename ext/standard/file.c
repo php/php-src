@@ -518,7 +518,7 @@ PHP_FUNCTION(file_get_contents)
 	size_t filename_len;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	zend_long offset = -1;
+	zend_long offset = 0;
 	zend_long maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -543,7 +543,7 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
-	if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
+	if (offset != 0 && php_stream_seek(stream, offset, ((offset > 0) ? SEEK_SET : SEEK_END)) < 0) {
 		php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 		php_stream_close(stream);
 		RETURN_FALSE;

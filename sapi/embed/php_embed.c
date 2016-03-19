@@ -34,7 +34,7 @@ const char HARDCODED_INI[] =
 	"max_input_time=-1\n\0";
 
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 static char* php_embed_read_cookies(void)

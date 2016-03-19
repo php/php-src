@@ -3,7 +3,7 @@ Test file_get_contents() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
+<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
@@ -63,11 +63,13 @@ $inputs = array(
       'int 0' => 0,
       'int 1' => 1,
       'int 12345' => 12345,
-      'int -12345' => -2345,
+      'int -12345' => -12345,
+	  'int -10' => -10,
 
       // float data
       'float 10.5' => 10.5,
       'float -10.5' => -10.5,
+      'float -22.5' => -22.5,
       'float 12.3456789000e10' => 12.3456789000e10,
       'float -12.3456789000e10' => -12.3456789000e10,
       'float .5' => .5,
@@ -133,19 +135,29 @@ string(%d) "ontents read"
 string(%d) ""
 
 --int -12345--
-string(%d) "contents read"
+Error: 2 - file_get_contents(): Failed to seek to position -12345 in the stream, %s(%d)
+bool(false)
+
+--int -10--
+string(10) "tents read"
 
 --float 10.5--
 string(3) "ead"
 
 --float -10.5--
-string(%d) "contents read"
+string(10) "tents read"
+
+--float -22.5--
+Error: 2 - file_get_contents(): Failed to seek to position -22 in the stream, %s(%d)
+bool(false)
 
 --float 12.3456789000e10--
-string(%d) %s
+Error: 2 - file_get_contents() expects parameter 4 to be integer, float given, %s(%d)
+NULL
 
 --float -12.3456789000e10--
-string(%d) %s
+Error: 2 - file_get_contents() expects parameter 4 to be integer, float given, %s(%d)
+NULL
 
 --float .5--
 string(%d) "contents read"

@@ -1784,8 +1784,11 @@ static int phar_analyze_path(const char *fname, const char *ext, int ext_len, in
 #ifdef PHP_WIN32
 				phar_unixify_path_separators(realpath, strlen(realpath));
 #endif
-				slash = strstr(realpath, filename) + ((ext - fname) + ext_len);
-				*slash = '\0';
+				slash = strstr(realpath, filename);
+				if (slash) {
+					slash += ((ext - fname) + ext_len);
+					*slash = '\0';
+				}
 				slash = strrchr(realpath, '/');
 
 				if (slash) {
@@ -3209,7 +3212,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 #ifdef COMPILE_DL_PHAR
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(phar)
 #endif

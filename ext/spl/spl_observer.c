@@ -858,10 +858,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 
 	/* copy members */
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
-	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref);
+	object_properties_load(&intern->std, Z_ARRVAL_P(pmembers));
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return;

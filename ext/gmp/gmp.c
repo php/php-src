@@ -215,7 +215,7 @@ zend_module_entry gmp_module_entry = {
 
 #ifdef COMPILE_DL_GMP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(gmp)
 #endif

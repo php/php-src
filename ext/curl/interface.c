@@ -838,6 +838,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLM_INTERNAL_ERROR);
 	REGISTER_CURL_CONSTANT(CURLM_OK);
 	REGISTER_CURL_CONSTANT(CURLM_OUT_OF_MEMORY);
+#if LIBCURL_VERSION_NUM >= 0x072001 /* Available since 7.32.1 */
+	REGISTER_CURL_CONSTANT(CURLM_ADDED_ALREADY);
+#endif
 
 	/* Curl proxy constants */
 	REGISTER_CURL_CONSTANT(CURLPROXY_HTTP);
@@ -1342,7 +1345,6 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.param_count = 2;
 			fci.params = argv;
 			fci.no_separation = 0;
-			fci.symbol_table = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1393,7 +1395,6 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			fci.param_count = 3;
 			fci.params = argv;
 			fci.no_separation = 0;
-			fci.symbol_table = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1450,7 +1451,6 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			fci.param_count = 5;
 			fci.params = argv;
 			fci.no_separation = 0;
-			fci.symbol_table = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1513,7 +1513,6 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.param_count = 3;
 			fci.params = argv;
 			fci.no_separation = 0;
-			fci.symbol_table = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1576,7 +1575,6 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
 			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.symbol_table = NULL;
 			fci.object = NULL;
 			fci.retval = &retval;
 			fci.param_count = 2;

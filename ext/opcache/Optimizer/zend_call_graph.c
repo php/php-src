@@ -277,17 +277,12 @@ int zend_build_call_graph(zend_arena **arena, zend_script *script, uint32_t buil
 	if (zend_foreach_op_array(call_graph, script, zend_op_array_calc) != SUCCESS) {
 		return FAILURE;
 	}
-	call_graph->op_arrays  = (zend_op_array**)zend_arena_calloc(arena, call_graph->op_arrays_count, sizeof(zend_op_array*));
+	call_graph->op_arrays = (zend_op_array**)zend_arena_calloc(arena, call_graph->op_arrays_count, sizeof(zend_op_array*));
 	call_graph->func_infos = (zend_func_info*)zend_arena_calloc(arena, call_graph->op_arrays_count, sizeof(zend_func_info));
-	if (!call_graph->op_arrays || !call_graph->func_infos) {
-		return FAILURE;
-	}
-
 	call_graph->op_arrays_count = 0;
 	if (zend_foreach_op_array(call_graph, script, zend_op_array_collect) != SUCCESS) {
 		return FAILURE;
 	}
-
 	for (i = 0; i < call_graph->op_arrays_count; i++) {
 		zend_analyze_calls(arena, script, build_flags, call_graph->op_arrays[i], call_graph->func_infos + i);
 	}

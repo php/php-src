@@ -40,6 +40,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_inheritance.h"
+#include "zend_type_info.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -1172,7 +1173,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	zend_uchar c;
 	size_t string_len;
 
-	if (offset < 0) {
+	if (offset < (zend_long)(-Z_STRLEN_P(str))) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
 		zend_string_release(Z_STR_P(str));
@@ -1202,6 +1203,10 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 			ZVAL_NULL(result);
 		}
 		return;
+	}
+
+	if (offset < 0) { /* Handle negative offset */
+		offset += (zend_long)Z_STRLEN_P(str);
 	}
 
 	old_str = Z_STR_P(str);
@@ -1816,7 +1821,7 @@ try_array:
 
 try_string_offset:
 		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-			switch(Z_TYPE_P(dim)) {
+			switch (Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
 				case IS_STRING:
 					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
@@ -1849,7 +1854,7 @@ try_string_offset:
 			offset = Z_LVAL_P(dim);
 		}
 
-		if (UNEXPECTED(offset < 0) || UNEXPECTED(Z_STRLEN_P(container) <= (size_t)offset)) {
+		if (UNEXPECTED(Z_STRLEN_P(container) < (size_t)((offset < 0) ? -offset : (offset + 1)))) {
 			if (type != BP_VAR_IS) {
 				zend_error(E_NOTICE, "Uninitialized string offset: %pd", offset);
 				ZVAL_EMPTY_STRING(result);
@@ -1857,12 +1862,17 @@ try_string_offset:
 				ZVAL_NULL(result);
 			}
 		} else {
-			zend_uchar c = (zend_uchar)Z_STRVAL_P(container)[offset];
+			zend_uchar c;
+			zend_long real_offset;
+
+			real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
+				? (zend_long)Z_STRLEN_P(container) + offset : offset;
+			c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
 
 			if (CG(one_char_string)[c]) {
 				ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
 			} else {
-				ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + offset, 1, 0));
+				ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + real_offset, 1, 0));
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -2357,6 +2367,10 @@ ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_ar
 static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(const zend_op *opline, zend_execute_data *call) /* {{{ */
 {
 	uint32_t arg_num = opline->extended_value & ZEND_FETCH_ARG_MASK;
+
+	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+		return QUICK_ARG_SHOULD_BE_SENT_BY_REF(call->func, arg_num);
+	}
 	return ARG_SHOULD_BE_SENT_BY_REF(call->func, arg_num);
 }
 /* }}} */
@@ -2597,6 +2611,20 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
+static void zend_swap_operands(zend_op *op) /* {{{ */
+{
+	znode_op     tmp;
+	zend_uchar   tmp_type;
+
+	tmp          = op->op1;
+	tmp_type     = op->op1_type;
+	op->op1      = op->op2;
+	op->op1_type = op->op2_type;
+	op->op2      = tmp;
+	op->op2_type = tmp_type;
+}
+/* }}} */
+
 #ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
 #  define ZEND_VM_FP_GLOBAL_REG "%esi"
@@ -2682,10 +2710,34 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
+		if (_result) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
+		if (!(_result)) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
 #else
 # define ZEND_VM_REPEATABLE_OPCODE
 # define ZEND_VM_REPEAT_OPCODE(_opcode)
 # define ZEND_VM_SMART_BRANCH(_result, _check)
+# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check)
+# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check)
 #endif
 
 #ifdef __GNUC__

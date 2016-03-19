@@ -320,7 +320,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	xmlXPathFreeObject(obj);
 
 	ZVAL_COPY_VALUE(&fci.function_name, &handler);
-	fci.symbol_table = NULL;
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.no_separation = 0;

@@ -32,10 +32,9 @@ $needle_mb = base64_decode(b'44CC');
 
 /*
  * Loop through integers as multiples of ten for $offset argument
- * iconv_strpos should not be able to accept negative values as $offset.
  * 60 is larger than *BYTE* count for $string_mb
  */
-for ($i = -10; $i <= 60; $i += 10) {
+for ($i = -30; $i <= 60; $i += 10) {
 	echo "\n**-- Offset is: $i --**\n";
 	echo "-- ASCII String --\n";
 	var_dump(iconv_strpos($string_ascii, $needle_ascii, $i));
@@ -49,7 +48,7 @@ echo "Done";
 --EXPECTF--
 *** Testing iconv_strpos() : usage variations ***
 
-**-- Offset is: -10 --**
+**-- Offset is: -30 --**
 -- ASCII String --
 
 Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
@@ -58,6 +57,18 @@ bool(false)
 
 Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
 bool(false)
+
+**-- Offset is: -20 --**
+-- ASCII String --
+int(9)
+--Multibyte String --
+int(9)
+
+**-- Offset is: -10 --**
+-- ASCII String --
+int(20)
+--Multibyte String --
+int(20)
 
 **-- Offset is: 0 --**
 -- ASCII String --

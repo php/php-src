@@ -551,9 +551,10 @@ PHP_FUNCTION(unpack)
 	zend_string *formatarg, *inputarg;
 	zend_long formatlen, inputpos, inputlen;
 	int i;
+	zend_long offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &formatarg,
-		&inputarg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|l", &formatarg,
+		&inputarg, &offset) == FAILURE) {
 		return;
 	}
 
@@ -562,6 +563,14 @@ PHP_FUNCTION(unpack)
 	input = ZSTR_VAL(inputarg);
 	inputlen = ZSTR_LEN(inputarg);
 	inputpos = 0;
+
+
+	if (offset < 0 || offset > inputlen) {
+		php_error_docref(NULL, E_WARNING, "Offset " ZEND_LONG_FMT " is out of input range" , offset);
+		RETURN_FALSE;
+	}
+	input += offset;
+	inputlen -= offset;
 
 	array_init(return_value);
 

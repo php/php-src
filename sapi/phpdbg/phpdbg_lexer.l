@@ -26,7 +26,7 @@
 #define RAW 2
 #define INITIAL 3
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 	PHPDBG_G(parser_stack) = stack;
