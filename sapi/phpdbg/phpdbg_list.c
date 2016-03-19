@@ -33,7 +33,7 @@
 #include "php_streams.h"
 #include "zend_exceptions.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define PHPDBG_LIST_COMMAND_D(f, h, a, m, l, s, flags) \
 	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[12], flags)

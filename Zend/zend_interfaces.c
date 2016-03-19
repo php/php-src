@@ -55,7 +55,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
-	fci.symbol_table = NULL;
 
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is

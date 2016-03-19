@@ -80,7 +80,7 @@
 # include <sys/mman.h>
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 const phpdbg_command_t phpdbg_watch_commands[] = {
 	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     &phpdbg_prompt_commands[24], "s", 0),

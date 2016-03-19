@@ -158,9 +158,9 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 	int index = 0, *dfs, *root;
 	zend_worklist_stack stack;
 	int j;
-	ALLOCA_FLAG(dfs_use_heap);
-	ALLOCA_FLAG(root_use_heap);
-	ALLOCA_FLAG(stack_use_heap);
+	ALLOCA_FLAG(dfs_use_heap)
+	ALLOCA_FLAG(root_use_heap)
+	ALLOCA_FLAG(stack_use_heap)
 
 	dfs = do_alloca(sizeof(int) * ssa->vars_count, dfs_use_heap);
 	memset(dfs, -1, sizeof(int) * ssa->vars_count);
@@ -199,6 +199,18 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 }
 /* }}} */
 
+static inline zend_bool is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
+{
+	if (opline->opcode == ZEND_ASSIGN ||
+			(opline->opcode == ZEND_UNSET_VAR && (opline->extended_value & ZEND_QUICK_SET))) {
+		return ssa_op->op1_use == var && ssa_op->op2_use != var;
+	}
+	if (opline->opcode == ZEND_FE_FETCH_R) {
+		return ssa_op->op2_use == var && ssa_op->op1_use != var;
+	}
+	return 0;
+}
+
 int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
@@ -220,9 +232,7 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 		ssa_vars[i].no_val = 1; /* mark as unused */
 		use = ssa->vars[i].use_chain;
 		while (use >= 0) {
-			if (op_array->opcodes[use].opcode != ZEND_ASSIGN ||
-				ssa->ops[use].op1_use != i ||
-				ssa->ops[use].op2_use == i) {
+			if (!is_no_val_use(&op_array->opcodes[use], &ssa->ops[use], i)) {
 				ssa_vars[i].no_val = 0; /* used directly */
 				zend_bitset_incl(worklist, i);
 			}
@@ -962,7 +972,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					op2_max = OP2_MAX_RANGE();
 
 					tmp->min = (op1_min == op1_max &&
-					           op2_min == op2_min &&
+					           op2_min == op2_max &&
 					           op1_min == op2_max);
 					tmp->max = (op1_min <= op2_max && op1_max >= op2_min);
 					return 1;
@@ -984,7 +994,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 
 					tmp->min = (op1_min > op2_max || op1_max < op2_min);
 					tmp->max = (op1_min != op1_max ||
-					           op2_min != op2_min ||
+					           op2_min != op2_max ||
 					           op1_min != op2_max);
 					return 1;
 				} else {
@@ -2204,23 +2214,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 	zend_class_entry *ce;
 	int j;
 
-	if (opline->opcode == ZEND_OP_DATA &&
-	    ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-	     (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
-	     (opline-1)->opcode == ZEND_ASSIGN_ADD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SUB ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MUL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_DIV ||
-	     (opline-1)->opcode == ZEND_ASSIGN_MOD ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SL ||
-	     (opline-1)->opcode == ZEND_ASSIGN_SR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_CONCAT ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_OR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_AND ||
-	     (opline-1)->opcode == ZEND_ASSIGN_BW_XOR ||
-	     (opline-1)->opcode == ZEND_ASSIGN_POW ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_R ||
-	     (opline-1)->opcode == ZEND_FE_FETCH_RW)) {
+	if (opline->opcode == ZEND_OP_DATA) {
 		opline--;
 		i--;
 	}
@@ -2374,6 +2368,14 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			if (opline->op1_type & (IS_CV|IS_VAR)) {
 				tmp |= MAY_BE_RCN;
+			}
+			if (opline->opcode != ZEND_QM_ASSIGN) {
+				/* COALESCE and JMP_SET result can't be null */
+				tmp &= ~MAY_BE_NULL;
+				if (opline->opcode == ZEND_JMP_SET) {
+					/* JMP_SET result can't be false either */
+					tmp &= ~MAY_BE_FALSE;
+				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			if ((t1 & MAY_BE_OBJECT) && ssa_ops[i].op1_use >= 0 && ssa_var_info[ssa_ops[i].op1_use].ce) {
@@ -3427,24 +3429,22 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
-			if (opline->result_type == IS_TMP_VAR) {
-				if (ssa_ops[i].result_def >= 0) {
-					tmp = MAY_BE_RC1;
-					if (t1 & MAY_BE_OBJECT) {
-						tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-					} else if (t1 & MAY_BE_ARRAY) {
-						if (t1 & MAY_BE_ARRAY_KEY_LONG) {
-							tmp |= MAY_BE_LONG;
-						}
-						if (t1 & MAY_BE_ARRAY_KEY_STRING) {
-							tmp |= MAY_BE_STRING;
-						}
-						if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
-							tmp |= MAY_BE_NULL;
-						}
+			if (ssa_ops[i].result_def >= 0) {
+				tmp = MAY_BE_RC1;
+				if (t1 & MAY_BE_OBJECT) {
+					tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+				} else if (t1 & MAY_BE_ARRAY) {
+					if (t1 & MAY_BE_ARRAY_KEY_LONG) {
+						tmp |= MAY_BE_LONG;
 					}
-					UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+					if (t1 & MAY_BE_ARRAY_KEY_STRING) {
+						tmp |= MAY_BE_STRING;
+					}
+					if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
+						tmp |= MAY_BE_NULL;
+					}
 				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
 //		case ZEND_CATCH:
@@ -3456,6 +3456,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_FETCH_DIM_W:
 		case ZEND_FETCH_DIM_UNSET:
 		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_LIST:
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = t1;
 				if (opline->opcode == ZEND_FETCH_DIM_W ||
@@ -3538,9 +3539,11 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].op1_def);
 				}
 			}
+			/* FETCH_LIST on a string behaves like FETCH_R on null */
 			tmp = zend_array_element_type(
-				t1,
-				(opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS),
+				opline->opcode != ZEND_FETCH_LIST ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
+				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
+					&& opline->opcode != ZEND_FETCH_LIST,
 				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_W ||
 			    opline->opcode == ZEND_FETCH_DIM_RW ||

@@ -42,7 +42,7 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(rval));
 #endif
 
 	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -102,7 +102,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nz
 	zend_long i;
 	var_entries *var_hash = (*var_hashx)->first;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(nzval));
+	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(nzval));
 #endif
 
 	while (var_hash) {
@@ -653,6 +653,11 @@ use_double:
 		return 0;
 	}
 
+	if (*(YYCURSOR + 1) != ';') {
+		*p = YYCURSOR + 1;
+		return 0;
+	}
+
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
@@ -678,6 +683,12 @@ use_double:
 	if (*(YYCURSOR) != '"') {
 		zend_string_free(str);
 		*p = YYCURSOR;
+		return 0;
+	}
+
+	if (*(YYCURSOR + 1) != ';') {
+		efree(str);
+		*p = YYCURSOR + 1;
 		return 0;
 	}
 

@@ -297,19 +297,13 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
-#ifdef ZTS
-#define PHP_ATTR_FMT_OFFSET 1
-#else
-#define PHP_ATTR_FMT_OFFSET 0
-#endif
-
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 3, PHP_ATTR_FMT_OFFSET + 4);
+	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
+	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
 PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 5, PHP_ATTR_FMT_OFFSET + 6);
+	PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 #ifdef PHP_WIN32
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
@@ -330,7 +324,7 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 PHPAPI extern int (*php_register_internal_extensions_func)(void);
 PHPAPI int php_register_internal_extensions(void);
-PHPAPI int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *));
+PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
 PHPAPI char *php_get_current_user(void);

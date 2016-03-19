@@ -200,6 +200,10 @@ typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 # define PTR_FMT "0x%0.8lx"
 #endif
 
+#ifdef MAP_HUGETLB
+int zend_mm_use_huge_pages = 1;
+#endif
+
 /*
  * Memory is retrived from OS by chunks of fixed size 2MB.
  * Inside chunk it's managed by pages of fixed size 4096B.
@@ -462,7 +466,7 @@ static void *zend_mm_mmap(size_t size)
 	void *ptr;
 
 #ifdef MAP_HUGETLB
-	if (size == ZEND_MM_CHUNK_SIZE) {
+	if (zend_mm_use_huge_pages && size == ZEND_MM_CHUNK_SIZE) {
 		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_HUGETLB, -1, 0);
 		if (ptr != MAP_FAILED) {
 			return ptr;
@@ -1353,6 +1357,10 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	/* special handling for zero-size allocation */
 	size = MAX(size, 1);
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+	if (UNEXPECTED(size < real_size)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+		return NULL;
+	}
 #endif
 	if (size <= ZEND_MM_MAX_SMALL_SIZE) {
 		ptr = zend_mm_alloc_small(heap, size, ZEND_MM_SMALL_SIZE_TO_BIN(size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2324,7 +2332,7 @@ ZEND_API int is_zend_mm(void)
 #endif
 }
 
-#if !ZEND_DEBUG && !defined(_WIN32)
+#if !ZEND_DEBUG && (!defined(_WIN32) || defined(__clang__))
 #undef _emalloc
 
 #if ZEND_MM_CUSTOM
@@ -2642,6 +2650,12 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		alloc_globals->mm_heap->custom_heap.std._free = free;
 		alloc_globals->mm_heap->custom_heap.std._realloc = realloc;
 		return;
+	}
+#endif
+#ifdef MAP_HUGETLB
+	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
+	if (tmp && !zend_atoi(tmp, 0)) {
+		zend_mm_use_huge_pages = 0;
 	}
 #endif
 	ZEND_TSRMLS_CACHE_UPDATE();

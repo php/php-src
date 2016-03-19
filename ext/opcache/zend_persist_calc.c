@@ -34,7 +34,9 @@
 # define ADD_STRING(str) ADD_DUP_SIZE((str), _ZSTR_STRUCT_SIZE(ZSTR_LEN(str)))
 
 # define ADD_INTERNED_STRING(str, do_free) do { \
-		if (!IS_ACCEL_INTERNED(str)) { \
+		if (ZCG(current_persistent_script)->corrupted) { \
+			ADD_STRING(str); \
+		} else if (!IS_ACCEL_INTERNED(str)) { \
 			zend_string *tmp = accel_new_interned_string(str); \
 			if (tmp != (str)) { \
 				if (do_free) { \
@@ -126,7 +128,7 @@ static void zend_persist_zval_calc(zval *z)
 		case IS_CONSTANT:
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
-			if (!Z_REFCOUNTED_P(z)) {
+			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
 				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			}
 			Z_GC_FLAGS_P(z) |= flags;
@@ -400,11 +402,15 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 	new_persistent_script->size = 0;
 	new_persistent_script->arena_mem = NULL;
 	new_persistent_script->arena_size = 0;
+	new_persistent_script->corrupted = 0;
 	ZCG(current_persistent_script) = new_persistent_script;
 
 	ADD_DUP_SIZE(new_persistent_script, sizeof(zend_persistent_script));
 	if (key) {
 		ADD_DUP_SIZE(key, key_length + 1);
+	} else {
+		/* script is not going to be saved in SHM */
+		new_persistent_script->corrupted = 1;
 	}
 	ADD_STRING(new_persistent_script->script.filename);
 
@@ -423,6 +429,7 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 #endif
 
 	new_persistent_script->size += new_persistent_script->arena_size;
+	new_persistent_script->corrupted = 0;
 
 	ZCG(current_persistent_script) = NULL;
 

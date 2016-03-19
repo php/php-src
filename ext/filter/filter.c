@@ -152,7 +152,7 @@ zend_module_entry filter_module_entry = {
 
 #ifdef COMPILE_DL_FILTER
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(filter)
 #endif

@@ -43,7 +43,7 @@
 #define INV_COND_EX(op)    ((op) == ZEND_JMPZ    ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 #define INV_EX_COND_EX(op) ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 
-#define RESULT_UNUSED(op)	((op->result_type & EXT_TYPE_UNUSED) != 0)
+#define RESULT_UNUSED(op)	(op->result_type == IS_UNUSED)
 #define SAME_VAR(op1, op2)  (op1 ## _type == op2 ## _type && op1.var == op2.var)
 
 typedef struct _zend_optimizer_ctx {

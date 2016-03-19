@@ -488,39 +488,16 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				if (next->op1_type == IS_CV) {
 					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
 					//USE_SSA_VAR(next->op1.var);
-				} else if (next->op1_type == IS_VAR ||
-				           next->op1_type == IS_TMP_VAR) {
+				} else if (next->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
 					//USE_SSA_VAR(op_array->last_var + next->op1.var);
 				}
 				if (next->op2_type == IS_CV) {
 					ssa_ops[k + 1].op2_use = var[EX_VAR_TO_NUM(next->op2.var)];
 					//USE_SSA_VAR(next->op2.var);
-				} else if (next->op2_type == IS_VAR ||
-				           next->op2_type == IS_TMP_VAR) {
-					/* ZEND_ASSIGN_??? use the second operand
-					   of the following OP_DATA instruction as
-					   a temporary variable */
-					switch (opline->opcode) {
-						case ZEND_ASSIGN_DIM:
-						case ZEND_ASSIGN_OBJ:
-						case ZEND_ASSIGN_ADD:
-						case ZEND_ASSIGN_SUB:
-						case ZEND_ASSIGN_MUL:
-						case ZEND_ASSIGN_DIV:
-						case ZEND_ASSIGN_MOD:
-						case ZEND_ASSIGN_SL:
-						case ZEND_ASSIGN_SR:
-						case ZEND_ASSIGN_CONCAT:
-						case ZEND_ASSIGN_BW_OR:
-						case ZEND_ASSIGN_BW_AND:
-						case ZEND_ASSIGN_BW_XOR:
-						case ZEND_ASSIGN_POW:
-							break;
-						default:
-							ssa_ops[k + 1].op2_use = var[EX_VAR_TO_NUM(next->op2.var)];
-							//USE_SSA_VAR(op_array->last_var + next->op2.var);
-					}
+				} else if (next->op2_type & (IS_VAR|IS_TMP_VAR)) {
+					ssa_ops[k + 1].op2_use = var[EX_VAR_TO_NUM(next->op2.var)];
+					//USE_SSA_VAR(op_array->last_var + next->op2.var);
 				}
 			}
 			if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
@@ -695,8 +672,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				var[EX_VAR_TO_NUM(opline->result.var)] = ssa_vars_count;
 				ssa_vars_count++;
 				//NEW_SSA_VAR(opline->result.var)
-			} else if (opline->result_type == IS_VAR ||
-			           opline->result_type == IS_TMP_VAR) {
+			} else if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 				ssa_ops[k].result_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->result.var)] = ssa_vars_count;
 				ssa_vars_count++;
@@ -783,8 +759,8 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	int *var = NULL;
 	int i, j, k, changed;
 	zend_dfg dfg;
-	ALLOCA_FLAG(dfg_use_heap);
-	ALLOCA_FLAG(var_use_heap);
+	ALLOCA_FLAG(dfg_use_heap)
+	ALLOCA_FLAG(var_use_heap)
 
 	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));

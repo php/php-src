@@ -331,9 +331,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
 
 	};
-
-	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
-
+	
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",	NULL,	0 }
 		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
@@ -344,7 +342,8 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	};
 
 	nvars = sizeof(vars)/sizeof(vars[0]);
-
+	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
+	
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	if (driver_options) {

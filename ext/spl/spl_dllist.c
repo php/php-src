@@ -156,7 +156,7 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
 
 	while (current) {
 		next = current->next;
-		if(current && dtor) {
+		if (dtor) {
 			dtor(current);
 		}
 		SPL_LLIST_DELREF(current);

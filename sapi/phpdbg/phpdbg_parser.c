@@ -94,7 +94,7 @@
 #undef yyerror
 static int yyerror(const char *msg);
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #ifdef _MSC_VER
 #define YYMALLOC malloc

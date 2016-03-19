@@ -892,7 +892,7 @@ zend_module_entry intl_module_entry = {
 
 #ifdef COMPILE_DL_INTL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE( intl )
 #endif

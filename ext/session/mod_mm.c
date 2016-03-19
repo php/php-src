@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+#include "php_stdint.h"
 #include "php_session.h"
 #include "mod_mm.h"
 #include "SAPI.h"
@@ -39,14 +40,11 @@
 
 #define PS_MM_FILE "session_mm_"
 
-/* For php_uint32 */
-#include "ext/standard/basic_functions.h"
-
 /* This list holds all data associated with one session. */
 
 typedef struct ps_sd {
 	struct ps_sd *next;
-	php_uint32 hv;		/* hash value of key */
+	uint32_t hv;		/* hash value of key */
 	time_t ctime;		/* time of last change */
 	void *data;
 	size_t datalen;		/* amount of valid data */
@@ -57,8 +55,8 @@ typedef struct ps_sd {
 typedef struct {
 	MM *mm;
 	ps_sd **hash;
-	php_uint32 hash_max;
-	php_uint32 hash_cnt;
+	uint32_t hash_max;
+	uint32_t hash_cnt;
 	pid_t owner;
 } ps_mm;
 
@@ -70,9 +68,9 @@ static ps_mm *ps_mm_instance = NULL;
 # define ps_mm_debug(a)
 #endif
 
-static inline php_uint32 ps_sd_hash(const char *data, int len)
+static inline uint32_t ps_sd_hash(const char *data, int len)
 {
-	php_uint32 h;
+	uint32_t h;
 	const char *e = data + len;
 
 	for (h = 2166136261U; data < e; ) {
@@ -85,7 +83,7 @@ static inline php_uint32 ps_sd_hash(const char *data, int len)
 
 static void hash_split(ps_mm *data)
 {
-	php_uint32 nmax;
+	uint32_t nmax;
 	ps_sd **nhash;
 	ps_sd **ohash, **ehash;
 	ps_sd *ps, *next;
@@ -114,7 +112,7 @@ static void hash_split(ps_mm *data)
 
 static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 {
-	php_uint32 hv, slot;
+	uint32_t hv, slot;
 	ps_sd *sd;
 	int keylen;
 
@@ -155,7 +153,7 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 
 static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 {
-	php_uint32 slot;
+	uint32_t slot;
 
 	slot = ps_sd_hash(sd->key, strlen(sd->key)) & data->hash_max;
 
@@ -180,7 +178,7 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 
 static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 {
-	php_uint32 hv, slot;
+	uint32_t hv, slot;
 	ps_sd *ret, *prev;
 
 	hv = ps_sd_hash(key, strlen(key));

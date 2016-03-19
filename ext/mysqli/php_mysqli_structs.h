@@ -341,7 +341,7 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 #define MyG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mysqli, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_MYSQLI)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #define my_estrdup(x) (x) ? estrdup(x) : NULL

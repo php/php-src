@@ -205,7 +205,7 @@ struct mb_overload_def {
 #define MBSTRG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mbstring, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_MBSTRING)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #else	/* HAVE_MBSTRING */

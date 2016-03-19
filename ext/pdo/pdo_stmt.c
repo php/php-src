@@ -742,7 +742,6 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 	if (ce->constructor) {
 		fci->function_table = &ce->function_table;
 		ZVAL_UNDEF(&fci->function_name);
-		fci->symbol_table = NULL;
 		fci->retval = &stmt->fetch.cls.retval;
 		fci->param_count = 0;
 		fci->params = NULL;
@@ -1542,16 +1541,16 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 {
 	struct pdo_bound_param_data param = {{{0}}};
 	zend_long param_type = PDO_PARAM_STR;
-	zval *parameter;
+	zval *parameter, *driver_params = NULL;
 
 	param.paramno = -1;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 			"lz|llz!", &param.paramno, &parameter, &param_type, &param.max_value_len,
-			&param.driver_params)) {
+			&driver_params)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|llz!", &param.name,
 				&parameter, &param_type, &param.max_value_len,
-				&param.driver_params)) {
+				&driver_params)) {
 			return 0;
 		}
 	}
@@ -1563,6 +1562,10 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	} else if (!param.name) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
 		return 0;
+	}
+
+	if (driver_params) {
+		ZVAL_COPY(&param.driver_params, driver_params);
 	}
 
 	ZVAL_COPY(&param.parameter, parameter);
@@ -2107,9 +2110,9 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		RETURN_FALSE;
 	}
 
-	php_stream_printf(out, "SQL: [%d] %.*s\n",
+	php_stream_printf(out, "SQL: [%zd] %.*s\n",
 		stmt->query_stringlen,
-		stmt->query_stringlen, stmt->query_string);
+		(int) stmt->query_stringlen, stmt->query_string);
 
 	php_stream_printf(out, "Params:  %d\n",
 		stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0);
@@ -2119,13 +2122,14 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		zend_string *key = NULL;
 		ZEND_HASH_FOREACH_KEY_PTR(stmt->bound_params, num, key, param) {
 			if (key) {
-				php_stream_printf(out, "Key: Name: [%d] %.*s\n", ZSTR_LEN(key), ZSTR_LEN(key), ZSTR_VAL(key));
+				php_stream_printf(out, "Key: Name: [%zd] %.*s\n",
+					ZSTR_LEN(key), (int) ZSTR_LEN(key), ZSTR_VAL(key));
 			} else {
 				php_stream_printf(out, "Key: Position #%pd:\n", num);
 			}
 
-			php_stream_printf(out, "paramno=%pd\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-					param->paramno, param->name? ZSTR_LEN(param->name) : 0, param->name? ZSTR_LEN(param->name) : 0,
+			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+					param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
 					param->name ? ZSTR_VAL(param->name) : "",
 					param->is_param,
 					param->param_type);
