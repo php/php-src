@@ -383,7 +383,7 @@ static zend_always_inline zend_bool _zend_object_has_type_hints(zval *object) {
 #define ZEND_OBJECT_HAS_TYPE_HINTS(object) _zend_object_has_type_hints(object)
 
 zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *property, void **cache);
-zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool resolve, zend_bool strict);
+zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool strict);
 
 END_EXTERN_C()
 

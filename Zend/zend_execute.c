@@ -825,38 +825,28 @@ static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *
 	return ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property));
 }
 
-zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool runtime, zend_bool strict) {
+zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool strict) {
 	switch (type) {
 		case IS_OBJECT: {
 			zend_class_entry *pce = type_ce ? *type_ce : NULL;
-			zend_string *resolved = runtime ? zend_resolve_property_type(type_name, scope) : type_name;
-			
-			if (!pce && runtime) {
+			zend_string *resolved = zend_resolve_property_type(type_name, scope);
+
+			if (!pce) {
 				pce = zend_lookup_class(resolved);
-				
 				if (type_ce) {
 					*type_ce = pce;				
 				}
 			}
 
-			if (Z_TYPE_P(property) != IS_OBJECT || !runtime || !instanceof_function(pce, Z_OBJCE_P(property))) {
-				if (runtime) {
-					zend_throw_exception_ex(zend_ce_type_error, type, 
-						"Typed property %s::$%s must be an instance of %s, %s used",
-							ZSTR_VAL(scope->name),
-							ZSTR_VAL(name),
-							ZSTR_VAL(resolved),
-							Z_TYPE_P(property) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(property)->name) :
-								zend_get_type_by_const(Z_TYPE_P(property)));
-				} else {
-					zend_error(scope->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR,
-						"Typed property %s::$%s must be an instance of %s, %s used",
-							ZSTR_VAL(scope->name),
-							ZSTR_VAL(name),
-							ZSTR_VAL(resolved),
+			if (Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(pce, Z_OBJCE_P(property))) {
+				zend_throw_exception_ex(zend_ce_type_error, type, 
+					"Typed property %s::$%s must be an instance of %s, %s used",
+						ZSTR_VAL(scope->name),
+						ZSTR_VAL(name),
+						ZSTR_VAL(resolved),
+						Z_TYPE_P(property) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(property)->name) :
 							zend_get_type_by_const(Z_TYPE_P(property)));
-				}
 				return 0;
 			}
 			return 1;
@@ -874,23 +864,14 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 
 		default:
 			if (!zend_verify_scalar_property_type(type, property, strict)) {
-				if (runtime) {
-					zend_throw_exception_ex(zend_ce_type_error, type, 
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(scope->name),
-							ZSTR_VAL(name),
-							zend_get_type_by_const(type),
-							Z_TYPE_P(property) == IS_OBJECT ?
-								ZSTR_VAL(Z_OBJCE_P(property)->name) :
-									zend_get_type_by_const(Z_TYPE_P(property)));
-				} else {
-					zend_error(scope->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR, 
-						"Typed property %s::$%s must be %s, %s used",
-							ZSTR_VAL(scope->name),
-							ZSTR_VAL(name),
-							zend_get_type_by_const(type),
-							zend_get_type_by_const(Z_TYPE_P(property)));
-				}
+				zend_throw_exception_ex(zend_ce_type_error, type, 
+					"Typed property %s::$%s must be %s, %s used",
+						ZSTR_VAL(scope->name),
+						ZSTR_VAL(name),
+						zend_get_type_by_const(type),
+						Z_TYPE_P(property) == IS_OBJECT ?
+							ZSTR_VAL(Z_OBJCE_P(property)->name) :
+								zend_get_type_by_const(Z_TYPE_P(property)));
 				return 0;
 			}
 			return 1;
