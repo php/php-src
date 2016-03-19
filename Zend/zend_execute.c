@@ -825,24 +825,20 @@ static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *
 	return ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property));
 }
 
-zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, zend_uchar type, zend_string *type_name, zend_class_entry **type_ce, zval *property, zend_bool strict) {
-	switch (type) {
+zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
+	switch (info->type) {
 		case IS_OBJECT: {
-			zend_class_entry *pce = type_ce ? *type_ce : NULL;
-			zend_string *resolved = zend_resolve_property_type(type_name, scope);
+			zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
 
-			if (!pce) {
-				pce = zend_lookup_class(resolved);
-				if (type_ce) {
-					*type_ce = pce;				
-				}
+			if (!info->type_ce) {
+				info->type_ce = zend_lookup_class(resolved);
 			}
 
-			if (Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(pce, Z_OBJCE_P(property))) {
-				zend_throw_exception_ex(zend_ce_type_error, type, 
+			if (Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(info->type_ce, Z_OBJCE_P(property))) {
+				zend_throw_exception_ex(zend_ce_type_error, info->type, 
 					"Typed property %s::$%s must be an instance of %s, %s used",
-						ZSTR_VAL(scope->name),
-						ZSTR_VAL(name),
+						ZSTR_VAL(info->ce->name),
+						ZSTR_VAL(info->name),
 						ZSTR_VAL(resolved),
 						Z_TYPE_P(property) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(property)->name) :
@@ -863,12 +859,12 @@ zend_bool zend_verify_property_type(zend_class_entry *scope, zend_string *name, 
 		}
 
 		default:
-			if (!zend_verify_scalar_property_type(type, property, strict)) {
-				zend_throw_exception_ex(zend_ce_type_error, type, 
+			if (!zend_verify_scalar_property_type(info->type, property, strict)) {
+				zend_throw_exception_ex(zend_ce_type_error, info->type, 
 					"Typed property %s::$%s must be %s, %s used",
-						ZSTR_VAL(scope->name),
-						ZSTR_VAL(name),
-						zend_get_type_by_const(type),
+						ZSTR_VAL(info->ce->name),
+						ZSTR_VAL(info->name),
+						zend_get_type_by_const(info->type),
 						Z_TYPE_P(property) == IS_OBJECT ?
 							ZSTR_VAL(Z_OBJCE_P(property)->name) :
 								zend_get_type_by_const(Z_TYPE_P(property)));
