@@ -716,7 +716,7 @@ static void zend_persist_property_info(zval *zv)
 	}
 
 	if (prop->type_name) {
-		zend_accel_store_string(prop->type_name);
+		zend_accel_store_interned_string(prop->type_name);
 
 		prop->type_ce = NULL;
 	}

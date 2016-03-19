@@ -5747,7 +5747,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -9537,7 +9536,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -11380,7 +11378,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -13716,7 +13713,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -14971,7 +14967,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -15527,7 +15522,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -17552,8 +17546,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -18373,6 +18365,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -18408,7 +18420,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -22079,8 +22090,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -22900,6 +22909,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -22935,7 +22964,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -24797,8 +24825,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -25622,6 +25648,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -25657,7 +25703,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -27429,8 +27474,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -28129,6 +28172,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -28236,7 +28299,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -30907,8 +30969,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -31607,6 +31667,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -31714,7 +31794,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -33324,8 +33403,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -34027,6 +34104,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -34135,7 +34232,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -38045,8 +38141,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -39033,6 +39127,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -39140,7 +39254,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -44733,8 +44846,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -45582,6 +45693,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -45689,7 +45820,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
@@ -48448,8 +48578,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -49301,6 +49429,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 		zval_ptr_dtor_nogc(free_op2);
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -49409,7 +49557,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 			HANDLE_EXCEPTION();
 		}
 
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 

@@ -734,8 +734,6 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 			}
 		}
 
-		/* TODO(krakjoe) don't like these changes still ... anyone else ? */
-
 		/* here we are sure we are dealing with an object */
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
@@ -2027,6 +2025,26 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+
+		if (UNEXPECTED(prop_info)) {
+			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
+				switch ((EX(opline) + 1)->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_INIT_ARRAY: {
+						zend_throw_exception_ex(
+							zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be referenced",
+							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+						HANDLE_EXCEPTION();
+					} break;
+				}
+			}
+		}
+	}
+
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -2135,7 +2153,6 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 			HANDLE_EXCEPTION();
 		}
 		
-		/* TODO(krakjoe) deref container problem again */
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
