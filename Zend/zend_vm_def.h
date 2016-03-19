@@ -2177,18 +2177,6 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
-
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {

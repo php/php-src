@@ -18450,18 +18450,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 
 	property = EX_CONSTANT(opline->op2);
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
-
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -22989,18 +22977,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
-
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -25723,18 +25699,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
-
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -28313,18 +28277,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CO
 	}
 
 	property = EX_CONSTANT(opline->op2);
-
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
@@ -31804,18 +31756,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
-
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -34236,18 +34176,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TM
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	zval_ptr_dtor_nogc(free_op2);
@@ -39253,18 +39181,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_
 	}
 
 	property = EX_CONSTANT(opline->op2);
-
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
@@ -45815,18 +45731,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
-
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -49546,18 +49450,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
-
-		if (prop_info) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-				"Typed property %s::$%s must not be unset",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(property));
-			HANDLE_EXCEPTION();
-		}
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	zval_ptr_dtor_nogc(free_op2);
