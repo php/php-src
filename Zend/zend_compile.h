@@ -831,25 +831,12 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
 
-/* variable parsing type (compile-time) */
-#define ZEND_PARSED_MEMBER				(1<<0)
-#define ZEND_PARSED_METHOD_CALL			(1<<1)
-#define ZEND_PARSED_STATIC_MEMBER		(1<<2)
-#define ZEND_PARSED_FUNCTION_CALL		(1<<3)
-#define ZEND_PARSED_VARIABLE			(1<<4)
-#define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
-#define ZEND_PARSED_NEW					(1<<6)
-#define ZEND_PARSED_LIST_EXPR			(1<<7)
-
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)
 
 #define ZEND_NAME_FQ       0
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
-
-/* unset types */
-#define ZEND_UNSET_REG 0
 
 /* var status for backpatching */
 #define BP_VAR_R			0
@@ -902,8 +889,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
-
-#define ZEND_MEMBER_FUNC_CALL   (1<<0)
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)

@@ -117,20 +117,7 @@ static const zend_internal_function zend_pass_function = {
 		zval_ptr_dtor_nogc(should_free); \
 	}
 
-/* End of zend_execute_locks.h */
-
 #define CV_DEF_OF(i) (EX(func)->op_array.vars[i])
-
-#define CTOR_CALL_BIT    0x1
-#define CTOR_USED_BIT    0x2
-
-#define IS_CTOR_CALL(ce) (((zend_uintptr_t)(ce)) & CTOR_CALL_BIT)
-#define IS_CTOR_USED(ce) (((zend_uintptr_t)(ce)) & CTOR_USED_BIT)
-
-#define ENCODE_CTOR(ce, used) \
-	((zend_class_entry*)(((zend_uintptr_t)(ce)) | CTOR_CALL_BIT | ((used) ? CTOR_USED_BIT : 0)))
-#define DECODE_CTOR(ce) \
-	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
 #define ZEND_VM_MAIN_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
 #define ZEND_VM_GENERATOR_STACK_PAGE_SLOTS (256)
