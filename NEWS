@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #69659 (ArrayAccess, isset() and the offsetExists method).
     (Nikita)
 
+- JSON:
+  . Fixed bug #71835 (json_encode sometimes incorrectly detects recursion
+    with JsonSerializable). (Jakub Zelenka)
+
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
 
