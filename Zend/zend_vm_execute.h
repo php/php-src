@@ -4311,6 +4311,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
 			zend_bool is_empty;
 
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, 0,
+					"Typed properties exist in %s: foreach by reference is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				HANDLE_EXCEPTION();
+			}
+
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_CONST == IS_VAR) {
 
@@ -13206,6 +13214,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
 			zend_bool is_empty;
 
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, 0,
+					"Typed properties exist in %s: foreach by reference is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				HANDLE_EXCEPTION();
+			}
+
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_TMP_VAR == IS_VAR) {
 
@@ -16795,6 +16811,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
 			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
 			zend_bool is_empty;
+
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, 0,
+					"Typed properties exist in %s: foreach by reference is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				HANDLE_EXCEPTION();
+			}
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_VAR == IS_VAR) {
@@ -37068,6 +37092,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
 			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
 			zend_bool is_empty;
+
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, 0,
+					"Typed properties exist in %s: foreach by reference is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				HANDLE_EXCEPTION();
+			}
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_CV == IS_VAR) {

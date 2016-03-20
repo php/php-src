@@ -6236,6 +6236,14 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
 			zend_bool is_empty;
 
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
+				zend_throw_exception_ex(
+					zend_ce_type_error, 0,
+					"Typed properties exist in %s: foreach by reference is disallowed",
+					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				HANDLE_EXCEPTION();
+			}
+
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (OP1_TYPE == IS_VAR) {
 					FREE_OP1_VAR_PTR();
