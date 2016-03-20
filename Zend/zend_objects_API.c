@@ -44,6 +44,7 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 {
 	if (objects->top > 1) {
+		zend_object **original_object_buckets = objects->object_buckets;
 		zend_object **obj_ptr = objects->object_buckets + 1;
 		zend_object **end = objects->object_buckets + objects->top;
 
@@ -56,6 +57,14 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 					GC_REFCOUNT(obj)++;
 					obj->handlers->dtor_obj(obj);
 					GC_REFCOUNT(obj)--;
+				}
+
+				if (original_object_buckets != objects->object_buckets) {
+					/* object_buckets was reallocated in dtor, obj_ptr and end are stale. */
+					original_object_buckets = objects->object_buckets;
+					obj_ptr = objects->object_buckets + 1;
+					end = objects->object_buckets + objects->top;
+					continue;
 				}
 			}
 			obj_ptr++;
