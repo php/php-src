@@ -307,7 +307,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
  Default implementation for __autoload() */
 PHP_FUNCTION(spl_autoload)
 {
-	int found = 0, pos_len, pos1_len;
+	int pos_len, pos1_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
 
@@ -333,32 +333,12 @@ PHP_FUNCTION(spl_autoload)
 			pos1_len = pos_len;
 		}
 		if (spl_autoload(class_name, lc_name, pos, pos1_len)) {
-			found = 1;
 			break; /* loaded */
 		}
 		pos = pos1 ? pos1 + 1 : NULL;
 		pos_len = pos1? pos_len - pos1_len - 1 : 0;
 	}
 	zend_string_free(lc_name);
-
-	if (!found && !SPL_G(autoload_running)) {
-		/* For internal errors, we generate E_ERROR, for direct calls an exception is thrown.
-		 * The "scope" is determined by an opcode, if it is ZEND_FETCH_CLASS we know function was called indirectly by
-		 * the Zend engine.
-		 */
-		zend_execute_data *ex = EX(prev_execute_data);
-
-		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
-			ex = ex->prev_execute_data;
-		}
-		if (ex &&
-		    ex->opline->opcode != ZEND_FETCH_CLASS &&
-		    ex->opline->opcode != ZEND_NEW) {
-			zend_throw_exception_ex(spl_ce_LogicException, 0, "Class %s could not be loaded", ZSTR_VAL(class_name));
-		} else {
-			php_error_docref(NULL, E_ERROR, "Class %s could not be loaded", ZSTR_VAL(class_name));
-		}
-	}
 } /* }}} */
 
 /* {{{ proto string spl_autoload_extensions([string file_extensions])

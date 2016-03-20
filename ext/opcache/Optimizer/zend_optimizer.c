@@ -33,7 +33,7 @@
 #include "zend_dump.h"
 
 #ifndef HAVE_DFA_PASS
-# define HAVE_DFA_PASS 0
+# define HAVE_DFA_PASS 1
 #endif
 
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)

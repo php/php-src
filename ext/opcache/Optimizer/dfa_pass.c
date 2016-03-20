@@ -412,7 +412,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 	if (ssa->var_info) {
 		int i;
-		zend_op *opline, *end;
+		zend_op *opline;
 		zval tmp;
 
 		/* Convert LONG constants to DOUBLE */

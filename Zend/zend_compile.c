@@ -737,11 +737,7 @@ void zend_do_free(znode *op1) /* {{{ */
 			}
 		}
 
-		opline = get_next_op(CG(active_op_array));
-
-		opline->opcode = ZEND_FREE;
-		SET_NODE(opline->op1, op1);
-		SET_UNUSED(opline->op2);
+		zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 	} else if (op1->op_type == IS_VAR) {
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 		while (opline->opcode == ZEND_END_SILENCE ||
