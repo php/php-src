@@ -17,6 +17,6 @@ var_dump(`"$php" -n -s -w -l`);
 --EXPECTF--	
 string(25) "No input file specified.
 "
-string(41) "No syntax errors detected in php://stdin
+string(49) "No syntax errors detected in Standard input code
 "
 ===DONE===

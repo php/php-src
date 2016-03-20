@@ -925,7 +925,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			/* here but this would make things only more complicated. And it */
 			/* is consitent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
-			file_handle.filename = "php://stdin";
+			file_handle.filename = "Standard input code";
 			file_handle.handle.fp = stdin;
 		}
 		file_handle.type = ZEND_HANDLE_FP;
@@ -964,7 +964,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (strcmp(file_handle.filename, "php://stdin")) {
+			if (strcmp(file_handle.filename, "Standard input code")) {
 				cli_register_file_handles();
 			}
 
