@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core: 
   . Added ability to disable huge pages in Zend Memory Manager through
     the environment variable USE_ZEND_ALLOC_HUGE_PAGES=0. (Dmitry)
+  . Fixed Bug #71859 (zend_objects_store_call_destructors operates on realloced
+    memory, crashing). (Laruence)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
 - ODBC:
