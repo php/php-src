@@ -18357,6 +18357,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -18400,6 +18401,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -22898,6 +22900,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -22941,6 +22944,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -25634,6 +25638,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -25677,6 +25682,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -28155,6 +28161,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -28198,6 +28205,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -31647,6 +31655,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -31690,6 +31699,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -34081,6 +34091,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -34124,6 +34135,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -39111,6 +39123,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -39154,6 +39167,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -45674,6 +45688,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -45717,6 +45732,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -49407,6 +49423,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
@@ -49450,6 +49467,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
 					zend_throw_exception_ex(
