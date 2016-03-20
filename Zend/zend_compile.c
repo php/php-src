@@ -6246,7 +6246,7 @@ ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode,
 	}
 
 	/* While basic arithmetic operators always produce numeric string errors,
-	 * bitwise operators only produce errors when *both* operands are strings */
+	 * bitwise operators don't produce errors if both operands are strings */
 	if ((opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)
 		&& Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		return 0;

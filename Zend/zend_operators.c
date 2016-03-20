@@ -779,7 +779,6 @@ try_again:
 					 return zend_dval_to_lval_cap(dval);
 				}
 			}
-			return ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10);
 		case IS_ARRAY:
 			return zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1 : 0;
 		case IS_OBJECT:
