@@ -537,10 +537,17 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
 	property_offset = zend_get_property_offset(zobj->ce, Z_STR_P(member), (type == BP_VAR_IS) || (zobj->ce->__get != NULL), cache_slot);
 
+
 	if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
 		if (EXPECTED(property_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			retval = OBJ_PROP(zobj, property_offset);
 			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				if (EXPECTED(EG(current_execute_data) != NULL)
+					&& EXPECTED(EG(current_execute_data)->func != NULL)
+					&& EXPECTED(EG(current_execute_data)->func->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+				) {
+					EG(current_execute_data)->func->op_array.property_offset = property_offset;
+				}
 				goto exit;
 			}
 		} else if (EXPECTED(zobj->properties != NULL)) {

@@ -6048,6 +6048,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 		}
 	}
 
+	if (IS_CONST == IS_CV && IS_CONST == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
+		}
+	}
+
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -9889,6 +9938,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 		}
 	}
 
+	if (IS_CONST == IS_CV && IS_CV == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
+		}
+	}
+
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -11807,6 +11905,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+
+	if (IS_CONST == IS_CV && (IS_TMP_VAR|IS_VAR) == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
 		}
 	}
 
@@ -28703,6 +28850,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 		}
 	}
 
+	if (IS_UNUSED == IS_CV && IS_CONST == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
+		}
+	}
+
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -32038,6 +32234,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 		}
 	}
 
+	if (IS_UNUSED == IS_CV && IS_CV == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
+		}
+	}
+
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -34304,6 +34549,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+
+	if (IS_UNUSED == IS_CV && (IS_TMP_VAR|IS_VAR) == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
 		}
 	}
 
@@ -39719,6 +40013,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+
+	if (IS_CV == IS_CV && IS_CONST == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
 		}
 	}
 
@@ -46213,6 +46556,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 		}
 	}
 
+	if (IS_CV == IS_CV && IS_CV == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
+		}
+	}
+
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -49756,6 +50148,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 		}
 	}
 
+	if (IS_CV == IS_CV && (IS_TMP_VAR|IS_VAR) == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
+		}
+	}
+
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -51982,6 +52423,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && IS_CONST == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
 		}
 	}
 
@@ -54328,6 +54818,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		}
 	}
 
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && IS_CV == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
+		}
+	}
+
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -55572,6 +56111,55 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && (IS_TMP_VAR|IS_VAR) == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
 		}
 	}
 

@@ -24,7 +24,6 @@
  * zend_vm_opcodes.h files by running:
  * php zend_vm_gen.php
  */
-
 ZEND_VM_HANDLER(1, ZEND_ADD, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
@@ -3157,6 +3156,55 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV, CONST|T
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+
+	if (OP1_TYPE == IS_CV && OP2_TYPE == IS_CONST
+			&& object != NULL
+			&& EXPECTED(fbc != NULL)
+			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			&& EXPECTED(fbc->op_array.property_offset != 0)
+	) {
+		zval *retval = NULL;
+		zend_op *nextop = NULL;
+		zend_bool assigned_result = 0;
+
+		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
+			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				nextop = (zend_op*) opline;
+				nextop++;
+				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+						if (EXPECTED(nextop->result_type == IS_VAR)) {
+							ZVAL_DEREF(retval);
+							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+							assigned_result = 1;
+						}
+						nextop++;
+					}
+					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
+						nextop++;
+					}
+				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+
+					if (EXPECTED(nextop->result_type == IS_VAR)) {
+						ZVAL_DEREF(retval);
+						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+						assigned_result = 1;
+					}
+					nextop++;
+				}
+				// TODO: verify return type
+				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
+				if (EXPECTED(assigned_result)) {
+					ZEND_VM_JMP(nextop);
+				}
+			}
 		}
 	}
 
