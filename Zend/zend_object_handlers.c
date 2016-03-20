@@ -710,13 +710,26 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 	zval tmp;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
-		if(offset == NULL) {
+		if (offset == NULL) {
 			/* [] construct */
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
+
+		if (type == BP_VAR_IS) {
+			zend_call_method_with_1_params(object, ce, NULL, "offsetexists", rv, offset);
+			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
+				return NULL;
+			}
+			if (!i_zend_is_true(rv)) {
+				zval_ptr_dtor(rv);
+				return &EG(uninitialized_zval);
+			}
+			zval_ptr_dtor(rv);
+		}
+
 		zend_call_method_with_1_params(object, ce, NULL, "offsetget", rv, offset);
 
 		zval_ptr_dtor(offset);

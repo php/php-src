@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed Bug #71859 (zend_objects_store_call_destructors operates on realloced
     memory, crashing). (Laruence)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
+  . Fixed bug #71731 (Null coalescing operator and ArrayAccess). (Nikita)
+  . Fixed bug #69659 (ArrayAccess, isset() and the offsetExists method).
+    (Nikita)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
