@@ -275,12 +275,11 @@ static zend_object *spl_array_object_clone(zval *zobject)
 }
 /* }}} */
 
-static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval *offset, int type) /* {{{ */
+static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *intern, zval *offset, int type) /* {{{ */
 {
 	zval *retval;
 	zend_long index;
 	zend_string *offset_key;
-	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *ht = spl_array_get_hash_table(intern);
 
 	if (!offset || Z_ISUNDEF_P(offset)) {
@@ -382,12 +381,21 @@ num_index:
 	}
 } /* }}} */
 
+static int spl_array_has_dimension(zval *object, zval *offset, int check_empty);
+
 static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type, zval *rv) /* {{{ */
 {
+	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zval *ret;
 
-	if (check_inherited) {
-		spl_array_object *intern = Z_SPLARRAY_P(object);
+	if (check_inherited &&
+			(intern->fptr_offset_get || (type == BP_VAR_IS && intern->fptr_offset_has))) {
+		if (type == BP_VAR_IS) {
+			if (!spl_array_has_dimension(object, offset, 0)) {
+				return &EG(uninitialized_zval);
+			}
+		}
+
 		if (intern->fptr_offset_get) {
 			zval tmp;
 			if (!offset) {
@@ -405,7 +413,8 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 			return &EG(uninitialized_zval);
 		}
 	}
-	ret = spl_array_get_dimension_ptr(check_inherited, object, offset, type);
+
+	ret = spl_array_get_dimension_ptr(check_inherited, intern, offset, type);
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
@@ -879,7 +888,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
-		return spl_array_get_dimension_ptr(1, object, member, type);
+		return spl_array_get_dimension_ptr(1, intern, member, type);
 	}
 	return std_object_handlers.get_property_ptr_ptr(object, member, type, cache_slot);
 } /* }}} */

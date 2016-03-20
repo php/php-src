@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Fixed bug #71731 (Null coalescing operator and ArrayAccess). (Nikita)
   . Fixed bug #69659 (ArrayAccess, isset() and the offsetExists method).
     (Nikita)
+  . Fixed bug #62059 (ArrayObject and isset are not friends). (Nikita)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
