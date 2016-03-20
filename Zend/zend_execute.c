@@ -852,7 +852,7 @@ zend_bool zend_verify_property_type(zend_property_info *info, zval *property, ze
 			case IS_OBJECT:
 				if (instanceof_function(zend_ce_closure, Z_OBJCE_P(property)))
 					return 1;
-			
+
 			case IS_ARRAY:
 				if (zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL))
 					return 1;
