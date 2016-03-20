@@ -712,7 +712,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
 		if(offset == NULL) {
 			/* [] construct */
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
