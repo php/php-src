@@ -1985,17 +1985,15 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
 		if (UNEXPECTED(prop_info)) {
-			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
-				switch ((EX(opline) + 1)->opcode) {
-					case ZEND_ASSIGN_REF:
-					case ZEND_INIT_ARRAY: {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
-					} break;
-				}
+			switch ((opline + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be referenced",
+						ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				} break;
 			}
 		}
 	}
@@ -2030,17 +2028,15 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
 
 		if (UNEXPECTED(prop_info)) {
-			if (EXPECTED(EX(opline) + 1 < &EX(func)->op_array.opcodes[EX(func)->op_array.last])) {
-				switch ((EX(opline) + 1)->opcode) {
-					case ZEND_ASSIGN_REF:
-					case ZEND_INIT_ARRAY: {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be referenced",
-							ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-						HANDLE_EXCEPTION();
-					} break;
-				}
+			switch ((opline + 1)->opcode) {
+				case ZEND_ASSIGN_REF:
+				case ZEND_INIT_ARRAY: {
+					zend_throw_exception_ex(
+						zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be referenced",
+						ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+					HANDLE_EXCEPTION();
+				} break;
 			}
 		}
 	}
