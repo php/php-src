@@ -25,6 +25,7 @@
 #include "php_math.h"
 #include "zend_multiply.h"
 #include "zend_exceptions.h"
+#include "zend_portability.h"
 
 #include <math.h>
 #include <float.h>
@@ -239,7 +240,7 @@ static double php_acosh(double x)
 	if (x >= 1) {
 		return log(x + sqrt(x * x - 1));
 	} else {
-		return (DBL_MAX+DBL_MAX)-(DBL_MAX+DBL_MAX);
+		return ZEND_NAN;
 	}
 # else
 	return(log(x + sqrt(x * x - 1)));
@@ -845,7 +846,7 @@ PHP_FUNCTION(log)
 	}
 
 	if (base == 1.0) {
-		RETURN_DOUBLE(php_get_nan());
+		RETURN_DOUBLE(ZEND_NAN);
 	}
 
 	if (base <= 0.0) {
@@ -1119,7 +1120,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 		char buf[(sizeof(double) << 3) + 1];
 
 		/* Don't try to convert +/- infinity */
-		if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
+		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
 			php_error_docref(NULL, E_WARNING, "Number too large");
 			return ZSTR_EMPTY_ALLOC();
 		}
