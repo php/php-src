@@ -4308,7 +4308,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
+			zend_object_iterator *iter;
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
@@ -4318,6 +4318,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 				HANDLE_EXCEPTION();
 			}
+
+			iter = ce->get_iterator(ce, array_ptr, 1);
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_CONST == IS_VAR) {
@@ -13211,7 +13213,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
+			zend_object_iterator *iter;
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
@@ -13221,6 +13223,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 				HANDLE_EXCEPTION();
 			}
+
+			iter = ce->get_iterator(ce, array_ptr, 1);
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_TMP_VAR == IS_VAR) {
@@ -16809,7 +16813,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
+			zend_object_iterator *iter;
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
@@ -16819,6 +16823,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 				HANDLE_EXCEPTION();
 			}
+
+			iter = ce->get_iterator(ce, array_ptr, 1);
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_VAR == IS_VAR) {
@@ -37090,7 +37096,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
+			zend_object_iterator *iter;
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
@@ -37100,6 +37106,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 				HANDLE_EXCEPTION();
 			}
+
+			iter = ce->get_iterator(ce, array_ptr, 1);
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (IS_CV == IS_VAR) {

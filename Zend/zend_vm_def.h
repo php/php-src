@@ -6233,7 +6233,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
+			zend_object_iterator *iter;
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array_ptr))) {
@@ -6243,6 +6243,8 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 				HANDLE_EXCEPTION();
 			}
+
+			iter = ce->get_iterator(ce, array_ptr, 1);
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (OP1_TYPE == IS_VAR) {
