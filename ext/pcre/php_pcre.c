@@ -62,6 +62,11 @@ enum {
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
+#ifdef PCRE_STUDY_JIT_COMPILE
+#define PCRE_JIT_STACK_MIN_SIZE (32 * 1024)
+#define PCRE_JIT_STACK_MAX_SIZE (256 * 1024)
+ZEND_TLS pcre_jit_stack *jit_stack = NULL;
+#endif
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 {
@@ -129,6 +134,16 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
+
+#ifdef PCRE_STUDY_JIT_COMPILE
+	/* Stack may only be destroyed when no cached patterns
+	 	possibly associated with it do exist. */
+	if (jit_stack) {
+		pcre_jit_stack_free(jit_stack);
+		jit_stack = NULL;
+	}
+#endif
+
 }
 /* }}} */
 
@@ -192,6 +207,19 @@ static PHP_MINIT_FUNCTION(pcre)
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 	UNREGISTER_INI_ENTRIES();
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION(pcre) */
+static PHP_RINIT_FUNCTION(pcre)
+{
+#ifdef PCRE_STUDY_JIT_COMPILE
+	if (PCRE_G(jit)) {
+		jit_stack = pcre_jit_stack_alloc(PCRE_JIT_STACK_MIN_SIZE,PCRE_JIT_STACK_MAX_SIZE);
+	}
+#endif
 
 	return SUCCESS;
 }
@@ -461,6 +489,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			extra->flags |= PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 			extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
 			extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
+#ifdef PCRE_STUDY_JIT_COMPILE
+			if (PCRE_G(jit) && jit_stack) {
+				pcre_assign_jit_stack(extra, NULL, jit_stack);
+			}
+#endif
 		}
 		if (error != NULL) {
 			php_error_docref(NULL, E_WARNING, "Error while studying pattern");
@@ -2199,7 +2232,7 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
-	NULL,
+	PHP_RINIT(pcre),
 	NULL,
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,
