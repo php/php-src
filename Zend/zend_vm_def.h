@@ -1987,6 +1987,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
@@ -2031,6 +2032,7 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 
 		if (UNEXPECTED(prop_info)) {
 			switch ((opline + 1)->opcode) {
+				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY: {
