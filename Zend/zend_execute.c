@@ -782,10 +782,9 @@ zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *pro
 		}
 
 		if (EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *info = zend_hash_find_ptr(
-				&Z_OBJCE_P(object)->properties_info, Z_STR_P(property));
+			zend_property_info *info = zend_get_property_info(Z_OBJCE_P(object), Z_STR_P(property), 1);
 
-			if (UNEXPECTED(info && info->type)) {
+			if (UNEXPECTED(info && info != ZEND_WRONG_PROPERTY_INFO && info->type)) {
 				return info;
 			}
 		}
