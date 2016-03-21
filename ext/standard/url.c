@@ -493,7 +493,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
-	start = zend_string_alloc(3 * len, 0);
+	start = zend_string_safe_alloc(3, len, 0, 0);
 	to = (unsigned char*)ZSTR_VAL(start);
 
 	while (from < end) {
@@ -611,7 +611,7 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 	register int x, y;
 	zend_string *str;
 
-	str = zend_string_alloc(3 * len, 0);
+	str = zend_string_safe_alloc(3, len, 0, 0);
 	for (x = 0, y = 0; len--; x++, y++) {
 		ZSTR_VAL(str)[y] = (unsigned char) s[x];
 #ifndef CHARSET_EBCDIC

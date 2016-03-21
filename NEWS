@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed Bug #71859 (zend_objects_store_call_destructors operates on realloced
     memory, crashing). (Laruence)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
+  . Fixed bug #71750 (Multiple Heap Overflows in php_raw_url_encode/
+    php_url_encode). (Stas)
   . Fixed bug #71731 (Null coalescing operator and ArrayAccess). (Nikita)
   . Fixed bug #69659 (ArrayAccess, isset() and the offsetExists method).
     (Nikita)
