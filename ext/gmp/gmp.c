@@ -509,6 +509,7 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 		shift_operator_helper(mpz_mul_2exp, result, op1, op2);
 		return SUCCESS;
 	case ZEND_SR:
+	case ZEND_LSR:
 		shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2);
 		return SUCCESS;
 	case ZEND_BW_OR:

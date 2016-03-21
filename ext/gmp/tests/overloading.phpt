@@ -53,8 +53,12 @@ var_dump(42 << $b);
 var_dump($a >> 2);
 var_dump(-$a >> 2);
 
+var_dump($a >>> 2);
+var_dump(-$a >>> 2);
+
 var_dump($a << -1);
 var_dump($a >> -1);
+var_dump($a >>> -1);
 
 var_dump(~$a);
 var_dump(-$a);
@@ -237,6 +241,17 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(3) "-11"
 }
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(2) "10"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(3) "-11"
+}
+
+Warning: main(): Shift cannot be negative in %s on line %d
+bool(false)
 
 Warning: main(): Shift cannot be negative in %s on line %d
 bool(false)
