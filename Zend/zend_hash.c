@@ -1794,7 +1794,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	target->pDestructor = source->pDestructor;
 
 	if (source->nNumUsed == 0) {
-		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;
@@ -1819,7 +1819,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			target->nInternalPointer = idx;
 		}
 	} else if (source->u.flags & HASH_FLAG_PACKED) {
-		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -1842,7 +1842,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			target->nInternalPointer = idx;
 		}
 	} else {
-		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer = HT_INVALID_IDX;
