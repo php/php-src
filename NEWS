@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   . Fixed bug #52339 (SPL autoloader breaks class_exists()). (Nikita)
   . Fixed bug #67582 (Cloned SplObjectStorage with overwritten getHash fails
     offsetExists()). (Nikita)
+  . Fixed bug #71735 (Double-free in SplDoublyLinkedList::offsetSet). (Stas)
 
 - Standard:
   . Fixed bug #71837 (Wrong arrays behaviour). (Laruence)
