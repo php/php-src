@@ -55,6 +55,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_POW:
 		case ZEND_SL:
 		case ZEND_SR:
+		case ZEND_LSR:
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 		case ZEND_IS_EQUAL:
@@ -80,8 +81,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
 					/* div by 0 */
 					break;
-				} else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
-					zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
+				} else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR ||
+					opline->opcode == ZEND_LSR) && zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 					/* shift by negative number */
 					break;
 				}

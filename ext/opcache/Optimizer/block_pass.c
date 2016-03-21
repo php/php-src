@@ -658,6 +658,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_MOD:
 			case ZEND_SL:
 			case ZEND_SR:
+			case ZEND_LSR:
 			case ZEND_IS_SMALLER:
 			case ZEND_IS_SMALLER_OR_EQUAL:
 			case ZEND_IS_IDENTICAL:
@@ -680,10 +681,10 @@ optimize_constant_binary_op:
 						SET_VAR_SOURCE(opline);
 		                opline++;
 						continue;
-		            } else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
-		                zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
+		            } else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR ||
+				opline->opcode == ZEND_LSR) && zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 						SET_VAR_SOURCE(opline);
-		                opline++;
+						opline++;
 						continue;
 					}
 					er = EG(error_reporting);
@@ -1598,6 +1599,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_ASSIGN_MOD:
 						case ZEND_ASSIGN_SL:
 						case ZEND_ASSIGN_SR:
+						case ZEND_ASSIGN_LSR:
 						case ZEND_ASSIGN_CONCAT:
 						case ZEND_ASSIGN_BW_OR:
 						case ZEND_ASSIGN_BW_AND:

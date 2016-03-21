@@ -71,6 +71,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_MOD:
 			case ZEND_SL:
 			case ZEND_SR:
+			case ZEND_LSR:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
 						convert_to_long(&ZEND_OP1_LITERAL(opline));
@@ -80,6 +81,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_ASSIGN_MOD:
 			case ZEND_ASSIGN_SL:
 			case ZEND_ASSIGN_SR:
+			case ZEND_ASSIGN_LSR:
 				if (opline->extended_value != 0) {
 					/* object tristate op - don't attempt to optimize it! */
 					break;

@@ -79,6 +79,7 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 			case ZEND_CONCAT:
 			case ZEND_SL:
 			case ZEND_SR:
+			case ZEND_LSR:
 			case ZEND_BW_OR:
 			case ZEND_BW_AND:
 			case ZEND_BW_XOR:
@@ -144,6 +145,9 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 								break;
 							case ZEND_SR:
 								opline->opcode = ZEND_ASSIGN_SR;
+								break;
+							case ZEND_LSR:
+								opline->opcode = ZEND_ASSIGN_LSR;
 								break;
 							case ZEND_BW_OR:
 								opline->opcode = ZEND_ASSIGN_BW_OR;
