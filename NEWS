@@ -15,6 +15,10 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #62059 (ArrayObject and isset are not friends). (Nikita)
 
+- Curl:
+  . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
+    (Michael Sierks)    
+
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
 
