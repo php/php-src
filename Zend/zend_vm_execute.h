@@ -18361,6 +18361,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -22908,6 +22909,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -25650,6 +25652,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -28177,6 +28180,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -31675,6 +31679,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -34115,6 +34120,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -39151,6 +39157,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -45720,6 +45727,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
@@ -49459,6 +49467,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
 				case ZEND_INIT_ARRAY:
+				case ZEND_ADD_ARRAY_ELEMENT:
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,

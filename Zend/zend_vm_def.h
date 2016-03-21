@@ -1990,7 +1990,8 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: 
+				case ZEND_INIT_ARRAY:	
+				case ZEND_ADD_ARRAY_ELEMENT: 
 				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
