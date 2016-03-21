@@ -650,28 +650,6 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-
-		if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
-			if (parent_info->type == IS_OBJECT) {
-				if (child_info->type != IS_OBJECT || 
-					!zend_string_equals_ci(zend_resolve_property_type(parent_info->type_name, parent_info->ce), 
-										   zend_resolve_property_type(child_info->type_name, child_info->ce))) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s (as in class %s)",
-						ZSTR_VAL(ce->name),
-						ZSTR_VAL(key),
-						ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
-						ZSTR_VAL(ce->parent->name));
-				}
-			} else if (parent_info->type != child_info->type) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s (as in class %s)",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(key),
-					zend_get_type_by_const(parent_info->type),
-					ZSTR_VAL(ce->parent->name));
-			}
-		}
 	
 		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			child_info->flags |= ZEND_ACC_CHANGED;
@@ -696,6 +674,36 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 				child_info->offset = parent_info->offset;
+			}
+		}
+
+		if (!(child_info->flags & ZEND_ACC_CHANGED)) {
+			if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
+				if (parent_info->type == IS_OBJECT) {
+					if (child_info->type != IS_OBJECT || 
+						!zend_string_equals_ci(zend_resolve_property_type(parent_info->type_name, parent_info->ce), 
+											   zend_resolve_property_type(child_info->type_name, child_info->ce))) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+						"Type of %s::$%s must be %s (as in class %s)",
+							ZSTR_VAL(ce->name),
+							ZSTR_VAL(key),
+							ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
+							ZSTR_VAL(ce->parent->name));
+					}
+				} else if (parent_info->type != child_info->type) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Type of %s::$%s must be %s (as in class %s)",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(key),
+						zend_get_type_by_const(parent_info->type),
+						ZSTR_VAL(ce->parent->name));
+				}
+			} else if (UNEXPECTED(child_info->type && !parent_info->type)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+						"Type of %s::$%s must not be defined (as in class %s)",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(key),
+						ZSTR_VAL(ce->parent->name));
 			}
 		}
 	} else {
