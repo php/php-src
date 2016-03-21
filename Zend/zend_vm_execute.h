@@ -18360,7 +18360,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -18405,7 +18406,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -22905,7 +22907,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -22950,7 +22953,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -25645,7 +25649,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -25690,7 +25695,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -28170,7 +28176,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -28215,7 +28222,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -31666,7 +31674,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -31711,7 +31720,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -34104,7 +34114,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -34149,7 +34160,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -39138,7 +39150,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -39183,7 +39196,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -45705,7 +45719,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -45750,7 +45765,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -49442,7 +49458,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
@@ -49487,7 +49504,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 				case ZEND_SEND_REF:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_ASSIGN_REF:
-				case ZEND_INIT_ARRAY: {
+				case ZEND_INIT_ARRAY:
+				case ZEND_YIELD: {
 					zend_throw_exception_ex(
 						zend_ce_type_error, prop_info->type,
 						"Typed property %s::$%s must not be referenced",
