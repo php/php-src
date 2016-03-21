@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #69659 (ArrayAccess, isset() and the offsetExists method).
     (Nikita)
   . Fixed bug #62059 (ArrayObject and isset are not friends). (Nikita)
+  . Fixed bug #71871 (Interfaces allow final and abstract functions). (Nikita)
 
 - Curl:
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
