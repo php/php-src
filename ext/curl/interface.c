@@ -2223,7 +2223,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 		case CURLOPT_CERTINFO:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071304 /* Available since 7.19.4 */
-		case CURLOPT_NOPROXY:
 		case CURLOPT_PROTOCOLS:
 		case CURLOPT_REDIR_PROTOCOLS:
 		case CURLOPT_SOCKS5_GSSAPI_NEC:
@@ -2305,6 +2304,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 		case CURLOPT_USERNAME:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071304 /* Available since 7.19.4 */
+		case CURLOPT_NOPROXY:
 		case CURLOPT_SOCKS5_GSSAPI_SERVICE:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
