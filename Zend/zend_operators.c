@@ -1572,7 +1572,12 @@ static int ZEND_FASTCALL shift_right_common(zval *result, zval *op1, zval *op2, 
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
 		if (EXPECTED(op2_lval > 0)) {
-			ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
+			if (op == ZEND_SR) {
+				ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
+			}
+			else {
+				ZVAL_LONG(result, 0);
+			}
 			return SUCCESS;
 		} else {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
