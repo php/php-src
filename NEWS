@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core: 
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
+- Curl:
+  . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
+    (Michael Sierks)    
+
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
 
