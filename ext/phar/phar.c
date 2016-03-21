@@ -2261,6 +2261,10 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 #endif
 	int ext_len, free_filename = 0;
 
+	if (CHECK_NULL_PATH(filename, filename_len)) {
+		return FAILURE;
+	}
+
 	if (!strncasecmp(filename, "phar://", 7)) {
 		filename += 7;
 		filename_len -= 7;
