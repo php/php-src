@@ -2,9 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.6
 
-- Core: 
-  . Added ability to disable huge pages in Zend Memory Manager through
-    the environment variable USE_ZEND_ALLOC_HUGE_PAGES=0. (Dmitry)
+- Core:
+  . Huge pages disabled by default. (Rasmus)
+  . Added ability to enable huge pages in Zend Memory Manager through
+    the environment variable USE_ZEND_ALLOC_HUGE_PAGES=1. (Dmitry)
   . Fixed Bug #71859 (zend_objects_store_call_destructors operates on realloced
     memory, crashing). (Laruence)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
@@ -18,7 +19,7 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
-    (Michael Sierks)    
+    (Michael Sierks)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
