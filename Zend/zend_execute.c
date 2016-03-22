@@ -820,7 +820,7 @@ zend_bool zend_verify_property_type(zend_property_info *info, zval *property, ze
 				info->type_ce = zend_lookup_class(resolved);
 			}
 
-			if (Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(info->type_ce, Z_OBJCE_P(property))) {
+			if (Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(property), info->type_ce)) {
 				zend_throw_exception_ex(zend_ce_type_error, info->type, 
 					"Typed property %s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(info->ce->name),
