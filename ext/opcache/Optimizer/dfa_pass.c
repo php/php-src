@@ -431,6 +431,31 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				op_array->opcodes[op2].opcode = ZEND_PRE_DEC;
 				SET_UNUSED(op_array->opcodes[op2].op2);
 
+			} else if (ssa->ops[op2].op1_def == i
+			 && !RETURN_VALUE_USED(&op_array->opcodes[op2])
+			 && ssa->ops[op2].op1_use >= 0
+			 && !(ssa->var_info[ssa->ops[op2].op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
+			 && (op_array->opcodes[op2].opcode == ZEND_ASSIGN_ADD
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_SUB
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_MUL
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_DIV
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_MOD
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_SL
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_SR
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_BW_OR
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_BW_AND
+			  || op_array->opcodes[op2].opcode == ZEND_ASSIGN_BW_XOR)
+			 && op_array->opcodes[op2].extended_value == 0) {
+
+				/* Reconstruct SSA */
+				ssa->ops[op2].result_def = ssa->ops[op2].op1_def;
+				ssa->ops[op2].op1_def = -1;
+
+				/* Update opcode */
+				op_array->opcodes[op2].opcode -= (ZEND_ASSIGN_ADD - ZEND_ADD);
+				op_array->opcodes[op2].result_type = op_array->opcodes[op2].op1_type;
+				op_array->opcodes[op2].result.var = op_array->opcodes[op2].op1.var;
+
 			}
 		}
 		if (remove_nops) {
