@@ -201,7 +201,7 @@ typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 #endif
 
 #ifdef MAP_HUGETLB
-int zend_mm_use_huge_pages = 1;
+int zend_mm_use_huge_pages = 0;
 #endif
 
 /*
@@ -2654,8 +2654,8 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 #endif
 #ifdef MAP_HUGETLB
 	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
-	if (tmp && !zend_atoi(tmp, 0)) {
-		zend_mm_use_huge_pages = 0;
+	if (tmp && zend_atoi(tmp, 0)) {
+		zend_mm_use_huge_pages = 1;
 	}
 #endif
 	ZEND_TSRMLS_CACHE_UPDATE();
