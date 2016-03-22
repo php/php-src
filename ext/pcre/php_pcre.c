@@ -212,18 +212,18 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 }
 /* }}} */
 
+#ifdef PCRE_STUDY_JIT_COMPILE
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
-#ifdef PCRE_STUDY_JIT_COMPILE
 	if (PCRE_G(jit)) {
 		jit_stack = pcre_jit_stack_alloc(PCRE_JIT_STACK_MIN_SIZE,PCRE_JIT_STACK_MAX_SIZE);
 	}
-#endif
 
 	return SUCCESS;
 }
 /* }}} */
+#endif
 
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(zval *data, void *arg)
@@ -2232,7 +2232,11 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
+#ifdef PCRE_STUDY_JIT_COMPILE
 	PHP_RINIT(pcre),
+#else
+	NULL
+#endif
 	NULL,
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,
