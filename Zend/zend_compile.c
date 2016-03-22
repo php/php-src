@@ -3798,6 +3798,10 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 		zend_op *opline = zend_emit_op(&result, ZEND_FETCH_W, &name_node, NULL);
 		opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
 
+		if (name_node.op_type == IS_CONST) {
+			zend_string_addref(Z_STR(name_node.u.constant));
+		}
+
 		zend_emit_assign_ref_znode(
 			zend_ast_create(ZEND_AST_VAR, zend_ast_create_znode(&name_node)),
 			&result
