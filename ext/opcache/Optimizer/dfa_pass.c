@@ -329,8 +329,11 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		for (i = 0; i < ssa->vars_count; i++) {
 			int op2 = ssa->vars[i].definition;
 
-			if (op2 >= 0
-			 && op_array->opcodes[op2].opcode == ZEND_ASSIGN
+			if (op2 < 0) {
+				continue;
+			}
+
+			if (op_array->opcodes[op2].opcode == ZEND_ASSIGN
 			 && op_array->opcodes[op2].op1_type == IS_CV
 			 && !RETURN_VALUE_USED(&op_array->opcodes[op2])
 			) {
@@ -403,6 +406,31 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 						}
 					}
 				}
+
+			} else if (op_array->opcodes[op2].opcode == ZEND_ASSIGN_ADD
+			 && op_array->opcodes[op2].extended_value == 0
+			 && ssa->ops[op2].op1_def == i
+			 && op_array->opcodes[op2].op2_type == IS_CONST
+			 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op2].op2.constant)) == IS_LONG
+			 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op2].op2.constant)) == 1
+			 && ssa->ops[op2].op1_use >= 0
+			 && !(ssa->var_info[ssa->ops[op2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+
+				op_array->opcodes[op2].opcode = ZEND_PRE_INC;
+				SET_UNUSED(op_array->opcodes[op2].op2);
+
+			} else if (op_array->opcodes[op2].opcode == ZEND_ASSIGN_SUB
+			 && op_array->opcodes[op2].extended_value == 0
+			 && ssa->ops[op2].op1_def == i
+			 && op_array->opcodes[op2].op2_type == IS_CONST
+			 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op2].op2.constant)) == IS_LONG
+			 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op2].op2.constant)) == 1
+			 && ssa->ops[op2].op1_use >= 0
+			 && !(ssa->var_info[ssa->ops[op2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+
+				op_array->opcodes[op2].opcode = ZEND_PRE_DEC;
+				SET_UNUSED(op_array->opcodes[op2].op2);
+
 			}
 		}
 		if (remove_nops) {
