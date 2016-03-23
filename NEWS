@@ -3,9 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.6
 
 - Core:
-  . Huge pages disabled by default. (Rasmus)
-  . Added ability to enable huge pages in Zend Memory Manager through
-    the environment variable USE_ZEND_ALLOC_HUGE_PAGES=1. (Dmitry)
   . Fixed Bug #71859 (zend_objects_store_call_destructors operates on realloced
     memory, crashing). (Laruence)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
@@ -56,6 +53,9 @@ PHP                                                                        NEWS
   . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
 
 - Core:
+  . Huge pages disabled by default. (Rasmus)
+  . Added ability to enable huge pages in Zend Memory Manager through
+    the environment variable USE_ZEND_ALLOC_HUGE_PAGES=1. (Dmitry)
   . Fixed bug #71756 (Call-by-reference widens scope to uninvolved functions
     when used in switch). (Laruence)
   . Fixed bug #71729 (Possible crash in zend_bin_strtod, zend_oct_strtod,
