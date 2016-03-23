@@ -4359,6 +4359,10 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 
 	smart_str_0(&string);
 
+	if (string.c == NULL) {
+		return estrdup("");
+	}
+
 	return string.c;
 }
 /* }}} */
