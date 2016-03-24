@@ -4309,7 +4309,7 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 	char                 buffer[33];
 
 	if (!format_len) {
-		return estrdup("");
+		return STR_EMPTY_ALLOC();
 	}
 
 	for (i = 0; i < format_len; i++) {
@@ -4360,7 +4360,7 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 	smart_str_0(&string);
 
 	if (string.c == NULL) {
-		return estrdup("");
+		return STR_EMPTY_ALLOC();
 	}
 
 	return string.c;
