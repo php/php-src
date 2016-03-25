@@ -284,13 +284,6 @@ else
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
 
-AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, 1, [Whether the system supports standard DES salt])
-AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, 1, [Whether the system supports BlowFish salt])
-AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, 1, [Whether the system supports extended DES salt])
-AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, 1, [Whether the system supports MD5 salt])
-AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, 1, [Whether the system supports SHA512 salt])
-AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, 1, [Whether the system supports SHA256 salt])
-
 dnl
 dnl Check for available functions
 dnl
