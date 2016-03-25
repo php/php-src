@@ -1712,6 +1712,9 @@ void php_request_shutdown_for_hook(void *dummy)
 
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
+	}
+
+	if (PG(modules_activated)) {
 		php_free_shutdown_functions();
 	}
 
@@ -1802,7 +1805,6 @@ void php_request_shutdown(void *dummy)
 	/* 5. Call all extensions RSHUTDOWN functions */
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
-		php_free_shutdown_functions();
 	}
 
 	/* 6. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
@@ -1810,7 +1812,12 @@ void php_request_shutdown(void *dummy)
 		php_output_deactivate();
 	} zend_end_try();
 
-	/* 7. Destroy super-globals */
+	/* 7. Free shutdown functions */
+	if (PG(modules_activated)) {
+		php_free_shutdown_functions();
+	}
+
+	/* 8. Destroy super-globals */
 	zend_try {
 		int i;
 
@@ -1819,37 +1826,37 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 8. free request-bound globals */
+	/* 9. free request-bound globals */
 	php_free_request_globals();
 
-	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 10. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate();
 
-	/* 10. Call all extensions post-RSHUTDOWN functions */
+	/* 11. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
-	/* 11. SAPI related shutdown (free stuff) */
+	/* 12. SAPI related shutdown (free stuff) */
 	zend_try {
 		sapi_deactivate();
 	} zend_end_try();
 
-	/* 12. free virtual CWD memory */
+	/* 13. free virtual CWD memory */
 	virtual_cwd_deactivate();
 
-	/* 13. Destroy stream hashes */
+	/* 14. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
-	/* 14. Free Willy (here be crashes) */
+	/* 15. Free Willy (here be crashes) */
 	zend_interned_strings_restore();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
 
-	/* 15. Reset max_execution_time */
+	/* 16. Reset max_execution_time */
 	zend_try {
 		zend_unset_timeout();
 	} zend_end_try();
