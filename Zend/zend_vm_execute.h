@@ -51392,9 +51392,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_R_SPEC_TMPVAR_CONST_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-
 	zval *container;
-	zval *offset = EX_CONSTANT(opline->op2);
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -51494,7 +51492,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_TMPVAR_CONST_H
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+
 	zval *container;
+	zval *offset = EX_CONSTANT(opline->op2);
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
