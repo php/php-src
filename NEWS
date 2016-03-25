@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
   . Fixed bug #71572 (String offset assignment from an empty string inserts
     null byte). (Francois)
+  . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
+    identifiers). (Andrea)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
