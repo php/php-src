@@ -24,7 +24,6 @@
 #include <stdlib.h>
 
 #include "php.h"
-#if HAVE_CRYPT
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -287,7 +286,6 @@ PHP_FUNCTION(crypt)
 	RETURN_STR(result);
 }
 /* }}} */
-#endif
 
 /*
  * Local variables:

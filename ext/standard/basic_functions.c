@@ -872,12 +872,10 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 /* {{{ crypt.c */
-#if HAVE_CRYPT
 ZEND_BEGIN_ARG_INFO_EX(arginfo_crypt, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, salt)
 ZEND_END_ARG_INFO()
-#endif
 /* }}} */
 /* {{{ cyr_convert.c */
 ZEND_BEGIN_ARG_INFO(arginfo_convert_cyr_string, 0)
@@ -3170,10 +3168,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	/* functions from browscap.c */
 	PHP_FE(get_browser,														arginfo_get_browser)
 
-#if HAVE_CRYPT
 	/* functions from crypt.c */
 	PHP_FE(crypt,															arginfo_crypt)
-#endif
 
 	/* functions from dir.c */
 	PHP_FE(opendir,															arginfo_opendir)
@@ -3643,10 +3639,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
-#if HAVE_CRYPT
 	BASIC_MINIT_SUBMODULE(crypt)
-#endif
-
 	BASIC_MINIT_SUBMODULE(lcg)
 
 	BASIC_MINIT_SUBMODULE(dir)
@@ -3715,10 +3708,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
-#if HAVE_CRYPT
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
-#endif
-
 	BASIC_MSHUTDOWN_SUBMODULE(random)
 
 	zend_hash_destroy(&basic_submodules);
