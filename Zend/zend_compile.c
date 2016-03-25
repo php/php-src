@@ -3792,7 +3792,8 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_call_common(&ctor_result, args_ast, NULL);
 	zend_do_free(&ctor_result);
 
-	/* New jumps over ctor call if ctor does not exist */
+	/* We save the position of DO_FCALL for convenience in find_live_range().
+	 * This info is not preserved for runtime. */
 	opline = &CG(active_op_array)->opcodes[opnum];
 	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
 }
