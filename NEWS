@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
+  . Fixed bug #67512 (php_crypt() crashes if crypt_r() does not exist or
+    _REENTRANT is not defined). (Nikita)
 
 31 Marc 2016, PHP 5.6.20
 
