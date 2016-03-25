@@ -48,6 +48,8 @@ PHP                                                                        NEWS
     stream_context_get_default). (Laruence)
   . Fixed bug #71837 (Wrong arrays behaviour). (Laruence)
   . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
+  . Fixed bug #67512 (php_crypt() crashes if crypt_r() does not exist or
+    _REENTRANT is not defined). (Nikita)
 
 31 Mar 2016 PHP 7.0.5
 
