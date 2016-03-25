@@ -42,6 +42,8 @@ PHP                                                                        NEWS
   . Fixed bug #71735 (Double-free in SplDoublyLinkedList::offsetSet). (Stas)
 
 - Standard:
+  . Fixed bug #71891 (header_register_callback() and
+    register_shutdown_function()). (Laruence)
   . Fixed bug #71884 (Null pointer deref (segfault) in
     stream_context_get_default). (Laruence)
   . Fixed bug #71837 (Wrong arrays behaviour). (Laruence)

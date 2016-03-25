@@ -5007,7 +5007,6 @@ PHPAPI void php_call_shutdown_functions(void) /* {{{ */
 			zend_hash_apply(BG(user_shutdown_function_names), user_shutdown_function_call);
 		}
 		zend_end_try();
-		php_free_shutdown_functions();
 	}
 }
 /* }}} */
