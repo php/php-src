@@ -678,12 +678,18 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:
+			{
 				/* If result of assert is unused, result of check is unused as well */
-				if (op_array->opcodes[opline->op2.opline_num - 1].result_type == IS_UNUSED) {
+				zend_op *call = &op_array->opcodes[opline->op2.opline_num - 1];
+				if (call->opcode == ZEND_EXT_FCALL_END) {
+					call--;
+				}
+				if (call->result_type == IS_UNUSED) {
 					opline->result_type = IS_UNUSED;
 				}
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
+			}
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_CATCH:
