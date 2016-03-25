@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Added void return type. (Andrea)
   . Added support for negative string offsets in string offset syntax and
     various string functions. (Francois)
+  . Added a form of the list() construct where keys can be specified. (Andrea)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).

@@ -241,7 +241,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
 %type <ast> variable_class_name dereferencable_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
-%type <ast> assignment_list_element array_pair encaps_var encaps_var_offset isset_variables
+%type <ast> unkeyed_assignment_list_element keyed_assignment_list_element array_pair
+%type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_list parameter_list class_statement_list
@@ -250,7 +251,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list array_pair_list non_empty_array_pair_list
-%type <ast> assignment_list isset_variable type return_type
+%type <ast> assignment_list unkeyed_assignment_list keyed_assignment_list
+%type <ast> isset_variable type return_type
 %type <ast> identifier
 
 %type <num> returns_ref function is_reference is_variadic variable_modifiers
@@ -1170,16 +1172,37 @@ property_name:
 ;
 
 assignment_list:
-		assignment_list ',' assignment_list_element
+		unkeyed_assignment_list
+			{ $$ = $1; }
+	|	keyed_assignment_list possible_comma
+			{ $$ = $1; }
+;
+
+unkeyed_assignment_list:
+		unkeyed_assignment_list ',' unkeyed_assignment_list_element
 			{ $$ = zend_ast_list_add($1, $3); }
-	|	assignment_list_element
+	|	unkeyed_assignment_list_element
 			{ $$ = zend_ast_create_list(1, ZEND_AST_LIST, $1); }
 ;
 
-assignment_list_element:
+unkeyed_assignment_list_element:
 		variable						{ $$ = $1; }
 	|	T_LIST '(' assignment_list ')'	{ $$ = $3; }
 	|	/* empty */						{ $$ = NULL; }
+;
+
+keyed_assignment_list:
+		keyed_assignment_list ',' keyed_assignment_list_element
+			{ $$ = zend_ast_list_add($1, $3); }
+	|	keyed_assignment_list_element
+			{ $$ = zend_ast_create_list(1, ZEND_AST_LIST, $1); }
+;
+
+keyed_assignment_list_element:
+		expr T_DOUBLE_ARROW variable
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
+	|	expr T_DOUBLE_ARROW T_LIST '(' assignment_list ')'
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
 ;
 
 

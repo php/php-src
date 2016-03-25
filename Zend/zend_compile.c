@@ -2709,9 +2709,8 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, int d
 }
 /* }}} */
 
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
+static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
 {
-	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_bool has_elems = 0;
 
@@ -2737,6 +2736,40 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 
 	if (!has_elems) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
+	}
+}
+/* }}} */
+
+static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
+{
+	uint32_t i;
+
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *pair_ast = list->child[i];
+		zend_ast *var_ast = pair_ast->child[0];
+		zend_ast *key_ast = pair_ast->child[1];
+		znode fetch_result, dim_node;
+
+		zend_compile_expr(&dim_node, key_ast);
+
+		if (expr_node->op_type == IS_CONST) {
+			Z_TRY_ADDREF(expr_node->u.constant);
+		}
+
+		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
+		zend_emit_assign_znode(var_ast, &fetch_result);
+	}
+}
+/* }}} */
+
+static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+
+	if (list->children > 0 && list->child[0] != NULL && list->child[0]->kind == ZEND_AST_ARRAY_ELEM) {
+		zend_compile_keyed_list_assign(list, expr_node);
+	} else {
+		zend_compile_unkeyed_list_assign(list, expr_node);
 	}
 
 	*result = *expr_node;

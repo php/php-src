@@ -5746,26 +5746,76 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_CONST_CONST_HA
 {
 	USE_OPLINE
 
+
 	zval *container;
+	zval *offset = EX_CONSTANT(opline->op2);
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
 
 try_fetch_list:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		zval *value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
 
-		if (UNEXPECTED(value == NULL)) {
-			zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
-			ZVAL_NULL(EX_VAR(opline->result.var));
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
 		} else {
-			ZVAL_COPY(EX_VAR(opline->result.var), value);
+			zend_error(E_WARNING, "Illegal offset type");
 		}
 	} else if (IS_CONST != IS_CONST &&
 	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
-		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
 
 		if (retval) {
 			if (result != retval) {
@@ -5783,6 +5833,7 @@ try_fetch_list:
 		}
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
+
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -9499,6 +9550,101 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 	}
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+
+	zval *container;
+	zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+	SAVE_OPLINE();
+	container = EX_CONSTANT(opline->op1);
+
+try_fetch_list:
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
+
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
+		} else {
+			zend_error(E_WARNING, "Illegal offset type");
+		}
+	} else if (IS_CONST != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
+		zval *result = EX_VAR(opline->result.var);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	} else if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+		goto try_fetch_list;
+	} else {
+		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(container, BP_VAR_R);
+		}
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -11308,6 +11454,101 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 	} else {
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_free_op free_op2;
+	zval *container;
+	zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+
+	SAVE_OPLINE();
+	container = EX_CONSTANT(opline->op1);
+
+try_fetch_list:
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
+
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
+		} else {
+			zend_error(E_WARNING, "Illegal offset type");
+		}
+	} else if (IS_CONST != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
+		zval *result = EX_VAR(opline->result.var);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	} else if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+		goto try_fetch_list;
+	} else {
+		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(container, BP_VAR_R);
+		}
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+	zval_ptr_dtor_nogc(free_op2);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -37859,26 +38100,76 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_CV_CONST_HANDL
 {
 	USE_OPLINE
 
+
 	zval *container;
+	zval *offset = EX_CONSTANT(opline->op2);
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
 
 try_fetch_list:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		zval *value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
 
-		if (UNEXPECTED(value == NULL)) {
-			zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
-			ZVAL_NULL(EX_VAR(opline->result.var));
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
 		} else {
-			ZVAL_COPY(EX_VAR(opline->result.var), value);
+			zend_error(E_WARNING, "Illegal offset type");
 		}
 	} else if (IS_CV != IS_CONST &&
 	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
-		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
 
 		if (retval) {
 			if (result != retval) {
@@ -37896,6 +38187,7 @@ try_fetch_list:
 		}
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
+
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -44238,6 +44530,101 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+
+	zval *container;
+	zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+	SAVE_OPLINE();
+	container = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+
+try_fetch_list:
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
+
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
+		} else {
+			zend_error(E_WARNING, "Illegal offset type");
+		}
+	} else if (IS_CV != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
+		zval *result = EX_VAR(opline->result.var);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+		goto try_fetch_list;
+	} else {
+		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(container, BP_VAR_R);
+		}
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -47793,6 +48180,101 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_free_op free_op2;
+	zval *container;
+	zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+
+	SAVE_OPLINE();
+	container = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+
+try_fetch_list:
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
+
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
+		} else {
+			zend_error(E_WARNING, "Illegal offset type");
+		}
+	} else if (IS_CV != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
+		zval *result = EX_VAR(opline->result.var);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+		goto try_fetch_list;
+	} else {
+		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(container, BP_VAR_R);
+		}
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+	zval_ptr_dtor_nogc(free_op2);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -51010,26 +51492,76 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_TMPVAR_CONST_H
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+
 	zval *container;
+	zval *offset = EX_CONSTANT(opline->op2);
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 try_fetch_list:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		zval *value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
 
-		if (UNEXPECTED(value == NULL)) {
-			zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
-			ZVAL_NULL(EX_VAR(opline->result.var));
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
 		} else {
-			ZVAL_COPY(EX_VAR(opline->result.var), value);
+			zend_error(E_WARNING, "Illegal offset type");
 		}
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
 	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
-		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
 
 		if (retval) {
 			if (result != retval) {
@@ -51047,6 +51579,7 @@ try_fetch_list:
 		}
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
+
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -53295,6 +53828,101 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+
+	zval *container;
+	zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+	SAVE_OPLINE();
+	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+
+try_fetch_list:
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
+
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
+		} else {
+			zend_error(E_WARNING, "Illegal offset type");
+		}
+	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
+		zval *result = EX_VAR(opline->result.var);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+		goto try_fetch_list;
+	} else {
+		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(container, BP_VAR_R);
+		}
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -54441,6 +55069,101 @@ fetch_obj_is_no_object:
 
 	zval_ptr_dtor_nogc(free_op2);
 	zval_ptr_dtor_nogc(free_op1);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zend_free_op free_op2;
+	zval *container;
+	zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+
+	SAVE_OPLINE();
+	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+
+try_fetch_list:
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		zval *value;
+		zend_string *str;
+		zend_ulong hval;
+
+assign_again_list:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index_list:
+			value = zend_hash_index_find(Z_ARRVAL_P(container), hval);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, hval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+
+			if (ZEND_HANDLE_NUMERIC(str, hval)) {
+				goto num_index_list;
+			}
+
+str_index_list:
+			value = zend_hash_find(Z_ARRVAL_P(container), str);
+
+			if (UNEXPECTED(value == NULL)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+			if (UNEXPECTED(str != Z_STR_P(offset))) {
+				zend_string_release(str);
+			}
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto assign_again_list;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index_list;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index_list;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			hval = Z_RES_HANDLE_P(offset);
+		} else {
+			zend_error(E_WARNING, "Illegal offset type");
+		}
+	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
+		zval *result = EX_VAR(opline->result.var);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+		goto try_fetch_list;
+	} else {
+		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(container, BP_VAR_R);
+		}
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -57495,30 +58218,30 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HANDLER,
 		ZEND_FETCH_LIST_SPEC_CONST_CONST_HANDLER,
+		ZEND_FETCH_LIST_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_FETCH_LIST_SPEC_CONST_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
+		ZEND_FETCH_LIST_SPEC_CONST_CV_HANDLER,
 		ZEND_FETCH_LIST_SPEC_TMPVAR_CONST_HANDLER,
+		ZEND_FETCH_LIST_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_FETCH_LIST_SPEC_TMPVAR_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
+		ZEND_FETCH_LIST_SPEC_TMPVAR_CV_HANDLER,
 		ZEND_FETCH_LIST_SPEC_TMPVAR_CONST_HANDLER,
+		ZEND_FETCH_LIST_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_FETCH_LIST_SPEC_TMPVAR_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
+		ZEND_FETCH_LIST_SPEC_TMPVAR_CV_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_LIST_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_LIST_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_LIST_SPEC_CV_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
+		ZEND_FETCH_LIST_SPEC_CV_CV_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
