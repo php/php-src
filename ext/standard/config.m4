@@ -260,28 +260,27 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
     AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
   fi
 
-  dnl 
-  dnl Check for __attribute__ ((__aligned__)) support in the compiler
-  dnl
-  AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
-  AC_TRY_COMPILE([
-  ],[
-    unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
-  ],[
-    ac_cv_attribute_aligned=yes
-  ],[
-    ac_cv_attribute_aligned=no
-  ])])
-  if test "$ac_cv_attribute_aligned" = "yes"; then
-    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
-  fi
-    
-
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
 
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
 else
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
+fi
+
+dnl 
+dnl Check for __attribute__ ((__aligned__)) support in the compiler
+dnl
+AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
+AC_TRY_COMPILE([
+],[
+  unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
+],[
+  ac_cv_attribute_aligned=yes
+],[
+  ac_cv_attribute_aligned=no
+])])
+if test "$ac_cv_attribute_aligned" = "yes"; then
+  AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
 fi
 
 dnl
