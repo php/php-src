@@ -31,8 +31,6 @@
 
 #include "zend_llist.h"
 
-#define DEBUG_ZEND 0
-
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define MAKE_NOP(opline) do { \
