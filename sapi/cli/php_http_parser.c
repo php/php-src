@@ -82,6 +82,8 @@ static const char *method_strings[] =
   , "POST"
   , "PUT"
   , "PATCH"
+  , "LINK"
+  , "UNLINK"
   , "CONNECT"
   , "OPTIONS"
   , "TRACE"
@@ -585,7 +587,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'D': parser->method = PHP_HTTP_DELETE; break;
           case 'G': parser->method = PHP_HTTP_GET; break;
           case 'H': parser->method = PHP_HTTP_HEAD; break;
-          case 'L': parser->method = PHP_HTTP_LOCK; break;
+          case 'L': parser->method = PHP_HTTP_LOCK; /* or LINK */ break;
           case 'M': parser->method = PHP_HTTP_MKCOL; /* or MOVE, MKCALENDAR, MKACTIVITY, MERGE, M-SEARCH */ break;
           case 'N': parser->method = PHP_HTTP_NOTIFY; break;
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
@@ -593,7 +595,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'R': parser->method = PHP_HTTP_REPORT; break;
           case 'S': parser->method = PHP_HTTP_SUBSCRIBE; /* or SEARCH */ break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;
-          case 'U': parser->method = PHP_HTTP_UNLOCK; /* or UNSUBSCRIBE */ break;
+          case 'U': parser->method = PHP_HTTP_UNLOCK; /* or UNSUBSCRIBE or UNLINK */ break;
           default: parser->method = PHP_HTTP_NOT_IMPLEMENTED; break;
         }
         state = s_req_method;
@@ -621,6 +623,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
           } else {
             parser->method = PHP_HTTP_NOT_IMPLEMENTED;
           }
+        } else if (index == 1 && parser->method == PHP_HTTP_LOCK && ch == 'I') {
+          parser->method = PHP_HTTP_LINK;
         } else if (parser->method == PHP_HTTP_MKCOL) {
           if (index == 1 && ch == 'O') {
             parser->method = PHP_HTTP_MOVE;
@@ -643,6 +647,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
           parser->method = PHP_HTTP_PATCH;
         } else if (index == 1 && parser->method == PHP_HTTP_SUBSCRIBE && ch == 'E') {
           parser->method = PHP_HTTP_SEARCH;
+        } else if (index == 3 && parser->method == PHP_HTTP_UNLOCK && ch == 'I') {
+          parser->method = PHP_HTTP_UNLINK;
         } else if (index == 2 && parser->method == PHP_HTTP_UNLOCK && ch == 'S') {
           parser->method = PHP_HTTP_UNSUBSCRIBE;
         } else if (index == 4 && parser->method == PHP_HTTP_PROPFIND && ch == 'P') {
