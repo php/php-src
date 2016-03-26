@@ -552,6 +552,31 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		goto exit;
 	}
 
+	/* magic isset */
+	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
+		zval tmp_object, tmp_result;
+		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+
+		if (!((*guard) & IN_ISSET)) {
+			ZVAL_COPY(&tmp_object, object);
+			ZVAL_UNDEF(&tmp_result);
+
+			*guard |= IN_ISSET;
+			zend_std_call_issetter(&tmp_object, member, &tmp_result);
+			*guard &= ~IN_ISSET;
+	
+			if (!zend_is_true(&tmp_result)) {
+				retval = &EG(uninitialized_zval);
+				zval_ptr_dtor(&tmp_object);
+				zval_ptr_dtor(&tmp_result);
+				goto exit;
+			}
+
+			zval_ptr_dtor(&tmp_object);
+			zval_ptr_dtor(&tmp_result);
+		}
+	}
+
 	/* magic get */
 	if (zobj->ce->__get) {
 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
