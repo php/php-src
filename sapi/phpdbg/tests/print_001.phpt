@@ -34,7 +34,7 @@ prompt> [Context %s (11 ops)]
 L1-19 {main}() %s - %s + 11 ops
  L4    #0     NOP                                                                                   
  L14   #1     NOP                                                                                   
- L18   #2     NEW                     "Foo\\Bar"           J4                   @1                  
+ L18   #2     NEW                     "Foo\\Bar"                                @1                  
  L18   #3     DO_FCALL                                                                              
  L18   #4     INIT_METHOD_CALL        @1                   "Foo"                                    
  L18   #5     SEND_VAL_EX             "test"               1                                        

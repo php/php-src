@@ -597,7 +597,9 @@ try_again:
 					if (obj_ht) {
 						zval arr;
 
-						if (!Z_OBJCE_P(op)->default_properties_count && obj_ht == Z_OBJ_P(op)->properties) {
+						if (!Z_OBJCE_P(op)->default_properties_count &&
+							obj_ht == Z_OBJ_P(op)->properties &&
+							!ZEND_HASH_GET_APPLY_COUNT(Z_OBJ_P(op)->properties)) {
 							/* fast copy */
 							if (EXPECTED(Z_OBJ_P(op)->handlers == &std_object_handlers)) {
 								ZVAL_ARR(&arr, obj_ht);
