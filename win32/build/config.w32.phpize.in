@@ -150,7 +150,7 @@ if (VCVERS >= 1400) {
 	}
 }
 
-ARG_WITH('prefix', 'PHP installation prefix', '');
+ARG_WITH('prefix', 'PHP installation prefix', PHP_PREFIX);
 ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
 if (VCVERS >= 1500 && PHP_MP != 'disable') {
 		// no from disable-all 
