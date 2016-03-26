@@ -77,7 +77,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						zend_string *class_name = Z_STR_P(&ZEND_OP1_LITERAL(opline) + 1);
 						ce = zend_hash_find_ptr(&ctx->script->class_table, class_name);
 					} else if (opline->op1_type == IS_UNUSED && op_array->scope
-							&& (opline->op1.num & ZEND_FETCH_CLASS_SELF)) {
+							&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
 						ce = op_array->scope;
 					}
 					if (ce) {

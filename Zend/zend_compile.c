@@ -3738,7 +3738,8 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 					&& zend_string_equals_ci(CG(active_class_entry)->name, lcname)) {
 				ce = CG(active_class_entry);
 			}
-		} else if (opline->op1_type == IS_UNUSED && (opline->op1.num & ZEND_FETCH_CLASS_SELF)
+		} else if (opline->op1_type == IS_UNUSED
+				&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
 				&& zend_is_scope_known()) {
 			ce = CG(active_class_entry);
 		}
