@@ -238,6 +238,11 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		zend_string_release(fe_class_name);
 	}
 
+	if (proto_arg_info->allow_null && !fe_arg_info->allow_null) {
+		/* incompatible nullability */
+		return 0;
+	}
+
 	if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
 		/* Incompatible type */
 		return 0;
