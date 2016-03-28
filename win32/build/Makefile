@@ -191,6 +191,7 @@ build-lib: build-ext-libs
 build-devel: build-headers build-lib
 	@if not exist $(BUILD_DIR_DEV)\script mkdir $(BUILD_DIR_DEV)\script >nul
 	@if not exist $(BUILD_DIR_DEV)\build mkdir $(BUILD_DIR_DEV)\build >nul
+	@copy run-tests.php $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\confutils.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\configure.tail $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\config.w32.phpize.in $(BUILD_DIR_DEV)\script\ /y >nul

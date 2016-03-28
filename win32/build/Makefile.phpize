@@ -26,6 +26,15 @@ clean: clean-pecl
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 
+!if "$(EXT_TARGETS)" == ""
+_EXTENSION_DLL=$(PECL_TARGETS)
+!else
+_EXTENSION_DLL=$(EXT_TARGETS)
+!endif
+
+test:
+	"$(PHP_PREFIX)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(PHP_PREFIX)\php.exe" -d extension=$(BUILD_DIR)\$(_EXTENSION_DLL)
+
 !if $(MT) == ""
 _VC_MANIFEST_EMBED_EXE=
 _VC_MANIFEST_EMBED_DLL=
