@@ -1155,7 +1155,6 @@ PHP_INI_END()
 #ifdef OPENSSL_USE_ATFORK
 static inline void php_openssl_atfork() {
 	struct {
-		char stack[72];
 		pid_t pid;
 		struct timeval time;
 	} seed;
