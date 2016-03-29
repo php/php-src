@@ -39,8 +39,16 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #71635 (DatePeriod::getEndDate segfault). (Thomas Punt)
 
+- Fileinfo:
+  . Fixed bug #71527 (Buffer over-write in finfo_open with malformed magic
+    file). (Anatol)
+
 - libxml:
   . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
+
+- mbstring:
+  . Fixed bug #71906 (AddressSanitizer: negative-size-param (-1) in
+    mbfl_strcut). (Stas)
 
 - ODBC:
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
@@ -58,6 +66,8 @@ PHP                                                                        NEWS
   . Fixed bug #71625 (Crash in php7.dll with bad phar filename).
     (Anatol)
   . Fixed bug #71317 (PharData fails to open specific file). (Jos Elstgeest)
+  . Fixed bug #71860 (Invalid memory write in phar on filename with \0 in
+    name). (Stas)
 
 - phpdbg:
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
@@ -66,6 +76,10 @@ PHP                                                                        NEWS
   . Fixed Bug #71683 (Null pointer dereference in zend_hash_str_find_bucket).
     (Yasuo)
 
+- SNMP:
+  . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
+    (Anatol)
+
 - SPL:
   . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
     (Nikita)
@@ -73,6 +87,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #71660 (array_column behaves incorrectly after foreach by
     reference). (Laruence)
+  . Fixed bug #71798 (Integer Overflow in php_raw_url_encode).
+    (taoguangchen at icloud dot com, Stas)
 
 - Zip:
   . Update bundled libzip to 1.1.2. (Remi, Anatol)
