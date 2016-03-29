@@ -110,6 +110,8 @@ enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
 
+ZEND_DECLARE_MODULE_GLOBALS(openssl);
+
 PHP_FUNCTION(openssl_get_md_methods);
 PHP_FUNCTION(openssl_get_cipher_methods);
 
@@ -523,7 +525,11 @@ zend_module_entry openssl_module_entry = {
 	NULL,
 	PHP_MINFO(openssl),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+        PHP_MODULE_GLOBALS(openssl),
+	NULL,
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -623,6 +629,15 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
+
+static void reinit_rng() /* {{{ */
+{
+	if (!OPG(rng_inited_for_request))
+	{
+		RAND_poll();
+		OPG(rng_inited_for_request) = 1;
+	}
+} /* }}} */
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
 {
@@ -1106,6 +1121,7 @@ static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo) { /* {
 	}
 }
 /* }}} */
+
 
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
@@ -5397,6 +5413,8 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	long buffer_length;
 	unsigned char *buffer = NULL;
 	zval *zstrong_result_returned = NULL;
+
+	reinit_rng();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;

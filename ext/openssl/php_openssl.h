@@ -101,6 +101,17 @@ PHP_FUNCTION(openssl_spki_export);
 PHP_FUNCTION(openssl_spki_export_challenge);
 
 PHP_FUNCTION(openssl_get_cert_locations);
+
+ZEND_BEGIN_MODULE_GLOBALS(openssl)
+	zend_bool rng_inited_for_request;
+ZEND_END_MODULE_GLOBALS(openssl)
+
+#ifdef ZTS
+#define OPG(v) TSRMG(openssl_globals_id, zend_openssl_globals *, v)
+#else
+#define OPG(v) (openssl_globals.v)
+#endif
+
 #else
 
 #define phpext_openssl_ptr NULL
