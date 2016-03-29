@@ -111,6 +111,7 @@ enum php_openssl_cipher_type {
 };
 
 ZEND_DECLARE_MODULE_GLOBALS(openssl);
+static PHP_GINIT_FUNCTION(openssl);
 
 PHP_FUNCTION(openssl_get_md_methods);
 PHP_FUNCTION(openssl_get_cipher_methods);
@@ -526,7 +527,7 @@ zend_module_entry openssl_module_entry = {
 	PHP_MINFO(openssl),
 	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(openssl),
-	NULL,
+	PHP_GINIT(openssl),
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
@@ -1127,6 +1128,13 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("openssl.cafile", NULL, PHP_INI_PERDIR, NULL)
 	PHP_INI_ENTRY("openssl.capath", NULL, PHP_INI_PERDIR, NULL)
 PHP_INI_END()
+/* }}} */
+
+/* {{{ PHP_GINIT_FUNCTION */
+static PHP_GINIT_FUNCTION(openssl)
+{
+	openssl_globals->rng_reseeded = 0;
+}
 /* }}} */
 
 /* {{{ PHP_RINIT_FUNCTION */
