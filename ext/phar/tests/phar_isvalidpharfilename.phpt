@@ -76,7 +76,7 @@ var_dump(Phar::isValidPharFilename('dir.phar.php', false));
 <?php
 rmdir(dirname(__FILE__) . '/.phar');
 --EXPECTF--
-Warning: Phar::isValidPharFilename() expects parameter 1 to be %string, array given in %sphar_isvalidpharfilename.php on line %d
+Warning: Phar::isValidPharFilename() expects parameter 1 to be a valid path, array given in %sphar_isvalidpharfilename.php on line %d
 *
 bool(false)
 bool(false)
