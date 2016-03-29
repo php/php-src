@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-17 Mar 2016 PHP 7.0.5RC1
+31 Mar 2016 PHP 7.0.5
 
 - CLI Server:
   . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
