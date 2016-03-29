@@ -521,7 +521,7 @@ zend_module_entry openssl_module_entry = {
 	openssl_functions,
 	PHP_MINIT(openssl),
 	PHP_MSHUTDOWN(openssl),
-	NULL,
+	PHP_RINIT(openssl),
 	NULL,
 	PHP_MINFO(openssl),
 	NO_VERSION_YET,
@@ -1128,7 +1128,14 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("openssl.capath", NULL, PHP_INI_PERDIR, NULL)
 PHP_INI_END()
 /* }}} */
- 
+
+/* {{{ PHP_RINIT_FUNCTION */
+PHP_RINIT_FUNCTION(openssl)
+{
+	OPENSSL_G(rng_reseeded) = 0;
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(openssl)
