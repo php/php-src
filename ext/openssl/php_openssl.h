@@ -103,7 +103,7 @@ PHP_FUNCTION(openssl_spki_export_challenge);
 PHP_FUNCTION(openssl_get_cert_locations);
 
 ZEND_BEGIN_MODULE_GLOBALS(openssl)
-	zend_bool rng_inited_for_request;
+	zend_bool rng_reseeded;
 ZEND_END_MODULE_GLOBALS(openssl)
 
 #ifdef ZTS
