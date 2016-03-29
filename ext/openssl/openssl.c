@@ -632,9 +632,9 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 
 static void php_openssl_rand_seed() /* {{{ */
 {
-	if (!OPENSSL_G(rng_inited_for_request)) {
+	if (!OPENSSL_G(rng_reseeded)) {
 		RAND_poll();
-		OPENSSL_G(rng_inited_for_request) = 1;
+		OPENSSL_G(rng_reseeded) = 1;
 	}
 } /* }}} */
 
