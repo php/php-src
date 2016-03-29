@@ -621,7 +621,7 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
  */
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
-	register int x, y;
+	register size_t x, y;
 	zend_string *str;
 
 	str = zend_string_safe_alloc(3, len, 0, 0);

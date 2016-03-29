@@ -527,7 +527,7 @@ static void php_snmp_error(zval *object, const char *docref, int type, const cha
 	}
 
 	if (object && (snmp_object->exceptions_enabled & type)) {
-		zend_throw_exception_ex(php_snmp_exception_ce, type, snmp_object->snmp_errstr);
+		zend_throw_exception_ex(php_snmp_exception_ce, type, "%s", snmp_object->snmp_errstr);
 	} else {
 		va_start(args, format);
 		php_verror(docref, "", E_WARNING, format, args);
