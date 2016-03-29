@@ -55,5 +55,5 @@ CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 
-Warning: Phar::addFromString() expects parameter 1 to be a valid path, string given in %s/bug64931.php on line %d
+Warning: Phar::addFromString() expects parameter 1 to be a valid path, string given in %s%ebug64931.php on line %d
 ===DONE===
