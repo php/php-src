@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #62059 (ArrayObject and isset are not friends). (Nikita)
   . Fixed bug #71871 (Interfaces allow final and abstract functions). (Nikita)
+  . Fixed bug #71922 (Crash on assert(new class{})). (Nikita)
 
 - Curl:
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
