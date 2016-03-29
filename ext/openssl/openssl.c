@@ -525,7 +525,7 @@ zend_module_entry openssl_module_entry = {
 	NULL,
 	PHP_MINFO(openssl),
 	NO_VERSION_YET,
-        PHP_MODULE_GLOBALS(openssl),
+    PHP_MODULE_GLOBALS(openssl),
 	NULL,
 	NULL,
 	NULL,
@@ -630,12 +630,11 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
 
-static void reinit_rng() /* {{{ */
+static void php_openssl_rand_seed() /* {{{ */
 {
-	if (!OPG(rng_inited_for_request))
-	{
+	if (!OPENSSL_G(rng_inited_for_request)) {
 		RAND_poll();
-		OPG(rng_inited_for_request) = 1;
+		OPENSSL_G(rng_inited_for_request) = 1;
 	}
 } /* }}} */
 

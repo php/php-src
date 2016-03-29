@@ -107,9 +107,9 @@ ZEND_BEGIN_MODULE_GLOBALS(openssl)
 ZEND_END_MODULE_GLOBALS(openssl)
 
 #ifdef ZTS
-#define OPG(v) TSRMG(openssl_globals_id, zend_openssl_globals *, v)
+#define OPENSSL_G(v) TSRMG(openssl_globals_id, zend_openssl_globals *, v)
 #else
-#define OPG(v) (openssl_globals.v)
+#define OPENSSL_G(v) (openssl_globals.v)
 #endif
 
 #else
