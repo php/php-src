@@ -1152,7 +1152,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-#ifdef OPENSSL_USE_ATFORK
+#if defined(OPENSSL_USE_ATFORK)
 static inline void php_openssl_atfork() {
 	struct {
 		pid_t pid;
