@@ -599,7 +599,7 @@ PHPAPI int php_url_decode(char *str, int len)
  */
 PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
 {
-	register int x, y;
+	register size_t x, y;
 	unsigned char *str;
 
 	str = (unsigned char *) safe_emalloc(3, len, 1);

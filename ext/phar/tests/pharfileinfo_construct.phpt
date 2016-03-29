@@ -47,7 +47,7 @@ echo $e->getMessage() . "\n";
 --EXPECTF--
 Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
 
-Warning: PharFileInfo::__construct() expects parameter 1 to be %string, array given in %spharfileinfo_construct.php on line %d
+Warning: PharFileInfo::__construct() expects parameter 1 to be a valid path, array given in %spharfileinfo_construct.php on line %d
 Cannot access phar file entry '/oops/I/do/not/exist' in archive '%spharfileinfo_construct.phar'
 Cannot call constructor twice
 '%spharfileinfo_construct.php' is not a valid phar archive URL (must have at least phar://filename.phar)
