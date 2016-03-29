@@ -78,7 +78,7 @@ PHP                                                                        NEWS
 
 - SNMP:
   . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
-    (Anatol)
+    (andrew at jmpesp dot org)
 
 - SPL:
   . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
