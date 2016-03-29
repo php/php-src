@@ -1152,6 +1152,21 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
+#ifdef OPENSSL_USE_ATFORK
+static inline void php_openssl_atfork() {
+	struct {
+		char stack[72];
+		pid_t pid;
+		struct timeval time;
+	} seed;
+
+	seed.pid = getpid();
+	gettimeofday(&seed.time, NULL);
+
+	RAND_add((unsigned char*) &seed, sizeof(seed), 0.0);
+}
+#endif
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(openssl)
@@ -1161,6 +1176,10 @@ PHP_MINIT_FUNCTION(openssl)
 	le_key = zend_register_list_destructors_ex(php_pkey_free, NULL, "OpenSSL key", module_number);
 	le_x509 = zend_register_list_destructors_ex(php_x509_free, NULL, "OpenSSL X.509", module_number);
 	le_csr = zend_register_list_destructors_ex(php_csr_free, NULL, "OpenSSL X.509 CSR", module_number);
+
+#ifdef OPENSSL_USE_ATFORK
+	pthread_atfork(NULL, NULL, php_openssl_atfork);
+#endif
 
 	SSL_library_init();
 	OpenSSL_add_all_ciphers();
