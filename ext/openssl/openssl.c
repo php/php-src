@@ -5413,7 +5413,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	unsigned char *buffer = NULL;
 	zval *zstrong_result_returned = NULL;
 
-	reinit_rng();
+	php_openssl_rand_seed();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;
