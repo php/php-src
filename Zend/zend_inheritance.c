@@ -167,7 +167,7 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
-static int zend_do_perform_type_hint_check(const zend_function *fe, uint32_t arg_num, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
+static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
 		/* Only one has a type declaration and the other one doesn't */
@@ -320,7 +320,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
 
-		if (!zend_do_perform_type_hint_check(fe, i, fe_arg_info, proto, proto_arg_info)) {
+		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
 			return 0;
 		}
 
@@ -338,7 +338,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 
-		if (!zend_do_perform_type_hint_check(fe, i, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
+		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			return 0;
 		}
 	}
