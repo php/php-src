@@ -488,6 +488,8 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 				} else {
 					smart_str_appends(&str, "NULL");
 				}
+			} else if (arg_info->type_hint && arg_info->allow_null) {
+				smart_str_appends(&str, " = NULL");
 			}
 
 			if (++i < num_args) {
