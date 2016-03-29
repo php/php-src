@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 31 Mar 2016 PHP 7.0.5
 
-- CLI Server:
-  . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
-
 - Core:
   . Huge pages disabled by default. (Rasmus)
   . Added ability to enable huge pages in Zend Memory Manager through
@@ -32,6 +29,9 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #71624 (`php -R` (PHP_MODE_PROCESS_STDIN) is broken).
     (Sean DuBois)
+
+- CLI Server:
+  . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
 
 - Curl:
   . Fixed bug #71694 (Support constant CURLM_ADDED_ALREADY). (mpyw)
