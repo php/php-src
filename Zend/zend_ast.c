@@ -922,6 +922,21 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 	}
 }
 
+static void zend_ast_export_class_no_header(smart_str *str, zend_ast_decl *decl, int indent) {
+	if (decl->child[0]) {
+		smart_str_appends(str, " extends ");
+		zend_ast_export_ns_name(str, decl->child[0], 0, indent);
+	}
+	if (decl->child[1]) {
+		smart_str_appends(str, " implements ");
+		zend_ast_export_ex(str, decl->child[1], 0, indent);
+	}
+	smart_str_appends(str, " {\n");
+	zend_ast_export_stmt(str, decl->child[2], indent + 1);
+	zend_ast_export_indent(str, indent);
+	smart_str_appends(str, "}");
+}
+
 #define BINARY_OP(_op, _p, _pl, _pr) do { \
 		op = _op; \
 		p = _p; \
@@ -1048,18 +1063,8 @@ tail_call:
 				smart_str_appends(str, "class ");
 			}
 			smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
-			if (decl->child[0]) {
-				smart_str_appends(str, " extends ");
-				zend_ast_export_ns_name(str, decl->child[0], 0, indent);
-			}
-			if (decl->child[1]) {
-				smart_str_appends(str, " implements ");
-				zend_ast_export_ex(str, decl->child[1], 0, indent);
-			}
-			smart_str_appends(str, " {\n");
-			zend_ast_export_stmt(str, decl->child[2], indent + 1);
-			zend_ast_export_indent(str, indent);
-			smart_str_appends(str, "}\n");
+			zend_ast_export_class_no_header(str, decl, indent);
+			smart_str_appendc(str, '\n');
 			break;
 
 		/* list nodes */
@@ -1344,10 +1349,20 @@ simple_list:
 			break;
 		case ZEND_AST_NEW:
 			smart_str_appends(str, "new ");
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
-			smart_str_appendc(str, '(');
-			zend_ast_export_ex(str, ast->child[1], 0, indent);
-			smart_str_appendc(str, ')');
+			if (ast->child[0]->kind == ZEND_AST_CLASS) {
+				smart_str_appends(str, "class");
+				if (zend_ast_get_list(ast->child[1])->children) {
+					smart_str_appendc(str, '(');
+					zend_ast_export_ex(str, ast->child[1], 0, indent);
+					smart_str_appendc(str, ')');
+				}
+				zend_ast_export_class_no_header(str, (zend_ast_decl *) ast->child[0], indent);
+			} else {
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				smart_str_appendc(str, '(');
+				zend_ast_export_ex(str, ast->child[1], 0, indent);
+				smart_str_appendc(str, ')');
+			}
 			break;
 		case ZEND_AST_INSTANCEOF:
 			zend_ast_export_ex(str, ast->child[0], 0, indent);
