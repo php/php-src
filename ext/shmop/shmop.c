@@ -203,6 +203,7 @@ PHP_FUNCTION(shmop_open)
 	}
 
 	if (shmctl(shmop->shmid, IPC_STAT, &shm)) {
+		/* please do not add coverage here: the segment would be leaked and impossible to delete via php */
 		php_error_docref(NULL, E_WARNING, "unable to get shared memory segment information '%s'", strerror(errno));
 		goto err;
 	}
