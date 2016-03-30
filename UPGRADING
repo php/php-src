@@ -21,9 +21,9 @@ PHP 7.1 UPGRADE NOTES
 - Core:
   . 'void' can no longer be used as the name of a class, interface, or trait.
     This applies to declarations, class_alias() and use statements.
-  . (int), intval() where $base is 10 or unspecified, settype(), integer
-    operators and other conversions now always respect scientific notation in
-    numeric strings.
+  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
+    decoct(), dechex(), integer operators and other conversions now always
+    respect scientific notation in numeric strings.
     (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
 
 - JSON:
@@ -44,6 +44,13 @@ PHP 7.1 UPGRADE NOTES
   . Number operators taking numeric strings now emit "A non well formed numeric
     string encountered" E_NOTICEs for leading-numeric strings, and "A
     non-numeric string encountered" E_WARNINGs for non-numeric strings.
+    This always applies to the +, -, *, /, **, %, << and >> operators, and
+    their assignment counterparts +=, -=, *=, /=, **=, %=, <<= and >>=.
+    For the bitwise operators |, & and ^, and their assignment counterparts
+    |=, &= and ^=, this only applies where only one operand is a string.
+    Note that this never applies to the bitwise NOT operator, ~, which does not
+    handle numeric strings, nor to the increment and decrement operators
+    ++ and --, which have a unique approach to handling numeric strings.
     (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
 
 ========================================

@@ -17,9 +17,9 @@ PHP                                                                        NEWS
   . Added a form of the list() construct where keys can be specified. (Andrea)
   . Number operators taking numeric strings now emit E_NOTICEs or E_WARNINGs
     when given malformed numeric strings. (Andrea)
-  . (int), intval() where $base is 10 or unspecified, settype(), integer
-    operators and other conversions now always respect scientific notation in
-    numeric strings. (Andrea)
+  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
+    decoct(), dechex(), integer operators and other conversions now always
+    respect scientific notation in numeric strings. (Andrea)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
