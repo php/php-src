@@ -70,12 +70,18 @@ static inline void zend_alloc_cache_slot(uint32_t literal) {
 	op_array->cache_size += sizeof(void*);
 }
 
-#define POLYMORPHIC_CACHE_SLOT_SIZE 2
+#define POLYMORPHIC_CACHE_SLOTS_COUNT 1 /* only one class */
 
 static inline void zend_alloc_polymorphic_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
 	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
-	op_array->cache_size += POLYMORPHIC_CACHE_SLOT_SIZE * sizeof(void*);
+	op_array->cache_size += POLYMORPHIC_CACHE_SLOTS_COUNT * sizeof(void*) * 2;
+}
+
+static inline void zend_alloc_polymorphic_cache_slots(uint32_t literal, int count) {
+	zend_op_array *op_array = CG(active_op_array);
+	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
+	op_array->cache_size += POLYMORPHIC_CACHE_SLOTS_COUNT * sizeof(void*) * (1 + count);
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
@@ -2647,7 +2653,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_OBJ_R, &obj_node, &prop_node);
 	if (opline->op2_type == IS_CONST) {
 		convert_to_string(CT_CONSTANT(opline->op2));
-		zend_alloc_polymorphic_cache_slot(opline->op2.constant);
+		zend_alloc_polymorphic_cache_slots(opline->op2.constant, 2);
 	}
 
 	return opline;
@@ -2688,7 +2694,7 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 	}
 	if (opline->op1_type == IS_CONST) {
 		convert_to_string(CT_CONSTANT(opline->op1));
-		zend_alloc_polymorphic_cache_slot(opline->op1.constant);
+		zend_alloc_polymorphic_cache_slots(opline->op1.constant, 2);
 	}
 	if (class_node.op_type == IS_CONST) {
 		opline->op2_type = IS_CONST;

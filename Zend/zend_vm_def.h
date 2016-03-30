@@ -754,7 +754,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 			}
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 				if (prop_info) {
 					if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
@@ -773,7 +773,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 			zend_assign_op_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, rp);
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 				if (prop_info) {
 					if (!zend_verify_property_type(prop_info, rp, EX_USES_STRICT_TYPES())) {
@@ -1181,7 +1181,7 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 				}
 
 				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 					if (prop_info) {
 						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
@@ -1204,7 +1204,7 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 			zend_pre_incdec_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, rv);
 
 			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+				zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 				if (prop_info) {
 					if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
@@ -1294,7 +1294,7 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 		}
 
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, NULL);
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 			if (prop_info) {
 				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
@@ -1949,7 +1949,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 	} while (0);
 
 	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, NULL);
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 
 		if (prop_info) {
 			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
@@ -1989,7 +1989,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	}
 
 	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 		if (UNEXPECTED(prop_info)) {
 			if (zend_vm_is_fetching_reference(opline)) {
@@ -2029,7 +2029,7 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	}
 
 	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 		if (UNEXPECTED(prop_info)) {
 			if (zend_vm_is_fetching_reference(opline)) {
@@ -2151,7 +2151,7 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 		}
 		
 		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, NULL);
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
 			if (prop_info) {
 				zend_throw_exception_ex(
@@ -2454,7 +2454,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 	}
 
 	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, NULL);
+		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
 
 		if (prop_info) {
 			if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {

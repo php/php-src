@@ -189,7 +189,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 			TO_STRING_NOWARN(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			alloc_cache_slots_op1(op_array, opline, 2);
+			alloc_cache_slots_op1(op_array, opline, 3);
 			break;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
@@ -286,7 +286,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 			TO_STRING_NOWARN(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			alloc_cache_slots_op2(op_array, opline, 2);
+			alloc_cache_slots_op2(op_array, opline, 3);
 			break;
 		case ZEND_ASSIGN_ADD:
 		case ZEND_ASSIGN_SUB:
@@ -303,7 +303,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 				TO_STRING_NOWARN(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-				alloc_cache_slots_op2(op_array, opline, 2);
+				alloc_cache_slots_op2(op_array, opline, 3);
 			} else {
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}

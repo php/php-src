@@ -360,6 +360,7 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 exit_dynamic:
 		if (cache_slot) {
 			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)(intptr_t)ZEND_DYNAMIC_PROPERTY_OFFSET);
+			CACHE_PTR_EX(cache_slot + 2, NULL);
 		}
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	} else if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
@@ -373,6 +374,7 @@ exit_dynamic:
 exit:
 	if (cache_slot) {
 		CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)(intptr_t)property_info->offset);
+		CACHE_PTR_EX(cache_slot + 2, property_info);
 	}
 	return property_info->offset;
 }
