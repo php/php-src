@@ -42,8 +42,8 @@ PHP 7.1 UPGRADE NOTES
   . Added a form of the list() construct where keys can be specified.
     (RFC: https://wiki.php.net/rfc/list_keys)
   . Number operators taking numeric strings now emit "A non well formed numeric
-    string encountered" E_NOTICEs for leading-numeric strings, and "A
-    non-numeric string encountered" E_WARNINGs for non-numeric strings.
+    value encountered" E_NOTICEs for leading-numeric strings, and "A
+    non-numeric value encountered" E_WARNINGs for non-numeric strings.
     This always applies to the +, -, *, /, **, %, << and >> operators, and
     their assignment counterparts +=, -=, *=, /=, **=, %=, <<= and >>=.
     For the bitwise operators |, & and ^, and their assignment counterparts
