@@ -25,13 +25,31 @@ var_dump($null[$arr]);
 echo "Done\n";
 ?>
 --EXPECTF--	
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
+
+Warning: Attempt to use null as an array in %s on line %d
 NULL
 Done

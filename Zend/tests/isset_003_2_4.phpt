@@ -29,11 +29,19 @@ var_dump(isset($GLOBALS[1]->$GLOBALS));
 bool(true)
 bool(true)
 bool(false)
+
+Warning: Attempt to use unknown as an array in %s on line %d
+
+Warning: Attempt to use null as an array in %s on line %d
+
+Warning: Attempt to use null as an array in %s on line %d
 bool(false)
 
 Notice: Undefined variable: c in %s on line %d
 
 Notice: Undefined variable: d in %s on line %d
+
+Warning: Attempt to use null as an array in %s on line %d
 
 Notice: Trying to get property of non-object in %s on line %d
 bool(false)

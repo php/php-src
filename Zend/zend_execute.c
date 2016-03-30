@@ -1879,6 +1879,7 @@ try_string_offset:
 			}
 		}
 	} else {
+		zend_error(E_WARNING, "Attempt to use %s as an array", zend_get_type_by_const(Z_TYPE_P(container)));
 		ZVAL_NULL(result);
 	}
 }

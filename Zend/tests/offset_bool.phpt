@@ -25,13 +25,30 @@ var_dump($bool[$arr]);
 echo "Done\n";
 ?>
 --EXPECTF--	
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
+
+Warning: Attempt to use boolean as an array in %s on line %d
 NULL
 Done

@@ -25,13 +25,31 @@ var_dump($long[$arr]);
 echo "Done\n";
 ?>
 --EXPECTF--	
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
 Done

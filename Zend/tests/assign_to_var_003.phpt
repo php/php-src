@@ -13,6 +13,7 @@ var_dump($var1);
 echo "Done\n";
 ?>
 --EXPECTF--	
+Warning: Attempt to use double as an array in %s on line %d
 NULL
 NULL
 Done
