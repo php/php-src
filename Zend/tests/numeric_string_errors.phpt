@@ -123,7 +123,7 @@ Warning: A non-numeric value encountered in %s on line %d
 Notice: A non well formed numeric value encountered in %s on line %d
 
 Notice: A non well formed numeric value encountered in %s on line %d
-int(360639813910528)
+int(%d)
 
 Warning: A non-numeric value encountered in %s on line %d
 
