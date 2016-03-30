@@ -48,9 +48,19 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #71635 (DatePeriod::getEndDate segfault). (Thomas Punt)
 
+- Fileinfo:
+  . Fixed bug #71527 (Buffer over-write in finfo_open with malformed magic
+    file). (Anatol)
+
+- Mbstring:
+  . Fixed bug #71906 (AddressSanitizer: negative-size-param (-1) in
+    mbfl_strcut). (Stas)
+
 - ODBC:
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
     for the first two statements). (einavitamar at gmail dot com, Anatol)
+  . Fixed bug #71860 (Invalid memory write in phar on filename with \0 in
+    name). (Stas)
 
 - PDO_DBlib:
   . Bug #54648 (PDO::MSSQL forces format of datetime fields).
@@ -61,6 +71,14 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #71504 (Parsing of tar file with duplicate filenames causes
     memory leak). (Jos Elstgeest)
+
+- SNMP:
+  . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
+    (andrew at jmpesp dot org)
+
+- Standard
+  . Fixed bug #71798 (Integer Overflow in php_raw_url_encode).
+    (taoguangchen at icloud dot com, Stas)
 
 03 Mar 2016, PHP 5.6.19
 
