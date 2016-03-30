@@ -177,6 +177,29 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 	return ptr;
 }
 
+zend_bool zend_vm_is_fetching_reference(const zend_op * opline) {
+	zend_op const *next = opline + 1;
+
+	while (next->opcode == ZEND_NOP ||
+			next->opcode == ZEND_TICKS ||
+			next->opcode == ZEND_EXT_NOP ||
+			next->opcode == ZEND_EXT_STMT)
+		next++;
+
+	switch (next->opcode) {
+		case ZEND_SEND_REF:
+		case ZEND_RETURN_BY_REF:
+		case ZEND_ASSIGN_REF:
+		case ZEND_INIT_ARRAY:	
+		case ZEND_ADD_ARRAY_ELEMENT: 
+		case ZEND_YIELD: {
+			return 1;
+		} break;
+	}
+
+	return 0;
+}
+
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
 {
 	return EX_VAR(var);
