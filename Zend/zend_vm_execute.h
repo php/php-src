@@ -17254,6 +17254,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 				pos++;
 				p++;
 			}
+
+			if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(array) && p->key)) {
+				zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(array, p->key, NULL);
+
+				if (UNEXPECTED(prop_info)) {
+					if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
+						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+							"Typed property %s::$%s must not be accessed before initialization",
+							ZSTR_VAL(prop_info->ce->name),
+							ZSTR_VAL(p->key));
+						HANDLE_EXCEPTION();
+					}
+				}
+			}
+
 			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
