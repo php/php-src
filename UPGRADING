@@ -21,6 +21,10 @@ PHP 7.1 UPGRADE NOTES
 - Core:
   . 'void' can no longer be used as the name of a class, interface, or trait.
     This applies to declarations, class_alias() and use statements.
+  . (int), intval() where $base is 10 or unspecified, settype(), integer
+    operators and other conversions now always respect scientific notation in
+    numeric strings.
+    (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
 
 - JSON:
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
@@ -37,6 +41,10 @@ PHP 7.1 UPGRADE NOTES
     (RFC: https://wiki.php.net/rfc/negative-string-offsets)
   . Added a form of the list() construct where keys can be specified.
     (RFC: https://wiki.php.net/rfc/list_keys)
+  . Number operators taking numeric strings now emit "A non well formed numeric
+    string encountered" E_NOTICEs for leading-numeric strings, and "A
+    non-numeric string encountered" E_WARNINGs for non-numeric strings.
+    (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
 
 ========================================
 3. Changes in SAPI modules
