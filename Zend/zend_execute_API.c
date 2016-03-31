@@ -1480,6 +1480,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		return ex->symbol_table;
 	}
 
+	ZEND_ADD_CALL_FLAG(ex, ZEND_CALL_FREE_SYMBOL_TABLE);
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache)) {
 		/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 		symbol_table = ex->symbol_table = *(EG(symtable_cache_ptr)--);

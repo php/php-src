@@ -2521,7 +2521,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		zend_object *object;
 
 		i_free_compiled_variables(execute_data);
-		if (UNEXPECTED(EX(symbol_table) != NULL)) {
+		if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
 			zend_clean_and_cache_symbol_table(EX(symbol_table));
 		}
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
@@ -2579,7 +2579,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	} else {
 		if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_TOP_FUNCTION) {
 			i_free_compiled_variables(execute_data);
-			if (UNEXPECTED(EX(symbol_table) != NULL)) {
+			if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
 				zend_clean_and_cache_symbol_table(EX(symbol_table));
 			}
 			zend_vm_stack_free_extra_args_ex(call_info, execute_data);
