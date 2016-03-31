@@ -631,12 +631,19 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
 
-static void php_openssl_rand_seed() /* {{{ */
+static int php_openssl_rand_seed() /* {{{ */
 {
-	if (!OPENSSL_G(rng_reseeded)) {
-		RAND_poll();
+	if (OPENSSL_G(rng_reseeded) != 1) {
+		int result = RAND_poll();
+		
+		if (result != 1) {
+			return 0; 
+		}
+		
 		OPENSSL_G(rng_reseeded) = 1;
 	}
+	
+	return 1;
 } /* }}} */
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
@@ -5428,7 +5435,10 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	unsigned char *buffer = NULL;
 	zval *zstrong_result_returned = NULL;
 
-	php_openssl_rand_seed();
+	if (php_openssl_rand_seed() != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
+		RETURN_FALSE;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;
