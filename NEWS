@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #71906 (AddressSanitizer: negative-size-param (-1) in
     mbfl_strcut). (Stas)
 
-- OBBC
+- ODBC
   . Fixed bug #71860 (Invalid memory write in phar on filename with \0 in
     name). (Stas)
 
