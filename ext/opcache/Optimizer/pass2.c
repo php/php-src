@@ -48,7 +48,10 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_POW:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
-						convert_scalar_to_number(&ZEND_OP1_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (is_numeric_string(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), NULL, NULL, 0)) {
+							convert_scalar_to_number(&ZEND_OP1_LITERAL(opline));
+						}
 					}
 				}
 				/* break missing *intentionally* - the assign_op's may only optimize op2 */
@@ -63,7 +66,10 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-						convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0)) {
+							convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
+						}
 					}
 				}
 				break;
@@ -73,7 +79,11 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_SR:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
-						convert_to_long(&ZEND_OP1_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (!(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING
+							&& !is_numeric_string(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), NULL, NULL, 0))) {
+							convert_to_long(&ZEND_OP1_LITERAL(opline));
+						}
 					}
 				}
 				/* break missing *intentionally - the assign_op's may only optimize op2 */
@@ -86,7 +96,11 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-						convert_to_long(&ZEND_OP2_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
+							&& !is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0))) {
+							convert_to_long(&ZEND_OP2_LITERAL(opline));
+						}
 					}
 				}
 				break;

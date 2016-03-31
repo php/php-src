@@ -1023,6 +1023,8 @@ END_EXTERN_C()
 /* The default value for CG(compiler_options) during eval() */
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
 
+ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2);
+
 #endif /* ZEND_COMPILE_H */
 
 /*

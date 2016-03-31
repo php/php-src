@@ -6237,6 +6237,35 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+{
+	if (!(opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_DIV
+		|| opcode == ZEND_POW || opcode == ZEND_MOD || opcode == ZEND_SL || opcode == ZEND_SR
+		|| opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)) {
+		return 0;
+	}
+
+	/* While basic arithmetic operators always produce numeric string errors,
+	 * bitwise operators don't produce errors if both operands are strings */
+	if ((opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)
+		&& Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
+		return 0;
+	}
+
+	if (Z_TYPE_P(op1) == IS_STRING
+		&& !is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), NULL, NULL, 0)) {
+		return 1;
+	}
+
+	if (Z_TYPE_P(op2) == IS_STRING
+		&& !is_numeric_string(Z_STRVAL_P(op2), Z_STRLEN_P(op2), NULL, NULL, 0)) {
+		return 1;
+	}
+
+	return 0;
+}
+/* }}} */
+
 static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	binary_op_type fn = get_binary_op(opcode);
@@ -6247,6 +6276,11 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 		return 0;
 	} else if ((opcode == ZEND_SL || opcode == ZEND_SR) &&
 	    zval_get_long(op2) < 0) {
+		return 0;
+	}
+
+	/* don't evaluate numeric string error-producing operations at compile-time */
+	if (zend_binary_op_produces_numeric_string_error(opcode, op1, op2)) {
 		return 0;
 	}
 
@@ -6262,11 +6296,11 @@ static inline void zend_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op
 }
 /* }}} */
 
-static inline void zend_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
+static inline zend_bool zend_try_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
 {
 	zval left;
 	ZVAL_LONG(&left, (kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
-	mul_function(result, &left, op);
+	return zend_try_ct_eval_binary_op(result, ZEND_MUL, &left, op);
 }
 /* }}} */
 
@@ -6464,10 +6498,11 @@ void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&expr_node, expr_ast);
 
 	if (expr_node.op_type == IS_CONST) {
-		result->op_type = IS_CONST;
-		zend_ct_eval_unary_pm(&result->u.constant, ast->kind, &expr_node.u.constant);
-		zval_ptr_dtor(&expr_node.u.constant);
-		return;
+		if (zend_try_ct_eval_unary_pm(&result->u.constant, ast->kind, &expr_node.u.constant)) {
+			result->op_type = IS_CONST;
+			zval_ptr_dtor(&expr_node.u.constant);
+			return;
+		}
 	}
 
 	lefthand_node.op_type = IS_CONST;
@@ -7802,7 +7837,9 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				return;
 			}
 
-			zend_ct_eval_unary_pm(&result, ast->kind, zend_ast_get_zval(ast->child[0]));
+			if (!zend_try_ct_eval_unary_pm(&result, ast->kind, zend_ast_get_zval(ast->child[0]))) {
+				return;
+			}
 			break;
 		case ZEND_AST_CONDITIONAL:
 		{
