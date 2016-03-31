@@ -637,13 +637,13 @@ static int php_openssl_rand_seed() /* {{{ */
 		int result = RAND_poll();
 		
 		if (result != 1) {
-			return 0; 
+			return FAILURE; 
 		}
 		
 		OPENSSL_G(rng_reseeded) = 1;
 	}
 	
-	return 1;
+	return SUCCESS;
 } /* }}} */
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
@@ -5435,7 +5435,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	unsigned char *buffer = NULL;
 	zval *zstrong_result_returned = NULL;
 
-	if (php_openssl_rand_seed() != 1) {
+	if (php_openssl_rand_seed() != SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
 		RETURN_FALSE;
 	}
