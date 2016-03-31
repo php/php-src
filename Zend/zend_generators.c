@@ -69,7 +69,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
 
-		if (Z_OBJ(execute_data->This)) {
+		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		}
 
@@ -334,7 +334,7 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 
 	object_init_ex(return_value, zend_ce_generator);
 
-	if (Z_OBJ(call->This)) {
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 		Z_ADDREF(call->This);
 	}
 
