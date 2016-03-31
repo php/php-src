@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #62059 (ArrayObject and isset are not friends). (Nikita)
   . Fixed bug #71871 (Interfaces allow final and abstract functions). (Nikita)
   . Fixed bug #71922 (Crash on assert(new class{})). (Nikita)
+  . Fixed bug #71334 (Cannot access array keys while uksort()). (Nikita)
 
 - Curl:
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
@@ -32,8 +33,8 @@ PHP                                                                        NEWS
     (Daniel kalaspuffar, Julien)
 
 - Postgres:
-  . Fixed bug #71820 (pg_fetch_object binds parameters before
-    call constructor). (Anatol)
+  . Fixed bug #71820 (pg_fetch_object binds parameters before call
+    constructor). (Anatol)
 
 - SPL:
   . Fixed bug #71838 (Deserializing serialized SPLObjectStorage-Object can't
@@ -116,8 +117,7 @@ PHP                                                                        NEWS
     (steven dot lambeth at gmx dot de, Anatol)
 
 - Phar:
-  . Fixed bug #71625 (Crash in php7.dll with bad phar filename).
-    (Anatol)
+  . Fixed bug #71625 (Crash in php7.dll with bad phar filename). (Anatol)
   . Fixed bug #71317 (PharData fails to open specific file). (Jos Elstgeest)
   . Fixed bug #71860 (Invalid memory write in phar on filename with \0 in
     name). (Stas)
@@ -126,7 +126,7 @@ PHP                                                                        NEWS
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
 
 - Session:
-  . Fixed Bug #71683 (Null pointer dereference in zend_hash_str_find_bucket).
+  . Fixed bug #71683 (Null pointer dereference in zend_hash_str_find_bucket).
     (Yasuo)
 
 - SNMP:
