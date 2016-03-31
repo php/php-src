@@ -176,8 +176,6 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 # endif
 	struct addrinfo hints, *res, *sai;
 #else
-	char *tmp_host_buf = NULL;
-	struct hostent tmp_host_info;
 	struct hostent *host_info;
 	struct in_addr in;
 #endif
@@ -251,7 +249,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 			host_info = NULL;
 			errno = E2BIG;
 		} else {
-			host_info = php_network_gethostbyname(host, &tmp_host_info, &tmp_host_buf);
+			host_info = php_network_gethostbyname(host);
 		}
 		if (host_info == NULL) {
 			if (error_string) {
@@ -272,9 +270,6 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	((struct sockaddr_in *)*sap)->sin_addr = in;
 	sap++;
 	n = 1;
-	if (tmp_host_buf) {
-		efree(tmp_host_buf);
-	}
 #endif
 
 	*sap = NULL;
