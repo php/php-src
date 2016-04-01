@@ -3577,6 +3577,13 @@ PHP_FUNCTION(openssl_pkey_new)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &args) == FAILURE) {
 		return;
 	}
+	
+	// php_openssl_generate_private_key uses php_openssl_write_rand_file which uses RAND_write_file, which uses RAND_bytes
+    if (php_openssl_rand_seed() != SUCCESS) {
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
+            RETURN_FALSE;
+    }
+	
 	RETVAL_FALSE;
 
 	if (args && Z_TYPE_P(args) == IS_ARRAY) {
