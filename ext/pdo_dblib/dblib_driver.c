@@ -170,7 +170,7 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 		 *
 		 */
 		*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
-		q = *quoted = emalloc(*quotedlen);
+		q = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
 
 		*q++ = '0';
 		*q++ = 'x';
@@ -181,7 +181,7 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 	} else {
 		/* Alpha/Numeric Quoting */
 		*quotedlen += 2; /* +2 for opening, closing quotes */
-		q  = *quoted = emalloc(*quotedlen);
+		q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
 		*q++ = '\'';
 
 		for (i=0;i<unquotedlen;i++) {
