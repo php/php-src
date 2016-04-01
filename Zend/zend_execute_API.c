@@ -295,8 +295,8 @@ void shutdown_executor(void) /* {{{ */
 		}
 
 		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_DESTRUCTOR, 1);
-		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_DESTRUCTOR, 1);
+		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
+		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 	} zend_end_try();
 
 	zend_try {

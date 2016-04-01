@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.6
 
 - Core:
+  . Fixed bug #71930 (_zval_dtor_func: Assertion `(arr)->gc.refcount <= 1'
+    failed). (Laruence)
   . Fixed bug #71914 (Reference is lost in "switch"). (Laruence)
   . Fixed Bug #71859 (zend_objects_store_call_destructors operates on realloced
     memory, crashing). (Laruence)
