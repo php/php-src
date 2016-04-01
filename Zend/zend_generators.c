@@ -211,7 +211,7 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
 			size += EX_NUM_ARGS() - op_array->num_args;
 		}
-		size += Z_OBJ(execute_data->This) != NULL; /* $this */
+		size += Z_TYPE(execute_data->This) == IS_OBJECT; /* $this */
 		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
 
 		/* Yield from root references */
@@ -273,7 +273,7 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 		}
 	}
 
-	if (Z_OBJ(execute_data->This)) {
+	if (Z_TYPE(execute_data->This) == IS_OBJECT) {
 		ZVAL_OBJ(gc_buffer++, Z_OBJ(execute_data->This));
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
@@ -351,7 +351,7 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	execute_data->return_value = (zval*)generator;
 
 	memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
-	Z_OBJ(generator->execute_fake.This) = (zend_object *) generator;
+	ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
 }
 /* }}} */
 
@@ -365,7 +365,7 @@ static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *obje
 
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr)
 {
-	if (!ptr->func && Z_OBJ(ptr->This)) {
+	if (!ptr->func && Z_TYPE(ptr->This) == IS_OBJECT) {
 		if (Z_OBJCE(ptr->This) == zend_ce_generator) {
 			zend_generator *generator = (zend_generator *) Z_OBJ(ptr->This);
 			zend_generator *root = (generator->node.children < 1 ? generator : generator->node.ptr.leaf)->node.ptr.root;

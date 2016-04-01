@@ -2149,7 +2149,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
@@ -2174,7 +2174,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))--;
@@ -2204,7 +2204,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(return_value) = return_value;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
-		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
 				GC_REFCOUNT(Z_OBJ(EX(This)))--;
@@ -2264,7 +2264,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 			} while (var != end);
 		}
 
-		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		}
@@ -2315,8 +2315,8 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 		call_info,
 		(zend_function*)op_array,
 		num_args,
-		call->called_scope,
-		Z_OBJ(call->This));
+		Z_TYPE(call->This) != IS_OBJECT ? Z_CE(call->This) : NULL,
+		Z_TYPE(call->This) == IS_OBJECT ? Z_OBJ(call->This) : NULL);
 	EX(prev_execute_data) = NULL;
 	EX_NUM_ARGS() = num_args;
 
@@ -2367,7 +2367,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	/* copy call frame into new stack segment */
 	new_call = zend_vm_stack_extend(used_stack * sizeof(zval));
 	*new_call = *call;
-	ZEND_SET_CALL_INFO(new_call, ZEND_CALL_INFO(new_call) | ZEND_CALL_ALLOCATED);
+	ZEND_ADD_CALL_FLAG(new_call, ZEND_CALL_ALLOCATED);
 
 	if (passed_args) {
 		zval *src = ZEND_CALL_ARG(call, 1);

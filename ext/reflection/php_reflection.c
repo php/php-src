@@ -88,7 +88,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
-	if (!Z_OBJ(EX(This)) || !instanceof_function(Z_OBJCE(EX(This)), ce)) {           \
+	if ((Z_TYPE(EX(This)) != IS_OBJECT) || !instanceof_function(Z_OBJCE(EX(This)), ce)) {           \
 		php_error_docref(NULL, E_ERROR, "%s() cannot be called statically", get_active_function_name());        \
 		return;                                                                                             \
 	}                                                                                                       \
@@ -2316,7 +2316,7 @@ ZEND_METHOD(reflection_generator, getThis)
 
 	REFLECTION_CHECK_VALID_GENERATOR(ex)
 
-	if (Z_OBJ(ex->This)) {
+	if (Z_TYPE(ex->This) == IS_OBJECT) {
 		ZVAL_COPY(return_value, &ex->This);
 	} else {
 		ZVAL_NULL(return_value);

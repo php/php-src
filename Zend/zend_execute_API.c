@@ -769,10 +769,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	func = fci_cache->function_handler;
-	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
-		func, fci->param_count, fci_cache->called_scope, fci_cache->object);
 	calling_scope = fci_cache->calling_scope;
-	fci->object = fci_cache->object;
+	fci->object = (func->common.fn_flags & ZEND_ACC_STATIC) ?
+		NULL : fci_cache->object;
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
+		func, fci->param_count, fci_cache->called_scope, fci->object);
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
 	     !IS_OBJ_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
@@ -839,10 +841,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	EG(scope) = calling_scope;
-	if (func->common.fn_flags & ZEND_ACC_STATIC) {
-		fci->object = NULL;
-	}
-	Z_OBJ(call->This) = fci->object;
 
 	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 		ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
@@ -1064,11 +1062,13 @@ ZEND_API zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex) /* {{{ */
 {
 	while (ex) {
-		if (ex->called_scope) {
-			return ex->called_scope;
+		if (Z_TYPE(ex->This) == IS_OBJECT) {
+			return Z_OBJCE(ex->This);
+		} else if (Z_CE(ex->This)) {
+			return Z_CE(ex->This);
 		} else if (ex->func) {
 			if (ex->func->type != ZEND_INTERNAL_FUNCTION || ex->func->common.scope) {
-				return ex->called_scope;
+				return NULL;
 			}
 		}
 		ex = ex->prev_execute_data;
@@ -1080,11 +1080,11 @@ ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex) /* {{{ *
 ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex) /* {{{ */
 {
 	while (ex) {
-		if (Z_OBJ(ex->This)) {
+		if (Z_TYPE(ex->This) == IS_OBJECT) {
 			return Z_OBJ(ex->This);
 		} else if (ex->func) {
 			if (ex->func->type != ZEND_INTERNAL_FUNCTION || ex->func->common.scope) {
-				return Z_OBJ(ex->This);
+				return NULL;
 			}
 		}
 		ex = ex->prev_execute_data;
