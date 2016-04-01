@@ -4920,6 +4920,12 @@ PHP_FUNCTION(openssl_seal)
 	} else {
 		cipher = EVP_rc4();
 	}
+	
+	// EVP_SealInit uses RAND_bytes
+	if (php_openssl_rand_seed() != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
+		RETURN_FALSE;
+	}
 
 	pkeys = safe_emalloc(nkeys, sizeof(*pkeys), 0);
 	eksl = safe_emalloc(nkeys, sizeof(*eksl), 0);
@@ -5215,6 +5221,7 @@ PHP_FUNCTION(openssl_encrypt)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ls", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
 		return;
 	}
+	
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm");
