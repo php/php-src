@@ -306,13 +306,9 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 		return (uint32_t)(intptr_t)CACHED_PTR_EX(cache_slot + 1);
 	}
 
-	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
+	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
 		if (!silent) {
-			if (ZSTR_LEN(member) == 0) {
-				zend_throw_error(NULL, "Cannot access empty property");
-			} else {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
-			}
+			zend_throw_error(NULL, "Cannot access property started with '\\0'");
 		}
 		return ZEND_WRONG_PROPERTY_OFFSET;
 	}
@@ -384,13 +380,9 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 	zend_property_info *property_info = NULL;
 	uint32_t flags;
 
-	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
+	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
 		if (!silent) {
-			if (ZSTR_LEN(member) == 0) {
-				zend_throw_error(NULL, "Cannot access empty property");
-			} else {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
-			}
+			zend_throw_error(NULL, "Cannot access property started with '\\0'");
 		}
 		return ZEND_WRONG_PROPERTY_INFO;
 	}
@@ -604,16 +596,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			zval_ptr_dtor(&tmp_object);
 			goto exit;
 		} else {
-			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(NULL, "Cannot access empty property");
-					retval = &EG(uninitialized_zval);
-					goto exit;
-				} else {
-					zend_throw_error(NULL, "Cannot access property started with '\\0'");
-					retval = &EG(uninitialized_zval);
-					goto exit;
-				}
+			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
+				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				retval = &EG(uninitialized_zval);
+				goto exit;
 			}
 		}
 	}
@@ -689,14 +675,9 @@ found:
 		} else if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
 			goto write_std_property;
 		} else {
-			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(NULL, "Cannot access empty property");
-					goto exit;
-				} else {
-					zend_throw_error(NULL, "Cannot access property started with '\\0'");
-					goto exit;
-				}
+			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
+				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				goto exit;
 			}
 		}
 	} else if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
@@ -955,14 +936,9 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 			(*guard) &= ~IN_UNSET;
 			zval_ptr_dtor(&tmp_object);
 		} else {
-			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(NULL, "Cannot access empty property");
-					goto exit;
-				} else {
-					zend_throw_error(NULL, "Cannot access property started with '\\0'");
-					goto exit;
-				}
+			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
+				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				goto exit;
 			}
 		}
 	}
