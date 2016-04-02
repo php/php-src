@@ -158,9 +158,9 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 	int index = 0, *dfs, *root;
 	zend_worklist_stack stack;
 	int j;
-	ALLOCA_FLAG(dfs_use_heap);
-	ALLOCA_FLAG(root_use_heap);
-	ALLOCA_FLAG(stack_use_heap);
+	ALLOCA_FLAG(dfs_use_heap)
+	ALLOCA_FLAG(root_use_heap)
+	ALLOCA_FLAG(stack_use_heap)
 
 	dfs = do_alloca(sizeof(int) * ssa->vars_count, dfs_use_heap);
 	memset(dfs, -1, sizeof(int) * ssa->vars_count);
@@ -199,6 +199,18 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 }
 /* }}} */
 
+static inline zend_bool is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
+{
+	if (opline->opcode == ZEND_ASSIGN ||
+			(opline->opcode == ZEND_UNSET_VAR && (opline->extended_value & ZEND_QUICK_SET))) {
+		return ssa_op->op1_use == var && ssa_op->op2_use != var;
+	}
+	if (opline->opcode == ZEND_FE_FETCH_R) {
+		return ssa_op->op2_use == var && ssa_op->op1_use != var;
+	}
+	return 0;
+}
+
 int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
@@ -220,9 +232,7 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 		ssa_vars[i].no_val = 1; /* mark as unused */
 		use = ssa->vars[i].use_chain;
 		while (use >= 0) {
-			if (op_array->opcodes[use].opcode != ZEND_ASSIGN ||
-				ssa->ops[use].op1_use != i ||
-				ssa->ops[use].op2_use == i) {
+			if (!is_no_val_use(&op_array->opcodes[use], &ssa->ops[use], i)) {
 				ssa_vars[i].no_val = 0; /* used directly */
 				zend_bitset_incl(worklist, i);
 			}
@@ -2027,25 +2037,29 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 	}
 	if (ssa->vars[var].use_chain >= 0) {
 		int use = ssa->vars[var].use_chain;
+		zend_ssa_op *op;
+
 		do {
-			if (ssa->ops[use].result_def >= 0) {
-				zend_bitset_incl(worklist, ssa->ops[use].result_def);
+			op = ssa->ops + use;
+			if (op->result_def >= 0) {
+				zend_bitset_incl(worklist, op->result_def);
 			}
-			if (ssa->ops[use].op1_def >= 0) {
-				zend_bitset_incl(worklist, ssa->ops[use].op1_def);
+			if (op->op1_def >= 0) {
+				zend_bitset_incl(worklist, op->op1_def);
 			}
-			if (ssa->ops[use].op2_def >= 0) {
-				zend_bitset_incl(worklist, ssa->ops[use].op2_def);
+			if (op->op2_def >= 0) {
+				zend_bitset_incl(worklist, op->op2_def);
 			}
 			if (op_array->opcodes[use].opcode == ZEND_OP_DATA) {
-				if (ssa->ops[use-1].result_def >= 0) {
-					zend_bitset_incl(worklist, ssa->ops[use-1].result_def);
+				op--;
+				if (op->result_def >= 0) {
+					zend_bitset_incl(worklist, op->result_def);
 				}
-				if (ssa->ops[use-1].op1_def >= 0) {
-					zend_bitset_incl(worklist, ssa->ops[use-1].op1_def);
+				if (op->op1_def >= 0) {
+					zend_bitset_incl(worklist, op->op1_def);
 				}
-				if (ssa->ops[use-1].op2_def >= 0) {
-					zend_bitset_incl(worklist, ssa->ops[use-1].op2_def);
+				if (op->op2_def >= 0) {
+					zend_bitset_incl(worklist, op->op2_def);
 				}
 			}
 			use = zend_ssa_next_use(ssa->ops, var, use);
@@ -2300,7 +2314,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			if ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING)) {
 				tmp |= MAY_BE_STRING;
 			}
-			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t1 & (MAY_BE_ANY-MAY_BE_STRING))) {
+			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t2 & (MAY_BE_ANY-MAY_BE_STRING))) {
 				tmp |= MAY_BE_LONG;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);

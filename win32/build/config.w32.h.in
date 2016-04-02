@@ -22,15 +22,6 @@
 #define PHP_PREFIX "@PREFIX@"
 #define PHP_SYSCONFDIR "@PREFIX@"
 
-/* Enable / Disable crypt() function (default: enabled) */
-#define HAVE_CRYPT 1
-#define PHP_STD_DES_CRYPT 1
-#define PHP_EXT_DES_CRYPT 1
-#define PHP_MD5_CRYPT 1
-#define PHP_BLOWFISH_CRYPT 1
-#define PHP_SHA512_CRYPT 1
-#define PHP_SHA256_CRYPT 1
-
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
 #define USE_CONFIG_FILE 1

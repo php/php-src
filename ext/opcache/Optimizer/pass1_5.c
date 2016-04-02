@@ -84,6 +84,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 					/* shift by negative number */
 					break;
+				} else if (zend_binary_op_produces_numeric_string_error(opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline))) {
+					/* produces numeric string E_NOTICE/E_WARNING */
+					break;
 				}
 				er = EG(error_reporting);
 				EG(error_reporting) = 0;
@@ -643,7 +646,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_FE_RESET_RW:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-		case ZEND_NEW:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:

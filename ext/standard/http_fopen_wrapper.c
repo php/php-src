@@ -614,10 +614,7 @@ finish:
 			} else {
 				php_error_docref(NULL, E_WARNING, "Cannot construct User-agent header");
 			}
-
-			if (ua) {
-				efree(ua);
-			}
+			efree(ua);
 		}
 	}
 

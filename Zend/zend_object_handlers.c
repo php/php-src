@@ -552,6 +552,31 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		goto exit;
 	}
 
+	/* magic isset */
+	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
+		zval tmp_object, tmp_result;
+		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+
+		if (!((*guard) & IN_ISSET)) {
+			ZVAL_COPY(&tmp_object, object);
+			ZVAL_UNDEF(&tmp_result);
+
+			*guard |= IN_ISSET;
+			zend_std_call_issetter(&tmp_object, member, &tmp_result);
+			*guard &= ~IN_ISSET;
+	
+			if (!zend_is_true(&tmp_result)) {
+				retval = &EG(uninitialized_zval);
+				zval_ptr_dtor(&tmp_object);
+				zval_ptr_dtor(&tmp_result);
+				goto exit;
+			}
+
+			zval_ptr_dtor(&tmp_object);
+			zval_ptr_dtor(&tmp_result);
+		}
+	}
+
 	/* magic get */
 	if (zobj->ce->__get) {
 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
@@ -710,13 +735,26 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 	zval tmp;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
-		if(offset == NULL) {
+		if (offset == NULL) {
 			/* [] construct */
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
+
+		if (type == BP_VAR_IS) {
+			zend_call_method_with_1_params(object, ce, NULL, "offsetexists", rv, offset);
+			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
+				return NULL;
+			}
+			if (!i_zend_is_true(rv)) {
+				zval_ptr_dtor(rv);
+				return &EG(uninitialized_zval);
+			}
+			zval_ptr_dtor(rv);
+		}
+
 		zend_call_method_with_1_params(object, ce, NULL, "offsetget", rv, offset);
 
 		zval_ptr_dtor(offset);

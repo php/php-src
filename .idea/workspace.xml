@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" assignedExecutableTargets="true" buildAllGenerated="true">
+    <generated>
+      <config projectName="php_src" targetName="php_src" />
+    </generated>
+  </component>
+  <component name="CMakeSettings" AUTO_RELOAD="false" GENERATION_PASS_SYSTEM_ENVIRONMENT="true">
+    <ADDITIONAL_GENERATION_ENVIRONMENT>
+      <envs />
+    </ADDITIONAL_GENERATION_ENVIRONMENT>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9908223a-7719-483e-b12c-151e11de1341" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_ereg_search_setpos.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/TSRM/m4/gethostbyname.m4" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/ArrayAccess_indirect_append.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug62814.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71359.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71414.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71428.1.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71428.2.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71428.3.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71731.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71756.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71841.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71859.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71871.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71871_2.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71914.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71922.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/bug71930.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/closure_invoke_case_insensitive.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/foreach_list_keyed.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/int_conversion_exponents.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_ArrayAccess.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_conversions.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_evaluation_order.inc" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_evaluation_order.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_evaluation_order_2.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_evaluation_order_3.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_evaluation_order_nested.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_non_literals.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_trailing_comma.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_keyed_undefined.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_mixed_keyed_unkeyed.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/list_mixed_nested_keyed_unkeyed.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/new_args_without_ctor.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/numeric_string_errors.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/numeric_string_errors_assign.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/str_offset_003.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/tests/str_offset_004.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Zend/zend_type_info.h" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/date/tests/bug71635.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/fileinfo/tests/bug71527.magic" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/fileinfo/tests/bug71527.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/json/tests/bug71835.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/mysqli/tests/bug71820.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/opcache/tests/bug71843.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/pcre/tests/preg_match_error4.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/pdo/tests/bug_52098.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/pdo_odbc/tests/max_columns.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/pgsql/tests/bug71820.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/reflection/tests/bug71767.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/session/tests/bug71603.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/spl/tests/ArrayObject_sort_different_backing_storage.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/spl/tests/bug52339.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/spl/tests/bug62059.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/spl/tests/bug67582.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/spl/tests/bug71735.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/spl/tests/bug71838.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/array/bug71334.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/array/bug71837.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/array/unexpected_array_mod_bug_variation1.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/bug71827.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/file/file_get_contents_variation5_32bit.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/general_functions/bug71891.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/serialize/bug71840.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/streams/bug71884.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/bug71806.dat" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/bug71806.phpt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/sapi/cli/tests/bug71624.phpt" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/ext/shmop/tests/003.phpt" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/ext/standard/tests/file/file_get_contents_variation5.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/file/file_get_contents_variation5_64bit.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos.phpt" afterPath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/mb_strimwidth.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_strimwidth.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/mb_stripos.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_stripos.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/mb_strpos.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_strpos.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/strpos.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/strpos.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/NEWS" afterPath="$PROJECT_DIR$/NEWS" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TSRM/tsrm.m4" afterPath="$PROJECT_DIR$/TSRM/tsrm.m4" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/UPGRADING" afterPath="$PROJECT_DIR$/UPGRADING" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/add_006.phpt" afterPath="$PROJECT_DIR$/Zend/tests/add_006.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/add_007.phpt" afterPath="$PROJECT_DIR$/Zend/tests/add_007.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/bug29883.phpt" afterPath="$PROJECT_DIR$/Zend/tests/bug29883.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/bug31098.phpt" afterPath="$PROJECT_DIR$/Zend/tests/bug31098.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/bug52879.phpt" afterPath="$PROJECT_DIR$/Zend/tests/bug52879.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/bug62358.phpt" afterPath="$PROJECT_DIR$/Zend/tests/bug62358.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/bug69467.phpt" afterPath="$PROJECT_DIR$/Zend/tests/bug69467.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/bug69955.phpt" afterPath="$PROJECT_DIR$/Zend/tests/bug69955.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/constant_expressions_dynamic.phpt" afterPath="$PROJECT_DIR$/Zend/tests/constant_expressions_dynamic.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/empty_str_offset.phpt" afterPath="$PROJECT_DIR$/Zend/tests/empty_str_offset.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/grammar/regression_004.phpt" afterPath="$PROJECT_DIR$/Zend/tests/grammar/regression_004.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/isset_str_offset.phpt" afterPath="$PROJECT_DIR$/Zend/tests/isset_str_offset.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/self_and.phpt" afterPath="$PROJECT_DIR$/Zend/tests/self_and.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/self_mod.phpt" afterPath="$PROJECT_DIR$/Zend/tests/self_mod.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/self_or.phpt" afterPath="$PROJECT_DIR$/Zend/tests/self_or.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/self_xor.phpt" afterPath="$PROJECT_DIR$/Zend/tests/self_xor.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/shift_001.phpt" afterPath="$PROJECT_DIR$/Zend/tests/shift_001.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/shift_002.phpt" afterPath="$PROJECT_DIR$/Zend/tests/shift_002.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/str_offset_001.phpt" afterPath="$PROJECT_DIR$/Zend/tests/str_offset_001.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/tests/traits/bug60153.phpt" afterPath="$PROJECT_DIR$/Zend/tests/traits/bug60153.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend.h" afterPath="$PROJECT_DIR$/Zend/zend.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_API.c" afterPath="$PROJECT_DIR$/Zend/zend_API.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_API.h" afterPath="$PROJECT_DIR$/Zend/zend_API.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_alloc.c" afterPath="$PROJECT_DIR$/Zend/zend_alloc.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_ast.c" afterPath="$PROJECT_DIR$/Zend/zend_ast.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_builtin_functions.c" afterPath="$PROJECT_DIR$/Zend/zend_builtin_functions.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_closures.c" afterPath="$PROJECT_DIR$/Zend/zend_closures.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_compile.c" afterPath="$PROJECT_DIR$/Zend/zend_compile.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_compile.h" afterPath="$PROJECT_DIR$/Zend/zend_compile.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_exceptions.c" afterPath="$PROJECT_DIR$/Zend/zend_exceptions.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_execute.c" afterPath="$PROJECT_DIR$/Zend/zend_execute.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_execute.h" afterPath="$PROJECT_DIR$/Zend/zend_execute.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_execute_API.c" afterPath="$PROJECT_DIR$/Zend/zend_execute_API.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_generators.c" afterPath="$PROJECT_DIR$/Zend/zend_generators.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_globals_macros.h" afterPath="$PROJECT_DIR$/Zend/zend_globals_macros.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_hash.c" afterPath="$PROJECT_DIR$/Zend/zend_hash.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_highlight.c" afterPath="$PROJECT_DIR$/Zend/zend_highlight.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_inheritance.c" afterPath="$PROJECT_DIR$/Zend/zend_inheritance.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_language_parser.y" afterPath="$PROJECT_DIR$/Zend/zend_language_parser.y" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_object_handlers.c" afterPath="$PROJECT_DIR$/Zend/zend_object_handlers.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_objects_API.c" afterPath="$PROJECT_DIR$/Zend/zend_objects_API.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_opcode.c" afterPath="$PROJECT_DIR$/Zend/zend_opcode.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_operators.c" afterPath="$PROJECT_DIR$/Zend/zend_operators.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_operators.h" afterPath="$PROJECT_DIR$/Zend/zend_operators.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_strtod.c" afterPath="$PROJECT_DIR$/Zend/zend_strtod.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_virtual_cwd.c" afterPath="$PROJECT_DIR$/Zend/zend_virtual_cwd.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_vm.h" afterPath="$PROJECT_DIR$/Zend/zend_vm.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_vm_def.h" afterPath="$PROJECT_DIR$/Zend/zend_vm_def.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_vm_execute.h" afterPath="$PROJECT_DIR$/Zend/zend_vm_execute.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_vm_execute.skl" afterPath="$PROJECT_DIR$/Zend/zend_vm_execute.skl" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_vm_gen.php" afterPath="$PROJECT_DIR$/Zend/zend_vm_gen.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_vm_opcodes.c" afterPath="$PROJECT_DIR$/Zend/zend_vm_opcodes.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Zend/zend_vm_opcodes.h" afterPath="$PROJECT_DIR$/Zend/zend_vm_opcodes.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/curl/interface.c" afterPath="$PROJECT_DIR$/ext/curl/interface.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/date/lib/timezonedb.h" afterPath="$PROJECT_DIR$/ext/date/lib/timezonedb.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/date/php_date.c" afterPath="$PROJECT_DIR$/ext/date/php_date.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/fileinfo/libmagic/funcs.c" afterPath="$PROJECT_DIR$/ext/fileinfo/libmagic/funcs.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/fileinfo/tests/bug68996.phpt" afterPath="$PROJECT_DIR$/ext/fileinfo/tests/bug68996.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/gmp/tests/serialize.phpt" afterPath="$PROJECT_DIR$/ext/gmp/tests/serialize.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/iconv/iconv.c" afterPath="$PROJECT_DIR$/ext/iconv/iconv.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos_variation3.phpt" afterPath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos_variation3.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos_variation3_64bit.phpt" afterPath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos_variation3_64bit.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos_variation5.phpt" afterPath="$PROJECT_DIR$/ext/iconv/tests/iconv_strpos_variation5.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/intl/grapheme/grapheme_string.c" afterPath="$PROJECT_DIR$/ext/intl/grapheme/grapheme_string.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/intl/tests/grapheme.phpt" afterPath="$PROJECT_DIR$/ext/intl/tests/grapheme.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/intl/tests/timezone_getCanonicalID_error.phpt" afterPath="$PROJECT_DIR$/ext/intl/tests/timezone_getCanonicalID_error.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/ldap/tests/ldap_option_reqcert_basic.phpt" afterPath="$PROJECT_DIR$/ext/ldap/tests/ldap_option_reqcert_basic.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/ldap/tests/ldap_option_reqcert_error.phpt" afterPath="$PROJECT_DIR$/ext/ldap/tests/ldap_option_reqcert_error.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/libmbfl/mbfl/mbfilter.c" afterPath="$PROJECT_DIR$/ext/mbstring/libmbfl/mbfl/mbfilter.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/mbstring.c" afterPath="$PROJECT_DIR$/ext/mbstring/mbstring.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/php_mbregex.c" afterPath="$PROJECT_DIR$/ext/mbstring/php_mbregex.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/bug45923.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/bug45923.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/mb_stripos_variation3.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_stripos_variation3.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/mb_stripos_variation5_Bug45923.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_stripos_variation5_Bug45923.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/mb_strpos_variation3.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_strpos_variation3.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mbstring/tests/mb_strpos_variation5.phpt" afterPath="$PROJECT_DIR$/ext/mbstring/tests/mb_strpos_variation5.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqli/mysqli.c" afterPath="$PROJECT_DIR$/ext/mysqli/mysqli.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqli/mysqli_mysqlnd.h" afterPath="$PROJECT_DIR$/ext/mysqli/mysqli_mysqlnd.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_alloc.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_alloc.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_alloc.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_alloc.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_auth.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_auth.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_auth.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_auth.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_block_alloc.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_block_alloc.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_block_alloc.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_block_alloc.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_charset.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_charset.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_charset.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_charset.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_commands.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_commands.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_commands.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_commands.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_connection.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_connection.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_connection.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_connection.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_debug.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_debug.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_debug.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_debug.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_driver.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_driver.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_enum_n_def.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_enum_n_def.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ext_plugin.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ext_plugin.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ext_plugin.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ext_plugin.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_libmysql_compat.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_libmysql_compat.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_loaddata.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_loaddata.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_net.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_net.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_plugin.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_plugin.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_plugin.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_plugin.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_portability.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_portability.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_priv.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_priv.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_protocol_frame_codec.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_protocol_frame_codec.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_protocol_frame_codec.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_protocol_frame_codec.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ps.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ps.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ps.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ps.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ps_codec.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_ps_codec.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_read_buffer.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_read_buffer.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_read_buffer.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_read_buffer.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result_meta.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result_meta.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result_meta.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_result_meta.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_reverse_api.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_reverse_api.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_reverse_api.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_reverse_api.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_statistics.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_statistics.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_statistics.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_statistics.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_structs.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_structs.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_vio.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_vio.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_vio.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_vio.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_wireprotocol.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_wireprotocol.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_wireprotocol.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/mysqlnd_wireprotocol.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/php_mysqlnd.c" afterPath="$PROJECT_DIR$/ext/mysqlnd/php_mysqlnd.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/mysqlnd/php_mysqlnd.h" afterPath="$PROJECT_DIR$/ext/mysqlnd/php_mysqlnd.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/odbc/php_odbc.c" afterPath="$PROJECT_DIR$/ext/odbc/php_odbc.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/block_pass.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/block_pass.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/dfa_pass.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/dfa_pass.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/nop_removal.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/nop_removal.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/optimize_func_calls.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/optimize_func_calls.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/pass1_5.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/pass1_5.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/pass2.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/pass2.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_call_graph.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_call_graph.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_cfg.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_cfg.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_dfg.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_dfg.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_func_info.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_func_info.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_inference.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_inference.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_inference.h" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_inference.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_optimizer.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_optimizer.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_ssa.c" afterPath="$PROJECT_DIR$/ext/opcache/Optimizer/zend_ssa.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/zend_file_cache.c" afterPath="$PROJECT_DIR$/ext/opcache/zend_file_cache.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/opcache/zend_persist.c" afterPath="$PROJECT_DIR$/ext/opcache/zend_persist.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pcre/php_pcre.c" afterPath="$PROJECT_DIR$/ext/pcre/php_pcre.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pcre/tests/preg_match_error3.phpt" afterPath="$PROJECT_DIR$/ext/pcre/tests/preg_match_error3.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pdo/pdo_stmt.c" afterPath="$PROJECT_DIR$/ext/pdo/pdo_stmt.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pdo_dblib/dblib_stmt.c" afterPath="$PROJECT_DIR$/ext/pdo_dblib/dblib_stmt.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pdo_odbc/odbc_driver.c" afterPath="$PROJECT_DIR$/ext/pdo_odbc/odbc_driver.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pdo_odbc/odbc_stmt.c" afterPath="$PROJECT_DIR$/ext/pdo_odbc/odbc_stmt.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pdo_odbc/pdo_odbc.c" afterPath="$PROJECT_DIR$/ext/pdo_odbc/pdo_odbc.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pdo_odbc/php_pdo_odbc_int.h" afterPath="$PROJECT_DIR$/ext/pdo_odbc/php_pdo_odbc_int.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/pgsql/pgsql.c" afterPath="$PROJECT_DIR$/ext/pgsql/pgsql.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/phar.c" afterPath="$PROJECT_DIR$/ext/phar/phar.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/phar_object.c" afterPath="$PROJECT_DIR$/ext/phar/phar_object.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/badparameters.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/badparameters.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/bug64931/bug64931.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/bug64931/bug64931.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/bug71498.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/bug71498.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/create_path_error.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/create_path_error.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/phar_extract.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/phar_extract.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/phar_isvalidpharfilename.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/phar_isvalidpharfilename.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/phar_unlinkarchive.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/phar_unlinkarchive.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/phar/tests/pharfileinfo_construct.phpt" afterPath="$PROJECT_DIR$/ext/phar/tests/pharfileinfo_construct.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/reflection/php_reflection.c" afterPath="$PROJECT_DIR$/ext/reflection/php_reflection.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/session/session.c" afterPath="$PROJECT_DIR$/ext/session/session.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/shmop/shmop.c" afterPath="$PROJECT_DIR$/ext/shmop/shmop.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/snmp/snmp.c" afterPath="$PROJECT_DIR$/ext/snmp/snmp.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/sockets/sockaddr_conv.c" afterPath="$PROJECT_DIR$/ext/sockets/sockaddr_conv.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/sockets/sockets.c" afterPath="$PROJECT_DIR$/ext/sockets/sockets.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/spl/php_spl.c" afterPath="$PROJECT_DIR$/ext/spl/php_spl.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/spl/spl_array.c" afterPath="$PROJECT_DIR$/ext/spl/spl_array.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/spl/spl_dllist.c" afterPath="$PROJECT_DIR$/ext/spl/spl_dllist.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/spl/spl_observer.c" afterPath="$PROJECT_DIR$/ext/spl/spl_observer.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/spl/tests/SplObjectStorage_unserialize_bad.phpt" afterPath="$PROJECT_DIR$/ext/spl/tests/SplObjectStorage_unserialize_bad.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/spl/tests/bug38325.phpt" afterPath="$PROJECT_DIR$/ext/spl/tests/bug38325.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/spl/tests/spl_autoload_001.phpt" afterPath="$PROJECT_DIR$/ext/spl/tests/spl_autoload_001.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/array.c" afterPath="$PROJECT_DIR$/ext/standard/array.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/basic_functions.c" afterPath="$PROJECT_DIR$/ext/standard/basic_functions.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/config.m4" afterPath="$PROJECT_DIR$/ext/standard/config.m4" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/crypt.c" afterPath="$PROJECT_DIR$/ext/standard/crypt.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/crypt_freesec.c" afterPath="$PROJECT_DIR$/ext/standard/crypt_freesec.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/dns.c" afterPath="$PROJECT_DIR$/ext/standard/dns.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/file.c" afterPath="$PROJECT_DIR$/ext/standard/file.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/file.h" afterPath="$PROJECT_DIR$/ext/standard/file.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/flock_compat.c" afterPath="$PROJECT_DIR$/ext/standard/flock_compat.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/http_fopen_wrapper.c" afterPath="$PROJECT_DIR$/ext/standard/http_fopen_wrapper.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/math.c" afterPath="$PROJECT_DIR$/ext/standard/math.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/password.c" afterPath="$PROJECT_DIR$/ext/standard/password.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/php_crypt.h" afterPath="$PROJECT_DIR$/ext/standard/php_crypt.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/streamsfuncs.c" afterPath="$PROJECT_DIR$/ext/standard/streamsfuncs.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/string.c" afterPath="$PROJECT_DIR$/ext/standard/string.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/array/unexpected_array_mod_bug.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/array/unexpected_array_mod_bug.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/file/bug39673.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/file/bug39673.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/file/file_put_contents_variation7.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/file/file_put_contents_variation7.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/general_functions/floatval.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/general_functions/floatval.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/general_functions/floatval_variation1.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/general_functions/floatval_variation1.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/general_functions/gettype_settype_variation2.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/general_functions/gettype_settype_variation2.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/math/decbin_basic.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/math/decbin_basic.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/math/dechex_basic.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/math/dechex_basic.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/math/decoct_basic.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/math/decoct_basic.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/math/pow_variation1.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/math/pow_variation1.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/math/pow_variation1_64bit.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/math/pow_variation1_64bit.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/math/pow_variation2.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/math/pow_variation2.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/bug40754.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/bug40754.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/bug55871.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/bug55871.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/stripos_basic2.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/stripos_basic2.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/stripos_error.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/stripos_error.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/stripos_variation14.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/stripos_variation14.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/substr_count_basic.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/substr_count_basic.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/substr_count_error.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/substr_count_error.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/tests/strings/substr_replace_error.phpt" afterPath="$PROJECT_DIR$/ext/standard/tests/strings/substr_replace_error.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/type.c" afterPath="$PROJECT_DIR$/ext/standard/type.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/url.c" afterPath="$PROJECT_DIR$/ext/standard/url.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/uuencode.c" afterPath="$PROJECT_DIR$/ext/standard/uuencode.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/var.c" afterPath="$PROJECT_DIR$/ext/standard/var.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/var_unserializer.c" afterPath="$PROJECT_DIR$/ext/standard/var_unserializer.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/standard/var_unserializer.re" afterPath="$PROJECT_DIR$/ext/standard/var_unserializer.re" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext/xsl/tests/bug71540.phpt" afterPath="$PROJECT_DIR$/ext/xsl/tests/bug71540.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/SAPI.c" afterPath="$PROJECT_DIR$/main/SAPI.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/fastcgi.c" afterPath="$PROJECT_DIR$/main/fastcgi.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/main.c" afterPath="$PROJECT_DIR$/main/main.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/network.c" afterPath="$PROJECT_DIR$/main/network.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main/php_network.h" afterPath="$PROJECT_DIR$/main/php_network.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sapi/cli/php_cli.c" afterPath="$PROJECT_DIR$/sapi/cli/php_cli.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sapi/phpdbg/phpdbg_utils.c" afterPath="$PROJECT_DIR$/sapi/phpdbg/phpdbg_utils.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sapi/phpdbg/tests/print_001.phpt" afterPath="$PROJECT_DIR$/sapi/phpdbg/tests/print_001.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/lang/bug22592.phpt" afterPath="$PROJECT_DIR$/tests/lang/bug22592.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/lang/bug28800.phpt" afterPath="$PROJECT_DIR$/tests/lang/bug28800.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/lang/operators/bitwiseShiftLeft_variationStr_64bit.phpt" afterPath="$PROJECT_DIR$/tests/lang/operators/bitwiseShiftLeft_variationStr_64bit.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/lang/operators/bitwiseShiftRight_variationStr.phpt" afterPath="$PROJECT_DIR$/tests/lang/operators/bitwiseShiftRight_variationStr.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/lang/operators/modulus_variationStr.phpt" afterPath="$PROJECT_DIR$/tests/lang/operators/modulus_variationStr.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/lang/operators/negate_variationStr.phpt" afterPath="$PROJECT_DIR$/tests/lang/operators/negate_variationStr.phpt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/win32/build/config.w32.h.in" afterPath="$PROJECT_DIR$/win32/build/config.w32.h.in" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/win32/build/libs_version.txt" afterPath="$PROJECT_DIR$/win32/build/libs_version.txt" />
+    </list>
+    <ignored path="php-src.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="php-src" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" />
+  <component name="JsBuildToolPackageJson" detection-done="true" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="116" />
+    <option name="y" value="36" />
+    <option name="width" value="1400" />
+    <option name="height" value="939" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="php-src" />
+              <option name="myItemType" value="com.jetbrains.cidr.projectView.CidrFilesViewHelper$MyProjectTreeStructure$1" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="php-src" />
+              <option name="myItemType" value="com.jetbrains.cidr.projectView.CidrFilesViewHelper$MyProjectTreeStructure$1" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="php-src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="js-jscs-nodeInterpreter" value="/usr/local/bin/node" />
+  </component>
+  <component name="RunManager" selected="Application.Build All">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="php_src" TARGET_NAME="php_src" CONFIG_NAME="Debug">
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" EXPLICIT_BUILD_TARGET_NAME="all">
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="php_src" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="php_src" TARGET_NAME="php_src" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="php_src" RUN_TARGET_NAME="php_src">
+      <envs />
+      <method />
+    </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="Application.Build All" />
+      <item index="1" class="java.lang.String" itemvalue="Application.php_src" />
+    </list>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9908223a-7719-483e-b12c-151e11de1341" name="Default" comment="" />
+      <created>1459619234162</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1459619234162</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="116" y="36" width="1400" height="939" extended-state="0" />
+    <editor active="false" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32988507" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

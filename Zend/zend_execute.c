@@ -40,6 +40,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_inheritance.h"
+#include "zend_type_info.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -116,20 +117,7 @@ static const zend_internal_function zend_pass_function = {
 		zval_ptr_dtor_nogc(should_free); \
 	}
 
-/* End of zend_execute_locks.h */
-
 #define CV_DEF_OF(i) (EX(func)->op_array.vars[i])
-
-#define CTOR_CALL_BIT    0x1
-#define CTOR_USED_BIT    0x2
-
-#define IS_CTOR_CALL(ce) (((zend_uintptr_t)(ce)) & CTOR_CALL_BIT)
-#define IS_CTOR_USED(ce) (((zend_uintptr_t)(ce)) & CTOR_USED_BIT)
-
-#define ENCODE_CTOR(ce, used) \
-	((zend_class_entry*)(((zend_uintptr_t)(ce)) | CTOR_CALL_BIT | ((used) ? CTOR_USED_BIT : 0)))
-#define DECODE_CTOR(ce) \
-	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
 #define ZEND_VM_MAIN_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
 #define ZEND_VM_GENERATOR_STACK_PAGE_SLOTS (256)
@@ -1172,7 +1160,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	zend_uchar c;
 	size_t string_len;
 
-	if (offset < 0) {
+	if (offset < (zend_long)(-Z_STRLEN_P(str))) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
 		zend_string_release(Z_STR_P(str));
@@ -1202,6 +1190,10 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 			ZVAL_NULL(result);
 		}
 		return;
+	}
+
+	if (offset < 0) { /* Handle negative offset */
+		offset += (zend_long)Z_STRLEN_P(str);
 	}
 
 	old_str = Z_STR_P(str);
@@ -1818,7 +1810,7 @@ try_array:
 
 try_string_offset:
 		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-			switch(Z_TYPE_P(dim)) {
+			switch (Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
 				case IS_STRING:
 					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
@@ -1851,7 +1843,7 @@ try_string_offset:
 			offset = Z_LVAL_P(dim);
 		}
 
-		if (UNEXPECTED(offset < 0) || UNEXPECTED(Z_STRLEN_P(container) <= (size_t)offset)) {
+		if (UNEXPECTED(Z_STRLEN_P(container) < (size_t)((offset < 0) ? -offset : (offset + 1)))) {
 			if (type != BP_VAR_IS) {
 				zend_error(E_NOTICE, "Uninitialized string offset: %pd", offset);
 				ZVAL_EMPTY_STRING(result);
@@ -1859,12 +1851,17 @@ try_string_offset:
 				ZVAL_NULL(result);
 			}
 		} else {
-			zend_uchar c = (zend_uchar)Z_STRVAL_P(container)[offset];
+			zend_uchar c;
+			zend_long real_offset;
+
+			real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
+				? (zend_long)Z_STRLEN_P(container) + offset : offset;
+			c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
 
 			if (CG(one_char_string)[c]) {
 				ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
 			} else {
-				ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + offset, 1, 0));
+				ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + real_offset, 1, 0));
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -2154,7 +2151,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
@@ -2179,7 +2176,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))--;
@@ -2209,7 +2206,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(return_value) = return_value;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
-		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
 				GC_REFCOUNT(Z_OBJ(EX(This)))--;
@@ -2269,7 +2266,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 			} while (var != end);
 		}
 
-		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		}
@@ -2316,15 +2313,12 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	EG(vm_stack_end) = EG(vm_stack)->end;
 
 	call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
-	if (Z_OBJ(call->This)) {
-		call_info |= ZEND_CALL_RELEASE_THIS;
-	}
 	execute_data = zend_vm_stack_push_call_frame(
 		call_info,
 		(zend_function*)op_array,
 		num_args,
-		call->called_scope,
-		Z_OBJ(call->This));
+		Z_TYPE(call->This) != IS_OBJECT ? Z_CE(call->This) : NULL,
+		Z_TYPE(call->This) == IS_OBJECT ? Z_OBJ(call->This) : NULL);
 	EX(prev_execute_data) = NULL;
 	EX_NUM_ARGS() = num_args;
 
@@ -2375,7 +2369,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	/* copy call frame into new stack segment */
 	new_call = zend_vm_stack_extend(used_stack * sizeof(zval));
 	*new_call = *call;
-	ZEND_SET_CALL_INFO(new_call, ZEND_CALL_INFO(new_call) | ZEND_CALL_ALLOCATED);
+	ZEND_ADD_CALL_FLAG(new_call, ZEND_CALL_ALLOCATED);
 
 	if (passed_args) {
 		zval *src = ZEND_CALL_ARG(call, 1);
@@ -2603,6 +2597,20 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
+static void zend_swap_operands(zend_op *op) /* {{{ */
+{
+	znode_op     tmp;
+	zend_uchar   tmp_type;
+
+	tmp          = op->op1;
+	tmp_type     = op->op1_type;
+	op->op1      = op->op2;
+	op->op1_type = op->op2_type;
+	op->op2      = tmp;
+	op->op2_type = tmp_type;
+}
+/* }}} */
+
 #ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
 #  define ZEND_VM_FP_GLOBAL_REG "%esi"
@@ -2688,10 +2696,34 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
+		if (_result) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
+		if (!(_result)) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
 #else
 # define ZEND_VM_REPEATABLE_OPCODE
 # define ZEND_VM_REPEAT_OPCODE(_opcode)
 # define ZEND_VM_SMART_BRANCH(_result, _check)
+# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check)
+# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check)
 #endif
 
 #ifdef __GNUC__

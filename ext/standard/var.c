@@ -864,7 +864,7 @@ again:
 					return;
 				}
 
-				if (ce && ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
+				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
 					BG(serialize_lock)++;
 					res = call_user_function_ex(CG(function_table), struc, &fname, &retval, 0, 0, 1, NULL);

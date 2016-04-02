@@ -242,7 +242,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
 %type <ast> variable_class_name dereferencable_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
-%type <ast> assignment_list_element array_pair encaps_var encaps_var_offset isset_variables
+%type <ast> unkeyed_assignment_list_element keyed_assignment_list_element array_pair
+%type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_list parameter_list class_statement_list
@@ -251,7 +252,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list array_pair_list non_empty_array_pair_list
-%type <ast> assignment_list isset_variable type return_type
+%type <ast> assignment_list unkeyed_assignment_list keyed_assignment_list
+%type <ast> isset_variable type return_type
 %type <ast> identifier
 
 %type <num> returns_ref function is_reference is_variadic variable_modifiers
@@ -474,10 +476,10 @@ unset_variable:
 ;
 
 function_declaration_statement:
-	function returns_ref T_STRING '(' parameter_list ')' return_type
-	backup_doc_comment '{' inner_statement_list '}'
-		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $8,
-		      zend_ast_get_str($3), $5, NULL, $10, $7); }
+	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+	'{' inner_statement_list '}'
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $4,
+		      zend_ast_get_str($3), $6, NULL, $10, $8); }
 ;
 
 is_reference:
@@ -706,10 +708,10 @@ class_statement:
 			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
-	|	method_modifiers function returns_ref identifier '(' parameter_list ')'
-		return_type backup_doc_comment method_body
-			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1, $2, $9,
-				  zend_ast_get_str($4), $6, NULL, $10, $8); }
+	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
+		return_type method_body
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1, $2, $5,
+				  zend_ast_get_str($4), $7, NULL, $10, $9); }
 ;
 
 name_list:
@@ -962,16 +964,16 @@ expr_without_variable:
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); }
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); }
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); }
-	|	function returns_ref '(' parameter_list ')' lexical_vars return_type
-		backup_doc_comment '{' inner_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2, $1, $8,
+	|	function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
+		'{' inner_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-			      $4, $6, $10, $7); }
-	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
-		return_type backup_doc_comment '{' inner_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | ZEND_ACC_STATIC, $2, $9,
+			      $5, $7, $10, $8); }
+	|	T_STATIC function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars
+		return_type '{' inner_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | ZEND_ACC_STATIC, $2, $4,
 			      zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-			      $5, $7, $11, $8); }
+			      $6, $8, $11, $9); }
 ;
 
 function:
@@ -1173,16 +1175,37 @@ property_name:
 ;
 
 assignment_list:
-		assignment_list ',' assignment_list_element
+		unkeyed_assignment_list
+			{ $$ = $1; }
+	|	keyed_assignment_list possible_comma
+			{ $$ = $1; }
+;
+
+unkeyed_assignment_list:
+		unkeyed_assignment_list ',' unkeyed_assignment_list_element
 			{ $$ = zend_ast_list_add($1, $3); }
-	|	assignment_list_element
+	|	unkeyed_assignment_list_element
 			{ $$ = zend_ast_create_list(1, ZEND_AST_LIST, $1); }
 ;
 
-assignment_list_element:
+unkeyed_assignment_list_element:
 		variable						{ $$ = $1; }
 	|	T_LIST '(' assignment_list ')'	{ $$ = $3; }
 	|	/* empty */						{ $$ = NULL; }
+;
+
+keyed_assignment_list:
+		keyed_assignment_list ',' keyed_assignment_list_element
+			{ $$ = zend_ast_list_add($1, $3); }
+	|	keyed_assignment_list_element
+			{ $$ = zend_ast_create_list(1, ZEND_AST_LIST, $1); }
+;
+
+keyed_assignment_list_element:
+		expr T_DOUBLE_ARROW variable
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
+	|	expr T_DOUBLE_ARROW T_LIST '(' assignment_list ')'
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
 ;
 
 

@@ -1968,6 +1968,9 @@ PHP_FUNCTION(strpos)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -2018,6 +2021,9 @@ PHP_FUNCTION(stripos)
 		return;
 	}
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -2465,6 +2471,7 @@ PHP_FUNCTION(substr_replace)
 
 	if (argc > 3) {
 		if (Z_TYPE_P(len) != IS_ARRAY) {
+			convert_to_long_ex(len);
 			l = zval_get_long(len);
 		}
 	} else {
@@ -2478,12 +2485,12 @@ PHP_FUNCTION(substr_replace)
 			(argc == 3 && Z_TYPE_P(from) == IS_ARRAY) ||
 			(argc == 4 && Z_TYPE_P(from) != Z_TYPE_P(len))
 		) {
-			php_error_docref(NULL, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
+			php_error_docref(NULL, E_WARNING, "'start' and 'length' should be of same type - numerical or array ");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
 		if (argc == 4 && Z_TYPE_P(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
-				php_error_docref(NULL, E_WARNING, "'from' and 'len' should have the same number of elements");
+				php_error_docref(NULL, E_WARNING, "'start' and 'length' should have the same number of elements");
 				RETURN_STR_COPY(Z_STR_P(str));
 			}
 		}
@@ -2555,7 +2562,7 @@ PHP_FUNCTION(substr_replace)
 			}
 			RETURN_NEW_STR(result);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
+			php_error_docref(NULL, E_WARNING, "Functionality of 'start' and 'length' as arrays is not implemented");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
 	} else { /* str is array of strings */
@@ -5287,12 +5294,10 @@ PHP_FUNCTION(substr_count)
 	endp = p + haystack_len;
 
 	if (offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset should be greater than or equal to 0");
-		RETURN_FALSE;
+		offset += (zend_long)haystack_len;
 	}
-
-	if ((size_t)offset > haystack_len) {
-		php_error_docref(NULL, E_WARNING, "Offset value " ZEND_LONG_FMT " exceeds string length", offset);
+	if ((offset < 0) || ((size_t)offset > haystack_len)) {
+		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 	p += offset;
@@ -5300,11 +5305,10 @@ PHP_FUNCTION(substr_count)
 	if (ac == 4) {
 
 		if (length <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length should be greater than 0");
-			RETURN_FALSE;
+			length += (haystack_len - offset);
 		}
-		if (length > (haystack_len - offset)) {
-			php_error_docref(NULL, E_WARNING, "Length value " ZEND_LONG_FMT " exceeds string length", length);
+		if ((length <= 0) || (length > (haystack_len - offset))) {
+			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
 		endp = p + length;

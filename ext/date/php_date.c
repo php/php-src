@@ -4447,6 +4447,10 @@ PHP_METHOD(DatePeriod, getEndDate)
 
         dpobj = Z_PHPPERIOD_P(getThis());
 
+        if (!dpobj->end) {
+                return;
+        }
+
         php_date_instantiate(dpobj->start_ce, return_value);
         dateobj = Z_PHPDATE_P(return_value);
         dateobj->time = timelib_time_ctor();

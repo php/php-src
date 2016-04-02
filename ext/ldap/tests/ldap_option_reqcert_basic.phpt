@@ -3,7 +3,10 @@ ldap_option_reqcert_basic() - Basic test to check if PHP can connect to a LDAP s
 --CREDITS--
 Edwin Hoksberg <edwin@edwinhoksberg.nl>
 --SKIPIF--
-<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
+<?php
+	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once dirname(__FILE__) .'/skipifbindfailure.inc';
+?>
 --FILE--
 <?php
 require "connect.inc";
