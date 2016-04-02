@@ -110,6 +110,9 @@ enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
 
+ZEND_DECLARE_MODULE_GLOBALS(openssl);
+static PHP_GINIT_FUNCTION(openssl);
+
 PHP_FUNCTION(openssl_get_md_methods);
 PHP_FUNCTION(openssl_get_cipher_methods);
 
@@ -519,11 +522,15 @@ zend_module_entry openssl_module_entry = {
 	openssl_functions,
 	PHP_MINIT(openssl),
 	PHP_MSHUTDOWN(openssl),
-	NULL,
+	PHP_RINIT(openssl),
 	NULL,
 	PHP_MINFO(openssl),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(openssl),
+	PHP_GINIT(openssl),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -623,6 +630,21 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
+
+static int php_openssl_rand_seed() /* {{{ */
+{
+	if (OPENSSL_G(rng_reseeded) != 1) {
+		int result = RAND_poll();
+		
+		if (result != 1) {
+			return FAILURE; 
+		}
+		
+		OPENSSL_G(rng_reseeded) = 1;
+	}
+	
+	return SUCCESS;
+} /* }}} */
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
 {
@@ -1107,13 +1129,28 @@ static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo) { /* {
 }
 /* }}} */
 
+
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("openssl.cafile", NULL, PHP_INI_PERDIR, NULL)
 	PHP_INI_ENTRY("openssl.capath", NULL, PHP_INI_PERDIR, NULL)
 PHP_INI_END()
 /* }}} */
- 
+
+/* {{{ PHP_GINIT_FUNCTION */
+static PHP_GINIT_FUNCTION(openssl)
+{
+	openssl_globals->rng_reseeded = 0;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION */
+PHP_RINIT_FUNCTION(openssl)
+{
+	OPENSSL_G(rng_reseeded) = 0;
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(openssl)
@@ -3083,6 +3120,12 @@ PHP_FUNCTION(openssl_csr_new)
 	}
 	RETVAL_FALSE;
 	
+	// php_openssl_generate_private_key uses php_openssl_write_rand_file which uses RAND_write_file, which uses RAND_bytes
+	if (php_openssl_rand_seed() != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
+		RETURN_FALSE;
+	}
+	
 	PHP_SSL_REQ_INIT(&req);
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS) {
@@ -3540,6 +3583,13 @@ PHP_FUNCTION(openssl_pkey_new)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &args) == FAILURE) {
 		return;
 	}
+	
+	// php_openssl_generate_private_key uses php_openssl_write_rand_file which uses RAND_write_file, which uses RAND_bytes
+	if (php_openssl_rand_seed() != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
+		RETURN_FALSE;
+	}
+	
 	RETVAL_FALSE;
 
 	if (args && Z_TYPE_P(args) == IS_ARRAY) {
@@ -4883,6 +4933,12 @@ PHP_FUNCTION(openssl_seal)
 	} else {
 		cipher = EVP_rc4();
 	}
+	
+	// EVP_SealInit uses RAND_bytes
+	if (php_openssl_rand_seed() != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
+		RETURN_FALSE;
+	}
 
 	pkeys = safe_emalloc(nkeys, sizeof(*pkeys), 0);
 	eksl = safe_emalloc(nkeys, sizeof(*eksl), 0);
@@ -5178,6 +5234,7 @@ PHP_FUNCTION(openssl_encrypt)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ls", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
 		return;
 	}
+	
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm");
@@ -5397,6 +5454,11 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	long buffer_length;
 	unsigned char *buffer = NULL;
 	zval *zstrong_result_returned = NULL;
+
+	if (php_openssl_rand_seed() != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't seed the randomizer sufficiently");
+		RETURN_FALSE;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;

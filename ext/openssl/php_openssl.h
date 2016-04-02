@@ -49,6 +49,8 @@ PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
 
+PHP_RINIT_FUNCTION(openssl);
+
 PHP_FUNCTION(openssl_pkey_get_private);
 PHP_FUNCTION(openssl_pkey_get_public);
 PHP_FUNCTION(openssl_pkey_free);
@@ -101,6 +103,17 @@ PHP_FUNCTION(openssl_spki_export);
 PHP_FUNCTION(openssl_spki_export_challenge);
 
 PHP_FUNCTION(openssl_get_cert_locations);
+
+ZEND_BEGIN_MODULE_GLOBALS(openssl)
+	zend_bool rng_reseeded;
+ZEND_END_MODULE_GLOBALS(openssl)
+
+#ifdef ZTS
+#define OPENSSL_G(v) TSRMG(openssl_globals_id, zend_openssl_globals *, v)
+#else
+#define OPENSSL_G(v) (openssl_globals.v)
+#endif
+
 #else
 
 #define phpext_openssl_ptr NULL
