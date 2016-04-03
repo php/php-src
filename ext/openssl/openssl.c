@@ -989,9 +989,8 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		str = CONF_get_string(req->req_config, req->section_name, "encrypt_rsa_key");
 		if (str == NULL) {
 			str = CONF_get_string(req->req_config, req->section_name, "encrypt_key");
-			if (str == NULL) {
-				php_openssl_store_errors();
-			}
+			/* it is sure that there are some errrors as str was NULL for encrypt_rsa_key */
+			php_openssl_store_errors();
 		}
 		if (str != NULL && strcmp(str, "no") == 0) {
 			req->priv_key_encrypt = 0;
