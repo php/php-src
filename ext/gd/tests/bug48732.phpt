@@ -19,4 +19,4 @@ echo 'Left Bottom: (' . $bbox[0]  . ', ' . $bbox[1] . ')';
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48732.png'); ?>
 --EXPECTF--
-Left Bottom: (0, 47)
+Left Bottom: (0, 46)
