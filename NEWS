@@ -1,9 +1,51 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.4
+?? ??? 2016 PHP 7.0.5
 
 - Core:
-  . Fixed bug #71485 (Return typehint on interanal func causes Fatal error
+  . Fixed bug #71629 (Out-of-bounds access in php_url_decode in context
+    php_stream_url_wrap_rfc2397). (mt at debian dot org)
+  . Fixed bug #71622 (Strings used in pass-as-reference cannot be used to
+    invoke C::$callable()). (Bob)
+  . Fixed bug #71596 (Segmentation fault on ZTS with date function
+    (setlocale)). (Anatol)
+  . Fixed bug #71535 (Integer overflow in zend_mm_alloc_heap()). (Dmitry)
+  . Fixed bug #71470 (Leaked 1 hashtable iterators). (Nikita)
+
+- libxml:
+  . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
+
+- ODBC:
+  . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
+    for the first two statements). (einavitamar at gmail dot com, Anatol)
+
+- PDO_DBlib:
+  . Bug #54648 (PDO::MSSQL forces format of datetime fields).
+    (steven dot lambeth at gmx dot de, Anatol)
+
+- Phar:
+  . Fixed bug #71625 (Crash in php7.dll with bad phar filename).
+    (Anatol)
+
+- phpdbg:
+  . Fixed crash when advancing (except step) inside an internal function. (Bob)
+
+- SPL:
+  . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
+    (Nikita)
+
+- Standard:
+  . Fixed bug #71660 (array_column behaves incorrectly after foreach by
+    reference). (Laruence)
+
+- Zip:
+  . Update bundled libzip to 1.1.2. (Remi, Anatol)
+
+?? Mar 2016 PHP 7.0.4
+
+- Core:
+  . Fixed bug (Low probability segfault in zend_arena). (Laruence)
+  . Fixed bug #71485 (Return typehint on internal func causes Fatal error
     when it throws exception). (Laruence)
   . Fixed bug #71474 (Crash because of VM stack corruption on Magento2).
     (Dmitry)
@@ -14,23 +56,58 @@ PHP                                                                        NEWS
   . Fixed bug #71442 (forward_static_call crash). (Laruence)
   . Fixed bug #71441 (Typehinted Generator with return in try/finally crashes).
     (Bob)
+  . Fixed bug #71529 (Variable references on array elements don't work when
+    using count). (Nikita)
+  . Fixed bug #71601 (finally block not executed after yield from). (Bob)
+
+- CLI server:
+  . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
+    (Johannes, Anatol)
+
+- CURL:
+  . Fixed bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes
+    while curl_multi_exec). (Laruence)
+  . Fixed memory leak in curl_getinfo(). (Leigh)
+
+- Date:
+  . Fixed bug #71525 (Calls to date_modify will mutate timelib_rel_time,
+    causing date_date_set issues). (Sean DuBois)
 
 - Fileinfo:
   . Fixed bug #71434 (finfo throws notice for specific python file). (Laruence)
 
 - FPM:
-  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi setup).
-    (Matt Haught, Remi)
+  . Fixed bug #62172 (FPM not working with Apache httpd 2.4 balancer/fcgi
+    setup). (Matt Haught, Remi)
+  . Fixed bug #71269 (php-fpm dumped core). (Mickaël)
+
+- Opcache:
+  . Fixed bug #71584 (Possible use-after-free of ZCG(cwd) in Zend Opcache).
+    (Yussuf Khalil)
+
+- PCRE:
+  . Fixed bug #71537 (PCRE segfault from Opcache). (Laruence)
+
+- phpdbg:
+  . Fixed inherited functions from unspecified files being included in
+    phpdbg_get_executable(). (Bob)
 
 - Standard:
+  . Fixed bug #71603 (compact() maintains references in php7). (Laruence)
   . Fixed bug #70720 (strip_tags improper php code parsing). (Julien)
+
+- XMLRPC:
+  . Fixed bug #71501 (xmlrpc_encode_request ignores encoding option). (Hieu Le)
+
+- Zip:
+  . Fixed bug #71561 (NULL pointer dereference in Zip::ExtractTo). (Laruence)
 
 04 Feb 2016 PHP 7.0.3
 
 - Core:
   . Added support for new HTTP 451 code. (Julien)
-  . Fixed bug #71039 (exec functions ignore length but look for NULL termination).
-    (Anatol)
+  . Fixed bug #71039 (exec functions ignore length but look for NULL
+    termination). (Anatol)
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
   . Fixed bug #71201 (round() segfault on 64-bit builds). (Anatol)
   . Fixed bug #71221 (Null pointer deref (segfault) in get_defined_vars via
@@ -57,6 +134,9 @@ PHP                                                                        NEWS
   . Fixed bug #71225 (curl_setopt() fails to set CURLOPT_POSTFIELDS with
     reference to CURLFile). (Laruence)
 
+- GD:
+  . Improved fix for bug #70976. (Remi)
+
 - Interbase:
   . Fixed Bug #71305 (Crash when optional resource is omitted).
   (Laruence, Anatol)
@@ -70,6 +150,9 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #71475 (openssl_seal() uninitialized memory usage). (Stas)
+
+- PCRE:
+  . Upgraded pcrelib to 8.38.
 
 - Phar:
   . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
@@ -142,16 +225,16 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
-- GD:
-  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
-    Out of Bounds). (emmanuel dot law at gmail dot com).
-
 - FPM:
   . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
+
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com)
 
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
@@ -182,12 +265,12 @@ PHP                                                                        NEWS
     (emmanuel dot law at gmail dot com)
 
 - WDDX:
-  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
-    (taoguangchen at icloud dot com)
+  . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet
+    Deserialization). (taoguangchen at icloud dot com)
   . Fixed bug #70741 (Session WDDX Packet Deserialization Type Confusion
     Vulnerability). (taoguangchen at icloud dot com)
 
-- XMLRPC
+- XMLRPC:
   . Fixed bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker).
     (Julien)
 

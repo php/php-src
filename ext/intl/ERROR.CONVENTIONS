@@ -21,9 +21,9 @@ intl.use_exceptions you get more fine-grained information about where the
 error occurred).
 
 The internal PHP code can set the global last error with:
-void intl_error_set_code(intl_error* err, UErrorCode err_code TSRMLS_DC);
-void intl_error_set_custom_msg(intl_error* err, char* msg, int copyMsg TSRMLS_DC);
-void intl_error_set(intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC);
+void intl_error_set_code(intl_error* err, UErrorCode err_code);
+void intl_error_set_custom_msg(intl_error* err, char* msg, int copyMsg);
+void intl_error_set(intl_error* err, UErrorCode code, char* msg, int copyMsg);
 
 and by passing NULL as the first parameter. The last function is a combination
 of the first two. If the message is not a static buffer, copyMsg should be 1.
@@ -44,9 +44,9 @@ typedef struct {
 
 The global error and the object error can be SIMULTANEOUSLY set with these
 functions:
-void intl_errors_set_custom_msg(intl_error* err, char* msg, int copyMsg TSRMLS_DC);
-void intl_errors_set_code(intl_error* err, UErrorCode err_code TSRMLS_DC);
-void intl_errors_set(intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC);
+void intl_errors_set_custom_msg(intl_error* err, char* msg, int copyMsg);
+void intl_errors_set_code(intl_error* err, UErrorCode err_code);
+void intl_errors_set(intl_error* err, UErrorCode code, char* msg, int copyMsg);
 
 by passing a pointer to the object's intl_error structed as the first parameter.
 Node the extra 's' in the functions' names ('errors', not 'error').
@@ -79,8 +79,8 @@ Errors should be lost after a function call. This is different from the way
 ICU operates, where functions return immediately if an error is set.
 
 Error resetting can be done with:
-void intl_error_reset(NULL TSRMLS_DC);				/* reset global error */
-void intl_errors_reset(intl_error* err TSRMLS_DC );	/* reset global and object error */
+void intl_error_reset(NULL);				/* reset global error */
+void intl_errors_reset(intl_error* err );	/* reset global and object error */
 
 In practice, intl_errors_reset() is not used because most classes have also
 plain functions mapped to the same internal functions as their instance methods.
@@ -97,10 +97,10 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	BREAKITER_METHOD_INIT_VARS;			/* macro also resets global error */
 	object = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 			&text, &text_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_set_text: bad arguments", 0 TSRMLS_CC);
+			"breakiter_set_text: bad arguments", 0);
 		RETURN_FALSE;
 	}
 

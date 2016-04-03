@@ -424,9 +424,9 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			char *p = strstr(get_output_encoding(), "//");
 
 			if (p) {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (size_t) strlen(mimetype), mimetype, (size_t)(p - get_output_encoding()), get_output_encoding());
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, (int) (p - get_output_encoding()), get_output_encoding());
 			} else {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (size_t) strlen(mimetype), mimetype, get_output_encoding());
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, get_output_encoding());
 			}
 			if (content_type && SUCCESS == sapi_add_header(content_type, (uint)len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;

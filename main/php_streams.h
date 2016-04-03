@@ -313,11 +313,7 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size);
 #define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size))
 
-#ifdef ZTS
-PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-#else
 PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
-#endif
 
 /* php_stream_printf macro & function require */
 #define php_stream_printf _php_stream_printf
@@ -579,11 +575,7 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 			php_stream_open_wrapper_ex(Z_STRVAL_PP((zstream)), (mode), (options), (opened), (context)) : NULL
 
 /* pushes an error message onto the stack for a wrapper instance */
-#ifdef ZTS
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
-#else
 PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-#endif
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */

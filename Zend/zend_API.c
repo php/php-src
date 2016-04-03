@@ -1226,8 +1226,15 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 				size_t prop_name_len;
 				if (zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len) == SUCCESS) {
 					zend_string *pname = zend_string_init(prop_name, prop_name_len, 0);
+					zend_class_entry *prev_scope = EG(scope);
+					if (class_name && class_name[0] != '*') {
+						zend_string *cname = zend_string_init(class_name, strlen(class_name), 0);
+						EG(scope) = zend_lookup_class(cname);
+						zend_string_release(cname);
+					}
 					property_info = zend_get_property_info(object->ce, pname, 1);
 					zend_string_release(pname);
+					EG(scope) = prev_scope;
 				} else {
 					property_info = ZEND_WRONG_PROPERTY_INFO;
 				}
@@ -1638,7 +1645,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			result = zend_symtable_update(ht, ZSTR_EMPTY_ALLOC(), value);
 			break;
 		case IS_RESOURCE:
-			zend_error(E_NOTICE, "Resource ID#" ZEND_LONG_FMT " used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
+			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
 			result = zend_hash_index_update(ht, Z_RES_HANDLE_P(key), value);
 			break;
 		case IS_FALSE:

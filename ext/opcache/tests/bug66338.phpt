@@ -15,13 +15,13 @@ file_put_contents( "$root-Officials.inc", '<?php
 
 file_put_contents( "$root-clientUS.php", '<?php 
 	class LocalTerms { const GOV_LEADER = "Barack Hussein Obama II"; }
-	require "'.$root.'-Officials.inc";
+	require \''.$root.'-Officials.inc\';
 	printf( "The President of the USA is %s\n", Officials::getLeader() );
 	' );
 
 file_put_contents( "$root-clientUK.php", '<?php 
 	class LocalTerms { const GOV_LEADER = "David William Donald Cameron"; }
-	require "'.$root.'-Officials.inc";
+	require \''.$root.'-Officials.inc\';
 	printf( "The Prime Minister of the UK is %s\n", Officials::getLeader() );
 	' );
 

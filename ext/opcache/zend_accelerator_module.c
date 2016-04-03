@@ -516,7 +516,9 @@ static zend_module_entry accel_module_entry = {
 	NULL,
 	zend_accel_info,
 	ACCELERATOR_VERSION "FE",
-	STANDARD_MODULE_PROPERTIES
+	NO_MODULE_GLOBALS,
+	accel_post_deactivate,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 int start_accel_module(void)

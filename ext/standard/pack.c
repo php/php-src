@@ -986,7 +986,7 @@ PHP_FUNCTION(unpack)
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
+				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}

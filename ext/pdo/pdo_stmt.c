@@ -2107,9 +2107,9 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		RETURN_FALSE;
 	}
 
-	php_stream_printf(out, "SQL: [%d] %.*s\n",
+	php_stream_printf(out, "SQL: [%zd] %.*s\n",
 		stmt->query_stringlen,
-		stmt->query_stringlen, stmt->query_string);
+		(int) stmt->query_stringlen, stmt->query_string);
 
 	php_stream_printf(out, "Params:  %d\n",
 		stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0);
@@ -2119,13 +2119,14 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		zend_string *key = NULL;
 		ZEND_HASH_FOREACH_KEY_PTR(stmt->bound_params, num, key, param) {
 			if (key) {
-				php_stream_printf(out, "Key: Name: [%d] %.*s\n", ZSTR_LEN(key), ZSTR_LEN(key), ZSTR_VAL(key));
+				php_stream_printf(out, "Key: Name: [%zd] %.*s\n",
+					ZSTR_LEN(key), (int) ZSTR_LEN(key), ZSTR_VAL(key));
 			} else {
 				php_stream_printf(out, "Key: Position #%pd:\n", num);
 			}
 
-			php_stream_printf(out, "paramno=%pd\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-					param->paramno, param->name? ZSTR_LEN(param->name) : 0, param->name? ZSTR_LEN(param->name) : 0,
+			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+					param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
 					param->name ? ZSTR_VAL(param->name) : "",
 					param->is_param,
 					param->param_type);

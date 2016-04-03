@@ -383,6 +383,9 @@ static int php_libxml_streams_IO_read(void *context, char *buffer, int len)
 
 static int php_libxml_streams_IO_write(void *context, const char *buffer, int len)
 {
+	if (CG(unclean_shutdown)) {
+		return -1;
+	}
 	return php_stream_write((php_stream*)context, buffer, len);
 }
 

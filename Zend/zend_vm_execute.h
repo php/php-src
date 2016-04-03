@@ -4183,6 +4183,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
+	/* This generator has no send target (though the generator we delegate to might have one) */
+	generator->send_target = NULL;
+
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
 	ZEND_VM_INC_OPCODE();
@@ -5537,7 +5540,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 					}
 				}
 				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -5644,15 +5647,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		function_name = EX_CONSTANT(opline->op2);
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if (IS_CONST & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
+					zend_throw_error(NULL, "Function name must be a string");
 
-				HANDLE_EXCEPTION();
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -6529,7 +6539,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CONST_HANDLER
 
 				value = EX_CONSTANT(opline->op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CONST != IS_CONST) {
+				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -6706,7 +6716,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMP_HANDLER(Z
 
 				value = EX_CONSTANT(opline->op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CONST != IS_CONST) {
+				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -7248,7 +7258,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_VAR_HANDLER(Z
 
 				value = EX_CONSTANT(opline->op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CONST != IS_CONST) {
+				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -7625,15 +7635,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if (IS_UNUSED & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
+					zend_throw_error(NULL, "Function name must be a string");
 
-				HANDLE_EXCEPTION();
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -8139,7 +8156,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLE
 
 				value = EX_CONSTANT(opline->op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CONST != IS_CONST) {
+				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -9261,7 +9278,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 					}
 				}
 				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -9368,15 +9385,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		function_name = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if (IS_CV & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
+					zend_throw_error(NULL, "Function name must be a string");
 
-				HANDLE_EXCEPTION();
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -9980,7 +10004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 
 				value = EX_CONSTANT(opline->op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CONST != IS_CONST) {
+				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -11068,7 +11092,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 					}
 				}
 				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						zval_ptr_dtor_nogc(free_op2);
 						HANDLE_EXCEPTION();
@@ -11176,15 +11200,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
+					zend_throw_error(NULL, "Function name must be a string");
+					zval_ptr_dtor_nogc(free_op2);
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -12517,6 +12548,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
+	/* This generator has no send target (though the generator we delegate to might have one) */
+	generator->send_target = NULL;
+
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
 	ZEND_VM_INC_OPCODE();
@@ -13006,7 +13040,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(Z
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR != IS_CONST) {
+				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -13183,7 +13217,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEN
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR != IS_CONST) {
+				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -13360,7 +13394,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEN
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR != IS_CONST) {
+				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -13730,7 +13764,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR != IS_CONST) {
+				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -14279,7 +14313,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR != IS_CONST) {
+				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -16335,6 +16369,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
+	/* This generator has no send target (though the generator we delegate to might have one) */
+	generator->send_target = NULL;
+
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
 	ZEND_VM_INC_OPCODE();
@@ -17507,15 +17544,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		function_name = EX_CONSTANT(opline->op2);
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if (IS_CONST & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
+					zend_throw_error(NULL, "Function name must be a string");
 
-				HANDLE_EXCEPTION();
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -18010,7 +18054,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CONST_HANDLER(Z
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_VAR != IS_CONST) {
+				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -18216,7 +18260,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEN
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_VAR != IS_CONST) {
+				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -18482,7 +18526,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEN
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_VAR != IS_CONST) {
+				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -19135,15 +19179,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if (IS_UNUSED & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
+					zend_throw_error(NULL, "Function name must be a string");
 
-				HANDLE_EXCEPTION();
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -19464,7 +19515,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_VAR != IS_CONST) {
+				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -20756,15 +20807,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		function_name = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if (IS_CV & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
+					zend_throw_error(NULL, "Function name must be a string");
 
-				HANDLE_EXCEPTION();
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -21152,7 +21210,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_VAR != IS_CONST) {
+				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -22326,15 +22384,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
+					zend_throw_error(NULL, "Function name must be a string");
+					zval_ptr_dtor_nogc(free_op2);
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -23727,7 +23792,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 					}
 				}
 				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -24287,7 +24352,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CONST_HANDLE
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_UNUSED != IS_CONST) {
+				if (IS_UNUSED == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -24428,7 +24493,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_UNUSED != IS_CONST) {
+				if (IS_UNUSED == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -24569,7 +24634,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_UNUSED != IS_CONST) {
+				if (IS_UNUSED == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -25108,7 +25173,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDL
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_UNUSED != IS_CONST) {
+				if (IS_UNUSED == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -26142,7 +26207,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 					}
 				}
 				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -26595,7 +26660,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(Z
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_UNUSED != IS_CONST) {
+				if (IS_UNUSED == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -27634,7 +27699,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 					}
 				}
 				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						zval_ptr_dtor_nogc(free_op2);
 						HANDLE_EXCEPTION();
@@ -29664,6 +29729,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 	if (RETURN_VALUE_USED(opline)) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
+
+	/* This generator has no send target (though the generator we delegate to might have one) */
+	generator->send_target = NULL;
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -31889,7 +31957,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 					}
 				}
 				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -32731,7 +32799,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZE
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CV != IS_CONST) {
+				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -33027,7 +33095,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CV != IS_CONST) {
+				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -33700,7 +33768,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CV != IS_CONST) {
+				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -34895,7 +34963,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(Z
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CV != IS_CONST) {
+				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -36965,7 +37033,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 					}
 				}
 				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -37583,7 +37651,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CV != IS_CONST) {
+				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -39537,7 +39605,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 					}
 				}
 				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						zval_ptr_dtor_nogc(free_op2);
 						HANDLE_EXCEPTION();
@@ -41764,7 +41832,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 					}
 				}
 				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -43904,7 +43972,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 					}
 				}
 				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 
 						HANDLE_EXCEPTION();
@@ -45042,7 +45110,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 					}
 				}
 				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						zval_ptr_dtor_nogc(free_op2);
 						HANDLE_EXCEPTION();

@@ -2944,7 +2944,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 					}
 				}
 				if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-					GET_OP1_UNDEF_CV(object, BP_VAR_R);
+					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						FREE_OP2();
 						HANDLE_EXCEPTION();
@@ -3053,15 +3053,22 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 		function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 		if (OP2_TYPE != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-				if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
+				do {
+					if (OP2_TYPE & (IS_VAR|IS_CV) && Z_ISREF_P(function_name)) {
+						function_name = Z_REFVAL_P(function_name);
+						if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+							break;
+						}
+					} else if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+						GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							HANDLE_EXCEPTION();
+						}
 					}
-				}
-				zend_throw_error(NULL, "Function name must be a string");
-				FREE_OP2();
-				HANDLE_EXCEPTION();
+					zend_throw_error(NULL, "Function name must be a string");
+					FREE_OP2();
+					HANDLE_EXCEPTION();
+				} while (0);
  			}
 		}
 
@@ -7316,7 +7323,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 				value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (OP1_TYPE != IS_CONST) {
+				if (OP1_TYPE == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
 						zval_copy_ctor_func(&generator->value);
 					}
@@ -7502,6 +7509,9 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 	if (RETURN_VALUE_USED(opline)) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
+
+	/* This generator has no send target (though the generator we delegate to might have one) */
+	generator->send_target = NULL;
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
