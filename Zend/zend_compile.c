@@ -5402,7 +5402,7 @@ ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int le
 
 	*class_name = NULL;
 
-	if (mangled_property[0]!=0) {
+	if (!len || mangled_property[0] != 0) {
 		*prop_name = mangled_property;
 		if (prop_len) {
 			*prop_len = len;
