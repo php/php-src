@@ -902,10 +902,16 @@ static int add_oid_section(struct php_x509_request * req) /* {{{ */
 			req->config_filename, req->var, req->req_config) == FAILURE) return FAILURE
 
 #define SET_OPTIONAL_STRING_ARG(key, varname, defval)	\
-		if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL && Z_TYPE_P(item) == IS_STRING) \
-		varname = Z_STRVAL_P(item); \
-	else \
-		varname = defval
+	do { \
+		if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL && Z_TYPE_P(item) == IS_STRING) { \
+			varname = Z_STRVAL_P(item); \
+		} else { \
+			varname = defval; \
+			if (varname == NULL) { \
+				php_openssl_store_errors(); \
+			} \
+		} \
+	} while(0)
 
 #define SET_OPTIONAL_LONG_ARG(key, varname, defval)	\
 	if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL && Z_TYPE_P(item) == IS_LONG) \
