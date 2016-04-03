@@ -2314,7 +2314,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			if ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING)) {
 				tmp |= MAY_BE_STRING;
 			}
-			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t1 & (MAY_BE_ANY-MAY_BE_STRING))) {
+			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t2 & (MAY_BE_ANY-MAY_BE_STRING))) {
 				tmp |= MAY_BE_LONG;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
