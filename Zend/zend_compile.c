@@ -5378,13 +5378,12 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
+void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t flags = list->attr;
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
-	zend_bool use_optional_types = 0;
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -5396,10 +5395,9 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < children; ++i) {
 		zend_ast *prop_ast = list->child[i];
-		zend_ast *type_ast = prop_ast->child[0];
-		zend_ast *name_ast = prop_ast->child[1];
-		zend_ast *value_ast = prop_ast->child[2];
-		zend_ast *doc_comment_ast = prop_ast->child[3];
+		zend_ast *name_ast = prop_ast->child[0];
+		zend_ast *value_ast = prop_ast->child[1];
+		zend_ast *doc_comment_ast = prop_ast->child[2];
 		zend_string *name = zend_ast_get_str(name_ast);
 		zend_string *doc_comment = NULL;
 		zval value_zv;
@@ -5412,16 +5410,8 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 				"Typed property %s::$%s must not be static",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(name));
-			}
+			}		
 
-			if (!use_optional_types && i > 0) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Typed property %s::$%s must not be mixed with untyped properties",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(name));
-			}			
-
-			use_optional_types = 1;
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				optional_type = type_ast->attr;
 			} else {
@@ -5458,11 +5448,6 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 					optional_type_name = class_name;
 				}
 			}
-		} else if (use_optional_types) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Untyped property %s::$%s must not be mixed with typed properties",
-				ZSTR_VAL(ce->name),
-				ZSTR_VAL(name));
 		}
 		
 		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */
@@ -5518,6 +5503,14 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 	}
 }
 /* }}} */
+
+void zend_compile_prop_group(zend_ast *list) /* {{{ */
+{
+	zend_ast *type_ast = list->child[0];
+	zend_ast *prop_ast = list->child[1];
+
+	zend_compile_prop_decl(prop_ast, type_ast);
+} /* }}} */
 
 void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 {
@@ -7594,8 +7587,8 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_METHOD:
 			zend_compile_func_decl(NULL, ast);
 			break;
-		case ZEND_AST_PROP_DECL:
-			zend_compile_prop_decl(ast);
+		case ZEND_AST_PROP_GROUP:
+			zend_compile_prop_group(ast);
 			break;
 		case ZEND_AST_CLASS_CONST_DECL:
 			zend_compile_class_const_decl(ast);

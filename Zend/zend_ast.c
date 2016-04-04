@@ -1100,7 +1100,12 @@ simple_list:
 			zend_ast_export_var_list(str, (zend_ast_list*)ast, indent);
 			smart_str_appendc(str, ')');
 			break;
-		case ZEND_AST_PROP_DECL:
+		case ZEND_AST_PROP_GROUP: {
+			zend_ast *type_ast = ast->child[0];
+			zend_ast *prop_ast = ast->child[1];
+
+			ast = prop_ast;
+
 			if (ast->attr & ZEND_ACC_PUBLIC) {
 				smart_str_appends(str, "public ");
 			} else if (ast->attr & ZEND_ACC_PROTECTED) {
@@ -1111,7 +1116,16 @@ simple_list:
 			if (ast->attr & ZEND_ACC_STATIC) {
 				smart_str_appends(str, "static ");
 			}
+
+			if (type_ast) {
+				zend_ast_export_name(
+					str, type_ast, 0, indent);
+				smart_str_appendc(str, ' ');
+			}
+			
 			goto simple_list;
+		}
+
 		case ZEND_AST_CONST_DECL:
 		case ZEND_AST_CLASS_CONST_DECL:
 			smart_str_appends(str, "const ");
@@ -1437,14 +1451,9 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_PROP_ELEM:
-			if (ast->child[0]) {
-				zend_ast_export_name(
-					str, ast->child[0], 0, indent);
-				smart_str_appendc(str, ' ');
-			}
 			smart_str_appendc(str, '$');
-			zend_ast_export_name(str, ast->child[1], 0, indent);
-			APPEND_DEFAULT_VALUE(2);
+			zend_ast_export_name(str, ast->child[0], 0, indent);
+			APPEND_DEFAULT_VALUE(1);
 		case ZEND_AST_CONST_ELEM:
 			zend_ast_export_name(str, ast->child[0], 0, indent);
 			APPEND_DEFAULT_VALUE(1);

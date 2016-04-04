@@ -701,8 +701,9 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers property_list ';'
-			{ $$ = $2; $$->attr = $1; }
+		variable_modifiers optional_type property_list ';'
+			{ $3->attr = $1; 
+			  $$ = zend_ast_create(ZEND_AST_PROP_LIST, $2, $3); }
 	|	method_modifiers T_CONST class_const_list ';'
 			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
@@ -800,10 +801,10 @@ property_list:
 ;
 
 property:
-		optional_type T_VARIABLE backup_doc_comment
-			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $2, NULL, ($3 ? zend_ast_create_zval_from_str($3) : NULL)); }
-	|	optional_type T_VARIABLE '=' expr backup_doc_comment
-			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $2, $4, ($5 ? zend_ast_create_zval_from_str($5) : NULL)); }
+		T_VARIABLE backup_doc_comment
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str($2) : NULL)); }
+	|	T_VARIABLE '=' expr backup_doc_comment
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 class_const_list:

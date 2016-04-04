@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties disallow mixing typed and untyped declarations
+Test typed properties type must preceed first declaration in group
 --FILE--
 <?php
 class Foo {
@@ -8,7 +8,8 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Typed property Foo::$qux must not be mixed with untyped properties in %s on line 3
+Parse error: syntax error, unexpected 'int' (T_STRING), expecting variable (T_VARIABLE) in %s on line 4
+
 
 
 

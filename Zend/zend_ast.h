@@ -131,6 +131,7 @@ enum _zend_ast_kind {
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
 	ZEND_AST_GROUP_USE,
+	ZEND_AST_PROP_GROUP,
 
 	/* 3 child nodes */
 	ZEND_AST_METHOD_CALL = 3 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -141,11 +142,11 @@ enum _zend_ast_kind {
 	ZEND_AST_CATCH,
 	ZEND_AST_PARAM,
 	ZEND_AST_CONST_ELEM,
+	ZEND_AST_PROP_ELEM,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
-	ZEND_AST_FOREACH,
-	ZEND_AST_PROP_ELEM,
+	ZEND_AST_FOREACH
 };
 
 typedef uint16_t zend_ast_kind;

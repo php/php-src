@@ -1,14 +1,20 @@
 --TEST--
-Test typed properties disallow mixing typed and untyped declarations
+Test typed properties type applies to all props in group
 --FILE--
 <?php
 class Foo {
 	public int $bar,
 				$qux;
 }
+
+$reflector = new ReflectionClass(Foo::class);
+
+$prop = $reflector->getProperty("qux");
+
+var_dump((string) $prop->getType());
 ?>
 --EXPECTF--
-Fatal error: Untyped property Foo::$qux must not be mixed with typed properties in %s on line 3
+string(3) "int"
 
 
 
