@@ -111,6 +111,25 @@ ZEND_API int clean_non_persistent_function_full(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static int clean_non_persistent_type_info(zval *zv) /* {{{ */
+{
+	zend_class_entry *ce = Z_PTR_P(zv);
+
+	if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS)) {
+		if (ZEND_CLASS_HAS_TYPE_HINTS(ce)) {
+			zend_property_info *prop_info;
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+				if (prop_info->type_ce->type == ZEND_USER_CLASS) {
+					prop_info->type_ce = NULL;
+				}
+			} ZEND_HASH_FOREACH_END();
+		}	
+		return ZEND_HASH_APPLY_KEEP;
+	}
+
+	return ZEND_HASH_APPLY_STOP;	
+} /* }}} */
+
 static int clean_non_persistent_class(zval *zv) /* {{{ */
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -357,6 +376,9 @@ void shutdown_executor(void) /* {{{ */
 		zend_objects_store_free_object_storage(&EG(objects_store));
 
 		zend_vm_stack_destroy();
+
+		/* remove non persistent type info from internal classes */
+		zend_hash_apply(EG(class_table), clean_non_persistent_type_info);
 
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {

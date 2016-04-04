@@ -362,6 +362,8 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 		}                                                \
 	} while (0)
 
+#define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
+
 static zend_always_inline zend_bool _zend_object_has_type_hints(zval *object) {
 	do {
 		if (Z_TYPE_P(object) != IS_OBJECT) {
@@ -374,7 +376,7 @@ static zend_always_inline zend_bool _zend_object_has_type_hints(zval *object) {
 			}
 		}
 
-		return (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS;
+		return ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object));
 	} while (0);
 
 	return 0;

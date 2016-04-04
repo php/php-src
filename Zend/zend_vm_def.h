@@ -6470,6 +6470,9 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY, JMP_ADDR)
 							ZSTR_VAL(prop_info->ce->name),
 							ZSTR_VAL(p->key));
 						HANDLE_EXCEPTION();
+					} else if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
+						zend_verify_property_type_error(prop_info, p->key, value);
+						HANDLE_EXCEPTION();
 					}
 				}
 			}
