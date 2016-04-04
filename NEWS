@@ -3,8 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.6
 
 - Core:
-  . Fixed bug #71414 (Fatal error when using interface trait and inheritance). (krakjoe)
-  . Fixed bug #71359 ( 	Coalescing operator on classes with overridden __get() method). (krakjoe)
+  . Fixed bug #71414 (Inheritance, traits and interfaces). (krakjoe)
+  . Fixed bug #71359 (Null coalescing operator and magic). (krakjoe)
   . Fixed bug #71930 (_zval_dtor_func: Assertion `(arr)->gc.refcount <= 1'
     failed). (Laruence)
   . Fixed bug #71914 (Reference is lost in "switch"). (Laruence)
@@ -49,7 +49,7 @@ PHP                                                                        NEWS
   . Fixed bug #71735 (Double-free in SplDoublyLinkedList::offsetSet). (Stas)
 
 - Standard:
-  . Fixed bug #71827 (substr_replace bug when length type is string). (krakjoe)
+  . Fixed bug #71827 (substr_replace bug, string length). (krakjoe)
   . Fixed bug #71891 (header_register_callback() and
     register_shutdown_function()). (Laruence)
   . Fixed bug #71884 (Null pointer deref (segfault) in
