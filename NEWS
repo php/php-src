@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug #52098 (Own PDOStatement implementation ignore __call()).
     (Daniel kalaspuffar, Julien)
+  . Fixed bug #71447 (Quotes inside comments not properly handled).
+    (Matteo)
 
 - Postgres:
   . Fixed bug #71820 (pg_fetch_object binds parameters before call
