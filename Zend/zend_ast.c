@@ -1102,11 +1102,6 @@ tail_call:
 simple_list:
 			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 20, indent);
 			break;
-		case ZEND_AST_LIST:
-			smart_str_appends(str, "list(");
-			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 20, indent);
-			smart_str_appendc(str, ')');
-			break;
 		case ZEND_AST_ARRAY:
 			smart_str_appendc(str, '[');
 			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 20, indent);

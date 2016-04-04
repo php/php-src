@@ -2578,13 +2578,13 @@ static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t
 
 void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type);
 void zend_compile_assign(znode *result, zend_ast *ast);
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node);
+static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style);
 
 static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
 {
 	znode dummy_node;
-	if (var_ast->kind == ZEND_AST_LIST) {
-		zend_compile_list_assign(&dummy_node, var_ast, value_node);
+	if (var_ast->kind == ZEND_AST_ARRAY) {
+		zend_compile_list_assign(&dummy_node, var_ast, value_node, var_ast->attr);
 	} else {
 		zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
 			zend_ast_create_znode(value_node));
@@ -2728,18 +2728,35 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, int d
 }
 /* }}} */
 
-static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
+static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_style) /* {{{ */ {
+	if (var_ast->kind == ZEND_AST_ARRAY) {
+		if (old_style != var_ast->attr) {
+			zend_error(E_COMPILE_ERROR, "Cannot mix [] and list()");
+		}
+	} else if (!zend_can_write_to_variable(var_ast)) {
+		zend_error(E_COMPILE_ERROR, "Assignments can only happen to writable values");
+	}
+}
+/* }}} */
+
+static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_node, zend_bool old_style) /* {{{ */
 {
 	uint32_t i;
 	zend_bool has_elems = 0;
 
 	for (i = 0; i < list->children; ++i) {
-		zend_ast *var_ast = list->child[i];
+		zend_ast *elem_ast = list->child[i];
+		zend_ast *var_ast;
 		znode fetch_result, dim_node;
 
-		if (var_ast == NULL) {
+		if (elem_ast == NULL) {
 			continue;
 		}
+		if (elem_ast->attr) {
+			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
+		}
+
+		var_ast = elem_ast->child[0];
 		has_elems = 1;
 
 		dim_node.op_type = IS_CONST;
@@ -2748,6 +2765,12 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
+
+		if (elem_ast->child[1] != NULL) {
+			zend_error(E_COMPILE_ERROR, "Cannot mix keyed and unkeyed array entries in assignments");
+		}
+
+		zend_verify_list_assign_target(var_ast, old_style);
 
 		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
 		zend_emit_assign_znode(var_ast, &fetch_result);
@@ -2759,7 +2782,7 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 }
 /* }}} */
 
-static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
+static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node, zend_bool old_style) /* {{{ */
 {
 	uint32_t i;
 
@@ -2769,11 +2792,25 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 		zend_ast *key_ast = pair_ast->child[1];
 		znode fetch_result, dim_node;
 
+		if (pair_ast->attr) {
+			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
+		}
+
 		zend_compile_expr(&dim_node, key_ast);
 
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
+
+		if (var_ast == NULL) {
+			zend_error(E_COMPILE_ERROR, "Cannot use empty array entries in keyed array");
+		}
+
+		if (key_ast == NULL) {
+			zend_error(E_COMPILE_ERROR, "Cannot mix keyed and unkeyed array entries in assignments");
+		}
+
+		zend_verify_list_assign_target(var_ast, old_style);
 
 		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
 		zend_emit_assign_znode(var_ast, &fetch_result);
@@ -2781,14 +2818,14 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 }
 /* }}} */
 
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
+static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 
-	if (list->children > 0 && list->child[0] != NULL && list->child[0]->kind == ZEND_AST_ARRAY_ELEM) {
-		zend_compile_keyed_list_assign(list, expr_node);
+	if (list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL /* has key */) {
+		zend_compile_keyed_list_assign(list, expr_node, old_style);
 	} else {
-		zend_compile_unkeyed_list_assign(list, expr_node);
+		zend_compile_unkeyed_list_assign(list, expr_node, old_style);
 	}
 
 	*result = *expr_node;
@@ -2838,13 +2875,16 @@ zend_bool zend_list_has_assign_to(zend_ast *list_ast, zend_string *name) /* {{{ 
 	zend_ast_list *list = zend_ast_get_list(list_ast);
 	uint32_t i;
 	for (i = 0; i < list->children; i++) {
-		zend_ast *var_ast = list->child[i];
-		if (!var_ast) {
+		zend_ast *elem_ast = list->child[i];
+		zend_ast *var_ast;
+
+		if (!elem_ast) {
 			continue;
 		}
+		var_ast = elem_ast->child[0];
 
 		/* Recursively check nested list()s */
-		if (var_ast->kind == ZEND_AST_LIST && zend_list_has_assign_to(var_ast, name)) {
+		if (var_ast->kind == ZEND_AST_ARRAY && zend_list_has_assign_to(var_ast, name)) {
 			return 1;
 		}
 
@@ -2926,7 +2966,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			zend_emit_op_data(&expr_node);
 			return;
-		case ZEND_AST_LIST:
+		case ZEND_AST_ARRAY:
 			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
 				/* list($a, $b) = $a should evaluate the right $a first */
 				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
@@ -2934,7 +2974,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 				zend_compile_expr(&expr_node, expr_ast);
 			}
 
-			zend_compile_list_assign(result, var_ast, &expr_node);
+			zend_compile_list_assign(result, var_ast, &expr_node, var_ast->attr);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -4327,7 +4367,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		if (key_ast->kind == ZEND_AST_REF) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Key element cannot be a reference");
 		}
-		if (key_ast->kind == ZEND_AST_LIST) {
+		if (key_ast->kind == ZEND_AST_ARRAY) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use list as key element");
 		}
 	}
@@ -6365,14 +6405,22 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 	uint32_t i;
 	zend_bool is_constant = 1;
 
+	if (ast->attr) {
+		zend_error(E_COMPILE_ERROR, "Cannot use list() as standalone expression");
+	}
+
 	/* First ensure that *all* child nodes are constant and by-val */
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
-		zend_bool by_ref = elem_ast->attr;
+
+		if (elem_ast == NULL) {
+			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
+		}
+
 		zend_eval_const_expr(&elem_ast->child[0]);
 		zend_eval_const_expr(&elem_ast->child[1]);
 
-		if (by_ref || elem_ast->child[0]->kind != ZEND_AST_ZVAL
+		if (elem_ast->attr /* by_ref */ || elem_ast->child[0]->kind != ZEND_AST_ZVAL
 			|| (elem_ast->child[1] && elem_ast->child[1]->kind != ZEND_AST_ZVAL)
 		) {
 			is_constant = 0;
@@ -6990,9 +7038,16 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
-		zend_ast *value_ast = elem_ast->child[0];
-		zend_ast *key_ast = elem_ast->child[1];
-		zend_bool by_ref = elem_ast->attr;
+		zend_ast *value_ast, *key_ast;
+		zend_bool by_ref;
+
+		if (elem_ast == NULL) {
+			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
+		}
+
+		value_ast = elem_ast->child[0];
+		key_ast = elem_ast->child[1];
+		by_ref = elem_ast->attr;
 
 		znode value_node, key_node, *key_node_ptr = NULL;
 
