@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 5.6.21
 
 - Core: 
+  . Fixed bug #69537 (__debugInfo with empty string for key gives error).
+    (krakjoe)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
 - Curl:
