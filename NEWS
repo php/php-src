@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.6
 
 - Core:
+  . Fixed bug #69537 (__debugInfo with empty string for key gives error).
+    (krakjoe)
   . Fixed bug #71609 (Segmentation fault on ZTS with gethostbyname). (krakjoe)
   . Fixed bug #71414 (Inheritance, traits and interfaces). (krakjoe)
   . Fixed bug #71359 (Null coalescing operator and magic). (krakjoe)
