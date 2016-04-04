@@ -334,8 +334,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 
 	object_init_ex(return_value, zend_ce_generator);
 
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-		Z_ADDREF(call->This);
+	if (Z_TYPE(EX(This)) == IS_OBJECT && !(EX_CALL_INFO() & ZEND_CALL_CLOSURE)) {
+		ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_RELEASE_THIS);
+		Z_ADDREF(EX(This));
 	}
 
 	/* Save execution context in generator object. */
