@@ -2154,15 +2154,19 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
-	if (UNEXPECTED(!op_array->run_time_cache)) {
-		op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
-		memset(op_array->run_time_cache, 0, op_array->cache_size);
-	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
 	ZEND_VM_INTERRUPT_CHECK();
+}
+/* }}} */
+
+static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
+{
+	ZEND_ASSERT(op_array->run_time_cache == NULL);
+	op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
+	memset(op_array->run_time_cache, 0, op_array->cache_size);
 }
 /* }}} */
 
@@ -2334,6 +2338,10 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	}
 
 	EX(symbol_table) = NULL;
+
+	if (UNEXPECTED(!op_array->run_time_cache)) {
+		init_func_run_time_cache(op_array);
+	}
 
 	i_init_func_execute_data(execute_data, op_array, return_value, 1);
 
