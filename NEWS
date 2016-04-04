@@ -40,6 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug #52098 (Own PDOStatement implementation ignore __call()).
     (Daniel kalaspuffar, Julien)
 
+- PDO_DBlib:
+  . Fixed bug #71943 (dblib_handle_quoter needs to allocate an extra byte).
+    (Adam Baratz)
+
 - Postgres:
   . Fixed bug #71820 (pg_fetch_object binds parameters before call
     constructor). (Anatol)
