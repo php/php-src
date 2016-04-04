@@ -1,5 +1,5 @@
 --TEST--
-Bug #47769 (Strange extends PDO)
+PDO Common: Bug #47769 (Strange extends PDO)
 --SKIPIF--
 <?php
 if (!extension_loaded("pdo_sqlite"))

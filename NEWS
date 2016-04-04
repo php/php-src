@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug #52098 (Own PDOStatement implementation ignore __call()).
     (Daniel kalaspuffar, Julien)
+  . Fixed bug #71447 (Quotes inside comments not properly handled).
+    (Matteo)
 
 - PDO_DBlib:
   . Fixed bug #71943 (dblib_handle_quoter needs to allocate an extra byte).
