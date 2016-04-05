@@ -4270,6 +4270,10 @@ static zend_string *date_interval_format(char *format, size_t format_len, timeli
 
 	smart_str_0(&string);
 
+	if (string.s == NULL) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
 	return string.s;
 }
 /* }}} */
