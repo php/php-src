@@ -454,7 +454,6 @@ struct _zend_execute_data {
 	zval                *return_value;
 	zend_function       *func;             /* executed funcrion              */
 	zval                 This;             /* this + call_info + num_args    */
-	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
 #if ZEND_EX_USE_RUN_TIME_CACHE
@@ -471,7 +470,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_TOP                (1 << 1)
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
-/* Unused flag (1 << 4) */
+#define ZEND_CALL_FREE_SYMBOL_TABLE  (1 << 4)
 #define ZEND_CALL_CLOSURE            (1 << 5)
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)
@@ -485,8 +484,8 @@ struct _zend_execute_data {
 #define ZEND_CALL_KIND(call) \
 	ZEND_CALL_KIND_EX(ZEND_CALL_INFO(call))
 
-#define ZEND_SET_CALL_INFO(call, info) do { \
-		Z_TYPE_INFO((call)->This) = IS_OBJECT_EX | ((info) << 24); \
+#define ZEND_SET_CALL_INFO(call, object, info) do { \
+		Z_TYPE_INFO((call)->This) = ((object) ? IS_OBJECT_EX : IS_UNDEF) | ((info) << 24); \
 	} while (0)
 
 #define ZEND_ADD_CALL_FLAG_EX(call_info, flag) do { \
@@ -1025,6 +1024,8 @@ END_EXTERN_C()
 
 /* The default value for CG(compiler_options) during eval() */
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
+
+ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2);
 
 #endif /* ZEND_COMPILE_H */
 

@@ -692,7 +692,7 @@ int fcgi_listen(const char *path, int backlog)
 				if(strlen(host) > MAXFQDNLEN) {
 					hep = NULL;
 				} else {
-					hep = gethostbyname(host);
+					hep = php_network_gethostbyname(host);
 				}
 				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);

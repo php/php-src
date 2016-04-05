@@ -685,7 +685,12 @@ optimize_constant_binary_op:
 						SET_VAR_SOURCE(opline);
 		                opline++;
 						continue;
+					} else if (zend_binary_op_produces_numeric_string_error(opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline))) {
+						SET_VAR_SOURCE(opline);
+		                opline++;
+						continue;
 					}
+					printf("%d\n", opline->opcode);
 					er = EG(error_reporting);
 					EG(error_reporting) = 0;
 					if (binary_op(&result, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline)) == SUCCESS) {

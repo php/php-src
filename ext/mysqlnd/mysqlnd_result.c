@@ -1475,7 +1475,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 		} else if (flags & MYSQLND_STORE_COPY) {
 			MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result->stored_data;
 			set->current_row = 0;
-			set->initialized = mnd_pecalloc((set->row_count / 8) + 1, sizeof(zend_uchar), set->persistent); /* +1 for safety */
+			set->initialized = mnd_pecalloc((unsigned int) ((set->row_count / 8) + 1), sizeof(zend_uchar), set->persistent); /* +1 for safety */
 		}
 	}
 

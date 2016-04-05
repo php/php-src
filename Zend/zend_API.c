@@ -370,11 +370,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *de
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
 			return 0;
 		}
-		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
-			*dest = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
-		} else {
-			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
-		}
+		*dest = zend_dval_to_lval_cap(Z_DVAL_P(arg));
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
 		int type;
@@ -384,11 +380,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *de
 				if (UNEXPECTED(zend_isnan(d))) {
 					return 0;
 				}
-				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
-					*dest = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
-				} else {
-					*dest = zend_dval_to_lval(d);
-				}
+				*dest = zend_dval_to_lval_cap(d);
 			} else {
 				return 0;
 			}
