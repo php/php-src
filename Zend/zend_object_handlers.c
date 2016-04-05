@@ -671,6 +671,16 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 found:
+				if (ZEND_OBJECT_HAS_TYPE_HINTS(object)) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, member, cache_slot);
+
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
+							goto exit;
+						}
+					}
+				}
 				zend_assign_to_variable(variable_ptr, value, IS_CV);
 				goto exit;
 			}
@@ -719,6 +729,18 @@ write_std_property:
 				Z_ADDREF_P(value);
 			}
 		}
+
+		if (ZEND_OBJECT_HAS_TYPE_HINTS(object)) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, member, cache_slot);
+
+			if (prop_info) {
+				if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
+					goto exit;
+				}
+			}
+		}
+		
 		if (EXPECTED(property_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			ZVAL_COPY_VALUE(OBJ_PROP(zobj, property_offset), value);
 		} else {
