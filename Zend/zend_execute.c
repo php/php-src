@@ -1367,7 +1367,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	}
 }
 
-static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc, zval *result)
+static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc, zval *result, zend_bool strict)
 {
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 		zval rv, obj;
@@ -1403,6 +1403,15 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			decrement_function(&z_copy);
 		}
 		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
+		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, cache_slot);
+
+			if (prop_info) {
+				if (!zend_verify_property_type(prop_info, &z_copy, strict)) {
+					zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
+				}
+			}
+		}
 		OBJ_RELEASE(Z_OBJ(obj));
 		zval_ptr_dtor(&z_copy);
 		zval_ptr_dtor(z);

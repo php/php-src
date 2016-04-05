@@ -17265,6 +17265,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 							ZSTR_VAL(prop_info->ce->name),
 							ZSTR_VAL(p->key));
 						HANDLE_EXCEPTION();
+					} else if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
+						zend_verify_property_type_error(prop_info, p->key, value);
+						HANDLE_EXCEPTION();
 					}
 				}
 			}
@@ -17884,6 +17887,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -18373,7 +18377,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	zend_free_op free_op1;
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -18420,20 +18424,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -22429,6 +22433,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -22918,7 +22923,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	zend_free_op free_op1;
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -22965,20 +22970,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -25165,6 +25170,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -25657,7 +25663,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	zend_free_op free_op1, free_op2;
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -25704,20 +25710,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -27825,6 +27831,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -28284,7 +28291,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -28331,20 +28338,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -31321,6 +31328,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -31780,7 +31788,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -31827,20 +31835,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -33756,6 +33764,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -34217,7 +34226,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	zend_free_op free_op2;
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -34264,20 +34273,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -38505,6 +38514,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -38994,7 +39004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
@@ -39041,20 +39051,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -45262,6 +45272,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -45751,7 +45762,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
@@ -45798,20 +45809,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
@@ -49090,6 +49101,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			SEPARATE_ZVAL_NOREF(zptr);
 
 			binary_op(zptr, zptr, value);
+
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
@@ -49582,7 +49594,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 	zend_free_op free_op2;
 	zval *object;
 	zval *property;
-	zval *zptr;
+	zval *zptr = NULL;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
@@ -49629,20 +49641,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 						decrement_function(zptr);
 					}
 				}
-			}
-		} else {
-			zend_post_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
-		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+				if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
+					if (prop_info) {
+						if (!zend_verify_property_type(prop_info, zptr, EX_USES_STRICT_TYPES())) {
+							zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
+							HANDLE_EXCEPTION();
+						}
+					}
 				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES());
 		}
 	} while (0);
 
