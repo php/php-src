@@ -165,7 +165,11 @@ again:
 				zval *val;
 
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
-					zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(struc, key, NULL);
+					zend_property_info *prop_info = NULL;
+
+					if (ZEND_OBJECT_HAS_TYPE_HINTS(struc)) {
+						prop_info = zend_object_fetch_property_type_info_ex(struc, key, NULL);
+					}
 
 					php_object_property_dump(prop_info, val, num, key, level);
 				} ZEND_HASH_FOREACH_END();
