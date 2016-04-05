@@ -2454,6 +2454,12 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		ZVAL_DEREF(value);
 	}
 
+	Z_OBJ_HT_P(object)->write_property(object, property_name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
+
 	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
 		zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property_name, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
 
@@ -2465,11 +2471,6 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		}
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property_name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL);
-
-	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
-	}
 	if (OP_DATA_TYPE == IS_CONST) {
 		zval_ptr_dtor_nogc(value);
 	} else {
