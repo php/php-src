@@ -95,6 +95,22 @@ static char *pdo_dblib_get_field_name(int type)
 }
 /* }}} */
 
+static void pdo_dblib_err_dtor(pdo_dblib_err *err)
+{
+	if (err->dberrstr) {
+		efree(err->dberrstr);
+		err->dberrstr = NULL;
+	}
+	if (err->lastmsg) {
+		efree(err->lastmsg);
+		err->lastmsg = NULL;
+	}
+	if (err->oserrstr) {
+		efree(err->oserrstr);
+		err->oserrstr = NULL;
+	}
+}
+
 static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -102,6 +118,8 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 
 	/* Cancel any pending results */
 	dbcancel(H->link);
+
+	pdo_dblib_err_dtor(&H->err);
 	
 	return 1;
 }
@@ -109,6 +127,8 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+
+	pdo_dblib_err_dtor(&S->err);
 
 	efree(S);
 
