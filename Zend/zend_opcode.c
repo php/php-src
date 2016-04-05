@@ -97,7 +97,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->run_time_cache = NULL;
 	op_array->cache_size = 0;
 	op_array->accessor_type = 0;
-	op_array->accessor_info.constant = 0;
+	op_array->accessor_info.property_offset = 0;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
