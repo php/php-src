@@ -2,6 +2,7 @@
 Test typed properties overflowing
 --FILE--
 <?php
+
 $foo = new class {
 	public int $bar = PHP_INT_MAX;
 };
