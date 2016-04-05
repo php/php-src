@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
     (Michael Sierks)    
 
+- Date:
+  . Fixed bug #71889 (DateInterval::format Segmentation fault).
+    (Thomas Punt)
+
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
 
