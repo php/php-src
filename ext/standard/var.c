@@ -48,7 +48,7 @@ static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key,
 }
 /* }}} */
 
-static void php_object_property_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
+static void php_object_property_dump(zend_property_info *prop_info, zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	const char *prop_name, *class_name;
 
@@ -71,7 +71,16 @@ static void php_object_property_dump(zval *zv, zend_ulong index, zend_string *ke
 		}
 		ZEND_PUTS("]=>\n");
 	}
-	php_var_dump(zv, level + 2);
+
+	if (prop_info && Z_TYPE_P(zv) == IS_NULL) {
+		php_printf("%*cuninitialized(%s)\n", 
+			level + 1, ' ',
+			(prop_info->type == IS_OBJECT) ?
+				ZSTR_VAL(prop_info->type_name) : 
+				zend_get_type_by_const(prop_info->type));
+	} else {
+		php_var_dump(zv, level + 2);
+	}
 }
 /* }}} */
 
@@ -156,7 +165,9 @@ again:
 				zval *val;
 
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
-					php_object_property_dump(val, num, key, level);
+					zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(struc, key, NULL);
+
+					php_object_property_dump(prop_info, val, num, key, level);
 				} ZEND_HASH_FOREACH_END();
 				if (is_temp) {
 					zend_hash_destroy(myht);
