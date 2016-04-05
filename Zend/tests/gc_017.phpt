@@ -10,7 +10,6 @@ class Node {
 	public $parent;
 	function __construct($name) {
 		$this->name = $name;
-		$this->children = array();
 		$this->parent = null;
 	}
 	function insert($node) {

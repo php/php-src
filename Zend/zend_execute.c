@@ -1090,7 +1090,6 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr_deref(value_type, value_op, execute_data, &free_value, BP_VAR_R);
- 	zval tmp;
 
 	/* Note:  property_name in this case is really the array index! */
 	if (!Z_OBJ_HT_P(object)->write_dimension) {
@@ -1101,10 +1100,8 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 
 	/* separate our value if necessary */
 	if (value_type == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	}
 

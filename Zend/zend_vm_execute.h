@@ -2579,9 +2579,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CONST_HANDLER(Z
 				HANDLE_EXCEPTION();
 			}
 		} else {
-			/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
-			if (UNEXPECTED(Z_OPT_COPYABLE_P(param))) {
-				zval_copy_ctor_func(param);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED_P(param))) {
+				Z_ADDREF_P(param);
 			}
 		}
 	}
@@ -3506,8 +3505,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_HANDLER(ZEND
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			ZVAL_COPY_VALUE(return_value, retval_ptr);
 			if (IS_CONST == IS_CONST) {
-				if (UNEXPECTED(Z_OPT_COPYABLE_P(return_value))) {
-					zval_copy_ctor_func(return_value);
+				if (UNEXPECTED(Z_OPT_REFCOUNTED_P(return_value))) {
+					Z_ADDREF_P(return_value);
 				}
 			}
 		} else if (IS_CONST == IS_CV) {
@@ -3616,8 +3615,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CONST_HA
 	if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 		ZVAL_COPY_VALUE(&generator->retval, retval);
 		if (IS_CONST == IS_CONST) {
-			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
-				zval_copy_ctor_func(&generator->retval);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->retval))) {
+				Z_ADDREF(generator->retval);
 			}
 		}
 	} else if (IS_CONST == IS_CV) {
@@ -3696,8 +3695,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZE
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(arg))) {
+			Z_ADDREF_P(arg);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -3727,8 +3726,8 @@ send_val_by_ref:
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(arg))) {
+			Z_ADDREF_P(arg);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -3758,8 +3757,8 @@ send_val_by_ref:
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(arg))) {
+			Z_ADDREF_P(arg);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -6927,9 +6926,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 			HANDLE_EXCEPTION();
 		}
 	} else {
-		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
-		if (UNEXPECTED(Z_OPT_COPYABLE(c.value))) {
-			zval_copy_ctor_func(&c.value);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED(c.value))) {
+			Z_ADDREF(c.value);
 		}
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
@@ -12921,8 +12919,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_O
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			ZVAL_COPY_VALUE(return_value, retval_ptr);
 			if (IS_TMP_VAR == IS_CONST) {
-				if (UNEXPECTED(Z_OPT_COPYABLE_P(return_value))) {
-					zval_copy_ctor_func(return_value);
+				if (UNEXPECTED(Z_OPT_REFCOUNTED_P(return_value))) {
+					Z_ADDREF_P(return_value);
 				}
 			}
 		} else if (IS_TMP_VAR == IS_CV) {
@@ -13031,8 +13029,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_TMP_HAND
 	if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 		ZVAL_COPY_VALUE(&generator->retval, retval);
 		if (IS_TMP_VAR == IS_CONST) {
-			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
-				zval_copy_ctor_func(&generator->retval);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->retval))) {
+				Z_ADDREF(generator->retval);
 			}
 		}
 	} else if (IS_TMP_VAR == IS_CV) {
@@ -13111,8 +13109,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(arg))) {
+			Z_ADDREF_P(arg);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -13142,8 +13140,8 @@ send_val_by_ref:
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(arg))) {
+			Z_ADDREF_P(arg);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -13173,8 +13171,8 @@ send_val_by_ref:
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(arg))) {
+			Z_ADDREF_P(arg);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -16188,8 +16186,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_O
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			ZVAL_COPY_VALUE(return_value, retval_ptr);
 			if (IS_VAR == IS_CONST) {
-				if (UNEXPECTED(Z_OPT_COPYABLE_P(return_value))) {
-					zval_copy_ctor_func(return_value);
+				if (UNEXPECTED(Z_OPT_REFCOUNTED_P(return_value))) {
+					Z_ADDREF_P(return_value);
 				}
 			}
 		} else if (IS_VAR == IS_CV) {
@@ -16299,8 +16297,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_VAR_HAND
 	if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 		ZVAL_COPY_VALUE(&generator->retval, retval);
 		if (IS_VAR == IS_CONST) {
-			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
-				zval_copy_ctor_func(&generator->retval);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->retval))) {
+				Z_ADDREF(generator->retval);
 			}
 		}
 	} else if (IS_VAR == IS_CV) {
@@ -18627,10 +18625,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -18676,10 +18672,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -18802,10 +18796,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -18851,10 +18843,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -18977,10 +18967,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -19026,10 +19014,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -19152,10 +19138,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -19201,10 +19185,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -23008,10 +22990,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -23057,10 +23037,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -23183,10 +23161,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -23232,10 +23208,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -23358,10 +23332,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -23407,10 +23379,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -23533,10 +23503,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -23582,10 +23550,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -25575,10 +25541,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -25624,10 +25588,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -25750,10 +25712,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -25799,10 +25759,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -25925,10 +25883,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -25974,10 +25930,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -26100,10 +26054,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -26149,10 +26101,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -28011,10 +27961,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -28060,10 +28008,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -28186,10 +28132,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -28235,10 +28179,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -28361,10 +28303,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -28410,10 +28350,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -28536,10 +28474,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -28585,10 +28521,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -31346,10 +31280,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -31395,10 +31327,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -31521,10 +31451,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -31570,10 +31498,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -31696,10 +31622,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -31745,10 +31669,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -31871,10 +31793,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -31920,10 +31840,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -33615,10 +33533,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -33664,10 +33580,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -33790,10 +33704,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -33839,10 +33751,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -33965,10 +33875,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -34014,10 +33922,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -34140,10 +34046,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -34189,10 +34093,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -35381,8 +35283,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OP
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			ZVAL_COPY_VALUE(return_value, retval_ptr);
 			if (IS_CV == IS_CONST) {
-				if (UNEXPECTED(Z_OPT_COPYABLE_P(return_value))) {
-					zval_copy_ctor_func(return_value);
+				if (UNEXPECTED(Z_OPT_REFCOUNTED_P(return_value))) {
+					Z_ADDREF_P(return_value);
 				}
 			}
 		} else if (IS_CV == IS_CV) {
@@ -35491,8 +35393,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CV_HANDL
 	if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 		ZVAL_COPY_VALUE(&generator->retval, retval);
 		if (IS_CV == IS_CONST) {
-			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
-				zval_copy_ctor_func(&generator->retval);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->retval))) {
+				Z_ADDREF(generator->retval);
 			}
 		}
 	} else if (IS_CV == IS_CV) {
@@ -38571,10 +38473,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -38620,10 +38520,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -38746,10 +38644,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -38795,10 +38691,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -38921,10 +38815,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -38970,10 +38862,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -39096,10 +38986,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -39145,10 +39033,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -45008,10 +44894,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -45057,10 +44941,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -45183,10 +45065,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -45232,10 +45112,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -45358,10 +45236,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -45407,10 +45283,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -45533,10 +45407,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -45582,10 +45454,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -48661,10 +48531,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CONST != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -48710,10 +48578,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CONST != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -48836,10 +48702,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_TMP_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -48885,10 +48749,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_TMP_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -49011,10 +48873,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_VAR != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -49060,10 +48920,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_VAR != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
@@ -49186,10 +49044,8 @@ fast_assign_obj:
 				}
 				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-						ZVAL_COPY_VALUE(&tmp, value);
-						zval_copy_ctor_func(&tmp);
-						value = &tmp;
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
 					}
 				} else if (IS_CV != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
@@ -49235,10 +49091,8 @@ fast_assign_obj:
 
 	/* separate our value if necessary */
 	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	} else if (IS_CV != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
