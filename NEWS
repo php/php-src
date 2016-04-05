@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 - PDO_DBlib:
   . Fixed bug #71943 (dblib_handle_quoter needs to allocate an extra byte).
     (Adam Baratz)
+  . Add DBLIB-specific attributes for controlling timeouts.
+    (Adam Baratz)
 
 - PDO_pgsql:
   . Fixed bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used).
