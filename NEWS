@@ -50,6 +50,10 @@ PHP                                                                        NEWS
   . Fixed bug #71943 (dblib_handle_quoter needs to allocate an extra byte).
     (Adam Baratz)
 
+- PDO_pgsql:
+  . Fixed bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used).
+    (Joseph Bylund)
+
 - Postgres:
   . Fixed bug #71820 (pg_fetch_object binds parameters before call
     constructor). (Anatol)
