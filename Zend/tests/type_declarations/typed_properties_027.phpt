@@ -1,14 +1,19 @@
 --TEST--
-Test typed properties int must be allowed to widen to float only at runtime
+Test typed properties float widen at runtime
 --FILE--
 <?php
 class Foo {
 
-	public int $bar = 1.1;
+	public float $bar = 1.1;
 }
+
+$foo = new Foo;
+$foo->bar = 10;
+
+var_dump($foo->bar);
 ?>
 --EXPECTF--
-Fatal error: Default value for properties with integer type can only be integer in %s on line 4
+float(10)
 
 
 
