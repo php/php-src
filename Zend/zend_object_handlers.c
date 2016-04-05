@@ -546,7 +546,8 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 					&& EXPECTED(EG(current_execute_data)->func != NULL)
 					&& EXPECTED(EG(current_execute_data)->func->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
 				) {
-					EG(current_execute_data)->func->op_array.property_offset = property_offset;
+					// Cache the property offset
+					EG(current_execute_data)->func->op_array.accessor_info.property_offset = property_offset;
 				}
 				goto exit;
 			}

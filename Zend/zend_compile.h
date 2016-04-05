@@ -365,8 +365,14 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
-	zend_uchar accessor_type; // the accessor type (getter, setter, const returniing)
-	uint32_t property_offset;
+
+	/* the accessor info */
+	union {
+		uint32_t property_offset;
+	} accessor_info;
+
+	/* the accessor type (getter, setter, const) */
+	zend_uchar accessor_type;
 
 	uint32_t *refcount;
 
@@ -598,6 +604,8 @@ struct _zend_execute_data {
 
 # define CT_CONSTANT(node) \
 	CT_CONSTANT_EX(CG(active_op_array), (node).constant)
+
+
 
 #if ZEND_USE_ABS_CONST_ADDR
 
@@ -1037,4 +1045,6 @@ ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode,
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ *
+ * vim:noet:
  */

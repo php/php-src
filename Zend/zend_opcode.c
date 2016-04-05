@@ -97,7 +97,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->run_time_cache = NULL;
 	op_array->cache_size = 0;
 	op_array->accessor_type = 0;
-	op_array->property_offset = 0;
+	op_array->accessor_info.constant = 0;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -647,23 +647,30 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	 *  - RETURN (IS_VAR)
 	 *  - RETURN (IS_CONST)
 	 * */
-	if (op_array->last == 3
-		&& (op_array->num_args == 0)
+	if ((op_array->num_args == 0)
 		&& (op_array->scope != NULL)
 		&& (op_array->scope->type & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) == 0
 		&& (op_array->scope->type == ZEND_USER_CLASS)
 		&& (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0
 		&& (op_array->fn_flags & ZEND_ACC_ABSTRACT) == 0
 	) {
-		// Verify the oplines
-		zend_op * returnop = opline + 1;
-		if (opline->opcode == ZEND_FETCH_OBJ_R
-			&& opline->op1_type == IS_UNUSED
-			&& opline->op2_type == IS_CONST
-			&& returnop->opcode == ZEND_RETURN
-			&& returnop->op1_type == IS_VAR
-		) {
-			op_array->accessor_type = ZEND_ACCESSOR_GETTER;
+		if (op_array->last == 3) {
+			zend_op * returnop = opline + 1;
+			if (opline->opcode == ZEND_FETCH_OBJ_R
+				&& opline->op1_type == IS_UNUSED
+				&& opline->op2_type == IS_CONST
+				&& returnop->opcode == ZEND_RETURN
+				&& returnop->op1_type == IS_VAR
+			) {
+				op_array->accessor_type = ZEND_ACCESSOR_GETTER;
+			}
+		} else if (op_array->last == 2) {
+			zend_op * returnop = opline + 1;
+			if (returnop->opcode == ZEND_RETURN
+				&& returnop->op1_type == IS_CONST) {
+				op_array->accessor_type = ZEND_ACCESSOR_CONST;
+				// op_array->accessor_info.constant = returnop->op1.constant;
+			}
 		}
 	}
 

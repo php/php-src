@@ -3159,51 +3159,49 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV, CONST|T
 		}
 	}
 
-	if (OP1_TYPE == IS_CV && OP2_TYPE == IS_CONST
-			&& object != NULL
-			&& EXPECTED(fbc != NULL)
-			&& UNEXPECTED(fbc->op_array.accessor_type == ZEND_ACCESSOR_GETTER)
-			&& EXPECTED(fbc->type == ZEND_USER_FUNCTION)
-			&& EXPECTED(fbc->op_array.property_offset != 0)
+	if (OP1_TYPE == IS_CV
+		&& OP2_TYPE == IS_CONST
+		&& EXPECTED(fbc != NULL)
+		&& UNEXPECTED(fbc->op_array.accessor_type != 0)
+		&& EXPECTED(object != NULL)
+		&& EXPECTED(Z_TYPE_P(object) != IS_UNDEF)
 	) {
+		zend_op *nextop = (zend_op*) opline + 1;
 		zval *retval = NULL;
-		zend_op *nextop = NULL;
-		zend_bool assigned_result = 0;
 
-		if (EXPECTED(Z_TYPE_P(object) != IS_UNDEF)) {
-			retval = OBJ_PROP(obj, fbc->op_array.property_offset);
-			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
-				nextop = (zend_op*) opline;
-				nextop++;
-				if (UNEXPECTED(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
-					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_BEGIN)) {
-						nextop++;
-					}
-					if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
-						if (EXPECTED(nextop->result_type == IS_VAR)) {
-							ZVAL_DEREF(retval);
-							ZVAL_COPY(EX_VAR(nextop->result.var), retval);
-							assigned_result = 1;
-						}
-						nextop++;
-					}
-					if (EXPECTED(nextop->opcode == ZEND_EXT_FCALL_END)) {
-						nextop++;
-					}
-				} else if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)) {
+		if (EXPECTED(fbc->op_array.accessor_type & ZEND_ACCESSOR_GETTER)
+			&& EXPECTED(fbc->op_array.accessor_info.property_offset != 0))
+		{
 
-					if (EXPECTED(nextop->result_type == IS_VAR)) {
-						ZVAL_DEREF(retval);
-						ZVAL_COPY(EX_VAR(nextop->result.var), retval);
-						assigned_result = 1;
-					}
-					nextop++;
+			retval = OBJ_PROP(obj, fbc->op_array.accessor_info.property_offset);
+
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)
+				&& EXPECTED(nextop->opcode == ZEND_DO_FCALL))
+			{
+				/*
+				TODO: verify return type
+				if (fbc->op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+					zend_verify_return_type(fbc, retval, CACHE_ADDR(opline->op2.num));
 				}
-				// TODO: verify return type
-				// zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
-				if (EXPECTED(assigned_result)) {
+				*/
+				if (EXPECTED(nextop->result_type == IS_VAR)) {
+					ZVAL_DEREF(retval);
+					ZVAL_COPY(EX_VAR(nextop->result.var), retval);
+					nextop++;
 					ZEND_VM_JMP(nextop);
 				}
+			}
+		} else if (EXPECTED(fbc->op_array.accessor_type & ZEND_ACCESSOR_CONST)) {
+			retval = fbc->op_array.literals + fbc->op_array.opcodes->op1.constant;
+			if (EXPECTED(nextop->opcode == ZEND_DO_FCALL)
+				&& EXPECTED(nextop->result_type == IS_VAR)
+			) {
+				ZVAL_COPY_VALUE(EX_VAR(nextop->result.var), retval);
+				if (UNEXPECTED(Z_OPT_COPYABLE_P(EX_VAR(nextop->result.var)))) {
+					zval_copy_ctor_func(EX_VAR(nextop->result.var));
+				}
+				nextop++;
+				ZEND_VM_JMP(nextop);
 			}
 		}
 	}
