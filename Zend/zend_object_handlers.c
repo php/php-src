@@ -730,7 +730,7 @@ write_std_property:
 			}
 		}
 
-		if (ZEND_OBJECT_HAS_TYPE_HINTS(object)) {
+		if (ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce)) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, member, cache_slot);
 
 			if (prop_info) {
