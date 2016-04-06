@@ -218,17 +218,27 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 		return FAILURE;
 	}
 
+	if (colno == 0) {
+		S->computed_column_name_count = 0;
+	}
+
 	col = &stmt->columns[colno];
 	fname = (char*)dbcolname(H->link, colno+1);
 
 	if (fname && *fname) {
 		col->name =  zend_string_init(fname, strlen(fname), 0);
 	} else {
-		char buf[16];
-		int len;
-		
-		len = snprintf(buf, sizeof(buf), "computed%d", colno);
-		col->name = zend_string_init(buf, len, 0);
+		if (S->computed_column_name_count > 0) {
+			char buf[16];
+			int len;
+
+			len = snprintf(buf, sizeof(buf), "computed%d", S->computed_column_name_count);
+			col->name = zend_string_init(buf, len, 0);
+		} else {
+			col->name = zend_string_init("computed", strlen("computed"), 0);
+		}
+
+		S->computed_column_name_count++;
 	}
 
 	col->maxlen = dbcollen(H->link, colno+1);

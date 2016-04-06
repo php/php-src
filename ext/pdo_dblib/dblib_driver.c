@@ -101,6 +101,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	stmt->driver_data = S;
 	stmt->methods = &dblib_stmt_methods;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+	S->computed_column_name_count = 0;
 	S->err.sqlstate = stmt->error_code;
 
 	return 1;
