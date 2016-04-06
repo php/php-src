@@ -84,12 +84,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			garbage = Z_COUNTED_P(variable_ptr);
 			if (--GC_REFCOUNT(garbage) == 0) {
 				ZVAL_COPY_VALUE(variable_ptr, value);
-				if (value_type == IS_CONST) {
-					/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
-						zval_copy_ctor_func(variable_ptr);
-					}
-				} else if (value_type == IS_CV) {
+				if (value_type & (IS_CONST|IS_CV)) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 						Z_ADDREF_P(variable_ptr);
 					}
@@ -113,12 +108,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 	} while (0);
 
 	ZVAL_COPY_VALUE(variable_ptr, value);
-	if (value_type == IS_CONST) {
-		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
-			zval_copy_ctor_func(variable_ptr);
-		}
-	} else if (value_type == IS_CV) {
+	if (value_type & (IS_CONST|IS_CV)) {
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 			Z_ADDREF_P(variable_ptr);
 		}
@@ -167,6 +157,19 @@ ZEND_API void zend_vm_stack_init(void);
 ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
+static zend_always_inline void zend_vm_init_call_frame(zend_execute_data *call, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
+{
+	call->func = func;
+	if (object) {
+		Z_OBJ(call->This) = object;
+		ZEND_SET_CALL_INFO(call, 1, call_info);
+	} else {
+		Z_CE(call->This) = called_scope;
+		ZEND_SET_CALL_INFO(call, 0, call_info);
+	}
+	ZEND_CALL_NUM_ARGS(call) = num_args;
+}
+
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
 {
 	zend_execute_data *call = (zend_execute_data*)EG(vm_stack_top);
@@ -175,19 +178,14 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 
 	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
 		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
-		ZEND_SET_CALL_INFO(call, call_info | ZEND_CALL_ALLOCATED);
+		ZEND_ASSERT_VM_STACK_GLOBAL;
+		zend_vm_init_call_frame(call, call_info | ZEND_CALL_ALLOCATED, func, num_args, called_scope, object);
+		return call;
 	} else {
 		EG(vm_stack_top) = (zval*)((char*)call + used_stack);
-		ZEND_SET_CALL_INFO(call, call_info);
+		zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
+		return call;
 	}
-
-	ZEND_ASSERT_VM_STACK_GLOBAL;
-
-	call->func = func;
-	Z_OBJ(call->This) = object;
-	ZEND_CALL_NUM_ARGS(call) = num_args;
-	call->called_scope = called_scope;
-	return call;
 }
 
 static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, zend_function *func)

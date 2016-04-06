@@ -4,14 +4,22 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
+  . Fixed bug #62814 (It is possible to stiffen child class members visibility).
+    (Nikita)
   . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
-  . Fixed buf #71572 (String offset assignment from an empty string inserts
+  . Fixed bug #71572 (String offset assignment from an empty string inserts
     null byte). (Francois)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
   . Added support for negative string offsets in string offset syntax and
     various string functions. (Francois)
+  . Added a form of the list() construct where keys can be specified. (Andrea)
+  . Number operators taking numeric strings now emit E_NOTICEs or E_WARNINGs
+    when given malformed numeric strings. (Andrea)
+  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
+    decoct(), dechex(), integer operators and other conversions now always
+    respect scientific notation in numeric strings. (Andrea)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).

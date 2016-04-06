@@ -737,11 +737,7 @@ void zend_do_free(znode *op1) /* {{{ */
 			}
 		}
 
-		opline = get_next_op(CG(active_op_array));
-
-		opline->opcode = ZEND_FREE;
-		SET_NODE(opline->op1, op1);
-		SET_UNUSED(opline->op2);
+		zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 	} else if (op1->op_type == IS_VAR) {
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 		while (opline->opcode == ZEND_END_SILENCE ||
@@ -1318,7 +1314,7 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 
 	*class_name = NULL;
 
-	if (ZSTR_VAL(name)[0] != '\0') {
+	if (!ZSTR_LEN(name) || ZSTR_VAL(name)[0] != '\0') {
 		*prop_name = ZSTR_VAL(name);
 		if (prop_len) {
 			*prop_len = ZSTR_LEN(name);
@@ -2713,9 +2709,8 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, int d
 }
 /* }}} */
 
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
+static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
 {
-	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_bool has_elems = 0;
 
@@ -2741,6 +2736,40 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 
 	if (!has_elems) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
+	}
+}
+/* }}} */
+
+static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node) /* {{{ */
+{
+	uint32_t i;
+
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *pair_ast = list->child[i];
+		zend_ast *var_ast = pair_ast->child[0];
+		zend_ast *key_ast = pair_ast->child[1];
+		znode fetch_result, dim_node;
+
+		zend_compile_expr(&dim_node, key_ast);
+
+		if (expr_node->op_type == IS_CONST) {
+			Z_TRY_ADDREF(expr_node->u.constant);
+		}
+
+		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
+		zend_emit_assign_znode(var_ast, &fetch_result);
+	}
+}
+/* }}} */
+
+static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+
+	if (list->children > 0 && list->child[0] != NULL && list->child[0]->kind == ZEND_AST_ARRAY_ELEM) {
+		zend_compile_keyed_list_assign(list, expr_node);
+	} else {
+		zend_compile_unkeyed_list_assign(list, expr_node);
 	}
 
 	*result = *expr_node;
@@ -3709,7 +3738,8 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 					&& zend_string_equals_ci(CG(active_class_entry)->name, lcname)) {
 				ce = CG(active_class_entry);
 			}
-		} else if (opline->op1_type == IS_UNUSED && (opline->op1.num & ZEND_FETCH_CLASS_SELF)
+		} else if (opline->op1_type == IS_UNUSED
+				&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
 				&& zend_is_scope_known()) {
 			ce = CG(active_class_entry);
 		}
@@ -3763,7 +3793,8 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_call_common(&ctor_result, args_ast, NULL);
 	zend_do_free(&ctor_result);
 
-	/* New jumps over ctor call if ctor does not exist */
+	/* We save the position of DO_FCALL for convenience in find_live_range().
+	 * This info is not preserved for runtime. */
 	opline = &CG(active_op_array)->opcodes[opnum];
 	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
 }
@@ -3801,6 +3832,10 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 		 * ASSIGN_REF, which then frees it. */
 		zend_op *opline = zend_emit_op(&result, ZEND_FETCH_W, &name_node, NULL);
 		opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
+
+		if (name_node.op_type == IS_CONST) {
+			zend_string_addref(Z_STR(name_node.u.constant));
+		}
 
 		zend_emit_assign_ref_znode(
 			zend_ast_create(ZEND_AST_VAR, zend_ast_create_znode(&name_node)),
@@ -5053,7 +5088,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	zend_string *lcname;
 
 	if (in_interface) {
-		if ((op_array->fn_flags & ZEND_ACC_PPP_MASK) != ZEND_ACC_PUBLIC) {
+		if (!is_public || (op_array->fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_ABSTRACT))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "
 				"%s::%s() must be omitted", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
@@ -5712,10 +5747,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	CG(active_class_entry) = ce;
 
-	if (implements_ast) {
-		zend_compile_implements(&declare_node, implements_ast);
-	}
-
 	zend_compile_stmt(stmt_ast);
 
 	/* Reset lineno for final opcodes and errors */
@@ -5772,11 +5803,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL);
 	}
 
+	if (implements_ast) {
+		zend_compile_implements(&declare_node, implements_ast);
+	}
+
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
-		&& (extends_ast || ce->num_interfaces > 0)
+		&& (extends_ast || implements_ast)
 	) {
 		zend_verify_abstract_class(ce);
-		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
+		if (implements_ast) {
 			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL);
 		}
 	}
@@ -6202,6 +6237,35 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+{
+	if (!(opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_DIV
+		|| opcode == ZEND_POW || opcode == ZEND_MOD || opcode == ZEND_SL || opcode == ZEND_SR
+		|| opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)) {
+		return 0;
+	}
+
+	/* While basic arithmetic operators always produce numeric string errors,
+	 * bitwise operators don't produce errors if both operands are strings */
+	if ((opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)
+		&& Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
+		return 0;
+	}
+
+	if (Z_TYPE_P(op1) == IS_STRING
+		&& !is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), NULL, NULL, 0)) {
+		return 1;
+	}
+
+	if (Z_TYPE_P(op2) == IS_STRING
+		&& !is_numeric_string(Z_STRVAL_P(op2), Z_STRLEN_P(op2), NULL, NULL, 0)) {
+		return 1;
+	}
+
+	return 0;
+}
+/* }}} */
+
 static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	binary_op_type fn = get_binary_op(opcode);
@@ -6212,6 +6276,11 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 		return 0;
 	} else if ((opcode == ZEND_SL || opcode == ZEND_SR) &&
 	    zval_get_long(op2) < 0) {
+		return 0;
+	}
+
+	/* don't evaluate numeric string error-producing operations at compile-time */
+	if (zend_binary_op_produces_numeric_string_error(opcode, op1, op2)) {
 		return 0;
 	}
 
@@ -6227,11 +6296,11 @@ static inline void zend_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op
 }
 /* }}} */
 
-static inline void zend_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
+static inline zend_bool zend_try_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
 {
 	zval left;
 	ZVAL_LONG(&left, (kind == ZEND_AST_UNARY_PLUS) ? 1 : -1);
-	mul_function(result, &left, op);
+	return zend_try_ct_eval_binary_op(result, ZEND_MUL, &left, op);
 }
 /* }}} */
 
@@ -6429,10 +6498,11 @@ void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&expr_node, expr_ast);
 
 	if (expr_node.op_type == IS_CONST) {
-		result->op_type = IS_CONST;
-		zend_ct_eval_unary_pm(&result->u.constant, ast->kind, &expr_node.u.constant);
-		zval_ptr_dtor(&expr_node.u.constant);
-		return;
+		if (zend_try_ct_eval_unary_pm(&result->u.constant, ast->kind, &expr_node.u.constant)) {
+			result->op_type = IS_CONST;
+			zval_ptr_dtor(&expr_node.u.constant);
+			return;
+		}
 	}
 
 	lefthand_node.op_type = IS_CONST;
@@ -7767,7 +7837,9 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				return;
 			}
 
-			zend_ct_eval_unary_pm(&result, ast->kind, zend_ast_get_zval(ast->child[0]));
+			if (!zend_try_ct_eval_unary_pm(&result, ast->kind, zend_ast_get_zval(ast->child[0]))) {
+				return;
+			}
 			break;
 		case ZEND_AST_CONDITIONAL:
 		{

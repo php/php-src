@@ -117,20 +117,7 @@ static const zend_internal_function zend_pass_function = {
 		zval_ptr_dtor_nogc(should_free); \
 	}
 
-/* End of zend_execute_locks.h */
-
 #define CV_DEF_OF(i) (EX(func)->op_array.vars[i])
-
-#define CTOR_CALL_BIT    0x1
-#define CTOR_USED_BIT    0x2
-
-#define IS_CTOR_CALL(ce) (((zend_uintptr_t)(ce)) & CTOR_CALL_BIT)
-#define IS_CTOR_USED(ce) (((zend_uintptr_t)(ce)) & CTOR_USED_BIT)
-
-#define ENCODE_CTOR(ce, used) \
-	((zend_class_entry*)(((zend_uintptr_t)(ce)) | CTOR_CALL_BIT | ((used) ? CTOR_USED_BIT : 0)))
-#define DECODE_CTOR(ce) \
-	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
 #define ZEND_VM_MAIN_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
 #define ZEND_VM_GENERATOR_STACK_PAGE_SLOTS (256)
@@ -1103,7 +1090,6 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr_deref(value_type, value_op, execute_data, &free_value, BP_VAR_R);
- 	zval tmp;
 
 	/* Note:  property_name in this case is really the array index! */
 	if (!Z_OBJ_HT_P(object)->write_dimension) {
@@ -1114,10 +1100,8 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 
 	/* separate our value if necessary */
 	if (value_type == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
+		if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
+			Z_ADDREF_P(value);
 		}
 	}
 
@@ -2162,20 +2146,24 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
-	if (UNEXPECTED(!op_array->run_time_cache)) {
-		op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
-		memset(op_array->run_time_cache, 0, op_array->cache_size);
-	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
 	ZEND_VM_INTERRUPT_CHECK();
+}
+/* }}} */
+
+static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
+{
+	ZEND_ASSERT(op_array->run_time_cache == NULL);
+	op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
+	memset(op_array->run_time_cache, 0, op_array->cache_size);
 }
 /* }}} */
 
@@ -2187,7 +2175,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))--;
@@ -2217,7 +2205,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(return_value) = return_value;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
-		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
 				GC_REFCOUNT(Z_OBJ(EX(This)))--;
@@ -2277,7 +2265,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 			} while (var != end);
 		}
 
-		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		}
@@ -2324,15 +2312,12 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	EG(vm_stack_end) = EG(vm_stack)->end;
 
 	call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
-	if (Z_OBJ(call->This)) {
-		call_info |= ZEND_CALL_RELEASE_THIS;
-	}
 	execute_data = zend_vm_stack_push_call_frame(
 		call_info,
 		(zend_function*)op_array,
 		num_args,
-		call->called_scope,
-		Z_OBJ(call->This));
+		Z_TYPE(call->This) != IS_OBJECT ? Z_CE(call->This) : NULL,
+		Z_TYPE(call->This) == IS_OBJECT ? Z_OBJ(call->This) : NULL);
 	EX(prev_execute_data) = NULL;
 	EX_NUM_ARGS() = num_args;
 
@@ -2350,6 +2335,10 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	}
 
 	EX(symbol_table) = NULL;
+
+	if (UNEXPECTED(!op_array->run_time_cache)) {
+		init_func_run_time_cache(op_array);
+	}
 
 	i_init_func_execute_data(execute_data, op_array, return_value, 1);
 
@@ -2383,7 +2372,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	/* copy call frame into new stack segment */
 	new_call = zend_vm_stack_extend(used_stack * sizeof(zval));
 	*new_call = *call;
-	ZEND_SET_CALL_INFO(new_call, ZEND_CALL_INFO(new_call) | ZEND_CALL_ALLOCATED);
+	ZEND_ADD_CALL_FLAG(new_call, ZEND_CALL_ALLOCATED);
 
 	if (passed_args) {
 		zval *src = ZEND_CALL_ARG(call, 1);

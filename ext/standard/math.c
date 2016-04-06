@@ -93,18 +93,6 @@ static inline double php_intpow10(int power) {
 }
 /* }}} */
 
-/* {{{ php_math_is_finite */
-static inline int php_math_is_finite(double value) {
-#if defined(PHP_WIN32)
-	return _finite(value);
-#elif defined(isfinite)
-	return isfinite(value);
-#else
-	return value == value && (value == 0. || value * 2. != value);
-#endif
-}
-/* }}} */
-
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double value, int mode) {
@@ -142,7 +130,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	double tmp_value;
 	int precision_places;
 
-	if (!php_math_is_finite(value)) {
+	if (!zend_finite(value)) {
 		return value;
 	}
 

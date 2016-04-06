@@ -1249,7 +1249,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	zobj = Z_OBJ_P(obj);
 
-	if (!zobj->ce->default_properties_count && properties == zobj->properties) {
+	if (!zobj->ce->default_properties_count && properties == zobj->properties && !ZEND_HASH_GET_APPLY_COUNT(properties)) {
 		/* fast copy */
 		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
 			if (EXPECTED(!(GC_FLAGS(properties) & IS_ARRAY_IMMUTABLE))) {
@@ -2433,7 +2433,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		}
 
 		/* $this may be passed into regular internal functions */
-		object = Z_OBJ(call->This);
+		object = (Z_TYPE(call->This) == IS_OBJECT) ? Z_OBJ(call->This) : NULL;
 
 		if (call->func) {
 			func = call->func;
@@ -2652,7 +2652,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		}
 
 		/* $this may be passed into regular internal functions */
-		object = call ? Z_OBJ(call->This) : NULL;
+		object = (call && (Z_TYPE(call->This) == IS_OBJECT)) ? Z_OBJ(call->This) : NULL;
 
 		if (call && call->func) {
 			func = call->func;

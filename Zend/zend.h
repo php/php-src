@@ -89,11 +89,6 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 # define zend_error_noreturn zend_error
 #endif
 
-/* overloaded elements data types */
-#define OE_IS_ARRAY					(1<<0)
-#define OE_IS_OBJECT				(1<<1)
-#define OE_IS_METHOD				(1<<2)
-
 struct _zend_serialize_data;
 struct _zend_unserialize_data;
 

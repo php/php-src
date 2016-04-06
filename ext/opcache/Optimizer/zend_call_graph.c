@@ -260,6 +260,8 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 			call_info = call_info->next_caller;
 		}
 	}
+
+	free_alloca(visited, use_heap);
 }
 
 static void zend_sort_op_arrays(zend_call_graph *call_graph)

@@ -268,8 +268,10 @@ ZEND_METHOD(exception, __construct)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
 		zend_class_entry *ce;
 
-		if (execute_data->called_scope) {
-			ce = execute_data->called_scope;
+		if (Z_TYPE(EX(This)) == IS_OBJECT) {
+			ce = Z_OBJCE(EX(This));
+		} else if (Z_CE(EX(This))) {
+			ce = Z_CE(EX(This));
 		} else {
 			ce = base_ce;
 		}
@@ -330,8 +332,10 @@ ZEND_METHOD(error_exception, __construct)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, zend_ce_throwable) == FAILURE) {
 		zend_class_entry *ce;
 
-		if (execute_data->called_scope) {
-			ce = execute_data->called_scope;
+		if (Z_TYPE(EX(This)) == IS_OBJECT) {
+			ce = Z_OBJCE(EX(This));
+		} else if (Z_CE(EX(This))) {
+			ce = Z_CE(EX(This));
 		} else {
 			ce = zend_ce_error_exception;
 		}

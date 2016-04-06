@@ -1,5 +1,5 @@
 --TEST--
-Bug #65946 (pdo_sql_parser.c permanently converts values bound to strings)
+PDO Common: Bug #65946 (pdo_sql_parser.c permanently converts values bound to strings)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo')) die('skip');
