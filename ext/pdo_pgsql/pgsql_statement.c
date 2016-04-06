@@ -637,7 +637,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 	add_assoc_long(return_value, "pgsql:table_oid", table_oid);
 	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
 	if (table_name) {
-		add_assoc_string(return_value, "table", table_name, 1);
+		add_assoc_string(return_value, "table", table_name);
 	}
 
 	switch (S->cols[colno].pgsql_type) {
