@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.6
 
 - Core:
+  . Fixed bug #71978 (Existence of return type hint affects other compatibility
+    rules). (Dmitry)
   . Fixed bug #71930 (_zval_dtor_func: Assertion `(arr)->gc.refcount <= 1'
     failed). (Laruence)
   . Fixed bug #71922 (Crash on assert(new class{})). (Nikita)
