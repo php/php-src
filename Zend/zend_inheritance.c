@@ -594,7 +594,6 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			error_level = E_WARNING;
 			error_verb = "should";
 		}
-
 		zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
 		zend_string_free(child_prototype);
 		zend_string_free(method_prototype);
