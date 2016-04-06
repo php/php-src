@@ -730,17 +730,6 @@ write_std_property:
 			}
 		}
 
-		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) && Z_TYPE_P(member) == IS_STRING)) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot);
-
-			if (prop_info) {
-				if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
-					goto exit;
-				}
-			}
-		}
-		
 		if (EXPECTED(property_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			ZVAL_COPY_VALUE(OBJ_PROP(zobj, property_offset), value);
 		} else {
