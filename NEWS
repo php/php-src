@@ -69,6 +69,8 @@ PHP                                                                        NEWS
   . Fixed bug #71735 (Double-free in SplDoublyLinkedList::offsetSet). (Stas)
 
 - Standard:
+  . Fixed bug #71969 (str_replace returns an incorrect resulting array after
+    a foreach by reference). (Laruence)
   . Fixed bug #71827 (substr_replace bug, string length). (krakjoe)
   . Fixed bug #71891 (header_register_callback() and
     register_shutdown_function()). (Laruence)
