@@ -180,11 +180,14 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 zend_bool zend_vm_is_fetching_reference(const zend_op * opline) {
 	zend_op const *next = opline + 1;
 
-	while (next->opcode == ZEND_NOP ||
-			next->opcode == ZEND_TICKS ||
-			next->opcode == ZEND_EXT_NOP ||
-			next->opcode == ZEND_EXT_STMT)
-		next++;
+	switch (next->opcode) {
+		case ZEND_NOP:
+		case ZEND_TICKS:
+		case ZEND_EXT_STMT:
+		case ZEND_FETCH_DIM_W: {
+			next++;
+		} break;
+	}
 
 	switch (next->opcode) {
 		case ZEND_SEND_REF:
@@ -877,6 +880,10 @@ void zend_verify_property_type_error(zend_property_info *info, zend_string *name
 }
 
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
+	if (EXPECTED(ZEND_SAME_FAKE_TYPE(info->type, Z_TYPE_P(property)) && Z_TYPE_P(property) != IS_OBJECT)) {
+		return 1;
+	}
+
 	switch (info->type) {
 		case IS_OBJECT: {
 			zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
@@ -1521,15 +1528,14 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 			if (prop_info) {
 				zval tmp;
 
-				ZVAL_UNDEF(&tmp);
 				binary_op(&tmp, z, value);
 				if (!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
 					OBJ_RELEASE(Z_OBJ(obj));
 					return;
 				}
-
-				ZVAL_COPY_VALUE(z, &tmp);
+				zval_ptr_dtor(z);
+				ZVAL_COPY(z, &tmp);
 			} else {
 				binary_op(z, z, value);
 			}
