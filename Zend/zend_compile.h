@@ -836,6 +836,8 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
 
+#define ZEND_TYPE_NULLABLE (1<<8)
+
 /* var status for backpatching */
 #define BP_VAR_R			0
 #define BP_VAR_W			1

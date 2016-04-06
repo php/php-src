@@ -656,6 +656,7 @@ type:
 return_type:
 		/* empty */	{ $$ = NULL; }
 	|	':' type	{ $$ = $2; }
+	|	':' '?' type	{ $$ = $3; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 argument_list:

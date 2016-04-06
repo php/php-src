@@ -4906,6 +4906,11 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_infos->allow_null = 0;
 		arg_infos->class_name = NULL;
 
+		if (return_type_ast->attr & ZEND_TYPE_NULLABLE) {
+			arg_infos->allow_null = 1;
+			return_type_ast->attr &= ~ZEND_TYPE_NULLABLE;
+		}
+
 		zend_compile_typename(return_type_ast, arg_infos);
 
 		arg_infos++;

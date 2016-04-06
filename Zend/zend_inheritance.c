@@ -344,6 +344,10 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			return 0;
 		}
+
+		if (fe->common.arg_info[-1].allow_null && !proto->common.arg_info[-1].allow_null) {
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -506,6 +510,9 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_appends(&str, ": ");
+		if (fptr->common.arg_info[-1].allow_null) {
+			smart_str_appendc(&str, '?');
+		}
 		zend_append_type_hint(&str, fptr, fptr->common.arg_info - 1, 1);
 	}
 	smart_str_0(&str);
@@ -590,7 +597,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			error_verb = "must";
 		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
                    (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1))) {
+		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
+		            (child->common.arg_info[-1].allow_null && !parent->common.arg_info[-1].allow_null))) {
 			error_level = E_COMPILE_ERROR;
 			error_verb = "must";
 		} else {
