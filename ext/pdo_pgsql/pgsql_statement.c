@@ -605,46 +605,46 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 	array_init(return_value);
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 
-  switch (S->cols[colno].pgsql_type) {
-    case BOOLOID:
-      add_assoc_string(return_value, "native_type", BOOLLABEL);
-      break;
-    case BYTEAOID:
-      add_assoc_string(return_value, "native_type", BYTEALABEL);
-      break;
-    case INT8OID:
-      add_assoc_string(return_value, "native_type", INT8LABEL);
-      break;
-    case INT2OID:
-      add_assoc_string(return_value, "native_type", INT2LABEL);
-      break;
-    case INT4OID:
-      add_assoc_string(return_value, "native_type", INT4LABEL);
-      break;
-    case TEXTOID:
-      add_assoc_string(return_value, "native_type", TEXTLABEL);
-      break;
-    case VARCHAROID:
-      add_assoc_string(return_value, "native_type", VARCHARLABEL);
-      break;
-    case DATEOID:
-      add_assoc_string(return_value, "native_type", DATELABEL);
-      break;
-    case TIMESTAMPOID:
-      add_assoc_string(return_value, "native_type", TIMESTAMPLABEL);
-      break;
-    default:
-      /* Fetch metadata from Postgres system catalogue */
-      spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
-      res = PQexec(S->H->server, q);
-      efree(q);
-      status = PQresultStatus(res);
-      if (status == PGRES_TUPLES_OK && 1 == PQntuples(res)) {
-        add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
-      }
-      PQclear(res);
-   }
-   return 1;
+	switch (S->cols[colno].pgsql_type) {
+		case BOOLOID:
+			add_assoc_string(return_value, "native_type", BOOLLABEL);
+			break;
+		case BYTEAOID:
+			add_assoc_string(return_value, "native_type", BYTEALABEL);
+			break;
+		case INT8OID:
+			add_assoc_string(return_value, "native_type", INT8LABEL);
+			break;
+		case INT2OID:
+			add_assoc_string(return_value, "native_type", INT2LABEL);
+			break;
+		case INT4OID:
+			add_assoc_string(return_value, "native_type", INT4LABEL);
+			break;
+		case TEXTOID:
+			add_assoc_string(return_value, "native_type", TEXTLABEL);
+			break;
+		case VARCHAROID:
+			add_assoc_string(return_value, "native_type", VARCHARLABEL);
+			break;
+		case DATEOID:
+			add_assoc_string(return_value, "native_type", DATELABEL);
+			break;
+		case TIMESTAMPOID:
+			add_assoc_string(return_value, "native_type", TIMESTAMPLABEL);
+			break;
+		default:
+			/* Fetch metadata from Postgres system catalogue */
+			spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
+			res = PQexec(S->H->server, q);
+			efree(q);
+			status = PQresultStatus(res);
+			if (status == PGRES_TUPLES_OK && 1 == PQntuples(res)) {
+				add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
+			}
+			PQclear(res);
+	}
+	return 1;
 }
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
