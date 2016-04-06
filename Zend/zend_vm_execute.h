@@ -5669,7 +5669,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_H
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -9543,7 +9543,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CV_HAND
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -11495,7 +11495,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_TMPVAR_
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -14024,7 +14024,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CONST_HAN
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -15279,7 +15279,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CV_HANDLE
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -15835,7 +15835,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_TMPVAR_HA
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -18618,7 +18618,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CONST_HAN
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -23110,7 +23110,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CV_HANDLE
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -25787,7 +25787,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_TMPVAR_HA
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -28262,7 +28262,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -31708,7 +31708,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HAN
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -34086,7 +34086,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMPVAR
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -39062,7 +39062,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CONST_HAND
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -45610,7 +45610,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}
@@ -49372,7 +49372,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_TMPVAR_HAN
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					goto fetch_obj_r_exit;
 				}
 			}
 		}

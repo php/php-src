@@ -1856,7 +1856,7 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR
 				retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 				if (EXPECTED(retval)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-					break;
+					ZEND_VM_C_GOTO(fetch_obj_r_exit);
 				}
 			}
 		}
@@ -1888,7 +1888,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
 				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
-			}	
+			}
 		}
 	}
 
