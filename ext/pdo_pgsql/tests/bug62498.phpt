@@ -43,13 +43,17 @@ var_dump($meta);
 
 ?>
 Done
---EXPECT--
+--EXPECTF--
 Begin test...
 array(9) {
   [0]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(21)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "int2"
     ["name"]=>
@@ -62,9 +66,13 @@ array(9) {
     int(1)
   }
   [1]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(23)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "int4"
     ["name"]=>
@@ -77,9 +85,13 @@ array(9) {
     int(1)
   }
   [2]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(20)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "int8"
     ["name"]=>
@@ -92,9 +104,13 @@ array(9) {
     int(1)
   }
   [3]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(1043)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(7) "varchar"
     ["name"]=>
@@ -107,9 +123,13 @@ array(9) {
     int(2)
   }
   [4]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(16)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "bool"
     ["name"]=>
@@ -122,9 +142,13 @@ array(9) {
     int(5)
   }
   [5]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(1082)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "date"
     ["name"]=>
@@ -137,9 +161,13 @@ array(9) {
     int(2)
   }
   [6]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(25)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "text"
     ["name"]=>
@@ -152,9 +180,13 @@ array(9) {
     int(2)
   }
   [7]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(1114)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(9) "timestamp"
     ["name"]=>
@@ -167,9 +199,13 @@ array(9) {
     int(2)
   }
   [8]=>
-  array(6) {
+  array(8) {
     ["pgsql:oid"]=>
     int(17)
+    ["pgsql:table_oid"]=>
+    int(%d)
+    ["table"]=>
+    string(13) "bugtest_62498"
     ["native_type"]=>
     string(5) "bytea"
     ["name"]=>
