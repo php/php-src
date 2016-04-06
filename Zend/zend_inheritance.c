@@ -577,6 +577,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
 		int error_level;
 		const char *error_verb;
+		zend_string *method_prototype = zend_get_function_declaration(parent);
+		zend_string *child_prototype = zend_get_function_declaration(child);
 
 		if (child->common.prototype && (
 			child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
@@ -592,8 +594,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			error_level = E_WARNING;
 			error_verb = "should";
 		}
-		zend_string *method_prototype = zend_get_function_declaration(parent);
-		zend_string *child_prototype = zend_get_function_declaration(child);
+
 		zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
 		zend_string_free(child_prototype);
 		zend_string_free(method_prototype);
