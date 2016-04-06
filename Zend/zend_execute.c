@@ -1469,6 +1469,15 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 			(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot)))) {
 			zval tmp;
 
+			if (Z_TYPE_P(z) == IS_NULL) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+					"Typed property %s::$%s must not be accessed before initialization",
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(property));
+				OBJ_RELEASE(Z_OBJ(obj));
+				return;
+			}
+
 			ZVAL_DUP(&tmp, z);
 
 			if (inc) {
@@ -1541,12 +1550,21 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		ZVAL_DEREF(z);
 		SEPARATE_ZVAL_NOREF(z);
 		
-		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE(obj)) && Z_TYPE_P(property) == IS_STRING)) {
+		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE(obj))  && Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
 
 			if (prop_info) {
 				zval tmp;
-
+				
+				if (Z_TYPE_P(z) == IS_NULL) {
+					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+						"Typed property %s::$%s must not be accessed before initialization",
+						ZSTR_VAL(prop_info->ce->name),
+						Z_STRVAL_P(property));
+					OBJ_RELEASE(Z_OBJ(obj));
+					return;
+				}
+				
 				binary_op(&tmp, z, value);
 				if (!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
