@@ -607,9 +607,9 @@ PHPAPI int php_get_module_initialized(void)
 }
 /* }}} */
 
-/* {{{ php_log_err
+/* {{{ php_log_err_with_severity
  */
-PHPAPI ZEND_COLD void php_log_err(char *log_message, int syslog_type_int)
+PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int)
 {
 	int fd = -1;
 	time_t error_time;
@@ -1101,7 +1101,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 			}
 #endif
 			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-			php_log_err(log_buffer, syslog_type_int);
+			php_log_err_with_severity(log_buffer, syslog_type_int);
 			efree(log_buffer);
 		}
 
