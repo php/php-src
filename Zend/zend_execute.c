@@ -1464,7 +1464,9 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		}
 		ZVAL_DEREF(z);
 		SEPARATE_ZVAL_NOREF(z);
-		if (ZEND_OBJECT_HAS_TYPE_HINTS(object) && (prop_info = zend_object_fetch_property_type_info(object, property, cache_slot))) {
+		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object)) && 
+			(Z_TYPE_P(property) == IS_STRING) && 
+			(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot)))) {
 			zval tmp;
 
 			ZVAL_DUP(&tmp, z);
@@ -1475,7 +1477,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 				decrement_function(&tmp);
 			}
 
-			if (!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+			if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 				zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
 				OBJ_RELEASE(Z_OBJ(obj));
 				zval_ptr_dtor(z);
@@ -1539,8 +1541,8 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		ZVAL_DEREF(z);
 		SEPARATE_ZVAL_NOREF(z);
 		
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, property, cache_slot);
+		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE(obj)) && Z_TYPE_P(property) == IS_STRING)) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
 
 			if (prop_info) {
 				zval tmp;
