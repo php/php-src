@@ -1406,7 +1406,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 
 		if (ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object)) && Z_TYPE_P(property) == IS_STRING) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
-			
+
 			if (prop_info) {
 				if (Z_TYPE_P(result) == IS_NULL) {
 					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
@@ -1416,22 +1416,18 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 					OBJ_RELEASE(Z_OBJ(obj));
 					zval_ptr_dtor(z);
 					return;
-				} else if (!zend_verify_property_type(prop_info, result, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), result);
-					return;
 				}
 			}
 		}
 
 		ZVAL_DUP(&z_copy, result);
-
 		if (inc) {
 			increment_function(&z_copy);
 		} else {
 			decrement_function(&z_copy);
 		}
 		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
-		
+
 		OBJ_RELEASE(Z_OBJ(obj));
 		zval_ptr_dtor(&z_copy);
 		zval_ptr_dtor(z);
