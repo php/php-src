@@ -671,8 +671,8 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 found:
-				if (ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce)) {
-					zend_property_info *prop_info = zend_object_fetch_property_type_info(object, member, cache_slot);
+				if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) && Z_TYPE_P(member) == IS_STRING)) {
+					zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot);
 
 					if (prop_info) {
 						if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
@@ -730,8 +730,8 @@ write_std_property:
 			}
 		}
 
-		if (ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce)) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(object, member, cache_slot);
+		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) && Z_TYPE_P(member) == IS_STRING)) {
+			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot);
 
 			if (prop_info) {
 				if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
