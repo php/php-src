@@ -485,24 +485,23 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 /* }}} */
 
 
-static void php_session_gc(void) /* {{{ */
+static zend_long php_session_gc(zend_bool immediate) /* {{{ */
 {
 	int nrand;
+	int nrdels = -1;
 
 	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
-		int nrdels = -1;
-
 		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
+		if (immediate) {
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+			return (zend_long)nrdels;
+		}
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
-#ifdef SESSION_DEBUG
-			if (nrdels != -1) {
-				php_error_docref(NULL, E_NOTICE, "purged %d expired session objects", nrdels);
-			}
-#endif
 		}
 	}
+	return (zend_long)nrdels;
 } /* }}} */
 
 
@@ -568,7 +567,7 @@ static void php_session_initialize(void) /* {{{ */
 	}
 
 	/* GC must be done after read */
-	php_session_gc();
+	php_session_gc(0);
 
 	if (PS(session_vars)) {
 		zend_string_release(PS(session_vars));
@@ -2381,6 +2380,31 @@ static PHP_FUNCTION(session_unset)
 }
 /* }}} */
 
+/* {{{ proto int session_gc(void)
+   Perform GC and return number of deleted sessions */
+static PHP_FUNCTION(session_gc)
+{
+	zend_long nrdels;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Session is not active");
+		RETURN_FALSE;
+	}
+
+	nrdels = php_session_gc(1);
+	if (nrdels < -1) {
+		php_error_docref(NULL, E_WARNING, "Failed to perfom session GC");
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(nrdels);
+}
+/* }}} */
+
+
 /* {{{ proto void session_write_close(void)
    Write session data and end session */
 static PHP_FUNCTION(session_write_close)
@@ -2558,6 +2582,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_start,             arginfo_session_void)
 	PHP_FE(session_destroy,           arginfo_session_void)
 	PHP_FE(session_unset,             arginfo_session_void)
+	PHP_FE(session_gc,                arginfo_session_void)
 	PHP_FE(session_set_save_handler,  arginfo_session_set_save_handler)
 	PHP_FE(session_cache_limiter,     arginfo_session_cache_limiter)
 	PHP_FE(session_cache_expire,      arginfo_session_cache_expire)
