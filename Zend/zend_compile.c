@@ -3674,6 +3674,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	znode obj_node, method_node;
 	zend_op *opline;
+	zend_function *fbc = NULL;
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
@@ -3697,7 +3698,20 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		SET_NODE(opline->op2, &method_node);
 	}
 
-	zend_compile_call_common(result, args_ast, NULL);
+	/* Check if this calls a known method on $this */
+	if (opline->op1_type == IS_UNUSED && opline->op2_type == IS_CONST &&
+			CG(active_class_entry) && zend_is_scope_known()) {
+		zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op2) + 1);
+		fbc = zend_hash_find_ptr(&CG(active_class_entry)->function_table, lcname);
+
+		/* We only know the exact method that is being called if it is either private or final.
+		 * Otherwise an overriding method in a child class may be called. */
+		if (fbc && !(fbc->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_FINAL))) {
+			fbc = NULL;
+		}
+	}
+
+	zend_compile_call_common(result, args_ast, fbc);
 }
 /* }}} */
 
