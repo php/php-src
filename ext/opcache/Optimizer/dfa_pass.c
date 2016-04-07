@@ -429,6 +429,28 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				op_array->opcodes[op2].opcode = ZEND_PRE_DEC;
 				SET_UNUSED(op_array->opcodes[op2].op2);
 
+			} else if (op_array->opcodes[op2].opcode == ZEND_VERIFY_RETURN_TYPE
+			 && ssa->ops[op2].op1_def == i
+			 && ssa->ops[op2].op1_use >= 0
+			 && ssa->ops[op2].op1_use_chain == -1
+			 && ssa->vars[i].use_chain >= 0
+			 && (ssa->var_info[ssa->ops[op2].op1_use].type & (MAY_BE_ANY|MAY_BE_UNDEF)) == (ssa->var_info[ssa->ops[op2].op1_def].type & MAY_BE_ANY)) {
+				/* remove useless type check */
+				int var1 = ssa->ops[op2].op1_use;
+				int ret = ssa->vars[i].use_chain;
+
+				ssa->vars[var1].use_chain = ret;
+				ssa->ops[ret].op1_use = var1;
+
+				ssa->vars[i].definition = -1;
+				ssa->vars[i].use_chain = -1;
+
+				ssa->ops[op2].op1_def = -1;
+				ssa->ops[op2].op1_use = -1;
+
+				MAKE_NOP(&op_array->opcodes[op2]);
+				remove_nops = 1;
+
 			} else if (ssa->ops[op2].op1_def == i
 			 && !RETURN_VALUE_USED(&op_array->opcodes[op2])
 			 && ssa->ops[op2].op1_use >= 0
