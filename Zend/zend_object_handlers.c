@@ -621,8 +621,8 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		}
 	}
 	if ((type != BP_VAR_IS)) {
-		if (EXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) || 
-					 !(prop_info = zend_hash_find_ptr(&zobj->ce->properties_info, Z_STR_P(member))) ||
+		if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) || 
+					 !(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot)) ||
 					 !prop_info->type)) {
 			zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), Z_STRVAL_P(member));
 		}
