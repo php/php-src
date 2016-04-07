@@ -63,6 +63,10 @@ PHP                                                                        NEWS
   . Fixed bug #71820 (pg_fetch_object binds parameters before call
     constructor). (Anatol)
 
+- Session:
+  . Fixed bug #71974 (Trans sid will always be send, even if cookies are 
+    available). (Yasuo)
+
 - SPL:
   . Fixed bug #71838 (Deserializing serialized SPLObjectStorage-Object can't
     access properties in PHP). (Nikita)
