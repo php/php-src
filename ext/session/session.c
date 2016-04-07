@@ -496,11 +496,6 @@ static void php_session_gc(void) /* {{{ */
 		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
-#ifdef SESSION_DEBUG
-			if (nrdels != -1) {
-				php_error_docref(NULL, E_NOTICE, "purged %d expired session objects", nrdels);
-			}
-#endif
 		}
 	}
 } /* }}} */
