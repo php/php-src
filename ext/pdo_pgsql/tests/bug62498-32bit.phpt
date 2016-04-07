@@ -1,12 +1,12 @@
 --TEST--
-PDO PgSQL Bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used), 64-bit
+PDO PgSQL Bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used), 32-bit
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require dirname(__FILE__) . '/config.inc';
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
-if (PHP_INT_SIZE < 8) die("skip valid for 64-bit only");
+if (PHP_INT_SIZE > 4) die("skip relevant for 32-bit only");
 ?>
 --FILE--
 <?php
@@ -101,7 +101,7 @@ array(9) {
     ["precision"]=>
     int(-1)
     ["pdo_type"]=>
-    int(1)
+    int(2)
   }
   [3]=>
   array(8) {
