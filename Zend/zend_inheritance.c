@@ -243,11 +243,6 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		return 0;
 	}
 
-	if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
-		/* incompatible nullability */
-		return 0;
-	}
-
 	return 1;
 }
 /* }}} */
@@ -321,6 +316,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		}
 
 		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
+			return 0;
+		}
+
+		if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
+			/* incompatible nullability */
 			return 0;
 		}
 
@@ -570,17 +570,31 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	}
 
 	if (child->common.prototype && (
-		child->common.prototype->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_HAS_RETURN_TYPE)
+		child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
 	)) {
-		if (UNEXPECTED(!zend_do_perform_implementation_check(child, child->common.prototype))) {
-			zend_string *method_prototype = zend_get_function_declaration(child->common.prototype);
-			zend_string *child_prototype = zend_get_function_declaration(child);
-			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s", ZSTR_VAL(child_prototype), ZSTR_VAL(method_prototype));
-		}
-	} else if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
+		parent = child->common.prototype;
+	}
+	if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
+		int error_level;
+		const char *error_verb;
 		zend_string *method_prototype = zend_get_function_declaration(parent);
 		zend_string *child_prototype = zend_get_function_declaration(child);
-		zend_error(E_WARNING, "Declaration of %s should be compatible with %s", ZSTR_VAL(child_prototype), ZSTR_VAL(method_prototype));
+
+		if (child->common.prototype && (
+			child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
+		)) {
+			error_level = E_COMPILE_ERROR;
+			error_verb = "must";
+		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
+                   (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1))) {
+			error_level = E_COMPILE_ERROR;
+			error_verb = "must";
+		} else {
+			error_level = E_WARNING;
+			error_verb = "should";
+		}
+		zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
 		zend_string_free(child_prototype);
 		zend_string_free(method_prototype);
 	}
