@@ -31,7 +31,8 @@ static zend_object_handlers zend_generator_handlers;
 
 static zend_object *zend_generator_create(zend_class_entry *class_type);
 
-static void zend_generator_cleanup_unfinished_execution(zend_generator *generator) /* {{{ */
+static void zend_generator_cleanup_unfinished_execution(
+		zend_generator *generator, uint32_t catch_op_num) /* {{{ */
 {
 	zend_execute_data *execute_data = generator->execute_data;
 
@@ -47,7 +48,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 		EG(vm_stack_end) = generator->stack->end;
 		EG(vm_stack) = generator->stack;
 
-		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
+		zend_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 
 		generator->stack = EG(vm_stack);
 		generator->stack->top = EG(vm_stack_top);
@@ -85,7 +86,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* Some cleanups are only necessary if the generator was closed
 		 * before it could finish execution (reach a return statement). */
 		if (UNEXPECTED(!finished_execution)) {
-			zend_generator_cleanup_unfinished_execution(generator);
+			zend_generator_cleanup_unfinished_execution(generator, 0);
 		}
 
 		/* Free closure object */
@@ -151,8 +152,11 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	/* If a finally block was found we jump directly to it and
 	 * resume the generator. */
 	if (finally_op_num) {
-		zval *fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
+		zval *fast_call;
 
+		zend_generator_cleanup_unfinished_execution(generator, finally_op_num);
+
+		fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 		Z_OBJ_P(fast_call) = EG(exception);
 		EG(exception) = NULL;
 		fast_call->u2.lineno = (uint32_t)-1;
