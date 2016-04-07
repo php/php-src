@@ -180,6 +180,7 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 zend_bool zend_vm_is_fetching_reference(const zend_op * opline) {
 	zend_op const *next = opline + 1;
 
+_zend_vm_is_fetching_reference:
 	switch (next->opcode) {
 		case ZEND_NOP:
 		case ZEND_TICKS:
@@ -188,7 +189,7 @@ zend_bool zend_vm_is_fetching_reference(const zend_op * opline) {
 		case ZEND_FETCH_W: 
 		case ZEND_FETCH_OBJ_W: {
 			next++;
-		} break;
+		} goto _zend_vm_is_fetching_reference;
 	}
 
 	switch (next->opcode) {
