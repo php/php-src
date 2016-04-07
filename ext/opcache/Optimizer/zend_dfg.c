@@ -131,6 +131,7 @@ op1_def:
 					case ZEND_FETCH_OBJ_RW:
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 					case ZEND_FETCH_OBJ_UNSET:
+					case ZEND_VERIFY_RETURN_TYPE:
 						DFG_SET(gen, set_size, j, var_num);
 					default:
 op1_use:
@@ -140,6 +141,9 @@ op1_use:
 					}
 				} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->op1.var);
+					if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
+						DFG_SET(gen, set_size, j, var_num);
+					}
 					if (!DFG_ISSET(def, set_size, j, var_num)) {
 						DFG_SET(use, set_size, j, var_num);
 					}

@@ -2265,12 +2265,30 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
 {
 	/* `return ...;` is illegal in a void function (but `return;` isn't) */
-	if (expr && return_info->type_hint == IS_VOID) {
-		zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+	if (return_info->type_hint == IS_VOID) {
+		if (expr) {
+			zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+		}
+		/* we don't need run-time check */
+		return;
 	}
 
 	if (return_info->type_hint != IS_UNDEF) {
-		zend_op *opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+		zend_op *opline;
+
+		if (expr && expr->op_type == IS_CONST) {
+			if ((return_info->type_hint == Z_TYPE(expr->u.constant))
+			 ||((return_info->type_hint == _IS_BOOL)
+			  && (Z_TYPE(expr->u.constant) == IS_FALSE
+			   || Z_TYPE(expr->u.constant) == IS_TRUE))
+			 || (return_info->allow_null
+			  && Z_TYPE(expr->u.constant) == IS_NULL)) {
+				/* we don't need run-time check */
+				return;
+			}
+		}
+
+		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
 		if (expr && expr->op_type == IS_CONST) {
 			opline->result_type = expr->op_type = IS_TMP_VAR;
 			opline->result.var = expr->u.op.var = get_temporary_variable(CG(active_op_array));

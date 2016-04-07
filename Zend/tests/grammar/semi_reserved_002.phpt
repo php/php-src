@@ -80,7 +80,6 @@ class Obj
     static function __FILE__(){ echo __METHOD__, PHP_EOL; }
     static function __DIR__(){ echo __METHOD__, PHP_EOL; }
     static function __NAMESPACE__(){ echo __METHOD__, PHP_EOL; }
-    static function __halt_compiler(){ echo __METHOD__, PHP_EOL; }
 }
 
 Obj::empty();
@@ -158,7 +157,6 @@ Obj::__LINE__();
 Obj::__FILE__();
 Obj::__DIR__();
 Obj::__NAMESPACE__();
-Obj::__halt_compiler();
 
 echo "\nDone\n";
 
@@ -238,6 +236,5 @@ Obj::__LINE__
 Obj::__FILE__
 Obj::__DIR__
 Obj::__NAMESPACE__
-Obj::__halt_compiler
 
 Done
