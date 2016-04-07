@@ -184,7 +184,9 @@ zend_bool zend_vm_is_fetching_reference(const zend_op * opline) {
 		case ZEND_NOP:
 		case ZEND_TICKS:
 		case ZEND_EXT_STMT:
-		case ZEND_FETCH_DIM_W: {
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_W: 
+		case ZEND_FETCH_OBJ_W: {
 			next++;
 		} break;
 	}
