@@ -3666,19 +3666,19 @@ static void zend_update_type_info(const zend_op_array *op_array,
 
 			tmp = zend_fetch_arg_info(script, ret_info, &ce);
 			tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-			if (opline->op1_type == IS_CONST) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-				if (ce) {
-					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_ops[i].result_def);
-				} else {
-					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].result_def);
-				}
-			} else {
+			if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 				if (ce) {
 					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_ops[i].op1_def);
 				} else {
 					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].op1_def);
+				}
+			} else {
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+				if (ce) {
+					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_ops[i].result_def);
+				} else {
+					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].result_def);
 				}
 			}
 			break;
