@@ -488,20 +488,20 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 static zend_long php_session_gc(zend_bool immediate) /* {{{ */
 {
 	int nrand;
-	int nrdels = -1;
+	int num = -1;
 
 	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
-		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
 		if (immediate) {
-			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
-			return (zend_long)nrdels;
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
+			return (zend_long)num;
 		}
+		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
 		if (nrand < PS(gc_probability)) {
-			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 		}
 	}
-	return (zend_long)nrdels;
+	return (zend_long)num;
 } /* }}} */
 
 
@@ -2384,7 +2384,7 @@ static PHP_FUNCTION(session_unset)
    Perform GC and return number of deleted sessions */
 static PHP_FUNCTION(session_gc)
 {
-	zend_long nrdels;
+	zend_long num;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -2394,13 +2394,13 @@ static PHP_FUNCTION(session_gc)
 		RETURN_FALSE;
 	}
 
-	nrdels = php_session_gc(1);
-	if (nrdels < -1) {
+	num = php_session_gc(1);
+	if (num < -1) {
 		php_error_docref(NULL, E_WARNING, "Failed to perfom session GC");
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(nrdels);
+	RETURN_LONG(num);
 }
 /* }}} */
 

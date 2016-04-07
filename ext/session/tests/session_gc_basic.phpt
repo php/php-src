@@ -7,16 +7,13 @@ Test session_gc() function : basic functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : int session_gc(void)
  * Description : Perform GC
  * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_gc() : basic functionality ***\n";
-
-// Turn off strice mode, since it does not allow uninitialized session ID
-ini_set('session.use_strict_mode',false);
 
 var_dump(session_gc());
 
@@ -31,7 +28,7 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_gc() : basic functionality ***
 
-Warning: session_gc(): Session is not active in %s on line 16
+Warning: session_gc(): Session is not active in %s on line %d
 bool(false)
 bool(true)
 int(%d)
