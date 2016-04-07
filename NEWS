@@ -69,6 +69,8 @@ PHP                                                                        NEWS
   . Fixed bug #52339 (SPL autoloader breaks class_exists()). (Nikita)
 
 - Standard:
+  . Fixed bug #71940 (Unserialize crushes on restore object reference).
+    (Laruence)
   . Fixed bug #71969 (str_replace returns an incorrect resulting array after
     a foreach by reference). (Laruence)
   . Fixed bug #71891 (header_register_callback() and
