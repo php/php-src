@@ -716,8 +716,6 @@ use_double:
 		zend_hash_real_init(Z_ARRVAL_P(rval), 0);
 	}
 
-	/* We should keep an reference to rval to prevent it from being dtor */
-	var_push_dtor(var_hash, rval);
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, 0)) {
 		return 0;
 	}

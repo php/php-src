@@ -1039,7 +1039,7 @@ PHP_FUNCTION(unserialize)
 
 	if (!php_var_unserialize_ex(return_value, &p, p + buf_len, &var_hash, class_hash)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		if(class_hash) {
+		if (class_hash) {
 			zend_hash_destroy(class_hash);
 			FREE_HASHTABLE(class_hash);
 		}
@@ -1050,8 +1050,12 @@ PHP_FUNCTION(unserialize)
 		}
 		RETURN_FALSE;
 	}
+	/* We should keep an reference to return_value to prevent it from being dtor
+	   in case nesting calls to unserialize */
+	var_push_dtor(&var_hash, return_value);
+
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	if(class_hash) {
+	if (class_hash) {
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}
