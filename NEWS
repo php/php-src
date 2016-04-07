@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug #69537 (__debugInfo with empty string for key gives error).
     (krakjoe)
   . Fixed bug #62059 (ArrayObject and isset are not friends). (Nikita)
+  . Fixed bug #71980 (Decorated/Nested Generator is Uncloseable in Finally).
+    (Nikita)
 
 - Curl:
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
