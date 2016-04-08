@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #71516 (IntlDateFormatter looses locale if pattern is set
     via constructor). (Anatol)
+  . Fixed bug #70455 (Missing constant: IntlChar::NO_NUMERIC_VALUE).
+    (Anatol)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
