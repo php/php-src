@@ -36,6 +36,7 @@ extern "C" {
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"
 
+
 /* {{{ */
 static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
@@ -117,14 +118,16 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 		}
 	}
 
+	DATE_FORMAT_OBJECT(dfo) = udat_open((UDateFormatStyle)time_type,
+			(UDateFormatStyle)date_type, locale_str, NULL, 0, svalue,
+			slength, &INTL_DATA_ERROR_CODE(dfo));
+
 	if (pattern_str && pattern_str_len > 0) {
-		DATE_FORMAT_OBJECT(dfo) = udat_open(UDAT_IGNORE, UDAT_IGNORE,
-				locale_str, NULL, 0, svalue, slength,
-				&INTL_DATA_ERROR_CODE(dfo));
-	} else {
-		DATE_FORMAT_OBJECT(dfo) = udat_open((UDateFormatStyle)time_type,
-				(UDateFormatStyle)date_type, locale_str, NULL, 0, svalue,
-				slength, &INTL_DATA_ERROR_CODE(dfo));
+		udat_applyPattern(DATE_FORMAT_OBJECT(dfo), true, svalue, slength);
+		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
+			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create: error applying pattern", 0);
+			goto error;
+		}
 	}
 
     if (!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
