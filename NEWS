@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #71889 (DateInterval::format Segmentation fault).
     (Thomas Punt)
 
+- Intl:
+  . Fixed bug #71516 (IntlDateFormatter looses locale if pattern is set
+    via constructor). (Anatol)
+
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
 
