@@ -68,6 +68,10 @@ PHP                                                                        NEWS
   . Fixed bug #71820 (pg_fetch_object binds parameters before call
     constructor). (Anatol)
 
+- SOAP:
+  . Fixed bug #71986 (Nested foreach assign-by-reference creates broken
+    variables). (Laruence)
+
 - SPL:
   . Fixed bug #71838 (Deserializing serialized SPLObjectStorage-Object can't
     access properties in PHP). (Nikita)
