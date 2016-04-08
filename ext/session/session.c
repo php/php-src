@@ -494,7 +494,7 @@ static zend_long php_session_gc(zend_bool immediate) /* {{{ */
 	if ((PS(mod_data) || PS(mod_user_implemented))) {
 		if (immediate) {
 			/* 0 TTL may be used for special meaning. Use 1. */
-			PS(mod)->s_gc(&PS(mod_data), 1, &num);
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 			return (zend_long)num;
 		}
 		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
