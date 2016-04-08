@@ -36,6 +36,13 @@ extern "C" {
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"
 
+#define INTL_UDATE_FMT_OK(i) \
+	(UDAT_FULL == (i) || UDAT_LONG == (i) ||    \
+	 UDAT_MEDIUM == (i) || UDAT_SHORT == (i) || \
+	 UDAT_RELATIVE == (i) || UDAT_FULL_RELATIVE == (i) || \
+	 UDAT_LONG_RELATIVE == (i) || UDAT_MEDIUM_RELATIVE == (i) || \
+	 UDAT_SHORT_RELATIVE == (i) || UDAT_NONE == (i) || \
+	 UDAT_PATTERN == (i))
 
 /* {{{ */
 static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
@@ -72,12 +79,6 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 		return FAILURE;
     }
 
-	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
-	if (locale_len == 0) {
-		locale_str = intl_locale_get_default();
-	}
-	locale = Locale::createFromName(locale_str);
-
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
@@ -85,6 +86,21 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 				"datefmt_create: cannot call constructor twice", 0);
 		return FAILURE;
 	}
+
+	if (!INTL_UDATE_FMT_OK(date_type)) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid date format style", 0);
+		return FAILURE;
+	}
+	if (!INTL_UDATE_FMT_OK(time_type)) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid time format style", 0);
+		return FAILURE;
+	}
+
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
+	if (locale_len == 0) {
+		locale_str = intl_locale_get_default();
+	}
+	locale = Locale::createFromName(locale_str);
 
 	/* process calendar */
 	if (datefmt_process_calendar_arg(calendar_zv, locale, "datefmt_create",
