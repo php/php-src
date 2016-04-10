@@ -40,10 +40,6 @@ typedef int (*php_json_parser_func_object_start_t)(
 		php_json_parser *parser);
 typedef int (*php_json_parser_func_object_end_t)(
 		php_json_parser *parser, zval *object);
-typedef int (*php_json_parser_func_depth_increase_t)(
-		php_json_parser *parser);
-typedef int (*php_json_parser_func_depth_decrease_t)(
-		php_json_parser *parser);
 
 typedef struct _php_json_parser_methods {
 	php_json_parser_func_array_create_t array_create;
@@ -54,8 +50,6 @@ typedef struct _php_json_parser_methods {
 	php_json_parser_func_object_update_t object_update;
 	php_json_parser_func_object_start_t object_start;
 	php_json_parser_func_object_end_t object_end;
-	php_json_parser_func_depth_increase_t depth_increase;
-	php_json_parser_func_depth_decrease_t depth_decrease;
 } php_json_parser_methods;
 
 struct _php_json_parser {
