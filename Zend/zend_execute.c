@@ -2978,7 +2978,6 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 	EG(scope) = fbc->common.scope;
 
 	ZVAL_NULL(ret);
-	Z_VAR_FLAGS_P(ret) = 0;
 
 	EG(current_execute_data) = call;
 	object->handlers->call_method(fbc->common.function_name, object, call, ret);

@@ -5647,7 +5647,9 @@ ZEND_METHOD(reflection_property, getValue)
 			php_error_docref(NULL, E_ERROR, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
 			/* Bails out */
 		}
-		ZVAL_DUP(return_value, &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]);
+		member_p = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
+		ZVAL_DEREF(member_p);
+		ZVAL_COPY(return_value, member_p);
 	} else {
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
@@ -5659,7 +5661,8 @@ ZEND_METHOD(reflection_property, getValue)
 
 		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
 		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1, &rv);
-		ZVAL_DUP(return_value, member_p);
+		ZVAL_DEREF(member_p);
+		ZVAL_COPY(return_value, member_p);
 	}
 }
 /* }}} */

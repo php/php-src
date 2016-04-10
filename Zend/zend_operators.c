@@ -136,17 +136,6 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, int str_len) /* {{{ 
 }
 /* }}} */
 
-static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
-{
-	if (Z_REFCOUNT_P(op) == 1) {
-		ZVAL_UNREF(op);
-	} else {
-		Z_DELREF_P(op);
-		ZVAL_COPY(op, Z_REFVAL_P(op));
-	}
-}
-/* }}} */
-
 void ZEND_FASTCALL _convert_scalar_to_number(zval *op, zend_bool silent) /* {{{ */
 {
 try_again:
