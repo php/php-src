@@ -971,7 +971,6 @@ static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC) 
 #define PHP_OPENSSL_RAND_ADD_TIME() ((void) 0)
 #else
 #define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
-#endif
 
 static inline void php_openssl_rand_add_timeval()  /* {{{ */
 {
@@ -981,6 +980,8 @@ static inline void php_openssl_rand_add_timeval()  /* {{{ */
 	RAND_add(&tv, sizeof(tv), 0.0);
 }
 /* }}} */
+
+#endif
 
 static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded TSRMLS_DC) /* {{{ */
 {
