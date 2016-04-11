@@ -43,6 +43,8 @@ PHP                                                                        NEWS
   . Fixed bug #70451, #70452 (Inconsistencies in return values of
     IntlChar methods). (Daniel Persson)
   . Fixed bug #68893 (Stackoverflow in datefmt_create). (Anatol)
+  . Fixed bug #66289 (Locale::lookup incorrectly returns en or en_US if locale
+    is empty). (Anatol)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
@@ -70,6 +72,8 @@ PHP                                                                        NEWS
 - Postgres:
   . Fixed bug #71820 (pg_fetch_object binds parameters before call
     constructor). (Anatol)
+  . Fixed bug #71998 (Function pg_insert does not insert when column
+    type = inet). (Anatol)
 
 - SOAP:
   . Fixed bug #71986 (Nested foreach assign-by-reference creates broken
@@ -84,6 +88,8 @@ PHP                                                                        NEWS
   . Fixed bug #52339 (SPL autoloader breaks class_exists()). (Nikita)
 
 - Standard:
+  . Fixed bug #71995 (Returning the same var twice from __sleep() produces
+    broken serialized data). (Laruence)
   . Fixed bug #71940 (Unserialize crushes on restore object reference).
     (Laruence)
   . Fixed bug #71969 (str_replace returns an incorrect resulting array after
