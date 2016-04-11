@@ -475,34 +475,56 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 	uint32_t call_info = EX_CALL_INFO();
 
 	if (EXPECTED(ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_FUNCTION)) {
-		zend_object *object;
-
 		i_free_compiled_variables(execute_data);
-		if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
-			zend_clean_and_cache_symbol_table(EX(symbol_table));
-		}
-		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
-		old_execute_data = execute_data;
-		execute_data = EG(current_execute_data) = EX(prev_execute_data);
-		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			object = Z_OBJ(old_execute_data->This);
-#if 0
-			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
-#else
-			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-#endif
-				GC_REFCOUNT(object)--;
-				if (GC_REFCOUNT(object) == 1) {
-					zend_object_store_ctor_failed(object);
-				}
+		if (UNEXPECTED(call_info & (ZEND_CALL_FREE_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED))) {
+			if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
+				zend_clean_and_cache_symbol_table(EX(symbol_table));
 			}
-			OBJ_RELEASE(object);
-		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
-			OBJ_RELEASE((zend_object*)old_execute_data->func->op_array.prototype);
-		}
-		EG(scope) = EX(func)->op_array.scope;
+			EG(current_execute_data) = EX(prev_execute_data);
+			if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
+				zend_object *object = Z_OBJ(execute_data->This);
+#if 0
+				if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
+#else
+				if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
+#endif
+					GC_REFCOUNT(object)--;
+					if (GC_REFCOUNT(object) == 1) {
+						zend_object_store_ctor_failed(object);
+					}
+				}
+				OBJ_RELEASE(object);
+			} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
+				OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
+			}
 
-		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
+			zend_vm_stack_free_extra_args_ex(call_info, execute_data);
+			old_execute_data = execute_data;
+			execute_data = EX(prev_execute_data);
+			zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
+		} else {
+			EG(current_execute_data) = EX(prev_execute_data);
+			if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
+				zend_object *object = Z_OBJ(execute_data->This);
+#if 0
+				if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
+#else
+				if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
+#endif
+					GC_REFCOUNT(object)--;
+					if (GC_REFCOUNT(object) == 1) {
+						zend_object_store_ctor_failed(object);
+					}
+				}
+				OBJ_RELEASE(object);
+			} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
+				OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
+			}
+			EG(vm_stack_top) = (zval*)execute_data;
+			execute_data = EX(prev_execute_data);
+		}
+
+		EG(scope) = EX(func)->op_array.scope;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			const zend_op *old_opline = EX(opline);
@@ -515,8 +537,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 
 		LOAD_NEXT_OPLINE();
 		ZEND_VM_LEAVE();
-	}
-	if (EXPECTED((ZEND_CALL_KIND_EX(call_info) & ZEND_CALL_TOP) == 0)) {
+	} else if (EXPECTED((ZEND_CALL_KIND_EX(call_info) & ZEND_CALL_TOP) == 0)) {
 		zend_detach_symbol_table(execute_data);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
@@ -535,14 +556,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 	} else {
 		if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_TOP_FUNCTION) {
 			i_free_compiled_variables(execute_data);
-			if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
-				zend_clean_and_cache_symbol_table(EX(symbol_table));
+			if (UNEXPECTED(call_info & (ZEND_CALL_FREE_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
+				if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
+					zend_clean_and_cache_symbol_table(EX(symbol_table));
+				}
+				zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 			}
-			zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 			EG(current_execute_data) = EX(prev_execute_data);
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
 			}
+			ZEND_VM_RETURN();
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
 
@@ -558,9 +582,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 				old_execute_data = old_execute_data->prev_execute_data;
 			}
 			EG(current_execute_data) = EX(prev_execute_data);
+			ZEND_VM_RETURN();
 		}
-
-		ZEND_VM_RETURN();
 	}
 }
 
