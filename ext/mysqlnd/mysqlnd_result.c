@@ -1391,7 +1391,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	}
 
 	if (ret == FAIL) {
-		COPY_CLIENT_ERROR(&set->error_info, row_packet->error_info);
+		memcpy(&set->error_info, &row_packet->error_info, sizeof(MYSQLND_ERROR_INFO));
 	} else {
 		/* libmysql's documentation says it should be so for SELECT statements */
 		UPSERT_STATUS_SET_AFFECTED_ROWS(conn->upsert_status, set->row_count);
