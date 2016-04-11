@@ -10,6 +10,11 @@ addons:
       - libicu-dev
       - libmcrypt-dev
       - libtidy-dev
+      - libenchant-dev
+      - libaspell-dev
+      - libpspell-dev
+      - librecode-dev
+
 notifications:
     email: 
        on_failure: change
@@ -48,4 +53,6 @@ before_script:
     - . ./travis/ext/pdo_pgsql/setup.sh
 
 # Run PHPs run-tests.php 
-script: ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff --set-timeout 120
+script:
+    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --set-timeout 120
+    - ./sapi/cli/php sapi/phpdbg/tests/run-tests.php -diff2stdout --phpdbg sapi/phpdbg/phpdbg

@@ -1,7 +1,7 @@
 --TEST--
 Phar - bug #70433 - Uninitialized pointer in phar_make_dirstream when zip entry filename is "/"
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar") || !extension_loaded("zlib")) die("skip"); ?>
 --FILE--
 <?php
 $phar = new PharData(__DIR__."/bug70433.zip");

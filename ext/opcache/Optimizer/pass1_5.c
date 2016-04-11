@@ -16,9 +16,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 	int i = 0;
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
-	/* bug #71127*
-	 zend_bool collect_constants = (op_array == &script->main_op_array); */
-	zend_bool collect_constants = 0;
+	zend_bool collect_constants = (ZEND_OPTIMIZER_PASS_15 & OPTIMIZATION_LEVEL)?
+		(op_array == &script->main_op_array) : 0;
 
 	while (opline < end) {
 		switch (opline->opcode) {

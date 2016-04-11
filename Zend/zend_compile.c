@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -5402,7 +5402,7 @@ ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int le
 
 	*class_name = NULL;
 
-	if (mangled_property[0]!=0) {
+	if (!len || mangled_property[0] != 0) {
 		*prop_name = mangled_property;
 		if (prop_len) {
 			*prop_len = len;

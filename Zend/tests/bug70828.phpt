@@ -20,5 +20,5 @@ namespace {
 }
 ?>
 --EXPECTF--
-Notice: Use of undefined constant nonexistent - assumed 'nonexistent' in /home/huixinchen/opensource/php-5.6/Zend/tests/bug70828.php on line 8
+Notice: Use of undefined constant nonexistent - assumed 'nonexistent' in %sbug70828.php on line %d
 string(11) "nonexistent"
