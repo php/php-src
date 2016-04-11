@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   . Fixed bug #68893 (Stackoverflow in datefmt_create). (Anatol)
   . Fixed bug #66289 (Locale::lookup incorrectly returns en or en_US if locale
     is empty). (Anatol)
+  . Fixed bug #70484 (selectordinal doesn't work with named parameters).
+    (Anatol)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
