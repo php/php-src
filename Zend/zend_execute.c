@@ -1086,35 +1086,14 @@ static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **c
 	return 1;
 }
 
-static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *object, zval *property_name, int value_type, znode_op value_op, const zend_execute_data *execute_data)
+static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim, zval *value)
 {
-	zend_free_op free_value;
- 	zval *value = get_zval_ptr_deref(value_type, value_op, execute_data, &free_value, BP_VAR_R);
-
-	/* Note:  property_name in this case is really the array index! */
-	if (!Z_OBJ_HT_P(object)->write_dimension) {
+	if (UNEXPECTED(!Z_OBJ_HT_P(object)->write_dimension)) {
 		zend_throw_error(NULL, "Cannot use object as array");
-		FREE_OP(free_value);
 		return;
 	}
 
-	/* separate our value if necessary */
-	if (value_type == IS_CONST) {
-		if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	}
-
-	Z_OBJ_HT_P(object)->write_dimension(object, property_name, value);
-
-	if (retval && EXPECTED(!EG(exception))) {
-		ZVAL_COPY(retval, value);
-	}
-	if (value_type == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		FREE_OP(free_value);
-	}
+	Z_OBJ_HT_P(object)->write_dimension(object, dim, value);
 }
 
 static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, binary_op_type binary_op)
@@ -1151,16 +1130,168 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 	}
 }
 
-static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *value, zval *result)
+static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
+{
+	zend_long offset;
+
+try_again:
+	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		switch(Z_TYPE_P(dim)) {
+			case IS_STRING:
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					break;
+				}
+				if (type != BP_VAR_UNSET) {
+					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+				}
+				break;
+			case IS_DOUBLE:
+			case IS_NULL:
+			case IS_FALSE:
+			case IS_TRUE:
+				zend_error(E_NOTICE, "String offset cast occurred");
+				break;
+			case IS_REFERENCE:
+				dim = Z_REFVAL_P(dim);
+				goto try_again;
+			default:
+				zend_error(E_WARNING, "Illegal offset type");
+				break;
+		}
+
+		offset = zval_get_long(dim);
+	} else {
+		offset = Z_LVAL_P(dim);
+	}
+
+	return offset;
+}
+
+static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
+{
+	const char *msg = NULL;
+	const zend_op *opline = EG(current_execute_data)->opline;
+	const zend_op *end;
+	uint32_t var;
+
+	switch (opline->opcode) {
+		case ZEND_ASSIGN_ADD:
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_MOD:
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+		case ZEND_ASSIGN_CONCAT:
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
+		case ZEND_ASSIGN_POW:
+			msg = "Cannot use assign-op operators with string offsets";
+			break;
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+			/* TODO: Encode the "reason" into opline->extended_value??? */
+			var = opline->result.var;
+			opline++;
+			end = EG(current_execute_data)->func->op_array.opcodes +
+				EG(current_execute_data)->func->op_array.last;
+			while (opline < end) {
+				if (opline->op1_type == IS_VAR && opline->op1.var == var) {
+					switch (opline->opcode) {
+						case ZEND_ASSIGN_ADD:
+						case ZEND_ASSIGN_SUB:
+						case ZEND_ASSIGN_MUL:
+						case ZEND_ASSIGN_DIV:
+						case ZEND_ASSIGN_MOD:
+						case ZEND_ASSIGN_SL:
+						case ZEND_ASSIGN_SR:
+						case ZEND_ASSIGN_CONCAT:
+						case ZEND_ASSIGN_BW_OR:
+						case ZEND_ASSIGN_BW_AND:
+						case ZEND_ASSIGN_BW_XOR:
+						case ZEND_ASSIGN_POW:
+							if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+								msg = "Cannot use string offset as an object";
+							} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+								msg = "Cannot use string offset as an array";
+							} else {
+								msg = "Cannot use assign-op operators with string offsets";
+							}
+							break;
+						case ZEND_PRE_INC_OBJ:
+						case ZEND_PRE_DEC_OBJ:
+						case ZEND_POST_INC_OBJ:
+						case ZEND_POST_DEC_OBJ:
+						case ZEND_PRE_INC:
+						case ZEND_PRE_DEC:
+						case ZEND_POST_INC:
+						case ZEND_POST_DEC:
+							msg = "Cannot increment/decrement string offsets";
+							break;
+						case ZEND_FETCH_DIM_W:
+						case ZEND_FETCH_DIM_RW:
+						case ZEND_FETCH_DIM_FUNC_ARG:
+						case ZEND_FETCH_DIM_UNSET:
+						case ZEND_ASSIGN_DIM:
+							msg = "Cannot use string offset as an array";
+							break;
+						case ZEND_FETCH_OBJ_W:
+						case ZEND_FETCH_OBJ_RW:
+						case ZEND_FETCH_OBJ_FUNC_ARG:
+						case ZEND_FETCH_OBJ_UNSET:
+						case ZEND_ASSIGN_OBJ:
+							msg = "Cannot use string offset as an object";
+							break;
+						case ZEND_ASSIGN_REF:
+						case ZEND_ADD_ARRAY_ELEMENT:
+						case ZEND_INIT_ARRAY:
+							msg = "Cannot create references to/from string offsets";
+							break;
+						case ZEND_RETURN_BY_REF:
+							msg = "Cannot return string offsets by reference";
+							break;
+						case ZEND_UNSET_DIM:
+						case ZEND_UNSET_OBJ:
+							msg = "Cannot unset string offsets";
+							break;
+						case ZEND_YIELD:
+							msg = "Cannot yield string offsets by reference";
+							break;
+						case ZEND_SEND_REF:
+						case ZEND_SEND_VAR_EX:
+							msg = "Only variables can be passed by reference";
+							break;
+						EMPTY_SWITCH_DEFAULT_CASE();
+					}
+					break;
+				}
+				if (opline->op2_type == IS_VAR && opline->op2.var == var) {
+					ZEND_ASSERT(opline->opcode == ZEND_ASSIGN_REF);
+					msg = "Cannot create references to/from string offsets";
+					break;
+				}
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	ZEND_ASSERT(msg != NULL);
+	zend_throw_error(NULL, msg);
+}
+
+static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result)
 {
 	zend_string *old_str;
 	zend_uchar c;
 	size_t string_len;
+	zend_long offset;
 
+	offset = zend_check_string_offset(dim, BP_VAR_W);
 	if (offset < (zend_long)(-Z_STRLEN_P(str))) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
-		zend_string_release(Z_STR_P(str));
 		if (result) {
 			ZVAL_NULL(result);
 		}
@@ -1182,7 +1313,6 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	if (string_len == 0) {
 		/* Error on empty input string */
 		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
-		zend_string_release(Z_STR_P(str));
 		if (result) {
 			ZVAL_NULL(result);
 		}
@@ -1193,7 +1323,6 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		offset += (zend_long)Z_STRLEN_P(str);
 	}
 
-	old_str = Z_STR_P(str);
 	if ((size_t)offset >= Z_STRLEN_P(str)) {
 		/* Extend string if needed */
 		zend_long old_len = Z_STRLEN_P(str);
@@ -1202,13 +1331,16 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else if (!Z_REFCOUNTED_P(str)) {
+		old_str = Z_STR_P(str);
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		zend_string_release(old_str);
+	} else {
+		SEPARATE_STRING(str);
 	}
 
 	Z_STRVAL_P(str)[offset] = c;
 
-	zend_string_release(old_str);
 	if (result) {
 		/* Return the new character */
 		if (CG(one_char_string)[c]) {
@@ -1472,6 +1604,9 @@ str_index:
 		}
 	} else {
 		switch (Z_TYPE_P(dim)) {
+			case IS_UNDEF:
+				zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
+				/* break missing intentionally */				
 			case IS_NULL:
 				offset_key = ZSTR_EMPTY_ALLOC();
 				goto str_index;
@@ -1500,169 +1635,14 @@ str_index:
 	return retval;
 }
 
-static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
+static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_W(HashTable *ht, const zval *dim)
 {
-	zend_long offset;
-
-try_again:
-	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		switch(Z_TYPE_P(dim)) {
-			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
-					break;
-				}
-				if (type != BP_VAR_UNSET) {
-					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
-				}
-				break;
-			case IS_DOUBLE:
-			case IS_NULL:
-			case IS_FALSE:
-			case IS_TRUE:
-				zend_error(E_NOTICE, "String offset cast occurred");
-				break;
-			case IS_REFERENCE:
-				dim = Z_REFVAL_P(dim);
-				goto try_again;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				break;
-		}
-
-		offset = zval_get_long(dim);
-	} else {
-		offset = Z_LVAL_P(dim);
-	}
-
-	return offset;
+	return zend_fetch_dimension_address_inner(ht, dim, IS_TMP_VAR, BP_VAR_W);
 }
 
-static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
+static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_W_CONST(HashTable *ht, const zval *dim)
 {
-	const char *msg = NULL;
-	const zend_op *opline = EG(current_execute_data)->opline;
-	const zend_op *end;
-	uint32_t var;
-
-	switch (opline->opcode) {
-		case ZEND_ASSIGN_ADD:
-		case ZEND_ASSIGN_SUB:
-		case ZEND_ASSIGN_MUL:
-		case ZEND_ASSIGN_DIV:
-		case ZEND_ASSIGN_MOD:
-		case ZEND_ASSIGN_SL:
-		case ZEND_ASSIGN_SR:
-		case ZEND_ASSIGN_CONCAT:
-		case ZEND_ASSIGN_BW_OR:
-		case ZEND_ASSIGN_BW_AND:
-		case ZEND_ASSIGN_BW_XOR:
-		case ZEND_ASSIGN_POW:
-			msg = "Cannot use assign-op operators with string offsets";
-			break;
-		case ZEND_FETCH_DIM_W:
-		case ZEND_FETCH_DIM_RW:
-		case ZEND_FETCH_DIM_FUNC_ARG:
-		case ZEND_FETCH_DIM_UNSET:
-			/* TODO: Encode the "reason" into opline->extended_value??? */
-			var = opline->result.var;
-			opline++;
-			end = EG(current_execute_data)->func->op_array.opcodes +
-				EG(current_execute_data)->func->op_array.last;
-			while (opline < end) {
-				if (opline->op1_type == IS_VAR && opline->op1.var == var) {
-					switch (opline->opcode) {
-						case ZEND_ASSIGN_ADD:
-						case ZEND_ASSIGN_SUB:
-						case ZEND_ASSIGN_MUL:
-						case ZEND_ASSIGN_DIV:
-						case ZEND_ASSIGN_MOD:
-						case ZEND_ASSIGN_SL:
-						case ZEND_ASSIGN_SR:
-						case ZEND_ASSIGN_CONCAT:
-						case ZEND_ASSIGN_BW_OR:
-						case ZEND_ASSIGN_BW_AND:
-						case ZEND_ASSIGN_BW_XOR:
-						case ZEND_ASSIGN_POW:
-							if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-								msg = "Cannot use string offset as an object";
-							} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
-								msg = "Cannot use string offset as an array";
-							} else {
-								msg = "Cannot use assign-op operators with string offsets";
-							}
-							break;
-						case ZEND_PRE_INC_OBJ:
-						case ZEND_PRE_DEC_OBJ:
-						case ZEND_POST_INC_OBJ:
-						case ZEND_POST_DEC_OBJ:
-						case ZEND_PRE_INC:
-						case ZEND_PRE_DEC:
-						case ZEND_POST_INC:
-						case ZEND_POST_DEC:
-							msg = "Cannot increment/decrement string offsets";
-							break;
-						case ZEND_FETCH_DIM_W:
-						case ZEND_FETCH_DIM_RW:
-						case ZEND_FETCH_DIM_FUNC_ARG:
-						case ZEND_FETCH_DIM_UNSET:
-						case ZEND_ASSIGN_DIM:
-							msg = "Cannot use string offset as an array";
-							break;
-						case ZEND_FETCH_OBJ_W:
-						case ZEND_FETCH_OBJ_RW:
-						case ZEND_FETCH_OBJ_FUNC_ARG:
-						case ZEND_FETCH_OBJ_UNSET:
-						case ZEND_ASSIGN_OBJ:
-							msg = "Cannot use string offset as an object";
-							break;
-						case ZEND_ASSIGN_REF:
-						case ZEND_ADD_ARRAY_ELEMENT:
-						case ZEND_INIT_ARRAY:
-							msg = "Cannot create references to/from string offsets";
-							break;
-						case ZEND_RETURN_BY_REF:
-							msg = "Cannot return string offsets by reference";
-							break;
-						case ZEND_UNSET_DIM:
-						case ZEND_UNSET_OBJ:
-							msg = "Cannot unset string offsets";
-							break;
-						case ZEND_YIELD:
-							msg = "Cannot yield string offsets by reference";
-							break;
-						case ZEND_SEND_REF:
-						case ZEND_SEND_VAR_EX:
-							msg = "Only variables can be passed by reference";
-							break;
-						EMPTY_SWITCH_DEFAULT_CASE();
-					}
-					break;
-				}
-				if (opline->op2_type == IS_VAR && opline->op2.var == var) {
-					ZEND_ASSERT(opline->opcode == ZEND_ASSIGN_REF);
-					msg = "Cannot create references to/from string offsets";
-					break;
-				}
-			}
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-	ZEND_ASSERT(msg != NULL);
-	zend_throw_error(NULL, msg);
-}
-
-static zend_always_inline zend_long zend_fetch_string_offset(zval *container, zval *dim, int type)
-{
-	zend_long offset = zend_check_string_offset(dim, type);
-
-	if (Z_REFCOUNTED_P(container)) {
-		if (Z_REFCOUNT_P(container) > 1) {
-			Z_DELREF_P(container);
-			zval_copy_ctor_func(container);
-		}
-		Z_ADDREF_P(container);
-	}
-	return offset;
+	return zend_fetch_dimension_address_inner(ht, dim, IS_CONST, BP_VAR_W);
 }
 
 static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container, zval *dim, int dim_type, int type)

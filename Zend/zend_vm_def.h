@@ -2343,30 +2343,29 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 ZEND_VM_C_LABEL(try_assign_dim_array):
+		SEPARATE_ARRAY(object_ptr);
 		if (OP2_TYPE == IS_UNUSED) {
-			SEPARATE_ARRAY(object_ptr);
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
 				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-				variable_ptr = NULL;
+				ZEND_VM_C_GOTO(assign_dim_error);
 			}
 		} else {
-			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-			SEPARATE_ARRAY(object_ptr);
-			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, OP2_TYPE, BP_VAR_W);
+			dim = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+			if (OP2_TYPE == IS_CONST) {
+				variable_ptr = zend_fetch_dimension_address_inner_W_CONST(Z_ARRVAL_P(object_ptr), dim);
+			} else {
+				variable_ptr = zend_fetch_dimension_address_inner_W(Z_ARRVAL_P(object_ptr), dim);
+			}
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				ZEND_VM_C_GOTO(assign_dim_error);
+			}
 			FREE_OP2();
 		}
-		if (UNEXPECTED(variable_ptr == NULL)) {
-			FREE_UNFETCHED_OP_DATA();
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-		} else {
-			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
-			value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(EX_VAR(opline->result.var), value);
-			}
+		value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+		value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -2376,10 +2375,24 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			}
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
-			zend_free_op free_op2;
-			zval *property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
-			zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, OP_DATA_TYPE, (opline+1)->op1, execute_data);
+			if (OP_DATA_TYPE == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
+				Z_ADDREF_P(value);
+			}
+
+			zend_assign_to_object_dim(object_ptr, dim, value);
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), value);
+			}
+
+			if (OP_DATA_TYPE == IS_CONST) {
+				zval_ptr_dtor_nogc(value);
+			} else {
+				FREE_OP_DATA();
+			}
 			FREE_OP2();
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
@@ -2389,13 +2402,10 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 					FREE_OP1_VAR_PTR();
 					HANDLE_EXCEPTION();
 				} else {
-					zend_long offset;
-
 					dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-					offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-					FREE_OP2();
 					value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
-					zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+					zend_assign_to_string_offset(object_ptr, dim, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+					FREE_OP2();
 					FREE_OP_DATA();
 				}
 			} else {
@@ -2407,11 +2417,11 @@ ZEND_VM_C_LABEL(assign_dim_convert_to_array):
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			ZEND_VM_C_GOTO(assign_dim_convert_to_array);
-		} else if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(object_ptr))) {
-			ZEND_VM_C_GOTO(assign_dim_clean);
 		} else {
-			zend_error(E_WARNING, "Cannot use a scalar value as an array");
-ZEND_VM_C_LABEL(assign_dim_clean):
+			if (OP1_TYPE != IS_VAR || UNEXPECTED(!Z_ISERROR_P(object_ptr))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+			}
+ZEND_VM_C_LABEL(assign_dim_error):
 			FREE_UNFETCHED_OP2();
 			FREE_UNFETCHED_OP_DATA();
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
