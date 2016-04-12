@@ -19509,6 +19509,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEPARATE_SPEC_VAR_UNUSED_HANDL
 	if (UNEXPECTED(Z_ISREF_P(var_ptr))) {
 		if (UNEXPECTED(Z_REFCOUNT_P(var_ptr) == 1)) {
 			ZVAL_UNREF(var_ptr);
+		} else if (!(Z_VAR_FLAGS_P(var_ptr) & IS_VAR_RET_REF)) {
+			Z_DELREF_P(var_ptr);
+			ZVAL_COPY(var_ptr, Z_REFVAL_P(var_ptr));
 		}
 	}
 
