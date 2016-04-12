@@ -17,7 +17,7 @@ class test {
 
 $test1 = new test();
 ?>
---EXPECT--
+--EXPECTF--
 test1
 test2
 test1

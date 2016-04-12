@@ -20,9 +20,39 @@ $arr[][]->bar = 2;
 
 Notice: Undefined variable: arr in %s on line %d
 
-Notice: Undefined variable: arr in %s on line %d
+Notice: Trying to get index of a non-array in %s on line 3
+
+Notice: Trying to get index of a non-array in %s on line 3
+
+Notice: Trying to get index of a non-array in %s on line 3
+
+Notice: Trying to get index of a non-array in %s on line 3
+
+Notice: Trying to get index of a non-array in %s on line 3
 
 Notice: Undefined variable: arr in %s on line %d
+
+Notice: Trying to get index of a non-array in %s on line 5
+
+Notice: Trying to get index of a non-array in %s on line 5
+
+Notice: Trying to get index of a non-array in %s on line 5
+
+Notice: Trying to get index of a non-array in %s on line 5
+
+Notice: Trying to get index of a non-array in %s on line 5
+
+Notice: Undefined variable: arr in %s on line %d
+
+Notice: Trying to get index of a non-array in %s on line 7
+
+Notice: Trying to get index of a non-array in %s on line 7
+
+Notice: Trying to get index of a non-array in %s on line 7
+
+Notice: Trying to get index of a non-array in %s on line 7
+
+Notice: Trying to get index of a non-array in %s on line 7
 
 Notice: Trying to get property of non-object in %s on line %d
 

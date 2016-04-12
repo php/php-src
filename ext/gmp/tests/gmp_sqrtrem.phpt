@@ -60,8 +60,12 @@ echo "Done\n";
 --EXPECTF--	
 Warning: gmp_sqrtrem(): Number has to be greater than or equal to 0 in %s on line %d
 
+Notice: Trying to get index of a non-array in %s on line 4
+
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
+
+Notice: Trying to get index of a non-array in %s on line 5
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
@@ -84,8 +88,12 @@ string(1) "1"
 
 Warning: gmp_sqrtrem(): Number has to be greater than or equal to 0 in %s on line %d
 
+Notice: Trying to get index of a non-array in %s on line 42
+
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
+
+Notice: Trying to get index of a non-array in %s on line 43
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

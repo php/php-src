@@ -27,8 +27,12 @@ var_dump($h);
 
 ?>
 --EXPECTF--
+Notice: Trying to get index of a non-array in %s on line 19
+
 Notice: Trying to get property of non-object in %s on line %d
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 22
 
 Notice: Trying to get property of non-object in %s on line %d
 NULL

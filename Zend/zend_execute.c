@@ -1856,6 +1856,9 @@ try_string_offset:
 			}
 		}
 	} else {
+		if (type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to get index of a non-array");
+		}
 		ZVAL_NULL(result);
 	}
 }
