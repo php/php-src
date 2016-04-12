@@ -7302,10 +7302,8 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 		if (UNEXPECTED(Z_REFCOUNT_P(var_ptr) == 1)) {
 			ZVAL_UNREF(var_ptr);
 		}
-	} else if (Z_COPYABLE_P(var_ptr) && Z_REFCOUNT_P(var_ptr) > 1) {
-		Z_DELREF_P(var_ptr);
-		ZVAL_DUP(EX_VAR(opline->op1.var), var_ptr);
 	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
