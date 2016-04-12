@@ -2301,195 +2301,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_DYNAMIC_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_function *fbc;
-	zval *function_name, *func;
-	zend_string *lcname;
 
-	zend_class_entry *called_scope;
-	zend_object *object;
+	zval *function_name;
 	zend_execute_data *call;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
 
 	SAVE_OPLINE();
 	function_name = EX_CONSTANT(opline->op2);
 
 try_function_name:
 	if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		const char *colon;
-
-		if ((colon = zend_memrchr(Z_STRVAL_P(function_name), ':', Z_STRLEN_P(function_name))) != NULL &&
-			colon > Z_STRVAL_P(function_name) &&
-			*(colon-1) == ':'
-		) {
-			zend_string *mname;
-			size_t cname_length = colon - Z_STRVAL_P(function_name) - 1;
-			size_t mname_length = Z_STRLEN_P(function_name) - cname_length - (sizeof("::") - 1);
-
-			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
-
-			object = NULL;
-			called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(called_scope == NULL)) {
-				zend_string_release(lcname);
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-			}
-
-			mname = zend_string_init(Z_STRVAL_P(function_name) + (cname_length + sizeof("::") - 1), mname_length, 0);
-
-			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, mname);
-			} else {
-				fbc = zend_std_get_static_method(called_scope, mname, NULL);
-			}
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
-				}
-				zend_string_release(lcname);
-				zend_string_release(mname);
-
-				HANDLE_EXCEPTION();
-			}
-
-			zend_string_release(lcname);
-			zend_string_release(mname);
-
-			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-
-					HANDLE_EXCEPTION();
-				}
-			}
-		} else {
-			if (Z_STRVAL_P(function_name)[0] == '\\') {
-				lcname = zend_string_alloc(Z_STRLEN_P(function_name) - 1, 0);
-				zend_str_tolower_copy(ZSTR_VAL(lcname), Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
-			} else {
-				lcname = zend_string_tolower(Z_STR_P(function_name));
-			}
-			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
-				zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
-				zend_string_release(lcname);
-
-				HANDLE_EXCEPTION();
-			}
-			zend_string_release(lcname);
-
-			fbc = Z_FUNC_P(func);
-			called_scope = NULL;
-			object = NULL;
-		}
-
-	} else if (IS_CONST != IS_CONST &&
-	    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-		Z_OBJ_HANDLER_P(function_name, get_closure) &&
-		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
-		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
-			/* Delay closure destruction until its invocation */
-			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
-			call_info |= ZEND_CALL_CLOSURE;
-		} else if (object) {
-			call_info |= ZEND_CALL_RELEASE_THIS;
-			GC_REFCOUNT(object)++; /* For $this pointer */
-		}
-
-	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
-			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
-		zval *obj;
-		zval *method;
-		obj = zend_hash_index_find(Z_ARRVAL_P(function_name), 0);
-		method = zend_hash_index_find(Z_ARRVAL_P(function_name), 1);
-
-		if (!obj || !method) {
-			zend_throw_error(NULL, "Array callback has to contain indices 0 and 1");
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZVAL_DEREF(obj);
-		if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
-			zend_throw_error(NULL, "First array member is not a valid class name or object");
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZVAL_DEREF(method);
-		if (Z_TYPE_P(method) != IS_STRING) {
-			zend_throw_error(NULL, "Second array member is not a valid method");
-
-			HANDLE_EXCEPTION();
-		}
-
-		if (Z_TYPE_P(obj) == IS_STRING) {
-			object = NULL;
-			called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(called_scope == NULL)) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-			}
-
-			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, Z_STR_P(method));
-			} else {
-				fbc = zend_std_get_static_method(called_scope, Z_STR_P(method), NULL);
-			}
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
-				}
-
-				HANDLE_EXCEPTION();
-			}
-			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-
-					HANDLE_EXCEPTION();
-				}
-			}
-		} else {
-			called_scope = Z_OBJCE_P(obj);
-			object = Z_OBJ_P(obj);
-
-			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
-				}
-
-				HANDLE_EXCEPTION();
-			}
-
-			if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-				object = NULL;
-			} else {
-				call_info |= ZEND_CALL_RELEASE_THIS;
-				GC_REFCOUNT(object)++; /* For $this pointer */
-			}
-		}
-
-	} else if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(function_name) == IS_REFERENCE) {
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
+		call = zend_init_dynamic_call_object(function_name, opline->extended_value);
+	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
+		call = zend_init_dynamic_call_array(Z_ARRVAL_P(function_name), opline->extended_value);
+	} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(function_name) == IS_REFERENCE)) {
 		function_name = Z_REFVAL_P(function_name);
 		goto try_function_name;
 	} else {
@@ -2500,14 +2326,13 @@ try_function_name:
 			}
 		}
 		zend_throw_error(NULL, "Function name must be a string");
+		call = NULL;
+	}
 
+	if (UNEXPECTED(!call)) {
 		HANDLE_EXCEPTION();
 	}
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		init_func_run_time_cache(&fbc->op_array);
-	}
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, called_scope, object);
+
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -2775,195 +2600,21 @@ try_class_name:
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_DYNAMIC_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_function *fbc;
-	zval *function_name, *func;
-	zend_string *lcname;
 
-	zend_class_entry *called_scope;
-	zend_object *object;
+	zval *function_name;
 	zend_execute_data *call;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
 
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 try_function_name:
 	if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		const char *colon;
-
-		if ((colon = zend_memrchr(Z_STRVAL_P(function_name), ':', Z_STRLEN_P(function_name))) != NULL &&
-			colon > Z_STRVAL_P(function_name) &&
-			*(colon-1) == ':'
-		) {
-			zend_string *mname;
-			size_t cname_length = colon - Z_STRVAL_P(function_name) - 1;
-			size_t mname_length = Z_STRLEN_P(function_name) - cname_length - (sizeof("::") - 1);
-
-			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
-
-			object = NULL;
-			called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(called_scope == NULL)) {
-				zend_string_release(lcname);
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-			}
-
-			mname = zend_string_init(Z_STRVAL_P(function_name) + (cname_length + sizeof("::") - 1), mname_length, 0);
-
-			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, mname);
-			} else {
-				fbc = zend_std_get_static_method(called_scope, mname, NULL);
-			}
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
-				}
-				zend_string_release(lcname);
-				zend_string_release(mname);
-
-				HANDLE_EXCEPTION();
-			}
-
-			zend_string_release(lcname);
-			zend_string_release(mname);
-
-			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-
-					HANDLE_EXCEPTION();
-				}
-			}
-		} else {
-			if (Z_STRVAL_P(function_name)[0] == '\\') {
-				lcname = zend_string_alloc(Z_STRLEN_P(function_name) - 1, 0);
-				zend_str_tolower_copy(ZSTR_VAL(lcname), Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
-			} else {
-				lcname = zend_string_tolower(Z_STR_P(function_name));
-			}
-			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
-				zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
-				zend_string_release(lcname);
-
-				HANDLE_EXCEPTION();
-			}
-			zend_string_release(lcname);
-
-			fbc = Z_FUNC_P(func);
-			called_scope = NULL;
-			object = NULL;
-		}
-
-	} else if (IS_CV != IS_CONST &&
-	    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-		Z_OBJ_HANDLER_P(function_name, get_closure) &&
-		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
-		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
-			/* Delay closure destruction until its invocation */
-			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
-			call_info |= ZEND_CALL_CLOSURE;
-		} else if (object) {
-			call_info |= ZEND_CALL_RELEASE_THIS;
-			GC_REFCOUNT(object)++; /* For $this pointer */
-		}
-
-	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
-			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
-		zval *obj;
-		zval *method;
-		obj = zend_hash_index_find(Z_ARRVAL_P(function_name), 0);
-		method = zend_hash_index_find(Z_ARRVAL_P(function_name), 1);
-
-		if (!obj || !method) {
-			zend_throw_error(NULL, "Array callback has to contain indices 0 and 1");
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZVAL_DEREF(obj);
-		if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
-			zend_throw_error(NULL, "First array member is not a valid class name or object");
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZVAL_DEREF(method);
-		if (Z_TYPE_P(method) != IS_STRING) {
-			zend_throw_error(NULL, "Second array member is not a valid method");
-
-			HANDLE_EXCEPTION();
-		}
-
-		if (Z_TYPE_P(obj) == IS_STRING) {
-			object = NULL;
-			called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(called_scope == NULL)) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-			}
-
-			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, Z_STR_P(method));
-			} else {
-				fbc = zend_std_get_static_method(called_scope, Z_STR_P(method), NULL);
-			}
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
-				}
-
-				HANDLE_EXCEPTION();
-			}
-			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-
-					HANDLE_EXCEPTION();
-				}
-			}
-		} else {
-			called_scope = Z_OBJCE_P(obj);
-			object = Z_OBJ_P(obj);
-
-			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
-				}
-
-				HANDLE_EXCEPTION();
-			}
-
-			if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-				object = NULL;
-			} else {
-				call_info |= ZEND_CALL_RELEASE_THIS;
-				GC_REFCOUNT(object)++; /* For $this pointer */
-			}
-		}
-
-	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(function_name) == IS_REFERENCE) {
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
+		call = zend_init_dynamic_call_object(function_name, opline->extended_value);
+	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
+		call = zend_init_dynamic_call_array(Z_ARRVAL_P(function_name), opline->extended_value);
+	} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(function_name) == IS_REFERENCE)) {
 		function_name = Z_REFVAL_P(function_name);
 		goto try_function_name;
 	} else {
@@ -2974,14 +2625,13 @@ try_function_name:
 			}
 		}
 		zend_throw_error(NULL, "Function name must be a string");
+		call = NULL;
+	}
 
+	if (UNEXPECTED(!call)) {
 		HANDLE_EXCEPTION();
 	}
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		init_func_run_time_cache(&fbc->op_array);
-	}
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, called_scope, object);
+
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -3034,195 +2684,21 @@ try_class_name:
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_DYNAMIC_CALL_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_function *fbc;
-	zval *function_name, *func;
-	zend_string *lcname;
 	zend_free_op free_op2;
-	zend_class_entry *called_scope;
-	zend_object *object;
+	zval *function_name;
 	zend_execute_data *call;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
 
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 try_function_name:
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		const char *colon;
-
-		if ((colon = zend_memrchr(Z_STRVAL_P(function_name), ':', Z_STRLEN_P(function_name))) != NULL &&
-			colon > Z_STRVAL_P(function_name) &&
-			*(colon-1) == ':'
-		) {
-			zend_string *mname;
-			size_t cname_length = colon - Z_STRVAL_P(function_name) - 1;
-			size_t mname_length = Z_STRLEN_P(function_name) - cname_length - (sizeof("::") - 1);
-
-			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
-
-			object = NULL;
-			called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(called_scope == NULL)) {
-				zend_string_release(lcname);
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-			}
-
-			mname = zend_string_init(Z_STRVAL_P(function_name) + (cname_length + sizeof("::") - 1), mname_length, 0);
-
-			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, mname);
-			} else {
-				fbc = zend_std_get_static_method(called_scope, mname, NULL);
-			}
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
-				}
-				zend_string_release(lcname);
-				zend_string_release(mname);
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
-			}
-
-			zend_string_release(lcname);
-			zend_string_release(mname);
-
-			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					zval_ptr_dtor_nogc(free_op2);
-					HANDLE_EXCEPTION();
-				}
-			}
-		} else {
-			if (Z_STRVAL_P(function_name)[0] == '\\') {
-				lcname = zend_string_alloc(Z_STRLEN_P(function_name) - 1, 0);
-				zend_str_tolower_copy(ZSTR_VAL(lcname), Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
-			} else {
-				lcname = zend_string_tolower(Z_STR_P(function_name));
-			}
-			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
-				zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
-				zend_string_release(lcname);
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
-			}
-			zend_string_release(lcname);
-
-			fbc = Z_FUNC_P(func);
-			called_scope = NULL;
-			object = NULL;
-		}
-		zval_ptr_dtor_nogc(free_op2);
-	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
-		Z_OBJ_HANDLER_P(function_name, get_closure) &&
-		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
-		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
-			/* Delay closure destruction until its invocation */
-			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
-			call_info |= ZEND_CALL_CLOSURE;
-		} else if (object) {
-			call_info |= ZEND_CALL_RELEASE_THIS;
-			GC_REFCOUNT(object)++; /* For $this pointer */
-		}
-		zval_ptr_dtor_nogc(free_op2);
-	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
-			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
-		zval *obj;
-		zval *method;
-		obj = zend_hash_index_find(Z_ARRVAL_P(function_name), 0);
-		method = zend_hash_index_find(Z_ARRVAL_P(function_name), 1);
-
-		if (!obj || !method) {
-			zend_throw_error(NULL, "Array callback has to contain indices 0 and 1");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
-
-		ZVAL_DEREF(obj);
-		if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
-			zend_throw_error(NULL, "First array member is not a valid class name or object");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
-
-		ZVAL_DEREF(method);
-		if (Z_TYPE_P(method) != IS_STRING) {
-			zend_throw_error(NULL, "Second array member is not a valid method");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
-
-		if (Z_TYPE_P(obj) == IS_STRING) {
-			object = NULL;
-			called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-			if (UNEXPECTED(called_scope == NULL)) {
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-			}
-
-			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, Z_STR_P(method));
-			} else {
-				fbc = zend_std_get_static_method(called_scope, Z_STR_P(method), NULL);
-			}
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
-				}
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
-			}
-			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						HANDLE_EXCEPTION();
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					zval_ptr_dtor_nogc(free_op2);
-					HANDLE_EXCEPTION();
-				}
-			}
-		} else {
-			called_scope = Z_OBJCE_P(obj);
-			object = Z_OBJ_P(obj);
-
-			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
-			if (UNEXPECTED(fbc == NULL)) {
-				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
-				}
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
-			}
-
-			if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-				object = NULL;
-			} else {
-				call_info |= ZEND_CALL_RELEASE_THIS;
-				GC_REFCOUNT(object)++; /* For $this pointer */
-			}
-		}
-		zval_ptr_dtor_nogc(free_op2);
-	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(function_name) == IS_REFERENCE) {
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
+		call = zend_init_dynamic_call_object(function_name, opline->extended_value);
+	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
+		call = zend_init_dynamic_call_array(Z_ARRVAL_P(function_name), opline->extended_value);
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(function_name) == IS_REFERENCE)) {
 		function_name = Z_REFVAL_P(function_name);
 		goto try_function_name;
 	} else {
@@ -3233,14 +2709,15 @@ try_function_name:
 			}
 		}
 		zend_throw_error(NULL, "Function name must be a string");
-		zval_ptr_dtor_nogc(free_op2);
+		call = NULL;
+	}
+
+	zval_ptr_dtor_nogc(free_op2);
+
+	if (UNEXPECTED(!call)) {
 		HANDLE_EXCEPTION();
 	}
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		init_func_run_time_cache(&fbc->op_array);
-	}
-	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, called_scope, object);
+
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
