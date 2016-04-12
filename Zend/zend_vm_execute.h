@@ -5362,6 +5362,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -9202,6 +9203,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -11123,6 +11125,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -38005,6 +38008,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -44506,6 +44510,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -48183,6 +48188,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -51520,6 +51526,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -53863,6 +53870,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
@@ -55110,6 +55118,7 @@ str_index_list:
 		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
 			zend_error(E_NOTICE, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			hval = Z_RES_HANDLE_P(offset);
+			goto num_index_list;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
 		}
