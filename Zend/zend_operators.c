@@ -747,6 +747,7 @@ static zend_always_inline zend_long ZEND_FASTCALL _zval_get_long_func_ex(zval *o
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE:
 			return 0;

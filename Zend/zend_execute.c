@@ -1797,6 +1797,8 @@ try_string_offset:
 					}
 					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 					break;
+				case IS_UNDEF:
+					zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
 				case IS_DOUBLE:
 				case IS_NULL:
 				case IS_FALSE:
@@ -1813,7 +1815,7 @@ try_string_offset:
 					break;
 			}
 
-			offset = zval_get_long(dim);
+			offset = _zval_get_long_func(dim);
 		} else {
 			offset = Z_LVAL_P(dim);
 		}
@@ -1840,6 +1842,10 @@ try_string_offset:
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+			zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
+			dim = &EG(uninitialized_zval);
+		}
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_throw_error(NULL, "Cannot use object as array");
 			ZVAL_NULL(result);
@@ -1856,6 +1862,12 @@ try_string_offset:
 			}
 		}
 	} else {
+		if (type != BP_VAR_IS && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			zval_undefined_cv(EG(current_execute_data)->opline->op1.var, EG(current_execute_data));
+		}
+		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+			zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
+		}
 		ZVAL_NULL(result);
 	}
 }
