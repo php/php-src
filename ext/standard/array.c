@@ -1029,37 +1029,30 @@ static int php_array_user_compare(const void *a, const void *b) /* {{{ */
 static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func, zend_bool renumber) /* {{{ */
 {
 	zval *array;
-	zend_refcounted *arr;
+	zend_array *arr;
 	zend_bool retval;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "af", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
 		return;
 	}
 
-	/* Increase reference counter, so the attempts to modify the array in user
-	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected by comparing the
-	 * zend_array pointer. The result of sorting in such case is undefined and
-	 * the function returns FALSE.
-	 */
-	Z_ADDREF_P(array);
-	arr = Z_COUNTED_P(array);
-
-	retval = zend_hash_sort(Z_ARRVAL_P(array), compare_func, renumber) != FAILURE;
-
-	if (arr != Z_COUNTED_P(array)) {
-		php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-		if (--GC_REFCOUNT(arr) <= 0) {
-			_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-		}
-		retval = 0;
-	} else {
-		Z_DELREF_P(array);
+	arr = Z_ARR_P(array);
+	if (zend_hash_num_elements(arr) == 0)  {
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+		RETURN_TRUE;
 	}
+
+	/* Copy array, so the in-place modifications will not be visible to the callback function */
+	arr = zend_array_dup(arr);
+
+	retval = zend_hash_sort(arr, compare_func, renumber) != FAILURE;
+
+	zval_ptr_dtor(array);
+	ZVAL_ARR(array, arr);
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_BOOL(retval);
@@ -2001,34 +1994,72 @@ PHP_FUNCTION(array_fill)
 	zval *val;
 	zend_long start_key, num;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "llz", &start_key, &num, &val) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_LONG(start_key)
+		Z_PARAM_LONG(num)
+		Z_PARAM_ZVAL(val)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
-	if (num < 0) {
-		php_error_docref(NULL, E_WARNING, "Number of elements can't be negative");
-		RETURN_FALSE;
-	}
-
-	/* allocate an array for return */
-	array_init_size(return_value, (uint32_t)num);
-
-	if (num == 0) {
-		return;
-	}
-
-	num--;
-	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, val);
-	Z_TRY_ADDREF_P(val);
-
-	while (num--) {
-		if (zend_hash_next_index_insert(Z_ARRVAL_P(return_value), val) != NULL) {
-			Z_TRY_ADDREF_P(val);
-		} else {
-			zval_dtor(return_value);
+	if (EXPECTED(num > 0)) {
+		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
+			php_error_docref(NULL, E_WARNING, "Too many elements");
+			RETURN_FALSE;
+		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
 			php_error_docref(NULL, E_WARNING, "Cannot add element to the array as the next element is already occupied");
 			RETURN_FALSE;
+		} else if (EXPECTED(start_key >= 0) && EXPECTED(start_key < num)) {
+			/* create packed array */
+			Bucket *p;
+			zend_long n;
+
+			array_init_size(return_value, (uint32_t)(start_key + num));
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			Z_ARRVAL_P(return_value)->nNumUsed = start_key + num;
+			Z_ARRVAL_P(return_value)->nNumOfElements = num;
+			Z_ARRVAL_P(return_value)->nInternalPointer = start_key;
+
+			if (Z_REFCOUNTED_P(val)) {
+				GC_REFCOUNT(Z_COUNTED_P(val)) += num;
+			}
+
+			p = Z_ARRVAL_P(return_value)->arData;
+			n = start_key;
+
+			while (start_key--) {
+				ZVAL_UNDEF(&p->val);
+				p++;
+			}
+			while (num--) {
+				ZVAL_COPY_VALUE(&p->val, val);
+				p->h = n++;
+				p->key = NULL;
+				p++;
+			}
+		} else {
+			/* create hash */
+			array_init_size(return_value, (uint32_t)num);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
+			if (Z_REFCOUNTED_P(val)) {
+				GC_REFCOUNT(Z_COUNTED_P(val)) += num;
+			}
+			zend_hash_index_add_new(Z_ARRVAL_P(return_value), start_key, val);
+			while (--num) {
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), val);
+				start_key++;
+			}
 		}
+	} else if (EXPECTED(num == 0)) {
+		array_init(return_value);
+		return;
+	} else {
+		php_error_docref(NULL, E_WARNING, "Number of elements can't be negative");
+		RETURN_FALSE;
 	}
 }
 /* }}} */

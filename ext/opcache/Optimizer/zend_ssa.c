@@ -664,6 +664,15 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 						ssa_vars_count++;
 					}
+					break;
+				case ZEND_VERIFY_RETURN_TYPE:
+					if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
+						ssa_ops[k].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(opline->op1.var)
+					}
+					break;
 				default:
 					break;
 			}

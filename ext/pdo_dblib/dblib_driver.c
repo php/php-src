@@ -101,6 +101,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	stmt->driver_data = S;
 	stmt->methods = &dblib_stmt_methods;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+	S->computed_column_name_count = 0;
 	S->err.sqlstate = stmt->error_code;
 
 	return 1;
@@ -170,7 +171,7 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 		 *
 		 */
 		*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
-		q = *quoted = emalloc(*quotedlen);
+		q = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
 
 		*q++ = '0';
 		*q++ = 'x';
@@ -181,7 +182,7 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 	} else {
 		/* Alpha/Numeric Quoting */
 		*quotedlen += 2; /* +2 for opening, closing quotes */
-		q  = *quoted = emalloc(*quotedlen);
+		q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
 		*q++ = '\'';
 
 		for (i=0;i<unquotedlen;i++) {
@@ -347,9 +348,19 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	if (driver_options) {
+		int connect_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_CONNECTION_TIMEOUT, -1);
+		int query_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_QUERY_TIMEOUT, -1);
 		int timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
-		dbsetlogintime(timeout); /* Connection/Login Timeout */
-		dbsettime(timeout); /* Statement Timeout */
+
+		if (connect_timeout == -1) {
+			connect_timeout = timeout;
+		}
+		if (query_timeout == -1) {
+			query_timeout = timeout;
+		}
+
+		dbsetlogintime(connect_timeout); /* Connection/Login Timeout */
+		dbsettime(query_timeout); /* Statement Timeout */
 	}
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);

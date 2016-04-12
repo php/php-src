@@ -2471,6 +2471,7 @@ PHP_FUNCTION(substr_replace)
 
 	if (argc > 3) {
 		if (Z_TYPE_P(len) != IS_ARRAY) {
+			convert_to_long_ex(len);
 			l = zval_get_long(len);
 		}
 	} else {
@@ -2484,12 +2485,12 @@ PHP_FUNCTION(substr_replace)
 			(argc == 3 && Z_TYPE_P(from) == IS_ARRAY) ||
 			(argc == 4 && Z_TYPE_P(from) != Z_TYPE_P(len))
 		) {
-			php_error_docref(NULL, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
+			php_error_docref(NULL, E_WARNING, "'start' and 'length' should be of same type - numerical or array ");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
 		if (argc == 4 && Z_TYPE_P(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
-				php_error_docref(NULL, E_WARNING, "'from' and 'len' should have the same number of elements");
+				php_error_docref(NULL, E_WARNING, "'start' and 'length' should have the same number of elements");
 				RETURN_STR_COPY(Z_STR_P(str));
 			}
 		}
@@ -2561,7 +2562,7 @@ PHP_FUNCTION(substr_replace)
 			}
 			RETURN_NEW_STR(result);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
+			php_error_docref(NULL, E_WARNING, "Functionality of 'start' and 'length' as arrays is not implemented");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
 	} else { /* str is array of strings */
@@ -4154,6 +4155,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(subject), num_key, string_key, subject_entry) {
+			ZVAL_DEREF(subject_entry);
 			if (Z_TYPE_P(subject_entry) != IS_ARRAY && Z_TYPE_P(subject_entry) != IS_OBJECT) {
 				count += php_str_replace_in_subject(search, replace, subject_entry, &result, case_sensitivity);
 			} else {

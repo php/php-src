@@ -227,7 +227,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		zval new_obj;
 
 		ZVAL_OBJ(&new_obj, new_object);
-		zval_copy_ctor(&new_obj);
+		Z_ADDREF(new_obj);
 		zend_call_method_with_0_params(&new_obj, old_object->ce, &old_object->ce->clone, ZEND_CLONE_FUNC_NAME, NULL);
 		zval_ptr_dtor(&new_obj);
 	}

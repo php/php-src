@@ -33,7 +33,7 @@ void free_zend_constant(zval *zv)
 	zend_constant *c = Z_PTR_P(zv);
 
 	if (!(c->flags & CONST_PERSISTENT)) {
-		zval_dtor(&c->value);
+		zval_ptr_dtor(&c->value);
 	} else {
 		zval_internal_dtor(&c->value);
 	}

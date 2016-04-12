@@ -77,16 +77,17 @@ static zend_bool zend_valid_closure_binding(
 		zend_closure *closure, zval *newthis, zend_class_entry *scope) /* {{{ */
 {
 	zend_function *func = &closure->func;
+	zend_bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_WARNING, "Cannot bind an instance to a static closure");
 			return 0;
 		}
 
-		if (func->type == ZEND_INTERNAL_FUNCTION && func->common.scope &&
+		if (is_fake_closure && func->common.scope &&
 				!instanceof_function(Z_OBJCE_P(newthis), func->common.scope)) {
 			/* Binding incompatible $this to an internal method is not supported. */
-			zend_error(E_WARNING, "Cannot bind internal method %s::%s() to object of class %s",
+			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s",
 					ZSTR_VAL(func->common.scope->name),
 					ZSTR_VAL(func->common.function_name),
 					ZSTR_VAL(Z_OBJCE_P(newthis)->name));
@@ -105,7 +106,7 @@ static zend_bool zend_valid_closure_binding(
 		return 0;
 	}
 
-	if ((func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) && scope != func->common.scope) {
+	if (is_fake_closure && scope != func->common.scope) {
 		zend_error(E_WARNING, "Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()");
 		return 0;
 	}
@@ -297,14 +298,10 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj) /* {{{ */
 
 static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
 {
-	zend_string *lc_name;
-
-	lc_name = zend_string_tolower(method);
-	if (zend_string_equals_literal(method, ZEND_INVOKE_FUNC_NAME)) {
-		zend_string_release(lc_name);
+	if (zend_string_equals_literal_ci(method, ZEND_INVOKE_FUNC_NAME)) {
 		return zend_get_closure_invoke_method(*object);
 	}
-	zend_string_release(lc_name);
+
 	return std_object_handlers.get_method(object, method, key);
 }
 /* }}} */

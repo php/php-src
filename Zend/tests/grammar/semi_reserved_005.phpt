@@ -79,7 +79,6 @@ class Obj
     const __FILE__ = '__FILE__';
     const __DIR__ = '__DIR__';
     const __NAMESPACE__ = '__NAMESPACE__';
-    const __HALT_COMPILER = '__halt_compiler';
 }
 
 echo Obj::EMPTY, PHP_EOL;
@@ -156,7 +155,6 @@ echo Obj::__LINE__, PHP_EOL;
 echo Obj::__FILE__, PHP_EOL;
 echo Obj::__DIR__, PHP_EOL;
 echo Obj::__NAMESPACE__, PHP_EOL;
-echo Obj::__HALT_COMPILER, PHP_EOL;
 
 echo "\nDone\n";
 
@@ -235,6 +233,5 @@ __LINE__
 __FILE__
 __DIR__
 __NAMESPACE__
-__halt_compiler
 
 Done

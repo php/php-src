@@ -31,7 +31,8 @@ static zend_object_handlers zend_generator_handlers;
 
 static zend_object *zend_generator_create(zend_class_entry *class_type);
 
-static void zend_generator_cleanup_unfinished_execution(zend_generator *generator) /* {{{ */
+static void zend_generator_cleanup_unfinished_execution(
+		zend_generator *generator, uint32_t catch_op_num) /* {{{ */
 {
 	zend_execute_data *execute_data = generator->execute_data;
 
@@ -47,7 +48,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 		EG(vm_stack_end) = generator->stack->end;
 		EG(vm_stack) = generator->stack;
 
-		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
+		zend_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 
 		generator->stack = EG(vm_stack);
 		generator->stack->top = EG(vm_stack_top);
@@ -69,7 +70,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
 
-		if (Z_OBJ(execute_data->This)) {
+		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		}
 
@@ -85,7 +86,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* Some cleanups are only necessary if the generator was closed
 		 * before it could finish execution (reach a return statement). */
 		if (UNEXPECTED(!finished_execution)) {
-			zend_generator_cleanup_unfinished_execution(generator);
+			zend_generator_cleanup_unfinished_execution(generator, 0);
 		}
 
 		/* Free closure object */
@@ -157,8 +158,11 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	/* If a finally block was found we jump directly to it and
 	 * resume the generator. */
 	if (finally_op_num) {
-		zval *fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
+		zval *fast_call;
 
+		zend_generator_cleanup_unfinished_execution(generator, finally_op_num);
+
+		fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 		Z_OBJ_P(fast_call) = EG(exception);
 		EG(exception) = NULL;
 		fast_call->u2.lineno = (uint32_t)-1;
@@ -211,7 +215,7 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
 			size += EX_NUM_ARGS() - op_array->num_args;
 		}
-		size += Z_OBJ(execute_data->This) != NULL; /* $this */
+		size += Z_TYPE(execute_data->This) == IS_OBJECT; /* $this */
 		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
 
 		/* Yield from root references */
@@ -273,7 +277,7 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 		}
 	}
 
-	if (Z_OBJ(execute_data->This)) {
+	if (Z_TYPE(execute_data->This) == IS_OBJECT) {
 		ZVAL_OBJ(gc_buffer++, Z_OBJ(execute_data->This));
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
@@ -334,8 +338,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 
 	object_init_ex(return_value, zend_ce_generator);
 
-	if (Z_OBJ(call->This)) {
-		Z_ADDREF(call->This);
+	if (Z_TYPE(EX(This)) == IS_OBJECT && !(EX_CALL_INFO() & ZEND_CALL_CLOSURE)) {
+		ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_RELEASE_THIS);
+		Z_ADDREF(EX(This));
 	}
 
 	/* Save execution context in generator object. */
@@ -351,7 +356,7 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	execute_data->return_value = (zval*)generator;
 
 	memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
-	Z_OBJ(generator->execute_fake.This) = (zend_object *) generator;
+	ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
 }
 /* }}} */
 
@@ -365,7 +370,7 @@ static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *obje
 
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr)
 {
-	if (!ptr->func && Z_OBJ(ptr->This)) {
+	if (!ptr->func && Z_TYPE(ptr->This) == IS_OBJECT) {
 		if (Z_OBJCE(ptr->This) == zend_ce_generator) {
 			zend_generator *generator = (zend_generator *) Z_OBJ(ptr->This);
 			zend_generator *root = (generator->node.children < 1 ? generator : generator->node.ptr.leaf)->node.ptr.root;

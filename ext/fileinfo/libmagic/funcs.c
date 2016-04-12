@@ -403,7 +403,7 @@ file_check_mem(struct magic_set *ms, unsigned int level)
 	size_t len;
 
 	if (level >= ms->c.len) {
-		len = (ms->c.len += 20) * sizeof(*ms->c.li);
+		len = (ms->c.len = 20 + level) * sizeof(*ms->c.li);
 		ms->c.li = CAST(struct level_info *, (ms->c.li == NULL) ?
 		    emalloc(len) :
 		    erealloc(ms->c.li, len));

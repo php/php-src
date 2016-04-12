@@ -36,13 +36,27 @@
 #endif
 
 /* from postgresql/src/include/catalog/pg_type.h */
+#define BOOLLABEL   "bool"
 #define BOOLOID     16
+#define BYTEALABEL  "bytea"
 #define BYTEAOID    17
-#define INT8OID     20
+#define DATELABEL   "date"
+#define DATEOID     1082
+#define INT2LABEL   "int2"
 #define INT2OID     21
+#define INT4LABEL   "int4"
 #define INT4OID     23
-#define TEXTOID     25
+#define INT8LABEL   "int8"
+#define INT8OID     20
 #define OIDOID      26
+#define TEXTLABEL   "text"
+#define TEXTOID     25
+#define TIMESTAMPLABEL "timestamp"
+#define TIMESTAMPOID   1114
+#define VARCHARLABEL "varchar"
+#define VARCHAROID   1043
+
+
 
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 {
@@ -573,12 +587,40 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 	return 1;
 }
 
+static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGconn *conn)
+{
+	char *table_name = NULL;
+	PGresult *tmp_res;
+	char *querystr = NULL;
+
+	spprintf(&querystr, 0, "SELECT RELNAME FROM PG_CLASS WHERE OID=%d", oid);
+
+	if ((tmp_res = PQexec(conn, querystr)) == NULL || PQresultStatus(tmp_res) != PGRES_TUPLES_OK) {
+		if (tmp_res) {
+			PQclear(tmp_res);
+		}
+		efree(querystr);
+		return 0;
+	}
+	efree(querystr);
+
+	if ((table_name = PQgetvalue(tmp_res, 0, 0)) == NULL) {
+		PQclear(tmp_res);
+		return 0;
+	}
+
+	PQclear(tmp_res);
+	return table_name;
+}
+
 static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	PGresult *res;
 	char *q=NULL;
 	ExecStatusType status;
+	Oid table_oid;
+	char *table_name=NULL;
 
 	if (!S->result) {
 		return FAILURE;
@@ -591,28 +633,52 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 	array_init(return_value);
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 
-	/* Fetch metadata from Postgres system catalogue */
-	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
-	res = PQexec(S->H->server, q);
-	efree(q);
-
-	status = PQresultStatus(res);
-
-	if (status != PGRES_TUPLES_OK) {
-		/* Failed to get system catalogue, but return success
-		 * with the data we have collected so far
-		 */
-		goto done;
+	table_oid = PQftable(S->result, colno);
+	add_assoc_long(return_value, "pgsql:table_oid", table_oid);
+	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
+	if (table_name) {
+		add_assoc_string(return_value, "table", table_name);
 	}
 
-	/* We want exactly one row returned */
-	if (1 != PQntuples(res)) {
-		goto done;
+	switch (S->cols[colno].pgsql_type) {
+		case BOOLOID:
+			add_assoc_string(return_value, "native_type", BOOLLABEL);
+			break;
+		case BYTEAOID:
+			add_assoc_string(return_value, "native_type", BYTEALABEL);
+			break;
+		case INT8OID:
+			add_assoc_string(return_value, "native_type", INT8LABEL);
+			break;
+		case INT2OID:
+			add_assoc_string(return_value, "native_type", INT2LABEL);
+			break;
+		case INT4OID:
+			add_assoc_string(return_value, "native_type", INT4LABEL);
+			break;
+		case TEXTOID:
+			add_assoc_string(return_value, "native_type", TEXTLABEL);
+			break;
+		case VARCHAROID:
+			add_assoc_string(return_value, "native_type", VARCHARLABEL);
+			break;
+		case DATEOID:
+			add_assoc_string(return_value, "native_type", DATELABEL);
+			break;
+		case TIMESTAMPOID:
+			add_assoc_string(return_value, "native_type", TIMESTAMPLABEL);
+			break;
+		default:
+			/* Fetch metadata from Postgres system catalogue */
+			spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
+			res = PQexec(S->H->server, q);
+			efree(q);
+			status = PQresultStatus(res);
+			if (status == PGRES_TUPLES_OK && 1 == PQntuples(res)) {
+				add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
+			}
+			PQclear(res);
 	}
-
-	add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
-done:
-	PQclear(res);
 	return 1;
 }
 
