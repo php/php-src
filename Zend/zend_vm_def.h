@@ -2281,7 +2281,6 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			if (UNEXPECTED(variable_ptr == NULL)) {
 				ZEND_VM_C_GOTO(assign_dim_error);
 			}
-			FREE_OP2();
 		}
 		value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 		value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
@@ -2314,7 +2313,6 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			} else {
 				FREE_OP_DATA();
 			}
-			FREE_OP2();
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
 				if (OP2_TYPE == IS_UNUSED) {
@@ -2326,7 +2324,6 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 					dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 					value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
 					zend_assign_to_string_offset(object_ptr, dim, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-					FREE_OP2();
 					FREE_OP_DATA();
 				}
 			} else {
@@ -2342,13 +2339,16 @@ ZEND_VM_C_LABEL(assign_dim_convert_to_array):
 			if (OP1_TYPE != IS_VAR || UNEXPECTED(!Z_ISERROR_P(object_ptr))) {
 				zend_error(E_WARNING, "Cannot use a scalar value as an array");
 			}
+			GET_OP2_ZVAL_PTR(BP_VAR_R);
 ZEND_VM_C_LABEL(assign_dim_error):
-			FREE_UNFETCHED_OP2();
 			FREE_UNFETCHED_OP_DATA();
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
 		}
+	}
+	if (OP2_TYPE != IS_UNUSED) {
+		FREE_OP2();
 	}
 	FREE_OP1_VAR_PTR();
 	/* assign_dim has two opcodes! */
