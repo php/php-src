@@ -249,7 +249,8 @@ END_EXTERN_C()
 #define ZEND_FETCH_CLASS_CONSTANT            181
 #define ZEND_BIND_LEXICAL                    182
 #define ZEND_BIND_STATIC                     183
+#define ZEND_ASSIGN_COALESCE                 184
 
-#define ZEND_VM_LAST_OPCODE                  183
+#define ZEND_VM_LAST_OPCODE                  184
 
 #endif

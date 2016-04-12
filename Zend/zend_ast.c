@@ -1304,6 +1304,7 @@ simple_list:
 				case ZEND_ASSIGN_SL:     BINARY_OP(" <<= ", 90, 91, 90);
 				case ZEND_ASSIGN_SR:     BINARY_OP(" >>= ", 90, 91, 90);
 				case ZEND_ASSIGN_CONCAT: BINARY_OP(" .= ",  90, 91, 90);
+				case ZEND_ASSIGN_COALESCE: BINARY_OP(" ??= ",  90, 91, 90);
 				case ZEND_ASSIGN_BW_OR:  BINARY_OP(" |= ",  90, 91, 90);
 				case ZEND_ASSIGN_BW_AND: BINARY_OP(" &= ",  90, 91, 90);
 				case ZEND_ASSIGN_BW_XOR: BINARY_OP(" ^= ",  90, 91, 90);
