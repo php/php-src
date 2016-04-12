@@ -385,6 +385,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_RW(const zend_exec
 	return EX_VAR(var);
 }
 
+static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_UNSET(const zend_execute_data *execute_data, uint32_t var)
+{
+	return EX_VAR(var);
+}
+
 static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execute_data *execute_data, uint32_t var)
 {
 	zval *ret = EX_VAR(var);
@@ -1145,6 +1150,8 @@ try_again:
 					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 				}
 				break;
+			case IS_UNDEF:
+				zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
 			case IS_DOUBLE:
 			case IS_NULL:
 			case IS_FALSE:
@@ -1159,7 +1166,7 @@ try_again:
 				break;
 		}
 
-		offset = zval_get_long(dim);
+		offset = _zval_get_long_func(dim);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
@@ -1692,6 +1699,10 @@ convert_to_array:
 		}
 		ZVAL_ERROR(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (/*dim_type == IS_CV &&*/ dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+			zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
+			dim = &EG(uninitialized_zval);
+		}
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_throw_error(NULL, "Cannot use object as array");
 			ZVAL_ERROR(result);
@@ -1730,22 +1741,30 @@ convert_to_array:
 				ZVAL_ERROR(result);
 			}
 		}
-	} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-		if (type != BP_VAR_UNSET) {
-			goto convert_to_array;
-		} else {
-			/* for read-mode only */
-			ZVAL_NULL(result);
-		}
-	} else if (EXPECTED(Z_ISERROR_P(container))) {
-		ZVAL_ERROR(result);
 	} else {
-		if (type == BP_VAR_UNSET) {
-			zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
-			ZVAL_NULL(result);
-		} else {
-			zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		if (type != BP_VAR_W && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			zval_undefined_cv(EG(current_execute_data)->opline->op1.var, EG(current_execute_data));
+		}
+		if (/*dim_type == IS_CV &&*/ dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+			zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
+		}
+		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+			if (type != BP_VAR_UNSET) {
+				goto convert_to_array;
+			} else {
+				/* for read-mode only */
+				ZVAL_NULL(result);
+			}
+		} else if (EXPECTED(Z_ISERROR_P(container))) {
 			ZVAL_ERROR(result);
+		} else {
+			if (type == BP_VAR_UNSET) {
+				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
+				ZVAL_NULL(result);
+			} else {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				ZVAL_ERROR(result);
+			}
 		}
 	}
 }
