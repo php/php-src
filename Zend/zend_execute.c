@@ -1669,6 +1669,16 @@ static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_
 	return zend_fetch_dimension_address_inner(ht, dim, IS_CONST, BP_VAR_W);
 }
 
+static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_RW(HashTable *ht, const zval *dim)
+{
+	return zend_fetch_dimension_address_inner(ht, dim, IS_TMP_VAR, BP_VAR_RW);
+}
+
+static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_RW_CONST(HashTable *ht, const zval *dim)
+{
+	return zend_fetch_dimension_address_inner(ht, dim, IS_CONST, BP_VAR_RW);
+}
+
 static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container, zval *dim, int dim_type, int type)
 {
     zval *retval;
