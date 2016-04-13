@@ -2846,6 +2846,90 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 }
 /* }}} */
 
+#define ZEND_FAKE_OP_ARRAY ((zend_op_array*)(zend_intptr_t)-1)
+
+static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type) /* {{{ */
+{
+	zend_op_array *new_op_array = NULL;
+	zval tmp_inc_filename;
+
+	ZVAL_UNDEF(&tmp_inc_filename);
+	if (Z_TYPE_P(inc_filename) != IS_STRING) {
+		ZVAL_STR(&tmp_inc_filename, zval_get_string(inc_filename));
+		inc_filename = &tmp_inc_filename;
+	}
+
+	if (type != ZEND_EVAL && strlen(Z_STRVAL_P(inc_filename)) != Z_STRLEN_P(inc_filename)) {
+		if (type == ZEND_INCLUDE_ONCE || type == ZEND_INCLUDE) {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, Z_STRVAL_P(inc_filename));
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
+		}
+	} else {
+		switch (type) {
+			case ZEND_INCLUDE_ONCE:
+			case ZEND_REQUIRE_ONCE: {
+					zend_file_handle file_handle;
+					zend_string *resolved_path;
+
+					resolved_path = zend_resolve_path(Z_STRVAL_P(inc_filename), (int)Z_STRLEN_P(inc_filename));
+					if (resolved_path) {
+						if (zend_hash_exists(&EG(included_files), resolved_path)) {
+							goto already_compiled;
+						}
+					} else {
+						resolved_path = zend_string_copy(Z_STR_P(inc_filename));
+					}
+
+					if (SUCCESS == zend_stream_open(ZSTR_VAL(resolved_path), &file_handle)) {
+
+						if (!file_handle.opened_path) {
+							file_handle.opened_path = zend_string_copy(resolved_path);
+						}
+
+						if (zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path)) {
+							zend_op_array *op_array = zend_compile_file(&file_handle, (type==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE));
+							zend_destroy_file_handle(&file_handle);
+							zend_string_release(resolved_path);
+							if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
+								zend_string_release(Z_STR(tmp_inc_filename));
+							}
+							return op_array;
+						} else {
+							zend_file_handle_dtor(&file_handle);
+already_compiled:
+							new_op_array = ZEND_FAKE_OP_ARRAY;
+						}
+					} else {
+						if (type == ZEND_INCLUDE_ONCE) {
+							zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, Z_STRVAL_P(inc_filename));
+						} else {
+							zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
+						}
+					}
+					zend_string_release(resolved_path);
+				}
+				break;
+			case ZEND_INCLUDE:
+			case ZEND_REQUIRE:
+				new_op_array = compile_filename(type, inc_filename);
+				break;
+			case ZEND_EVAL: {
+					char *eval_desc = zend_make_compiled_string_description("eval()'d code");
+					new_op_array = zend_compile_string(inc_filename, eval_desc);
+					efree(eval_desc);
+				}
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+	}
+	if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
+		zend_string_release(Z_STR(tmp_inc_filename));
+	}
+	return new_op_array;
+}
+/* }}} */
+
 #ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
 #  define ZEND_VM_FP_GLOBAL_REG "%esi"
