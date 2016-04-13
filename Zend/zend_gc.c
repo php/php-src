@@ -19,6 +19,56 @@
 
 /* $Id$ */
 
+
+/**
+ * zend_gc_collect_cycles
+ * ======================
+ *
+ * Colors and its meaning
+ * ----------------------
+ *
+ * BLACK  (GC_BLACK)   - In use or free.
+ * GREY   (GC_GREY)    - Possible member of cycle.
+ * WHITE  (GC_WHITE)   - Member of garbage cycle.
+ * PURPLE (GC_PURPLE)  - Possible root of cycle.
+ *
+ * Colors described in the paper but not used
+ * ------------------------------------------
+ *
+ * GREEN - Acyclic
+ * RED   - Candidate cycle underogin
+ * ORANGE - Candidate cycle awaiting epoch boundary.
+ *
+ *
+ * Flow
+ * =====
+ *
+ * The garbage collect cycle starts from 'gc_mark_roots', which traverses the
+ * possible roots, and calls mark_grey for roots are marked purple with
+ * depth-first traverse.
+ *
+ * After all possible roots are traversed and marked,
+ * gc_scan_roots will be called, and each root will be called with
+ * gc_scan(root->ref)
+ *
+ * gc_scan checkes the colors of possible members.
+ *
+ * If the node is marked as grey and the refcount > 0
+ *    gc_scan_black will be called on that node to scan it's subgraph.
+ * otherwise (refcount == 0), it marks the node white.
+ *
+ * A node MAY be added to possbile roots when ZEND_UNSET_VAR happens or
+ * zend_assign_to_variable is called only when possible garbage node is
+ * produced.
+ * gc_possible_root() will be called to add the nodes to possible roots.
+ *
+ *
+ * For objects, we call their get_gc handler (by default 'zend_std_get_gc') to
+ * get the object properties to scan.
+ *
+ *
+ * @see http://researcher.watson.ibm.com/researcher/files/us-bacon/Bacon01Concurrent.pdf
+ */
 #include "zend.h"
 #include "zend_API.h"
 
@@ -1156,4 +1206,6 @@ ZEND_API int zend_gc_collect_cycles(void)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ *
+ * vim:noexpandtab:
  */
