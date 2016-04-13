@@ -769,6 +769,23 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 	return 1;
 }
 
+static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
+{
+	uint32_t i;
+	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
+	zval *p = ZEND_CALL_ARG(call, 1);
+
+	for (i = 0; i < num_args; ++i) {
+		if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
+			EG(current_execute_data) = call->prev_execute_data;
+			zend_vm_stack_free_args(call);
+			return 0;
+		}
+		p++;
+	}
+	return 1;
+}
+
 static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
@@ -2927,6 +2944,44 @@ already_compiled:
 		zend_string_release(Z_STR(tmp_inc_filename));
 	}
 	return new_op_array;
+}
+/* }}} */
+
+static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_execute_data *call, zval *ret) /* {{{ */
+{
+	zend_object *object;
+
+	/* Not sure what should be done here if it's a static method */
+	if (UNEXPECTED(Z_TYPE(call->This) != IS_OBJECT)) {
+		zend_vm_stack_free_args(call);
+		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+			zend_string_release(fbc->common.function_name);
+		}
+		efree(fbc);
+		zend_vm_stack_free_call_frame(call);
+
+		zend_throw_error(NULL, "Cannot call overloaded function for non-object");
+		return 0;
+	}
+
+	object = Z_OBJ(call->This);
+	EG(scope) = fbc->common.scope;
+
+	ZVAL_NULL(ret);
+	Z_VAR_FLAGS_P(ret) = 0;
+
+	EG(current_execute_data) = call;
+	object->handlers->call_method(fbc->common.function_name, object, call, ret);
+	EG(current_execute_data) = call->prev_execute_data;
+
+	zend_vm_stack_free_args(call);
+
+	if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+		zend_string_release(fbc->common.function_name);
+	}
+	efree(fbc);
+
+	return 1;
 }
 /* }}} */
 

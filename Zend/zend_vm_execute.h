@@ -793,21 +793,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_U
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
-		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			uint32_t i;
-			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-			zval *p = ZEND_CALL_ARG(call, 1);
-
-			for (i = 0; i < num_args; ++i) {
-				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
-					EG(current_execute_data) = call->prev_execute_data;
-					zend_vm_stack_free_args(call);
-					zend_vm_stack_free_call_frame(call);
-					zend_throw_exception_internal(NULL);
-					HANDLE_EXCEPTION();
-				}
-				p++;
-			}
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
+		 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
+			zend_vm_stack_free_call_frame(call);
+			zend_throw_exception_internal(NULL);
+			HANDLE_EXCEPTION();
 		}
 
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
@@ -897,21 +887,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_U
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
-		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			uint32_t i;
-			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-			zval *p = ZEND_CALL_ARG(call, 1);
-
-			for (i = 0; i < num_args; ++i) {
-				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
-					EG(current_execute_data) = call->prev_execute_data;
-					zend_vm_stack_free_args(call);
-					zend_vm_stack_free_call_frame(call);
-					zend_throw_exception_internal(NULL);
-					HANDLE_EXCEPTION();
-				}
-				p++;
-			}
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
+		 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
+			zend_vm_stack_free_call_frame(call);
+			zend_throw_exception_internal(NULL);
+			HANDLE_EXCEPTION();
 		}
 
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
@@ -1019,25 +999,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HA
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
-		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			uint32_t i;
-			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-			zval *p = ZEND_CALL_ARG(call, 1);
-
-			for (i = 0; i < num_args; ++i) {
-				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
-					EG(current_execute_data) = call->prev_execute_data;
-					zend_vm_stack_free_args(call);
-					if (0) {
-						ZVAL_UNDEF(EX_VAR(opline->result.var));
-					}
-					if (UNEXPECTED(should_change_scope)) {
-						goto fcall_end_change_scope;
-					} else {
-						goto fcall_end;
-					}
-				}
-				p++;
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
+		  && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
+			if (0) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+			if (UNEXPECTED(should_change_scope)) {
+				goto fcall_end_change_scope;
+			} else {
+				goto fcall_end;
 			}
 		}
 
@@ -1073,41 +1043,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HA
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		zval retval;
-		/* Not sure what should be done here if it's a static method */
-		if (UNEXPECTED(Z_TYPE(call->This) != IS_OBJECT)) {
-			zend_vm_stack_free_args(call);
-			if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-				zend_string_release(fbc->common.function_name);
-			}
-			efree(fbc);
-			zend_vm_stack_free_call_frame(call);
 
-			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
+		ret = 0 ? EX_VAR(opline->result.var) : &retval;
+
+		call->prev_execute_data = execute_data;
+
+		if (UNEXPECTED(!zend_do_fcall_overloaded(fbc, call, ret))) {
 			HANDLE_EXCEPTION();
 		}
 
-		object = Z_OBJ(call->This);
-		EG(scope) = fbc->common.scope;
-
-		ret = 0 ? EX_VAR(opline->result.var) : &retval;
-		ZVAL_NULL(ret);
-
-		call->prev_execute_data = execute_data;
-		EG(current_execute_data) = call;
-		object->handlers->call_method(fbc->common.function_name, object, call, ret);
-		EG(current_execute_data) = call->prev_execute_data;
-
-		zend_vm_stack_free_args(call);
-
-		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			zend_string_release(fbc->common.function_name);
-		}
-		efree(fbc);
-
 		if (!0) {
 			zval_ptr_dtor(ret);
-		} else {
-			Z_VAR_FLAGS_P(ret) = 0;
 		}
 	}
 
@@ -1214,25 +1160,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_USED_HAND
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
-		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			uint32_t i;
-			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-			zval *p = ZEND_CALL_ARG(call, 1);
-
-			for (i = 0; i < num_args; ++i) {
-				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
-					EG(current_execute_data) = call->prev_execute_data;
-					zend_vm_stack_free_args(call);
-					if (1) {
-						ZVAL_UNDEF(EX_VAR(opline->result.var));
-					}
-					if (UNEXPECTED(should_change_scope)) {
-						goto fcall_end_change_scope;
-					} else {
-						goto fcall_end;
-					}
-				}
-				p++;
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
+		  && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
+			if (1) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+			if (UNEXPECTED(should_change_scope)) {
+				goto fcall_end_change_scope;
+			} else {
+				goto fcall_end;
 			}
 		}
 
@@ -1268,41 +1204,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_USED_HAND
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		zval retval;
-		/* Not sure what should be done here if it's a static method */
-		if (UNEXPECTED(Z_TYPE(call->This) != IS_OBJECT)) {
-			zend_vm_stack_free_args(call);
-			if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-				zend_string_release(fbc->common.function_name);
-			}
-			efree(fbc);
-			zend_vm_stack_free_call_frame(call);
 
-			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
+		ret = 1 ? EX_VAR(opline->result.var) : &retval;
+
+		call->prev_execute_data = execute_data;
+
+		if (UNEXPECTED(!zend_do_fcall_overloaded(fbc, call, ret))) {
 			HANDLE_EXCEPTION();
 		}
 
-		object = Z_OBJ(call->This);
-		EG(scope) = fbc->common.scope;
-
-		ret = 1 ? EX_VAR(opline->result.var) : &retval;
-		ZVAL_NULL(ret);
-
-		call->prev_execute_data = execute_data;
-		EG(current_execute_data) = call;
-		object->handlers->call_method(fbc->common.function_name, object, call, ret);
-		EG(current_execute_data) = call->prev_execute_data;
-
-		zend_vm_stack_free_args(call);
-
-		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			zend_string_release(fbc->common.function_name);
-		}
-		efree(fbc);
-
 		if (!1) {
 			zval_ptr_dtor(ret);
-		} else {
-			Z_VAR_FLAGS_P(ret) = 0;
 		}
 	}
 
@@ -2148,25 +2060,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 		EG(current_execute_data) = call;
 
-		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			uint32_t i;
-			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-			zval *p = ZEND_CALL_ARG(call, 1);
-
-			EG(current_execute_data) = call;
-
-			for (i = 0; i < num_args; ++i) {
-				if (UNEXPECTED(!zend_verify_internal_arg_type(fbc, i + 1, p))) {
-					EG(current_execute_data) = call->prev_execute_data;
-					zend_vm_stack_free_args(call);
-					zend_vm_stack_free_call_frame(call);
-					if (ret) {
-						ZVAL_UNDEF(ret);
-					}
-					goto call_trampoline_end;
-				}
-				p++;
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
+		 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
+			zend_vm_stack_free_call_frame(call);
+			if (ret) {
+				ZVAL_UNDEF(ret);
 			}
+			goto call_trampoline_end;
 		}
 
 		if (ret == NULL) {
