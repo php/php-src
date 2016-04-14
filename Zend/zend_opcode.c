@@ -96,6 +96,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->run_time_cache = NULL;
 	op_array->cache_size = 0;
+	op_array->accessor_type = 0;
+	op_array->accessor_info.property_offset = 0;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -629,6 +631,49 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		CG(context).literals_size = op_array->last_literal;
 	}
 	opline = op_array->opcodes;
+
+	/* If the op_array is a method without arguments and return one property,
+	 * we mark the op_array as an accessor.
+	 *
+	 * The condition below doesn't check op_array->type because the op_array is
+	 * already initialized with ZEND_USER_FUNCTION.
+	 *
+	 * When zend_extension is enabled, the compiler_option "ZEND_COMPILE_EXTENDED_INFO" will 
+	 * extend the op array with zend extension only op. The accessor info will be ignored.
+	 *
+	 * The expected op codes here are:
+	 *
+	 *  - FETCH_OBJ_R (IS_UNUSED, IS_CONST -> IS_VAR)
+	 *  - RETURN (IS_VAR)
+	 *  - RETURN (IS_CONST)
+	 * */
+	if ((op_array->num_args == 0)
+		&& (op_array->scope != NULL)
+		&& (op_array->scope->type & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) == 0
+		&& (op_array->scope->type == ZEND_USER_CLASS)
+		&& (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0
+		&& (op_array->fn_flags & ZEND_ACC_ABSTRACT) == 0
+	) {
+		if (op_array->last == 3) {
+			zend_op * returnop = opline + 1;
+			if (opline->opcode == ZEND_FETCH_OBJ_R
+				&& opline->op1_type == IS_UNUSED
+				&& opline->op2_type == IS_CONST
+				&& returnop->opcode == ZEND_RETURN
+				&& returnop->op1_type == IS_VAR
+			) {
+				op_array->accessor_type = ZEND_ACCESSOR_GETTER;
+			}
+		} else if (op_array->last == 2) {
+			zend_op * returnop = opline + 1;
+			if (returnop->opcode == ZEND_RETURN
+				&& returnop->op1_type == IS_CONST) {
+				op_array->accessor_type = ZEND_ACCESSOR_CONST;
+				// op_array->accessor_info.constant = returnop->op1.constant;
+			}
+		}
+	}
+
 	end = opline + op_array->last;
 	while (opline < end) {
 		switch (opline->opcode) {
@@ -827,4 +872,6 @@ ZEND_API binary_op_type get_binary_op(int opcode)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ *
+ * vim:noet:
  */

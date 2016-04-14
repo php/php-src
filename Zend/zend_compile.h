@@ -197,6 +197,10 @@ typedef struct _zend_oparray_context {
 	HashTable *labels;
 } zend_oparray_context;
 
+#define ZEND_ACCESSOR_GETTER 0x01
+#define ZEND_ACCESSOR_SETTER 0x02
+#define ZEND_ACCESSOR_CONST  0x04
+
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
@@ -361,6 +365,15 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
+
+	/* the accessor info */
+	union {
+		uint32_t property_offset;
+	} accessor_info;
+
+	/* the accessor type (getter, setter, const) */
+	zend_uchar accessor_type;
+
 	uint32_t *refcount;
 
 	uint32_t this_var;
@@ -421,7 +434,6 @@ typedef struct _zend_internal_function {
 
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
-
 	struct {
 		zend_uchar type;  /* never used */
 		zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
@@ -433,7 +445,6 @@ union _zend_function {
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;
 	} common;
-
 	zend_op_array op_array;
 	zend_internal_function internal_function;
 };
@@ -593,6 +604,8 @@ struct _zend_execute_data {
 
 # define CT_CONSTANT(node) \
 	CT_CONSTANT_EX(CG(active_op_array), (node).constant)
+
+
 
 #if ZEND_USE_ABS_CONST_ADDR
 
@@ -1032,4 +1045,6 @@ ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode,
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ *
+ * vim:noet:
  */
