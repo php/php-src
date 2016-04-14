@@ -50,8 +50,8 @@ Interoperability Support" (ID 207303.1) for details.
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.0</release>
-   <api>2.1.0</api>
+   <release>2.1.1</release>
+   <api>2.1.1</api>
   </version>
   <stability>
    <release>stable</release>
@@ -60,7 +60,7 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Updated driver name format.    
+Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
   </notes>
  <contents>
   <dir name="/">
@@ -162,6 +162,7 @@ Updated driver name format.
     <file name="bug51291_2.phpt" role="test" />
     <file name="bug68298.phpt" role="test" />
     <file name="bug71422.phpt" role="test" />
+    <file name="bug71600.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
@@ -465,6 +466,22 @@ Updated driver name format.
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.1.0</release>
+   <api>2.1.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Updated driver name format.    
+  </notes>
+</release>
 
 <release>
   <version>

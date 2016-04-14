@@ -1423,15 +1423,17 @@ PHP_FUNCTION(oci_fetch_all)
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
 	zval_dtor(array);
-	array_init(array);
 
 	while (skip--) {
 		if (php_oci_statement_fetch(statement, nrows)) {
+			array_init(array);
 			RETURN_LONG(0);
 		}
 	}
 
 	if (flags & PHP_OCI_FETCHSTATEMENT_BY_ROW) {
+		/* Fetch by Row: array will contain one sub-array per query row */
+		array_init(array);
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);
 
 		for (i = 0; i < statement->ncolumns; i++) {
@@ -1441,7 +1443,7 @@ PHP_FUNCTION(oci_fetch_all)
 		while (!php_oci_statement_fetch(statement, nrows)) {
 			zval row;
 			
-			array_init(&row);
+			array_init_size(&row, statement->ncolumns);
 
 			for (i = 0; i < statement->ncolumns; i++) {
 				php_oci_column_to_zval(columns[ i ], &element, PHP_OCI_RETURN_LOBS);
@@ -1452,7 +1454,7 @@ PHP_FUNCTION(oci_fetch_all)
 					zend_string *zvtmp;
 					zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 					zend_symtable_update(Z_ARRVAL(row), zvtmp, &element);
-                   zend_string_release(zvtmp);
+					zend_string_release(zvtmp);
 				}
 			}
 
@@ -1467,6 +1469,8 @@ PHP_FUNCTION(oci_fetch_all)
 		efree(columns);
 
 	} else { /* default to BY_COLUMN */
+		/* Fetch by columns: array will contain one sub-array per query column */
+		array_init_size(array, statement->ncolumns);
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);
 		outarrs = safe_emalloc(statement->ncolumns, sizeof(zval*), 0);
 		
@@ -1483,9 +1487,9 @@ PHP_FUNCTION(oci_fetch_all)
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0);
 				
 				array_init(&tmp);
-                zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
+				zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zvtmp, &tmp);
-               zend_string_release(zvtmp);
+				zend_string_release(zvtmp);
 			}
 		}
 

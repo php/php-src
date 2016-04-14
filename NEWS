@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.7
 
+- OCI8
+  . Fixed bug #71600 (oci_fetch_all segfaults when selecting more than
+    eight columns)
+
 - SQLite3:
   . Fixed bug #68849 (bindValue is not using the right data type).
     (Anatol)
