@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #71889 (DateInterval::format Segmentation fault).
     (Thomas Punt)
 
+- OCI8:
+  . Fixed bug #71422 (Fix ORA-01438: value larger than specified precision
+    allowed for this column)
+
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
 
