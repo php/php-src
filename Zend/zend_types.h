@@ -929,7 +929,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define SEPARATE_ARRAY(zv) do {							\
 		zval *_zv = (zv);								\
 		zend_array *_arr = Z_ARR_P(_zv);				\
-		if (GC_REFCOUNT(_arr) > 1) {					\
+		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
 			if (!Z_IMMUTABLE_P(_zv)) {					\
 				GC_REFCOUNT(_arr)--;					\
 			}											\

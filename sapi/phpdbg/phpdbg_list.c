@@ -242,6 +242,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	char resolved_path_buf[MAXPATHLEN];
 
 	if (zend_stream_fixup(file, &bufptr, &data.len) == FAILURE) {
+		zend_file_handle_dtor(file);
 		return NULL;
 	}
 
@@ -288,6 +289,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 
 	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake);
+	zend_file_handle_dtor(file);
 
 	return ret;
 }
