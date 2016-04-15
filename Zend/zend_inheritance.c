@@ -24,6 +24,7 @@
 #include "zend_inheritance.h"
 #include "zend_smart_str.h"
 #include "zend_inheritance.h"
+#include "zend_closures.h"
 
 static void overriden_ptr_dtor(zval *zv) /* {{{ */
 {
@@ -84,6 +85,45 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_function, func, sizeof(zend_op_array));
 	}
+	return new_function;
+}
+/* }}} */
+
+static zend_function *zend_duplicate_function_ex(zend_function *func, zend_class_entry *ce, zend_function *prototype) /* {{{ */
+{
+	zend_function *new_function;
+
+	if (UNEXPECTED(func->type == ZEND_INTERNAL_FUNCTION)) {
+		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
+			new_function = pemalloc(sizeof(zend_internal_function), 1);
+			memcpy(new_function, func, sizeof(zend_internal_function));
+		} else {
+			new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
+			memcpy(new_function, func, sizeof(zend_internal_function));
+			new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
+		}
+		if (EXPECTED(new_function->common.function_name)) {
+			zend_string_addref(new_function->common.function_name);
+		}
+	} else {
+		if (func->op_array.refcount) {
+			(*func->op_array.refcount)++;
+		}
+		if (func->op_array.static_variables &&
+			!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+			GC_REFCOUNT(func->op_array.static_variables)++;
+		}
+		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+		memcpy(new_function, func, sizeof(zend_op_array));
+	}
+
+	zend_string_release(new_function->common.function_name);
+	new_function->common.function_name = 
+		zend_string_copy(prototype->common.function_name);
+
+	new_function->common.scope = ce;
+	new_function->common.prototype = prototype;
+
 	return new_function;
 }
 /* }}} */
@@ -759,7 +799,7 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 }
 /* }}} */
 
-ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
+void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *parent_ce, zend_bool ignore_final_class) /* {{{ */
 {
 	zend_property_info *property_info;
 	zend_function *func;
@@ -779,7 +819,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 
 		/* Class must not extend a final class */
-		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
+		if (parent_ce->ce_flags & ZEND_ACC_FINAL && !ignore_final_class) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		}
 	}
@@ -934,6 +974,12 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		zend_verify_abstract_class(ce);
 	}
 	ce->ce_flags |= parent_ce->ce_flags & (ZEND_HAS_STATIC_IN_METHODS | ZEND_ACC_USE_GUARDS);
+}
+/* }}} */
+
+ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
+{
+	zend_do_inheritance_ex(ce, parent_ce, 0);
 }
 /* }}} */
 
@@ -1693,6 +1739,95 @@ void zend_check_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
 	}
 }
 /* }}} */
+
+static inline zend_string* zend_get_functional_interface_name(zend_string *name, zend_class_entry *interface) { /* {{{ */
+	zend_string *type_name = zend_string_alloc(
+		ZSTR_LEN(interface->name) + ZSTR_LEN(name) + sizeof("{}"), 0);
+
+	memcpy(&ZSTR_VAL(type_name)[0], "{", sizeof("{")-1);
+	memcpy(&ZSTR_VAL(type_name)[(sizeof("{")-1)], ZSTR_VAL(interface->name), ZSTR_LEN(interface->name));
+	memcpy(&ZSTR_VAL(type_name)[(sizeof("{")-1) + ZSTR_LEN(interface->name)], "}", sizeof("}") - 1);
+	memcpy(&ZSTR_VAL(type_name)[(sizeof("{")-1) + ZSTR_LEN(interface->name) + (sizeof("}")-1)], ZSTR_VAL(name), ZSTR_LEN(name));
+
+	return type_name;
+} /* }}} */
+
+static inline uint32_t zend_get_functional_interface_method(zend_string **key, zend_function **prototype, zend_class_entry *interface) { /* {{{ */
+	zend_string *_key = NULL;
+	zend_function *_prototype = NULL;
+	uint32_t methods = 0;
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&interface->function_table, _key, _prototype) {
+		*prototype = _prototype;
+		*key = _key;
+
+		if (++methods > 1) {
+			break;
+		} 
+	} ZEND_HASH_FOREACH_END();
+	
+	return methods;
+} /* }}} */
+
+ZEND_API zend_class_entry* zend_get_functional_interface(zend_string *name, zend_function *func, zend_class_entry *interface) { /* {{{ */
+	zend_class_entry *type;
+	zend_string *type_name;
+	zend_string *key = NULL;
+	zend_function *prototype = NULL;
+
+	if (!interface) {
+		return zend_ce_closure;
+	}
+
+	type_name = zend_get_functional_interface_name(name, interface);
+
+	if ((type = zend_hash_find_ptr(CG(class_table), type_name))) {
+		zend_string_release(type_name);
+		return type;
+	}
+
+	if (zend_get_functional_interface_method(&key, &prototype, interface) != 1) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"cannot implement non functional interface %s",
+			ZSTR_VAL(interface->name));
+	}
+
+	if (!(interface->ce_flags & ZEND_ACC_INTERFACE)) {
+		zend_error_noreturn(E_COMPILE_ERROR, 
+			"cannot implement non interface %s",
+			ZSTR_VAL(interface->name));
+	}
+
+	if (((prototype->common.fn_flags & ZEND_ACC_STATIC) && !(func->common.fn_flags & ZEND_ACC_STATIC))) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"cannot create non static implementation of static functional interface %s",
+			ZSTR_VAL(interface->name));
+	}
+
+	if (((func->common.fn_flags & ZEND_ACC_STATIC) && !(prototype->common.fn_flags & ZEND_ACC_STATIC))) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"cannot create static implementation of non static functional interface %s",
+			ZSTR_VAL(interface->name));
+	}
+
+	type = (zend_class_entry*) zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
+
+	zend_initialize_class_data(type, 1);
+
+	type->name = type_name;
+	type->type = ZEND_USER_CLASS;
+	type->refcount = 1;
+	type->ce_flags |= ZEND_ACC_FINAL;
+
+	func = zend_duplicate_function_ex(func, type, prototype);
+	func->common.fn_flags &= ~ZEND_ACC_CLOSURE;
+	zend_hash_update_ptr(
+		&type->function_table, key, func);
+	zend_do_inheritance_ex(type, zend_ce_closure, 1);
+	zend_class_implements(type, 1, interface);
+
+	return (zend_class_entry*) zend_hash_add_ptr(CG(class_table), type->name, type);
+} /* }}} */
 
 /*
  * Local variables:

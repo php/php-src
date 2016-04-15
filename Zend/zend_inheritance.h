@@ -34,7 +34,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 void zend_do_early_binding(void);
 
 void zend_check_deprecated_constructor(const zend_class_entry *ce);
-
+ZEND_API zend_class_entry* zend_get_functional_interface(zend_string *name, zend_function *func, zend_class_entry *interface);
 END_EXTERN_C()
 
 #endif

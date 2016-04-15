@@ -25,6 +25,7 @@
 #include "zend_closures.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_inheritance.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_globals.h"
@@ -42,6 +43,7 @@ typedef struct _zend_closure {
 	zend_function     func;
 	zval              this_ptr;
 	zend_class_entry *called_scope;
+	zend_class_entry *interface;
 	void (*orig_internal_handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_closure;
 
@@ -155,7 +157,7 @@ ZEND_METHOD(Closure, call)
 
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		zval new_closure;
-		zend_create_closure(&new_closure, fci_cache.function_handler, Z_OBJCE_P(newthis), closure->called_scope, newthis);
+		zend_create_closure(&new_closure, fci_cache.function_handler, Z_OBJCE_P(newthis), closure->called_scope, newthis, closure->interface);
 		closure = (zend_closure *) Z_OBJ(new_closure);
 		fci_cache.function_handler = &closure->func;
 	} else {
@@ -228,7 +230,7 @@ ZEND_METHOD(Closure, bind)
 		called_scope = ce;
 	}
 
-	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
+	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis, closure->interface);
 	new_closure = (zend_closure *) Z_OBJ_P(return_value);
 
 	/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
@@ -276,8 +278,30 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	}
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
-	invoke->internal_function.scope = zend_ce_closure;
+	invoke->internal_function.scope = object->ce;
 	invoke->internal_function.function_name = zend_string_init(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1, 0);
+	return invoke;
+}
+/* }}} */
+
+ZEND_API zend_function *zend_get_closure_interface_method(zend_string *name, zend_function *func, zend_class_entry *interface) /* {{{ */
+{
+	zend_function *invoke = (zend_function*) emalloc(sizeof(zend_function));
+	const uint32_t keep_flags =
+		ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC | ZEND_ACC_HAS_RETURN_TYPE;
+
+	invoke->common = func->common;
+	invoke->type = ZEND_INTERNAL_FUNCTION;
+	invoke->internal_function.fn_flags =
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (func->common.fn_flags & keep_flags);
+	if (func->type != ZEND_INTERNAL_FUNCTION || (func->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+		invoke->internal_function.fn_flags |=
+			ZEND_ACC_USER_ARG_INFO;
+	}
+	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
+	invoke->internal_function.module = 0;
+	invoke->internal_function.scope = interface;
+	invoke->internal_function.function_name = zend_string_copy(name);
 	return invoke;
 }
 /* }}} */
@@ -296,13 +320,21 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj) /* {{{ */
 }
 /* }}} */
 
-static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
+zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
 {
+	zend_function *func;
+
 	if (zend_string_equals_literal_ci(method, ZEND_INVOKE_FUNC_NAME)) {
 		return zend_get_closure_invoke_method(*object);
 	}
 
-	return std_object_handlers.get_method(object, method, key);
+	func = std_object_handlers.get_method(object, method, key);
+
+	if (func && func->common.prototype) {
+		return zend_get_closure_interface_method(method, func, (*object)->ce);
+	}
+
+	return func;
 }
 /* }}} */
 
@@ -380,8 +412,8 @@ static zend_object *zend_closure_clone(zval *zobject) /* {{{ */
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(zobject);
 	zval result;
 
-	zend_create_closure(&result, &closure->func,
-		closure->func.common.scope, closure->called_scope, &closure->this_ptr);
+	zend_create_closure(&result, &closure->func,closure->func.common.scope, closure->called_scope, &closure->this_ptr, closure->interface);
+	
 	return Z_OBJ(result);
 }
 /* }}} */
@@ -548,19 +580,25 @@ static void zend_closure_internal_handler(INTERNAL_FUNCTION_PARAMETERS) /* {{{ *
 }
 /* }}} */
 
-ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
-{
+ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, zend_class_entry *interface) { /* {{{ */
 	zend_closure *closure;
 
-	object_init_ex(res, zend_ce_closure);
+	object_init_ex(res, interface ? interface : zend_ce_closure);
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 
 	if ((scope == NULL) && this_ptr && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {
 		/* use dummy scope if we're binding an object without specifying a scope */
 		/* maybe it would be better to create one for this purpose */
-		scope = zend_ce_closure;
+		scope = Z_OBJCE_P(res);
+	} else {
+		/* we use the interfaces scope if not rebinding */
+		if ((scope == NULL ) && interface) {
+			scope = Z_OBJCE_P(res);
+		}
 	}
+
+	closure->interface = interface;
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		memcpy(&closure->func, func, sizeof(zend_op_array));
@@ -585,7 +623,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {
 			/* avoid infinity recursion, by taking handler from nested closure */
 			zend_closure *nested = (zend_closure*)((char*)func - XtOffsetOf(zend_closure, func));
-			ZEND_ASSERT(nested->std.ce == zend_ce_closure);
+			ZEND_ASSERT(instanceof_function(nested->std.ce, zend_ce_closure));
 			closure->orig_internal_handler = nested->orig_internal_handler;
 		} else {
 			closure->orig_internal_handler = closure->func.internal_function.handler;
@@ -616,7 +654,7 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 {
 	zend_closure *closure;
 
-	zend_create_closure(res, func, scope, called_scope, this_ptr);
+	zend_create_closure(res, func, scope, called_scope, this_ptr, NULL);
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
