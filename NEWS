@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - SQLite3:
   . Fixed bug #68849 (bindValue is not using the right data type). (Anatol)
 
+- Standard:
+  . Fixed bug #72031 (array_column() against an array of objects discards all
+    values matching null). (Nikita)
+
 28 Apr 2016 PHP 7.0.6
 
 - Core:
