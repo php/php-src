@@ -12,12 +12,11 @@ PHP                                                                        NEWS
     (Michael Sierks)    
 
 - Date:
-  . Fixed bug #71889 (DateInterval::format Segmentation fault).
-    (Thomas Punt)
+  . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
 
 - OCI8:
   . Fixed bug #71422 (Fix ORA-01438: value larger than specified precision
-    allowed for this column)
+    allowed for this column). (Chris Jones)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
@@ -28,9 +27,8 @@ PHP                                                                        NEWS
 
 - PDO:
   . Fixed bug #52098 (Own PDOStatement implementation ignore __call()).
-    (Daniel kalaspuffar, Julien)
-  . Fixed bug #71447 (Quotes inside comments not properly handled).
-    (Matteo)
+    (Daniel Kalaspuffar, Julien)
+  . Fixed bug #71447 (Quotes inside comments not properly handled). (Matteo)
 
 - Postgres:
   . Fixed bug #71820 (pg_fetch_object binds parameters before call
@@ -45,7 +43,7 @@ PHP                                                                        NEWS
   . Fixed bug #67512 (php_crypt() crashes if crypt_r() does not exist or
     _REENTRANT is not defined). (Nikita)
 
-31 Marc 2016, PHP 5.6.20
+31 Mar 2016, PHP 5.6.20
 
 - CLI Server:
   . Fixed bug #69953 (Support MKCALENDAR request method). (Christoph)
@@ -79,8 +77,7 @@ PHP                                                                        NEWS
     (steven dot lambeth at gmx dot de, Anatol)
 
 - Phar:
-  . Fixed bug #71625 (Crash in php7.dll with bad phar filename).
-    (Anatol)
+  . Fixed bug #71625 (Crash in php7.dll with bad phar filename). (Anatol)
   . Fixed bug #71504 (Parsing of tar file with duplicate filenames causes
     memory leak). (Jos Elstgeest)
 
@@ -88,7 +85,7 @@ PHP                                                                        NEWS
   . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
     (andrew at jmpesp dot org)
 
-- Standard
+- Standard:
   . Fixed bug #71798 (Integer Overflow in php_raw_url_encode).
     (taoguangchen at icloud dot com, Stas)
 
