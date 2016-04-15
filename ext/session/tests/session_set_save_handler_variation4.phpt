@@ -63,7 +63,7 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
+Write [%s,%s,%sBlah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
 NULL
 Open [%s,PHPSESSID]

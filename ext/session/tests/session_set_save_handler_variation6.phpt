@@ -71,7 +71,7 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
+Write [%s,%s,%sBlah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
 array(3) {
   ["Blah"]=>
@@ -92,7 +92,7 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
+Write [%s,%s,%sBlah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
 Close [%s,PHPSESSID]
 Starting session again..!
 Open [%s,PHPSESSID]

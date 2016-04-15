@@ -92,7 +92,7 @@ session_destroy();
 --EXPECTF--
 OPEN: PHPSESSID
 READ: abtest
-object(foo)#4 (2) {
+object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -100,18 +100,18 @@ object(foo)#4 (2) {
 }
 array(1) {
   [3]=>
-  object(foo)#2 (2) {
+  object(foo)#%d (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
     int(2)
   }
 }
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
+WRITE: abtest, __SESS_N_VARS__|i:2;baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
 CLOSE
 OPEN: PHPSESSID
 READ: abtest
-object(foo)#2 (2) {
+object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -119,7 +119,7 @@ object(foo)#2 (2) {
 }
 array(1) {
   [3]=>
-  object(foo)#4 (2) {
+  object(foo)#%d (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
@@ -127,11 +127,11 @@ array(1) {
   }
 }
 int(123)
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;
+WRITE: abtest, __SESS_N_VARS__|i:3;baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;
 CLOSE
 OPEN: PHPSESSID
 READ: abtest
-object(foo)#4 (2) {
+object(foo)#%d (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -139,7 +139,7 @@ object(foo)#4 (2) {
 }
 array(1) {
   [3]=>
-  object(foo)#2 (2) {
+  object(foo)#%d (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
@@ -149,4 +149,3 @@ array(1) {
 int(123)
 DESTROY: abtest
 CLOSE
-

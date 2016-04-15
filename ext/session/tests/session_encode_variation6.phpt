@@ -35,17 +35,17 @@ ob_end_flush();
 *** Testing session_encode() : variation ***
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0 in %s on line %d
-bool(false)
+Notice: session_encode(): Skipping numeric key 0 in %ssession_encode_variation6.php on line %d
+string(20) "__SESS_N_VARS__|i:1;"
 bool(true)
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 1234567890 in %s on line %d
-bool(false)
+Notice: session_encode(): Skipping numeric key 1234567890 in %ssession_encode_variation6.php on line %d
+string(20) "__SESS_N_VARS__|i:1;"
 bool(true)
 bool(true)
 
-Notice: session_encode(): Skipping numeric key -1234567890 in %s on line %d
-bool(false)
+Notice: session_encode(): Skipping numeric key -1234567890 in %ssession_encode_variation6.php on line %d
+string(20) "__SESS_N_VARS__|i:1;"
 bool(true)
 Done
