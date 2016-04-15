@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72014 (Including a file with anonymous classes multiple times
     leads to fatal error). (Laruence)
 
+- Postgres:
+  . Fixed bug #71062 (pg_convert() doesn't accept ISO 8601 for datatype
+    timestamp). (denver at timothy dot io)
+
 - SQLite3:
   . Fixed bug #68849 (bindValue is not using the right data type).
     (Anatol)
