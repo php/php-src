@@ -3534,7 +3534,7 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
 		}
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
 		if (Z_TYPE_P(name) == IS_STRING) {
-			prop = zend_hash_find(Z_ARRVAL_P(data), Z_STR_P(name));
+			prop = zend_symtable_find(Z_ARRVAL_P(data), Z_STR_P(name));
 		} else if (Z_TYPE_P(name) == IS_LONG) {
 			prop = zend_hash_index_find(Z_ARRVAL_P(data), Z_LVAL_P(name));
 		}
