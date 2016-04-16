@@ -2237,7 +2237,7 @@ double_str:
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(low, high);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0; i < size && (element = low - (i * step)) >= high; ++i) {
+				for (i = 0, element = low; i < size && element >= high; ++i, element = low - (i * step)) {
 					Z_DVAL(tmp) = element;
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
@@ -2251,7 +2251,7 @@ double_str:
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(high, low);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0; i < size && (element = low + (i * step)) <= high; ++i) {
+				for (i = 0, element = low; i < size && element <= high; ++i, element = low + (i * step)) {
 					Z_DVAL(tmp) = element;
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
