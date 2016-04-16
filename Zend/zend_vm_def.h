@@ -4272,11 +4272,11 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR, NUM, SEND)
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
-	     Z_ISREF_P(varptr)) &&
-	    (Z_ISREF_P(varptr) || Z_TYPE_P(varptr) == IS_OBJECT)) {
-
-		ZVAL_MAKE_REF(varptr);
+	if (Z_ISREF_P(varptr)) {
+		/* nothing to do */
+	} else if (!(opline->extended_value & ZEND_ARG_SEND_FUNCTION)
+			&& Z_TYPE_P(varptr) == IS_OBJECT) {
+		ZVAL_NEW_REF(varptr, varptr);
 	} else {
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :

@@ -15500,11 +15500,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDL
 
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
-	     Z_ISREF_P(varptr)) &&
-	    (Z_ISREF_P(varptr) || Z_TYPE_P(varptr) == IS_OBJECT)) {
-
-		ZVAL_MAKE_REF(varptr);
+	if (Z_ISREF_P(varptr)) {
+		/* nothing to do */
+	} else if (!(opline->extended_value & ZEND_ARG_SEND_FUNCTION)
+			&& Z_TYPE_P(varptr) == IS_OBJECT) {
+		ZVAL_NEW_REF(varptr, varptr);
 	} else {
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
