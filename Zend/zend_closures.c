@@ -52,17 +52,11 @@ static zend_object_handlers closure_handlers;
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
 	zend_function *func = EX(func);
-	zval *arguments;
+	zval *arguments = ZEND_CALL_ARG(execute_data, 1);
 
-	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
-		efree(arguments);
-		zend_throw_error(NULL, "Cannot get arguments for calling closure");
-		RETVAL_FALSE;
-	} else if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
+	if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
 		RETVAL_FALSE;
 	}
-	efree(arguments);
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release(func->internal_function.function_name);
