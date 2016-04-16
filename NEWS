@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     leads to fatal error). (Laruence)
 
 - Postgres:
+  . Fixed bug #72028 (pg_query_params(): NULL converts to empty string).
+    (Laruence)
   . Fixed bug #71062 (pg_convert() doesn't accept ISO 8601 for datatype
     timestamp). (denver at timothy dot io)
 
