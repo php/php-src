@@ -3521,18 +3521,17 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
 	zval *prop = NULL;
 
 	if (Z_TYPE_P(data) == IS_OBJECT) {
-		zend_string *key = zval_get_string(name);
+		if (!Z_OBJ_HANDLER_P(data, has_property) || !Z_OBJ_HANDLER_P(data, read_property)) {
+			return NULL;
+		}
 
 		/* The has_property check is first performed in "exists" mode (which returns true for
 		 * properties that are null but exist) and then in "has" mode to handle objects that
 		 * implement __isset (which is not called in "exists" mode). */
-		if (!Z_OBJ_HANDLER_P(data, has_property)
-				|| Z_OBJ_HANDLER_P(data, has_property)(data, name, 2, NULL)
+		if (Z_OBJ_HANDLER_P(data, has_property)(data, name, 2, NULL)
 				|| Z_OBJ_HANDLER_P(data, has_property)(data, name, 0, NULL)) {
-			prop = zend_read_property(Z_OBJCE_P(data), data, ZSTR_VAL(key), ZSTR_LEN(key), 1, rv);
+			prop = Z_OBJ_HANDLER_P(data, read_property)(data, name, BP_VAR_R, NULL, rv);
 		}
-
-		zend_string_release(key);
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
 		if (Z_TYPE_P(name) == IS_STRING) {
 			prop = zend_hash_find(Z_ARRVAL_P(data), Z_STR_P(name));
