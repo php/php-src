@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #71062 (pg_convert() doesn't accept ISO 8601 for datatype
     timestamp). (denver at timothy dot io)
 
+- Session:
+  . Fixed bug #71972 (Cyclic references causing session_start(): Failed to
+    decode session object). (Laruence)
+
 - SQLite3:
   . Fixed bug #68849 (bindValue is not using the right data type). (Anatol)
 
