@@ -3164,6 +3164,16 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			break;
+		case ZEND_SEND_UNPACK:
+			if (ssa_ops[i].op1_def >= 0) {
+				tmp = t1 | MAY_BE_RC1|MAY_BE_RCN;
+				if (t1 & MAY_BE_ARRAY) {
+					/* SEND_UNPACK may acquire references into the array */
+					tmp |= MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+			}
+			break;
 		case ZEND_FAST_CONCAT:
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:

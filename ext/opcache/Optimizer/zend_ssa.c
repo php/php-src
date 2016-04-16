@@ -585,6 +585,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_REF:
+				case ZEND_SEND_UNPACK:
 				case ZEND_FE_RESET_RW:
 //TODO: ???
 					if (opline->op1_type == IS_CV) {
