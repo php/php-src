@@ -523,7 +523,6 @@ void zend_register_closure_ce(void) /* {{{ */
 
 	memcpy(&closure_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	closure_handlers.free_obj = zend_closure_free_storage;
-	closure_handlers.clone_obj = NULL;
 	closure_handlers.get_constructor = zend_closure_get_constructor;
 	closure_handlers.get_method = zend_closure_get_method;
 	closure_handlers.write_property = zend_closure_write_property;
