@@ -295,8 +295,9 @@ PHPAPI void php_session_reset_id(void);
 	zend_ulong num_key;													\
 	zval *struc;
 
-#define PS_ENCODE_LOOP(code) do {									\
+#define PS_ENCODE_LOOP_EX(once, code) do {							\
 	HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
+	once;                                                           \
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
 			php_error_docref(NULL, E_NOTICE,				\
@@ -308,6 +309,8 @@ PHPAPI void php_session_reset_id(void);
 		} 															\
 	} ZEND_HASH_FOREACH_END();										\
 } while(0)
+
+#define PS_ENCODE_LOOP(code)  PS_ENCODE_LOOP_EX(, code)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 

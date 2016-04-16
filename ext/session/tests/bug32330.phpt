@@ -71,7 +71,7 @@ $_SESSION['E'] = 'F';
 open: path = /tmp, name = sid
 read: id = %s
 gc: maxlifetime = %d
-write: id = %s, data = A|s:1:"B";
+write: id = %s, data = %s|i:1;A|s:1:"B";
 close
 open: path = /tmp, name = sid
 read: id = %s
@@ -81,5 +81,5 @@ close
 open: path = /tmp, name = sid
 read: id = %s
 gc: maxlifetime = %d
-write: id = %s, data = E|s:1:"F";
+write: id = %s, data = %s|i:1;E|s:1:"F";
 close

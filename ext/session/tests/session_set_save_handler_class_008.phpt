@@ -59,7 +59,7 @@ ob_end_flush();
 *** Testing session_set_save_handler() : manual shutdown ***
 (#1) constructor called
 (#1) finish called %s
-(#1) writing %s = foo|s:3:"bar";
+(#1) writing %s = %sfoo|s:3:"bar";
 (#1) closing %s
 done
 (#1) destructor called

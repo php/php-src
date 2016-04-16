@@ -20,15 +20,17 @@ echo "*** Testing session_encode() : variation ***\n";
 var_dump(session_start());
 $_SESSION["foo"] = 1234567890;
 $encoded = session_encode();
+var_dump($encoded);
 var_dump(base64_encode($encoded));
 var_dump(session_destroy());
 
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_encode() : variation ***
 bool(true)
-string(24) "A2Zvb2k6MTIzNDU2Nzg5MDs="
+string(37) "__SESS_N_VARS__i:1;fooi:1234567890;"
+string(52) "D19fU0VTU19OX1ZBUlNfX2k6MTsDZm9vaToxMjM0NTY3ODkwOw=="
 bool(true)
 Done

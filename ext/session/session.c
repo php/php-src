@@ -95,6 +95,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 	}
 
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
+#define PS_NUM_VARS "__SESS_N_VARS__"
 
 static void php_session_send_cookie(void);
 static void php_session_abort(void);
@@ -951,7 +952,15 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary) /* {{{ */
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
-	PS_ENCODE_LOOP(
+	PS_ENCODE_LOOP_EX(
+			if (zend_hash_num_elements(_ht)) {
+				smart_str_appendc(&buf, (unsigned char)(sizeof(PS_NUM_VARS) - 1));
+				smart_str_appendl(&buf, PS_NUM_VARS, sizeof(PS_NUM_VARS) - 1);
+				smart_str_appendl(&buf, "i:", sizeof("i:") - 1);
+				smart_str_append_long(&buf, zend_hash_num_elements(_ht));
+				smart_str_appendc(&buf, ';');
+			}
+			,
 			if (ZSTR_LEN(key) > PS_BIN_MAX) continue;
 			smart_str_appendc(&buf, (unsigned char)ZSTR_LEN(key));
 			smart_str_appendl(&buf, ZSTR_VAL(key), ZSTR_LEN(key));
@@ -971,7 +980,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary) /* {{{ */
 
 PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 {
-	const char *p;
+	const char *p, *q;
 	const char *endptr = val + vallen;
 	int has_value;
 	int namelen;
@@ -986,6 +995,22 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 
 		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
 			return FAILURE;
+		}
+
+		IF_SESSION_VARS() {
+			if (namelen == sizeof(PS_NUM_VARS) - 1 &&
+				strncmp(p + 1, PS_NUM_VARS, sizeof(PS_NUM_VARS) - 1) == 0) {
+				HashTable *sess_vars = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));
+				uint32_t count;
+				p += sizeof(PS_NUM_VARS) + sizeof("i:") - 1; /* "|i:" */
+				q = p;
+				while (*(++q) != ';');
+				if ((count = zend_atoi(p, q - p))) {
+					zend_hash_extend(sess_vars, zend_hash_num_elements(sess_vars) + count, 0);
+				}
+				p = ++q;
+				continue;
+			}
 		}
 
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
@@ -1038,7 +1063,16 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
-	PS_ENCODE_LOOP(
+	PS_ENCODE_LOOP_EX(
+			if (zend_hash_num_elements(_ht)) {
+				/* Prepend vars number to make unserializer easier */
+				smart_str_appendl(&buf, PS_NUM_VARS, sizeof(PS_NUM_VARS) - 1);
+				smart_str_appendc(&buf, PS_DELIMITER);
+				smart_str_appendl(&buf, "i:", sizeof("i:") - 1);
+				smart_str_append_long(&buf, zend_hash_num_elements(_ht));
+				smart_str_appendc(&buf, ';');
+			}
+			,
 			smart_str_appendl(&buf, ZSTR_VAL(key), ZSTR_LEN(key));
 			if (memchr(ZSTR_VAL(key), PS_DELIMITER, ZSTR_LEN(key)) || memchr(ZSTR_VAL(key), PS_UNDEF_MARKER, ZSTR_LEN(key))) {
 				PHP_VAR_SERIALIZE_DESTROY(var_hash);
@@ -1080,6 +1114,22 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		while (*q != PS_DELIMITER) {
 			if (++q >= endptr) goto break_outer_loop;
 		}
+		namelen = q - p;
+		IF_SESSION_VARS() {
+			if (namelen == sizeof(PS_NUM_VARS) - 1 &&
+				strncmp(p, PS_NUM_VARS, sizeof(PS_NUM_VARS) - 1) == 0) {
+				HashTable *sess_vars = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));
+				uint32_t count;
+				q += sizeof("i:"); /* "|i:" */
+				p = q;
+				while (*(++q) != ';');
+				if ((count = zend_atoi(p, q - p))) {
+					zend_hash_extend(sess_vars, zend_hash_num_elements(sess_vars) + count, 0);
+				}
+				p = ++q;
+				continue;
+			}
+		}
 		if (p[0] == PS_UNDEF_MARKER) {
 			p++;
 			has_value = 0;
@@ -1087,7 +1137,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 			has_value = 1;
 		}
 
-		namelen = q - p;
 		name = zend_string_init(p, namelen, 0);
 		q++;
 
