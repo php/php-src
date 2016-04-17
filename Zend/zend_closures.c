@@ -382,23 +382,16 @@ static zend_object *zend_closure_clone(zval *zobject) /* {{{ */
 
 int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
-	zend_closure *closure;
-
-	if (Z_TYPE_P(obj) != IS_OBJECT) {
-		return FAILURE;
-	}
-
-	closure = (zend_closure *)Z_OBJ_P(obj);
+	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
 	*fptr_ptr = &closure->func;
 	*ce_ptr = closure->called_scope;
 
-	if (obj_ptr) {
-		if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
-			*obj_ptr = Z_OBJ(closure->this_ptr);
-		} else {
-			*obj_ptr = NULL;
-		}
+	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
+		*obj_ptr = Z_OBJ(closure->this_ptr);
+	} else {
+		*obj_ptr = NULL;
 	}
+
 	return SUCCESS;
 }
 /* }}} */
