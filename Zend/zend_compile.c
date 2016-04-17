@@ -5308,6 +5308,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		LITERAL_STR(opline->op1, zend_string_copy(lcname));
 		/* RTD key is placed after lcname literal in op1 */
 		zend_add_literal_string(CG(active_op_array), &key);
+		SET_UNUSED(opline->op2);
 	}
 
 	zend_string_release(lcname);
@@ -5758,6 +5759,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			SET_NODE(opline->op2, &extends_node);
 		} else {
 			opline->opcode = ZEND_DECLARE_CLASS;
+			SET_UNUSED(opline->op2);
 		}
 
 		key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
