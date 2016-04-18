@@ -1262,7 +1262,7 @@ send_again:
 
 		zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, zend_hash_num_elements(ht));
 
-		if (opline->op1_type != IS_CONST && opline->op1_type != IS_TMP_VAR && Z_REFCOUNT_P(args) > 1) {
+		if ((opline->op1_type & (IS_VAR|IS_CV)) && Z_REFCOUNT_P(args) > 1) {
 			uint32_t i;
 			int separate = 0;
 
