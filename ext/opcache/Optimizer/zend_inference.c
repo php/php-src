@@ -2208,7 +2208,7 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 	uint32_t tmp = 0;
 
 	*pce = NULL;
-	if (arg_info->class_name) {
+	if (arg_info->type_hint == IS_OBJECT && arg_info->class_name) {
 		// class type hinting...
 		zend_string *lcname = zend_string_tolower(arg_info->class_name);
 		tmp |= MAY_BE_OBJECT;

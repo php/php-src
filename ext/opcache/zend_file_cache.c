@@ -345,6 +345,35 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 	}
 }
 
+static void zend_file_cache_serialize_arg_info(zend_arg_info *arg, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (arg->name && !IS_SERIALIZED(arg->name)) {
+		SERIALIZE_STR(arg->name);
+	}
+	if (arg->type_hint != IS_CALLABLE && !IS_SERIALIZED(arg->class_name)) {
+		SERIALIZE_STR(arg->class_name);
+	}
+
+	if (arg->type_hint == IS_CALLABLE && arg->children && !IS_SERIALIZED(arg->children)) {
+		zend_arg_callable_info *callable_type = (zend_arg_callable_info *)arg;
+		zend_arg_info_children *children;
+		uint32_t num_args;
+
+		SERIALIZE_PTR(callable_type->children);
+		children = callable_type->children;
+		UNSERIALIZE_PTR(callable_type->children);
+
+		if (callable_type->arg_flags & ZEND_CALLABLE_HAS_RETURN_TYPE) {
+			zend_file_cache_serialize_arg_info(&children->child[children->n_childs], script, info, buf);
+		}
+
+		num_args = children->n_childs;
+		while (num_args > 0) {
+			zend_file_cache_serialize_arg_info(&children->child[num_args - 1], script, info, buf);
+		}
+	}
+}
+
 static void zend_file_cache_serialize_op_array(zend_op_array            *op_array,
                                                zend_persistent_script   *script,
                                                zend_file_cache_metainfo *info,
@@ -433,12 +462,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				end++;
 			}
 			while (p < end) {
-				if (!IS_SERIALIZED(p->name)) {
-					SERIALIZE_STR(p->name);
-				}
-				if (!IS_SERIALIZED(p->class_name)) {
-					SERIALIZE_STR(p->class_name);
-				}
+				zend_file_cache_serialize_arg_info(p, script, info, buf);
 				p++;
 			}
 		}
@@ -922,6 +946,35 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 	}
 }
 
+static void zend_file_cache_unserialize_arg_info(zend_arg_info *arg, zend_persistent_script *script, void *buf)
+{
+	if (arg->name && !IS_UNSERIALIZED(arg->name)) {
+		UNSERIALIZE_STR(arg->name);
+	}
+
+	if (arg->type_hint != IS_CALLABLE && !IS_UNSERIALIZED(arg->class_name)) {
+		UNSERIALIZE_STR(arg->class_name);
+	}
+
+	if (arg->type_hint == IS_CALLABLE && arg->children && !IS_UNSERIALIZED(arg->children)) {
+		zend_arg_callable_info *callable_type = (zend_arg_callable_info *)arg;
+		zend_arg_info_children *children;
+		uint32_t num_args;
+
+		UNSERIALIZE_PTR(callable_type->children);
+		children = callable_type->children;
+
+		if (callable_type->arg_flags & ZEND_CALLABLE_HAS_RETURN_TYPE) {
+			zend_file_cache_unserialize_arg_info(&children->child[children->n_childs], script, buf);
+		}
+
+		num_args = children->n_childs;
+		while (num_args > 0) {
+			zend_file_cache_unserialize_arg_info(&children->child[num_args - 1], script, buf);
+		}
+	}
+}
+
 static void zend_file_cache_unserialize_op_array(zend_op_array           *op_array,
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
@@ -1006,12 +1059,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				end++;
 			}
 			while (p < end) {
-				if (!IS_UNSERIALIZED(p->name)) {
-					UNSERIALIZE_STR(p->name);
-				}
-				if (!IS_UNSERIALIZED(p->class_name)) {
-					UNSERIALIZE_STR(p->class_name);
-				}
+				zend_file_cache_unserialize_arg_info(p, script, buf);
 				p++;
 			}
 		}

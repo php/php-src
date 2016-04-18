@@ -167,6 +167,34 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
+static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info);
+
+static int zend_do_perform_callable_type_hint_check(const zend_function *fe, zend_arg_callable_info *fe_callable, const zend_function *proto, zend_arg_callable_info *proto_callable) /* {{{ */
+{
+	if (fe_callable->arg_flags != proto_callable->arg_flags || fe_callable->pass_by_reference != proto_callable->pass_by_reference
+		|| fe_callable->allow_null != proto_callable->allow_null || fe_callable->is_variadic != proto_callable->is_variadic) {
+
+		return 0;
+	}
+
+	if (fe_callable->children) {
+		uint32_t i, n_args;
+		if (fe_callable->children->n_childs != proto_callable->children->n_childs) {
+			return 0;
+		}
+
+		n_args = fe_callable->children->n_childs + (fe_callable->arg_flags & ZEND_CALLABLE_HAS_RETURN_TYPE ? 1 : 0);
+		for (i = 0; i < n_args; i++) {
+			if (!zend_do_perform_type_hint_check(fe, &fe_callable->children->child[i], proto, &proto_callable->children->child[i])) {
+				return 0;
+			}
+		}
+	}
+
+	return 1;
+}
+/* }}} */
+
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
@@ -174,7 +202,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		return 0;
 	}
 
-	if (fe_arg_info->class_name) {
+	if (fe_arg_info->type_hint == IS_OBJECT && proto_arg_info->type_hint == IS_OBJECT && fe_arg_info->class_name) {
 		zend_string *fe_class_name, *proto_class_name;
 		const char *class_name;
 
@@ -236,6 +264,13 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		}
 		zend_string_release(proto_class_name);
 		zend_string_release(fe_class_name);
+	} else if (fe_arg_info->type_hint == IS_CALLABLE && proto_arg_info->type_hint == IS_CALLABLE) {
+		zend_arg_callable_info *fe_callable = (zend_arg_callable_info *)fe_arg_info;
+		zend_arg_callable_info *proto_callable = (zend_arg_callable_info *)proto_arg_info;
+		
+		if (UNEXPECTED(fe_callable->arg_flags != 0 || proto_callable->arg_flags != 0)) {
+			return zend_do_perform_callable_type_hint_check(fe, fe_callable, proto, proto_callable);
+		}
 	}
 
 	if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
@@ -346,9 +381,38 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 }
 /* }}} */
 
-static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
+static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info);
+static ZEND_COLD void zend_append_param(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int force_name, uint32_t idx);
+
+static ZEND_COLD void zend_append_type_callable(smart_str *str, const zend_function *fptr, zend_arg_callable_info *arg_cb) /* {{{ */
+{	
+	smart_str_appendl(str, "callable", 8);
+
+	if (arg_cb->arg_flags & ZEND_CALLABLE_HAS_ARGS_DECLARED) {
+		smart_str_appendc(str, '(');
+
+		if (!(arg_cb->arg_flags & ZEND_CALLABLE_EXPECTS_ZERO_ARGS)) {
+			uint32_t i, total;
+			for (i = 0, total = arg_cb->children->n_childs; i < total; i++) {
+				zend_append_param(str, fptr, &arg_cb->children->child[i], 0, i);
+				if (i + 1 < total) {
+					smart_str_appends(str, ", ");
+				}
+			}
+		}
+		smart_str_appendc(str, ')');
+	}
+
+	if (arg_cb->arg_flags & ZEND_CALLABLE_HAS_RETURN_TYPE) {
+		smart_str_appendl(str, ": ", 2);
+		zend_append_type_hint(str, fptr, &arg_cb->children->child[arg_cb->children->n_childs]);
+	}
+}
+/* }}} */
+
+static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info) /* {{{ */
 {
-	if (arg_info->class_name) {
+	if (arg_info->type_hint == IS_OBJECT && arg_info->class_name) {
 		const char *class_name;
 		size_t class_name_len;
 
@@ -369,11 +433,10 @@ static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function 
 		}
 
 		smart_str_appendl(str, class_name, class_name_len);
-		if (!return_hint) {
-			smart_str_appendc(str, ' ');
-		}
 	} else if (arg_info->type_hint) {
-		if (arg_info->type_hint == IS_LONG) {
+		if (arg_info->type_hint == IS_CALLABLE) {
+			zend_append_type_callable(str, fptr, (zend_arg_callable_info *)arg_info);
+		} else if (arg_info->type_hint == IS_LONG) {
 			smart_str_appendl(str, "int", 3);
 		} else if (arg_info->type_hint == _IS_BOOL) {
 			smart_str_appendl(str, "bool", 4);
@@ -381,8 +444,37 @@ static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function 
 			const char *type_name = zend_get_type_by_const(arg_info->type_hint);
 			smart_str_appends(str, type_name);
 		}
-		if (!return_hint) {
-			smart_str_appendc(str, ' ');
+	}
+}
+/* }}} */
+
+static ZEND_COLD void zend_append_param(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int force_name, uint32_t idx) /* {{{ */
+{
+	zend_append_type_hint(str, fptr, arg_info);
+
+	if ((force_name || arg_info->name) && arg_info->type_hint) {
+		smart_str_appendc(str, ' ');
+	}
+
+	if (arg_info->pass_by_reference) {
+		smart_str_appendc(str, '&');
+	}
+
+	if (arg_info->is_variadic) {
+		smart_str_appends(str, "...");
+	}
+
+	if (force_name || arg_info->name) {
+		smart_str_appendc(str, '$');
+		if (arg_info->name) {
+			if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+				smart_str_appends(str, ((zend_internal_arg_info*)arg_info)->name);
+			} else {
+				smart_str_append(str, arg_info->name);
+			}
+		} else {
+			smart_str_appends(str, "param");
+			smart_str_append_unsigned(str, idx);
 		}
 	}
 }
@@ -415,28 +507,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 			num_args++;
 		}
 		for (i = 0; i < num_args;) {
-			zend_append_type_hint(&str, fptr, arg_info, 0);
-
-			if (arg_info->pass_by_reference) {
-				smart_str_appendc(&str, '&');
-			}
-
-			if (arg_info->is_variadic) {
-				smart_str_appends(&str, "...");
-			}
-
-			smart_str_appendc(&str, '$');
-
-			if (arg_info->name) {
-				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
-					smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->name);
-				} else {
-					smart_str_appendl(&str, ZSTR_VAL(arg_info->name), ZSTR_LEN(arg_info->name));
-				}
-			} else {
-				smart_str_appends(&str, "param");
-				smart_str_append_unsigned(&str, i);
-			}
+			zend_append_param(&str, fptr, arg_info, 1, i);
 
 			if (i >= required && !arg_info->is_variadic) {
 				smart_str_appends(&str, " = ");
@@ -503,7 +574,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_appends(&str, ": ");
-		zend_append_type_hint(&str, fptr, fptr->common.arg_info - 1, 1);
+		zend_append_type_hint(&str, fptr, fptr->common.arg_info - 1);
 	}
 	smart_str_0(&str);
 

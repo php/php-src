@@ -288,6 +288,11 @@ typedef struct _zend_oparray_context {
 /* op_array uses strict mode types */
 #define ZEND_ACC_STRICT_TYPES			0x80000000
 
+/* zend_arg_callable_info->arg_flags */
+#define ZEND_CALLABLE_HAS_RETURN_TYPE	0x1
+#define ZEND_CALLABLE_HAS_ARGS_DECLARED	0x2
+#define ZEND_CALLABLE_EXPECTS_ZERO_ARGS	0x4
+
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
@@ -318,21 +323,49 @@ typedef struct _zend_class_constant {
 typedef struct _zend_internal_arg_info {
 	const char *name;
 	const char *class_name;
+	struct _zend_internal_arg_info_children *children;
 	zend_uchar type_hint;
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_internal_arg_info;
 
+/* arg_info children for internal functions (can be used for callable args or generic types) */
+typedef struct _zend_internal_arg_info_children {
+	uint32_t n_childs;
+	zend_internal_arg_info child[1];
+} zend_internal_arg_info_children;
+
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_string *class_name;
+	struct _zend_arg_info_children *children;
 	zend_uchar type_hint;
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
+
+/* arg_info for callable type hints in user functions,
+ * just like zend_internal_function_info it redefines some fields
+ * but has the same layout. children->child[children->num_args] element
+ * is a return type if it's set.
+ */
+typedef struct _zend_arg_callable_info {
+	zend_string *name;
+	zend_uintptr_t arg_flags;
+	struct _zend_arg_info_children *children;
+	zend_uchar type_hint;
+	zend_uchar pass_by_reference;
+	zend_bool allow_null;
+	zend_bool is_variadic;
+} zend_arg_callable_info;
+
+typedef struct _zend_arg_info_children {
+	uint32_t n_childs;
+	zend_arg_info child[1];
+} zend_arg_info_children;
 
 /* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
@@ -342,6 +375,7 @@ typedef struct _zend_arg_info {
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
 	const char *class_name;
+	zend_uintptr_t _children; /* unused */
 	zend_uchar type_hint;
 	zend_bool return_reference;
 	zend_bool allow_null;
@@ -917,7 +951,7 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)
 
-/* Quick API to check firat 12 arguments */
+/* Quick API to check first 12 arguments */
 #define MAX_ARG_FLAG_NUM 12
 
 #ifdef WORDS_BIGENDIAN
