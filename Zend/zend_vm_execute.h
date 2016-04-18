@@ -15636,7 +15636,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 		if (UNEXPECTED(!Z_ISREF_P(arg))) {
-
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
 				zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
@@ -15659,21 +15658,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 				zval_ptr_dtor_nogc(free_op1);
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-
-			ZVAL_NEW_REF(arg, arg);
 		}
-		Z_ADDREF_P(arg);
 	} else {
 		if (Z_ISREF_P(arg) &&
 		    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 			/* don't separate references for __call */
 			arg = Z_REFVAL_P(arg);
 		}
-		if (Z_OPT_REFCOUNTED_P(arg)) {
-			Z_ADDREF_P(arg);
-		}
 	}
-	ZVAL_COPY_VALUE(param, arg);
+	ZVAL_COPY(param, arg);
 
 	zval_ptr_dtor_nogc(free_op1);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -35245,7 +35238,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 		if (UNEXPECTED(!Z_ISREF_P(arg))) {
-
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
 				zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
@@ -35267,21 +35259,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-
-			ZVAL_NEW_REF(arg, arg);
 		}
-		Z_ADDREF_P(arg);
 	} else {
 		if (Z_ISREF_P(arg) &&
 		    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 			/* don't separate references for __call */
 			arg = Z_REFVAL_P(arg);
 		}
-		if (Z_OPT_REFCOUNTED_P(arg)) {
-			Z_ADDREF_P(arg);
-		}
 	}
-	ZVAL_COPY_VALUE(param, arg);
+	ZVAL_COPY(param, arg);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
