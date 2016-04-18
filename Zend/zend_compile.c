@@ -3669,7 +3669,8 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
-			zval_ptr_dtor(&(ce->default_properties_table[parent_info->offset]));
+			/* Don't keep default properties in GC (thry may be freed by opcache) */
+			i_zval_ptr_dtor_nogc(ce->default_properties_table[parent_info->offset] ZEND_FILE_LINE_CC TSRMLS_CC);
 			ce->default_properties_table[parent_info->offset] = ce->default_properties_table[child_info->offset];
 			ce->default_properties_table[child_info->offset] = NULL;
 			child_info->offset = parent_info->offset;
