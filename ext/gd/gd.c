@@ -5362,7 +5362,10 @@ PHP_FUNCTION(imageaffinematrixget)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number is expected as option");
 				RETURN_FALSE;
 			}
-			convert_to_double_ex(&options);
+			if(Z_TYPE_P(options) != IS_DOUBLE) {
+				Z_ADDREF_P(options);
+				convert_to_double_ex(&options);
+			}
 			angle = Z_DVAL_P(options);
 
 			if (type == GD_AFFINE_SHEAR_HORIZONTAL) {

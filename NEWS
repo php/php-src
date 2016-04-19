@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
 
+- GD: 
+  . Fixed bug #71952 (Corruption inside imageaffinematrixget). (Stas)
+
 - OCI8:
   . Fixed bug #71422 (Fix ORA-01438: value larger than specified precision
     allowed for this column). (Chris Jones)
