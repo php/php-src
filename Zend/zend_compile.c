@@ -3637,6 +3637,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 {
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
+	TSRMLS_FETCH();
 
 	if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
 		if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
