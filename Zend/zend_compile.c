@@ -5325,7 +5325,6 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 					CG(active_op_array), 
 						zend_resolve_class_name(
 							interface_name, interface_ast->attr));
-			zend_string_release(interface_name);
 		}
 
 		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);

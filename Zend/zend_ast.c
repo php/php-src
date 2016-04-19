@@ -473,6 +473,9 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 			zend_ast_destroy_ex(decl->child[1], free);
 			zend_ast_destroy_ex(decl->child[2], free);
 			zend_ast_destroy_ex(decl->child[3], free);
+			if (decl->child[4]) {
+				zend_ast_destroy_ex(decl->child[4], free);
+			}
 			break;
 		}
 		default:
