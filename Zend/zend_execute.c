@@ -2998,6 +2998,63 @@ ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_da
 	zend_verify_missing_arg(execute_data, arg_num, cache_slot);
 }
 
+static inline zend_property_info* zend_anon_fetch_prop_info(zval *object, zend_string *prop) {
+	zend_property_info *info;
+	zend_class_entry *scope = EG(scope);
+	
+	EG(scope) = Z_OBJCE_P(object);
+	info = zend_get_property_info(Z_OBJCE_P(object), prop, 1);
+	EG(scope) = scope;
+
+	return info;
+}
+
+static inline zval* zend_anon_fetch_prop(zval *object, zend_string *prop, int type, zval *val) {
+	zval name;
+	zend_property_info *info;
+	zend_class_entry *scope = EG(scope);
+	
+	info = zend_anon_fetch_prop_info(object, prop);
+
+	if (!info || info == ZEND_WRONG_PROPERTY_INFO) {
+		zend_declare_property(
+			Z_OBJCE_P(object), ZSTR_VAL(prop), ZSTR_LEN(prop), val, ZEND_ACC_PRIVATE);
+	}
+
+	ZVAL_STR(&name, prop);
+
+	EG(scope) = Z_OBJCE_P(object);
+	val = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, &name, type, NULL);
+	EG(scope) = scope;
+
+	return val;
+}
+
+void zend_anon_bind_var(zval *object, zend_string *prop, zval *var) {
+	zval *var_ptr;
+
+	if (Z_ISREF_P(var)) {
+		var_ptr = zend_anon_fetch_prop(object, prop, BP_VAR_RW, var);
+
+		if (var_ptr) {
+			Z_ADDREF_P(var);
+			ZVAL_REF(var_ptr, Z_REF_P(var));
+			return;
+		}
+	}
+
+	var_ptr = zend_anon_fetch_prop(object, prop, BP_VAR_R, var);
+
+	if (var_ptr != var) {
+		zend_class_entry *scope = EG(scope);
+		zval name;
+		ZVAL_STR(&name, prop);
+
+		EG(scope) = Z_OBJCE_P(object);
+		Z_OBJ_HT_P(object)->write_property(object, &name, var, NULL);
+		EG(scope) = scope;
+	}
+}
 /*
  * Local variables:
  * tab-width: 4

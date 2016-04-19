@@ -8217,6 +8217,68 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(184, ZEND_BIND_ANON_VAR, VAR, CV, REF)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *var;
+	zval *object = EX_VAR(opline->op1.var);
+
+	if (opline->extended_value) {
+		/* By-ref binding */
+		var = GET_OP2_ZVAL_PTR(BP_VAR_W);
+		ZVAL_MAKE_REF(var);
+		Z_ADDREF_P(var);
+	} else {
+		var = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+		if (UNEXPECTED(Z_ISUNDEF_P(var))) {
+			SAVE_OPLINE();
+			var = GET_OP2_UNDEF_CV(var, BP_VAR_R);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+		}
+		ZVAL_DEREF(var);
+		Z_TRY_ADDREF_P(var);
+	}
+
+	zend_anon_bind_var(object, CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var)), var);
+
+	FREE_OP2();
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(185, ZEND_BIND_ANON_PROP, VAR, CONST, SPEC(OP_DATA=VAR)) 
+{
+	USE_OPLINE
+	zend_free_op free_op_data;
+	zval *var;
+	SAVE_OPLINE();
+
+	if (opline->extended_value) {
+		/* By-ref binding */
+		var = GET_OP_DATA_ZVAL_PTR(BP_VAR_W);
+		ZVAL_MAKE_REF(var);
+		Z_ADDREF_P(var);
+	} else {
+		var = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+		if (UNEXPECTED(Z_ISUNDEF_P(var))) {
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+			ZEND_VM_NEXT_OPCODE_EX(1, 2);
+		}
+		ZVAL_DEREF(var);
+		Z_TRY_ADDREF_P(var);
+	}
+
+	zend_anon_bind_var(EX_VAR(opline->op1.var), Z_STR_P(EX_CONSTANT(opline->op2)), var);
+
+	FREE_OP_DATA();
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
 ZEND_VM_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))
 {
 	USE_OPLINE

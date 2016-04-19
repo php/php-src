@@ -3158,10 +3158,9 @@ ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc) /* 
 }
 /* }}} */
 
-void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
+void zend_compile_call_common_ex(znode *result, zend_ast *args_ast, zend_function *fbc, uint32_t opnum_init) /* {{{ */
 {
 	zend_op *opline;
-	uint32_t opnum_init = get_next_op_number(CG(active_op_array)) - 1;
 	uint32_t arg_count;
 	uint32_t call_flags;
 
@@ -3181,6 +3180,11 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	opline->op1.num = call_flags;
 
 	zend_do_extended_fcall_end();
+} /* }}} */
+
+void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
+{
+	zend_compile_call_common_ex(result, args_ast, fbc, get_next_op_number(CG(active_op_array)) - 1);
 }
 /* }}} */
 
@@ -3771,12 +3775,62 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast);
+void zend_compile_anon_use(znode *object, zend_ast *use_ast) { /* {{{ */
+	zend_ast *use_ast_list = use_ast->child[0];
+	zend_ast_list *use_list = zend_ast_get_list(use_ast_list);
+	uint32_t i = 0;
+
+	for (i = 0; i < use_list->children; i++) {
+		zend_ast *use_var = use_list->child[i];
+		zend_op *opline;
+		zend_bool by_ref = use_var->attr;
+
+		switch (use_var->kind) {
+			case ZEND_AST_ZVAL: {
+				zend_string *var_name = 
+					zend_string_copy(
+						zend_ast_get_str(use_var));
+
+				if (zend_string_equals_literal(var_name, "this")) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
+				}
+
+				if (zend_is_auto_global(var_name)) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot use auto-global as lexical variable");
+				}
+
+				opline = zend_emit_op(NULL, ZEND_BIND_ANON_VAR, object, NULL);
+				opline->op2_type = IS_CV;
+				opline->op2.var = lookup_cv(CG(active_op_array), var_name);
+				opline->extended_value = by_ref;
+			} break;
+
+			case ZEND_AST_PROP: {
+				znode prop;
+				zend_string *name = 
+					zend_string_copy(
+						zend_ast_get_str(use_var->child[1]));
+
+				zend_compile_prop(&prop, use_var, BP_VAR_R);
+
+				opline = zend_emit_op(NULL, ZEND_BIND_ANON_PROP, object, NULL);
+				opline->op2_type = IS_CONST;
+				opline->op2.constant = 
+					zend_add_literal_string(CG(active_op_array), &name);
+				opline->extended_value = by_ref;
+				zend_emit_op_data(&prop);
+			} break;
+		}
+	}
+} /* }}} */
+
+zend_ast* zend_compile_class_decl(zend_ast *ast);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *args_ast = ast->child[1];
+	zend_ast *use_ast = NULL;
 
 	znode class_node, ctor_result;
 	zend_op *opline;
@@ -3784,7 +3838,8 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
 		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
-		zend_compile_class_decl(class_ast);
+		use_ast = zend_compile_class_decl(class_ast);
+
 		/* jump over anon class declaration */
 		opline = &CG(active_op_array)->opcodes[dcl_opnum];
 		if (opline->opcode == ZEND_FETCH_CLASS) {
@@ -3808,7 +3863,11 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		SET_NODE(opline->op1, &class_node);
 	}
 
-	zend_compile_call_common(&ctor_result, args_ast, NULL);
+	if (use_ast) {
+		zend_compile_anon_use(result, use_ast);
+	}
+
+	zend_compile_call_common_ex(&ctor_result, args_ast, NULL, opnum);
 	zend_do_free(&ctor_result);
 
 	/* We save the position of DO_FCALL for convenience in find_live_range().
@@ -5654,12 +5713,14 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast) /* {{{ */
+zend_ast* zend_compile_class_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
+	zend_ast *use_ast = decl->child[4];
+
 	zend_string *name, *lcname, *import_name = NULL;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
@@ -5846,6 +5907,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	FC(implementing_class) = original_implementing_class;
 	CG(active_class_entry) = original_ce;
+
+	return use_ast;
 }
 /* }}} */
 

@@ -58,6 +58,7 @@ enum _zend_ast_kind {
 	ZEND_AST_NAME_LIST,
 	ZEND_AST_TRAIT_ADAPTATIONS,
 	ZEND_AST_USE,
+	ZEND_AST_ANON_USE_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -96,6 +97,7 @@ enum _zend_ast_kind {
 	ZEND_AST_GOTO,
 	ZEND_AST_BREAK,
 	ZEND_AST_CONTINUE,
+	ZEND_AST_ANON_USE,
 
 	/* 2 child nodes */
 	ZEND_AST_DIM = 2 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -184,7 +186,7 @@ typedef struct _zend_ast_decl {
 	unsigned char *lex_pos;
 	zend_string *doc_comment;
 	zend_string *name;
-	zend_ast *child[4];
+	zend_ast *child[5];
 } zend_ast_decl;
 
 typedef void (*zend_ast_process_t)(zend_ast *ast);
@@ -197,7 +199,7 @@ ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...);
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
-	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 );
 
 ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
