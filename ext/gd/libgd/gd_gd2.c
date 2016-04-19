@@ -150,6 +150,9 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 			if (gdGetInt(&cidx[i].size, in) != 1) {
 				goto fail1;
 			}
+			if (cidx[i].offset < 0 || cidx[i].size < 0) {
+				goto fail1;
+			}
 		}
 		*chunkIdx = cidx;
 	}
