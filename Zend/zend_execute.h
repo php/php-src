@@ -360,6 +360,8 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 		}                                                \
 	} while (0)
 
+void zend_anon_bind_var(zval *object, zend_string *prop, zval *var);
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
