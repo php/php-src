@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug #71972 (Cyclic references causing session_start(): Failed to
     decode session object). (Laruence)
 
+- SPL:
+  . Fixed bug #72051 (The reference in CallbackFilterIterator doesn't work as
+    expected). (Laruence)
+
 - SQLite3:
   . Fixed bug #68849 (bindValue is not using the right data type). (Anatol)
 
