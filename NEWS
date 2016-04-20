@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.7
 
 - Core:
+  . Fixed bug #72057 (PHP Hangs when using custom error handler and typehint).
+    (Nikita Nefedov)
   . Fixed bug #72038 (Function calls with values to a by-ref parameter don't
     always throw a notice). (Bob)
 
