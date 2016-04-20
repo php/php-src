@@ -3577,8 +3577,8 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 		HANDLE_EXCEPTION();
 	}
 
-	ZEND_VM_INTERRUPT_CHECK();
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL))
@@ -3694,8 +3694,8 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		}
 		HANDLE_EXCEPTION();
 	}
-	ZEND_VM_INTERRUPT_CHECK();
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
@@ -3854,8 +3854,8 @@ ZEND_VM_C_LABEL(fcall_end):
 		HANDLE_EXCEPTION();
 	}
 
-	ZEND_VM_INTERRUPT_CHECK();
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
@@ -5405,8 +5405,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 	} else if (RETURN_VALUE_USED(opline)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 	}
-	ZEND_VM_INTERRUPT_CHECK();
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH|ISSET)
@@ -7078,8 +7078,6 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 	int in_finally = 0;
 
-	ZEND_VM_INTERRUPT_CHECK();
-
 	{
 		const zend_op *exc_opline = EG(opline_before_exception);
 		if ((exc_opline->opcode == ZEND_FREE || exc_opline->opcode == ZEND_FE_FREE)
@@ -7539,10 +7537,10 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, TRY_CATCH, FAST_RET)
 
 	if (fast_call->u2.lineno != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
-		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		if (fast_ret->extended_value & ZEND_FAST_CALL_FROM_FINALLY) {
 			fast_call->u2.lineno = EX(func)->op_array.try_catch_array[fast_ret->op2.num].finally_op - 2;
 		}
+		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		ZEND_VM_CONTINUE();
 	} else {
 		/* special case for unhandled exceptions */

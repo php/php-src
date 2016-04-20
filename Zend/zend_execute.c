@@ -2101,9 +2101,15 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 /* }}} */
 
 #ifdef ZEND_WIN32
+static zend_never_inline ZEND_COLD ZEND_NORETURN void ZEND_FASTCALL zend_interrupt(void) /* {{{ */
+{
+	zend_timeout(0);
+}
+/* }}} */
+
 # define ZEND_VM_INTERRUPT_CHECK() do { \
-		if (EG(timed_out)) { \
-			zend_timeout(0); \
+		if (UNEXPECTED(EG(timed_out))) { \
+			zend_interrupt(); \
 		} \
 	} while (0)
 #else
@@ -2198,7 +2204,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
-	ZEND_VM_INTERRUPT_CHECK();
 }
 /* }}} */
 
@@ -2235,7 +2240,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
-	ZEND_VM_INTERRUPT_CHECK();
 }
 /* }}} */
 
@@ -2326,7 +2330,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
-	ZEND_VM_INTERRUPT_CHECK();
 }
 /* }}} */
 
