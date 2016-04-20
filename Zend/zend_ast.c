@@ -409,6 +409,10 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			}
 			break;
 		case ZEND_AST_DIM:
+			if (ast->child[1] == NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
+			}
+
 			if (ast->attr == ZEND_DIM_IS && ast->child[0]->kind == ZEND_AST_DIM) {
 				ast->child[0]->attr = ZEND_DIM_IS;
 			}

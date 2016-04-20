@@ -25,8 +25,10 @@ var_dump((new class { public $var = null ?? A['undefined']['index'] ?? 2; })->va
 var_dump((new class { public $var = null ?? A[1][0][2] ?? 3; })->var);
 var_dump((new class { public $var = A[1][0][2] ?? 4; })->var);
 
+const D = [][] ?? 1;
+
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
 int(2)
 int(3)
@@ -39,3 +41,5 @@ int(1)
 int(2)
 int(3)
 int(4)
+
+Fatal error: Cannot use [] for reading in %s.php on line 25
