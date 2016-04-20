@@ -3776,8 +3776,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 /* }}} */
 
 void zend_compile_anon_declare(zend_class_entry *ce, zend_ast *use_ast) { /* {{{ */
-	zend_ast *use_ast_list = use_ast->child[0];
-	zend_ast_list *use_list = zend_ast_get_list(use_ast_list);
+	zend_ast_list *use_list = zend_ast_get_list(use_ast);
 	uint32_t i = 0;
 	HashTable used;
 	zval nil;
@@ -3833,8 +3832,7 @@ void zend_compile_anon_declare(zend_class_entry *ce, zend_ast *use_ast) { /* {{{
 } /* }}} */
 
 void zend_compile_anon_use(znode *object, zend_ast *use_ast) { /* {{{ */
-	zend_ast *use_ast_list = use_ast->child[0];
-	zend_ast_list *use_list = zend_ast_get_list(use_ast_list);
+	zend_ast_list *use_list = zend_ast_get_list(use_ast);
 	uint32_t i = 0;
 	HashTable used;
 

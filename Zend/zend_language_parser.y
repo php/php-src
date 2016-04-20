@@ -848,12 +848,12 @@ anonymous_class_use_var:
 
 anonymous_class_use_list:
 		anonymous_class_use_list ',' anonymous_class_use_var	{ $$ = zend_ast_list_add($1, $3); }
-	|	anonymous_class_use_var	{ $$ = zend_ast_create_list(1, ZEND_AST_ANON_USE_LIST, $1); }
+	|	anonymous_class_use_var	{ $$ = zend_ast_create_list(1, ZEND_AST_ANON_USE, $1); }
 ;
 
 anonymous_class_use:
 		/* empty */								{ $$ = NULL; }
-	|	T_USE '(' anonymous_class_use_list ')'	{ $$ = zend_ast_create(ZEND_AST_ANON_USE, $3); }
+	|	T_USE '(' anonymous_class_use_list ')'	{ $$ = $3; }
 ;
 
 anonymous_class:
