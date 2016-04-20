@@ -5363,10 +5363,14 @@ PHP_FUNCTION(imageaffinematrixget)
 				RETURN_FALSE;
 			}
 			if(Z_TYPE_P(options) != IS_DOUBLE) {
-				Z_ADDREF_P(options);
-				convert_to_double_ex(&options);
+				zval dval;
+				dval = *options;
+				zval_copy_ctor(&dval);
+				convert_to_double(&dval);
+				angle = Z_DVAL(dval);
+			} else {
+				angle = Z_DVAL_P(options);
 			}
-			angle = Z_DVAL_P(options);
 
 			if (type == GD_AFFINE_SHEAR_HORIZONTAL) {
 				res = gdAffineShearHorizontal(affine, angle);
