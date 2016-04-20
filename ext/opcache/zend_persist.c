@@ -640,6 +640,21 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
+	if (op_array->attributes) {
+		if (already_stored) {
+			op_array->attributes = zend_shared_alloc_get_xlat_entry(op_array->attributes);
+			ZEND_ASSERT(op_array->attributes != NULL);
+		} else {
+			zend_hash_persist(op_array->attributes, zend_persist_zval_static);
+			zend_accel_store(op_array->attributes, sizeof(HashTable));
+			/* make immutable array */
+			GC_REFCOUNT(op_array->attributes) = 2;
+			GC_TYPE_INFO(op_array->attributes) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
+			op_array->attributes->u.flags |= HASH_FLAG_STATIC_KEYS;
+			op_array->attributes->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
+		}
+	}
+
 	if (op_array->try_catch_array) {
 		zend_accel_store(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
@@ -713,6 +728,15 @@ static void zend_persist_property_info(zval *zv)
 			prop->doc_comment = NULL;
 		}
 	}
+	if (prop->attributes) {
+		zend_hash_persist(prop->attributes, zend_persist_zval_static);
+		zend_accel_store(prop->attributes, sizeof(HashTable));
+		/* make immutable array */
+		GC_REFCOUNT(prop->attributes) = 2;
+		GC_TYPE_INFO(prop->attributes) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
+		prop->attributes->u.flags |= HASH_FLAG_STATIC_KEYS;
+		prop->attributes->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
+	}
 }
 
 static void zend_persist_class_constant(zval *zv)
@@ -745,6 +769,15 @@ static void zend_persist_class_constant(zval *zv)
 			}
 			c->doc_comment = NULL;
 		}
+	}
+	if (c->attributes) {
+		zend_hash_persist(c->attributes, zend_persist_zval_static);
+		zend_accel_store(c->attributes, sizeof(HashTable));
+		/* make immutable array */
+		GC_REFCOUNT(c->attributes) = 2;
+		GC_TYPE_INFO(c->attributes) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
+		c->attributes->u.flags |= HASH_FLAG_STATIC_KEYS;
+		c->attributes->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 	}
 }
 
@@ -793,6 +826,15 @@ static void zend_persist_class_entry(zval *zv)
 				}
 				ce->info.user.doc_comment = NULL;
 			}
+		}
+		if (ce->info.user.attributes) {
+			zend_hash_persist(ce->info.user.attributes, zend_persist_zval_static);
+			zend_accel_store(ce->info.user.attributes, sizeof(HashTable));
+			/* make immutable array */
+			GC_REFCOUNT(ce->info.user.attributes) = 2;
+			GC_TYPE_INFO(ce->info.user.attributes) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
+			ce->info.user.attributes->u.flags |= HASH_FLAG_STATIC_KEYS;
+			ce->info.user.attributes->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
 		if (ce->num_interfaces && ce->interfaces) {

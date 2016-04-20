@@ -178,6 +178,7 @@ void startup_scanner(void)
 {
 	CG(parse_error) = 0;
 	CG(doc_comment) = NULL;
+	CG(attributes) = NULL;
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 }

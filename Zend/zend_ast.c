@@ -69,7 +69,7 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 }
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
+	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment, HashTable *attributes,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
 ) {
 	zend_ast_decl *ast;
@@ -82,6 +82,7 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	ast->flags = flags;
 	ast->lex_pos = LANG_SCNG(yy_text);
 	ast->doc_comment = doc_comment;
+	ast->attributes = attributes;
 	ast->name = name;
 	ast->child[0] = child0;
 	ast->child[1] = child1;
@@ -467,6 +468,9 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 			}
 			if (decl->doc_comment) {
 				zend_string_release(decl->doc_comment);
+			}
+			if (decl->attributes) {
+				zend_array_ptr_dtor(decl->attributes);
 			}
 			zend_ast_destroy_ex(decl->child[0], free);
 			zend_ast_destroy_ex(decl->child[1], free);

@@ -140,12 +140,12 @@ enum _zend_ast_kind {
 	ZEND_AST_TRY,
 	ZEND_AST_CATCH,
 	ZEND_AST_PARAM,
-	ZEND_AST_PROP_ELEM,
-	ZEND_AST_CONST_ELEM,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
+	ZEND_AST_PROP_ELEM,
+	ZEND_AST_CONST_ELEM,
 };
 
 typedef uint16_t zend_ast_kind;
@@ -183,6 +183,7 @@ typedef struct _zend_ast_decl {
 	uint32_t flags;
 	unsigned char *lex_pos;
 	zend_string *doc_comment;
+	HashTable *attributes;
 	zend_string *name;
 	zend_ast *child[4];
 } zend_ast_decl;
@@ -196,7 +197,7 @@ ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ..
 ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...);
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
+	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment, HashTable *attributes,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
 );
 
@@ -231,6 +232,12 @@ static zend_always_inline zend_string *zend_ast_get_str(zend_ast *ast) {
 	return Z_STR_P(zv);
 }
 
+static zend_always_inline HashTable *zend_ast_get_hash(zend_ast *ast) {
+	zval *zv = zend_ast_get_zval(ast);
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
+	return Z_ARR_P(zv);
+}
+
 static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 	ZEND_ASSERT(!zend_ast_is_list(ast));
 	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
@@ -255,6 +262,12 @@ static zend_always_inline zend_ast *zend_ast_create_zval_from_str(zend_string *s
 static zend_always_inline zend_ast *zend_ast_create_zval_from_long(zend_long lval) {
 	zval zv;
 	ZVAL_LONG(&zv, lval);
+	return zend_ast_create_zval(&zv);
+}
+
+static zend_always_inline zend_ast *zend_ast_create_zval_from_hash(HashTable *hash) {
+	zval zv;
+	ZVAL_ARR(&zv, hash);
 	return zend_ast_create_zval(&zv);
 }
 

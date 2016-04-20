@@ -244,6 +244,11 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		ADD_STRING(op_array->doc_comment);
 	}
 
+	if (op_array->attributes) {
+		ADD_DUP_SIZE(op_array->attributes, sizeof(HashTable));
+		zend_hash_persist_calc(op_array->attributes, zend_persist_zval_calc);
+	}
+
 	if (op_array->try_catch_array) {
 		ADD_DUP_SIZE(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
@@ -291,6 +296,10 @@ static void zend_persist_property_info_calc(zval *zv)
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 			ADD_STRING(prop->doc_comment);
 		}
+		if (prop->attributes) {
+			ADD_DUP_SIZE(prop->attributes, sizeof(HashTable));
+			zend_hash_persist_calc(prop->attributes, zend_persist_zval_calc);
+		}
 	}
 }
 
@@ -304,6 +313,10 @@ static void zend_persist_class_constant_calc(zval *zv)
 		zend_persist_zval_calc(&c->value);
 		if (ZCG(accel_directives).save_comments && c->doc_comment) {
 			ADD_STRING(c->doc_comment);
+		}
+		if (c->attributes) {
+			ADD_DUP_SIZE(c->attributes, sizeof(HashTable));
+			zend_hash_persist_calc(c->attributes, zend_persist_zval_calc);
 		}
 	}
 }
@@ -340,6 +353,10 @@ static void zend_persist_class_entry_calc(zval *zv)
 		}
 		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
 			ADD_STRING(ce->info.user.doc_comment);
+		}
+		if (ce->info.user.attributes) {
+			ADD_DUP_SIZE(ce->info.user.attributes, sizeof(HashTable));
+			zend_hash_persist_calc(ce->info.user.attributes, zend_persist_zval_calc);
 		}
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
