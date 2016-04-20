@@ -38,6 +38,9 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
@@ -169,9 +172,7 @@ void init_executor(void) /* {{{ */
 	zend_objects_store_init(&EG(objects_store), 1024);
 
 	EG(full_tables_cleanup) = 0;
-#ifdef ZEND_WIN32
 	EG(timed_out) = 0;
-#endif
 
 	EG(exception) = NULL;
 	EG(prev_exception) = NULL;
@@ -1183,8 +1184,47 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 }
 /* }}} */
 
+static void zend_set_timeout_ex(zend_long seconds, int reset_signals);
+
 ZEND_API void zend_timeout(int dummy) /* {{{ */
 {
+	EG(timed_out) = 0;
+	zend_set_timeout_ex(0, 1);
+	zend_error_noreturn(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+}
+/* }}} */
+
+#ifndef ZEND_WIN32
+static void zend_timeout_handler(int dummy) /* {{{ */
+{
+#ifndef ZTS
+    if (EG(timed_out)) {
+		/* Die on hard timeout */
+		const char *error_filename = NULL;
+		uint error_lineno = 0;
+		char *log_buffer = NULL;
+
+		if (zend_is_compiling()) {
+			error_filename = ZSTR_VAL(zend_get_compiled_filename());
+			error_lineno = zend_get_compiled_lineno();
+		} else if (zend_is_executing()) {
+			error_filename = zend_get_executed_filename();
+			if (error_filename[0] == '[') { /* [no active file] */
+				error_filename = NULL;
+				error_lineno = 0;
+			} else {
+				error_lineno = zend_get_executed_lineno();
+			}
+		}
+		if (!error_filename) {
+			error_filename = "Unknown";
+		}
+
+		zend_spprintf(&log_buffer, 0, "\nFatal error: Maximum execution time of %pd+%pd seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
+		write(2, log_buffer, strlen(log_buffer));
+		_exit(1);
+    }
+#endif
 
 	if (zend_on_timeout) {
 #ifdef ZEND_SIGNALS
@@ -1199,9 +1239,17 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 		zend_on_timeout(EG(timeout_seconds));
 	}
 
-	zend_error_noreturn(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	EG(timed_out) = 1;
+
+#ifndef ZTS
+	if (EG(hard_timeout) > 0) {
+		/* Set hard timeout */
+		zend_set_timeout_ex(EG(hard_timeout), 1);
+	}
+#endif
 }
 /* }}} */
+#endif
 
 #ifdef ZEND_WIN32
 VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
@@ -1224,10 +1272,8 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 #define SIGPROF 27
 #endif
 
-void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
+static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 {
-
-	EG(timeout_seconds) = seconds;
 
 #ifdef ZEND_WIN32
 	if(!seconds) {
@@ -1239,7 +1285,6 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 		delete and recreate. */
 	if (NULL != tq_timer) {
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
-			EG(timed_out) = 0;
 			tq_timer = NULL;
 			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
 			return;
@@ -1249,12 +1294,10 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 
 	/* XXX passing NULL means the default timer queue provided by the system is used */
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)&EG(timed_out), seconds*1000, 0, WT_EXECUTEONLYONCE)) {
-		EG(timed_out) = 0;
 		tq_timer = NULL;
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
 	}
-	EG(timed_out) = 0;
 #else
 #	ifdef HAVE_SETITIMER
 	{
@@ -1277,19 +1320,36 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 
 		if (reset_signals) {
 #	ifdef ZEND_SIGNALS
-			zend_signal(signo, zend_timeout);
+			zend_signal(signo, zend_timeout_handler);
 #	else
 			sigset_t sigset;
+#   ifdef HAVE_SIGACTION
+			struct sigaction act;
 
-			signal(signo, zend_timeout);
+			act.sa_handler = zend_timeout_handler;
+			sigemptyset(&act.sa_mask);
+			act.sa_flags = SA_RESETHAND | SA_NODEFER;
+			sigaction(signo, &act, NULL);
+#   else
+			signal(signo, zend_timeout_handler);
+#   endif /* HAVE_SIGACTION */
 			sigemptyset(&sigset);
 			sigaddset(&sigset, signo);
 			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-#	endif
+#	endif /* ZEND_SIGNALS */
 		}
 	}
 #	endif /* HAVE_SETITIMER */
 #endif
+}
+/* }}} */
+
+void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
+{
+
+	EG(timeout_seconds) = seconds;
+	zend_set_timeout_ex(seconds, reset_signals);
+	EG(timed_out) = 0;
 }
 /* }}} */
 
@@ -1320,6 +1380,7 @@ void zend_unset_timeout(void) /* {{{ */
 #endif
 	}
 #	endif
+	EG(timed_out) = 0;
 #endif
 }
 /* }}} */

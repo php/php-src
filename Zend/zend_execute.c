@@ -2100,22 +2100,17 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
 static zend_never_inline ZEND_COLD ZEND_NORETURN void ZEND_FASTCALL zend_interrupt(void) /* {{{ */
 {
 	zend_timeout(0);
 }
 /* }}} */
 
-# define ZEND_VM_INTERRUPT_CHECK() do { \
+#define ZEND_VM_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(EG(timed_out))) { \
 			zend_interrupt(); \
 		} \
 	} while (0)
-#else
-# define ZEND_VM_INTERRUPT_CHECK() do { \
-	} while (0)
-#endif
 
 /*
  * Stack Frame Layout (the whole stack frame is allocated at once)
