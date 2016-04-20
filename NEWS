@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Nikita Nefedov)
   . Fixed bug #72038 (Function calls with values to a by-ref parameter don't
     always throw a notice). (Bob)
+  . Fixed bug #71737 (Memory leak in closure with parameter named $this).
+    (Nikita)
 
 - OCI8:
   . Fixed bug #71600 (oci_fetch_all segfaults when selecting more than eight
