@@ -1914,7 +1914,7 @@ ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *
 
 ZEND_API void zend_fetch_dimension_by_zval_is(zval *result, zval *container, zval *dim, int dim_type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS);
 }
 
 
