@@ -782,8 +782,8 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	/* Compute Variable Liveness */
 	dfg.vars = op_array->last_var + op_array->T;
 	dfg.size = set_size = zend_bitset_len(dfg.vars);
-	dfg.tmp = do_alloca((set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1), dfg_use_heap);
-	memset(dfg.tmp, 0, (set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1));
+	dfg.tmp = do_alloca((set_size * sizeof(zend_ulong)) * (blocks_count * 4 + 1), dfg_use_heap);
+	memset(dfg.tmp, 0, (set_size * sizeof(zend_ulong)) * (blocks_count * 4 + 1));
 	dfg.def = dfg.tmp + set_size;
 	dfg.use = dfg.def + set_size * blocks_count;
 	dfg.in  = dfg.use + set_size * blocks_count;
