@@ -147,7 +147,6 @@ struct _php_core_globals {
 	char *disable_functions;
 	char *disable_classes;
 	zend_bool allow_url_include;
-	zend_bool exit_on_timeout;
 #ifdef PHP_WIN32
 	zend_bool com_initialized;
 #endif
