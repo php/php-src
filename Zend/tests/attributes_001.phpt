@@ -68,9 +68,9 @@ array(3) {
   }
 }
 array(4) {
-  [0]=>
+  ["a1"]=>
   bool(true)
-  [1]=>
+  ["a2"]=>
   object(ast\Node)#4 (4) {
     ["kind"]=>
     int(520)
@@ -86,7 +86,7 @@ array(4) {
       string(1) "a"
     }
   }
-  [2]=>
+  ["a3"]=>
   array(2) {
     [0]=>
     object(ast\Node)#5 (4) {
@@ -121,7 +121,7 @@ array(4) {
       }
     }
   }
-  [3]=>
+  ["a4"]=>
   object(ast\Node)#7 (4) {
     ["kind"]=>
     int(130)

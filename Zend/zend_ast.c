@@ -1728,6 +1728,7 @@ ZEND_API void zend_ast_convert_attributes(zval *ret, HashTable *attributes)
 {
 	zval *val, tmp;
 	HashTable *ht, *ht2, *res_ht;
+	zend_string *key;
 	int convert_ast = 0;
 
 	ZEND_HASH_FOREACH_VAL(attributes, val) {
@@ -1751,14 +1752,14 @@ ZEND_API void zend_ast_convert_attributes(zval *ret, HashTable *attributes)
 	if (convert_ast) {
 		array_init_size(ret, zend_hash_num_elements(attributes));
 		res_ht = Z_ARR_P(ret);
-		ZEND_HASH_FOREACH_VAL(attributes, val) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(attributes, key, val) {
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 				zend_ast_convert_to_object(&tmp, Z_ASTVAL_P(val));
-				zend_hash_next_index_insert_new(res_ht, &tmp);
+				zend_hash_add_new(res_ht, key, &tmp);
 			} else if (Z_TYPE_P(val) == IS_ARRAY) {
 				ht = Z_ARR_P(val);
 				array_init_size(&tmp, zend_hash_num_elements(ht));
-				val = zend_hash_next_index_insert_new(res_ht, &tmp);
+				val = zend_hash_add_new(res_ht, key, &tmp);
 				ht2 = Z_ARR_P(val);
 				ZEND_HASH_FOREACH_VAL(ht, val) {
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
@@ -1775,7 +1776,7 @@ ZEND_API void zend_ast_convert_attributes(zval *ret, HashTable *attributes)
 				if (Z_REFCOUNTED_P(val)) {
 					Z_ADDREF_P(val);
 				}
-				zend_hash_next_index_insert_new(res_ht, val);
+				zend_hash_add_new(res_ht, key, val);
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else if (GC_FLAGS(attributes) & IS_ARRAY_IMMUTABLE) {
