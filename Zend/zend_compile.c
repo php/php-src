@@ -7388,6 +7388,10 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_ct_eval_unary_pm(&result, ast->kind, zend_ast_get_zval(ast->child[0]));
 			break;
 		case ZEND_AST_COALESCE:
+			/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
+			if (ast->child[0]->kind == ZEND_AST_DIM) {
+				ast->child[0]->attr = ZEND_DIM_IS;
+			}
 			zend_eval_const_expr(&ast->child[0]);
 
 			if (ast->child[0]->kind != ZEND_AST_ZVAL) {
@@ -7438,6 +7442,11 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 
 			if (ast->child[1] == NULL) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
+			}
+
+			/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
+			if (ast->attr == ZEND_DIM_IS && ast->child[0]->kind == ZEND_AST_DIM) {
+				ast->child[0]->attr = ZEND_DIM_IS;
 			}
 
 			zend_eval_const_expr(&ast->child[0]);
