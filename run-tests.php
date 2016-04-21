@@ -2792,7 +2792,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	} elseif ('WARN' == $type) {
 		junit_suite_record($suite, 'test_warn');
 		$JUNIT['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
-	} elseif('FAIL' == $type) {
+	} elseif ('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
 		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
 	} else {
