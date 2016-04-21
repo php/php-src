@@ -68,17 +68,101 @@ array(3) {
   }
 }
 array(4) {
-  ["a1"]=>
+  [0]=>
   bool(true)
-  ["a2"]=>
-  AST(1 + 'a')
-  ["a3"]=>
+  [1]=>
+  object(ast\Node)#4 (4) {
+    ["kind"]=>
+    int(520)
+    ["flags"]=>
+    int(1)
+    ["lineno"]=>
+    int(0)
+    ["children"]=>
+    array(2) {
+      [0]=>
+      int(1)
+      [1]=>
+      string(1) "a"
+    }
+  }
+  [2]=>
   array(2) {
     [0]=>
-    AST(1 + 'b')
+    object(ast\Node)#5 (4) {
+      ["kind"]=>
+      int(520)
+      ["flags"]=>
+      int(1)
+      ["lineno"]=>
+      int(0)
+      ["children"]=>
+      array(2) {
+        [0]=>
+        int(1)
+        [1]=>
+        string(1) "b"
+      }
+    }
     [1]=>
-    AST(2 + 'c')
+    object(ast\Node)#6 (4) {
+      ["kind"]=>
+      int(520)
+      ["flags"]=>
+      int(1)
+      ["lineno"]=>
+      int(0)
+      ["children"]=>
+      array(2) {
+        [0]=>
+        int(2)
+        [1]=>
+        string(1) "c"
+      }
+    }
   }
-  ["a4"]=>
-  AST(['a' => 1, 'b' => 2])
+  [3]=>
+  object(ast\Node)#7 (4) {
+    ["kind"]=>
+    int(130)
+    ["flags"]=>
+    int(0)
+    ["lineno"]=>
+    int(0)
+    ["children"]=>
+    array(2) {
+      [0]=>
+      object(ast\Node)#8 (4) {
+        ["kind"]=>
+        int(525)
+        ["flags"]=>
+        int(0)
+        ["lineno"]=>
+        int(0)
+        ["children"]=>
+        array(2) {
+          [0]=>
+          int(1)
+          [1]=>
+          string(1) "a"
+        }
+      }
+      [1]=>
+      object(ast\Node)#9 (4) {
+        ["kind"]=>
+        int(525)
+        ["flags"]=>
+        int(0)
+        ["lineno"]=>
+        int(0)
+        ["children"]=>
+        array(2) {
+          [0]=>
+          int(2)
+          [1]=>
+          string(1) "b"
+        }
+      }
+    }
+  }
 }

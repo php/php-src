@@ -1720,3 +1720,154 @@ ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const c
 	smart_str_0(&str);
 	return str.s;
 }
+
+ZEND_API zend_class_entry *zend_ast_node_ce = NULL;
+ZEND_API zend_class_entry *zend_ast_decl_ce = NULL;
+
+ZEND_API void zend_ast_convert_attributes(zval *ret, HashTable *attributes)
+{
+	zval *val, tmp;
+	HashTable *ht, *ht2, *res_ht;
+	int convert_ast = 0;
+
+	ZEND_HASH_FOREACH_VAL(attributes, val) {
+		if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+			convert_ast = 1;
+			break;
+		} else if (Z_TYPE_P(val) == IS_ARRAY) {
+			ht = Z_ARR_P(val);
+			ZEND_HASH_FOREACH_VAL(ht, val) {
+				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+					convert_ast = 1;
+					break;
+				}
+			} ZEND_HASH_FOREACH_END();
+			if (convert_ast) {
+				break;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (convert_ast) {
+		array_init_size(ret, zend_hash_num_elements(attributes));
+		res_ht = Z_ARR_P(ret);
+		ZEND_HASH_FOREACH_VAL(attributes, val) {
+			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				zend_ast_convert_to_object(&tmp, Z_ASTVAL_P(val));
+				zend_hash_next_index_insert_new(res_ht, &tmp);
+			} else if (Z_TYPE_P(val) == IS_ARRAY) {
+				ht = Z_ARR_P(val);
+				array_init_size(&tmp, zend_hash_num_elements(ht));
+				val = zend_hash_next_index_insert_new(res_ht, &tmp);
+				ht2 = Z_ARR_P(val);
+				ZEND_HASH_FOREACH_VAL(ht, val) {
+					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+						zend_ast_convert_to_object(&tmp, Z_ASTVAL_P(val));
+						zend_hash_next_index_insert_new(ht2, &tmp);
+					} else {
+						if (Z_REFCOUNTED_P(val)) {
+							Z_ADDREF_P(val);
+						}
+						zend_hash_next_index_insert_new(ht2, val);
+					}
+				} ZEND_HASH_FOREACH_END();
+			} else {
+				if (Z_REFCOUNTED_P(val)) {
+					Z_ADDREF_P(val);
+				}
+				zend_hash_next_index_insert_new(res_ht, val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else if (GC_FLAGS(attributes) & IS_ARRAY_IMMUTABLE) {
+		ZVAL_IMMUTABLE_ARR(ret, attributes);
+	} else {
+		GC_REFCOUNT(attributes)++;
+		ZVAL_ARR(ret, attributes);
+	}
+}
+
+ZEND_API void zend_ast_convert_to_object(zval *ret, zend_ast *ast)
+{
+	uint32_t i, children;
+	zend_object *obj;
+	HashTable *ht;
+	zval tmp;
+
+	if (ast->kind == ZEND_AST_ZVAL) {
+		ZVAL_COPY(ret, zend_ast_get_zval(ast));
+	} else if ((ast->kind >> ZEND_AST_SPECIAL_SHIFT) & 1) {
+		zend_ast_decl *decl = (zend_ast_decl *)ast;
+
+		ZEND_ASSERT(ast->kind != ZEND_AST_ZNODE);
+
+		object_init_ex(ret, zend_ast_decl_ce);
+		obj = Z_OBJ_P(ret);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 0), decl->kind);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 1), decl->attr);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 2), decl->start_lineno);
+		children = 4;
+		array_init_size(OBJ_PROP_NUM(obj, 3), children);
+		ht = Z_ARR_P(OBJ_PROP_NUM(obj, 3));
+		for (i = 0; i < children; i++) {
+			zend_ast_convert_to_object(&tmp, decl->child[i]);
+			zend_hash_index_add_new(ht, i, &tmp);
+		}
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 4), decl->end_lineno);
+		if (decl->name) {
+			ZVAL_STR_COPY(OBJ_PROP_NUM(obj, 5), decl->name);
+		}
+		if (decl->doc_comment) {
+			ZVAL_STR_COPY(OBJ_PROP_NUM(obj, 6), decl->doc_comment);
+		}
+		if (decl->attributes) {
+			zend_ast_convert_attributes(OBJ_PROP_NUM(obj, 7), decl->attributes);
+		}
+	} else if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+
+		object_init_ex(ret, zend_ast_node_ce);
+		obj = Z_OBJ_P(ret);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 0), list->kind);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 1), list->attr);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 2), list->lineno);
+		children = list->children;
+		array_init_size(OBJ_PROP_NUM(obj, 3), children);
+		ht = Z_ARR_P(OBJ_PROP_NUM(obj, 3));
+		for (i = 0; i < children; i++) {
+			zend_ast_convert_to_object(&tmp, list->child[i]);
+			zend_hash_index_add_new(ht, i, &tmp);
+		}
+	} else {
+		object_init_ex(ret, zend_ast_node_ce);
+		obj = Z_OBJ_P(ret);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 0), ast->kind);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 1), ast->attr);
+		ZVAL_LONG(OBJ_PROP_NUM(obj, 2), ast->lineno);
+		children = zend_ast_get_num_children(ast);
+		array_init_size(OBJ_PROP_NUM(obj, 3), children);
+		ht = Z_ARR_P(OBJ_PROP_NUM(obj, 3));
+		for (i = 0; i < children; i++) {
+			zend_ast_convert_to_object(&tmp, ast->child[i]);
+			zend_hash_index_add_new(ht, i, &tmp);
+		}
+	}
+}
+
+void zend_register_ast_classes(void)
+{
+	zend_class_entry tmp_ce;
+
+	INIT_CLASS_ENTRY(tmp_ce, "ast\\Node", NULL);
+	zend_ast_node_ce = zend_register_internal_class(&tmp_ce);
+	zend_declare_property_null(zend_ast_node_ce, "kind", sizeof("kind")-1, ZEND_ACC_PUBLIC);
+	zend_declare_property_null(zend_ast_node_ce, "flags", sizeof("flags")-1, ZEND_ACC_PUBLIC);
+	zend_declare_property_null(zend_ast_node_ce, "lineno", sizeof("lineno")-1, ZEND_ACC_PUBLIC);
+	zend_declare_property_null(zend_ast_node_ce, "children", sizeof("children")-1, ZEND_ACC_PUBLIC);
+
+	INIT_CLASS_ENTRY(tmp_ce, "ast\\Node\\Decl", NULL);
+	zend_ast_decl_ce = zend_register_internal_class_ex(&tmp_ce, zend_ast_node_ce);
+	zend_declare_property_null(zend_ast_decl_ce, "endLineno", sizeof("endLineno")-1, ZEND_ACC_PUBLIC);
+	zend_declare_property_null(zend_ast_decl_ce, "name", sizeof("name")-1, ZEND_ACC_PUBLIC);
+	zend_declare_property_null(zend_ast_decl_ce, "docComment", sizeof("docComment")-1, ZEND_ACC_PUBLIC);
+	zend_declare_property_null(zend_ast_decl_ce, "attributes", sizeof("attributes")-1, ZEND_ACC_PUBLIC);
+}

@@ -1922,14 +1922,10 @@ ZEND_METHOD(reflection_function, getAttributes)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.attributes) {
-		if (GC_FLAGS(fptr->op_array.attributes) & IS_ARRAY_IMMUTABLE) {
-			RETURN_IMMUTABLE_ARR(fptr->op_array.attributes);
-		} else {
-			GC_REFCOUNT(fptr->op_array.attributes)++;
-			RETURN_ARR(fptr->op_array.attributes);
-		}
+		zend_ast_convert_attributes(return_value, fptr->op_array.attributes);
+	} else {
+		RETVAL_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -3909,14 +3905,10 @@ ZEND_METHOD(reflection_class_constant, getAttributes)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->attributes) {
-		if (GC_FLAGS(ref->attributes) & IS_ARRAY_IMMUTABLE) {
-			RETURN_IMMUTABLE_ARR(ref->attributes);
-		} else {
-			GC_REFCOUNT(ref->attributes)++;
-			RETURN_ARR(ref->attributes);
-		}
+		zend_ast_convert_attributes(return_value, ref->attributes);
+	} else {
+		RETVAL_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -4291,14 +4283,10 @@ ZEND_METHOD(reflection_class, getAttributes)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS && ce->info.user.attributes) {
-		if (GC_FLAGS(ce->info.user.attributes) & IS_ARRAY_IMMUTABLE) {
-			RETURN_IMMUTABLE_ARR(ce->info.user.attributes);
-		} else {
-			GC_REFCOUNT(ce->info.user.attributes)++;
-			RETURN_ARR(ce->info.user.attributes);
-		}
+		zend_ast_convert_attributes(return_value, ce->info.user.attributes);
+	} else {
+		RETVAL_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -5866,14 +5854,10 @@ ZEND_METHOD(reflection_property, getAttributes)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop.attributes) {
-		if (GC_FLAGS(ref->prop.attributes) & IS_ARRAY_IMMUTABLE) {
-			RETURN_IMMUTABLE_ARR(ref->prop.attributes);
-		} else {
-			GC_REFCOUNT(ref->prop.attributes)++;
-			RETURN_ARR(ref->prop.attributes);
-		}
+		zend_ast_convert_attributes(return_value, ref->prop.attributes);
+	} else {
+		RETVAL_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 

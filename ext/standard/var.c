@@ -75,14 +75,6 @@ static void php_object_property_dump(zval *zv, zend_ulong index, zend_string *ke
 }
 /* }}} */
 
-static void php_var_dump_ast(zend_ast *ast) /* {{{ */
-{
-	zend_string *str = zend_ast_export("", ast, "");
-	php_printf("%s", ZSTR_VAL(str));
-	zend_string_release(str);
-}
-/* }}} */
-
 PHPAPI void php_var_dump(zval *struc, int level) /* {{{ */
 {
 	HashTable *myht;
@@ -190,11 +182,6 @@ again:
 			struc = Z_REFVAL_P(struc);
 			goto again;
 			break;
-		case IS_CONSTANT_AST:
-			php_printf("%sAST(", COMMON);
-			php_var_dump_ast(Z_ASTVAL_P(struc));
-			PUTS(")\n");
-			break;			
 		default:
 			php_printf("%sUNKNOWN:0\n", COMMON);
 			break;
@@ -359,11 +346,6 @@ again:
 		}
 		struc = Z_REFVAL_P(struc);
 		goto again;
-	case IS_CONSTANT_AST:
-		php_printf("%sAST(", COMMON);
-		php_var_dump_ast(Z_ASTVAL_P(struc));
-		PUTS(")\n");
-		break;			
 	default:
 		php_printf("%sUNKNOWN:0\n", COMMON);
 		break;

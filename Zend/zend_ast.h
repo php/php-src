@@ -281,4 +281,12 @@ static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast
 	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
 }
 
+extern ZEND_API zend_class_entry *zend_ast_node_ce;
+extern ZEND_API zend_class_entry *zend_ast_decl_ce;
+
+void zend_register_ast_classes(void);
+
+ZEND_API void zend_ast_convert_attributes(zval *ret, HashTable *attributes);
+ZEND_API void zend_ast_convert_to_object(zval *ret, zend_ast *ast);
+
 #endif
