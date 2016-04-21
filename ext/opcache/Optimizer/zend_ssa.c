@@ -765,7 +765,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	zend_ssa_block *ssa_blocks;
 	int blocks_count = ssa->cfg.blocks_count;
 	uint32_t set_size;
-	zend_bitset tmp, gen, in;
+	zend_bitset tmp, def, in;
 	int *var = NULL;
 	int i, j, k, changed;
 	zend_dfg dfg;
@@ -784,8 +784,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	dfg.size = set_size = zend_bitset_len(dfg.vars);
 	dfg.tmp = do_alloca((set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1), dfg_use_heap);
 	memset(dfg.tmp, 0, (set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1));
-	dfg.gen = dfg.tmp + set_size;
-	dfg.def = dfg.gen + set_size * blocks_count;
+	dfg.def = dfg.tmp + set_size;
 	dfg.use = dfg.def + set_size * blocks_count;
 	dfg.in  = dfg.use + set_size * blocks_count;
 	dfg.out = dfg.in  + set_size * blocks_count;
@@ -800,10 +799,10 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	}
 
 	tmp = dfg.tmp;
-	gen = dfg.gen;
+	def = dfg.def;
 	in  = dfg.in;
 
-	/* SSA construction, Step 1: Propagate "gen" sets in merge points */
+	/* SSA construction, Step 1: Propagate "def" sets in merge points */
 	do {
 		changed = 0;
 		for (j = 0; j < blocks_count; j++) {
@@ -811,16 +810,16 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				continue;
 			}
 			if (j >= 0 && (blocks[j].predecessors_count > 1 || j == 0)) {
-				zend_bitset_copy(tmp, gen + (j * set_size), set_size);
+				zend_bitset_copy(tmp, def + (j * set_size), set_size);
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
 					while (i != -1 && i != blocks[j].idom) {
-						zend_bitset_union_with_intersection(tmp, tmp, gen + (i * set_size), in + (j * set_size), set_size);
+						zend_bitset_union_with_intersection(tmp, tmp, def + (i * set_size), in + (j * set_size), set_size);
 						i = blocks[i].idom;
 					}
 				}
-				if (!zend_bitset_equal(gen + (j * set_size), tmp, set_size)) {
-					zend_bitset_copy(gen + (j * set_size), tmp, set_size);
+				if (!zend_bitset_equal(def + (j * set_size), tmp, set_size)) {
+					zend_bitset_copy(def + (j * set_size), tmp, set_size);
 					changed = 1;
 				}
 			}
@@ -850,7 +849,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
 					while (i != -1 && i != blocks[j].idom) {
-						zend_bitset_union_with_intersection(tmp, tmp, gen + (i * set_size), in + (j * set_size), set_size);
+						zend_bitset_union_with_intersection(tmp, tmp, def + (i * set_size), in + (j * set_size), set_size);
 						i = blocks[i].idom;
 					}
 				}
@@ -907,7 +906,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 							if (p) {
 								if (p->pi >= 0) {
 									if (zend_bitset_in(in + (j * set_size), p->var) &&
-									    !zend_bitset_in(gen + (i * set_size), p->var)) {
+									    !zend_bitset_in(def + (i * set_size), p->var)) {
 										zend_bitset_incl(tmp, p->var);
 									}
 								} else {
