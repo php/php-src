@@ -896,6 +896,8 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
 
+#define ZEND_DIM_IS 1
+
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
 	arg_num--;
