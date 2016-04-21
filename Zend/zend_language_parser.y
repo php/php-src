@@ -233,7 +233,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument expr_without_variable global_var
+%type <ast> extends_from parameter optional_type multi_type 
+%type <ast> argument expr_without_variable global_var multi_type_combine 
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
@@ -636,10 +637,22 @@ parameter:
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, $6); }
 ;
 
+multi_type_combine:
+		T_LOGICAL_OR		{ $$ = zend_ast_create(ZEND_AST_UNION); }
+	|	T_LOGICAL_AND		{ $$ = zend_ast_create(ZEND_AST_INTERSECTION); }
+;
+
+multi_type:
+		multi_type multi_type_combine type 	
+			{ $$ = zend_ast_list_add($1, $2);
+			  $$ = zend_ast_list_add($1, $3); }
+	|	type
+			{ $$ = zend_ast_create_list(1, ZEND_AST_TYPE_LIST, $1); }
+;
 
 optional_type:
 		/* empty */	{ $$ = NULL; }
-	|	type		{ $$ = $1; }
+	|	multi_type	{ $$ = $1; }
 ;
 
 type:
@@ -649,8 +662,8 @@ type:
 ;
 
 return_type:
-		/* empty */	{ $$ = NULL; }
-	|	':' type	{ $$ = $2; }
+		/* empty */		{ $$ = NULL; }
+	|	':' multi_type	{ $$ = $2; }
 ;
 
 argument_list:

@@ -24,6 +24,7 @@
 #include "zend_inheritance.h"
 #include "zend_smart_str.h"
 #include "zend_inheritance.h"
+#include "zend_type_info.h"
 
 static void overriden_ptr_dtor(zval *zv) /* {{{ */
 {
@@ -167,6 +168,76 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
+zend_string* zend_get_multi_type_declaration(zend_multi_type *m) { /* {{{ */
+	smart_str sm;
+	uint32_t types = m->types;
+
+	memset(&sm, 0, sizeof(smart_str));	
+
+	smart_str_alloc(&sm, 42, 0);
+
+#define APPEND_MULTI_TYPE_SEP() do { \
+	if (types) { \
+		smart_str_appends(&sm, m->type == ZEND_MULTI_UNION ? " or " : " and "); \
+	} \
+} while (0)
+#define APPEND_MULTI_TYPE_EX(t, c) do { \
+	smart_str_appends(&sm, zend_get_type_by_const(c)); \
+	types &= ~MAY_BE_##t; \
+} while(0)
+#define APPEND_MULTI_TYPE(t) APPEND_MULTI_TYPE_EX(t, IS_##t) 
+
+	if (types & MAY_BE_OBJECT) {
+		uint32_t it;
+
+		for (it = 0; it < m->last; it++) {
+			if (it > 0) {
+				 smart_str_appends(&sm, " ");
+			}
+
+			smart_str_append(&sm, m->names[it]);
+			if (it + 1 < m->last) {
+				smart_str_appends(&sm, 
+					m->type == ZEND_MULTI_UNION ? " or" : " and");
+			}
+		}
+
+		types &= ~MAY_BE_OBJECT;
+
+		APPEND_MULTI_TYPE_SEP();
+	}
+
+	if (types & MAY_BE_ARRAY) {
+		APPEND_MULTI_TYPE(ARRAY);
+	}
+
+	APPEND_MULTI_TYPE_SEP();
+
+	if (types & MAY_BE_CALLABLE) {
+		APPEND_MULTI_TYPE(CALLABLE);
+	}
+
+	APPEND_MULTI_TYPE_SEP();
+
+	if (types & MAY_BE_RESOURCE) {
+		APPEND_MULTI_TYPE(RESOURCE);
+	}
+
+	APPEND_MULTI_TYPE_SEP();
+
+	if (types & MAY_BE_VOID) {
+		APPEND_MULTI_TYPE(VOID);
+	}
+
+#undef APPEND_MULTI_TYPE
+#undef APPEND_MULTI_TYPE_EX
+#undef APPEND_MULTI_TYPE_SEP
+
+	smart_str_0(&sm);
+
+	return sm.s;
+} /* }}} */
+
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
@@ -241,6 +312,27 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 	if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
 		/* Incompatible type */
 		return 0;
+	}
+
+	if (ZEND_LOG_XOR(fe_arg_info->multi.types, proto_arg_info->multi.types)) {
+		/* one has multiple types and the other doesn't */
+		return 0;
+	}
+
+	if (fe_arg_info->multi.types) {
+		uint32_t n = 0;
+
+		/* different number of classes */
+		if (fe_arg_info->multi.last != proto_arg_info->multi.last) {
+			return 0;
+		}
+
+		for (n = 0; n < fe_arg_info->multi.last; n++) {
+			/* TODO parent/self/etc */
+			if (!zend_string_equals_ci(fe_arg_info->multi.names[n], proto_arg_info->multi.names[n])) {
+				return 0;
+			}
+		}
 	}
 
 	return 1;
@@ -384,6 +476,14 @@ static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function 
 		if (!return_hint) {
 			smart_str_appendc(str, ' ');
 		}
+	} else if (arg_info->multi.types) {
+		zend_string *decl = 
+			zend_get_multi_type_declaration(&arg_info->multi);
+		smart_str_append(str, decl);
+		if (!return_hint) {
+			smart_str_appends(str, " ");
+		}
+		zend_string_release(decl);
 	}
 }
 /* }}} */

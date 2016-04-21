@@ -723,6 +723,80 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 	return zend_verify_weak_scalar_type_hint(type_hint, arg);
 }
 
+static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null, zval *arg, void **_cache_slot) {
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		if (allow_null || m->types & MAY_BE_VOID) {
+			return 1;
+		}
+		return 0;
+	}
+
+	if (UNEXPECTED(m->types & MAY_BE_ARRAY)) {
+		if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
+			if (UNEXPECTED(m->type == ZEND_MULTI_UNION)) {
+				return 1;
+			}
+		} else if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+			return 0;
+		}
+	}
+
+	if (UNEXPECTED(m->types & MAY_BE_CALLABLE)) {
+		if (EXPECTED(zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL))) {
+			if (UNEXPECTED(m->type == ZEND_MULTI_UNION)) {
+				return 1;
+			}
+		} else if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+			return 0;
+		}
+	}
+
+	if (UNEXPECTED(m->types & MAY_BE_RESOURCE)) {
+		if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+			if (UNEXPECTED(m->type == ZEND_MULTI_UNION)) {
+				return 1;
+			}
+		} else if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+			return 0;
+		}
+	}
+
+	if (EXPECTED(m->types & MAY_BE_OBJECT)) {
+		uint32_t it;
+		void ***cache_slot = (void***) _cache_slot;
+		zend_class_entry *ce;
+
+		if (UNEXPECTED(Z_TYPE_P(arg) != IS_OBJECT)) {
+			return 0;
+		}
+
+		for (it = 0; it < m->last; it++) {
+			if (cache_slot && cache_slot[it]) {
+				ce = (zend_class_entry*) cache_slot[it];
+			} else {
+				ce = zend_lookup_class(m->names[it]);
+				if (cache_slot) {
+					cache_slot[it] = (void**) ce;
+				}
+			}
+
+			if (EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce))) {
+				if (EXPECTED(m->type == ZEND_MULTI_UNION)) {
+					return 1;
+				}
+			} else if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+				return 0;
+			}
+		}
+
+		if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+			return 1;
+		}
+	}
+
+	return 0;
+} 
+
 static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
 {
 	zend_internal_arg_info *cur_arg_info;
@@ -800,9 +874,22 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 		return 1;
 	}
 
-	if (cur_arg_info->type_hint) {
+	if (cur_arg_info->type_hint || cur_arg_info->multi.types) {
 		ZVAL_DEREF(arg);
-		if (EXPECTED(cur_arg_info->type_hint == Z_TYPE_P(arg))) {
+
+		if (UNEXPECTED(cur_arg_info->multi.types)) {
+			if (UNEXPECTED(!zend_verify_multi_type(&cur_arg_info->multi, cur_arg_info->allow_null, arg, cache_slot))) {
+				zend_string *decl = zend_get_multi_type_declaration(&cur_arg_info->multi);
+				zend_verify_arg_error(zf, arg_num, "be ", ZSTR_VAL(decl), 
+						Z_TYPE_P(arg) == IS_OBJECT ?
+							"instance of " : "", 
+						Z_TYPE_P(arg) == IS_OBJECT ? 
+							ZSTR_VAL(Z_OBJCE_P(arg)->name) :
+							zend_get_type_by_const(Z_TYPE_P(arg)), arg);
+				zend_string_release(decl);
+				return 0;
+			}
+		} else if (EXPECTED(cur_arg_info->type_hint == Z_TYPE_P(arg))) {
 			if (cur_arg_info->class_name) {
 				if (EXPECTED(*cache_slot)) {
 					ce = (zend_class_entry*)*cache_slot;
@@ -1019,8 +1106,19 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	char *need_msg;
 	zend_class_entry *ce;
 
-	if (ret_info->type_hint) {
-		if (EXPECTED(ret_info->type_hint == Z_TYPE_P(ret))) {
+	if (ret_info->type_hint || ret_info->multi.types) {
+		if (UNEXPECTED(ret_info->multi.types)) {
+			if (UNEXPECTED(!zend_verify_multi_type(&ret_info->multi, ret_info->allow_null, ret, cache_slot))) {
+				zend_string *decl = zend_get_multi_type_declaration(&ret_info->multi);
+				zend_verify_return_error(zf, "be ", ZSTR_VAL(decl), 
+						Z_TYPE_P(ret) == IS_OBJECT ?
+							"instance of " : "", 
+						Z_TYPE_P(ret) == IS_OBJECT ? 
+							ZSTR_VAL(Z_OBJCE_P(ret)->name) :
+							zend_get_type_by_const(Z_TYPE_P(ret)));
+				zend_string_release(decl);
+			}
+		} else if (EXPECTED(ret_info->type_hint == Z_TYPE_P(ret))) {
 			if (ret_info->class_name) {
 				if (EXPECTED(*cache_slot)) {
 					ce = (zend_class_entry*)*cache_slot;

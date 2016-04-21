@@ -438,6 +438,16 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].class_name) {
 				zend_string_release(arg_info[i].class_name);
 			}
+
+			if (arg_info[i].multi.types) {
+				if (arg_info[i].multi.names) {
+					uint32_t it = 0;
+					for (it = 0; it < arg_info[i].multi.last; it++) {
+						zend_string_release(arg_info[i].multi.names[it]);
+					}
+					efree(arg_info[i].multi.names);
+				}
+			}
 		}
 		efree(arg_info);
 	}
