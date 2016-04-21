@@ -666,7 +666,7 @@ zend_function *spl_filesystem_object_get_method_check(zval **object_ptr, char *m
 {
 	spl_filesystem_object *fsobj = zend_object_store_get_object(*object_ptr TSRMLS_CC);
 
-	if (fsobj->u.dir.entry.d_name[0] == '\0' && fsobj->orig_path == NULL) {
+	if (fsobj->u.dir.dirp == NULL && fsobj->orig_path == NULL) {
 		method = "_bad_state_ex";
 		method_len = sizeof("_bad_state_ex") - 1;
 		key = NULL;

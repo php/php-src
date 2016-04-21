@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug #72336 (openssl_pkey_new does not fail for invalid DSA params).
     (Jakub Zelenka)
 
+- SPL:
+  . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
+
 - SQLite3:
   . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
     (cmb)
