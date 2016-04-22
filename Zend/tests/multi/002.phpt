@@ -2,7 +2,7 @@
 union test return array or Traversable
 --FILE--
 <?php
-$cb = function($i) : array or Traversable {
+$cb = function($i) : array | Traversable {
 	return $i == 0 ? [] : new ArrayObject;
 };
 

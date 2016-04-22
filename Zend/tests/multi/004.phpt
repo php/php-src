@@ -2,7 +2,7 @@
 union of simple types
 --FILE--
 <?php
-$cb = function(callable or array $arg) {
+$cb = function(callable | array $arg) {
 	return $arg;
 };
 

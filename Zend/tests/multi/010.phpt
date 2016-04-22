@@ -3,7 +3,7 @@ basic union test inheritance with class
 --FILE--
 <?php
 class Foo {
-	public function method() : IFoo and IBar {}
+	public function method() : IFoo & IBar {}
 }
 
 class Bar extends Foo {

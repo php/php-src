@@ -2,7 +2,7 @@
 intersection disallow generator
 --FILE--
 <?php
-function () : Generator and stdClass {
+function () : Generator & stdClass {
 	yield $thing;
 };
 ?>

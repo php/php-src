@@ -2,7 +2,7 @@
 union default values (pass)
 --FILE--
 <?php
-function (IFoo or IBar $thing = null) {};
+function (IFoo | IBar $thing = null) {};
 
 echo "ok";
 ?>

@@ -20,7 +20,7 @@ class Bar implements IFoo, IBar {
 }
 
 /* not sure if string should be check first? */
-$cb = function(IFoo and IBar $arg) {
+$cb = function(IFoo & IBar $arg) {
 	return $arg;
 };
 

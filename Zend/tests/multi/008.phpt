@@ -3,7 +3,7 @@ basic union test inheritance
 --FILE--
 <?php
 class Foo {
-	public function method(array or Traversable $arg) {}
+	public function method(array | Traversable $arg) {}
 }
 
 class Bar extends Foo {

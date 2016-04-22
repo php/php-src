@@ -4,7 +4,7 @@ basic union exception test
 <?php
 class Foo {}
 
-$foo = function($throw) : Foo or void {
+$foo = function($throw) : Foo | void {
 	if($throw) {
 		throw new Exception();
 	}

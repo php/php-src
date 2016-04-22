@@ -2,7 +2,7 @@
 basic reflection
 --FILE--
 <?php
-$function = function(IFoo or IBar $thing) : IFoo and IBar {
+$function = function(IFoo | IBar $thing) : IFoo & IBar {
 
 };
 

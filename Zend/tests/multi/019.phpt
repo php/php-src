@@ -2,7 +2,7 @@
 union disallow generator
 --FILE--
 <?php
-function () : Generator or stdClass {
+function () : Generator | stdClass {
 	yield $thing;
 };
 ?>

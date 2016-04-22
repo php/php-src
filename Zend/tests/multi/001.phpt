@@ -2,7 +2,7 @@
 union test param array or Traversable
 --FILE--
 <?php
-$cb = function(array or Traversable $thing) {
+$cb = function(array | Traversable $thing) {
 	return $thing;
 };
 
