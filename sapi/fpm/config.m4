@@ -588,12 +588,12 @@ if test "$PHP_FPM" != "no"; then
 
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
     if test -z "$PKG_CONFIG"; then
-      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+      AC_PATH_TOOL(PKG_CONFIG, pkg-config)
     fi
     unset SYSTEMD_LIBS
     unset SYSTEMD_INCS
 
-    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd; then
+    if test -n "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd; then
       dnl systemd version >= 209 provides libsystemd
       AC_MSG_CHECKING([for libsystemd])
       SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd`
@@ -601,7 +601,7 @@ if test "$PHP_FPM" != "no"; then
       SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd`
       AC_MSG_RESULT([version $SYSTEMD_VERS])
 
-    elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd-daemon; then
+    elif test -n "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd-daemon; then
       dnl systemd version < 209 provides libsystemd-daemon
       AC_MSG_CHECKING([for libsystemd-daemon])
       SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd-daemon`

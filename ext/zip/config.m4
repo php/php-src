@@ -53,7 +53,7 @@ if test "$PHP_ZIP" != "no"; then
 
   if test "$PHP_LIBZIP" != "no"; then
 
-    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    AC_PATH_TOOL(PKG_CONFIG, pkg-config)
 
     dnl system libzip, depends on libzip
     AC_MSG_CHECKING(for libzip)
@@ -62,7 +62,7 @@ if test "$PHP_ZIP" != "no"; then
       LIBZIP_LIBDIR="$PHP_LIBZIP/$PHP_LIBDIR"
       AC_MSG_RESULT(from option: found in $PHP_LIBZIP)
 
-    elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libzip; then
+    elif test -n "$PKG_CONFIG" && $PKG_CONFIG --exists libzip; then
       if $PKG_CONFIG libzip --atleast-version 0.11; then
         LIBZIP_CFLAGS=`$PKG_CONFIG libzip --cflags`
         LIBZIP_LIBDIR=`$PKG_CONFIG libzip --variable=libdir`

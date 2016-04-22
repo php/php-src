@@ -2318,11 +2318,11 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
 
   dnl First try to find pkg-config
   if test -z "$PKG_CONFIG"; then
-    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    AC_PATH_TOOL(PKG_CONFIG, pkg-config)
   fi
 
   dnl If pkg-config is found try using it
-  if test "$PHP_OPENSSL_DIR" = "yes" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists openssl; then
+  if test "$PHP_OPENSSL_DIR" = "yes" && test -n "$PKG_CONFIG" && $PKG_CONFIG --exists openssl; then
     if $PKG_CONFIG --atleast-version=1.0.1 openssl; then
       found_openssl=yes
       OPENSSL_LIBS=`$PKG_CONFIG --libs openssl`
