@@ -2983,7 +2983,7 @@ ZEND_METHOD(reflection_type, allowsNull)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->allow_null || param->arg_info->multi.types & MAY_BE_VOID);
+	RETVAL_BOOL(param->arg_info->allow_null);
 }
 /* }}} */
 

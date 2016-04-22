@@ -724,8 +724,9 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 }
 
 static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null, zval *arg, void **_cache_slot) {
+	/* null/void cannot be found in multi type, this is implicit nullability from parameter */
 	if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
-		if (allow_null || m->types & MAY_BE_VOID) {
+		if (allow_null) {
 			return 1;
 		}
 		return 0;

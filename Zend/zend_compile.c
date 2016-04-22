@@ -2270,7 +2270,7 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
 {
 	/* `return ...;` is illegal in a void function (but `return;` isn't) */
-	if (return_info->type_hint == IS_VOID && !(return_info->multi.types & MAY_BE_VOID)) {
+	if (return_info->type_hint == IS_VOID) {
 		if (expr) {
 			zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
 		}
@@ -4877,19 +4877,15 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 				switch (type) {
 					case IS_LONG:
 					case IS_DOUBLE:
-					case IS_NULL:
 					case IS_STRING:
+					/* nullable types needs to deal with null/void */
+					case IS_NULL:
+					case IS_VOID:
 						zend_error_noreturn(E_COMPILE_ERROR, 
 							"Scalar type %s is not allowed in %s",
 							zend_get_type_by_const(type),
 							ZEND_MULTI_NAME(arg_info->multi.type));
 					break;
-
-					case IS_VOID:
-						if (arg_info->multi.type == ZEND_MULTI_INTERSECTION) {
-							zend_error_noreturn(E_COMPILE_ERROR,
-								"void is not allowed in intersections");
-						}
 
 					default:
 						if (arg_info->multi.types & (1<<type)) {
@@ -5071,7 +5067,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 
 			zend_compile_typename(type_ast, arg_info);
 
-			if (arg_info->type_hint == IS_VOID || arg_info->multi.types & MAY_BE_VOID) {
+			if (arg_info->type_hint == IS_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
 
