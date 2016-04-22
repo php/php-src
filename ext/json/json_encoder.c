@@ -446,7 +446,7 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 static void php_json_encode_serializable_object(smart_str *buf, zval *val, int options) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
-	zval retval, fname;
+	zval retval, fname, args[1];
 	HashTable* myht;
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
@@ -461,17 +461,20 @@ static void php_json_encode_serializable_object(smart_str *buf, zval *val, int o
 		return;
 	}
 
+	ZVAL_LONG(&args[0], JSON_G(encoder_depth));
 	ZVAL_STRING(&fname, "jsonSerialize");
 
-	if (FAILURE == call_user_function_ex(EG(function_table), val, &fname, &retval, 0, NULL, 1, NULL) || Z_TYPE(retval) == IS_UNDEF) {
+	if (FAILURE == call_user_function_ex(EG(function_table), val, &fname, &retval, 1, args, 1, NULL) || Z_TYPE(retval) == IS_UNDEF) {
 		zend_throw_exception_ex(NULL, 0, "Failed calling %s::jsonSerialize()", ZSTR_VAL(ce->name));
 		smart_str_appendl(buf, "null", sizeof("null") - 1);
+		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&fname);
 		return;
 	}
 
 	if (EG(exception)) {
 		/* Error already raised */
+		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&retval);
 		zval_ptr_dtor(&fname);
 		smart_str_appendl(buf, "null", sizeof("null") - 1);
@@ -487,6 +490,7 @@ static void php_json_encode_serializable_object(smart_str *buf, zval *val, int o
 		php_json_encode(buf, &retval, options);
 	}
 
+	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&fname);
 }
