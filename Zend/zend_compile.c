@@ -4887,7 +4887,7 @@ void zend_compile_callable_arg_info(zend_ast *ast, zend_arg_callable_info *cb_ar
 		return;
 	}
 
-	nb_args = args_list ? args_list->children : 0;
+	nb_args = args_list->children;
 
 	cb_arg_info->children = (zend_arg_info_children *)safe_emalloc(
 		sizeof(zend_arg_info),
