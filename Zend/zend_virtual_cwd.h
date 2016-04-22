@@ -63,6 +63,7 @@ typedef unsigned short mode_t;
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define IS_SLASH_P(c)	(*(c) == '/' || \
         (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
+#define IS_SLASH_AT(p,n,i)	(IS_SLASH(p[i]) && cwd_is_slash_at(p,n,i))
 
 /* COPY_WHEN_ABSOLUTE is 2 under Win32 because by chance both regular absolute paths
    in the file system and UNC paths need copying of two characters */
@@ -81,6 +82,7 @@ typedef unsigned short mode_t;
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define IS_SLASH_P(c)	IS_SLASH(*(c))
+#define IS_SLASH_AT(p,n,i)	IS_SLASH(p[i])
 /* Colon indicates volume name, either first character should be forward slash or backward slash */
 #define IS_ABSOLUTE_PATH(path, len) \
     ((strchr(path, ':') != NULL) || ((len >= 1) && ((path[0] == '/') || (path[0] == '\\'))))
@@ -100,6 +102,7 @@ typedef unsigned short mode_t;
 
 #define IS_SLASH(c)	((c) == '/')
 #define IS_SLASH_P(c)	(*(c) == '/')
+#define IS_SLASH_AT(p,n,i)	IS_SLASH(p[i])
 
 #endif
 
@@ -130,6 +133,7 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef ZEND_WIN32
+CWD_API BOOL cwd_is_slash_at(const char *psz, size_t length, size_t index);
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
 # define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
 # define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
