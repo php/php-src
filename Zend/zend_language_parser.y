@@ -644,6 +644,7 @@ optional_type:
 
 type:
 		T_ARRAY			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
+	|	T_CALLABLE		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE_CALLABLE, IS_CALLABLE, NULL, NULL); }
 	|	T_CALLABLE callable_arg_type_list return_type
 						{ $$ = zend_ast_create_ex(ZEND_AST_TYPE_CALLABLE, IS_CALLABLE, $2, $3); }
 	|	name			{ $$ = $1; }
@@ -655,8 +656,7 @@ return_type:
 ;
 
 callable_arg_type_list:
-		/* empty */	{ $$ = NULL; }
-	|	'(' ')'		{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
+		'(' ')'		{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
 	|	'(' non_empty_callable_arg_type_list ')' { $$ = $2; }
 ;
 

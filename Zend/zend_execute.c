@@ -1028,7 +1028,6 @@ static void zend_generate_func_callable_str(zend_function *zf, smart_str *str)
 	if (zf->common.num_args || (zf->common.fn_flags & ZEND_ACC_VARIADIC)) {
 		uint32_t i;
 		uint32_t num_args = zf->common.num_args + ((zf->common.fn_flags & ZEND_ACC_VARIADIC) > 0);
-		uint32_t required_num_args = zf->common.required_num_args + ((zf->common.fn_flags & ZEND_ACC_VARIADIC) > 0);
 		zend_arg_info *cur_arg = zf->common.arg_info;
 
 		for (i = 0; i < num_args; i++) {
@@ -1108,7 +1107,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 				zend_fcall_info_cache callable_fcc;
 
 				if (!zend_is_callable_ex(arg, NULL, IS_CALLABLE_CHECK_SILENT, NULL, &callable_fcc, NULL)
-					&& (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || default_value && is_null_constant(default_value)))) {
+					&& (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value))))) {
 
 					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 					return 0;
