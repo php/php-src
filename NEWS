@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #72059 (?? is not allowed on constant expressions). (Bob, Marcio)
 
+- JSON:
+  . Fixed bug #72069 (Behavior \JsonSerializable different from json_encode).
+    (Laruence)
+
 - OCI8:
   . Fixed bug #71600 (oci_fetch_all segfaults when selecting more than eight
     columns). (Tian Yang)
