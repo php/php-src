@@ -2,6 +2,12 @@
 FPM: Test status page
 --SKIPIF--
 <?php include "skipif.inc"; ?>
+--XFAIL--
+randomly intermittently failing all the time in CI, with diff:
+017+ active processes:     0
+018+ total processes:      1
+017- active processes:     1
+018- total processes:      2
 --FILE--
 <?php
 

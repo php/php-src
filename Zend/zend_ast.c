@@ -337,6 +337,22 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				zval_dtor(&op1);
 			}
 			break;
+		case ZEND_AST_COALESCE:
+			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
+				ret = FAILURE;
+				break;
+			}
+			if (Z_TYPE(op1) > IS_NULL) {
+				*result = op1;
+			} else {
+				if (UNEXPECTED(zend_ast_evaluate(result, ast->child[1], scope) != SUCCESS)) {
+					zval_dtor(&op1);
+					ret = FAILURE;
+					break;
+				}
+				zval_dtor(&op1);
+			}
+			break;
 		case ZEND_AST_UNARY_PLUS:
 			if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
@@ -385,6 +401,10 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			}
 			break;
 		case ZEND_AST_DIM:
+			if (ast->child[1] == NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
+			}
+
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
 			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
@@ -393,7 +413,12 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			} else {
 				zval tmp;
 
-				zend_fetch_dimension_by_zval(&tmp, &op1, &op2);
+				if (ast->attr == ZEND_DIM_IS) {
+					zend_fetch_dimension_by_zval_is(&tmp, &op1, &op2, IS_CONST);
+				} else {
+					zend_fetch_dimension_by_zval(&tmp, &op1, &op2);
+				}
+
 				if (UNEXPECTED(Z_ISREF(tmp))) {
 					ZVAL_DUP(result, Z_REFVAL(tmp));
 				} else {

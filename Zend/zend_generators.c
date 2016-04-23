@@ -220,10 +220,10 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 
 		/* Yield from root references */
 		if (generator->node.children == 0) {
-			zend_generator *root = generator->node.ptr.root;
-			while (root != generator) {
+			zend_generator *child = generator, *root = generator->node.ptr.root;
+			while (root != child) {
+				child = child->node.parent;
 				size++;
-				root = zend_generator_get_child(&root->node, generator);
 			}
 		}
 	}
@@ -287,8 +287,8 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 	if (generator->node.children == 0) {
 		zend_generator *child = generator, *root = generator->node.ptr.root;
 		while (root != child) {
-			ZVAL_OBJ(gc_buffer++, &child->std);
 			child = child->node.parent;
+			ZVAL_OBJ(gc_buffer++, &child->std);
 		}
 	}
 
