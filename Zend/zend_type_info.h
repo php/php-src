@@ -38,6 +38,7 @@
 
 /* fakes */
 #define MAY_BE_CALLABLE				(1 << IS_CALLABLE)
+#define MAY_BE_BOOL				(1 << _IS_BOOL)
 
 #define MAY_BE_ARRAY_SHIFT          (IS_REFERENCE)
 

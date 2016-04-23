@@ -357,6 +357,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent);
 
 ZEND_API char *zend_get_type_by_const(int type);
+ZEND_API char *zend_get_type_by_const_boolean(int type);
 
 #define getThis()							((Z_TYPE(EX(This)) == IS_OBJECT) ? &EX(This) : NULL)
 #define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)

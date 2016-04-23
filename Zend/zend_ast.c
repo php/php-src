@@ -778,8 +778,10 @@ static void zend_ast_export_type_list(smart_str *str, zend_ast_list *list, int i
 				zend_ast_get_str(type_ast) : NULL;
 		
 		if (!name) {
-			smart_str_appends(str, zend_get_type_by_const(type_ast->attr));
-		} else smart_str_append(str, name);
+			smart_str_appends(str, zend_get_type_by_const_boolean(type_ast->attr));
+		} else {
+			smart_str_append(str, name);
+		}
 
 		if (combine_ast) {
 			smart_str_appends(str, 

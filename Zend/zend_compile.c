@@ -204,6 +204,8 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("float"), IS_DOUBLE},
 	{ZEND_STRL("string"), IS_STRING},
 	{ZEND_STRL("bool"), _IS_BOOL},
+	{ZEND_STRL("true"), IS_TRUE},
+	{ZEND_STRL("false"), IS_FALSE},
 	{ZEND_STRL("void"), IS_VOID},
 	{NULL, 0, IS_UNDEF}
 };
@@ -4853,7 +4855,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 			zend_uchar type = name ? 
 				zend_lookup_builtin_type_by_name(name) : type_ast->attr;
 
-			if (arg_info->multi.type && combine && combine->kind != arg_info->multi.type) {
+			if (arg_info->multi.type && combine && (combine->kind == ZEND_AST_UNION) != (arg_info->multi.type == ZEND_MULTI_UNION)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use %s when creating %s type",
 					combine->kind == ZEND_AST_UNION ? "union" : "intersection",
@@ -4875,9 +4877,6 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 
 			if (type != 0) {
 				switch (type) {
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_STRING:
 					/* nullable types needs to deal with null/void */
 					case IS_NULL:
 					case IS_VOID:
@@ -4887,11 +4886,19 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 							ZEND_MULTI_NAME(arg_info->multi.type));
 					break;
 
+					case IS_FALSE:
+					case IS_TRUE:
+					case _IS_BOOL:
+						if (arg_info->multi.types & ((MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_BOOL) & ~(1<<type))) {
+							zend_error_noreturn(E_COMPILE_ERROR,
+								"Only one of false, true or bool allowed in a type union");
+						}
+						/* fallthrough */
 					default:
 						if (arg_info->multi.types & (1<<type)) {
 							zend_error_noreturn(E_COMPILE_ERROR, 
 								"%s is already present in %s",
-								zend_get_type_by_const(type),
+								zend_get_type_by_const_boolean(type),
 								ZEND_MULTI_NAME(arg_info->multi.type));
 						}
 
@@ -4917,8 +4924,10 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 
 				if (arg_info->multi.names) {
 					arg_info->multi.names = erealloc(arg_info->multi.names, sizeof(zend_string*) * ++arg_info->multi.last);
-				} else arg_info->multi.names = emalloc(sizeof(zend_string*) * ++arg_info->multi.last);
-				
+				} else {
+					arg_info->multi.names = emalloc(sizeof(zend_string*) * ++arg_info->multi.last);
+				}
+
 				arg_info->multi.types |= (1 << IS_OBJECT);
 				arg_info->multi.names[arg_info->multi.last-1] = name;
 
@@ -4936,6 +4945,11 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Scalar type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
+			}
+			if (type == IS_TRUE || type == IS_FALSE) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use %s as standalone scalar type",
+					ZSTR_VAL(class_name));
 			}
 			arg_info->type_hint = type;
 		} else {

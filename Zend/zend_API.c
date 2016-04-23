@@ -192,6 +192,16 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 }
 /* }}} */
 
+ZEND_API char *zend_get_type_by_const_boolean(int type) {
+	if (type == IS_FALSE) {
+		return "false";
+	} else if (type == IS_TRUE) {
+		return "true";
+	} else {
+		return zend_get_type_by_const(type);
+	}
+}
+
 ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
 	ZVAL_DEREF(arg);
