@@ -112,7 +112,7 @@ PHP_FUNCTION(grapheme_strpos)
 	int haystack_len, needle_len;
 	unsigned char *found;
 	long loffset = 0;
-	int32_t offset = 0;
+	int32_t offset = 0, noffset = 0;
 	int ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &loffset) == FAILURE) {
@@ -132,6 +132,7 @@ PHP_FUNCTION(grapheme_strpos)
 
 	/* we checked that it will fit: */
 	offset = (int32_t) loffset;
+	noffset = offset >= 0 ? offset : haystack_len + offset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
@@ -146,7 +147,7 @@ PHP_FUNCTION(grapheme_strpos)
 	/* quick check to see if the string might be there
 	 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
 	*/
-	found = (unsigned char *)php_memnstr((char *)haystack + offset, (char *)needle, needle_len, (char *)haystack + haystack_len);
+	found = (unsigned char *)php_memnstr((char *)haystack + noffset, (char *)needle, needle_len, (char *)haystack + haystack_len);
 
 	/* if it isn't there the we are done */
 	if (!found) {
@@ -214,12 +215,13 @@ PHP_FUNCTION(grapheme_stripos)
 	is_ascii = ( grapheme_ascii_check(haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
+		int32_t noffset = offset >= 0 ? offset : haystack_len + offset;
 		needle_dup = (unsigned char *)estrndup((char *)needle, needle_len);
 		php_strtolower((char *)needle_dup, needle_len);
 		haystack_dup = (unsigned char *)estrndup((char *)haystack, haystack_len);
 		php_strtolower((char *)haystack_dup, haystack_len);
 
-		found = (unsigned char*) php_memnstr((char *)haystack_dup + offset, (char *)needle_dup, needle_len, (char *)haystack_dup + haystack_len);
+		found = (unsigned char*) php_memnstr((char *)haystack_dup + noffset, (char *)needle_dup, needle_len, (char *)haystack_dup + haystack_len);
 
 		efree(haystack_dup);
 		efree(needle_dup);
@@ -537,7 +539,7 @@ PHP_FUNCTION(grapheme_substr)
 			efree(ustr);
 		}
 		ubrk_close(bi);
-		RETURN_EMPTY_STRING();		
+		RETURN_EMPTY_STRING();
 	}
 
 	/* find the end point of the string to return */
@@ -576,7 +578,7 @@ PHP_FUNCTION(grapheme_substr)
 			sub_str_end_pos = ustr_len;
 		}
 	}
-	
+
 	if(sub_str_start_pos > sub_str_end_pos) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length is beyond start", 1 TSRMLS_CC );
 
