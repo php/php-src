@@ -809,7 +809,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
-			if (j >= 0 && (blocks[j].predecessors_count > 1 || j == 0)) {
+			if (blocks[j].predecessors_count > 1 || j == 0) {
 				zend_bitset_copy(tmp, def + (j * set_size), set_size);
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
@@ -862,9 +862,6 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 						sizeof(int) * blocks[j].predecessors_count +
 						sizeof(void*) * blocks[j].predecessors_count);
 
-					if (!phi) {
-						goto failure;
-					}
 					phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
 					memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
 					phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
@@ -931,9 +928,6 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 							sizeof(int) * blocks[j].predecessors_count +
 							sizeof(void*) * blocks[j].predecessors_count);
 
-						if (!phi) {
-							goto failure;
-						}
 						phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
 						memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
 						phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
@@ -963,7 +957,6 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	}
 	ssa->vars_count = op_array->last_var;
 	if (zend_ssa_rename(op_array, build_flags, ssa, var, 0) != SUCCESS) {
-failure:
 		free_alloca(var, var_use_heap);
 		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
