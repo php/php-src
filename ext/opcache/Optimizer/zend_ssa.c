@@ -856,29 +856,25 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			}
 
 			if (!zend_bitset_empty(tmp, set_size)) {
-				i = op_array->last_var + op_array->T;
-				while (i > 0) {
-					i--;
-					if (zend_bitset_in(tmp, i)) {
-						zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
-							sizeof(zend_ssa_phi) +
-							sizeof(int) * blocks[j].predecessors_count +
-							sizeof(void*) * blocks[j].predecessors_count);
+				ZEND_BITSET_REVERSE_FOREACH(tmp, set_size, i) {
+					zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
+						sizeof(zend_ssa_phi) +
+						sizeof(int) * blocks[j].predecessors_count +
+						sizeof(void*) * blocks[j].predecessors_count);
 
-						if (!phi) {
-							goto failure;
-						}
-						phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
-						memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
-						phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
-
-					    phi->pi = -1;
-						phi->var = i;
-						phi->ssa_var = -1;
-						phi->next = ssa_blocks[j].phis;
-						ssa_blocks[j].phis = phi;
+					if (!phi) {
+						goto failure;
 					}
-				}
+					phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
+					memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
+					phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
+
+					phi->pi = -1;
+					phi->var = i;
+					phi->ssa_var = -1;
+					phi->next = ssa_blocks[j].phis;
+					ssa_blocks[j].phis = phi;
+				} ZEND_BITSET_FOREACH_END();
 			}
 		}
 	}
@@ -921,38 +917,34 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			}
 
 			if (!zend_bitset_empty(tmp, set_size)) {
-				i = op_array->last_var + op_array->T;
-				while (i > 0) {
-					i--;
-					if (zend_bitset_in(tmp, i)) {
-						zend_ssa_phi **pp = &ssa_blocks[j].phis;
-						while (*pp) {
-							if ((*pp)->pi <= 0 && (*pp)->var == i) {
-								break;
-							}
-							pp = &(*pp)->next;
+				ZEND_BITSET_REVERSE_FOREACH(tmp, set_size, i) {
+					zend_ssa_phi **pp = &ssa_blocks[j].phis;
+					while (*pp) {
+						if ((*pp)->pi <= 0 && (*pp)->var == i) {
+							break;
 						}
-						if (*pp == NULL) {
-							zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
-								sizeof(zend_ssa_phi) +
-								sizeof(int) * blocks[j].predecessors_count +
-								sizeof(void*) * blocks[j].predecessors_count);
-
-							if (!phi) {
-								goto failure;
-							}
-							phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
-							memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
-							phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
-
-						    phi->pi = -1;
-							phi->var = i;
-							phi->ssa_var = -1;
-							phi->next = NULL;
-							*pp = phi;
-						}
+						pp = &(*pp)->next;
 					}
-				}
+					if (*pp == NULL) {
+						zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
+							sizeof(zend_ssa_phi) +
+							sizeof(int) * blocks[j].predecessors_count +
+							sizeof(void*) * blocks[j].predecessors_count);
+
+						if (!phi) {
+							goto failure;
+						}
+						phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
+						memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
+						phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
+
+						phi->pi = -1;
+						phi->var = i;
+						phi->ssa_var = -1;
+						phi->next = NULL;
+						*pp = phi;
+					}
+				} ZEND_BITSET_FOREACH_END();
 			}
 		}
 	}
