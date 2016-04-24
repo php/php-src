@@ -4855,6 +4855,12 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 			zend_uchar type = name ? 
 				zend_lookup_builtin_type_by_name(name) : type_ast->attr;
 
+			if (name && type != 0 && type_ast->attr != ZEND_NAME_NOT_FQ) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Scalar type declaration '%s' must be unqualified",
+					ZSTR_VAL(zend_string_tolower(name)));
+			}
+
 			if (arg_info->multi.type && combine && (combine->kind == ZEND_AST_UNION) != (arg_info->multi.type == ZEND_MULTI_UNION)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use %s when creating %s type",
@@ -4935,6 +4941,22 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 			}
 		}
 		
+		if (arg_info->multi.type == ZEND_MULTI_INTERSECTION) {
+			zend_long non_callable = arg_info->multi.types & ~MAY_BE_CALLABLE;
+			if ((non_callable & (non_callable - 1)) != 0) {
+				arg_info->multi.types = non_callable;
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot require parameters to be %s at the same time in intersection types",
+					ZSTR_VAL(zend_get_multi_type_declaration(&arg_info->multi)));
+			}
+			if (arg_info->multi.types & ~(MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_CALLABLE|MAY_BE_OBJECT)) {
+				arg_info->multi.types &= ~(MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_CALLABLE|MAY_BE_OBJECT);
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Scalar types %s are disallowed in intersection types",
+					ZSTR_VAL(zend_get_multi_type_declaration(&arg_info->multi)));
+			}
+		}
+
 		zend_hash_destroy(&classes);
 		arg_info->type_hint = -1; /* invalid value unequal to any valid type and not 0 */
 	} else {

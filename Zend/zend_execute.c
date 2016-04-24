@@ -738,67 +738,78 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
 	allowed_types = m->types;
 	multi_type = m->type;
 
-/* Strict rule table for unions
- *
- * If passed value is explicitly allowed, succeed.
- * If long passed and double allowed, cast to double.
- * Else fail in strict mode
- */
-	if (EXPECTED(multi_type == ZEND_MULTI_UNION)) {
-		if (EXPECTED((1 << arg_type) & allowed_types)) {
-			return 1;
-		}
-		if (EXPECTED((allowed_types & MAY_BE_BOOL) && (arg_type == IS_TRUE || arg_type == IS_FALSE))) {
-			return 1;
-		} else if (arg_type == IS_LONG && (allowed_types & MAY_BE_DOUBLE)) {
-			ZVAL_DOUBLE(arg, (double) Z_LVAL_P(arg));
-			return 1;
-		}
-	}
-
 	if (UNEXPECTED(allowed_types & MAY_BE_CALLABLE)) {
 		if (EXPECTED(zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL))) {
 			if (EXPECTED(multi_type == ZEND_MULTI_UNION)) {
 				return 1;
+			} else if (allowed_types & MAY_BE_ARRAY) {
+				return arg_type == IS_ARRAY;
+			} else if (allowed_types & MAY_BE_STRING) {
+				return arg_type == IS_STRING;
 			}
 		} else if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
 			return 0;
 		}
 	}
 
-	if (EXPECTED(allowed_types & MAY_BE_OBJECT && arg_type == IS_OBJECT)) {
-		uint32_t it, last = m->last;
-		zend_class_entry *ce, *instance_ce = Z_OBJCE_P(arg);
+	if (allowed_types & MAY_BE_OBJECT) {
+		if (EXPECTED(arg_type == IS_OBJECT)) {
+			uint32_t it, last = m->last;
+			zend_class_entry *ce, *instance_ce = Z_OBJCE_P(arg);
 
-		for (it = 0; it < last; it++) {
-			if (EXPECTED(cache_slot) && EXPECTED(cache_slot[it])) {
-				ce = (zend_class_entry *) cache_slot[it];
-			} else {
-				ce = zend_lookup_class(m->names[it]);
-				if (UNEXPECTED(!ce)) {
-					if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
-						return 0;
+			for (it = 0; it < last; it++) {
+				if (EXPECTED(cache_slot) && EXPECTED(cache_slot[it])) {
+					ce = (zend_class_entry *) cache_slot[it];
+				} else {
+					ce = zend_lookup_class(m->names[it]);
+					if (UNEXPECTED(!ce)) {
+						if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
+							return 0;
+						}
+						continue;
+					} else if (EXPECTED(cache_slot)) {
+						cache_slot[it] = (void *) ce;
 					}
-					continue;
-				} else if (EXPECTED(cache_slot)) {
-					cache_slot[it] = (void *) ce;
+				}
+
+				if (EXPECTED(instanceof_function(instance_ce, ce))) {
+					if (EXPECTED(multi_type == ZEND_MULTI_UNION)) {
+						return 1;
+					}
+				} else if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
+					return 0;
 				}
 			}
 
-			if (EXPECTED(instanceof_function(instance_ce, ce))) {
-				if (EXPECTED(multi_type == ZEND_MULTI_UNION)) {
-					return 1;
-				}
-			} else if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
-				return 0;
+			if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
+				return 1;
 			}
-		}
 
-		if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
-			return 1;
+			/* do not allow random objects to succeed in generic allowed_types check */
+			allowed_types &= ~MAY_BE_OBJECT;
+		} else if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
+			return 0;
 		}
 	}
 
+	ZEND_ASSERT(multi_type == ZEND_MULTI_UNION); /* there is always at least one class in an intersection type, or it is callable */
+
+/* Strict rule table for unions
+ *
+ * If passed value is explicitly allowed, succeed.
+ * If long passed and double allowed, cast to double.
+ * Else fail in strict mode
+ */
+	if (EXPECTED((1 << arg_type) & allowed_types)) {
+		return 1;
+	}
+	if (EXPECTED((allowed_types & MAY_BE_BOOL) && (arg_type == IS_TRUE || arg_type == IS_FALSE))) {
+		return 1;
+	}
+	if (arg_type == IS_LONG && (allowed_types & MAY_BE_DOUBLE)) {
+		ZVAL_DOUBLE(arg, (double) Z_LVAL_P(arg));
+		return 1;
+	}
 	if (UNEXPECTED(strict)) {
 		return 0;
 	}
@@ -815,7 +826,6 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
  * Else fail in weak mode (i.e. only true or false possible, but not boolean in general or non-numeric string for int|float)
  */
 	if (EXPECTED(((1 << arg_type) & SCALAR_TYPEMASK) && (allowed_types & SCALAR_TYPEMASK))) {
-		ZEND_ASSERT(multi_type == ZEND_MULTI_UNION);
 
 		/* If there's no other scalar type than true or false */
 		if (UNEXPECTED((allowed_types & (SCALAR_TYPEMASK & ~(MAY_BE_FALSE|MAY_BE_TRUE))) == 0)) {
