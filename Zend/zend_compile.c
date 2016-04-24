@@ -2280,7 +2280,7 @@ static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info)
 		return;
 	}
 
-	if (return_info->type_hint != IS_UNDEF || return_info->multi.types) {
+	if (return_info->type_hint != IS_UNDEF) {
 		zend_op *opline;
 
 		/* TODO(someone) check multi here against constant literals etc ? */
@@ -4936,6 +4936,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 		}
 		
 		zend_hash_destroy(&classes);
+		arg_info->type_hint = -1; /* invalid value unequal to any valid type and not 0 */
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);

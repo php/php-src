@@ -725,14 +725,18 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 
 
 #define SCALAR_TYPEMASK (MAY_BE_BOOL|MAY_BE_TRUE|MAY_BE_FALSE|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE)
-static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null, zval *arg, void **_cache_slot, zend_bool strict) {
+static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null, zval *arg, void **cache_slot, zend_bool strict) {
+	zend_uchar arg_type = Z_TYPE_P(arg);
+	zend_uchar multi_type;
+	zend_long allowed_types;
+
 	/* null/void cannot be found in multi type, this is implicit nullability from parameter */
-	if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
-		if (allow_null) {
-			return 1;
-		}
-		return 0;
+	if (UNEXPECTED(arg_type == IS_NULL)) {
+		return allow_null;
 	}
+
+	allowed_types = m->types;
+	multi_type = m->type;
 
 /* Strict rule table for unions
  *
@@ -740,57 +744,57 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
  * If long passed and double allowed, cast to double.
  * Else fail in strict mode
  */
-	if (EXPECTED(m->type == ZEND_MULTI_UNION)) {
-		if (EXPECTED((1<<Z_TYPE_P(arg)) & m->types)) {
+	if (EXPECTED(multi_type == ZEND_MULTI_UNION)) {
+		if (EXPECTED((1 << arg_type) & allowed_types)) {
 			return 1;
 		}
-		if (EXPECTED((m->types & MAY_BE_BOOL) && (Z_TYPE_P(arg) == IS_TRUE || Z_TYPE_P(arg) == IS_FALSE))) {
+		if (EXPECTED((allowed_types & MAY_BE_BOOL) && (arg_type == IS_TRUE || arg_type == IS_FALSE))) {
 			return 1;
-		} else if (Z_TYPE_P(arg) == IS_LONG && (m->types & MAY_BE_DOUBLE)) {
+		} else if (arg_type == IS_LONG && (allowed_types & MAY_BE_DOUBLE)) {
 			ZVAL_DOUBLE(arg, (double) Z_LVAL_P(arg));
 			return 1;
 		}
 	}
 
-	if (UNEXPECTED(m->types & MAY_BE_CALLABLE)) {
+	if (UNEXPECTED(allowed_types & MAY_BE_CALLABLE)) {
 		if (EXPECTED(zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL))) {
-			if (EXPECTED(m->type == ZEND_MULTI_UNION)) {
+			if (EXPECTED(multi_type == ZEND_MULTI_UNION)) {
 				return 1;
 			}
-		} else if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+		} else if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
 			return 0;
 		}
 	}
 
-	if (EXPECTED(m->types & MAY_BE_OBJECT && Z_TYPE_P(arg) == IS_OBJECT)) {
-		uint32_t it;
-		void ***cache_slot = (void***) _cache_slot;
-		zend_class_entry *ce;
+	if (EXPECTED(allowed_types & MAY_BE_OBJECT && arg_type == IS_OBJECT)) {
+		uint32_t it, last = m->last;
+		zend_class_entry *ce, *instance_ce = Z_OBJCE_P(arg);
 
-		if (UNEXPECTED(Z_TYPE_P(arg) != IS_OBJECT)) {
-			return 0;
-		}
-
-		for (it = 0; it < m->last; it++) {
-			if (cache_slot && cache_slot[it]) {
-				ce = (zend_class_entry*) cache_slot[it];
+		for (it = 0; it < last; it++) {
+			if (EXPECTED(cache_slot) && EXPECTED(cache_slot[it])) {
+				ce = (zend_class_entry *) cache_slot[it];
 			} else {
 				ce = zend_lookup_class(m->names[it]);
-				if (cache_slot) {
-					cache_slot[it] = (void**) ce;
+				if (UNEXPECTED(!ce)) {
+					if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
+						return 0;
+					}
+					continue;
+				} else if (EXPECTED(cache_slot)) {
+					cache_slot[it] = (void *) ce;
 				}
 			}
 
-			if (EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce))) {
-				if (EXPECTED(m->type == ZEND_MULTI_UNION)) {
+			if (EXPECTED(instanceof_function(instance_ce, ce))) {
+				if (EXPECTED(multi_type == ZEND_MULTI_UNION)) {
 					return 1;
 				}
-			} else if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+			} else if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
 				return 0;
 			}
 		}
 
-		if (UNEXPECTED(m->type == ZEND_MULTI_INTERSECTION)) {
+		if (UNEXPECTED(multi_type == ZEND_MULTI_INTERSECTION)) {
 			return 1;
 		}
 	}
@@ -810,31 +814,33 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
  * If possible to cast to boolean
  * Else fail in weak mode (i.e. only true or false possible, but not boolean in general or non-numeric string for int|float)
  */
-	if (EXPECTED(((1<<Z_TYPE_P(arg)) & SCALAR_TYPEMASK) && (m->types & SCALAR_TYPEMASK))) {
-		/* If there's any other scalar type than true or false */
-		if (UNEXPECTED((m->types & (SCALAR_TYPEMASK & ~(MAY_BE_FALSE|MAY_BE_TRUE))) == 0)) {
+	if (EXPECTED(((1 << arg_type) & SCALAR_TYPEMASK) && (allowed_types & SCALAR_TYPEMASK))) {
+		ZEND_ASSERT(multi_type == ZEND_MULTI_UNION);
+
+		/* If there's no other scalar type than true or false */
+		if (UNEXPECTED((allowed_types & (SCALAR_TYPEMASK & ~(MAY_BE_FALSE|MAY_BE_TRUE))) == 0)) {
 			zend_bool truth = zend_is_true(arg);
-			if (UNEXPECTED(truth != ((m->types & MAY_BE_TRUE) != 0))) {
+			if (UNEXPECTED(truth != ((allowed_types & MAY_BE_TRUE) != 0))) {
 				return 0;
 			}
 
-			zval_ptr_dtor(arg);
+			zval_dtor(arg);
 			ZVAL_BOOL(arg, truth);
 			return 1;
 		}
 
-		switch (Z_TYPE_P(arg)) {
+		switch (arg_type) {
 			case IS_TRUE:
 			case IS_FALSE:
-				if (m->types & MAY_BE_LONG) {
-					ZVAL_LONG(arg, Z_TYPE_P(arg) == IS_TRUE);
-				} else if (m->types & MAY_BE_DOUBLE) {
-					ZVAL_DOUBLE(arg, (double) (Z_TYPE_P(arg) == IS_TRUE));
-				} else if (Z_TYPE_P(arg) == IS_FALSE) {
-					ZEND_ASSERT((m->types & SCALAR_TYPEMASK) == MAY_BE_STRING);
+				if (allowed_types & MAY_BE_LONG) {
+					ZVAL_LONG(arg, arg_type == IS_TRUE);
+				} else if (allowed_types & MAY_BE_DOUBLE) {
+					ZVAL_DOUBLE(arg, (double) (arg_type == IS_TRUE));
+				} else if (arg_type == IS_FALSE) {
+					ZEND_ASSERT((allowed_types & SCALAR_TYPEMASK) == MAY_BE_STRING);
 					ZVAL_EMPTY_STRING(arg);
 				} else {
-					ZEND_ASSERT((m->types & SCALAR_TYPEMASK) == MAY_BE_STRING);
+					ZEND_ASSERT((allowed_types & SCALAR_TYPEMASK) == MAY_BE_STRING);
 					if (CG(one_char_string)['1']) {
 						ZVAL_INTERNED_STR(arg, CG(one_char_string)['1']);
 					} else {
@@ -844,47 +850,47 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
 				return 1;
 
 			case IS_LONG:
-				if (m->types & MAY_BE_STRING) {
+				if (allowed_types & MAY_BE_STRING) {
 					ZVAL_NEW_STR(arg, zend_long_to_str(Z_LVAL_P(arg)));
 				} else {
 					/* long->double is handled at start to have identical behavior between strict and non-strict */
-					ZEND_ASSERT(m->types & MAY_BE_BOOL);
+					ZEND_ASSERT(allowed_types & MAY_BE_BOOL);
 					ZVAL_BOOL(arg, Z_LVAL_P(arg) != 0);
 				}
 				return 1;
 
 			case IS_DOUBLE:
-				if ((m->types & (MAY_BE_LONG|MAY_BE_STRING)) == (MAY_BE_LONG|MAY_BE_STRING) && Z_DVAL_P(arg) == (double)(zend_long)Z_DVAL_P(arg)) {
+				if ((allowed_types & (MAY_BE_LONG|MAY_BE_STRING)) == (MAY_BE_LONG|MAY_BE_STRING) && Z_DVAL_P(arg) == (double)(zend_long)Z_DVAL_P(arg)) {
 					ZVAL_LONG(arg, (zend_long) Z_DVAL_P(arg));
-				} else if (m->types & MAY_BE_STRING) {
+				} else if (allowed_types & MAY_BE_STRING) {
 					ZVAL_NEW_STR(arg, zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(arg)));
-				} else if (m->types & MAY_BE_LONG) {
+				} else if (allowed_types & MAY_BE_LONG) {
 					ZVAL_LONG(arg, zend_dval_to_lval_cap(Z_DVAL_P(arg)));
 				} else {
-					ZEND_ASSERT(m->types & MAY_BE_BOOL);
+					ZEND_ASSERT(allowed_types & MAY_BE_BOOL);
 					ZVAL_BOOL(arg, !!Z_DVAL_P(arg));
 				}
 				return 1;
 
 			case IS_STRING:
-				if (m->types & (MAY_BE_DOUBLE|MAY_BE_LONG)) {
+				if (allowed_types & (MAY_BE_DOUBLE|MAY_BE_LONG)) {
 					zend_uchar type;
 					zend_long lval;
 					double dval;
 					/* do not emit notices when we can still cast to true */
-					if (0 == (type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, (m->types & (MAY_BE_TRUE|MAY_BE_BOOL)) ? 1 : -1))) {
-						if (!(m->types & MAY_BE_BOOL) && !(m->types & (Z_STRLEN_P(arg) == 0 ? MAY_BE_FALSE : MAY_BE_TRUE))) {
+					if (0 == (type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, (allowed_types & (MAY_BE_TRUE|MAY_BE_BOOL)) ? 1 : -1))) {
+						if (!(allowed_types & MAY_BE_BOOL) && !(allowed_types & (Z_STRLEN_P(arg) == 0 ? MAY_BE_FALSE : MAY_BE_TRUE))) {
 							return 0;
 						}
 					} else if (type == IS_LONG) {
-						if (m->types & MAY_BE_LONG) {
+						if (allowed_types & MAY_BE_LONG) {
 							ZVAL_LONG(arg, lval);
 						} else {
 							ZVAL_DOUBLE(arg, (double) lval);
 						}
 						return 1;
 					} else {
-						if (m->types & MAY_BE_DOUBLE) {
+						if (allowed_types & MAY_BE_DOUBLE) {
 							ZVAL_DOUBLE(arg, dval);
 						} else {
 							ZVAL_LONG(arg, zend_dval_to_lval_cap(dval));
@@ -903,7 +909,7 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
 		ZEND_ASSERT(0);
 	}
 
-	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT && (m->types & MAY_BE_STRING))) {
+	if (EXPECTED(arg_type == IS_OBJECT && (allowed_types & MAY_BE_STRING))) {
 		zend_string *dummy;
 		return zend_parse_arg_str_weak(arg, &dummy);
 	}
@@ -989,7 +995,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 		return 1;
 	}
 
-	if (cur_arg_info->type_hint || cur_arg_info->multi.types) {
+	if (cur_arg_info->type_hint) {
 		ZVAL_DEREF(arg);
 
 		if (UNEXPECTED(cur_arg_info->multi.types)) {
@@ -1221,7 +1227,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	char *need_msg;
 	zend_class_entry *ce;
 
-	if (ret_info->type_hint || ret_info->multi.types) {
+	if (ret_info->type_hint) {
 		if (UNEXPECTED(ret_info->multi.types)) {
 			if (UNEXPECTED(!zend_verify_multi_type(&ret_info->multi, ret_info->allow_null, ret, cache_slot, ZEND_RET_USES_STRICT_TYPES()))) {
 				zend_string *decl = zend_get_multi_type_declaration(&ret_info->multi);

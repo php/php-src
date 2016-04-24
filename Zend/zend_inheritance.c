@@ -431,7 +431,15 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
-	if (arg_info->class_name) {
+	if (arg_info->multi.types) {
+		zend_string *decl = 
+			zend_get_multi_type_declaration(&arg_info->multi);
+		smart_str_append(str, decl);
+		if (!return_hint) {
+			smart_str_appends(str, " ");
+		}
+		zend_string_release(decl);
+	} else if (arg_info->class_name) {
 		const char *class_name;
 		size_t class_name_len;
 
@@ -467,14 +475,6 @@ static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function 
 		if (!return_hint) {
 			smart_str_appendc(str, ' ');
 		}
-	} else if (arg_info->multi.types) {
-		zend_string *decl = 
-			zend_get_multi_type_declaration(&arg_info->multi);
-		smart_str_append(str, decl);
-		if (!return_hint) {
-			smart_str_appends(str, " ");
-		}
-		zend_string_release(decl);
 	}
 }
 /* }}} */
