@@ -3435,7 +3435,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 	zend_class_entry *called_scope;
 	zend_object *object;
 	zend_execute_data *call;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
+	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 
 	SAVE_OPLINE();
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);

@@ -756,7 +756,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	fci->object = (func->common.fn_flags & ZEND_ACC_STATIC) ?
 		NULL : fci_cache->object;
 
-	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC,
 		func, fci->param_count, fci_cache->called_scope, fci->object);
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
@@ -1688,6 +1688,20 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 		}
 	}
 	return FAILURE;
+}
+/* }}} */
+
+ZEND_API int zend_forbid_dynamic_call(const char *func_name) /* {{{ */
+{
+	zend_execute_data *ex = EG(current_execute_data);
+	ZEND_ASSERT(ex != NULL && ex->func != NULL);
+
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
+		zend_error(E_WARNING, "Cannot call %s dynamically", func_name);
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 /* }}} */
 

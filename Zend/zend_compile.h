@@ -473,6 +473,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)
 #define ZEND_CALL_GENERATOR          (1 << 8)
+#define ZEND_CALL_DYNAMIC            (1 << 9)
 
 #define ZEND_CALL_INFO_SHIFT         16
 
