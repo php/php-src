@@ -168,9 +168,32 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
-zend_string* zend_get_multi_type_declaration(zend_multi_type *m) { /* {{{ */
+uint32_t zend_get_multi_type_count(zend_multi_type *m) {
+	uint32_t count = 0;
+
+	if (m->types & MAY_BE_TRUE)
+		count++;
+	if (m->types & MAY_BE_FALSE)
+		count++;
+	if (m->types & MAY_BE_BOOL)
+		count++;
+	if (m->types & MAY_BE_LONG)
+		count++;
+	if (m->types & MAY_BE_DOUBLE)
+		count++;
+	if (m->types & MAY_BE_CALLABLE)
+		count++;
+	if (m->types & MAY_BE_ARRAY)
+		count++;
+	if (m->types & MAY_BE_RESOURCE)
+		count++;
+
+	return count + m->last;
+}
+
+zend_string* zend_get_multi_type_declaration(zend_multi_type *m, zend_bool humans) { /* {{{ */
 	smart_str sm;
-	uint32_t types = m->types;
+	uint32_t types = m->types, count = zend_get_multi_type_count(m);
 
 	memset(&sm, 0, sizeof(smart_str));	
 
@@ -178,7 +201,28 @@ zend_string* zend_get_multi_type_declaration(zend_multi_type *m) { /* {{{ */
 
 #define APPEND_MULTI_TYPE_SEP() do { \
 	if (types) { \
-		smart_str_appends(&sm, m->type == ZEND_MULTI_UNION ? " or " : " and "); \
+		count--; \
+		if (m->type == ZEND_MULTI_UNION) { \
+			if (humans) { \
+				if (count > 1) { \
+					smart_str_appends(&sm, ", "); \
+				} else { \
+					smart_str_appends(&sm, " or "); \
+				} \
+			} else { \
+				smart_str_appends(&sm, " | "); \
+			} \
+		} else { \
+			if (humans) { \
+				if (count > 1) { \
+					smart_str_appends(&sm, ", "); \
+				} else { \
+					smart_str_appends(&sm, " and "); \
+				} \
+			} else { \
+				smart_str_appends(&sm, " & "); \
+			} \
+		} \
 	} \
 } while(0)
 #define APPEND_MULTI_TYPE(t, c) do { \
@@ -433,7 +477,7 @@ static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function 
 {
 	if (arg_info->multi.types) {
 		zend_string *decl = 
-			zend_get_multi_type_declaration(&arg_info->multi);
+			zend_get_multi_type_declaration(&arg_info->multi, 0);
 		smart_str_append(str, decl);
 		if (!return_hint) {
 			smart_str_appends(str, " ");

@@ -11,4 +11,4 @@ class Bar extends Foo {
 }
 ?>
 --EXPECTF--
-Warning: Declaration of Bar::method($arg) should be compatible with Foo::method(IFoo and IBar $arg) in %s on line 8
+Warning: Declaration of Bar::method($arg) should be compatible with Foo::method(IFoo & IBar $arg) in %s on line 8

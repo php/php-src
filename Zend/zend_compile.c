@@ -4952,13 +4952,13 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 				arg_info->multi.types = non_callable;
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot require parameters to be %s at the same time in intersection types",
-					ZSTR_VAL(zend_get_multi_type_declaration(&arg_info->multi)));
+					ZSTR_VAL(zend_get_multi_type_declaration(&arg_info->multi, 1)));
 			}
 			if (arg_info->multi.types & ~(MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_CALLABLE|MAY_BE_OBJECT)) {
 				arg_info->multi.types &= ~(MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_CALLABLE|MAY_BE_OBJECT);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Scalar types %s are disallowed in intersection types",
-					ZSTR_VAL(zend_get_multi_type_declaration(&arg_info->multi)));
+					ZSTR_VAL(zend_get_multi_type_declaration(&arg_info->multi, 1)));
 			}
 		}
 

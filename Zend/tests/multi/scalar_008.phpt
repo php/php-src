@@ -26,7 +26,7 @@ int(1)
 float(1.1)
 bool(true)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be true or integer or float, string given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be true, integer or float, string given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foo('')
 #1 {main}

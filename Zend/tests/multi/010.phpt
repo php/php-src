@@ -11,4 +11,4 @@ class Bar extends Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of Bar::method() must be compatible with Foo::method(): IFoo and IBar in %s on line 8
+Fatal error: Declaration of Bar::method() must be compatible with Foo::method(): IFoo & IBar in %s on line 8

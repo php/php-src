@@ -1010,7 +1010,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 
 		if (UNEXPECTED(cur_arg_info->multi.types)) {
 			if (UNEXPECTED(!zend_verify_multi_type(&cur_arg_info->multi, cur_arg_info->allow_null, arg, cache_slot, ZEND_ARG_USES_STRICT_TYPES()))) {
-				zend_string *decl = zend_get_multi_type_declaration(&cur_arg_info->multi);
+				zend_string *decl = zend_get_multi_type_declaration(&cur_arg_info->multi, 1);
 				zend_verify_arg_error(zf, arg_num, "be ", ZSTR_VAL(decl), 
 						Z_TYPE_P(arg) == IS_OBJECT ?
 							"instance of " : "", 
@@ -1240,7 +1240,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	if (ret_info->type_hint) {
 		if (UNEXPECTED(ret_info->multi.types)) {
 			if (UNEXPECTED(!zend_verify_multi_type(&ret_info->multi, ret_info->allow_null, ret, cache_slot, ZEND_RET_USES_STRICT_TYPES()))) {
-				zend_string *decl = zend_get_multi_type_declaration(&ret_info->multi);
+				zend_string *decl = zend_get_multi_type_declaration(&ret_info->multi, 1);
 				zend_verify_return_error(zf, "be ", ZSTR_VAL(decl), 
 						Z_TYPE_P(ret) == IS_OBJECT ?
 							"instance of " : "", 
