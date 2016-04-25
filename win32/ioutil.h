@@ -128,14 +128,6 @@ PW32IO int php_win32_ioutil_close(int fd);
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts);
 PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode);
 
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO int php_win32_ioutil_mkdir_a(const char *path, mode_t mode);
-PW32IO int php_win32_ioutil_open_a(const char *path, int flags, ...);
-PW32IO int php_win32_ioutil_chdir_a(const char *path);
-PW32IO int php_win32_ioutil_rename_a(const char *oldname, const char *newname);
-PW32IO char *php_win32_ioutil_getcwd_a(const char *buf, int len);
-#endif
-
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
@@ -143,9 +135,7 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
 
 #if 0
-PW32IO int php_win32_ioutil_access_a(const char *path, mode_t mode);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
-PW32IO int php_win32_ioutil_open(const char *path, int flags, ...);
 #endif
 
 #define PHP_WIN32_IOUTIL_INIT_W(path) \

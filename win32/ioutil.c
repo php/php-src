@@ -380,184 +380,6 @@ PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...)
 		return -1;
 }/*}}}*/
 
-PW32IO int php_win32_ioutil_open_a(const char *path, int flags, ...)
-{/*{{{*/
-	php_ioutil_open_opts open_opts;
-	HANDLE file;
-	int fd;
-	mode_t mode = 0;
-
-	if (flags & O_CREAT) {
-		va_list arg;
-
-		va_start(arg, flags);
-		mode = (mode_t) va_arg(arg, int);
-		va_end(arg);
-	}
-
-	if (!php_win32_ioutil_posix_to_open_opts(flags, mode, &open_opts)) {
-		goto einval;
-	}
-
-	/* XXX care about security attributes here if needed, see tsrm_win32_access() */
-	file = CreateFileA(path,
-		open_opts.access,
-		open_opts.share,
-		NULL,
-		open_opts.disposition,
-		open_opts.attributes,
-		NULL);
-
-	if (file == INVALID_HANDLE_VALUE) {
-		DWORD error = GetLastError();
-
-		if (error == ERROR_FILE_EXISTS && (flags & _O_CREAT) &&
-			!(flags & _O_EXCL)) {
-			/* Special case: when ERROR_FILE_EXISTS happens and O_CREAT was */
-			/* specified, it means the path referred to a directory. */
-			_set_errno(EISDIR);
-		} else {
-			SET_ERRNO_FROM_WIN32_CODE(error);
-		}
-		return -1;
-	}
-
-	fd = _open_osfhandle((intptr_t) file, flags);
-	if (fd < 0) {
-		DWORD error = GetLastError();
-
-		/* The only known failure mode for _open_osfhandle() is EMFILE, in which
-		 * case GetLastError() will return zero. However we'll try to handle other
-		 * errors as well, should they ever occur.
-		 */
-		if (errno == EMFILE) {
-			_set_errno(EMFILE);
-		} else if (error != ERROR_SUCCESS) {
-			SET_ERRNO_FROM_WIN32_CODE(error);
-		}
-		CloseHandle(file);
-		return -1;
-	}
-
-	if (flags & _O_TEXT) {
-		_setmode(fd, _O_TEXT);
-	} else if (flags & _O_BINARY) {
-		_setmode(fd, _O_BINARY);
-	}
-
-	return fd;
-
-	einval:
-		_set_errno(EINVAL);
-		return -1;
-}/*}}}*/
-
-#if 0
-PW32IO int php_win32_ioutil_open(const char *path, int flags, ...)
-{/*{{{*/
-	php_ioutil_open_opts open_opts;
-	HANDLE file;
-	int fd;
-	mode_t mode = 0;
-	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
-	BOOL use_a = 0;
-
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-	if (!pathw) {
-		/* Falling back to the path literally given */
-		use_a = 1;
-	}
-#else
-	if (!pathw) {
-		goto einval;
-	}
-#endif
-
-	if (flags & O_CREAT) {
-		va_list arg;
-
-		va_start(arg, flags);
-		mode = (mode_t) va_arg(arg, int);
-		va_end(arg);
-	}
-
-	if (!php_win32_ioutil_posix_to_open_opts(flags, mode, &open_opts)) {
-		goto einval;
-	}
-
-	/* XXX care about security attributes here if needed, see tsrm_win32_access() */
-	if (!use_a) {
-		file = CreateFileW(pathw,
-			open_opts.access,
-			open_opts.share,
-			NULL,
-			open_opts.disposition,
-			open_opts.attributes,
-			NULL);
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-	} else {
-		file = CreateFileA(path,
-			open_opts.access,
-			open_opts.share,
-			NULL,
-			open_opts.disposition,
-			open_opts.attributes,
-			NULL);
-#endif
-	}
-
-	if (file == INVALID_HANDLE_VALUE) {
-		DWORD error = GetLastError();
-
-		if (error == ERROR_FILE_EXISTS && (flags & _O_CREAT) &&
-			!(flags & _O_EXCL)) {
-			/* Special case: when ERROR_FILE_EXISTS happens and O_CREAT was */
-			/* specified, it means the path referred to a directory. */
-			_set_errno(EISDIR);
-		} else {
-			SET_ERRNO_FROM_WIN32_CODE(error);
-		}
-		return -1;
-	}
-
-	fd = _open_osfhandle((intptr_t) file, flags);
-	if (fd < 0) {
-		DWORD error = GetLastError();
-
-		/* The only known failure mode for _open_osfhandle() is EMFILE, in which
-		 * case GetLastError() will return zero. However we'll try to handle other
-		 * errors as well, should they ever occur.
-		 */
-		if (errno == EMFILE) {
-			_set_errno(EMFILE);
-		} else if (error != ERROR_SUCCESS) {
-			SET_ERRNO_FROM_WIN32_CODE(error);
-		}
-		CloseHandle(file);
-		return -1;
-	}
-
-	if (pathw) {
-		free(pathw);
-	}
-
-	if (flags & _O_TEXT) {
-		_setmode(fd, _O_TEXT);
-	} else if (flags & _O_BINARY) {
-		_setmode(fd, _O_BINARY);
-	}
-
-	return fd;
-
-	einval:
-		if (pathw) {
-			free(pathw);
-		}
-		_set_errno(EINVAL);
-		return -1;
-}/*}}}*/
-#endif
-
 PW32IO int php_win32_ioutil_close(int fd)
 {/*{{{*/
 	int result = -1;
@@ -582,23 +404,6 @@ PW32IO int php_win32_ioutil_close(int fd)
 
 	return result;
 }/*}}}*/
-
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO int php_win32_ioutil_mkdir_a(const char *path, mode_t mode)
-{/*{{{*/
-	int ret = 0;
-	DWORD err = 0;
-
-	/* TODO extend with mode usage */
-	if (!CreateDirectoryA(path, NULL)) {
-		err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-#endif
 
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
@@ -641,22 +446,6 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 	return ret;
 }/*}}}*/
 
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO int php_win32_ioutil_unlink_a(const char *path)
-{/*{{{*/
-	int ret = 0;
-	DWORD err = 0;
-
-	if (!DeleteFileA(path)) {
-		err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-#endif
-
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
@@ -670,22 +459,6 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 
 	return ret;
 }/*}}}*/
-
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO int php_win32_ioutil_rmdir_a(const char *path)
-{/*{{{*/
-	int ret = 0;
-	DWORD err = 0;
-
-	if (!RemoveDirectoryA(path)) {
-		err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-#endif
 
 PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 {/*{{{*/
@@ -701,22 +474,6 @@ PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 	return ret;
 }/*}}}*/
 
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO int php_win32_ioutil_chdir_a(const char *path)
-{/*{{{*/
-	int ret = 0;
-	DWORD err = 0;
-	
-	if (!SetCurrentDirectoryA(path)) {
-		err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-#endif
-
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
@@ -731,22 +488,6 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 	return ret;
 }/*}}}*/
 
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO int php_win32_ioutil_rename_a(const char *oldname, const char *newname)
-{/*{{{*/
-	int ret = 0;
-	DWORD err = 0;
-
-	if (!MoveFileExA(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
-		err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-#endif
-
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
 {/*{{{*/
 	int ret = 0;
@@ -760,43 +501,6 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 
 	return ret;
 }/*}}}*/
-
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO char *php_win32_ioutil_getcwd_a(const char *buf, int len)
-{/*{{{*/
-	DWORD err = 0;
-	char *tmp_buf = NULL;
-	
-	/* If buf was NULL, the result has to be freed outside here. */
-	if (!buf) {
-		DWORD tmp_len = GetCurrentDirectoryA(0, NULL) + 1;
-		if (!tmp_len) {
-			err = GetLastError();
-			SET_ERRNO_FROM_WIN32_CODE(err);
-			return NULL;
-		} else if (tmp_len > len) {
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
-			return NULL;
-		}
-
-		len = tmp_len;
-
-		tmp_buf = (char *)malloc((len)*sizeof(char));
-		if (!tmp_buf) {
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
-			return NULL;
-		}
-		buf = tmp_buf;
-	}
-
-	if (!GetCurrentDirectoryA(len, buf)) {
-		err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return buf;
-}/*}}}*/
-#endif
 
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 {/*{{{*/
@@ -864,13 +568,6 @@ PW32IO BOOL php_win32_ioutil_use_unicode(void)
 
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0
-#if PHP_WIN32_IOUTIL_ANSI_COMPAT_MODE
-PW32IO int php_win32_ioutil_access_a(const char *path, mode_t mode)
-{
-	return _access(path, mode);
-}
-#endif
-
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
 {
 	return _waccess(path, mode);
