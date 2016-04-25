@@ -206,6 +206,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("bool"), _IS_BOOL},
 	{ZEND_STRL("true"), IS_TRUE},
 	{ZEND_STRL("false"), IS_FALSE},
+	{ZEND_STRL("null"), IS_NULL},
 	{ZEND_STRL("void"), IS_VOID},
 	{NULL, 0, IS_UNDEF}
 };
@@ -4883,13 +4884,17 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 
 			if (type != 0) {
 				switch (type) {
-					/* nullable types needs to deal with null/void */
+					/* nullable types needs to deal with null/void; If we want to disallow null in this patch, add this again...
 					case IS_NULL:
-					case IS_VOID:
 						zend_error_noreturn(E_COMPILE_ERROR, 
 							"Scalar type %s is not allowed in %s",
 							zend_get_type_by_const(type),
 							ZEND_MULTI_NAME(arg_info->multi.type));
+					break;
+*/
+					case IS_VOID:
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Void is not a valid parameter type");
 					break;
 
 					case IS_FALSE:
@@ -4969,7 +4974,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 					"Scalar type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
-			if (type == IS_TRUE || type == IS_FALSE) {
+			if (type == IS_TRUE || type == IS_FALSE || type == IS_NULL) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use %s as standalone scalar type",
 					ZSTR_VAL(class_name));

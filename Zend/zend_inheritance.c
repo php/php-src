@@ -181,14 +181,13 @@ zend_string* zend_get_multi_type_declaration(zend_multi_type *m) { /* {{{ */
 		smart_str_appends(&sm, m->type == ZEND_MULTI_UNION ? " or " : " and "); \
 	} \
 } while(0)
-#define APPEND_MULTI_TYPE_EX(t, c) do { \
+#define APPEND_MULTI_TYPE(t, c) do { \
 	smart_str_appends(&sm, zend_get_type_by_const_boolean(c)); \
-	types &= ~MAY_BE_##t; \
+	types &= ~t; \
 } while(0)
-#define APPEND_MULTI_TYPE(t) APPEND_MULTI_TYPE_EX(t, IS_##t)
 #define CHECK_MULTI_TYPE(t) \
 	if (types & MAY_BE_##t) { \
-		APPEND_MULTI_TYPE(t); \
+		APPEND_MULTI_TYPE(MAY_BE_##t, IS_##t); \
 		APPEND_MULTI_TYPE_SEP(); \
 	}
 
@@ -209,7 +208,7 @@ zend_string* zend_get_multi_type_declaration(zend_multi_type *m) { /* {{{ */
 	CHECK_MULTI_TYPE(TRUE)
 	CHECK_MULTI_TYPE(FALSE)
 	if (types & MAY_BE_BOOL) {
-		APPEND_MULTI_TYPE_EX(BOOL, _IS_BOOL);
+		APPEND_MULTI_TYPE(MAY_BE_BOOL, _IS_BOOL);
 		APPEND_MULTI_TYPE_SEP();
 	}
 	CHECK_MULTI_TYPE(LONG)
@@ -218,6 +217,7 @@ zend_string* zend_get_multi_type_declaration(zend_multi_type *m) { /* {{{ */
 	CHECK_MULTI_TYPE(ARRAY)
 	CHECK_MULTI_TYPE(CALLABLE)
 	CHECK_MULTI_TYPE(RESOURCE)
+	CHECK_MULTI_TYPE(NULL)
 
 #undef CHECK_MULTI_TYPE
 #undef APPEND_MULTI_TYPE

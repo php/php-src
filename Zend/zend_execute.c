@@ -730,9 +730,9 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
 	zend_uchar multi_type;
 	zend_long allowed_types;
 
-	/* null/void cannot be found in multi type, this is implicit nullability from parameter */
+	/* null cannot be found in multi type, this is implicit nullability from parameter */
 	if (UNEXPECTED(arg_type == IS_NULL)) {
-		return allow_null;
+		return allow_null || (m->types & MAY_BE_NULL);
 	}
 
 	allowed_types = m->types;
