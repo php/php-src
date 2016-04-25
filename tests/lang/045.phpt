@@ -4,6 +4,8 @@ Timeout again inside register_shutdown_function
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
+--INI--
+hard_timeout=1
 --FILE--
 <?php
 set_time_limit(1);
