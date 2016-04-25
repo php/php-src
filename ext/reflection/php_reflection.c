@@ -3048,7 +3048,7 @@ ZEND_METHOD(reflection_type, __toString)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if(param->arg_info->multi.type) {
-		RETURN_STR(zend_get_multi_type_declaration(&param->arg_info->multi));
+		RETURN_STR(zend_get_multi_type_declaration(&param->arg_info->multi, 1));
 	} else switch (param->arg_info->type_hint) {
 		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
 		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
