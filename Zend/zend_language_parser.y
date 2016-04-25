@@ -315,10 +315,10 @@ attribute_values:
 	|	attribute_values ',' expr	{ $$ = zend_add_attribute_value($1, $3); }
 
 attribute_list:
-		T_STRING												{ zend_add_attribute($1, NULL); }
-	|	T_STRING '(' attribute_values ')'						{ zend_add_attribute($1, $3); }
-	|	attribute_list ',' T_STRING								{ zend_add_attribute($3, NULL); }
-	|	attribute_list ',' T_STRING '(' attribute_values ')'	{ zend_add_attribute($3, $5); }
+		namespace_name												{ zend_add_attribute($1, NULL); }
+	|	namespace_name '(' attribute_values ')'						{ zend_add_attribute($1, $3); }
+	|	attribute_list ',' namespace_name							{ zend_add_attribute($3, NULL); }
+	|	attribute_list ',' namespace_name '(' attribute_values ')'	{ zend_add_attribute($3, $5); }
 ;
 
 attribute:

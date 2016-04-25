@@ -1924,7 +1924,7 @@ ZEND_METHOD(reflection_function, getAttributes)
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.attributes) {
 		zend_ast_convert_attributes(return_value, fptr->op_array.attributes);
 	} else {
-		RETVAL_FALSE;
+		array_init(return_value);
 	}
 }
 /* }}} */
@@ -3907,7 +3907,7 @@ ZEND_METHOD(reflection_class_constant, getAttributes)
 	if (ref->attributes) {
 		zend_ast_convert_attributes(return_value, ref->attributes);
 	} else {
-		RETVAL_FALSE;
+		array_init(return_value);
 	}
 }
 /* }}} */
@@ -4285,7 +4285,7 @@ ZEND_METHOD(reflection_class, getAttributes)
 	if (ce->type == ZEND_USER_CLASS && ce->info.user.attributes) {
 		zend_ast_convert_attributes(return_value, ce->info.user.attributes);
 	} else {
-		RETVAL_FALSE;
+		array_init(return_value);
 	}
 }
 /* }}} */
@@ -5856,7 +5856,7 @@ ZEND_METHOD(reflection_property, getAttributes)
 	if (ref->prop.attributes) {
 		zend_ast_convert_attributes(return_value, ref->prop.attributes);
 	} else {
-		RETVAL_FALSE;
+		array_init(return_value);
 	}
 }
 /* }}} */

@@ -1826,10 +1826,16 @@ void zend_add_attribute(zend_ast *name, zend_ast *value) /* {{{ */
 	zval *val, tmp;
 	zend_string *key = zend_ast_get_str(name);
 
+#if 1 /* SPECIAL_ATTRIBUTE */
+	if (ZSTR_LEN(key) >= 2 && ZSTR_VAL(key)[0] == '_' && ZSTR_VAL(key)[1] == '_') {
+		zend_error_noreturn(E_COMPILE_ERROR, "Unknown special attribute %s", ZSTR_VAL(key));
+	}
+#endif
 	if (!CG(attributes)) {
 		ALLOC_HASHTABLE(CG(attributes));
 		zend_hash_init(CG(attributes), 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
+#if 0 /* ATTRIBUTE_VALUES_ARRAYS */
 	if (value) {
 		if (value->kind == ZEND_AST_ZVAL) {
 			val = zend_ast_get_zval(value);
@@ -1846,6 +1852,32 @@ void zend_add_attribute(zend_ast *name, zend_ast *value) /* {{{ */
 	if (!zend_hash_add(CG(attributes), key, val)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Redeclared attribute %s", ZSTR_VAL(key));
 	}
+#else
+	ZVAL_NULL(&tmp);
+	val = zend_hash_add(CG(attributes), key, &tmp);
+	if (!val) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Redeclared attribute %s", ZSTR_VAL(key));
+	}
+	if (value) {
+		if (value->kind == ZEND_AST_ZVAL) {
+			zval *zv = zend_ast_get_zval(value);
+
+			if (Z_TYPE_P(zv) == IS_ARRAY) {
+				ZVAL_COPY_VALUE(val, zv);
+			} else {
+				array_init(val);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(val), zv);
+			}
+		} else {
+			ZVAL_NEW_AST(&tmp, zend_ast_copy(value));
+			zend_ast_destroy(value);
+			array_init(val);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(val), &tmp);
+		}
+	} else {
+		array_init(val);
+	}
+#endif
 	zend_string_release(key);
 }
 /* }}} */

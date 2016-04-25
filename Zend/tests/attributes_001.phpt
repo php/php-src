@@ -2,6 +2,12 @@
 Basic attributes usage
 --FILE--
 <?php
+// No attributes
+function f0() {
+}
+$r = new ReflectionFunction("f0");
+var_dump($r->getAttributes());
+
 // Function attributes
 <<TestFunction>>
 function foo() {
@@ -36,29 +42,46 @@ var_dump($r->getAttributes());
 function f2() {}
 $r = new ReflectionFunction("f2");
 var_dump($r->getAttributes());
+
+// Attributes with namespaces
+<<Foo\Bar>>
+function f4() {
+}
+$r = new ReflectionFunction("f4");
+var_dump($r->getAttributes());
 ?>
 --EXPECT--
+array(0) {
+}
 array(1) {
   ["TestFunction"]=>
-  bool(true)
+  array(0) {
+  }
 }
 array(1) {
   ["TestClass"]=>
-  bool(true)
+  array(0) {
+  }
 }
 array(1) {
   ["TestConst"]=>
-  bool(true)
+  array(0) {
+  }
 }
 array(1) {
   ["TestProp"]=>
-  bool(true)
+  array(0) {
+  }
 }
 array(3) {
   ["a1"]=>
-  bool(true)
+  array(0) {
+  }
   ["a2"]=>
-  int(1)
+  array(1) {
+    [0]=>
+    int(1)
+  }
   ["a3"]=>
   array(2) {
     [0]=>
@@ -69,21 +92,25 @@ array(3) {
 }
 array(4) {
   ["a1"]=>
-  bool(true)
+  array(0) {
+  }
   ["a2"]=>
-  object(ast\Node)#4 (4) {
-    ["kind"]=>
-    int(520)
-    ["flags"]=>
-    int(1)
-    ["lineno"]=>
-    int(0)
-    ["children"]=>
-    array(2) {
-      [0]=>
+  array(1) {
+    [0]=>
+    object(ast\Node)#4 (4) {
+      ["kind"]=>
+      int(520)
+      ["flags"]=>
       int(1)
-      [1]=>
-      string(1) "a"
+      ["lineno"]=>
+      int(0)
+      ["children"]=>
+      array(2) {
+        [0]=>
+        int(1)
+        [1]=>
+        string(1) "a"
+      }
     }
   }
   ["a3"]=>
@@ -122,47 +149,55 @@ array(4) {
     }
   }
   ["a4"]=>
-  object(ast\Node)#7 (4) {
-    ["kind"]=>
-    int(130)
-    ["flags"]=>
-    int(0)
-    ["lineno"]=>
-    int(0)
-    ["children"]=>
-    array(2) {
-      [0]=>
-      object(ast\Node)#8 (4) {
-        ["kind"]=>
-        int(525)
-        ["flags"]=>
-        int(0)
-        ["lineno"]=>
-        int(0)
-        ["children"]=>
-        array(2) {
-          [0]=>
-          int(1)
-          [1]=>
-          string(1) "a"
+  array(1) {
+    [0]=>
+    object(ast\Node)#7 (4) {
+      ["kind"]=>
+      int(130)
+      ["flags"]=>
+      int(0)
+      ["lineno"]=>
+      int(0)
+      ["children"]=>
+      array(2) {
+        [0]=>
+        object(ast\Node)#8 (4) {
+          ["kind"]=>
+          int(525)
+          ["flags"]=>
+          int(0)
+          ["lineno"]=>
+          int(0)
+          ["children"]=>
+          array(2) {
+            [0]=>
+            int(1)
+            [1]=>
+            string(1) "a"
+          }
         }
-      }
-      [1]=>
-      object(ast\Node)#9 (4) {
-        ["kind"]=>
-        int(525)
-        ["flags"]=>
-        int(0)
-        ["lineno"]=>
-        int(0)
-        ["children"]=>
-        array(2) {
-          [0]=>
-          int(2)
-          [1]=>
-          string(1) "b"
+        [1]=>
+        object(ast\Node)#9 (4) {
+          ["kind"]=>
+          int(525)
+          ["flags"]=>
+          int(0)
+          ["lineno"]=>
+          int(0)
+          ["children"]=>
+          array(2) {
+            [0]=>
+            int(2)
+            [1]=>
+            string(1) "b"
+          }
         }
       }
     }
+  }
+}
+array(1) {
+  ["Foo\Bar"]=>
+  array(0) {
   }
 }
