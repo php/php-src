@@ -5,5 +5,6 @@ basic union disallow void
 function() : Foo | void {};
 ?>
 --EXPECTF--
-Fatal error: Scalar type void is not allowed in union in %s on line 2
+Fatal error: Void is not a valid parameter type in %s on line 2
+
 
