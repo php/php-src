@@ -774,7 +774,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	fci->object = (func->common.fn_flags & ZEND_ACC_STATIC) ?
 		NULL : fci_cache->object;
 
-	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC,
 		func, fci->param_count, fci_cache->called_scope, fci->object);
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
@@ -1720,47 +1720,12 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 }
 /* }}} */
 
-// TODO Need a less hacky way to do this
-static inline zend_bool is_dynamic_call(zend_execute_data *ex) /* {{{ */
-{
-	const zend_op *opline = ex->opline;
-	int level = 1;
-	while (level != 0) {
-		opline--;
-		switch (opline->opcode) {
-			case ZEND_DO_ICALL:
-			case ZEND_DO_UCALL:
-			case ZEND_DO_FCALL:
-			case ZEND_DO_FCALL_BY_NAME:
-				level++;
-				break;
-			case ZEND_INIT_FCALL:
-			case ZEND_INIT_FCALL_BY_NAME:
-			case ZEND_INIT_NS_FCALL_BY_NAME:
-			case ZEND_INIT_METHOD_CALL:
-			case ZEND_INIT_STATIC_METHOD_CALL:
-			case ZEND_NEW:
-			case ZEND_INIT_DYNAMIC_CALL:
-			case ZEND_INIT_USER_CALL:
-				level--;
-				break;
-		}
-	}
-
-	return opline->opcode == ZEND_INIT_DYNAMIC_CALL
-		|| opline->opcode == ZEND_INIT_USER_CALL;
-}
-/* }}} */
-
 ZEND_API int zend_forbid_dynamic_call(const char *func_name) /* {{{ */
 {
 	zend_execute_data *ex = EG(current_execute_data);
 	ZEND_ASSERT(ex != NULL && ex->func != NULL);
 
-	/* Skip call frame */
-	ex = ex->prev_execute_data;
-
-	if (!ex->func || !ZEND_USER_CODE(ex->func->common.type) || is_dynamic_call(ex)) {
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
 		zend_error(E_WARNING, "Cannot call %s dynamically", func_name);
 		return FAILURE;
 	}
