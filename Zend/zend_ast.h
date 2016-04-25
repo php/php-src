@@ -33,6 +33,8 @@ enum _zend_ast_kind {
 	/* special nodes */
 	ZEND_AST_ZVAL = 1 << ZEND_AST_SPECIAL_SHIFT,
 	ZEND_AST_ZNODE,
+	ZEND_AST_UNION,
+	ZEND_AST_INTERSECTION,
 
 	/* declaration nodes */
 	ZEND_AST_FUNC_DECL,
@@ -58,6 +60,7 @@ enum _zend_ast_kind {
 	ZEND_AST_NAME_LIST,
 	ZEND_AST_TRAIT_ADAPTATIONS,
 	ZEND_AST_USE,
+	ZEND_AST_TYPE_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,

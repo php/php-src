@@ -233,7 +233,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument expr_without_variable global_var
+%type <ast> extends_from parameter multi_type optional_assign_expr
+%type <ast> argument expr_without_variable global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
@@ -255,7 +256,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> isset_variable type return_type
 %type <ast> identifier
 
-%type <num> returns_ref function is_reference is_variadic variable_modifiers
+%type <num> returns_ref function is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> class_modifiers class_modifier use_type
 
@@ -481,11 +482,6 @@ function_declaration_statement:
 		      zend_ast_get_str($3), $6, NULL, $10, $8); }
 ;
 
-is_reference:
-		/* empty */	{ $$ = 0; }
-	|	'&'			{ $$ = ZEND_PARAM_REF; }
-;
-
 is_variadic:
 		/* empty */ { $$ = 0; }
 	|	T_ELLIPSIS  { $$ = ZEND_PARAM_VARIADIC; }
@@ -630,16 +626,25 @@ non_empty_parameter_list:
 ;
 
 parameter:
-		optional_type is_reference is_variadic T_VARIABLE
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, NULL); }
-	|	optional_type is_reference is_variadic T_VARIABLE '=' expr
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, $6); }
+		is_variadic T_VARIABLE optional_assign_expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1, NULL, $2, $3); }
+	|	'&' is_variadic T_VARIABLE optional_assign_expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, ZEND_PARAM_REF | $2, NULL, $3, $4); }
+	|	multi_type is_variadic T_VARIABLE optional_assign_expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2, $1, $3, $4); }
+	|	multi_type '&' is_variadic T_VARIABLE optional_assign_expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, ZEND_PARAM_REF | $3, $1, $4, $5); }
 ;
 
-
-optional_type:
-		/* empty */	{ $$ = NULL; }
-	|	type		{ $$ = $1; }
+multi_type:
+		multi_type '|' type
+			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_UNION));
+			  $$ = zend_ast_list_add($1, $3); }
+	|	multi_type '&' type
+			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_INTERSECTION));
+			  $$ = zend_ast_list_add($1, $3); }
+	|	type
+			{ $$ = zend_ast_create_list(1, ZEND_AST_TYPE_LIST, $1); }
 ;
 
 type:
@@ -648,9 +653,14 @@ type:
 	|	name		{ $$ = $1; }
 ;
 
-return_type:
+optional_assign_expr:
 		/* empty */	{ $$ = NULL; }
-	|	':' type	{ $$ = $2; }
+	|	'=' expr	{ $$ = $2; }
+;
+
+return_type:
+		/* empty */		{ $$ = NULL; }
+	|	':' multi_type	{ $$ = $2; }
 ;
 
 argument_list:

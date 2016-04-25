@@ -42,6 +42,8 @@
 #include "zend_generators.h"
 #include "zend_extensions.h"
 #include "zend_builtin_functions.h"
+#include "zend_type_info.h"
+#include "zend_inheritance.h"
 
 #define reflection_update_property(object, name, value) do { \
 		zval member; \
@@ -2705,7 +2707,7 @@ ZEND_METHOD(reflection_parameter, hasType)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint != 0);
+	RETVAL_BOOL(param->arg_info->type_hint != 0 || param->arg_info->multi.types);
 }
 /* }}} */
 
@@ -2724,7 +2726,7 @@ ZEND_METHOD(reflection_parameter, getType)
 	if (((param->fptr->type == ZEND_INTERNAL_FUNCTION &&
 	      !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
 		((zend_internal_arg_info*)param->arg_info)->type_hint :
-		param->arg_info->type_hint) == 0)
+		param->arg_info->type_hint) == 0 && !param->arg_info->multi.types)
 	{
 		RETURN_NULL();
 	}
@@ -2744,7 +2746,7 @@ ZEND_METHOD(reflection_parameter, isArray)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint == IS_ARRAY);
+	RETVAL_BOOL(param->arg_info->type_hint == IS_ARRAY || param->arg_info->multi.types & MAY_BE_ARRAY);
 }
 /* }}} */
 
@@ -2760,7 +2762,7 @@ ZEND_METHOD(reflection_parameter, isCallable)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint == IS_CALLABLE);
+	RETVAL_BOOL(param->arg_info->type_hint == IS_CALLABLE || param->arg_info->multi.types & MAY_BE_CALLABLE);
 }
 /* }}} */
 
@@ -2997,7 +2999,39 @@ ZEND_METHOD(reflection_type, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint != IS_OBJECT);
+	RETVAL_BOOL(param->arg_info->type_hint != IS_OBJECT && !(param->arg_info->multi.types & MAY_BE_OBJECT));
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionType::isUnion()
+  Returns whether parameter is a union type */
+ZEND_METHOD(reflection_type, isUnion)
+{
+	reflection_object *intern;
+	type_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->multi.type == ZEND_MULTI_UNION);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionType::isIntersection()
+  Returns whether parameter is an intersection type */
+ZEND_METHOD(reflection_type, isIntersection)
+{
+	reflection_object *intern;
+	type_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->multi.type == ZEND_MULTI_INTERSECTION);
 }
 /* }}} */
 
@@ -3013,7 +3047,9 @@ ZEND_METHOD(reflection_type, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	switch (param->arg_info->type_hint) {
+	if(param->arg_info->multi.type) {
+		RETURN_STR(zend_get_multi_type_declaration(&param->arg_info->multi, 1));
+	} else switch (param->arg_info->type_hint) {
 		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
 		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
 		case IS_OBJECT:
@@ -6742,6 +6778,8 @@ static const zend_function_entry reflection_type_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_type, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_type, isBuiltin, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_type, isUnion, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_type, isIntersection, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, 0)
 	PHP_FE_END
 };

@@ -314,6 +314,17 @@ typedef struct _zend_class_constant {
 	zend_class_entry *ce;
 } zend_class_constant;
 
+typedef struct _zend_multi_type {
+	zend_uchar type;
+	zend_long types;
+	zend_string **names;
+	uint32_t last;
+} zend_multi_type;
+
+#define ZEND_MULTI_UNION 			1
+#define ZEND_MULTI_INTERSECTION 	2
+#define ZEND_MULTI_NAME(m) ((m == ZEND_MULTI_UNION) ? "union" : "intersection")
+
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
@@ -322,6 +333,7 @@ typedef struct _zend_internal_arg_info {
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
+	zend_multi_type multi;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
@@ -332,6 +344,7 @@ typedef struct _zend_arg_info {
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
+	zend_multi_type multi;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,

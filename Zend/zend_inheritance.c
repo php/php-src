@@ -24,6 +24,7 @@
 #include "zend_inheritance.h"
 #include "zend_smart_str.h"
 #include "zend_inheritance.h"
+#include "zend_type_info.h"
 
 static void overriden_ptr_dtor(zval *zv) /* {{{ */
 {
@@ -167,6 +168,111 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
+uint32_t zend_get_multi_type_count(zend_multi_type *m) {
+	uint32_t count = 0;
+
+	if (m->types & MAY_BE_TRUE)
+		count++;
+	if (m->types & MAY_BE_FALSE)
+		count++;
+	if (m->types & MAY_BE_BOOL)
+		count++;
+	if (m->types & MAY_BE_LONG)
+		count++;
+	if (m->types & MAY_BE_DOUBLE)
+		count++;
+	if (m->types & MAY_BE_CALLABLE)
+		count++;
+	if (m->types & MAY_BE_ARRAY)
+		count++;
+	if (m->types & MAY_BE_RESOURCE)
+		count++;
+
+	return count + m->last;
+}
+
+zend_string* zend_get_multi_type_declaration(zend_multi_type *m, zend_bool humans) { /* {{{ */
+	smart_str sm;
+	uint32_t types = m->types, count = zend_get_multi_type_count(m);
+
+	memset(&sm, 0, sizeof(smart_str));	
+
+	smart_str_alloc(&sm, 42, 0);
+
+#define APPEND_MULTI_TYPE_SEP() do { \
+	if (types) { \
+		count--; \
+		if (m->type == ZEND_MULTI_UNION) { \
+			if (humans) { \
+				if (count > 1) { \
+					smart_str_appends(&sm, ", "); \
+				} else { \
+					smart_str_appends(&sm, " or "); \
+				} \
+			} else { \
+				smart_str_appends(&sm, " | "); \
+			} \
+		} else { \
+			if (humans) { \
+				if (count > 1) { \
+					smart_str_appends(&sm, ", "); \
+				} else { \
+					smart_str_appends(&sm, " and "); \
+				} \
+			} else { \
+				smart_str_appends(&sm, " & "); \
+			} \
+		} \
+	} \
+} while(0)
+#define APPEND_MULTI_TYPE(t, c) do { \
+	smart_str_appends(&sm, zend_get_type_by_const_boolean(c)); \
+	types &= ~t; \
+} while(0)
+#define CHECK_MULTI_TYPE(t) \
+	if (types & MAY_BE_##t) { \
+		APPEND_MULTI_TYPE(MAY_BE_##t, IS_##t); \
+		APPEND_MULTI_TYPE_SEP(); \
+	}
+
+	if (types & MAY_BE_OBJECT) {
+		uint32_t it;
+
+		for (it = 0; it < m->last; it++) {
+			smart_str_append(&sm, m->names[it]);
+			if (it + 1 < m->last) {
+				APPEND_MULTI_TYPE_SEP();
+			}
+		}
+
+		types &= ~MAY_BE_OBJECT;
+		APPEND_MULTI_TYPE_SEP();
+	}
+
+	CHECK_MULTI_TYPE(TRUE)
+	CHECK_MULTI_TYPE(FALSE)
+	if (types & MAY_BE_BOOL) {
+		APPEND_MULTI_TYPE(MAY_BE_BOOL, _IS_BOOL);
+		APPEND_MULTI_TYPE_SEP();
+	}
+	CHECK_MULTI_TYPE(LONG)
+	CHECK_MULTI_TYPE(DOUBLE)
+	CHECK_MULTI_TYPE(STRING)
+	CHECK_MULTI_TYPE(ARRAY)
+	CHECK_MULTI_TYPE(CALLABLE)
+	CHECK_MULTI_TYPE(RESOURCE)
+	CHECK_MULTI_TYPE(NULL)
+
+#undef CHECK_MULTI_TYPE
+#undef APPEND_MULTI_TYPE
+#undef APPEND_MULTI_TYPE_EX
+#undef APPEND_MULTI_TYPE_SEP
+
+	smart_str_0(&sm);
+
+	return sm.s;
+} /* }}} */
+
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
@@ -241,6 +347,27 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 	if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
 		/* Incompatible type */
 		return 0;
+	}
+
+	if (ZEND_LOG_XOR(fe_arg_info->multi.types, proto_arg_info->multi.types)) {
+		/* one has multiple types and the other doesn't */
+		return 0;
+	}
+
+	if (fe_arg_info->multi.types) {
+		uint32_t n = 0;
+
+		/* different number of classes */
+		if (fe_arg_info->multi.last != proto_arg_info->multi.last) {
+			return 0;
+		}
+
+		for (n = 0; n < fe_arg_info->multi.last; n++) {
+			/* TODO parent/self/etc */
+			if (!zend_string_equals_ci(fe_arg_info->multi.names[n], proto_arg_info->multi.names[n])) {
+				return 0;
+			}
+		}
 	}
 
 	return 1;
@@ -348,7 +475,15 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
-	if (arg_info->class_name) {
+	if (arg_info->multi.types) {
+		zend_string *decl = 
+			zend_get_multi_type_declaration(&arg_info->multi, 0);
+		smart_str_append(str, decl);
+		if (!return_hint) {
+			smart_str_appends(str, " ");
+		}
+		zend_string_release(decl);
+	} else if (arg_info->class_name) {
 		const char *class_name;
 		size_t class_name_len;
 

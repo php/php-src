@@ -35,6 +35,8 @@ void zend_do_early_binding(void);
 
 void zend_check_deprecated_constructor(const zend_class_entry *ce);
 
+zend_string* zend_get_multi_type_declaration(zend_multi_type *u, zend_bool humans);
+
 END_EXTERN_C()
 
 #endif
