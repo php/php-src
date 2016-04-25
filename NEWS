@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-14 Apr 2016 PHP 7.0.6RC1
+28 Apr 2016 PHP 7.0.6
 
 - Core:
   . Fixed bug #71930 (_zval_dtor_func: Assertion `(arr)->gc.refcount <= 1'
@@ -32,16 +32,14 @@ PHP                                                                        NEWS
     (Michael Sierks)
 
 - Date:
-  . Fixed bug #71889 (DateInterval::format Segmentation fault).
-    (Thomas Punt)
+  . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
 
 - Intl:
-  . Fixed bug #71516 (IntlDateFormatter looses locale if pattern is set
-    via constructor). (Anatol)
-  . Fixed bug #70455 (Missing constant: IntlChar::NO_NUMERIC_VALUE).
-    (Anatol)
-  . Fixed bug #70451, #70452 (Inconsistencies in return values of
-    IntlChar methods). (Daniel Persson)
+  . Fixed bug #71516 (IntlDateFormatter looses locale if pattern is set via
+    constructor). (Anatol)
+  . Fixed bug #70455 (Missing constant: IntlChar::NO_NUMERIC_VALUE). (Anatol)
+  . Fixed bug #70451, #70452 (Inconsistencies in return values of IntlChar
+    methods). (Daniel Persson)
   . Fixed bug #68893 (Stackoverflow in datefmt_create). (Anatol)
   . Fixed bug #66289 (Locale::lookup incorrectly returns en or en_US if locale
     is empty). (Anatol)
@@ -58,14 +56,12 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug #52098 (Own PDOStatement implementation ignore __call()).
     (Daniel kalaspuffar, Julien)
-  . Fixed bug #71447 (Quotes inside comments not properly handled).
-    (Matteo)
+  . Fixed bug #71447 (Quotes inside comments not properly handled). (Matteo)
 
 - PDO_DBlib:
   . Fixed bug #71943 (dblib_handle_quoter needs to allocate an extra byte).
     (Adam Baratz)
-  . Add DBLIB-specific attributes for controlling timeouts.
-    (Adam Baratz)
+  . Add DBLIB-specific attributes for controlling timeouts. (Adam Baratz)
 
 - PDO_pgsql:
   . Fixed bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used).
@@ -165,7 +161,7 @@ PHP                                                                        NEWS
     (nish dot aravamudan at canonical dot com)
 
 - PDO_DBlib:
-  . Bug #54648 (PDO::MSSQL forces format of datetime fields).
+  . Fixed bug #54648 (PDO::MSSQL forces format of datetime fields).
     (steven dot lambeth at gmx dot de, Anatol)
 
 - Phar:
