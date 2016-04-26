@@ -846,6 +846,10 @@ static zend_bool zend_callable_verify_signature_callable(const zend_arg_callable
 		uint32_t num_args = expected_args->n_childs > given_args->n_childs ? given_args->n_childs : expected_args->n_childs;
 
 		while (i < num_args) {
+			if (UNEXPECTED(given_arg_child->is_variadic && !given_arg_child->type_hint)) {
+				return 1;
+			}
+
 			if (UNEXPECTED(!zend_callable_verify_arg_type(expected_arg_child, given_arg_child))) {
 				return 0;
 			}
@@ -925,6 +929,10 @@ static zend_bool zend_callable_verify_signature_function(const zend_arg_callable
 
 		num_args = arg_info->children->n_childs < num_args ? arg_info->children->n_childs : num_args;
 		for (i = 0; i < num_args; i++, cur_arg_info++, cur_exp_arg_info++) {
+			if (UNEXPECTED(cur_arg_info->is_variadic && !cur_arg_info->type_hint)) {
+				return 1;
+			}
+
 			if (UNEXPECTED(!zend_callable_verify_arg_type(cur_arg_info, cur_exp_arg_info) || cur_exp_arg_info->is_variadic != cur_arg_info->is_variadic)) {
 				return 0;
 			}

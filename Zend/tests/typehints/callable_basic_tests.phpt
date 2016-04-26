@@ -14,5 +14,8 @@ $a(function (A $a) {});
 $a = function (callable(): A $a) {};
 $a(function (): A {});
 
+$a = function (callable(A, int) $a) {};
+$a(function (...$everything) {});
+
 ?>
 --EXPECT--

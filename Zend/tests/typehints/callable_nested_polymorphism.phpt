@@ -8,6 +8,9 @@ If it has nested input callable constraints, with each level argument variance s
 class A {}
 class B extends A {}
 
+// Verify variance of callable parameters with related class type hints
+// -------------------------------------------
+
 function elephant(callable(callable(A)) $chipmunk) {
     $chipmunk("giraffe");
 };
@@ -22,6 +25,7 @@ function giraffe(A $a) {
 
 elephant("chipmunk");
 
+// Verify callable return type variance
 // -------------------------------------------
 
 function beetle(callable(): A $fly) {
@@ -34,6 +38,7 @@ function fly(): B {
 
 beetle("fly");
 
+// Verify callable: callable: ... syntax
 // -------------------------------------------
 
 function ostrich(callable(): callable(): B $pidgeotto) {
@@ -50,6 +55,7 @@ function pidgeot(): B {
 
 ostrich("pidgeotto");
 
+// Verify that type variance for related classes works accordingly to the rules
 // -------------------------------------------
 
 function hummingbird(callable(callable(callable(callable(A)))) $falcon) {
@@ -74,6 +80,7 @@ function condor(A $a) {
 
 hummingbird("falcon");
 
+// Verify that additional params on the second level of nesting are acceptable
 // -------------------------------------------
 
 function chimp(callable(callable(A)) $dog) {
@@ -88,8 +95,27 @@ function rat(A $a) {
     var_dump($a);
 }
 
+chimp('dog');
+
+// Verify that variadic parameter without typehint can replace any other params
+// ------------------------------------------
+
+function snake(callable(callable(...$a)) $lion) {
+    $lion("tiger");
+}
+
+function lion(callable(B) $tiger) {
+    $tiger(new B);
+}
+
+function tiger(...$a) {
+    var_dump($a);
+}
+
 ?>
 --EXPECTF--
+object(B)#%d (0) {
+}
 object(B)#%d (0) {
 }
 object(B)#%d (0) {
