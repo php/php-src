@@ -4939,7 +4939,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 					arg_info->multi.names = emalloc(sizeof(zend_string*) * ++arg_info->multi.last);
 				}
 
-				arg_info->multi.types |= (1 << IS_OBJECT);
+				arg_info->multi.types |= MAY_BE_OBJECT;
 				arg_info->multi.names[arg_info->multi.last-1] = name;
 
 				zend_hash_add_empty_element(&classes, name);

@@ -8,8 +8,9 @@ class B {}
 class C {}
 class CC extends C {}
 
-function foo(B|C $foo) {
+function foo(B|C $foo): B|C {
 	var_dump($foo);
+	return $foo;
 }
 
 foo(new CC);

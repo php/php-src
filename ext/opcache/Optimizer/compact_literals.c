@@ -27,6 +27,7 @@
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
+#include "zend_type_info.h"
 #include "zend_vm.h"
 
 #define DEBUG_COMPACT_LITERALS 0
@@ -126,6 +127,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
+	zend_arg_info *arg_info = op_array->arg_info;
 
 	if (op_array->last_literal) {
 		cache_size = 0;
@@ -283,9 +285,14 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_RECV_INIT:
 					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 0, 0, 1);
-					if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != -1) {
-						Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = cache_size;
-						cache_size += sizeof(void *);
+					if (arg_info[opline->op1.num - 1].multi.types & MAY_BE_OBJECT) {
+						opline->op2.num = cache_size;
+						cache_size += sizeof(void *) * arg_info[opline->op1.num - 1].multi.last;
+					} else {
+						if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != -1) {
+							Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = cache_size;
+							cache_size += sizeof(void *);
+						}
 					}
 					break;
 				case ZEND_DECLARE_FUNCTION:
@@ -296,10 +303,25 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:
+					if (opline->op2.num != -1) {
+						if (arg_info[opline->op1.num - 1].multi.types & MAY_BE_OBJECT) {
+							opline->op2.num = cache_size;
+							cache_size += sizeof(void *) * arg_info[opline->op1.num - 1].multi.last;
+						} else {
+							opline->op2.num = cache_size;
+							cache_size += sizeof(void *);
+						}
+					}
+					break;
 				case ZEND_VERIFY_RETURN_TYPE:
 					if (opline->op2.num != -1) {
-						opline->op2.num = cache_size;
-						cache_size += sizeof(void *);
+						if (arg_info[-1].multi.types & MAY_BE_OBJECT) {
+							opline->op2.num = cache_size;
+							cache_size += sizeof(void *) * arg_info[-1].multi.last;
+						} else {
+							opline->op2.num = cache_size;
+							cache_size += sizeof(void *);
+						}
 					}
 				default:
 					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
