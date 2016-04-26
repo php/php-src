@@ -171,6 +171,8 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 uint32_t zend_get_multi_type_count(zend_multi_type *m) {
 	uint32_t count = 0;
 
+	if (m->types & MAY_BE_NULL)
+		count++;
 	if (m->types & MAY_BE_TRUE)
 		count++;
 	if (m->types & MAY_BE_FALSE)

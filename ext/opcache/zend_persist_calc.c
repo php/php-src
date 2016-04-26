@@ -233,6 +233,13 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			if (arg_info[i].class_name) {
 				ADD_INTERNED_STRING(arg_info[i].class_name, 1);
 			}
+			if (arg_info[i].multi.types && arg_info[i].multi.names) {
+				uint32_t it;
+				ADD_DUP_SIZE(arg_info[i].multi.names, sizeof(zend_string *) * arg_info[i].multi.last);
+				for (it = 0; it < arg_info[i].multi.last; it++) {
+					ADD_INTERNED_STRING(arg_info[i].multi.names[it], 1);
+				}
+			}
 		}
 	}
 

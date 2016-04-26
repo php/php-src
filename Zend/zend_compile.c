@@ -5118,7 +5118,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 					ZEND_MULTI_NAME(arg_info->multi.type));
 			}
 
-			if (type_ast->kind == ZEND_AST_TYPE) {
+			if (type_ast->kind == ZEND_AST_TYPE_LIST && zend_ast_get_list(type_ast)->child[0]->kind == ZEND_AST_TYPE) {
 				if (arg_info->type_hint == IS_ARRAY) {
 					if (default_ast && !has_null_default
 						&& Z_TYPE(default_node.u.constant) != IS_ARRAY

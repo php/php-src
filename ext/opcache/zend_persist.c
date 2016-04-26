@@ -608,6 +608,13 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				if (arg_info[i].class_name) {
 					zend_accel_store_interned_string(arg_info[i].class_name);
 				}
+				if (arg_info[i].multi.types && arg_info[i].multi.names) {
+					uint32_t it;
+					zend_accel_store(arg_info[i].multi.names, sizeof(zend_string *) * arg_info[i].multi.last);
+					for (it = 0; it < arg_info[i].multi.last; it++) {
+						zend_accel_store_interned_string(arg_info[i].multi.names[it]);
+					}
+				}
 			}
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {

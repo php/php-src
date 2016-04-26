@@ -2208,7 +2208,28 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 	uint32_t tmp = 0;
 
 	*pce = NULL;
-	if (arg_info->class_name) {
+	if (arg_info->multi.types) {
+		if (arg_info->multi.type == ZEND_MULTI_INTERSECTION) {
+			/* only type currently supported to be in an intersection with other types: callable */
+			tmp |= arg_info->multi.types & ~MAY_BE_CALLABLE;
+		} else {
+			if (arg_info->multi.types & MAY_BE_CALLABLE) {
+				tmp |= MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY;
+			}
+			tmp |= arg_info->multi.types & ~MAY_BE_CALLABLE;
+			if (tmp & MAY_BE_BOOL) {
+				tmp = (tmp & ~MAY_BE_BOOL) | MAY_BE_TRUE | MAY_BE_FALSE;
+			}
+		}
+		if (tmp & MAY_BE_ARRAY) {
+			tmp |= MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		}
+		if (arg_info->multi.last >= 1 && (arg_info->multi.type == ZEND_MULTI_INTERSECTION || arg_info->multi.last == 1)) {
+			zend_string *lcname = zend_string_tolower(arg_info->multi.names[0]);
+			*pce = get_class_entry(script, lcname);
+			zend_string_release(lcname);
+		}
+	} else if (arg_info->class_name) {
 		// class type hinting...
 		zend_string *lcname = zend_string_tolower(arg_info->class_name);
 		tmp |= MAY_BE_OBJECT;
