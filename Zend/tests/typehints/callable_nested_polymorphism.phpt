@@ -24,7 +24,7 @@ elephant("chipmunk");
 
 // -------------------------------------------
 
-function beetle(callable: A $fly) {
+function beetle(callable(): A $fly) {
     var_dump($fly());
 };
 
@@ -36,11 +36,11 @@ beetle("fly");
 
 // -------------------------------------------
 
-function ostrich(callable: callable: B $pidgeotto) {
+function ostrich(callable(): callable(): B $pidgeotto) {
     var_dump($pidgeotto()());
 };
 
-function pidgeotto(): callable: B {
+function pidgeotto(): callable(): B {
     return "pidgeot";
 }
 
