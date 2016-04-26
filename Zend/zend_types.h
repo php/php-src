@@ -138,6 +138,7 @@ struct _zval_struct {
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
 		uint32_t     access_flags;         /* class constant access flags */
+		uint32_t     property_guard;       /* single property guard */
 	} u2;
 };
 

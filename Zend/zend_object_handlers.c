@@ -486,31 +486,58 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 /* }}} */
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
-	efree_size(Z_PTR_P(el), sizeof(zend_ulong));
+	uint32_t *ptr = (uint32_t*)Z_PTR_P(el);
+	if (EXPECTED(!(((zend_uintptr_t)ptr) & 1))) {
+		efree_size(ptr, sizeof(uint32_t));
+	}
 }
 /* }}} */
 
-static zend_long *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
+static uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
 {
 	HashTable *guards;
-	zend_long stub, *guard;
+	zval *zv;
+	uint32_t *ptr;
 
 	ZEND_ASSERT(GC_FLAGS(zobj) & IS_OBJ_USE_GUARDS);
-	if (GC_FLAGS(zobj) & IS_OBJ_HAS_GUARDS) {
-		guards = Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]);
+	zv = zobj->properties_table + zobj->ce->default_properties_count;
+	if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
+		zend_string *str = Z_STR_P(zv);
+		if (EXPECTED(str == member) ||
+		     /* hash values are always pred-calculated here */
+		    (EXPECTED(ZSTR_H(str) == ZSTR_H(member)) &&
+		     EXPECTED(ZSTR_LEN(str) == ZSTR_LEN(member)) &&
+		     EXPECTED(memcmp(ZSTR_VAL(str), ZSTR_VAL(member), ZSTR_LEN(member)) == 0))) {
+			return &zv->u2.property_guard;
+		} else if (EXPECTED(zv->u2.property_guard == 0)) {
+			zend_string_release(Z_STR_P(zv));
+			ZVAL_STR_COPY(zv, member);
+			return &zv->u2.property_guard;
+		} else {
+			ALLOC_HASHTABLE(guards);
+			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
+			/* mark pointer as "special" using low bit */
+			zend_hash_add_new_ptr(guards, member, (void*)(((zend_uintptr_t)&zv->u2.property_guard) | 1));
+			ZVAL_ARR(zv, guards);
+		}
+	} else if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
+		guards = Z_ARRVAL_P(zv);
 		ZEND_ASSERT(guards != NULL);
-		if ((guard = (zend_long *)zend_hash_find_ptr(guards, member)) != NULL) {
-			return guard;
+		zv = zend_hash_find(guards, member);
+		if (zv != NULL) {
+			return (uint32_t*)(((zend_uintptr_t)Z_PTR_P(zv)) & ~1);
 		}
 	} else {
-		ALLOC_HASHTABLE(guards);
-		zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
-		Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]) = guards;
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
 		GC_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;
+		ZVAL_STR_COPY(zv, member);
+		zv->u2.property_guard = 0;
+		return &zv->u2.property_guard;
 	}
-
-	stub = 0;
-	return (zend_long *)zend_hash_add_mem(guards, member, &stub, sizeof(zend_ulong));
+	/* we have to allocate uint32_t separately because ht->arData may be reallocated */
+	ptr = (uint32_t*)emalloc(sizeof(uint32_t));
+	*ptr = 0;
+	return (uint32_t*)zend_hash_add_new_ptr(guards, member, ptr);
 }
 /* }}} */
 
@@ -555,7 +582,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	/* magic isset */
 	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
 		zval tmp_object, tmp_result;
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
 			ZVAL_COPY(&tmp_object, object);
@@ -579,7 +606,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	/* magic get */
 	if (zobj->ce->__get) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		if (!((*guard) & IN_GET)) {
 			zval tmp_object;
 
@@ -674,7 +701,7 @@ found:
 
 	/* magic set */
 	if (zobj->ce->__set) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 	    if (!((*guard) & IN_SET)) {
 			zval tmp_object;
@@ -944,7 +971,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 
 	/* magic unset */
 	if (zobj->ce->__unset) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		if (!((*guard) & IN_UNSET)) {
 			zval tmp_object;
 
@@ -1507,7 +1534,7 @@ found:
 
 	result = 0;
 	if ((has_set_exists != 2) && zobj->ce->__isset) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;
