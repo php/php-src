@@ -1116,7 +1116,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 
 					smart_str_0(&given_msg);
 					smart_str_0(&needed_msg);
-					zend_verify_arg_error(zf, arg_num, "be callable of compliant signature: ", needed_msg.s->val, given_msg.s->val, "", arg);
+					zend_verify_arg_error(zf, arg_num, "be compliant with ", needed_msg.s->val, "incompatible ", given_msg.s->val, arg);
 					zend_string_release(given_msg.s);
 					zend_string_release(needed_msg.s);
 					return 0;
@@ -1326,7 +1326,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 
 					smart_str_0(&given_msg);
 					smart_str_0(&needed_msg);
-					zend_verify_return_error(zf, "be callable of compliant signature: ", needed_msg.s->val, given_msg.s->val, "");
+					zend_verify_return_error(zf, "be compliant with ", needed_msg.s->val, "incompatible ", given_msg.s->val);
 					zend_string_release(given_msg.s);
 					zend_string_release(needed_msg.s);
 				}
