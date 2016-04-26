@@ -898,7 +898,8 @@ static zend_bool zend_callable_verify_arg_type(const zend_arg_info *arg_info, co
 
 static zend_bool zend_callable_verify_signature_function(const zend_arg_callable_info *arg_info, const zend_function *zf)
 {
-	uint32_t num_args = zf->common.num_args + ((zf->common.fn_flags & ZEND_ACC_VARIADIC) ? 1 : 0);
+	uint32_t fn_num_args = zf->common.num_args + ((zf->common.fn_flags & ZEND_ACC_VARIADIC) ? 1 : 0);
+	uint32_t fn_args_required = zf->common.required_num_args;
 
 	if (EXPECTED(!(arg_info->arg_flags & (ZEND_CALLABLE_HAS_RETURN_TYPE | ZEND_CALLABLE_HAS_ARGS_DECLARED)))) {
 		return 1;
@@ -908,7 +909,9 @@ static zend_bool zend_callable_verify_signature_function(const zend_arg_callable
 		return 0;
 	}
 
-	if (UNEXPECTED((arg_info->arg_flags & ZEND_CALLABLE_EXPECTS_ZERO_ARGS) && num_args > 0)) {
+	if (UNEXPECTED(((arg_info->arg_flags & ZEND_CALLABLE_EXPECTS_ZERO_ARGS) && fn_args_required > 0)
+		|| (!(arg_info->arg_flags & ZEND_CALLABLE_EXPECTS_ZERO_ARGS) && fn_args_required > arg_info->children->n_childs))) {
+
 		return 0;
 	}
 
@@ -918,22 +921,29 @@ static zend_bool zend_callable_verify_signature_function(const zend_arg_callable
 		return 0;
 	}
 
-	if (UNEXPECTED((arg_info->arg_flags & ZEND_CALLABLE_HAS_ARGS_DECLARED) && !(arg_info->arg_flags & ZEND_CALLABLE_EXPECTS_ZERO_ARGS) && zf->common.arg_info)) {
+	if (UNEXPECTED(fn_num_args > 0)) {
 		uint32_t i;
+		uint32_t num_args = (arg_info->arg_flags & ZEND_CALLABLE_EXPECTS_ZERO_ARGS) ? 0 : arg_info->children->n_childs;
 		zend_arg_info *cur_exp_arg_info = arg_info->children->child;
 		zend_arg_info *cur_arg_info = zf->common.arg_info;
 
-		if (UNEXPECTED(arg_info->children->n_childs < num_args)) {
-			return 0;
-		}
-
-		num_args = arg_info->children->n_childs < num_args ? arg_info->children->n_childs : num_args;
-		for (i = 0; i < num_args; i++, cur_arg_info++, cur_exp_arg_info++) {
-			if (UNEXPECTED(cur_arg_info->is_variadic && !cur_arg_info->type_hint)) {
+		/* iterate over expected arg_info first */
+		for (i = 0; i < num_args; i++) {
+			/* if given function has less parameters than callable typehint we don't need to process the rest */
+			if (UNEXPECTED(i >= fn_num_args)) {
 				return 1;
 			}
-
-			if (UNEXPECTED(!zend_callable_verify_arg_type(cur_arg_info, cur_exp_arg_info) || cur_exp_arg_info->is_variadic != cur_arg_info->is_variadic)) {
+			/* if current parameter is variadic without type hint it is compatible with everything */
+			if (UNEXPECTED(cur_arg_info[i].is_variadic && !cur_arg_info[i].type_hint)) {
+				return 1;
+			}
+			if (UNEXPECTED(!zend_callable_verify_arg_type(&cur_arg_info[i], &cur_exp_arg_info[i]) || cur_exp_arg_info[i].is_variadic != cur_arg_info[i].is_variadic)) {
+				return 0;
+			}
+		}
+		/* iterate over the rest of parameters in given function (they are all optional) and make sure they don't have a typehint */
+		for (; i < fn_num_args; i++) {
+			if (UNEXPECTED(cur_arg_info[i].type_hint)) {
 				return 0;
 			}
 		}
