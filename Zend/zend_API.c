@@ -3412,7 +3412,6 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 	}
 
 	fci->size = sizeof(*fci);
-	fci->function_table = fcc->calling_scope ? &fcc->calling_scope->function_table : EG(function_table);
 	fci->object = fcc->object;
 	ZVAL_COPY_VALUE(&fci->function_name, callable);
 	fci->retval = NULL;

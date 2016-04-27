@@ -2075,7 +2075,6 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	ZVAL_UNDEF(&retval);
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = num_args;

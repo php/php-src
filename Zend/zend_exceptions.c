@@ -678,7 +678,6 @@ ZEND_METHOD(exception, __toString)
 		zend_long line = zval_get_long(GET_PROPERTY(exception, "line"));
 
 		fci.size = sizeof(fci);
-		fci.function_table = &Z_OBJCE_P(exception)->function_table;
 		ZVAL_COPY_VALUE(&fci.function_name, &fname);
 		fci.object = Z_OBJ_P(exception);
 		fci.retval = &trace;

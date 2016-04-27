@@ -299,7 +299,6 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		zval retval;
 
 		fci.size = sizeof(fci);
-		fci.function_table = &uwrap->ce->function_table;
 		ZVAL_UNDEF(&fci.function_name);
 		fci.object = Z_OBJ_P(object);
 		fci.retval = &retval;

@@ -46,7 +46,7 @@ ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 
 /* true globals */
-ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0}, {{0}}, {0}}, NULL, NULL, NULL, 0, 0 };
+ZEND_API const zend_fcall_info empty_fcall_info = { 0, {{0}, {{0}}, {0}}, NULL, NULL, NULL, 0, 0 };
 ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
@@ -663,18 +663,11 @@ ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change) /* {{{ */
 }
 /* }}} */
 
-int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[]) /* {{{ */
-{
-	return call_user_function_ex(function_table, object, function_name, retval_ptr, param_count, params, 1, NULL);
-}
-/* }}} */
-
-int _call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation) /* {{{ */
+int _call_user_function_ex(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation) /* {{{ */
 {
 	zend_fcall_info fci;
 
 	fci.size = sizeof(fci);
-	fci.function_table = function_table;
 	fci.object = object ? Z_OBJ_P(object) : NULL;
 	ZVAL_COPY_VALUE(&fci.function_name, function_name);
 	fci.retval = retval_ptr;
@@ -1023,7 +1016,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	}
 
 	fcall_info.size = sizeof(fcall_info);
-	fcall_info.function_table = EG(function_table);
 	ZVAL_STR_COPY(&fcall_info.function_name, EG(autoload_func)->common.function_name);
 	fcall_info.retval = &local_retval;
 	fcall_info.param_count = 1;

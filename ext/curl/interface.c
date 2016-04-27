@@ -1342,7 +1342,6 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			ZVAL_STRINGL(&argv[1], data, length);
 
 			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
 			fci.object = NULL;
 			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
 			fci.retval = &retval;
@@ -1392,7 +1391,6 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			ZVAL_STRING(&argv[2], string);
 
 			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
 			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
 			fci.object = NULL;
 			fci.retval = &retval;
@@ -1448,7 +1446,6 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			ZVAL_LONG(&argv[4], (zend_long)ulnow);
 
 			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
 			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
 			fci.object = NULL;
 			fci.retval = &retval;
@@ -1510,7 +1507,6 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			ZVAL_LONG(&argv[2], (int)size * nmemb);
 
 			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
 			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
 			fci.object = NULL;
 			fci.retval = &retval;
@@ -1577,7 +1573,6 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			ZVAL_STRINGL(&argv[1], data, length);
 
 			fci.size = sizeof(fci);
-			fci.function_table = EG(function_table);
 			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
 			fci.object = NULL;
 			fci.retval = &retval;

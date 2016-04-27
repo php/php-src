@@ -62,7 +62,6 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 	spl_instantiate(pce, retval);
 
 	fci.size = sizeof(zend_fcall_info);
-	fci.function_table = &pce->function_table;
 	ZVAL_STR(&fci.function_name, func->common.function_name);
 	fci.object = Z_OBJ_P(retval);
 	fci.retval = &dummy;

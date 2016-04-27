@@ -740,7 +740,6 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (ce->constructor) {
-		fci->function_table = &ce->function_table;
 		ZVAL_UNDEF(&fci->function_name);
 		fci->retval = &stmt->fetch.cls.retval;
 		fci->param_count = 0;
