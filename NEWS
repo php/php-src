@@ -170,7 +170,8 @@ PHP                                                                        NEWS
   . Fixed bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
 
 - Zip:
-  . Fixed bug #71923 (integer overflow in ZipArchive::getFrom*). (Stas)
+  . Fixed bug #71923 (integer overflow in ZipArchive::getFrom*).
+    (CVE-2016-3078) (Stas)
 
 31 Mar 2016 PHP 7.0.5
 
