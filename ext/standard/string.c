@@ -5374,7 +5374,7 @@ PHP_FUNCTION(str_pad)
 		return;
 	}
 
-	result = zend_string_safe_alloc(ZSTR_LEN(input), 1, num_pad_chars, 0);
+	result = zend_string_safe_alloc(1, ZSTR_LEN(input), num_pad_chars, 0);
 	ZSTR_LEN(result) = 0;
 
 	/* We need to figure out the left/right padding lengths. */
