@@ -5284,7 +5284,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 }
 /* }}} */
 
-static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl) /* {{{ */
+static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_ast *interface_ast) /* {{{ */
 {
 	zend_ast *params_ast = decl->child[0];
 	zend_string *name = decl->name, *lcname, *key;
@@ -5313,9 +5313,47 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 	zend_hash_update_ptr(CG(function_table), key, op_array);
 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		znode inode;
+
+		inode.op_type = IS_UNUSED;
+		if (interface_ast) {
+			zend_string *interface_name = zend_ast_get_str(interface_ast);
+			uint32_t fetch_type = zend_get_class_fetch_type(interface_name);
+
+			if (fetch_type != ZEND_FETCH_CLASS_DEFAULT) {
+				switch (fetch_type) {
+					case ZEND_FETCH_CLASS_PARENT:
+						zend_error_noreturn(E_COMPILE_ERROR, "functional interface cannot implement parent");
+					break;
+					
+					case ZEND_FETCH_CLASS_STATIC:
+						zend_error_noreturn(E_COMPILE_ERROR, "functional interface cannot implement static");
+					break;
+
+					case ZEND_FETCH_CLASS_SELF:
+						zend_error_noreturn(E_COMPILE_ERROR, "functional interface cannot implement self");
+					break;
+				}
+			}
+
+			opline = zend_emit_op(&inode, ZEND_FETCH_CLASS, NULL, NULL);
+			opline->extended_value = fetch_type | ZEND_FETCH_CLASS_EXCEPTION;
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = 
+				zend_add_class_name_literal(
+					CG(active_op_array), 
+						zend_resolve_class_name(
+							interface_name, interface_ast->attr));
+		}
+
 		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
+		if (inode.op_type != IS_UNUSED) {
+			SET_NODE(opline->op2, &inode);
+		} else {
+			SET_UNUSED(opline->op2);
+		}
 	} else {
 		opline = get_next_op(CG(active_op_array));
 		opline->opcode = ZEND_DECLARE_FUNCTION;
@@ -5337,6 +5375,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
+	zend_ast *interface_ast = decl->child[4];
+
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -5360,7 +5400,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		zend_bool has_body = stmt_ast != NULL;
 		zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		zend_begin_func_decl(result, op_array, decl);
+		zend_begin_func_decl(result, op_array, decl, interface_ast);
 		if (uses_ast) {
 			zend_compile_closure_binding(result, uses_ast);
 		}

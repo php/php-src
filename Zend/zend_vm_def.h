@@ -7223,12 +7223,13 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
+ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, ANY)
 {
 	USE_OPLINE
 	zval *zfunc;
 	zval *object;
 	zend_class_entry *called_scope;
+	zend_class_entry *interface = NULL;
 
 	SAVE_OPLINE();
 
@@ -7247,8 +7248,15 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 		called_scope = Z_CE(EX(This));
 		object = NULL;
 	}
-	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc),
-		EG(scope), called_scope, object);
+
+	if (OP2_TYPE != IS_UNUSED) {
+		interface = zend_get_functional_interface(
+			Z_STR_P(EX_CONSTANT(opline->op1)), 
+			Z_FUNC_P(zfunc), Z_CE_P(EX_VAR(opline->op2.var)));
+	}
+
+	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), 
+		EG(scope), called_scope, object, interface);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
