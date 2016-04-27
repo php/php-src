@@ -26,7 +26,7 @@ int(1)
 int(0)
 string(1) "1"
 
-Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be integer or float or string, null given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be integer, float or string, null given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foo(NULL)
 #1 {main}

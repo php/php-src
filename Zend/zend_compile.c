@@ -5114,11 +5114,25 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			}
 
 			if (arg_info->multi.types && default_ast && !has_null_default) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Default value for %s types can only be NULL",
-					ZEND_MULTI_NAME(arg_info->multi.type));
-			}
-
-			if (type_ast->kind == ZEND_AST_TYPE_LIST && zend_ast_get_list(type_ast)->child[0]->kind == ZEND_AST_TYPE) {
+				zend_uchar default_type = Z_TYPE(default_node.u.constant);
+				if (Z_CONSTANT(default_node.u.constant)) {
+					/* empty, do runtime check */
+				} else if (arg_info->multi.type == ZEND_MULTI_INTERSECTION) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Default value for intersection types can only be NULL");
+				} else if (!(arg_info->multi.types & (1 << default_type)) && ((default_type != IS_TRUE && default_type != IS_FALSE) || !(arg_info->multi.types & MAY_BE_BOOL))) {
+					if (default_type == IS_LONG && (arg_info->multi.types & MAY_BE_DOUBLE)) {
+						convert_to_double(&default_node.u.constant);
+					} else {
+						arg_info->multi.types = (arg_info->multi.types & ~MAY_BE_OBJECT) | MAY_BE_NULL;
+						arg_info->multi.last = 0;
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Default type %s does not match allowed types %s for parameter %d",
+							zend_get_type_by_const_boolean(default_type),
+							ZSTR_VAL(zend_get_multi_type_declaration(&arg_info->multi, 1)),
+							i + 1);
+					}
+				}
+			} else if (type_ast->kind == ZEND_AST_TYPE_LIST && zend_ast_get_list(type_ast)->child[0]->kind == ZEND_AST_TYPE) {
 				if (arg_info->type_hint == IS_ARRAY) {
 					if (default_ast && !has_null_default
 						&& Z_TYPE(default_node.u.constant) != IS_ARRAY

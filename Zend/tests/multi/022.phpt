@@ -7,4 +7,4 @@ function foo(array & string & stdClass $foo) {}
 
 ?>
 --EXPECTF--
-Fatal error: Cannot require parameters to be stdClass and string and array at the same time in intersection types in %s on line %d
+Fatal error: Cannot require parameters to be stdClass, string and array at the same time in intersection types in %s on line %d

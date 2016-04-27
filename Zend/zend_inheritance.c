@@ -183,11 +183,11 @@ uint32_t zend_get_multi_type_count(zend_multi_type *m) {
 		count++;
 	if (m->types & MAY_BE_DOUBLE)
 		count++;
+	if (m->types & MAY_BE_STRING)
+		count++;
 	if (m->types & MAY_BE_CALLABLE)
 		count++;
 	if (m->types & MAY_BE_ARRAY)
-		count++;
-	if (m->types & MAY_BE_RESOURCE)
 		count++;
 
 	return count + m->last;
@@ -262,7 +262,6 @@ zend_string* zend_get_multi_type_declaration(zend_multi_type *m, zend_bool human
 	CHECK_MULTI_TYPE(STRING)
 	CHECK_MULTI_TYPE(ARRAY)
 	CHECK_MULTI_TYPE(CALLABLE)
-	CHECK_MULTI_TYPE(RESOURCE)
 	CHECK_MULTI_TYPE(NULL)
 
 #undef CHECK_MULTI_TYPE

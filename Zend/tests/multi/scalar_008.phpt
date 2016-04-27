@@ -3,10 +3,11 @@ Scalar type conversion: int|float|true
 --FILE--
 <?php
 
-function foo(int|float|true $foo) {
+function foo(int|float|true $foo = true) {
         var_dump($foo);
 }
 
+foo();
 foo(1);
 foo(1.1);
 foo(false);
@@ -18,6 +19,7 @@ foo("");
 
 ?>
 --EXPECTF--
+bool(true)
 int(1)
 float(1.1)
 int(0)

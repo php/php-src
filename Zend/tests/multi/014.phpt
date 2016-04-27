@@ -5,4 +5,4 @@ union default values (fail)
 function (IFoo | IBar $thing = 1) {};
 ?>
 --EXPECTF--
-Fatal error: Default value for union types can only be NULL in %s on line 2
+Fatal error: Default type integer does not match allowed types null for parameter 1 in %s on line 2
