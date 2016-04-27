@@ -1145,7 +1145,7 @@ ZEND_FUNCTION(gmp_export)
 		size_t bits_per_word = size * 8;
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
 
-		zend_string *out_string = zend_string_safe_alloc(count, out_len, 0, 0);
+		zend_string *out_string = zend_string_safe_alloc(count, size, 0, 0);
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
 		ZSTR_VAL(out_string)[ZSTR_LEN(out_string)] = '\0';
 
