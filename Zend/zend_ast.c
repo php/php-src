@@ -962,6 +962,57 @@ static void zend_ast_export_class_no_header(smart_str *str, zend_ast_decl *decl,
 	smart_str_appends(str, "}");
 }
 
+static void zend_ast_export_callable_args_list(smart_str *str, zend_ast_list *list, int indent)
+{
+	uint32_t i = 0;
+	zend_ast *ast;
+
+	while (i < list->children) {
+		if (i != 0) {
+			smart_str_appends(str, ", ");
+		}
+
+		ast = list->child[i];
+
+		if (ast->child[0]) {
+			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+
+			if (ast->child[1]) {
+				smart_str_appendc(str, ' ');
+			}
+		}
+		if (ast->attr & ZEND_PARAM_REF) {
+			smart_str_appendc(str, '&');
+		}
+		if (ast->attr & ZEND_PARAM_VARIADIC) {
+			smart_str_appends(str, "...");
+		}
+
+		if (ast->child[1]) {
+			smart_str_appendc(str, '$');
+			zend_ast_export_name(str, ast->child[1], 0, indent);
+		}
+
+		i++;
+	}
+}
+
+static void zend_ast_export_callable_type(smart_str *str, zend_ast *ast, int indent)
+{
+	smart_str_appends(str, "callable");
+
+	if (ast->child[0]) {
+		smart_str_appendc(str, '(');
+		zend_ast_export_callable_args_list(str, zend_ast_get_list(ast->child[0]), indent);
+		smart_str_appendc(str, ')');
+	}
+
+	if (ast->child[1]) {
+		smart_str_appends(str, ": ");
+		zend_ast_export_ex(str, ast->child[1], 0, indent);
+	}
+}
+
 #define BINARY_OP(_op, _p, _pl, _pr) do { \
 		op = _op; \
 		p = _p; \
@@ -1175,9 +1226,11 @@ simple_list:
 		case ZEND_AST_TYPE:
 			switch (ast->attr) {
 				case IS_ARRAY:    APPEND_STR("array");
-				case IS_CALLABLE: APPEND_STR("callable");
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
+			break;
+		case ZEND_AST_TYPE_CALLABLE:
+			zend_ast_export_callable_type(str, ast, indent);
 			break;
 
 		/* 1 child node */
