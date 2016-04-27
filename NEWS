@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fix bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
     offset). (Stas)
 
+- XML:
+   . Fix bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
+
 31 Mar 2016, PHP 5.5.34
 
 - Fileinfo:
