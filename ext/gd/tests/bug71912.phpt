@@ -7,10 +7,10 @@ Bug #71912 (libgd: signedness vulnerability)
 ?>
 --FILE--
 <?php
-imagecreatefromgd2(__DIR__."/invalid_neg_size.gd2");
+imagecreatefromgd2(__DIR__ . DIRECTORY_SEPARATOR . "invalid_neg_size.gd2");
 ?>
 OK
 --EXPECTF--
 
-Warning: imagecreatefromgd2(): '%s/invalid_neg_size.gd2' is not a valid GD2 file in %s/bug71912.php on line %d
+Warning: imagecreatefromgd2(): '%s%einvalid_neg_size.gd2' is not a valid GD2 file in %s%ebug71912.php on line %d
 OK
