@@ -439,8 +439,9 @@ PHP_FUNCTION(bcpowmod)
 	scale_int = (int) ((int)scale < 0 ? 0 : scale);
 
 	if (bc_raisemod(first, second, mod, &result, scale_int) != -1) {
-		if (result->n_scale > scale) {
-			result->n_scale = (int)scale;
+		if (result->n_scale > scale_int) {
+			result = split_bc_num(result);
+			result->n_scale = scale_int;
 		}
 		RETVAL_STR(bc_num2str(result));
 	} else {
