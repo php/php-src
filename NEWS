@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
+- BCmath:
+  . Fixed bug #72093 (bcpowmod accepts negative scale and corrupts
+    _one_ definition). (Stas)
+
 - Curl:
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
     (Michael Sierks)    
@@ -16,8 +20,16 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
 
+- EXIF:
+  . Fixed bug #72094 (Out of bounds heap read access in exif header processing). (Stas)
+
 - GD: 
   . Fixed bug #71952 (Corruption inside imageaffinematrixget). (Stas)
+  . Fixed bug #71912 (libgd: signedness vulnerability). (Stas)
+
+- Intl:
+  . Fixed bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
+    offset). (Stas)
 
 - OCI8:
   . Fixed bug #71422 (Fix ORA-01438: value larger than specified precision
@@ -47,6 +59,9 @@ PHP                                                                        NEWS
   . Fixed bug #71840 (Unserialize accepts wrongly data). (Ryat, Laruence)
   . Fixed bug #67512 (php_crypt() crashes if crypt_r() does not exist or
     _REENTRANT is not defined). (Nikita)
+
+- XML:
+  . Fixed bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
 
 31 Mar 2016, PHP 5.6.20
 
