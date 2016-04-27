@@ -79,12 +79,22 @@ PHP                                                                        NEWS
   . Fixed bug #71980 (Decorated/Nested Generator is Uncloseable in Finally).
     (Nikita)
 
+- BCmath:
+  . Fixed bug #72093 (bcpowmod accepts negative scale and corrupts
+    _one_ definition). (Stas)
+
 - Curl:
   . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
     (Michael Sierks)
 
 - Date:
   . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
+
+- EXIF:
+  . Fixed bug #72094 (Out of bounds heap read access in exif header processing). (Stas)
+
+- GD:
+  . Fixed bug #71912 (libgd: signedness vulnerability). (Stas)
 
 - Intl:
   . Fixed bug #71516 (IntlDateFormatter looses locale if pattern is set via
@@ -97,6 +107,8 @@ PHP                                                                        NEWS
     is empty). (Anatol)
   . Fixed bug #70484 (selectordinal doesn't work with named parameters).
     (Anatol)
+  . Fixed bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
+    offset). (Stas)
 
 - ODBC:
   . Fixed bug #63171 (Script hangs after max_execution_time). (Remi)
@@ -153,6 +165,12 @@ PHP                                                                        NEWS
   . Fixed bug #71827 (substr_replace bug, string length). (krakjoe)
   . Fixed bug #67512 (php_crypt() crashes if crypt_r() does not exist or
     _REENTRANT is not defined). (Nikita)
+
+- XML:
+  . Fixed bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
+
+- Zip:
+  . Fixed bug #71923 (integer overflow in ZipArchive::getFrom*). (Stas)
 
 31 Mar 2016 PHP 7.0.5
 
