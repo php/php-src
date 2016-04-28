@@ -51,6 +51,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #72031 (array_column() against an array of objects discards all
     values matching null). (Nikita)
+  . Fixed bug #72116 (array_fill optimization breaks implementation). (Bob)
 
 28 Apr 2016 PHP 7.0.6
 
@@ -170,7 +171,8 @@ PHP                                                                        NEWS
   . Fixed bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
 
 - Zip:
-  . Fixed bug #71923 (integer overflow in ZipArchive::getFrom*). (Stas)
+  . Fixed bug #71923 (integer overflow in ZipArchive::getFrom*).
+    (CVE-2016-3078) (Stas)
 
 31 Mar 2016 PHP 7.0.5
 
