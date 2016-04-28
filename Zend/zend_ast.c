@@ -256,23 +256,23 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 		case ZEND_AST_ZVAL:
 		{
 			zval *zv = zend_ast_get_zval(ast);
-			if (scope) {
-				/* class constants may be updated in-place */
-				if (Z_OPT_CONSTANT_P(zv)) {
-					if (UNEXPECTED(zval_update_constant_ex(zv, 1, scope) != SUCCESS)) {
+
+			if (Z_OPT_CONSTANT_P(zv)) {
+				if (!(Z_TYPE_FLAGS_P(zv) & IS_TYPE_IMMUTABLE)) {
+					if (UNEXPECTED(zval_update_constant_ex(zv, scope) != SUCCESS)) {
+						ret = FAILURE;
+						break;
+					}
+					ZVAL_COPY(result, zv);
+				} else {
+					ZVAL_COPY_VALUE(result, zv);
+					if (UNEXPECTED(zval_update_constant_ex(result, scope) != SUCCESS)) {
 						ret = FAILURE;
 						break;
 					}
 				}
-				ZVAL_DUP(result, zv);
 			} else {
-				ZVAL_DUP(result, zv);
-				if (Z_OPT_CONSTANT_P(result)) {
-					if (UNEXPECTED(zval_update_constant_ex(result, 1, scope) != SUCCESS)) {
-						ret = FAILURE;
-						break;
-					}
-				}
+				ZVAL_COPY(result, zv);
 			}
 			break;
 		}

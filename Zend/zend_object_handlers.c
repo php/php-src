@@ -271,12 +271,24 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 
 static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce) /* {{{ */
 {
+	zend_class_entry *scope;
+
 	if (property_info->flags & ZEND_ACC_PUBLIC) {
 		return 1;
 	} else if (property_info->flags & ZEND_ACC_PRIVATE) {
-		return (ce == EG(scope) || property_info->ce == EG(scope));
+		if (EG(fake_scope)) {
+			scope = EG(fake_scope);
+		} else {
+			scope = zend_get_executed_scope();
+		}
+		return (ce == scope || property_info->ce == scope);
 	} else if (property_info->flags & ZEND_ACC_PROTECTED) {
-		return zend_check_protected(property_info->ce, EG(scope));
+		if (EG(fake_scope)) {
+			scope = EG(fake_scope);
+		} else {
+			scope = zend_get_executed_scope();
+		}
+		return zend_check_protected(property_info->ce, scope);
 	}
 	return 0;
 }
@@ -301,6 +313,7 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 	zval *zv;
 	zend_property_info *property_info = NULL;
 	uint32_t flags;
+	zend_class_entry *scope;
 
 	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
 		return (uint32_t)(intptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -347,10 +360,16 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 		}
 	}
 
-	if (EG(scope) != ce
-		&& EG(scope)
-		&& is_derived_class(ce, EG(scope))
-		&& (zv = zend_hash_find(&EG(scope)->properties_info, member)) != NULL
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+
+	if (scope != ce
+		&& scope
+		&& is_derived_class(ce, scope)
+		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
 		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
@@ -383,6 +402,7 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 	zval *zv;
 	zend_property_info *property_info = NULL;
 	uint32_t flags;
+	zend_class_entry *scope;
 
 	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
 		if (!silent) {
@@ -424,10 +444,16 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 		}
 	}
 
-	if (EG(scope) != ce
-		&& EG(scope)
-		&& is_derived_class(ce, EG(scope))
-		&& (zv = zend_hash_find(&EG(scope)->properties_info, member)) != NULL
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+
+	if (scope != ce
+		&& scope
+		&& is_derived_class(ce, scope)
+		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
 		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 	} else if (UNEXPECTED(property_info == NULL)) {
@@ -1022,6 +1048,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
 {
     zval *func;
+    zend_class_entry *scope;
 
 	if (!ce) {
 		return 0;
@@ -1033,7 +1060,8 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 	 * 2.  One of our parent classes are the same as the scope, and it contains
 	 *     a private function with the same name that has the same scope.
 	 */
-	if (fbc->common.scope == ce && EG(scope) == ce) {
+	scope = zend_get_executed_scope();
+	if (fbc->common.scope == ce && scope == ce) {
 		/* rule #1 checks out ok, allow the function call */
 		return fbc;
 	}
@@ -1042,11 +1070,11 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 	/* Check rule #2 */
 	ce = ce->parent;
 	while (ce) {
-		if (ce == EG(scope)) {
+		if (ce == scope) {
 			if ((func = zend_hash_find(&ce->function_table, function_name))) {
 				fbc = Z_FUNC_P(func);
 				if (fbc->common.fn_flags & ZEND_ACC_PRIVATE
-					&& fbc->common.scope == EG(scope)) {
+					&& fbc->common.scope == scope) {
 					return fbc;
 				}
 			}
@@ -1149,6 +1177,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	zval *func;
 	zend_function *fbc;
 	zend_string *lc_method_name;
+	zend_class_entry *scope = NULL;
 	ALLOCA_FLAG(use_heap);
 
 	if (EXPECTED(key != NULL)) {
@@ -1187,7 +1216,8 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			if (zobj->ce->__call) {
 				fbc = zend_get_user_call_function(zobj->ce, method_name);
 			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				scope = zend_get_executed_scope();
+				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
 				fbc = NULL;
 			}
 		}
@@ -1195,26 +1225,29 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		/* Ensure that we haven't overridden a private function and end up calling
 		 * the overriding public function...
 		 */
-		if (EG(scope) &&
-		    is_derived_class(fbc->common.scope, EG(scope)) &&
-		    fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
-			if ((func = zend_hash_find(&EG(scope)->function_table, lc_method_name)) != NULL) {
-				zend_function *priv_fbc = Z_FUNC_P(func);
-				if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
-					&& priv_fbc->common.scope == EG(scope)) {
-					fbc = priv_fbc;
+		if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PROTECTED)) {
+			scope = zend_get_executed_scope();
+		}
+		if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
+			if (scope && is_derived_class(fbc->common.scope, scope)) {
+				if ((func = zend_hash_find(&scope->function_table, lc_method_name)) != NULL) {
+					zend_function *priv_fbc = Z_FUNC_P(func);
+					if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
+						&& priv_fbc->common.scope == scope) {
+						fbc = priv_fbc;
+					}
 				}
 			}
 		}
-		if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
+		if (fbc->common.fn_flags & ZEND_ACC_PROTECTED) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 * If we're not and __call() handler exists, invoke it, otherwise error out.
 			 */
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
-					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
 					fbc = NULL;
 				}
 			}
@@ -1240,6 +1273,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	char *lc_class_name;
 	zend_string *lc_function_name;
 	zend_object *object;
+	zend_class_entry *scope;
 
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR_P(key);
@@ -1300,25 +1334,27 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 */
-		updated_fbc = zend_check_private_int(fbc, EG(scope), lc_function_name);
+		scope = zend_get_executed_scope();
+		updated_fbc = zend_check_private_int(fbc, scope, lc_function_name);
 		if (EXPECTED(updated_fbc != NULL)) {
 			fbc = updated_fbc;
 		} else {
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
 				fbc = NULL;
 			}
 		}
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
-		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
+		scope = zend_get_executed_scope();
+		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
 				fbc = NULL;
 			}
 		}
@@ -1382,6 +1418,7 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 {
 	zend_function *constructor = zobj->ce->constructor;
+	zend_class_entry *scope;
 
 	if (constructor) {
 		if (constructor->op_array.fn_flags & ZEND_ACC_PUBLIC) {
@@ -1389,9 +1426,14 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 		} else if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
-			if (UNEXPECTED(constructor->common.scope != EG(scope))) {
-				if (EG(scope)) {
-					zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
+			if (UNEXPECTED(constructor->common.scope != scope)) {
+				if (scope) {
+					zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
 					constructor = NULL;
 				} else {
 					zend_throw_error(NULL, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
@@ -1403,9 +1445,14 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 			 * Constructors only have prototype if they are defined by an interface but
 			 * it is the compilers responsibility to take care of the prototype.
 			 */
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), EG(scope)))) {
-				if (EG(scope)) {
-					zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
+				if (scope) {
+					zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
 					constructor = NULL;
 				} else {
 					zend_throw_error(NULL, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));

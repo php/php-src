@@ -1307,7 +1307,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
-			fcc.calling_scope = EG(scope);
+			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);
 			fcc.object = Z_OBJ_P(return_value);
 

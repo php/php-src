@@ -645,19 +645,19 @@ static ZEND_COLD void zend_verify_arg_error(const zend_function *zf, uint32_t ar
 	}
 }
 
-static int is_null_constant(zval *default_value)
+static int is_null_constant(zend_class_entry *scope, zval *default_value)
 {
 	if (Z_CONSTANT_P(default_value)) {
 		zval constant;
 
-		ZVAL_COPY_VALUE(&constant, default_value);
-		if (UNEXPECTED(zval_update_constant_ex(&constant, 0, NULL) != SUCCESS)) {
+		ZVAL_COPY(&constant, default_value);
+		if (UNEXPECTED(zval_update_constant_ex(&constant, scope) != SUCCESS)) {
 			return 0;
 		}
 		if (Z_TYPE(constant) == IS_NULL) {
 			return 1;
 		}
-		zval_dtor(&constant);
+		zval_ptr_dtor(&constant);
 	}
 	return 0;
 }
@@ -822,7 +822,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 					return 0;
 				}
 			}
-		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value)))) {
+		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(zf->common.scope, default_value)))) {
 			if (cur_arg_info->class_name) {
 				if (EXPECTED(*cache_slot)) {
 					ce = (zend_class_entry*)*cache_slot;
@@ -2979,7 +2979,6 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 	}
 
 	object = Z_OBJ(call->This);
-	EG(scope) = fbc->common.scope;
 
 	ZVAL_NULL(ret);
 

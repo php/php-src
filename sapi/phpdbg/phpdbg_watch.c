@@ -680,7 +680,9 @@ static int phpdbg_watchpoint_parse_step(char *name, size_t namelen, char *key, s
 }
 
 static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*callback)(phpdbg_watchpoint_t *)) {
-	if (EG(scope) && len >= 5 && !memcmp("$this", input, 5)) {
+	zend_class_entry *scope = zend_get_executed_scope();
+
+	if (scope && len >= 5 && !memcmp("$this", input, 5)) {
 		zend_hash_str_add(EG(current_execute_data)->symbol_table, ZEND_STRL("this"), &EG(current_execute_data)->This);
 	}
 

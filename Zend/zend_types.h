@@ -410,8 +410,13 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 /* zval.u1.v.const_flags */
 #define IS_CONSTANT_UNQUALIFIED		0x010
+#define IS_CONSTANT_VISITED_MARK	0x020
 #define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
 #define IS_CONSTANT_IN_NAMESPACE	0x100  /* used only in opline->extended_value */
+
+#define IS_CONSTANT_VISITED(p)		(Z_CONST_FLAGS_P(p) & IS_CONSTANT_VISITED_MARK)
+#define MARK_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) |= IS_CONSTANT_VISITED_MARK
+#define RESET_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) &= ~IS_CONSTANT_VISITED_MARK
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_PERSISTENT			(1<<0) /* allocated using malloc   */

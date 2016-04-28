@@ -750,7 +750,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 
 		fcc->initialized = 1;
 		fcc->function_handler = ce->constructor;
-		fcc->calling_scope = EG(scope);
+		fcc->calling_scope = zend_get_executed_scope();
 		fcc->called_scope = ce;
 		return 1;
 	} else if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {

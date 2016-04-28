@@ -96,39 +96,39 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				/* Ensure that if we're calling a private function, we're allowed to do so.
 				 */
-				if (object->ce != EG(scope)) {
-					zend_class_entry *ce = object->ce;
+				if (EG(current_execute_data)) {
+					zend_class_entry *scope = zend_get_executed_scope();
 
-					if (EG(current_execute_data)) {
+					if (object->ce != scope) {
 						zend_throw_error(NULL,
 							"Call to private %s::__destruct() from context '%s'",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
-					} else {
-						zend_error(E_WARNING,
-							"Call to private %s::__destruct() from context '%s' during shutdown ignored",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+							ZSTR_VAL(object->ce->name),
+							scope ? ZSTR_VAL(scope->name) : "");
+						return;
 					}
+				} else {
+					zend_error(E_WARNING,
+						"Call to private %s::__destruct() from context '' during shutdown ignored",
+						ZSTR_VAL(object->ce->name));
 					return;
 				}
 			} else {
 				/* Ensure that if we're calling a protected function, we're allowed to do so.
 				 */
-				if (!zend_check_protected(zend_get_function_root_class(destructor), EG(scope))) {
-					zend_class_entry *ce = object->ce;
+				if (EG(current_execute_data)) {
+					zend_class_entry *scope = zend_get_executed_scope();
 
-					if (EG(current_execute_data)) {
+					if (!zend_check_protected(zend_get_function_root_class(destructor), scope)) {
 						zend_throw_error(NULL,
 							"Call to protected %s::__destruct() from context '%s'",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
-					} else {
-						zend_error(E_WARNING,
-							"Call to protected %s::__destruct() from context '%s' during shutdown ignored",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+							ZSTR_VAL(object->ce->name),
+							scope ? ZSTR_VAL(scope->name) : "");
+						return;
 					}
+				} else {
+					zend_error(E_WARNING,
+						"Call to protected %s::__destruct() from context '' during shutdown ignored",
+						ZSTR_VAL(object->ce->name));
 					return;
 				}
 			}

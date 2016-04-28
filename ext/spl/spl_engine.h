@@ -71,7 +71,7 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 
 	fcc.initialized = 1;
 	fcc.function_handler = func;
-	fcc.calling_scope = EG(scope);
+	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = pce;
 	fcc.object = Z_OBJ_P(retval);
 

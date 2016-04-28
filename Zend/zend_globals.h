@@ -161,7 +161,7 @@ struct _zend_executor_globals {
 	zend_vm_stack  vm_stack;
 
 	struct _zend_execute_data *current_execute_data;
-	zend_class_entry *scope;
+	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
 	zend_long precision;
 

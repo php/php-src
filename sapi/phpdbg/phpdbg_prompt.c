@@ -797,7 +797,6 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zval retval;
 
 	zend_execute_data *original_execute_data = EG(current_execute_data);
-	zend_class_entry *original_scope = EG(scope);
 	zend_vm_stack original_stack = EG(vm_stack);
 	zend_object *ex = NULL;
 
@@ -845,7 +844,6 @@ PHPDBG_COMMAND(ev) /* {{{ */
 			OBJ_RELEASE(ex);
 		}
 		EG(current_execute_data) = original_execute_data;
-		EG(scope) = original_scope;
 		EG(vm_stack_top) = original_stack->top;
 		EG(vm_stack_end) = original_stack->end;
 		EG(vm_stack) = original_stack;

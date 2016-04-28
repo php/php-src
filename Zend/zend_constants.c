@@ -334,13 +334,6 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		class_name = zend_string_init(name, class_name_len, 0);
 		lcname = do_alloca(class_name_len + 1, use_heap);
 		zend_str_tolower_copy(lcname, name, class_name_len);
-		if (!scope) {
-			if (EG(current_execute_data)) {
-				scope = EG(scope);
-			} else {
-				scope = CG(active_class_entry);
-			}
-		}
 
 		if (class_name_len == sizeof("self")-1 &&
 		    !memcmp(lcname, "self", sizeof("self")-1)) {
@@ -391,13 +384,26 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 				ret_constant = &c->value;
 			}
 		}
-		zend_string_release(class_name);
-		zend_string_free(constant_name);
 		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
-			if (UNEXPECTED(zval_update_constant_ex(ret_constant, 1, ce) != SUCCESS)) {
+			if (Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
+				if (IS_CONSTANT_VISITED(ret_constant)) {
+					zend_throw_error(NULL, "Cannot declare self-referencing constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_string_release(class_name);
+					zend_string_free(constant_name);
+					return NULL;
+				}
+				MARK_CONSTANT_VISITED(ret_constant);
+			}
+			if (UNEXPECTED(zval_update_constant_ex(ret_constant, ce) != SUCCESS)) {
+				RESET_CONSTANT_VISITED(ret_constant);
+				zend_string_release(class_name);
+				zend_string_free(constant_name);
 				return NULL;
 			}
+			RESET_CONSTANT_VISITED(ret_constant);
 		}
+		zend_string_release(class_name);
+		zend_string_free(constant_name);
 		return ret_constant;
 	}
 

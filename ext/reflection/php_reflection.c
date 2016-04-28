@@ -456,7 +456,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		zend_class_constant *c;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-			zval_update_constant_ex(&c->value, 1, NULL);
+			zval_update_constant_ex(&c->value, NULL);
 			_class_const_string(str, ZSTR_VAL(key), c, indent);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -706,14 +706,10 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval zv;
-			zend_class_entry *old_scope;
 
 			string_write(str, " = ", sizeof(" = ")-1);
 			ZVAL_DUP(&zv, RT_CONSTANT(&fptr->op_array, precv->op2));
-			old_scope = EG(scope);
-			EG(scope) = fptr->common.scope;
-			zval_update_constant_ex(&zv, 1, NULL);
-			EG(scope) = old_scope;
+			zval_update_constant_ex(&zv, fptr->common.scope);
 			if (Z_TYPE(zv) == IS_TRUE) {
 				string_write(str, "true", sizeof("true")-1);
 			} else if (Z_TYPE(zv) == IS_FALSE) {
@@ -1931,7 +1927,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 			fptr->op_array.static_variables = zend_array_dup(fptr->op_array.static_variables);
 		}
 		ZEND_HASH_FOREACH_VAL(fptr->op_array.static_variables, val) {
-			if (UNEXPECTED(zval_update_constant_ex(val, 1, fptr->common.scope) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(val, fptr->common.scope) != SUCCESS)) {
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1969,7 +1965,7 @@ ZEND_METHOD(reflection_function, invoke)
 
 	fcc.initialized = 1;
 	fcc.function_handler = fptr;
-	fcc.calling_scope = EG(scope);
+	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
 
@@ -2027,7 +2023,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 
 	fcc.initialized = 1;
 	fcc.function_handler = fptr;
-	fcc.calling_scope = EG(scope);
+	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
 
@@ -2890,11 +2886,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	ZVAL_COPY_VALUE(return_value, RT_CONSTANT(&param->fptr->op_array, precv->op2));
 	if (Z_CONSTANT_P(return_value)) {
-		zend_class_entry *old_scope = EG(scope);
-
-		EG(scope) = param->fptr->common.scope;
-		zval_update_constant_ex(return_value, 0, NULL);
-		EG(scope) = old_scope;
+		zval_update_constant_ex(return_value, param->fptr->common.scope);
 	} else {
 		zval_copy_ctor(return_value);
 	}
@@ -3965,7 +3957,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
 		if (Z_CONSTANT(prop_copy)) {
-			if (UNEXPECTED(zval_update_constant_ex(&prop_copy, 1, NULL) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(&prop_copy, NULL) != SUCCESS)) {
 				return;
 			}
 		}
@@ -4621,7 +4613,7 @@ ZEND_METHOD(reflection_class, getConstants)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-		if (UNEXPECTED(zval_update_constant_ex(&c->value, 1, ce) != SUCCESS)) {
+		if (UNEXPECTED(zval_update_constant_ex(&c->value, ce) != SUCCESS)) {
 			zend_array_destroy(Z_ARRVAL_P(return_value));
 			return;
 		}
@@ -4669,7 +4661,7 @@ ZEND_METHOD(reflection_class, getConstant)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-		if (UNEXPECTED(zval_update_constant_ex(&c->value, 1, ce) != SUCCESS)) {
+		if (UNEXPECTED(zval_update_constant_ex(&c->value, ce) != SUCCESS)) {
 			return;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -4856,10 +4848,10 @@ ZEND_METHOD(reflection_class, newInstance)
 		return;
 	}
 
-	old_scope = EG(scope);
-	EG(scope) = ce;
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
 	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
-	EG(scope) = old_scope;
+	EG(fake_scope) = old_scope;
 
 	/* Run the constructor if there is one */
 	if (constructor) {
@@ -4893,7 +4885,7 @@ ZEND_METHOD(reflection_class, newInstance)
 
 		fcc.initialized = 1;
 		fcc.function_handler = constructor;
-		fcc.calling_scope = EG(scope);
+		fcc.calling_scope = zend_get_executed_scope();;
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object = Z_OBJ_P(return_value);
 
@@ -4959,10 +4951,10 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		return;
 	}
 
-	old_scope = EG(scope);
-	EG(scope) = ce;
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
 	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
-	EG(scope) = old_scope;
+	EG(fake_scope) = old_scope;
 
 	/* Run the constructor if there is one */
 	if (constructor) {
@@ -4995,7 +4987,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 
 		fcc.initialized = 1;
 		fcc.function_handler = constructor;
-		fcc.calling_scope = EG(scope);
+		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object = Z_OBJ_P(return_value);
 
