@@ -355,6 +355,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
+
+	if (arg_info->type_hint != IS_UNDEF && arg_info->allow_null) {
+		smart_str_appendc(str, '?');
+	}
+
 	if (arg_info->class_name) {
 		const char *class_name;
 		size_t class_name_len;
@@ -495,8 +500,6 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 				} else {
 					smart_str_appends(&str, "NULL");
 				}
-			} else if (arg_info->type_hint && arg_info->allow_null) {
-				smart_str_appends(&str, " = NULL");
 			}
 
 			if (++i < num_args) {
@@ -510,9 +513,6 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_appends(&str, ": ");
-		if (fptr->common.arg_info[-1].allow_null) {
-			smart_str_appendc(&str, '?');
-		}
 		zend_append_type_hint(&str, fptr, fptr->common.arg_info - 1, 1);
 	}
 	smart_str_0(&str);
