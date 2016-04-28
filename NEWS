@@ -251,7 +251,8 @@ PHP                                                                        NEWS
     heap overflow). (CVE-2015-4643) (Max Spelsberg)
   . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
     (CVE-2015-4642) (Anatol Belski)
-  . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
+  . Fixed bug #69719 (Incorrect handling of paths with NULs). (CVE-2015-4598)
+   (Stas)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
