@@ -51,7 +51,6 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #72031 (array_column() against an array of objects discards all
     values matching null). (Nikita)
-  . Fixed bug #72116 (array_fill optimization breaks implementation). (Bob)
 
 28 Apr 2016 PHP 7.0.6
 
@@ -166,6 +165,7 @@ PHP                                                                        NEWS
   . Fixed bug #71827 (substr_replace bug, string length). (krakjoe)
   . Fixed bug #67512 (php_crypt() crashes if crypt_r() does not exist or
     _REENTRANT is not defined). (Nikita)
+  . Fixed bug #72116 (array_fill optimization breaks implementation). (Bob)
 
 - XML:
   . Fixed bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
