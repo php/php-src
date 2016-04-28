@@ -69,13 +69,16 @@ PHP                                                                        NEWS
   . Improved the fix for bug #70976. (Remi)
 
 - PCRE:
-  . Upgraded pcrelib to 8.38. 
+  . Upgraded pcrelib to 8.38. (CVE-2015-8383, CVE-2015-8386, CVE-2015-8387,
+    CVE-2015-8389, CVE-2015-8390, CVE-2015-8391, CVE-2015-8393, CVE-2015-8394)
 
 - Phar:
-  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
+  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (CVE-2016-4342)
+    (Stas)
   . Fixed bug #71391 (NULL Pointer Dereference in phar_tar_setupmetadata()).
     (Stas)
-  . Fixed bug #71488 (Stack overflow when decompressing tar archives). (Stas)
+  . Fixed bug #71488 (Stack overflow when decompressing tar archives).
+    (CVE-2016-2554) (Stas)
 
 - WDDX:
   . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
@@ -87,7 +90,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
-    Out of Bounds). (emmanuel dot law at gmail dot com).
+    Out of Bounds). (CVE-2016-1903) (emmanuel dot law at gmail dot com).
 
 - WDDX:
   . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
