@@ -7,13 +7,13 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
 
-- Curl:
-  . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
-    (Michael Sierks)    
-
 - BCmath:
   . Fixed bug #72093 (bcpowmod accepts negative scale and corrupts
     _one_ definition). (Stas)
+
+- Curl:
+  . Fixed bug #71831 (CURLOPT_NOPROXY applied as long instead of string).
+    (Michael Sierks)    
 
 - Date:
   . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
