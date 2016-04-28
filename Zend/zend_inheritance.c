@@ -319,13 +319,10 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 
-#if 0
-		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
 		if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
 			/* incompatible nullability */
 			return 0;
 		}
-#endif
 
 		/* by-ref constraints on arguments are invariant */
 		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {

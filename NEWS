@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #62814 (It is possible to stiffen child class members visibility).
     (Nikita)
   . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
+  . Fixed bug #71428 (Inheritance and allow_null). (Joe)
   . Fixed bug #71572 (String offset assignment from an empty string inserts
     null byte). (Francois)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
