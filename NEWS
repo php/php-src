@@ -23,7 +23,7 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #72094 (Out of bounds heap read access in exif header processing). (Stas)
 
-- GD: 
+- GD:
   . Fixed bug #71952 (Corruption inside imageaffinematrixget). (Stas)
   . Fixed bug #71912 (libgd: signedness vulnerability). (Stas)
 
