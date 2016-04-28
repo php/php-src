@@ -2029,6 +2029,7 @@ PHP_FUNCTION(array_fill)
 			Z_ARRVAL_P(return_value)->nNumUsed = start_key + num;
 			Z_ARRVAL_P(return_value)->nNumOfElements = num;
 			Z_ARRVAL_P(return_value)->nInternalPointer = start_key;
+			Z_ARRVAL_P(return_value)->nNextFreeElement = start_key + num;
 
 			if (Z_REFCOUNTED_P(val)) {
 				GC_REFCOUNT(Z_COUNTED_P(val)) += num;
