@@ -2489,8 +2489,8 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 
 	if (EXPECTED(ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_FUNCTION)) {
 		i_free_compiled_variables(execute_data);
-		if (UNEXPECTED(call_info & (ZEND_CALL_FREE_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED))) {
-			if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
+		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED))) {
+			if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 				zend_clean_and_cache_symbol_table(EX(symbol_table));
 			}
 			EG(current_execute_data) = EX(prev_execute_data);
@@ -2567,8 +2567,8 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	} else {
 		if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_TOP_FUNCTION) {
 			i_free_compiled_variables(execute_data);
-			if (UNEXPECTED(call_info & (ZEND_CALL_FREE_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
-				if (UNEXPECTED(call_info & ZEND_CALL_FREE_SYMBOL_TABLE)) {
+			if (UNEXPECTED(call_info & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
+				if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 					zend_clean_and_cache_symbol_table(EX(symbol_table));
 				}
 				zend_vm_stack_free_extra_args_ex(call_info, execute_data);
@@ -2584,7 +2584,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			zend_detach_symbol_table(execute_data);
 			old_execute_data = EX(prev_execute_data);
 			while (old_execute_data) {
-				if (old_execute_data->func && ZEND_USER_CODE(old_execute_data->func->op_array.type)) {
+				if (old_execute_data->func && (ZEND_CALL_INFO(old_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 					if (old_execute_data->symbol_table == symbol_table) {
 						zend_attach_symbol_table(old_execute_data);
 					}
@@ -3590,7 +3590,6 @@ ZEND_VM_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL))
 	EX(call) = call->prev_execute_data;
 
 	ret = NULL;
-	call->symbol_table = NULL;
 	if (RETURN_VALUE_USED(opline)) {
 		ret = EX_VAR(opline->result.var);
 		ZVAL_NULL(ret);
@@ -3624,7 +3623,6 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 			zend_vm_stack_free_call_frame(call);
 		} else {
 			ret = NULL;
-			call->symbol_table = NULL;
 			if (RETURN_VALUE_USED(opline)) {
 				ret = EX_VAR(opline->result.var);
 				ZVAL_NULL(ret);
@@ -3734,7 +3732,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 			}
 		} else {
 			ret = NULL;
-			call->symbol_table = NULL;
 			if (RETURN_VALUE_USED(opline)) {
 				ret = EX_VAR(opline->result.var);
 				ZVAL_NULL(ret);
@@ -5348,12 +5345,12 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 
 		new_op_array->scope = EX(func)->op_array.scope;
 
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_CODE,
+		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_CODE | ZEND_CALL_HAS_SYMBOL_TABLE,
 			(zend_function*)new_op_array, 0,
 			Z_TYPE(EX(This)) != IS_OBJECT ? Z_CE(EX(This)) : NULL,
 			Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJ(EX(This)) : NULL);
 
-		if (EX(symbol_table)) {
+		if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 			call->symbol_table = EX(symbol_table);
 		} else {
 			call->symbol_table = zend_rebuild_symbol_table();
@@ -7837,7 +7834,6 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 
 		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
 
-		call->symbol_table = NULL;
 		if (UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
 		}

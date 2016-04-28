@@ -467,7 +467,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_TOP                (1 << 1)
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
-#define ZEND_CALL_FREE_SYMBOL_TABLE  (1 << 4)
+#define ZEND_CALL_HAS_SYMBOL_TABLE   (1 << 4)
 #define ZEND_CALL_CLOSURE            (1 << 5)
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)

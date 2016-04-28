@@ -1540,7 +1540,7 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_d
 		ht = &EG(symbol_table);
 	} else {
 		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
-		if (!EX(symbol_table)) {
+		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_rebuild_symbol_table();
 		}
 		ht = EX(symbol_table);
@@ -2252,7 +2252,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	if (UNEXPECTED(EX(symbol_table) != NULL)) {
+	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
@@ -2380,8 +2380,6 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 			arg_dst++;
 		} while (arg_src != end);
 	}
-
-	EX(symbol_table) = NULL;
 
 	if (UNEXPECTED(!op_array->run_time_cache)) {
 		init_func_run_time_cache(op_array);

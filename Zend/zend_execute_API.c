@@ -853,7 +853,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
-		call->symbol_table = NULL;
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_init_execute_data(call, &func->op_array, fci->retval);
 			zend_execute_ex(call);
@@ -1535,11 +1534,11 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 	if (!ex) {
 		return NULL;
 	}
-	if (ex->symbol_table) {
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		return ex->symbol_table;
 	}
 
-	ZEND_ADD_CALL_FLAG(ex, ZEND_CALL_FREE_SYMBOL_TABLE);
+	ZEND_ADD_CALL_FLAG(ex, ZEND_CALL_HAS_SYMBOL_TABLE);
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache)) {
 		/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 		symbol_table = ex->symbol_table = *(EG(symtable_cache_ptr)--);
@@ -1640,7 +1639,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 	}
 
 	if (execute_data) {
-		if (!execute_data->symbol_table) {
+		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_ulong h = zend_string_hash_val(name);
 			zend_op_array *op_array = &execute_data->func->op_array;
 
@@ -1682,7 +1681,7 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 	}
 
 	if (execute_data) {
-		if (!execute_data->symbol_table) {
+		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_ulong h = zend_hash_func(name, len);
 			zend_op_array *op_array = &execute_data->func->op_array;
 			if (EXPECTED(op_array->last_var)) {

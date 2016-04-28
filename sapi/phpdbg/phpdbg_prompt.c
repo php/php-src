@@ -687,7 +687,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		/* clean up from last execution */
-		if (ex && ex->symbol_table) {
+		if (ex && (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_hash_clean(ex->symbol_table);
 		} else {
 			zend_rebuild_symbol_table();
