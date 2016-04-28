@@ -543,7 +543,9 @@ static uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member)
 			ALLOC_HASHTABLE(guards);
 			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
 			/* mark pointer as "special" using low bit */
-			zend_hash_add_new_ptr(guards, member, (void*)(((zend_uintptr_t)&zv->u2.property_guard) | 1));
+			zend_hash_add_new_ptr(guards, member,
+				(void*)(((zend_uintptr_t)&zv->u2.property_guard) | 1));
+			zend_string_release(Z_STR_P(zv));
 			ZVAL_ARR(zv, guards);
 		}
 	} else if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
