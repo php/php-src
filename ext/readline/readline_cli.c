@@ -106,7 +106,8 @@ static size_t readline_shell_ub_write(const char *str, size_t str_length) /* {{{
 	   caller (sapi_cli_single_write in sapi/cli) which will actually
 	   write due to -1 return code */
 	php_last_char = str[str_length-1];
-	return -1;
+
+	return (size_t) -1;
 }
 /* }}} */
 
