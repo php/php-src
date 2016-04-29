@@ -215,14 +215,14 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #71527 (Buffer over-write in finfo_open with malformed magic
-    file). (Anatol)
+    file). (CVE-2015-8865) (Anatol)
 
 - libxml:
   . Fixed bug #71536 (Access Violation crashes php-cgi.exe). (Anatol)
 
 - mbstring:
   . Fixed bug #71906 (AddressSanitizer: negative-size-param (-1) in
-    mbfl_strcut). (Stas)
+    mbfl_strcut). (CVE-2016-4073) (Stas)
 
 - ODBC:
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
@@ -240,7 +240,7 @@ PHP                                                                        NEWS
   . Fixed bug #71625 (Crash in php7.dll with bad phar filename). (Anatol)
   . Fixed bug #71317 (PharData fails to open specific file). (Jos Elstgeest)
   . Fixed bug #71860 (Invalid memory write in phar on filename with \0 in
-    name). (Stas)
+    name). (CVE-2016-4072) (Stas)
 
 - phpdbg:
   . Fixed crash when advancing (except step) inside an internal function. (Bob)
@@ -251,7 +251,7 @@ PHP                                                                        NEWS
 
 - SNMP:
   . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
-    (andrew at jmpesp dot org)
+    (CVE-2016-4071) (andrew at jmpesp dot org)
 
 - SPL:
   . Fixed bug #71617 (private properties lost when unserializing ArrayObject).
@@ -260,7 +260,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #71660 (array_column behaves incorrectly after foreach by
     reference). (Laruence)
-  . Fixed bug #71798 (Integer Overflow in php_raw_url_encode).
+  . Fixed bug #71798 (Integer Overflow in php_raw_url_encode). (CVE-2016-4070)
     (taoguangchen at icloud dot com, Stas)
 
 - Zip:
