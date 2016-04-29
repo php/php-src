@@ -32,6 +32,8 @@
 
 #include <curl/curl.h>
 
+#define SAVE_CURLSH_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
+
 /* {{{ proto void curl_share_init()
    Initialize a share curl handle */
 PHP_FUNCTION(curl_share_init)
@@ -85,6 +87,7 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 			break;
 	}
 
+	SAVE_CURLSH_ERROR(sh, error);
 	if (error != CURLSHE_OK) {
 		return 1;
 	} else {
@@ -127,6 +130,48 @@ void _php_curl_share_close(zend_resource *rsrc) /* {{{ */
 	}
 }
 /* }}} */
+
+/* {{{ proto int curl_share_errno(resource mh)
+         Return an integer containing the last share curl error number */
+PHP_FUNCTION(curl_share_errno)
+{
+	zval        *z_sh;
+	php_curlsh  *sh;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_sh) == FAILURE) {
+		return;
+	}
+
+	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(z_sh), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(sh->err.no);
+}
+/* }}} */
+
+
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
+/* {{{ proto bool curl_share_strerror(int code)
+         return string describing error code */
+PHP_FUNCTION(curl_share_strerror)
+{
+	zend_long code;
+	const char *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &code) == FAILURE) {
+		return;
+	}
+
+	str = curl_share_strerror(code);
+	if (str) {
+		RETURN_STRING(str);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+#endif
 
 #endif
 
