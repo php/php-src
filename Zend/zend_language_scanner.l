@@ -1044,6 +1044,12 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 								Z_STRLEN_P(zendlval)--;
 							}
 						}
+						if (octal_buf[2] &&
+						    (octal_buf[0] > '3')) {
+							/* 3 octit values must not overflow 0xFF (\377) */
+							zend_error(E_COMPILE_WARNING, "Octal escape sequence overflow \\%s is greater than \\377", octal_buf);
+						}
+
 						*t++ = (char) ZEND_STRTOL(octal_buf, NULL, 8);
 					} else {
 						*t++ = '\\';

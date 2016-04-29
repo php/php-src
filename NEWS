@@ -31,6 +31,7 @@ PHP                                                                        NEWS
     respect scientific notation in numeric strings. (Andrea)
   . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
     Pierrick)
+  . Raise a compile-time warning on octal escape sequence overflow. (Sara)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
