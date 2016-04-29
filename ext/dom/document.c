@@ -1621,6 +1621,7 @@ PHP_FUNCTION(dom_document_savexml)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|O!l", &id, dom_document_class_entry, &nodep, dom_node_class_entry, &options) == FAILURE) {
 		return;
 	}
+	options = options | XML_SAVE_AS_XML;
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
