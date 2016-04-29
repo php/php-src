@@ -21,7 +21,7 @@ set_active_cp(65001);
 
 $prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . "testBug64699" . DIRECTORY_SEPARATOR;
 
-$dirs = array("a", "ソ", "ゾ", "şŞıİğĞ", "多国語");
+$dirs = array("a", "ソ", "ゾ", "şŞıİğĞ", "多国語", "表");
 
 mkdir($prefix);
 foreach ($dirs as $d) {
@@ -58,5 +58,6 @@ filetype()[dir ] == is_dir()[dir ] -> OK: şŞıİğĞ
 filetype()[dir ] == is_dir()[dir ] -> OK: ソ
 filetype()[dir ] == is_dir()[dir ] -> OK: ゾ
 filetype()[dir ] == is_dir()[dir ] -> OK: 多国語
+filetype()[dir ] == is_dir()[dir ] -> OK: 表
 Active code page: %d
 ===DONE===
