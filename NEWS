@@ -17,7 +17,7 @@ PHP                                                                        NEWS
     processing). (Stas)
 
 - GD:
-  . Fix bug #71912 (libgd: signedness vulnerability). (Stas)
+  . Fix bug #71912 (libgd: signedness vulnerability) (CVE-2016-3074). (Stas)
 
 - Intl:
   . Fix bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
