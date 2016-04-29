@@ -25,7 +25,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #71952 (Corruption inside imageaffinematrixget). (Stas)
-  . Fixed bug #71912 (libgd: signedness vulnerability). (Stas)
+  . Fixed bug #71912 (libgd: signedness vulnerability). (CVE-2016-3074) (Stas)
 
 - Intl:
   . Fixed bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
