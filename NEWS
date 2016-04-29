@@ -285,7 +285,8 @@ PHP                                                                        NEWS
     using count). (Nikita)
   . Fixed bug #71601 (finally block not executed after yield from). (Bob)
   . Fixed bug #71637 (Multiple Heap Overflow due to integer overflows in 
-    xml/filter_url/addcslashes). (Stas)
+    xml/filter_url/addcslashes). (CVE-2016-4344, CVE-2016-4345, CVE-2016-4346)
+    (Stas)
 
 - CLI server:
   . Fixed bug #71559 (Built-in HTTP server, we can download file in web by bug).
@@ -321,7 +322,7 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #71610 (Type Confusion Vulnerability - SOAP /
-    make_http_soap_request()). (Stas)
+    make_http_soap_request()). (CVE-2016-3185) (Stas)
 
 - Standard:
   . Fixed bug #71603 (compact() maintains references in php7). (Laruence)
