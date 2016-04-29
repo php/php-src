@@ -2882,7 +2882,7 @@ SPL_METHOD(SplFileObject, fwrite)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		if (length >= 0) {
-			str_len = MAX(0, MIN((size_t)length, str_len));
+			str_len = MIN((size_t)length, str_len);
 		} else {
 			/* Negative length given, nothing to write */
 			str_len = 0;

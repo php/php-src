@@ -4248,7 +4248,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR, NUM, SEND)
 
 	if (EXPECTED(Z_ISREF_P(varptr) ||
 	    ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
-	     (opline->extended_value & ZEND_ARG_SEND_SILENT) :
+	     ((opline->extended_value & ZEND_ARG_SEND_SILENT) != 0) :
 	     ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num
 	    )))) {
 		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
