@@ -471,12 +471,12 @@ PHP                                                                        NEWS
   . Fixed bug #69882 (OpenSSL error "key values mismatch" after
     openssl_pkcs12_read with extra cert). (Tomasz Sawicki)
   . Fixed bug #70014 (openssl_random_pseudo_bytes() is not cryptographically
-    secure). (Stas)
+    secure). (CVE-2015-8867) (Stas)
 
 - Phar:
   . Improved fix for bug #69441. (Anatol Belski)
   . Fixed bug #70019 (Files extracted from archive may be placed outside of
-    destination directory). (Anatol Belski)
+    destination directory).  (CVE-2015-6833) (Anatol Belski)
 
 - SOAP:
   . Fixed bug #70081 (SoapClient info leak / null pointer dereference via
@@ -484,13 +484,13 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #70068 (Dangling pointer in the unserialization of ArrayObject
-    items). (sean.heelan)
+    items). (CVE-2015-6832) (sean.heelan)
   . Fixed bug #70166 (Use After Free Vulnerability in unserialize() with
-    SPLArrayObject). (taoguangchen at icloud dot com)
+    SPLArrayObject). (CVE-2015-6831) (taoguangchen at icloud dot com)
   . Fixed bug #70168 (Use After Free Vulnerability in unserialize() with
-    SplObjectStorage). (taoguangchen at icloud dot com)
+    SplObjectStorage).  (CVE-2015-6831) (taoguangchen at icloud dot com)
   . Fixed bug #70169 (Use After Free Vulnerability in unserialize() with
-    SplDoublyLinkedList). (taoguangchen at icloud dot com)
+    SplDoublyLinkedList). (CVE-2015-6831) (taoguangchen at icloud dot com)
 
 - Standard:
   . Fixed bug #70096 (Repeated iptcembed() adds superfluous FF bytes). (cmb)
