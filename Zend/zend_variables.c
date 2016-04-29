@@ -224,12 +224,8 @@ ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
-		zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
-
-		GC_REFCOUNT(ast) = 1;
-		GC_TYPE_INFO(ast) = IS_CONSTANT_AST;
-		ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
-		Z_AST_P(zvalue) = ast;
+		zend_ast *copy = zend_ast_copy(Z_ASTVAL_P(zvalue));
+		ZVAL_NEW_AST(zvalue, copy);
 	}
 }
 
