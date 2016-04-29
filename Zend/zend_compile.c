@@ -2640,6 +2640,11 @@ void zend_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 
 static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
 {
+	if (!CG(active_op_array)->scope) {
+		/* This would be simply a variable called $this, not a real $this */
+		return 0;
+	}
+
 	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
 		zval *name = zend_ast_get_zval(ast->child[0]);
 		return Z_TYPE_P(name) == IS_STRING && zend_string_equals_literal(Z_STR_P(name), "this");
