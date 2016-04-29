@@ -80,17 +80,17 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #71527 (Buffer over-write in finfo_open with malformed magic
-    file). (Anatol)
+    file). (CVE-2015-8865) (Anatol)
 
 - Mbstring:
   . Fixed bug #71906 (AddressSanitizer: negative-size-param (-1) in
-    mbfl_strcut). (Stas)
+    mbfl_strcut). (CVE-2016-4073) (Stas)
 
 - ODBC:
   . Fixed bug #47803, #69526 (Executing prepared statements is succesfull only
     for the first two statements). (einavitamar at gmail dot com, Anatol)
   . Fixed bug #71860 (Invalid memory write in phar on filename with \0 in
-    name). (Stas)
+    name). (CVE-2016-4072) (Stas)
 
 - PDO_DBlib:
   . Fixed bug #54648 (PDO::MSSQL forces format of datetime fields).
@@ -103,11 +103,11 @@ PHP                                                                        NEWS
 
 - SNMP:
   . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
-    (andrew at jmpesp dot org)
+    (CVE-2016-4071) (andrew at jmpesp dot org)
 
 - Standard:
   . Fixed bug #71798 (Integer Overflow in php_raw_url_encode).
-    (taoguangchen at icloud dot com, Stas)
+    (CVE-2016-4070) (taoguangchen at icloud dot com, Stas)
 
 03 Mar 2016, PHP 5.6.19
 
