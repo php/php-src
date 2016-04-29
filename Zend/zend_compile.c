@@ -7024,7 +7024,7 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 
 	/* Add a flag to INIT_ARRAY if we know this array cannot be packed */
 	if (!packed) {
-		ZEND_ASSERT(opnum_init != -1);
+		ZEND_ASSERT(opnum_init != (uint32_t)-1);
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
 	}
@@ -7288,11 +7288,11 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		while (opline != init_opline) {
 			opline--;
 			if (opline->opcode == ZEND_ROPE_ADD &&
-			    opline->result.var == -1) {
+			    opline->result.var == (uint32_t)-1) {
 				opline->op1.var = var;
 				opline->result.var = var;
 			} else if (opline->opcode == ZEND_ROPE_INIT &&
-			           opline->result.var == -1) {
+			           opline->result.var == (uint32_t)-1) {
 				opline->result.var = var;
 			}
 		}

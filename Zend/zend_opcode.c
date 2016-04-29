@@ -736,7 +736,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	}
 
 	if (op_array->live_range) {
-		uint32_t i;
+		int i;
 
 		for (i = 0; i < op_array->last_live_range; i++) {
 			op_array->live_range[i].var =

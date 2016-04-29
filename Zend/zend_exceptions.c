@@ -662,14 +662,15 @@ ZEND_METHOD(exception, __toString)
 	zend_class_entry *base_ce;
 	zend_string *str;
 	zend_fcall_info fci;
-	zval fname, rv;
+	zval rv;
+	zend_string *fname;
 
 	DEFAULT_0_PARAMS;
 
 	str = ZSTR_EMPTY_ALLOC();
 
 	exception = getThis();
-	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1);
+	fname = zend_string_init("gettraceasstring", sizeof("gettraceasstring")-1, 0);
 
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && instanceof_function(Z_OBJCE_P(exception), zend_ce_throwable)) {
 		zend_string *prev_str = str;
@@ -678,7 +679,7 @@ ZEND_METHOD(exception, __toString)
 		zend_long line = zval_get_long(GET_PROPERTY(exception, "line"));
 
 		fci.size = sizeof(fci);
-		ZVAL_COPY_VALUE(&fci.function_name, &fname);
+		ZVAL_STR(&fci.function_name, fname);
 		fci.object = Z_OBJ_P(exception);
 		fci.retval = &trace;
 		fci.param_count = 0;
@@ -719,7 +720,7 @@ ZEND_METHOD(exception, __toString)
 
 		exception = GET_PROPERTY(exception, "previous");
 	}
-	zval_dtor(&fname);
+	zend_string_release(fname);
 
 	exception = getThis();
 	base_ce = i_get_exception_base(exception);
