@@ -1044,7 +1044,7 @@ PHP                                                                        NEWS
   . Implemented FR #70438 (Add IV parameter for openssl_seal and openssl_open)
     (Jakub Zelenka)
   . Fixed bug #70014 (openssl_random_pseudo_bytes() is not cryptographically
-    secure). (Stas)
+    secure). (CVE-2015-8867) (Stas)
   . Fixed bug #69882 (OpenSSL error "key values mismatch" after
     openssl_pkcs12_read with extra cert). (Tomasz Sawicki)
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
@@ -1292,7 +1292,8 @@ PHP                                                                        NEWS
     (Daniel Lowrey & Bob Weinand)
 
 - Zip:
-  . Fixed bug #70322 (ZipArchive::close() doesn't indicate errors). (cmb)
+  . Fixed bug #70322 (ZipArchive::close() doesn't indicate errors).
+    (CVE-2014-9767) (cmb)
   . Fixed bug #70350 (ZipArchive::extractTo allows for directory traversal when
     creating directories). (neal at fb dot com)
   . Added ZipArchive::setCompressionName and ZipArchive::setCompressionIndex
