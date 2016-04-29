@@ -384,15 +384,18 @@ PHP                                                                        NEWS
   . Fixed bug #71475 (openssl_seal() uninitialized memory usage). (Stas)
 
 - PCRE:
-  . Upgraded pcrelib to 8.38.
+  . Upgraded pcrelib to 8.38. (CVE-2015-8383, CVE-2015-8386, CVE-2015-8387,
+    CVE-2015-8389, CVE-2015-8390, CVE-2015-8391, CVE-2015-8393, CVE-2015-8394)
 
 - Phar:
-  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
+  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (CVE-2016-4342)
+    (Stas)
   . Fixed bug #71331 (Uninitialized pointer in phar_make_dirstream()).
     (CVE-2016-4343) (Stas)
   . Fixed bug #71391 (NULL Pointer Dereference in phar_tar_setupmetadata()).
     (Stas)
-  . Fixed bug #71488 (Stack overflow when decompressing tar archives). (Stas)
+  . Fixed bug #71488 (Stack overflow when decompressing tar archives).
+    (CVE-2016-2554) (Stas)
 
 - SOAP:
   . Fixed bug #70979 (crash with bad soap request). (Anatol)
