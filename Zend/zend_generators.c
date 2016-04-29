@@ -827,7 +827,7 @@ try_again:
 }
 /* }}} */
 
-static void inline zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
+static inline void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
 {
 	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
 		generator->flags |= ZEND_GENERATOR_DO_INIT;
@@ -838,7 +838,7 @@ static void inline zend_generator_ensure_initialized(zend_generator *generator) 
 }
 /* }}} */
 
-static void inline zend_generator_rewind(zend_generator *generator) /* {{{ */
+static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
 {
 	zend_generator_ensure_initialized(generator);
 
@@ -1161,7 +1161,8 @@ static zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_get_data,
 	zend_generator_iterator_get_key,
 	zend_generator_iterator_move_forward,
-	zend_generator_iterator_rewind
+	zend_generator_iterator_rewind,
+	NULL
 };
 
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
