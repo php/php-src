@@ -421,6 +421,7 @@ typedef struct _zend_internal_function {
 
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
+	uint32_t   quick_arg_flags;
 
 	struct {
 		zend_uchar type;  /* never used */
@@ -924,16 +925,16 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 
 #ifdef WORDS_BIGENDIAN
 # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
-		*(uint32_t*)&(zf)->type |= ((mask) << ((arg_num) - 1) * 2); \
+		(zf)->quick_arg_flags |= ((mask) << ((arg_num) - 1) * 2); \
 	} while (0)
 # define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
-	(((*((uint32_t*)&((zf)->type))) >> (((arg_num) - 1) * 2)) & (mask))
+	(((zf)->quick_arg_flags >> (((arg_num) - 1) * 2)) & (mask))
 #else
 # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
-		*(uint32_t*)&(zf)->type |= (((mask) << 6) << (arg_num) * 2); \
+		(zf)->quick_arg_flags |= (((mask) << 6) << (arg_num) * 2); \
 	} while (0)
 # define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
-	(((*(uint32_t*)&(zf)->type) >> (((arg_num) + 3) * 2)) & (mask))
+	(((zf)->quick_arg_flags >> (((arg_num) + 3) * 2)) & (mask))
 #endif
 
 #define QUICK_ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
