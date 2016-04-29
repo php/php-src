@@ -577,7 +577,8 @@ PHP                                                                        NEWS
     on Windows. (Jorge Oliveira, Anatol)
   . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
     (CVE-2015-4642) (Anatol Belski)
-  . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
+  . Fixed bug #69719 (Incorrect handling of paths with NULs). (CVE-2015-4598)
+    (Stas)
 
 - FTP
   . Improved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
