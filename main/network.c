@@ -487,6 +487,11 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 				setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&sockoptval, sizeof(sockoptval));
 			}
 #endif
+#ifdef TCP_NODELAY
+			if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+				setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&sockoptval, sizeof(sockoptval));
+			}
+#endif
 
 			n = bind(sock, sa, socklen);
 
@@ -726,7 +731,8 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_string,
-		int *error_code
+		int *error_code,
+		int tcp_nodelay
 		)
 {
 	php_socket_t clisock = -1;
@@ -750,6 +756,11 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 					textaddr,
 					addr, addrlen
 					);
+			if (tcp_nodelay) {
+#ifdef TCP_NODELAY
+				setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
+#endif
+			}
 		} else {
 			error = php_socket_errno();
 		}
@@ -765,7 +776,6 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 	return clisock;
 }
 /* }}} */
-
 
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
@@ -899,6 +909,15 @@ skip_bind:
 				int val = 1;
 				if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
 					setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
+				}
+			}
+#endif
+
+#ifdef TCP_NODELAY
+			{
+				int val = 1;
+				if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+					setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&val, sizeof(val));
 				}
 			}
 #endif

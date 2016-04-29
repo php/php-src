@@ -647,7 +647,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	if ((*filename == '.')
 	/* Absolute path open */
 	 || IS_ABSOLUTE_PATH(filename, filename_length)
-	 || (!path || (path && !*path))
+	 || (!path || !*path)
 	) {
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}

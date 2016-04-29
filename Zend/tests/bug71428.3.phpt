@@ -1,5 +1,7 @@
 --TEST--
 bug #71428: Validation type inheritance with = NULL
+--XFAIL--
+This is a BC break
 --FILE--
 <?php
 class A { }

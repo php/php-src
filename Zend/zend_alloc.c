@@ -1862,7 +1862,7 @@ static zend_mm_heap *zend_mm_init(void)
 	heap->peak = 0;
 #endif
 #if ZEND_MM_LIMIT
-	heap->limit = (Z_L(-1) >> Z_L(1));
+	heap->limit = ((size_t)Z_L(-1) >> (size_t)Z_L(1));
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM

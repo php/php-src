@@ -1492,7 +1492,7 @@ not_relative_path:
 	}
 #endif
 
-	if (!path || (path && !*path)) {
+	if (!path || !*path) {
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 

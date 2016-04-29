@@ -122,8 +122,8 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 	return variable_ptr;
 }
 
-ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change);
-ZEND_API int zval_update_constant_ex(zval *pp, zend_bool inline_change, zend_class_entry *scope);
+ZEND_API int zval_update_constant(zval *pp);
+ZEND_API int zval_update_constant_ex(zval *pp, zend_class_entry *scope);
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {
@@ -284,6 +284,7 @@ ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *zend_get_executed_filename(void);
 ZEND_API zend_string *zend_get_executed_filename_ex(void);
 ZEND_API uint zend_get_executed_lineno(void);
+ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API zend_bool zend_is_executing(void);
 
 ZEND_API void zend_set_timeout(zend_long seconds, int reset_signals);

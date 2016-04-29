@@ -2075,7 +2075,6 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	ZVAL_UNDEF(&retval);
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = num_args;
@@ -2883,7 +2882,7 @@ SPL_METHOD(SplFileObject, fwrite)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		if (length >= 0) {
-			str_len = MAX(0, MIN((size_t)length, str_len));
+			str_len = MIN((size_t)length, str_len);
 		} else {
 			/* Negative length given, nothing to write */
 			str_len = 0;

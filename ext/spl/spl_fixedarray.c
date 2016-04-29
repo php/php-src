@@ -410,11 +410,11 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 static void spl_fixedarray_object_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_fixedarray_object *intern;
+	zval tmp;
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->fptr_offset_set) {
-		zval tmp;
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;

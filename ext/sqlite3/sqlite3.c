@@ -683,7 +683,6 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	fake_argc = argc + is_agg;
 
 	fc->fci.size = sizeof(fc->fci);
-	fc->fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
 	fc->fci.object = NULL;
 	fc->fci.retval = &retval;
@@ -841,7 +840,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	int ret;
 
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
-	collation->fci.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
 	collation->fci.fci.object = NULL;
 	collation->fci.fci.retval = &retval;
