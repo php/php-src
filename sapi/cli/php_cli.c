@@ -304,7 +304,7 @@ static size_t sapi_cli_ub_write(const char *str, size_t str_length) /* {{{ */
 	if (cli_shell_callbacks.cli_shell_ub_write) {
 		size_t ub_wrote;
 		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length);
-		if (ub_wrote > -1) {
+		if (ub_wrote != (size_t)-1) {
 			return ub_wrote;
 		}
 	}
