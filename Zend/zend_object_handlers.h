@@ -27,8 +27,8 @@ struct _zend_property_info;
 #define ZEND_WRONG_PROPERTY_INFO \
 	((struct _zend_property_info*)((zend_intptr_t)-1))
 
-#define ZEND_DYNAMIC_PROPERTY_OFFSET (-1)
-#define ZEND_WRONG_PROPERTY_OFFSET   (-2)
+#define ZEND_DYNAMIC_PROPERTY_OFFSET ((uint32_t)(-1))
+#define ZEND_WRONG_PROPERTY_OFFSET   ((uint32_t)(-2))
 
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
