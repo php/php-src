@@ -471,7 +471,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
-    Out of Bounds). (emmanuel dot law at gmail dot com)
+    Out of Bounds). (CVE-2016-1903) (emmanuel dot law at gmail dot com)
 
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
@@ -499,7 +499,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #71270 (Heap BufferOver Flow in escapeshell functions).
-    (emmanuel dot law at gmail dot com)
+    (CVE-2016-1904) (emmanuel dot law at gmail dot com)
 
 - WDDX:
   . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet
