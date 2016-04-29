@@ -4,17 +4,18 @@ Incompatible context call (non-internal function)
 <?php
 
 class A {
-	    function foo() { var_dump(get_class($this)); }
+    function foo() { var_dump(get_class($this)); }
 }
 class B {
-	   function bar() { A::foo(); }
+    function bar() { A::foo(); }
 }
 $b = new B;
 $b->bar();
 
 ?>
 --EXPECTF--
-Deprecated: Non-static method A::foo() should not be called statically in %s on line %d
-
-Notice: Undefined variable: this in %s on line %d
-string(1) "A"
+Fatal error: Uncaught Error: Non-static method A::foo() cannot be called statically in %s:%d
+Stack trace:
+#0 %s(%d): B->bar()
+#1 {main}
+  thrown in %s on line %d
