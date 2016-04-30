@@ -4152,6 +4152,19 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	/* Narrowing integer initialization to doubles */
 	zend_type_narrowing(op_array, script, ssa);
 
+	for (j = 0; j < op_array->last_var; j++) {
+		if (zend_string_equals_literal(op_array->vars[j], "php_errormsg")) {
+			/* Mark all SSA vars for $php_errormsg as references,
+			 * to make sure we don't optimize it. */
+			int i;
+			for (i = 0; i < ssa_vars_count; i++) {
+				if (ssa->vars[i].var == j) {
+					ssa_var_info[i].type |= MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+				}
+			}
+		}
+	}
+
 	if (ZEND_FUNC_INFO(op_array)) {
 		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);
 	}
