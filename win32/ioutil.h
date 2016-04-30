@@ -159,8 +159,9 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
 		size_t len = wcslen(pathw); \
-		/* Path may not end with ' ' or '.' */ \
-		if (len > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[len-2]) && (L' ' == pathw[len-1] || L'.' == pathw[len-1])) { \
+		if (len >= 1 && L' ' == pathw[len-1] || \
+			len > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[len-2]) && L'.' != pathw[len-2] && L'.' == pathw[len-1] \
+			) { \
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
 			return ret; \
 		} \
