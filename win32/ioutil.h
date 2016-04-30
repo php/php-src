@@ -138,6 +138,17 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 #endif
 
+#define PHP_WIN32_IOUTIL_DEFAULT_SLASHW L'\\'
+#define PHP_WIN32_IOUTIL_DEFAULT_DIR_SEPARATORW	L';'
+#define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == L'\\' || (c) == L'/')
+#define PHP_WIN32_IOUTIL_IS_LETTERW(c) (((c) >= L'a' && (c) <= L'z') || ((c) >= L'A' && (c) <= L'Z'))
+#define PHP_WIN32_IOUTIL_JUNCTION_PREFIXW L"\\??\\"
+#define PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW 4
+#define PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW L"\\\\?\\"
+#define PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW 4
+#define PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW L"\\\\?\\UNC\\"
+#define PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW 8
+
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
 
@@ -145,6 +156,15 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 	if (pathw) { \
 		free(pathw); \
 	}
+
+#define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
+		size_t len = wcslen(pathw); \
+		/* Path may not end with ' ' or '.' */ \
+		if (len > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[len-2]) && (L' ' == pathw[len-1] || L'.' == pathw[len-1])) { \
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
+			return ret; \
+		} \
+} while (0);
 
 #define php_win32_ioutil_access_cond(path, mode) _waccess(pathw, mode)
 #define php_win32_ioutil_unlink_cond(path) php_win32_ioutil_unlink_w(pathw)
@@ -159,6 +179,8 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
 
 	/* TODO set errno. */
 	ret = _waccess(pathw, mode);
@@ -180,6 +202,8 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
 
 	if (flags & O_CREAT) {
 		va_list arg;
@@ -211,6 +235,8 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 		return -1;
 	}
 
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
+
 	if (!DeleteFileW(pathw)) {
 		err = GetLastError();
 		ret = -1;
@@ -234,6 +260,8 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
 
 	if (!RemoveDirectoryW(pathw)) {
 		err = GetLastError();
@@ -264,6 +292,8 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 		return NULL;
 	}
 
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, NULL)
+
 	ret = _wfopen(pathw, modew);
 	_get_errno(&err);
 	free(pathw);
@@ -286,6 +316,9 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldnamew, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(newnamew, -1)
 
 	ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
 	err = GetLastError();
@@ -372,6 +405,8 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
 
 	ret = _wchmod(pathw, mode);
 	_get_errno(&err);
