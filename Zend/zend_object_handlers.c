@@ -519,7 +519,7 @@ static void zend_property_guard_dtor(zval *el) /* {{{ */ {
 }
 /* }}} */
 
-static uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
+ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
 {
 	HashTable *guards;
 	zval *zv;
