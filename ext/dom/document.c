@@ -1639,13 +1639,16 @@ PHP_FUNCTION(dom_document_savexml)
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
+			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
 		if(xmlSaveTree(xscp, node) < 0) {
+			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
 	} else {
 		if(xmlSaveDoc(xscp, docp) < 0) {
+			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
 	}
