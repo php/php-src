@@ -2884,11 +2884,9 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 		return;
 	}
 
-	ZVAL_COPY_VALUE(return_value, RT_CONSTANT(&param->fptr->op_array, precv->op2));
+	ZVAL_DUP(return_value, RT_CONSTANT(&param->fptr->op_array, precv->op2));
 	if (Z_CONSTANT_P(return_value)) {
 		zval_update_constant_ex(return_value, param->fptr->common.scope);
-	} else {
-		zval_copy_ctor(return_value);
 	}
 }
 /* }}} */

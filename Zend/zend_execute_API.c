@@ -608,21 +608,8 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 						Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
 					}
 				}
-				if (actual[0] == '\\') {
-					if (inline_change) {
-						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p));
-						--Z_STRLEN_P(p);
-					} else {
-						++actual;
-					}
-					--actual_len;
-				}
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
-					if (ZSTR_VAL(save)[0] == '\\') {
-						zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save) + 1);
-					} else {
-						zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save));
-					}
+					zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save));
 					if (inline_change) {
 						zend_string_release(save);
 					}
@@ -646,12 +633,6 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 				zend_string_release(Z_STR_P(p));
 			}
 			ZVAL_COPY_VALUE(p, const_value);
-			if (Z_OPT_CONSTANT_P(p)) {
-				if (UNEXPECTED(zval_update_constant_ex(p, scope) != SUCCESS)) {
-					RESET_CONSTANT_VISITED(p);
-					return FAILURE;
-				}
-			}
 			zval_opt_copy_ctor(p);
 		}
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
