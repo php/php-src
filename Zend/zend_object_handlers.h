@@ -180,6 +180,8 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
 
+ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
+
 #define zend_free_trampoline(func) do { \
 		if ((func) == &EG(trampoline)) { \
 			EG(trampoline).common.function_name = NULL; \
