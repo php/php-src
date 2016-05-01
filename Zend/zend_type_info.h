@@ -36,6 +36,10 @@
 #define MAY_BE_ANY                  (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
 #define MAY_BE_REF                  (1 << IS_REFERENCE) /* may be reference */
 
+/* fakes */
+#define MAY_BE_CALLABLE				(1 << IS_CALLABLE)
+#define MAY_BE_BOOL				(1 << _IS_BOOL)
+
 #define MAY_BE_ARRAY_SHIFT          (IS_REFERENCE)
 
 #define MAY_BE_ARRAY_OF_NULL		(MAY_BE_NULL     << MAY_BE_ARRAY_SHIFT)
