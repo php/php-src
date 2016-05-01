@@ -776,18 +776,21 @@ static void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_lis
 	}
 }
 
-static void zend_ast_export_name_list(smart_str *str, zend_ast_list *list, int indent)
+static void zend_ast_export_name_list_ex(smart_str *str, zend_ast_list *list, int indent, const char *separator)
 {
 	uint32_t i = 0;
 
 	while (i < list->children) {
 		if (i != 0) {
-			smart_str_appends(str, ", ");
+			smart_str_appends(str, separator);
 		}
 		zend_ast_export_name(str, list->child[i], 0, indent);
 		i++;
 	}
 }
+
+#define zend_ast_export_name_list(s, l, i) zend_ast_export_name_list_ex(s, l, i, ", ")
+#define zend_ast_export_catch_name_list(s, l, i) zend_ast_export_name_list_ex(s, l, i, "|")
 
 static void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int indent)
 {
@@ -1584,7 +1587,7 @@ simple_list:
 			break;
 		case ZEND_AST_CATCH:
 			smart_str_appends(str, "} catch (");
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			zend_ast_export_catch_name_list(str, ast->child[0], indent);
 			smart_str_appends(str, " $");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			smart_str_appends(str, ") {\n");

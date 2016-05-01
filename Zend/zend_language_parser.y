@@ -245,7 +245,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
-%type <ast> echo_expr_list unset_variables catch_list parameter_list class_statement_list
+%type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
@@ -456,8 +456,13 @@ statement:
 catch_list:
 		/* empty */
 			{ $$ = zend_ast_create_list(0, ZEND_AST_CATCH_LIST); }
-	|	catch_list T_CATCH '(' name T_VARIABLE ')' '{' inner_statement_list '}'
+	|	catch_list T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_CATCH, $4, $5, $8)); }
+;
+
+catch_name_list:
+		name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+	|	catch_name_list '|' name { $$ = zend_ast_list_add($1, $3); }
 ;
 
 finally_statement:
