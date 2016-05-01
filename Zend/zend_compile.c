@@ -4586,6 +4586,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	}
 
 	for (i = 0; i < catches->children; ++i) {
+
 		zend_ast *catch_ast = catches->child[i];
 		zend_ast_list *classes = zend_ast_get_list(catch_ast->child[0]);
 		zend_ast *var_ast = catch_ast->child[1];
@@ -4653,7 +4654,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 	if (finally_ast) {
 		uint32_t opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;
-		
+
 		/* Pop FAST_CALL from unwind stack */
 		zend_stack_del_top(&CG(loop_var_stack));
 
