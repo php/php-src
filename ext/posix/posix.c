@@ -987,7 +987,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	array_init(&array_members);
 
 	add_assoc_string(array_group, "name", g->gr_name);
-	if (array_group->gr_passwd) {
+	if (g->gr_passwd) {
 		add_assoc_string(array_group, "passwd", g->gr_passwd);
 	} else {
 		add_assoc_null(array_group, "passwd");
