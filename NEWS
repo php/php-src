@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #72014 (Including a file with anonymous classes multiple times
     leads to fatal error). (Laruence)
 
+- POSIX:
+  . Fixed bug #72133 (php_posix_group_to_array crashes if gr_passwd is NULL).
+    (esminis at esminis dot lt)
+
 - Postgres:
   . Fixed bug #72028 (pg_query_params(): NULL converts to empty string).
     (Laruence)
