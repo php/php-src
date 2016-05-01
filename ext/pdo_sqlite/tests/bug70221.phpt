@@ -12,7 +12,7 @@ function _test() { return 42; }
 $db->sqliteCreateFunction('test', '_test', 0);
 print("Everything is fine, no exceptions here\n");
 unset($db);
-unlink($dbfile);
+@unlink($dbfile);
 ?>
 --EXPECT--
 Everything is fine, no exceptions here
