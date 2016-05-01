@@ -773,6 +773,7 @@ zend_string *zend_resolve_non_class_name(
 
 	if (ZSTR_VAL(name)[0] == '\\') {
 		/* Remove \ prefix (only relevant if this is a string rather than a label) */
+		*is_fully_qualified = 1;
 		return zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
 	}
 
