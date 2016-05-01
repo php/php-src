@@ -61,6 +61,13 @@ extern "C" {
 # define PW32IO __declspec(dllimport)
 #endif
 
+#define PHP_WIN32_IOUTIL_MAXPATHLEN 2048
+
+#if !defined(MAXPATHLEN) || MAXPATHLEN < PHP_WIN32_IOUTIL_MAXPATHLEN
+# undef MAXPATHLEN
+# define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
+#endif
+
 #ifndef mode_t
 typedef unsigned short mode_t;
 #endif
