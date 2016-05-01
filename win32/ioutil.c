@@ -208,7 +208,8 @@ PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_iout
 	switch (flags & (_O_RDONLY | _O_WRONLY | _O_RDWR)) {
 		case _O_RDONLY:
 			opts->access = FILE_GENERIC_READ;
-			opts->attributes |= FILE_FLAG_BACKUP_SEMANTICS;
+			/* XXX not opening dirs yet, see also at the bottom of this function. Should be evaluated properly. */
+			/*opts->attributes |= FILE_FLAG_BACKUP_SEMANTICS;*/
 			break;
 		case _O_WRONLY:
 			opts->access = FILE_GENERIC_WRITE;
