@@ -30,22 +30,22 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #71527 (Buffer over-write in finfo_open with malformed magic
-    file). (Anatol)
+    file). (CVE-2015-8865) (Anatol)
 
 - Mbstring:
   . Fixed bug #71906 (AddressSanitizer: negative-size-param (-1) in
-    mbfl_strcut). (Stas)
+    mbfl_strcut). (CVE-2016-4073) (Stas)
 
-- ODBC
+- ODBC:
   . Fixed bug #71860 (Invalid memory write in phar on filename with \0 in
-    name). (Stas)
+    name). (CVE-2016-4072) (Stas)
 
 - SNMP:
   . Fixed bug #71704 (php_snmp_error() Format String Vulnerability).
-    (andrew at jmpesp dot org)
+    (CVE-2016-4071) (andrew at jmpesp dot org)
 
-- Standard
-  . Fixed bug #71798 (Integer Overflow in php_raw_url_encode).
+- Standard:
+  . Fixed bug #71798 (Integer Overflow in php_raw_url_encode). (CVE-2016-4070)
     (taoguangchen at icloud dot com, Stas)
 
 03 Mar 2016, PHP 5.5.33
@@ -69,13 +69,16 @@ PHP                                                                        NEWS
   . Improved the fix for bug #70976. (Remi)
 
 - PCRE:
-  . Upgraded pcrelib to 8.38. 
+  . Upgraded pcrelib to 8.38. (CVE-2015-8383, CVE-2015-8386, CVE-2015-8387,
+    CVE-2015-8389, CVE-2015-8390, CVE-2015-8391, CVE-2015-8393, CVE-2015-8394)
 
 - Phar:
-  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (Stas)
+  . Fixed bug #71354 (Heap corruption in tar/zip/phar parser). (CVE-2016-4342)
+    (Stas)
   . Fixed bug #71391 (NULL Pointer Dereference in phar_tar_setupmetadata()).
     (Stas)
-  . Fixed bug #71488 (Stack overflow when decompressing tar archives). (Stas)
+  . Fixed bug #71488 (Stack overflow when decompressing tar archives).
+    (CVE-2016-2554) (Stas)
 
 - WDDX:
   . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
@@ -87,7 +90,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
-    Out of Bounds). (emmanuel dot law at gmail dot com).
+    Out of Bounds). (CVE-2016-1903) (emmanuel dot law at gmail dot com).
 
 - WDDX:
   . Fixed bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization).
@@ -102,16 +105,18 @@ PHP                                                                        NEWS
 01 Oct 2015, PHP 5.5.30
 
 - Phar:
-  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()).
+    (CVE-2015-7803) (Stas)
   . Fixed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
-    entry filename is "/"). (Stas)
+    entry filename is "/"). (CVE-2015-7804) (Stas)
 
 03 Sep 2015, PHP 5.5.29
 
 - Core:
-  . Fixed bug #70172 (Use After Free Vulnerability in unserialize()). (Stas)
+  . Fixed bug #70172 (Use After Free Vulnerability in unserialize()).
+    (CVE-2015-6834) (Stas)
   . Fixed bug #70219 (Use after free vulnerability in session deserializer). 
-    (taoguangchen at icloud dot com)
+    (CVE-2015-6835) (taoguangchen at icloud dot com)
 
 - EXIF:
   . Fixed bug #70385 (Buffer over-read in exif_read_data with TIFF IFD tag byte
@@ -127,20 +132,21 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #70388 (SOAP serialize_function_call() type confusion / RCE).
-    (Stas)
+    (CVE-2015-6836) (Stas)
   
 - SPL:
   . Fixed bug #70365 (Use-after-free vulnerability in unserialize() with
-    SplObjectStorage). (taoguangchen at icloud dot com)
+    SplObjectStorage). (CVE-2015-6834) (taoguangchen at icloud dot com)
   . Fixed bug #70366 (Use-after-free vulnerability in unserialize() with
-    SplDoublyLinkedList). (taoguangchen at icloud dot com)
+    SplDoublyLinkedList). (CVE-2015-6834) (taoguangchen at icloud dot com)
 
 - XSLT:
-  . Fixed bug #69782 (NULL pointer dereference). (Stas)
+  . Fixed bug #69782 (NULL pointer dereference). (CVE-2015-6837, CVE-2015-6838)
+    (Stas)
 
 - ZIP:
   . Fixed bug #70350 (ZipArchive::extractTo allows for directory traversal when 
-    creating directories). (neal at fb dot com)
+    creating directories). (CVE-2014-9767) (neal at fb dot com)
 
 06 Aug 2015, PHP 5.5.28
 
@@ -155,12 +161,12 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #70014 (openssl_random_pseudo_bytes() is not cryptographically
-    secure). (Stas)
+    secure). (CVE-2015-8867) (Stas)
 
 - Phar:
   . Improved fix for bug #69441. (Anatol Belski)
   . Fixed bug #70019 (Files extracted from archive may be placed outside of 
-    destination directory). (Anatol Belski)
+    destination directory). (CVE-2015-6833) (Anatol Belski)
 
 - SOAP:
   . Fixed bug #70081 (SoapClient info leak / null pointer dereference via
@@ -168,13 +174,13 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #70068 (Dangling pointer in the unserialization of ArrayObject
-    items). (sean.heelan)
+    items). (CVE-2015-6832) (sean.heelan)
   . Fixed bug #70166 (Use After Free Vulnerability in unserialize() with
-    SPLArrayObject). (taoguangchen at icloud dot com)
+    SPLArrayObject). (CVE-2015-6831) (taoguangchen at icloud dot com)
   . Fixed bug #70168 (Use After Free Vulnerability in unserialize() with
-    SplObjectStorage). (taoguangchen at icloud dot com)
+    SplObjectStorage). (CVE-2015-6831) (taoguangchen at icloud dot com)
   . Fixed bug #70169 (Use After Free Vulnerability in unserialize() with
-    SplDoublyLinkedList). (taoguangchen at icloud dot com)
+    SplDoublyLinkedList). (CVE-2015-6831) (taoguangchen at icloud dot com)
 
 9 Jul 2015, PHP 5.5.27
 
@@ -245,7 +251,8 @@ PHP                                                                        NEWS
     heap overflow). (CVE-2015-4643) (Max Spelsberg)
   . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
     (CVE-2015-4642) (Anatol Belski)
-  . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
+  . Fixed bug #69719 (Incorrect handling of paths with NULs). (CVE-2015-4598)
+   (Stas)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
