@@ -1193,9 +1193,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main(int argc, char *argv[])
 #endif
 {
-#ifdef PHP_CLI_WIN32_NO_CONSOLE
+#if defined(PHP_WIN32)
+# ifdef PHP_CLI_WIN32_NO_CONSOLE
 	int argc = __argc;
 	char **argv = __argv;
+# else
+	int num_args;
+	wchar_t **argv_wide;
+	char **argv_save = argv;
+# endif
 #endif
 
 	int c;
@@ -1367,6 +1373,12 @@ exit_loop:
 	if (php_win32_cp_use_unicode()) {
 		SetConsoleOutputCP(65001U);
 		SetConsoleCP(65001U);
+
+		/* Ignore the delivered argv and argc, read from W API. This place
+		 	might be too late though, but this is the earliest place ATW
+			we can access the internal charset information from PHP. */
+		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
+		PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc, 1)
 	} else {
 		SetConsoleOutputCP(prev_cp);
 		SetConsoleCP(prev_cp);
@@ -1417,6 +1429,10 @@ out:
 	 * exiting.
 	 */
 	cleanup_ps_args(argv);
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+	PHP_WIN32_FREE_ARRAY(argv, argc);
+	argv = argv_save;
+#endif
 	exit(exit_status);
 }
 /* }}} */

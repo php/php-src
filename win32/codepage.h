@@ -76,6 +76,27 @@ __forceinline static char *php_win32_cp_w_to_any(wchar_t* w_source_ptr)
 	return NULL;
 }
 
+#define PHP_WIN32_CP_W_TO_A_ARRAY(aw, aw_len, aa, aa_len, utf8) do { \
+	int i; \
+	aa_len = aw_len; \
+	aa = (char **) malloc(aw_len * sizeof(char *)); \
+	for (i = 0; i < aw_len; i++) { \
+		if (utf8) \
+			argv[i] = php_win32_cp_w_to_utf8(argv_wide[i]); \
+		else \
+			argv[i] = php_win32_cp_w_to_any(argv_wide[i]); \
+	} \
+} while (0);
+
+
+#define PHP_WIN32_FREE_ARRAY(a, a_len) do { \
+	int i; \
+	for (i = 0; i < a_len; i++) { \
+		free(a[i]); \
+	} \
+	free(a); \
+} while (0);
+
 #ifdef __cplusplus
 }
 #endif
