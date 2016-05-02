@@ -6083,16 +6083,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 	name  = EX_CONSTANT(opline->op1);
 	val   = EX_CONSTANT(opline->op2);
 
-	ZVAL_COPY_VALUE(&c.value, val);
+	ZVAL_COPY(&c.value, val);
 	if (Z_OPT_CONSTANT(c.value)) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 
 
 			HANDLE_EXCEPTION();
-		}
-	} else {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED(c.value))) {
-			Z_ADDREF(c.value);
 		}
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
