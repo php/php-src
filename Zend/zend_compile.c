@@ -4542,7 +4542,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	zend_ast_list *catches = zend_ast_get_list(ast->child[1]);
 	zend_ast *finally_ast = ast->child[2];
 
-	uint32_t i;
+	uint32_t i, j;
 	zend_op *opline;
 	uint32_t try_catch_offset;
 	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), catches->children, 0);
@@ -4587,34 +4587,53 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < catches->children; ++i) {
 		zend_ast *catch_ast = catches->child[i];
-		zend_ast *class_ast = catch_ast->child[0];
+		zend_ast_list *classes = zend_ast_get_list(catch_ast->child[0]);
 		zend_ast *var_ast = catch_ast->child[1];
 		zend_ast *stmt_ast = catch_ast->child[2];
 		zval *var_name = zend_ast_get_zval(var_ast);
 		zend_bool is_last_catch = (i + 1 == catches->children);
 
+		uint32_t *jmp_multicatch = safe_emalloc(sizeof(uint32_t), classes->children - 1, 0);
 		uint32_t opnum_catch;
-
-		if (!zend_is_const_default_class_ref(class_ast)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
-		}
-
-		opnum_catch = get_next_op_number(CG(active_op_array));
-		if (i == 0) {
-			CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
-		}
 
 		CG(zend_lineno) = catch_ast->lineno;
 
-		opline = get_next_op(CG(active_op_array));
-		opline->opcode = ZEND_CATCH;
-		opline->op1_type = IS_CONST;
-		opline->op1.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name_ast(class_ast));
+		for (j = 0; j < classes->children; j++) {
 
-		opline->op2_type = IS_CV;
-		opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR_P(var_name)));
-		opline->result.num = is_last_catch;
+			zend_ast *class_ast = classes->child[j];
+			zend_bool is_last_class = (j + 1 == classes->children);
+
+			if (!zend_is_const_default_class_ref(class_ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
+			}
+
+			opnum_catch = get_next_op_number(CG(active_op_array));
+			if (i == 0 && j == 0) {
+				CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
+			}
+
+			opline = get_next_op(CG(active_op_array));
+			opline->opcode = ZEND_CATCH;
+			opline->op1_type = IS_CONST;
+			opline->op1.constant = zend_add_class_name_literal(CG(active_op_array),
+					zend_resolve_class_name_ast(class_ast));
+
+			opline->op2_type = IS_CV;
+			opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR_P(var_name)));
+
+			opline->result.num = is_last_catch && is_last_class;
+
+			if (!is_last_class) {
+				jmp_multicatch[j] = zend_emit_jump(0);
+				opline->extended_value = get_next_op_number(CG(active_op_array));
+			}
+		}
+
+		for (j = 0; j < classes->children - 1; j++) {
+			zend_update_jump_target_to_next(jmp_multicatch[j]);
+		}
+
+		efree(jmp_multicatch);
 
 		zend_compile_stmt(stmt_ast);
 

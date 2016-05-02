@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
     decoct(), dechex(), integer operators and other conversions now always
     respect scientific notation in numeric strings. (Andrea)
+  . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
+    Pierrick)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
