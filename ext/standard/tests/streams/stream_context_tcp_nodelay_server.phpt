@@ -18,11 +18,11 @@ $serverCode = <<<'CODE'
 
 	var_dump(socket_get_option(
 				socket_import_stream($server), 
-					SOL_TCP, TCP_NODELAY));
+					SOL_TCP, TCP_NODELAY) > 0);
 
 	var_dump(socket_get_option(
 				socket_import_stream($client), 
-					SOL_TCP, TCP_NODELAY));
+					SOL_TCP, TCP_NODELAY) > 0);
 
 	fclose($client);
 	fclose($server);
@@ -43,5 +43,5 @@ include sprintf(
 ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
 ?>
 --EXPECT--
-int(0)
-int(1)
+bool(false)
+bool(true)
