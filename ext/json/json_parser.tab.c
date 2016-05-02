@@ -1464,7 +1464,7 @@ yyreduce:
 
     {
 				PHP_JSON_DEPTH_INC;
-				if (parser->methods->object_start && FAILURE == parser->methods->object_start(parser)) {
+				if (parser->methods.object_start && FAILURE == parser->methods.object_start(parser)) {
 					YYERROR;
 				}
 			}
@@ -1476,7 +1476,7 @@ yyreduce:
     {
 				ZVAL_COPY_VALUE(&(yyval.value), &(yyvsp[-1].value));
 				PHP_JSON_DEPTH_DEC;
-				if (parser->methods->object_end && FAILURE == parser->methods->object_end(parser, &(yyval.value))) {
+				if (parser->methods.object_end && FAILURE == parser->methods.object_end(parser, &(yyval.value))) {
 					YYERROR;
 				}
 			}
@@ -1495,7 +1495,7 @@ yyreduce:
   case 8:
 
     {
-				parser->methods->object_create(parser, &(yyval.value));
+				parser->methods.object_create(parser, &(yyval.value));
 			}
 
     break;
@@ -1503,8 +1503,8 @@ yyreduce:
   case 10:
 
     {
-				parser->methods->object_create(parser, &(yyval.value));
-				if (parser->methods->object_update(parser, &(yyval.value), (yyvsp[0].pair).key, &(yyvsp[0].pair).val) == FAILURE) {
+				parser->methods.object_create(parser, &(yyval.value));
+				if (parser->methods.object_update(parser, &(yyval.value), (yyvsp[0].pair).key, &(yyvsp[0].pair).val) == FAILURE) {
 					YYERROR;
 				}
 			}
@@ -1514,7 +1514,7 @@ yyreduce:
   case 11:
 
     {
-				if (parser->methods->object_update(parser, &(yyvsp[-2].value), (yyvsp[0].pair).key, &(yyvsp[0].pair).val) == FAILURE) {
+				if (parser->methods.object_update(parser, &(yyvsp[-2].value), (yyvsp[0].pair).key, &(yyvsp[0].pair).val) == FAILURE) {
 					YYERROR;
 				}
 				ZVAL_COPY_VALUE(&(yyval.value), &(yyvsp[-2].value));
@@ -1551,7 +1551,7 @@ yyreduce:
 
     {
 				PHP_JSON_DEPTH_INC;
-				if (parser->methods->array_start && FAILURE == parser->methods->array_start(parser)) {
+				if (parser->methods.array_start && FAILURE == parser->methods.array_start(parser)) {
 					YYERROR;
 				}
 			}
@@ -1563,7 +1563,7 @@ yyreduce:
     {
 				ZVAL_COPY_VALUE(&(yyval.value), &(yyvsp[-1].value));
 				PHP_JSON_DEPTH_DEC;
-				if (parser->methods->array_end && FAILURE == parser->methods->array_end(parser, &(yyval.value))) {
+				if (parser->methods.array_end && FAILURE == parser->methods.array_end(parser, &(yyval.value))) {
 					YYERROR;
 				}
 			}
@@ -1582,7 +1582,7 @@ yyreduce:
   case 19:
 
     {
-				parser->methods->array_create(parser, &(yyval.value));
+				parser->methods.array_create(parser, &(yyval.value));
 			}
 
     break;
@@ -1590,8 +1590,8 @@ yyreduce:
   case 21:
 
     {
-				parser->methods->array_create(parser, &(yyval.value));
-				parser->methods->array_append(parser, &(yyval.value), &(yyvsp[0].value));
+				parser->methods.array_create(parser, &(yyval.value));
+				parser->methods.array_append(parser, &(yyval.value), &(yyvsp[0].value));
 			}
 
     break;
@@ -1599,7 +1599,7 @@ yyreduce:
   case 22:
 
     {
-				parser->methods->array_append(parser, &(yyvsp[-2].value), &(yyvsp[0].value));
+				parser->methods.array_append(parser, &(yyvsp[-2].value), &(yyvsp[0].value));
 				ZVAL_COPY_VALUE(&(yyval.value), &(yyvsp[-2].value));
 			}
 
@@ -1947,7 +1947,7 @@ void php_json_parser_init_ex(php_json_parser *parser,
 	parser->depth = 1;
 	parser->max_depth = max_depth;
 	parser->return_value = return_value;
-	parser->methods = parser_methods;
+	memcpy(&parser->methods, parser_methods, sizeof(php_json_parser_methods));
 }
 
 void php_json_parser_init(php_json_parser *parser,

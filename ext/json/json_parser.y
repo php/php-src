@@ -102,7 +102,7 @@ object:
 		'{'
 			{
 				PHP_JSON_DEPTH_INC;
-				if (parser->methods->object_start && FAILURE == parser->methods->object_start(parser)) {
+				if (parser->methods.object_start && FAILURE == parser->methods.object_start(parser)) {
 					YYERROR;
 				}
 			}
@@ -110,7 +110,7 @@ object:
 			{
 				ZVAL_COPY_VALUE(&$$, &$3);
 				PHP_JSON_DEPTH_DEC;
-				if (parser->methods->object_end && FAILURE == parser->methods->object_end(parser, &$$)) {
+				if (parser->methods.object_end && FAILURE == parser->methods.object_end(parser, &$$)) {
 					YYERROR;
 				}
 			}
@@ -128,7 +128,7 @@ object_end:
 members:
 		/* empty */
 			{
-				parser->methods->object_create(parser, &$$);
+				parser->methods.object_create(parser, &$$);
 			}
 	|	member
 ;
@@ -136,14 +136,14 @@ members:
 member:
 		pair
 			{
-				parser->methods->object_create(parser, &$$);
-				if (parser->methods->object_update(parser, &$$, $1.key, &$1.val) == FAILURE) {
+				parser->methods.object_create(parser, &$$);
+				if (parser->methods.object_update(parser, &$$, $1.key, &$1.val) == FAILURE) {
 					YYERROR;
 				}
 			}
 	|	member ',' pair
 			{
-				if (parser->methods->object_update(parser, &$1, $3.key, &$3.val) == FAILURE) {
+				if (parser->methods.object_update(parser, &$1, $3.key, &$3.val) == FAILURE) {
 					YYERROR;
 				}
 				ZVAL_COPY_VALUE(&$$, &$1);
@@ -170,7 +170,7 @@ array:
 		'['
 			{
 				PHP_JSON_DEPTH_INC;
-				if (parser->methods->array_start && FAILURE == parser->methods->array_start(parser)) {
+				if (parser->methods.array_start && FAILURE == parser->methods.array_start(parser)) {
 					YYERROR;
 				}
 			}
@@ -178,7 +178,7 @@ array:
 			{
 				ZVAL_COPY_VALUE(&$$, &$3);
 				PHP_JSON_DEPTH_DEC;
-				if (parser->methods->array_end && FAILURE == parser->methods->array_end(parser, &$$)) {
+				if (parser->methods.array_end && FAILURE == parser->methods.array_end(parser, &$$)) {
 					YYERROR;
 				}
 			}
@@ -196,7 +196,7 @@ array_end:
 elements:
 		/* empty */
 			{
-				parser->methods->array_create(parser, &$$);
+				parser->methods.array_create(parser, &$$);
 			}
 	|	element
 ;
@@ -204,12 +204,12 @@ elements:
 element:
 		value
 			{
-				parser->methods->array_create(parser, &$$);
-				parser->methods->array_append(parser, &$$, &$1);
+				parser->methods.array_create(parser, &$$);
+				parser->methods.array_append(parser, &$$, &$1);
 			}
 	|	element ',' value
 			{
-				parser->methods->array_append(parser, &$1, &$3);
+				parser->methods.array_append(parser, &$1, &$3);
 				ZVAL_COPY_VALUE(&$$, &$1);
 			}
 	|	element errlex
@@ -339,7 +339,7 @@ void php_json_parser_init_ex(php_json_parser *parser,
 	parser->depth = 1;
 	parser->max_depth = max_depth;
 	parser->return_value = return_value;
-	parser->methods = parser_methods;
+	memcpy(&parser->methods, parser_methods, sizeof(php_json_parser_methods));
 }
 
 void php_json_parser_init(php_json_parser *parser,

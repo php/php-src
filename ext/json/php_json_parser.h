@@ -57,7 +57,7 @@ struct _php_json_parser {
 	zval *return_value;
 	unsigned int depth;
 	int max_depth;
-	const php_json_parser_methods *methods;
+	php_json_parser_methods methods;
 };
 
 PHP_JSON_API void php_json_parser_init_ex(
