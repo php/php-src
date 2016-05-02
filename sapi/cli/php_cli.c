@@ -179,6 +179,10 @@ const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+ZEND_TLS DWORD prev_cp;
+#endif
+
 static int print_module_info(zval *element) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(element);
@@ -483,10 +487,28 @@ ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
+/* {{{ Windows specific function defs */
+#ifdef PHP_WIN32
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cli_set_cp, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cli_get_cp, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+PHP_FUNCTION(cli_set_cp);
+PHP_FUNCTION(cli_get_cp);
+#endif
+/* }}} */
+
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
 	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
 	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
+#ifdef PHP_WIN32
+	PHP_FE(cli_set_cp, arginfo_cli_set_cp)
+	PHP_FE(cli_get_cp, arginfo_cli_get_cp)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -1340,6 +1362,17 @@ exit_loop:
 	}
 	module_started = 1;
 
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+	prev_cp = GetConsoleCP();
+	if (php_win32_ioutil_use_unicode()) {
+		SetConsoleOutputCP(65001U);
+		SetConsoleCP(65001U);
+	} else {
+		SetConsoleOutputCP(prev_cp);
+		SetConsoleCP(prev_cp);
+	}
+#endif
+
 	/* -e option */
 	if (use_extended_info) {
 		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
@@ -1373,6 +1406,12 @@ out:
 	tsrm_shutdown();
 #endif
 
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+	/* Restore the original console CP */
+	SetConsoleOutputCP(prev_cp);
+	SetConsoleCP(prev_cp);
+#endif
+
 	/*
 	 * Do not move this de-initialization. It needs to happen right before
 	 * exiting.
@@ -1381,6 +1420,36 @@ out:
 	exit(exit_status);
 }
 /* }}} */
+
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+PHP_FUNCTION(cli_set_cp) /* {{{ */
+{
+	zend_long cp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &cp) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(SetConsoleOutputCP((UINT)cp) && SetConsoleCP((UINT)cp));
+}
+/* }}} */
+
+PHP_FUNCTION(cli_get_cp) /* {{{ */
+{
+	zend_long cp;
+	UINT in_cp, out_cp;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	in_cp = GetConsoleCP();
+	out_cp = GetConsoleOutputCP();
+
+	RETURN_LONG(in_cp == out_cp ? in_cp : -1);
+}
+/* }}} */
+#endif
 
 /*
  * Local variables:
