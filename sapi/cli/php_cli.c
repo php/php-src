@@ -488,7 +488,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Windows specific function defs */
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cli_set_cp, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -505,7 +505,7 @@ static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
 	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
 	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
 	PHP_FE(cli_set_cp, arginfo_cli_set_cp)
 	PHP_FE(cli_get_cp, arginfo_cli_get_cp)
 #endif
@@ -1364,7 +1364,7 @@ exit_loop:
 
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
 	prev_cp = GetConsoleCP();
-	if (php_win32_ioutil_use_unicode()) {
+	if (php_win32_cp_use_unicode()) {
 		SetConsoleOutputCP(65001U);
 		SetConsoleCP(65001U);
 	} else {
@@ -1436,7 +1436,6 @@ PHP_FUNCTION(cli_set_cp) /* {{{ */
 
 PHP_FUNCTION(cli_get_cp) /* {{{ */
 {
-	zend_long cp;
 	UINT in_cp, out_cp;
 
 	if (zend_parse_parameters_none() == FAILURE) {

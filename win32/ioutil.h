@@ -50,6 +50,7 @@
 #include <stdio.h>
 
 #include "win32/winutil.h"
+#include "win32/codepage.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,51 +86,15 @@ typedef enum {
 	PHP_WIN32_IOUTIL_IS_UTF8
 } php_win32_ioutil_encoding;
 
-PW32IO BOOL php_win32_ioutil_use_unicode(void);
-PW32IO wchar_t *php_win32_ioutil_mb_to_w(const char* path);
-PW32IO wchar_t *php_win32_ioutil_thread_to_w(const char* path);
-PW32IO wchar_t *php_win32_ioutil_ascii_to_w(const char* path);
-PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr);
-PW32IO char *php_win32_ioutil_w_to_thread(wchar_t* w_source_ptr);
-/* This function tries to make the best guess to convert any
-   given string to a wide char, also prefering the fastest code
-   path to unicode. It returns NULL on fail. */
-__forceinline wchar_t *php_win32_ioutil_any_to_w(const char* in)
-{
-	wchar_t *ret;
-
-	/* First try the pure ascii conversion. This is the fastest way to do the
-		thing. */
-	ret = php_win32_ioutil_ascii_to_w(in);
-
-	/* If that failed, try to convert to multibyte. */
-	if (!ret) {
-
-		ret = php_win32_ioutil_mb_to_w(in);
-
-		if (!ret) {
-			ret = php_win32_ioutil_thread_to_w(in);
-		}
-	}
-
-	return ret;
-}
-
-/* This function converts from unicode function output back to PHP. If
-	the PHP's current charset is not compatible with unicode, so the current
-	thread CP will be used. The latter is the default behavior in PHP < 7.1,
-	as only ANSI complaint functions was used previously. */
-__forceinline static char *php_win32_ioutil_w_to_any(wchar_t* w_source_ptr)
-{
-	if (php_win32_ioutil_use_unicode()) {
-		return php_win32_ioutil_w_to_utf8(w_source_ptr);
-	} else {
-		return php_win32_ioutil_w_to_thread(w_source_ptr);
-	}
-
-	/* Never happens. */
-	return NULL;
-}
+/* Keep these functions aliased for case some additional handling
+   is needed later. */
+#define php_win32_ioutil_any_to_w php_win32_cp_any_to_w
+#define php_win32_ioutil_ascii_to_w php_win32_cp_ascii_to_w
+#define php_win32_ioutil_mb_to_w php_win32_cp_mb_to_w
+#define php_win32_ioutil_thread_to_w php_win32_cp_thread_to_w
+#define php_win32_ioutil_w_to_any php_win32_cp_w_to_any
+#define php_win32_ioutil_w_to_utf8 php_win32_cp_w_to_utf8
+#define php_win32_ioutil_w_to_thread php_win32_cp_w_to_thread
 
 PW32IO int php_win32_ioutil_close(int fd);
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts);

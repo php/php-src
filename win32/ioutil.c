@@ -56,142 +56,13 @@
 #include "win32/winutil.h"
 #include "win32/time.h"
 #include "win32/ioutil.h"
+#include "win32/codepage.h"
 
 /*
 #undef NONLS
 #undef _WINNLS_
 #include <winnls.h>
 */
-PW32IO wchar_t *php_win32_ioutil_mb_to_w(const char* path)
-{/*{{{*/
-	wchar_t *ret;
-	int ret_len, tmp_len;
-
-	if (!path) {
-		return NULL;
-	}
-
-    ret_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, NULL, 0);
-    if (ret_len == 0) {
-		return NULL;
-    }
-
-	ret = malloc(ret_len * sizeof(wchar_t));
-	if (!ret) {
-		return NULL;
-	}
-
-	tmp_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, ret, ret_len);
-
-    /* assert(tmp_len == ret_len); */
-
-	return ret;
-}/*}}}*/
-
-PW32IO wchar_t *php_win32_ioutil_thread_to_w(const char* path)
-{/*{{{*/
-	wchar_t *ret;
-	int ret_len, tmp_len;
-
-	if (!path) {
-		return NULL;
-	}
-
-    ret_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, NULL, 0);
-    if (ret_len == 0) {
-		return NULL;
-    }
-
-	ret = malloc(ret_len * sizeof(wchar_t));
-	if (!ret) {
-		return NULL;
-	}
-
-	tmp_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, ret, ret_len);
-
-    /* assert(tmp_len == ret_len); */
-
-	return ret;
-
-}/*}}}*/
-
-PW32IO wchar_t *php_win32_ioutil_ascii_to_w(const char* path)
-{/*{{{*/
-	wchar_t *ret = NULL;
-	size_t len = strlen(path);
-	const char *idx = path, *end = path + len;
-
-	while (idx != end) {
-		if (!__isascii(*idx)) {
-			break;
-		}
-		idx++;
-	}
-
-	if (idx == end) {
-		ret = malloc((len+1)*sizeof(wchar_t));
-		if (!ret) {
-			return NULL;
-		}
-		if (-1 == swprintf(ret, len+1, L"%hs", path)) {
-			return NULL;
-		}
-	}
-
-	return ret;
-}/*}}}*/
-
-PW32IO char *php_win32_ioutil_w_to_utf8(wchar_t* w_source_ptr)
-{/*{{{*/
-	int r;
-	int target_len;
-	char* target;
-
-
-	target_len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, w_source_ptr, -1, NULL, 0, NULL, NULL);
-	if (target_len == 0) {
-		return NULL;
-	}
-
-	target = malloc(target_len);
-	if (target == NULL) {
-		SetLastError(ERROR_OUTOFMEMORY);
-		_set_errno(ENOMEM);
-		return NULL;
-	}
-
-	r = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, w_source_ptr, -1, target, target_len, NULL, NULL);
-
-	/*assert(r == target_len);*/
-
-	return target;
-}/*}}}*/
-
-PW32IO char *php_win32_ioutil_w_to_thread(wchar_t* w_source_ptr)
-{/*{{{*/
-	int r;
-	int target_len;
-	char* target;
-
-
-	target_len = WideCharToMultiByte(CP_THREAD_ACP, 0, w_source_ptr, -1, NULL, 0, NULL, NULL);
-	if (target_len == 0) {
-		return NULL;
-	}
-
-	target = malloc(target_len);
-	if (target == NULL) {
-		SetLastError(ERROR_OUTOFMEMORY);
-		_set_errno(ENOMEM);
-		return NULL;
-	}
-
-	r = WideCharToMultiByte(CP_THREAD_ACP, 0, w_source_ptr, -1, target, target_len, NULL, NULL);
-
-	/*assert(r == target_len);*/
-
-	return target;
-}/*}}}*/
 
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts)
 {/*{{{*/
@@ -550,35 +421,6 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	}
 
 	return (wchar_t *)buf;
-}/*}}}*/
-
-PW32IO BOOL php_win32_ioutil_use_unicode(void)
-{/*{{{*/
-	char *enc = NULL;
-	size_t len = 0;
-	const zend_encoding *zenc;
-
-	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
-		enc = PG(internal_encoding);
-	} else if (SG(default_charset) && SG(default_charset)[0] ) {
-		enc = SG(default_charset);
-	} else {
-		zenc = zend_multibyte_get_internal_encoding();
-		if (zenc) {
-			enc = (char *)zend_multibyte_get_encoding_name(zenc);
-		}
-	}
-
-	if (NULL == enc) {
-		return 1;
-	}
-
-	if ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len &&
-		(zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0)) {
-		return 1;
-	}
-
-	return 0;
 }/*}}}*/
 
 /* an extended version could be implemented, for now direct functions can be used. */
