@@ -456,8 +456,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		zend_class_constant *c;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-			zval_update_constant_ex(&c->value, NULL);
-			_class_const_string(str, ZSTR_VAL(key), c, indent);
+			zval_update_constant_ex(&c->value, c->ce);
+			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent.buf));
 		} ZEND_HASH_FOREACH_END();
 	}
 	string_printf(str, "%s  }\n", indent);
@@ -633,11 +633,15 @@ static void _const_string(string *str, char *name, zval *value, char *indent)
 /* {{{ _class_const_string */
 static void _class_const_string(string *str, char *name, zend_class_constant *c, char *indent)
 {
-	char *type = zend_zval_type_name(&c->value);
 	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
-	zend_string *value_str = zval_get_string(&c->value);
+	zend_string *value_str;
+	char *type;
 
-	string_printf(str, "%s    Constant [ %s %s %s ] { %s }\n",
+	zval_update_constant_ex(&c->value, c->ce);
+	value_str = zval_get_string(&c->value);
+	type = zend_zval_type_name(&c->value);
+
+	string_printf(str, "%sConstant [ %s %s %s ] { %s }\n",
 					indent, visibility, type, name, ZSTR_VAL(value_str));
 
 	zend_string_release(value_str);
@@ -3821,6 +3825,9 @@ ZEND_METHOD(reflection_class_constant, getValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	ZVAL_DUP(return_value, &ref->value);
+	if (Z_CONSTANT_P(return_value)) {
+		zval_update_constant_ex(return_value, ref->ce);
+	}
 }
 /* }}} */
 
