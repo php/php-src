@@ -4,27 +4,30 @@ PHP                                                                        NEWS
 
 ??? 2016, PHP 5.5.36
 
+- Phar:
+  . Fixed bug #71331 (Uninitialized pointer in phar_make_dirstream()).
+    (CVE-2016-4343) (Stas)
 
 
 28 Apr 2016, PHP 5.5.35
 
 - BCMath:
-  . Fix bug #72093 (bcpowmod accepts negative scale and corrupts _one_
+  . Fixed bug #72093 (bcpowmod accepts negative scale and corrupts _one_
     definition). (Stas)
 
 - Exif:
-  . Fix bug #72094 (Out of bounds heap read access in exif header
+  . Fixed bug #72094 (Out of bounds heap read access in exif header
     processing). (Stas)
 
 - GD:
-  . Fix bug #71912 (libgd: signedness vulnerability) (CVE-2016-3074). (Stas)
+  . Fixed bug #71912 (libgd: signedness vulnerability) (CVE-2016-3074). (Stas)
 
 - Intl:
-  . Fix bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
+  . Fixed bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
     offset). (Stas)
 
 - XML:
-   . Fix bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
+   . Fixed bug #72099 (xml_parse_into_struct segmentation fault). (Stas)
 
 31 Mar 2016, PHP 5.5.34
 
