@@ -1587,7 +1587,7 @@ simple_list:
 			break;
 		case ZEND_AST_CATCH:
 			smart_str_appends(str, "} catch (");
-			zend_ast_export_catch_name_list(str, ast->child[0], indent);
+			zend_ast_export_catch_name_list(str, zend_ast_get_list(ast->child[0]), indent);
 			smart_str_appends(str, " $");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			smart_str_appends(str, ") {\n");
