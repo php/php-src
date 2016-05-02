@@ -207,6 +207,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	zend_hash_internal_pointer_reset(manifest);
 
 	while (FAILURE != zend_hash_has_more_elements(manifest)) {
+		keylen = 0;
 		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
 			break;
 		}
@@ -214,7 +215,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		PHAR_STR(key, str_key);
 
 		if (keylen <= (uint)dirlen) {
-			if (keylen < (uint)dirlen || !strncmp(str_key, dir, dirlen)) {
+			if (keylen == 0 || keylen < (uint)dirlen || !strncmp(str_key, dir, dirlen)) {
 				PHAR_STR_FREE(str_key);
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
