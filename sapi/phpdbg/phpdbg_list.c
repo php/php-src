@@ -232,6 +232,7 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 	efree(func_name);
 } /* }}} */
 
+/* Note: do not free the original file handler, let original compile_file() or caller do that. Caller may rely on its value to check success */
 zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
 	zend_file_handle fake;
@@ -242,8 +243,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	char resolved_path_buf[MAXPATHLEN];
 
 	if (zend_stream_fixup(file, &bufptr, &data.len) == FAILURE) {
-		zend_file_handle_dtor(file);
-		return NULL;
+		return PHPDBG_G(compile_file)(file, type);
 	}
 
 	data.buf = emalloc(data.len + ZEND_MMAP_AHEAD + 1);
@@ -280,6 +280,10 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	if (ret == NULL) {
 		efree(data.buf);
 		efree(dataptr);
+
+		fake.opened_path = NULL;
+		zend_file_handle_dtor(&fake);
+
 		return NULL;
 	}
 
@@ -289,7 +293,6 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 
 	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake);
-	zend_file_handle_dtor(file);
 
 	return ret;
 }
