@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0
 
 - Core:
+  . Implemented safe execution timeout handling, that prevents rundom crashes
+    after "Maximum execution time exceeded" error. (Dmitry)
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
   . Fixed bug #62814 (It is possible to stiffen child class members visibility).
     (Nikita)
@@ -20,10 +22,16 @@ PHP                                                                        NEWS
   . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
     decoct(), dechex(), integer operators and other conversions now always
     respect scientific notation in numeric strings. (Andrea)
+  . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
+    Pierrick)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
+
+- Intl:
+  . Added IntlTimeZone::getWindowsID() and
+    IntlTimeZone::getIDForWindowsID(). (Sara)
 
 - Hash:
   . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
@@ -64,5 +72,6 @@ PHP                                                                        NEWS
   . Implemented FR #69359 (Provide a way to fetch the current environment
     variables). (Ferenc)
   . unpack() function accepts an additional optional argument $offset. (Dmitry)
+  . Implemented #51879 stream context socket option tcp_nodelay (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

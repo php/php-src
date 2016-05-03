@@ -439,6 +439,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getWindowsID, 0, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, timezone)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getIDForWindowsID, 0, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, timezone)
+	ZEND_ARG_INFO(0, region)
+ZEND_END_ARG_INFO()
+#endif
+
 /* }}} */
 
 /* {{{ TimeZone_class_functions
@@ -475,6 +486,10 @@ static zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME_MAPPING(toDateTimeZone,		intltz_to_date_time_zone,		ainfo_tz_void,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorCode,		intltz_get_error_code,			ainfo_tz_void,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorMessage,		intltz_get_error_message,		ainfo_tz_void,				ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+	PHP_ME_MAPPING(getWindowsID,		intltz_get_windows_id,			ainfo_tz_getWindowsID,		ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getIDForWindowsID,	intltz_get_id_for_windows_id,		ainfo_tz_getIDForWindowsID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#endif
 	PHP_FE_END
 };
 /* }}} */

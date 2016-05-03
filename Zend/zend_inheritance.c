@@ -319,10 +319,13 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 
+#if 0
+		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
 		if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
 			/* incompatible nullability */
 			return 0;
 		}
+#endif
 
 		/* by-ref constraints on arguments are invariant */
 		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
@@ -657,7 +660,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
 				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
 
-				zval_ptr_dtor(&(ce->default_properties_table[parent_num]));
+				/* Don't keep default properties in GC (thry may be freed by opcache) */
+				zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
 				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 				child_info->offset = parent_info->offset;

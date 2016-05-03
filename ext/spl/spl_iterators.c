@@ -1998,7 +1998,6 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	zend_fcall_info        *fci = &intern->u.cbfilter->fci;
 	zend_fcall_info_cache  *fcc = &intern->u.cbfilter->fcc;
 	zval                    params[3];
-	zval                    result;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2012,19 +2011,22 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	ZVAL_COPY_VALUE(&params[1], &intern->current.key);
 	ZVAL_COPY_VALUE(&params[2], &intern->inner.zobject);
 
-	fci->retval = &result;
+	fci->retval = return_value;
 	fci->param_count = 3;
 	fci->params = params;
 	fci->no_separation = 0;
 
-	if (zend_call_function(fci, fcc) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
+	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
 	}
+
 	if (EG(exception)) {
-		return;
+		RETURN_NULL();
 	}
 
-	RETURN_ZVAL(&result, 1, 1);
+	/* zend_call_function may change args to IS_REF */
+	ZVAL_COPY_VALUE(&intern->current.data, &params[0]);
+	ZVAL_COPY_VALUE(&intern->current.key, &params[1]);
 }
 /* }}} */
 

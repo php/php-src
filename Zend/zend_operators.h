@@ -821,6 +821,18 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
 
+static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
+{
+	if (Z_REFCOUNT_P(op) == 1) {
+		ZVAL_UNREF(op);
+	} else {
+		Z_DELREF_P(op);
+		ZVAL_COPY(op, Z_REFVAL_P(op));
+	}
+}
+/* }}} */
+
+
 END_EXTERN_C()
 
 #endif

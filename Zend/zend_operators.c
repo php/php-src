@@ -136,17 +136,6 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, int str_len) /* {{{ 
 }
 /* }}} */
 
-static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
-{
-	if (Z_REFCOUNT_P(op) == 1) {
-		ZVAL_UNREF(op);
-	} else {
-		Z_DELREF_P(op);
-		ZVAL_COPY(op, Z_REFVAL_P(op));
-	}
-}
-/* }}} */
-
 void ZEND_FASTCALL _convert_scalar_to_number(zval *op, zend_bool silent) /* {{{ */
 {
 try_again:
@@ -610,26 +599,26 @@ try_again:
 				if (Z_OBJ_HT_P(op)->get_properties) {
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op);
 					if (obj_ht) {
-						zval arr;
+						zend_array *arr;
 
 						if (!Z_OBJCE_P(op)->default_properties_count &&
 							obj_ht == Z_OBJ_P(op)->properties &&
 							!ZEND_HASH_GET_APPLY_COUNT(Z_OBJ_P(op)->properties)) {
 							/* fast copy */
 							if (EXPECTED(Z_OBJ_P(op)->handlers == &std_object_handlers)) {
-								ZVAL_ARR(&arr, obj_ht);
+								arr = obj_ht;
 								if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(op)->properties) & IS_ARRAY_IMMUTABLE))) {
 									GC_REFCOUNT(Z_OBJ_P(op)->properties)++;
 								}
 							} else {
-								ZVAL_ARR(&arr, zend_array_dup(obj_ht));
+								arr = zend_array_dup(obj_ht);
 							}
 							zval_dtor(op);
-							ZVAL_COPY_VALUE(op, &arr);
+							ZVAL_ARR(op, arr);
 						} else {
-							ZVAL_ARR(&arr, zend_array_dup(obj_ht));
+							arr = zend_array_dup(obj_ht);
 							zval_dtor(op);
-							ZVAL_COPY_VALUE(op, &arr);
+							ZVAL_ARR(op, arr);
 						}
 						return;
 					}
@@ -747,6 +736,7 @@ static zend_always_inline zend_long ZEND_FASTCALL _zval_get_long_func_ex(zval *o
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE:
 			return 0;
@@ -2942,6 +2932,8 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 			td[(unsigned char)needle[i]] = i + 1;
 		}
 	} else {
+		size_t i;
+
 		for (i = 0; i < needle_len; i++) {
 			td[(unsigned char)needle[i]] = (int)needle_len - i;
 		}

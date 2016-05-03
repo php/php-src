@@ -21,6 +21,8 @@
 #include "php.h"
 #include "zend_compile.h"
 #include "zend_extensions.h"
+#include "Optimizer/zend_optimizer.h"
+#include "zend_optimizer_internal.h"
 #include "zend_inference.h"
 #include "zend_call_graph.h"
 #include "zend_func_info.h"
@@ -150,39 +152,32 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 		call_info = NULL;
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL:
-				if ((func = zend_hash_find_ptr(&script->function_table, Z_STR_P(CRT_CONSTANT(opline->op2)))) != NULL) {
-					zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
-					if (callee_func_info) {
-					    call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info) + (sizeof(zend_send_arg_info) * ((int)opline->extended_value - 1)));
-						call_info->caller_op_array = op_array;
-						call_info->caller_init_opline = opline;
-						call_info->caller_call_opline = NULL;
-						call_info->callee_func = func;
-						call_info->num_args = opline->extended_value;
-						call_info->next_caller = callee_func_info->caller_info;
-						callee_func_info->caller_info = call_info;
-						call_info->next_callee = func_info->callee_info;
-						func_info->callee_info = call_info;
-					}
-				} else if ((func = zend_hash_find_ptr(EG(function_table), Z_STR_P(CRT_CONSTANT(opline->op2)))) != NULL &&
-				           func->type == ZEND_INTERNAL_FUNCTION) {
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+				func = zend_optimizer_get_called_func(
+					script, op_array, opline, (build_flags & ZEND_RT_CONSTANTS) != 0);
+				if (func) {
 					call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info) + (sizeof(zend_send_arg_info) * ((int)opline->extended_value - 1)));
 					call_info->caller_op_array = op_array;
 					call_info->caller_init_opline = opline;
 					call_info->caller_call_opline = NULL;
 					call_info->callee_func = func;
 					call_info->num_args = opline->extended_value;
-					call_info->next_caller = NULL;
 					call_info->next_callee = func_info->callee_info;
 					func_info->callee_info = call_info;
+
+					if (func->type == ZEND_INTERNAL_FUNCTION) {
+						call_info->next_caller = NULL;
+					} else {
+						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
+						call_info->next_caller = callee_func_info->caller_info;
+					}
 				}
 				/* break missing intentionally */
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_NEW:
-			case ZEND_INIT_METHOD_CALL:
-			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call] = call_info;
 				call++;
