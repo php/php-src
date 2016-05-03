@@ -53,13 +53,13 @@ reflectClassConstant($instance, "BAD_CONST");
 Reflecting on class constant TestClass::PUB
 
 __toString():
-string(42) "    Constant [ public boolean PUB ] { 1 }
+string(38) "Constant [ public boolean PUB ] { 1 }
 "
 export():
-string(42) "    Constant [ public boolean PUB ] { 1 }
+string(38) "Constant [ public boolean PUB ] { 1 }
 "
 export():
-    Constant [ public boolean PUB ] { 1 }
+Constant [ public boolean PUB ] { 1 }
 
 NULL
 getName():
@@ -87,13 +87,13 @@ string(21) "/** My Doc comment */"
 Reflecting on class constant TestClass::PROT
 
 __toString():
-string(46) "    Constant [ protected integer PROT ] { 4 }
+string(42) "Constant [ protected integer PROT ] { 4 }
 "
 export():
-string(46) "    Constant [ protected integer PROT ] { 4 }
+string(42) "Constant [ protected integer PROT ] { 4 }
 "
 export():
-    Constant [ protected integer PROT ] { 4 }
+Constant [ protected integer PROT ] { 4 }
 
 NULL
 getName():
@@ -121,13 +121,13 @@ string(26) "/** Another doc comment */"
 Reflecting on class constant TestClass::PRIV
 
 __toString():
-string(49) "    Constant [ private string PRIV ] { keepOut }
+string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
-string(49) "    Constant [ private string PRIV ] { keepOut }
+string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
-    Constant [ private string PRIV ] { keepOut }
+Constant [ private string PRIV ] { keepOut }
 
 NULL
 getName():
@@ -155,13 +155,13 @@ bool(false)
 Reflecting on class constant TestClass::PRIV
 
 __toString():
-string(49) "    Constant [ private string PRIV ] { keepOut }
+string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
-string(49) "    Constant [ private string PRIV ] { keepOut }
+string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
-    Constant [ private string PRIV ] { keepOut }
+Constant [ private string PRIV ] { keepOut }
 
 NULL
 getName():

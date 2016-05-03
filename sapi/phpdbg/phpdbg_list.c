@@ -200,11 +200,12 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 
 	/* search active scope if begins with period */
 	if (func_name[0] == '.') {
-		if (EG(scope)) {
+		zend_class_entry *scope = zend_get_executed_scope();
+		if (scope) {
 			func_name++;
 			func_name_len--;
 
-			func_table = &EG(scope)->function_table;
+			func_table = &scope->function_table;
 		} else {
 			phpdbg_error("inactive", "type=\"noclasses\"", "No active class");
 			return;
@@ -290,6 +291,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake);
 	zend_file_handle_dtor(file);
+	file->type = -1;
 
 	return ret;
 }

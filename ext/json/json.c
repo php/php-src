@@ -254,7 +254,7 @@ static PHP_FUNCTION(json_decode)
 		return;
 	}
 
-	JSON_G(error_code) = 0;
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;

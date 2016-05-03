@@ -295,7 +295,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	}
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 	if (fci.param_count > 0) {
 		fci.params = args;
 	} else {
