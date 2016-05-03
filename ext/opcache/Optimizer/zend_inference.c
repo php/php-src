@@ -2888,7 +2888,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_POST_INC:
 		case ZEND_POST_DEC:
 			if (ssa_ops[i].result_def >= 0) {
-				tmp = (MAY_BE_RC1 | t1) & ~(MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_RCN);
+				tmp = (MAY_BE_RC1 | t1) & ~(MAY_BE_UNDEF|MAY_BE_ERROR|MAY_BE_REF|MAY_BE_RCN);
 				if (t1 & MAY_BE_UNDEF) {
 					tmp |= MAY_BE_NULL;
 				}
@@ -3076,7 +3076,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			if (ssa_ops[i].result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+				UPDATE_SSA_TYPE(tmp & ~MAY_BE_REF, ssa_ops[i].result_def);
 				if ((t2 & MAY_BE_OBJECT) && ssa_ops[i].op2_use >= 0 && ssa_var_info[ssa_ops[i].op2_use].ce) {
 					UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_ops[i].op2_use].ce, ssa_var_info[ssa_ops[i].op2_use].is_instanceof, ssa_ops[i].result_def);
 				} else {
@@ -3096,7 +3096,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			if (opline->op2_type == IS_VAR && opline->extended_value == ZEND_RETURNS_FUNCTION) {
 				tmp = (MAY_BE_REF | MAY_BE_RCN | MAY_BE_RC1 | t2) & ~MAY_BE_UNDEF;
 			} else {
-				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN);
+				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF|MAY_BE_ERROR|MAY_BE_RC1|MAY_BE_RCN);
 			}
 			if (t2 & MAY_BE_UNDEF) {
 				tmp |= MAY_BE_NULL;
@@ -3161,6 +3161,16 @@ static void zend_update_type_info(const zend_op_array *op_array,
 // TODO: ???
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = (t1 & MAY_BE_UNDEF)|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+			}
+			break;
+		case ZEND_SEND_UNPACK:
+			if (ssa_ops[i].op1_def >= 0) {
+				tmp = t1 | MAY_BE_RC1|MAY_BE_RCN;
+				if (t1 & MAY_BE_ARRAY) {
+					/* SEND_UNPACK may acquire references into the array */
+					tmp |= MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			break;
@@ -3605,7 +3615,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 			}
 			if (ssa_ops[i].result_def >= 0) {
-				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ERROR;
+				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+				if (opline->opcode != ZEND_FETCH_OBJ_R && opline->opcode != ZEND_FETCH_OBJ_IS) {
+					tmp |= MAY_BE_ERROR;
+				}
 				if (opline->result_type == IS_TMP_VAR) {
 					tmp |= MAY_BE_RC1;
 				} else {
@@ -4138,6 +4151,19 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 
 	/* Narrowing integer initialization to doubles */
 	zend_type_narrowing(op_array, script, ssa);
+
+	for (j = 0; j < op_array->last_var; j++) {
+		if (zend_string_equals_literal(op_array->vars[j], "php_errormsg")) {
+			/* Mark all SSA vars for $php_errormsg as references,
+			 * to make sure we don't optimize it. */
+			int i;
+			for (i = 0; i < ssa_vars_count; i++) {
+				if (ssa->vars[i].var == j) {
+					ssa_var_info[i].type |= MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+				}
+			}
+		}
+	}
 
 	if (ZEND_FUNC_INFO(op_array)) {
 		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);

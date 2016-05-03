@@ -131,7 +131,6 @@ struct _zval_struct {
 		uint32_t type_info;
 	} u1;
 	union {
-		uint32_t     var_flags;
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
@@ -139,6 +138,7 @@ struct _zval_struct {
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
 		uint32_t     access_flags;         /* class constant access flags */
+		uint32_t     property_guard;       /* single property guard */
 	} u2;
 };
 
@@ -345,9 +345,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_CONST_FLAGS(zval)			(zval).u1.v.const_flags
 #define Z_CONST_FLAGS_P(zval_p)		Z_CONST_FLAGS(*(zval_p))
 
-#define Z_VAR_FLAGS(zval)			(zval).u2.var_flags
-#define Z_VAR_FLAGS_P(zval_p)		Z_VAR_FLAGS(*(zval_p))
-
 #define Z_TYPE_INFO(zval)			(zval).u1.type_info
 #define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
 
@@ -413,11 +410,13 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 /* zval.u1.v.const_flags */
 #define IS_CONSTANT_UNQUALIFIED		0x010
+#define IS_CONSTANT_VISITED_MARK	0x020
 #define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
 #define IS_CONSTANT_IN_NAMESPACE	0x100  /* used only in opline->extended_value */
 
-/* zval.u2.var_flags */
-#define IS_VAR_RET_REF				(1<<0) /* return by by reference */
+#define IS_CONSTANT_VISITED(p)		(Z_CONST_FLAGS_P(p) & IS_CONSTANT_VISITED_MARK)
+#define MARK_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) |= IS_CONSTANT_VISITED_MARK
+#define RESET_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) &= ~IS_CONSTANT_VISITED_MARK
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_PERSISTENT			(1<<0) /* allocated using malloc   */
@@ -929,7 +928,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define SEPARATE_ARRAY(zv) do {							\
 		zval *_zv = (zv);								\
 		zend_array *_arr = Z_ARR_P(_zv);				\
-		if (GC_REFCOUNT(_arr) > 1) {					\
+		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
 			if (!Z_IMMUTABLE_P(_zv)) {					\
 				GC_REFCOUNT(_arr)--;					\
 			}											\

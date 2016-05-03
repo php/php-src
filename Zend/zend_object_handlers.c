@@ -271,12 +271,24 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 
 static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce) /* {{{ */
 {
+	zend_class_entry *scope;
+
 	if (property_info->flags & ZEND_ACC_PUBLIC) {
 		return 1;
 	} else if (property_info->flags & ZEND_ACC_PRIVATE) {
-		return (ce == EG(scope) || property_info->ce == EG(scope));
+		if (EG(fake_scope)) {
+			scope = EG(fake_scope);
+		} else {
+			scope = zend_get_executed_scope();
+		}
+		return (ce == scope || property_info->ce == scope);
 	} else if (property_info->flags & ZEND_ACC_PROTECTED) {
-		return zend_check_protected(property_info->ce, EG(scope));
+		if (EG(fake_scope)) {
+			scope = EG(fake_scope);
+		} else {
+			scope = zend_get_executed_scope();
+		}
+		return zend_check_protected(property_info->ce, scope);
 	}
 	return 0;
 }
@@ -301,6 +313,7 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 	zval *zv;
 	zend_property_info *property_info = NULL;
 	uint32_t flags;
+	zend_class_entry *scope;
 
 	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
 		return (uint32_t)(intptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -347,10 +360,16 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 		}
 	}
 
-	if (EG(scope) != ce
-		&& EG(scope)
-		&& is_derived_class(ce, EG(scope))
-		&& (zv = zend_hash_find(&EG(scope)->properties_info, member)) != NULL
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+
+	if (scope != ce
+		&& scope
+		&& is_derived_class(ce, scope)
+		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
 		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0)) {
@@ -383,6 +402,7 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 	zval *zv;
 	zend_property_info *property_info = NULL;
 	uint32_t flags;
+	zend_class_entry *scope;
 
 	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
 		if (!silent) {
@@ -424,10 +444,16 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 		}
 	}
 
-	if (EG(scope) != ce
-		&& EG(scope)
-		&& is_derived_class(ce, EG(scope))
-		&& (zv = zend_hash_find(&EG(scope)->properties_info, member)) != NULL
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+
+	if (scope != ce
+		&& scope
+		&& is_derived_class(ce, scope)
+		&& (zv = zend_hash_find(&scope->properties_info, member)) != NULL
 		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE) {
 		property_info = (zend_property_info*)Z_PTR_P(zv);
 	} else if (UNEXPECTED(property_info == NULL)) {
@@ -486,31 +512,60 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 /* }}} */
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
-	efree_size(Z_PTR_P(el), sizeof(zend_ulong));
+	uint32_t *ptr = (uint32_t*)Z_PTR_P(el);
+	if (EXPECTED(!(((zend_uintptr_t)ptr) & 1))) {
+		efree_size(ptr, sizeof(uint32_t));
+	}
 }
 /* }}} */
 
-static zend_long *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
+ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
 {
 	HashTable *guards;
-	zend_long stub, *guard;
+	zval *zv;
+	uint32_t *ptr;
 
 	ZEND_ASSERT(GC_FLAGS(zobj) & IS_OBJ_USE_GUARDS);
-	if (GC_FLAGS(zobj) & IS_OBJ_HAS_GUARDS) {
-		guards = Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]);
+	zv = zobj->properties_table + zobj->ce->default_properties_count;
+	if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
+		zend_string *str = Z_STR_P(zv);
+		if (EXPECTED(str == member) ||
+		     /* hash values are always pred-calculated here */
+		    (EXPECTED(ZSTR_H(str) == ZSTR_H(member)) &&
+		     EXPECTED(ZSTR_LEN(str) == ZSTR_LEN(member)) &&
+		     EXPECTED(memcmp(ZSTR_VAL(str), ZSTR_VAL(member), ZSTR_LEN(member)) == 0))) {
+			return &zv->u2.property_guard;
+		} else if (EXPECTED(zv->u2.property_guard == 0)) {
+			zend_string_release(Z_STR_P(zv));
+			ZVAL_STR_COPY(zv, member);
+			return &zv->u2.property_guard;
+		} else {
+			ALLOC_HASHTABLE(guards);
+			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
+			/* mark pointer as "special" using low bit */
+			zend_hash_add_new_ptr(guards, member,
+				(void*)(((zend_uintptr_t)&zv->u2.property_guard) | 1));
+			zend_string_release(Z_STR_P(zv));
+			ZVAL_ARR(zv, guards);
+		}
+	} else if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
+		guards = Z_ARRVAL_P(zv);
 		ZEND_ASSERT(guards != NULL);
-		if ((guard = (zend_long *)zend_hash_find_ptr(guards, member)) != NULL) {
-			return guard;
+		zv = zend_hash_find(guards, member);
+		if (zv != NULL) {
+			return (uint32_t*)(((zend_uintptr_t)Z_PTR_P(zv)) & ~1);
 		}
 	} else {
-		ALLOC_HASHTABLE(guards);
-		zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
-		Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]) = guards;
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
 		GC_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;
+		ZVAL_STR_COPY(zv, member);
+		zv->u2.property_guard = 0;
+		return &zv->u2.property_guard;
 	}
-
-	stub = 0;
-	return (zend_long *)zend_hash_add_mem(guards, member, &stub, sizeof(zend_ulong));
+	/* we have to allocate uint32_t separately because ht->arData may be reallocated */
+	ptr = (uint32_t*)emalloc(sizeof(uint32_t));
+	*ptr = 0;
+	return (uint32_t*)zend_hash_add_new_ptr(guards, member, ptr);
 }
 /* }}} */
 
@@ -555,7 +610,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	/* magic isset */
 	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
 		zval tmp_object, tmp_result;
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
 			ZVAL_COPY(&tmp_object, object);
@@ -579,7 +634,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	/* magic get */
 	if (zobj->ce->__get) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		if (!((*guard) & IN_GET)) {
 			zval tmp_object;
 
@@ -674,7 +729,7 @@ found:
 
 	/* magic set */
 	if (zobj->ce->__set) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 	    if (!((*guard) & IN_SET)) {
 			zval tmp_object;
@@ -944,7 +999,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 
 	/* magic unset */
 	if (zobj->ce->__unset) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		if (!((*guard) & IN_UNSET)) {
 			zval tmp_object;
 
@@ -995,6 +1050,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, zend_string *function_name) /* {{{ */
 {
     zval *func;
+    zend_class_entry *scope;
 
 	if (!ce) {
 		return 0;
@@ -1006,7 +1062,8 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 	 * 2.  One of our parent classes are the same as the scope, and it contains
 	 *     a private function with the same name that has the same scope.
 	 */
-	if (fbc->common.scope == ce && EG(scope) == ce) {
+	scope = zend_get_executed_scope();
+	if (fbc->common.scope == ce && scope == ce) {
 		/* rule #1 checks out ok, allow the function call */
 		return fbc;
 	}
@@ -1015,11 +1072,11 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 	/* Check rule #2 */
 	ce = ce->parent;
 	while (ce) {
-		if (ce == EG(scope)) {
+		if (ce == scope) {
 			if ((func = zend_hash_find(&ce->function_table, function_name))) {
 				fbc = Z_FUNC_P(func);
 				if (fbc->common.fn_flags & ZEND_ACC_PRIVATE
-					&& fbc->common.scope == EG(scope)) {
+					&& fbc->common.scope == scope) {
 					return fbc;
 				}
 			}
@@ -1122,6 +1179,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	zval *func;
 	zend_function *fbc;
 	zend_string *lc_method_name;
+	zend_class_entry *scope = NULL;
 	ALLOCA_FLAG(use_heap);
 
 	if (EXPECTED(key != NULL)) {
@@ -1160,7 +1218,8 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			if (zobj->ce->__call) {
 				fbc = zend_get_user_call_function(zobj->ce, method_name);
 			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				scope = zend_get_executed_scope();
+				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
 				fbc = NULL;
 			}
 		}
@@ -1168,26 +1227,29 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		/* Ensure that we haven't overridden a private function and end up calling
 		 * the overriding public function...
 		 */
-		if (EG(scope) &&
-		    is_derived_class(fbc->common.scope, EG(scope)) &&
-		    fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
-			if ((func = zend_hash_find(&EG(scope)->function_table, lc_method_name)) != NULL) {
-				zend_function *priv_fbc = Z_FUNC_P(func);
-				if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
-					&& priv_fbc->common.scope == EG(scope)) {
-					fbc = priv_fbc;
+		if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PROTECTED)) {
+			scope = zend_get_executed_scope();
+		}
+		if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
+			if (scope && is_derived_class(fbc->common.scope, scope)) {
+				if ((func = zend_hash_find(&scope->function_table, lc_method_name)) != NULL) {
+					zend_function *priv_fbc = Z_FUNC_P(func);
+					if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
+						&& priv_fbc->common.scope == scope) {
+						fbc = priv_fbc;
+					}
 				}
 			}
 		}
-		if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
+		if (fbc->common.fn_flags & ZEND_ACC_PROTECTED) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 * If we're not and __call() handler exists, invoke it, otherwise error out.
 			 */
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
-					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+					zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), scope ? ZSTR_VAL(scope->name) : "");
 					fbc = NULL;
 				}
 			}
@@ -1213,6 +1275,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	char *lc_class_name;
 	zend_string *lc_function_name;
 	zend_object *object;
+	zend_class_entry *scope;
 
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR_P(key);
@@ -1273,25 +1336,27 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 */
-		updated_fbc = zend_check_private_int(fbc, EG(scope), lc_function_name);
+		scope = zend_get_executed_scope();
+		updated_fbc = zend_check_private_int(fbc, scope, lc_function_name);
 		if (EXPECTED(updated_fbc != NULL)) {
 			fbc = updated_fbc;
 		} else {
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
 				fbc = NULL;
 			}
 		}
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
-		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
+		scope = zend_get_executed_scope();
+		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
-				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(NULL, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), scope ? ZSTR_VAL(scope->name) : "");
 				fbc = NULL;
 			}
 		}
@@ -1355,6 +1420,7 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 {
 	zend_function *constructor = zobj->ce->constructor;
+	zend_class_entry *scope;
 
 	if (constructor) {
 		if (constructor->op_array.fn_flags & ZEND_ACC_PUBLIC) {
@@ -1362,9 +1428,14 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 		} else if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
-			if (UNEXPECTED(constructor->common.scope != EG(scope))) {
-				if (EG(scope)) {
-					zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
+			if (UNEXPECTED(constructor->common.scope != scope)) {
+				if (scope) {
+					zend_throw_error(NULL, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
 					constructor = NULL;
 				} else {
 					zend_throw_error(NULL, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
@@ -1376,9 +1447,14 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 			 * Constructors only have prototype if they are defined by an interface but
 			 * it is the compilers responsibility to take care of the prototype.
 			 */
-			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), EG(scope)))) {
-				if (EG(scope)) {
-					zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
+			if (EG(fake_scope)) {
+				scope = EG(fake_scope);
+			} else {
+				scope = zend_get_executed_scope();
+			}
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
+				if (scope) {
+					zend_throw_error(NULL, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name));
 					constructor = NULL;
 				} else {
 					zend_throw_error(NULL, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
@@ -1507,7 +1583,7 @@ found:
 
 	result = 0;
 	if ((has_set_exists != 2) && zobj->ce->__isset) {
-		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;

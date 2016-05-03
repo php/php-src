@@ -50,6 +50,9 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions);
 ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions);
 
+/* export zend_pass_function to allow comparisons against it */
+extern ZEND_API const zend_internal_function zend_pass_function;
+
 ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot);
@@ -122,8 +125,8 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 	return variable_ptr;
 }
 
-ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change);
-ZEND_API int zval_update_constant_ex(zval *pp, zend_bool inline_change, zend_class_entry *scope);
+ZEND_API int zval_update_constant(zval *pp);
+ZEND_API int zval_update_constant_ex(zval *pp, zend_class_entry *scope);
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {
@@ -284,16 +287,18 @@ ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *zend_get_executed_filename(void);
 ZEND_API zend_string *zend_get_executed_filename_ex(void);
 ZEND_API uint zend_get_executed_lineno(void);
+ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API zend_bool zend_is_executing(void);
 
 ZEND_API void zend_set_timeout(zend_long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(void);
-ZEND_API void zend_timeout(int dummy);
+ZEND_API ZEND_NORETURN void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type);
 void zend_verify_abstract_class(zend_class_entry *ce);
 
 ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim);
+ZEND_API void zend_fetch_dimension_by_zval_is(zval *result, zval *container, zval *dim, int dim_type);
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 

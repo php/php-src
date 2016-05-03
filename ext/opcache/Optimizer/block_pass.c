@@ -690,7 +690,6 @@ optimize_constant_binary_op:
 		                opline++;
 						continue;
 					}
-					printf("%d\n", opline->opcode);
 					er = EG(error_reporting);
 					EG(error_reporting) = 0;
 					if (binary_op(&result, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline)) == SUCCESS) {

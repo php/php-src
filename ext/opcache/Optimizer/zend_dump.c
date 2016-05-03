@@ -1143,7 +1143,6 @@ void zend_dump_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zen
 
 	for (j = 0; j < cfg->blocks_count; j++) {
 		fprintf(stderr, "  BB%d:\n", j);
-		zend_dump_var_set(op_array, "gen", DFG_BITSET(dfg->gen, dfg->size, j));
 		zend_dump_var_set(op_array, "def", DFG_BITSET(dfg->def, dfg->size, j));
 		zend_dump_var_set(op_array, "use", DFG_BITSET(dfg->use, dfg->size, j));
 		zend_dump_var_set(op_array, "in ", DFG_BITSET(dfg->in,  dfg->size, j));

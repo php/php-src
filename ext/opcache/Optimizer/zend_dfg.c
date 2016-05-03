@@ -25,21 +25,19 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	int set_size;
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
-	zend_bitset tmp, gen, def, use, in, out;
+	zend_bitset tmp, def, use, in, out;
 	zend_op *opline;
 	uint32_t k, var_num;
 	int j;
 
-	/* FIXME: can we use "gen" instead of "def" for flow analyzing? */
 	set_size = dfg->size;
 	tmp = dfg->tmp;
-	gen = dfg->gen;
 	def = dfg->def;
 	use = dfg->use;
 	in  = dfg->in;
 	out = dfg->out;
 
-	/* Collect "gen", "def" and "use" sets */
+	/* Collect "def" and "use" sets */
 	for (j = 0; j < blocks_count; j++) {
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
@@ -84,6 +82,9 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							goto op1_def;
 						}
 						goto op1_use;
+					case ZEND_UNSET_VAR:
+						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
+						/* break missing intentionally */
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_BIND_GLOBAL:
@@ -92,17 +93,6 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_FE_RESET_RW:
-op1_def:
-						if (!DFG_ISSET(use, set_size, j, var_num)) {
-							// FIXME: include into "use" to ...?
-							DFG_SET(use, set_size, j, var_num);
-							DFG_SET(def, set_size, j, var_num);
-						}
-						DFG_SET(gen, set_size, j, var_num);
-						break;
-					case ZEND_UNSET_VAR:
-						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
-						/* break missing intentionally */
 					case ZEND_ASSIGN_ADD:
 					case ZEND_ASSIGN_SUB:
 					case ZEND_ASSIGN_MUL:
@@ -132,7 +122,11 @@ op1_def:
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 					case ZEND_FETCH_OBJ_UNSET:
 					case ZEND_VERIFY_RETURN_TYPE:
-						DFG_SET(gen, set_size, j, var_num);
+op1_def:
+						// FIXME: include into "use" too ...?
+						DFG_SET(use, set_size, j, var_num);
+						DFG_SET(def, set_size, j, var_num);
+						break;
 					default:
 op1_use:
 						if (!DFG_ISSET(def, set_size, j, var_num)) {
@@ -142,9 +136,9 @@ op1_use:
 				} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->op1.var);
 					if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
-						DFG_SET(gen, set_size, j, var_num);
-					}
-					if (!DFG_ISSET(def, set_size, j, var_num)) {
+						DFG_SET(use, set_size, j, var_num);
+						DFG_SET(def, set_size, j, var_num);
+					} else if (!DFG_ISSET(def, set_size, j, var_num)) {
 						DFG_SET(use, set_size, j, var_num);
 					}
 				}
@@ -165,12 +159,9 @@ op1_use:
 						case ZEND_FE_FETCH_R:
 						case ZEND_FE_FETCH_RW:
 op2_def:
-							if (!DFG_ISSET(use, set_size, j, var_num)) {
-								// FIXME: include into "use" to ...?
-								DFG_SET(use, set_size, j, var_num);
-								DFG_SET(def, set_size, j, var_num);
-							}
-							DFG_SET(gen, set_size, j, var_num);
+							// FIXME: include into "use" too ...?
+							DFG_SET(use, set_size, j, var_num);
+							DFG_SET(def, set_size, j, var_num);
 							break;
 						default:
 op2_use:
@@ -182,10 +173,7 @@ op2_use:
 				} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->op2.var);
 					if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
-						if (!DFG_ISSET(use, set_size, j, var_num)) {
-							DFG_SET(def, set_size, j, var_num);
-						}
-						DFG_SET(gen, set_size, j, var_num);
+						DFG_SET(def, set_size, j, var_num);
 					} else {
 						if (!DFG_ISSET(def, set_size, j, var_num)) {
 							DFG_SET(use, set_size, j, var_num);
@@ -194,10 +182,7 @@ op2_use:
 				}
 				if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->result.var);
-					if (!DFG_ISSET(use, set_size, j, var_num)) {
-						DFG_SET(def, set_size, j, var_num);
-					}
-					DFG_SET(gen, set_size, j, var_num);
+					DFG_SET(def, set_size, j, var_num);
 				}
 			}
 		}

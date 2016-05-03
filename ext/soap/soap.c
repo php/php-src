@@ -953,7 +953,6 @@ PHP_METHOD(SoapFault, __toString)
 	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1, &rv4);
 
 	fci.size = sizeof(fci);
-	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
 	ZVAL_STRINGL(&fci.function_name, "gettraceasstring", sizeof("gettraceasstring")-1);
 	fci.object = Z_OBJ(EX(This));
 	fci.retval = &trace;

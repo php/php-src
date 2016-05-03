@@ -1229,16 +1229,16 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
 		if (Z_TYPE_P(tmp) == IS_LONG) {
-			double val = Z_LVAL_P(tmp);
+			zend_long val = Z_LVAL_P(tmp);
+
 			*++strptr = NULL;
 			((zend_long *) (strings + numelems))[strptr - strings] = Z_LVAL_P(tmp);
-			if (val < 0) {
-				val = -10 * val;
-			}
-			if (val < 10) {
+			if (val <= 0) {
 				len++;
-			} else {
-				len += (int) log10(10 * (double) val);
+			}
+			while (val) {
+				val /= 10;
+				len++;
 			}
 		} else {
 			*++strptr = zval_get_string(tmp);
@@ -5375,7 +5375,7 @@ PHP_FUNCTION(str_pad)
 		return;
 	}
 
-	result = zend_string_safe_alloc(ZSTR_LEN(input), 1, num_pad_chars, 0);
+	result = zend_string_safe_alloc(1, ZSTR_LEN(input), num_pad_chars, 0);
 	ZSTR_LEN(result) = 0;
 
 	/* We need to figure out the left/right padding lengths. */

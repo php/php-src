@@ -954,12 +954,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						/* Clean up class name var entry */
 						zval_ptr_dtor(&ent1->data);
 					} else if (Z_TYPE(ent2->data) == IS_OBJECT) {
-						zend_class_entry *old_scope = EG(scope);
-
-						EG(scope) = Z_OBJCE(ent2->data);
-						add_property_zval(&ent2->data, ent1->varname, &ent1->data);
+						zend_update_property(Z_OBJCE(ent2->data), &ent2->data, ent1->varname, strlen(ent1->varname), &ent1->data);
 						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
-						EG(scope) = old_scope;
 					} else {
 						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
 					}

@@ -36,7 +36,7 @@ extern "C" {
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"
 
-#if U_ICU_VERSION_MINOR_NUM < 50
+#if U_ICU_VERSION_MAJOR_NUM < 50
 #define UDAT_PATTERN 0
 #endif
 

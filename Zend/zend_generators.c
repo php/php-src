@@ -64,7 +64,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
 
-		if (execute_data->symbol_table) {
+		if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
 		}
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
@@ -208,7 +208,7 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		zend_op_array *op_array = &EX(func)->op_array;
 
 		/* Compiled variables */
-		if (!execute_data->symbol_table) {
+		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			size += op_array->last_var;
 		}
 		/* Extra args */
@@ -220,10 +220,10 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 
 		/* Yield from root references */
 		if (generator->node.children == 0) {
-			zend_generator *root = generator->node.ptr.root;
-			while (root != generator) {
+			zend_generator *child = generator, *root = generator->node.ptr.root;
+			while (root != child) {
+				child = child->node.parent;
 				size++;
-				root = zend_generator_get_child(&root->node, generator);
 			}
 		}
 	}
@@ -262,7 +262,7 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 	ZVAL_COPY_VALUE(gc_buffer++, &generator->retval);
 	ZVAL_COPY_VALUE(gc_buffer++, &generator->values);
 
-	if (!execute_data->symbol_table) {
+	if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 		uint32_t i, num_cvs = EX(func)->op_array.last_var;
 		for (i = 0; i < num_cvs; i++) {
 			ZVAL_COPY_VALUE(gc_buffer++, EX_VAR_NUM(i));
@@ -287,12 +287,16 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 	if (generator->node.children == 0) {
 		zend_generator *child = generator, *root = generator->node.ptr.root;
 		while (root != child) {
-			ZVAL_OBJ(gc_buffer++, &child->std);
 			child = child->node.parent;
+			ZVAL_OBJ(gc_buffer++, &child->std);
 		}
 	}
 
-	return execute_data->symbol_table;
+	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
+		return execute_data->symbol_table;
+	} else {
+		return NULL;
+	}
 }
 /* }}} */
 
@@ -321,7 +325,7 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 }
 /* }}} */
 
-/* Requires globals EG(scope), EG(This) and EG(current_execute_data). */
+/* Requires globals EG(current_execute_data). */
 ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
 	zend_generator *generator;
@@ -761,13 +765,11 @@ try_again:
 	{
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
-		zend_class_entry *original_scope = EG(scope);
 		zend_vm_stack original_stack = EG(vm_stack);
 		original_stack->top = EG(vm_stack_top);
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
-		EG(scope) = generator->execute_data->func->common.scope;
 		EG(vm_stack_top) = generator->stack->top;
 		EG(vm_stack_end) = generator->stack->end;
 		EG(vm_stack) = generator->stack;
@@ -797,7 +799,6 @@ try_again:
 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
-		EG(scope) = original_scope;
 		EG(vm_stack_top) = original_stack->top;
 		EG(vm_stack_end) = original_stack->end;
 		EG(vm_stack) = original_stack;
@@ -826,7 +827,7 @@ try_again:
 }
 /* }}} */
 
-static void inline zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
+static inline void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
 {
 	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
 		generator->flags |= ZEND_GENERATOR_DO_INIT;
@@ -837,7 +838,7 @@ static void inline zend_generator_ensure_initialized(zend_generator *generator) 
 }
 /* }}} */
 
-static void inline zend_generator_rewind(zend_generator *generator) /* {{{ */
+static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
 {
 	zend_generator_ensure_initialized(generator);
 
@@ -1160,7 +1161,8 @@ static zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_get_data,
 	zend_generator_iterator_get_key,
 	zend_generator_iterator_move_forward,
-	zend_generator_iterator_rewind
+	zend_generator_iterator_rewind,
+	NULL
 };
 
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
