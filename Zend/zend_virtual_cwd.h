@@ -61,8 +61,6 @@ typedef unsigned short mode_t;
 #define DEFAULT_SLASH '\\'
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-#define IS_SLASH_P(c)	(*(c) == '/' || \
-        (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
 #define IS_SLASH_AT(p,n,i)	(IS_SLASH(p[i]) && cwd_is_slash_at(p,n,i))
 
 /* COPY_WHEN_ABSOLUTE is 2 under Win32 because by chance both regular absolute paths
@@ -81,7 +79,6 @@ typedef unsigned short mode_t;
 #define DEFAULT_SLASH '/'
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-#define IS_SLASH_P(c)	IS_SLASH(*(c))
 #define IS_SLASH_AT(p,n,i)	IS_SLASH(p[i])
 /* Colon indicates volume name, either first character should be forward slash or backward slash */
 #define IS_ABSOLUTE_PATH(path, len) \
@@ -101,7 +98,6 @@ typedef unsigned short mode_t;
 #endif
 
 #define IS_SLASH(c)	((c) == '/')
-#define IS_SLASH_P(c)	(*(c) == '/')
 #define IS_SLASH_AT(p,n,i)	IS_SLASH(p[i])
 
 #endif
