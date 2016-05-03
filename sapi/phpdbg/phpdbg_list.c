@@ -291,6 +291,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake);
 	zend_file_handle_dtor(file);
+	file->type = -1;
 
 	return ret;
 }
