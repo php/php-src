@@ -16,7 +16,7 @@ $stream = stream_socket_client(
 $socket = 
 	socket_import_stream($stream);
 
-var_dump(socket_get_option($socket, SOL_TCP, TCP_NODELAY));
+var_dump(socket_get_option($socket, SOL_TCP, TCP_NODELAY) > 0);
 ?>
 --EXPECT--
-int(1)
+bool(true)

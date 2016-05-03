@@ -3353,6 +3353,7 @@ again:
 					memcpy(ZSTR_VAL(*callable_name), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
 					memcpy(ZSTR_VAL(*callable_name) + ZSTR_LEN(ce->name), "::__invoke", sizeof("::__invoke"));
 				}
+				fcc->initialized = 1;
 				return 1;
 			}
 			if (callable_name) {
