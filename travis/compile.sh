@@ -9,8 +9,9 @@ if [[ "$ENABLE_DEBUG" == 1 ]]; then
 else
 	DEBUG="";
 fi
-./buildconf --force
+./buildconf
 ./configure \
+--config-cache \
 --prefix=$HOME"/php-install" \
 --quiet \
 $DEBUG \
