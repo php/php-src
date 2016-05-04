@@ -125,9 +125,8 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
 
 #define PHP_WIN32_IOUTIL_CLEANUP_W() \
-	if (pathw) { \
 		free(pathw); \
-	}
+		pathw = NULL;
 
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
 		size_t len = wcslen(pathw); \
