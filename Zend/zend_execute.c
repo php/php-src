@@ -65,9 +65,9 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 #define get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type)
 
 /* Prototypes */
-static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array);
+static void zend_extension_statement_handler(const zend_extension *extension, zend_execute_data *frame);
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_execute_data *frame);
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_execute_data *frame);
 
 #define RETURN_VALUE_USED(opline) ((opline)->result_type != IS_UNUSED)
 
@@ -1508,26 +1508,26 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 }
 
 /* Utility Functions for Extensions */
-static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_statement_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->statement_handler) {
-		extension->statement_handler(op_array);
+		extension->statement_handler(frame);
 	}
 }
 
 
-static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->fcall_begin_handler) {
-		extension->fcall_begin_handler(op_array);
+		extension->fcall_begin_handler(frame);
 	}
 }
 
 
-static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->fcall_end_handler) {
-		extension->fcall_end_handler(op_array);
+		extension->fcall_end_handler(frame);
 	}
 }
 

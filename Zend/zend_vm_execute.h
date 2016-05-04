@@ -1534,7 +1534,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXT_STMT_SPEC_HANDLER(ZEND_OPC
 
 	if (!EG(no_extensions)) {
 		SAVE_OPLINE();
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_statement_handler, EX(func));
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_statement_handler, execute_data);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -1546,7 +1546,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXT_FCALL_BEGIN_SPEC_HANDLER(Z
 
 	if (!EG(no_extensions)) {
 		SAVE_OPLINE();
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_begin_handler, EX(func));
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_begin_handler, execute_data);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -1558,7 +1558,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXT_FCALL_END_SPEC_HANDLER(ZEN
 
 	if (!EG(no_extensions)) {
 		SAVE_OPLINE();
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_end_handler, EX(func));
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_end_handler, execute_data);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	ZEND_VM_NEXT_OPCODE();
