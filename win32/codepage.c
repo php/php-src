@@ -181,6 +181,36 @@ PW32CP BOOL php_win32_cp_use_unicode(void)
 	return 0;
 }/*}}}*/
 
+/* {{{ proto bool proc_set_cp(int cp)
+ * Set process codepage. */
+PHP_FUNCTION(proc_set_cp) 
+{
+	zend_long cp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &cp) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(SetConsoleOutputCP((UINT)cp) && SetConsoleCP((UINT)cp));
+}
+/* }}} */
+
+/* {{{ proto int proc_set_cp(void)
+ * Get process codepage. */
+PHP_FUNCTION(proc_get_cp)
+{
+	UINT in_cp, out_cp;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	in_cp = GetConsoleCP();
+	out_cp = GetConsoleOutputCP();
+
+	RETURN_LONG(in_cp == out_cp ? in_cp : -1);
+}
+/* }}} */
 /*
  * Local variables:
  * tab-width: 4

@@ -133,6 +133,11 @@ PHP_FUNCTION(parse_ini_string);
 PHP_FUNCTION(config_get_hash);
 #endif
 
+#if defined(PHP_WIN32)
+PHP_FUNCTION(proc_set_cp);
+PHP_FUNCTION(proc_get_cp);
+#endif
+
 PHP_FUNCTION(str_rot13);
 PHP_FUNCTION(stream_get_filters);
 PHP_FUNCTION(stream_filter_register);

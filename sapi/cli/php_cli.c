@@ -487,28 +487,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ Windows specific function defs */
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cli_set_cp, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cli_get_cp, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-PHP_FUNCTION(cli_set_cp);
-PHP_FUNCTION(cli_get_cp);
-#endif
-/* }}} */
-
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
 	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
 	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-	PHP_FE(cli_set_cp, arginfo_cli_set_cp)
-	PHP_FE(cli_get_cp, arginfo_cli_get_cp)
-#endif
 	{NULL, NULL, NULL}
 };
 
@@ -1436,35 +1418,6 @@ out:
 	exit(exit_status);
 }
 /* }}} */
-
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-PHP_FUNCTION(cli_set_cp) /* {{{ */
-{
-	zend_long cp;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &cp) == FAILURE) {
-		return;
-	}
-
-	RETURN_BOOL(SetConsoleOutputCP((UINT)cp) && SetConsoleCP((UINT)cp));
-}
-/* }}} */
-
-PHP_FUNCTION(cli_get_cp) /* {{{ */
-{
-	UINT in_cp, out_cp;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	in_cp = GetConsoleCP();
-	out_cp = GetConsoleOutputCP();
-
-	RETURN_LONG(in_cp == out_cp ? in_cp : -1);
-}
-/* }}} */
-#endif
 
 /*
  * Local variables:
