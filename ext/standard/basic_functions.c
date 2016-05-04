@@ -2682,6 +2682,17 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_get_cp, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_is_cp_utf8, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_cp_conv_utf8_to_thread, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_cp_conv_thread_to_utf8, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* }}} */
 
@@ -3379,6 +3390,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #ifdef PHP_WIN32
 	PHP_FE(proc_set_cp, arginfo_proc_set_cp)
 	PHP_FE(proc_get_cp, arginfo_proc_get_cp)
+	PHP_FE(proc_is_cp_utf8, arginfo_proc_is_cp_utf8)
+	PHP_FE(proc_cp_conv_utf8_to_thread, arginfo_proc_cp_conv_utf8_to_thread)
+	PHP_FE(proc_cp_conv_thread_to_utf8, arginfo_proc_cp_conv_thread_to_utf8)
 #endif
 	PHP_FE_END
 };

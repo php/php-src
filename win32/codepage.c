@@ -181,6 +181,8 @@ PW32CP BOOL php_win32_cp_use_unicode(void)
 	return 0;
 }/*}}}*/
 
+/* Userspace functions, see basic_functions.* for arginfo and decls. */
+
 /* {{{ proto bool proc_set_cp(int cp)
  * Set process codepage. */
 PHP_FUNCTION(proc_set_cp) 
@@ -210,6 +212,78 @@ PHP_FUNCTION(proc_get_cp)
 
 	RETURN_LONG(in_cp == out_cp ? in_cp : -1);
 }
+/* }}} */
+
+
+/* {{{ proto bool proc_is_cp_utf8(void)
+ * Indicates whether the codepage is UTF-8 compatible. */
+PHP_FUNCTION(proc_is_cp_utf8)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(php_win32_cp_use_unicode());
+}
+/* }}} */
+
+/* {{{ proto string proc_cp_conv_utf8_to_threa(string subject)
+ * Convert string from UTF-8 to the current thread codepage. */
+PHP_FUNCTION(proc_cp_conv_utf8_to_thread)
+{
+	char *subj;
+	size_t subj_len;
+	wchar_t *tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &subj, &subj_len) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_SIZE_T_INT_OVFL(subj_len)) {
+		php_error_docref(NULL, E_WARNING, "String is too long");
+		RETURN_NULL();
+	}
+
+	tmp = php_win32_cp_mb_to_w(subj);
+	if (!tmp) {
+		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
+		RETURN_NULL();
+	}
+
+	RETVAL_STRING(php_win32_cp_w_to_thread(tmp));
+
+	free(tmp);
+}
+/* }}} */
+
+/* {{{ proto string proc_cp_conv_utf8_to_thread(string subject)
+ * Convert string from the current thread codepage to UTF-8. */
+PHP_FUNCTION(proc_cp_conv_thread_to_utf8)
+{
+	char *subj;
+	size_t subj_len;
+	wchar_t *tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &subj, &subj_len) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_SIZE_T_INT_OVFL(subj_len)) {
+		php_error_docref(NULL, E_WARNING, "String is too long");
+		RETURN_NULL();
+	}
+
+	tmp = php_win32_cp_thread_to_w(subj);
+	if (!tmp) {
+		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
+		RETURN_NULL();
+	}
+
+	RETVAL_STRING(php_win32_cp_w_to_utf8(tmp));
+
+	free(tmp);
+}
+
 /* }}} */
 /*
  * Local variables:
