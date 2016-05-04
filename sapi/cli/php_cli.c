@@ -1183,6 +1183,7 @@ int main(int argc, char *argv[])
 	int num_args;
 	wchar_t **argv_wide;
 	char **argv_save = argv;
+	BOOL using_wide_argv = 0;
 # endif
 #endif
 
@@ -1361,6 +1362,7 @@ exit_loop:
 			we can access the internal charset information from PHP. */
 		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
 		PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
+		using_wide_argv = 1;
 	} else {
 		SetConsoleOutputCP(prev_cp);
 		SetConsoleCP(prev_cp);
@@ -1404,17 +1406,17 @@ out:
 	/* Restore the original console CP */
 	SetConsoleOutputCP(prev_cp);
 	SetConsoleCP(prev_cp);
-#endif
 
+	if (using_wide_argv) {
+		PHP_WIN32_FREE_ARRAY(argv, argc);
+	}
+	argv = argv_save;
+#endif
 	/*
 	 * Do not move this de-initialization. It needs to happen right before
 	 * exiting.
 	 */
 	cleanup_ps_args(argv);
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-	PHP_WIN32_FREE_ARRAY(argv, argc);
-	argv = argv_save;
-#endif
 	exit(exit_status);
 }
 /* }}} */
