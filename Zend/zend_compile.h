@@ -1019,6 +1019,9 @@ END_EXTERN_C()
 /* force IS_OBJ_USE_GUARDS for all classes */
 #define ZEND_COMPILE_GUARDS						(1<<9)
 
+/* disable builtin special case function calls */
+#define ZEND_COMPILE_NO_BUILTINS				(1<<10)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

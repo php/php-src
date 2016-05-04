@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0
 
 - Core:
+  . Change statement and fcall extension handlers to accept frame. (Joe)
   . Implemented safe execution timeout handling, that prevents rundom crashes
     after "Maximum execution time exceeded" error. (Dmitry)
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
