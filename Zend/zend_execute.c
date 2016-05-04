@@ -1559,24 +1559,24 @@ try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
 num_index:
-		retval = zend_hash_index_find(ht, hval);
-		if (retval == NULL) {
-			switch (type) {
-				case BP_VAR_R:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					/* break missing intentionally */
-				case BP_VAR_UNSET:
-				case BP_VAR_IS:
-					retval = &EG(uninitialized_zval);
-					break;
-				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-					break;
-				case BP_VAR_W:
-					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-					break;
-			}
+		ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+		return retval;
+num_undef:
+		switch (type) {
+			case BP_VAR_R:
+				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				/* break missing intentionally */
+			case BP_VAR_UNSET:
+			case BP_VAR_IS:
+				retval = &EG(uninitialized_zval);
+				break;
+			case BP_VAR_RW:
+				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+				break;
+			case BP_VAR_W:
+				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+				break;
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
