@@ -2038,6 +2038,15 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulon
 	return p ? &p->val : NULL;
 }
 
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h)
+{
+	Bucket *p;
+
+	IS_CONSISTENT(ht);
+
+	p = zend_hash_index_find_bucket(ht, h);
+	return p ? &p->val : NULL;
+}
 
 ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zend_ulong h)
 {
