@@ -227,7 +227,7 @@ PHP_FUNCTION(proc_is_cp_utf8)
 }
 /* }}} */
 
-/* {{{ proto string proc_cp_conv_utf8_to_threa(string subject)
+/* {{{ proto string proc_cp_conv_utf8_to_thread(string subject)
  * Convert string from UTF-8 to the current thread codepage. */
 PHP_FUNCTION(proc_cp_conv_utf8_to_thread)
 {
@@ -256,7 +256,7 @@ PHP_FUNCTION(proc_cp_conv_utf8_to_thread)
 }
 /* }}} */
 
-/* {{{ proto string proc_cp_conv_utf8_to_thread(string subject)
+/* {{{ proto string proc_cp_conv_thread_to_utf8(string subject)
  * Convert string from the current thread codepage to UTF-8. */
 PHP_FUNCTION(proc_cp_conv_thread_to_utf8)
 {
