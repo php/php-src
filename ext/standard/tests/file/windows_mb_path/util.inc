@@ -2,16 +2,15 @@
 
 function get_active_cp()
 {
-	$s = exec("chcp");
-
-	preg_match(",.*: (\d+),", $s, $m);
-
-	return $m[1];
+	return proc_get_cp();
 }
 
 function set_active_cp($cp, $echo = true)
 {
-	$ret = exec("chcp $cp");
+	if (!proc_set_cp($cp)) {
+		echo "Failed to set cp $cp\n";
+		return;
+	}
 
 	if ($echo) echo "Active code page: ", get_active_cp(), "\n";
 }
