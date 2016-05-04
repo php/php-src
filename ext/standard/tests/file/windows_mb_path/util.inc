@@ -22,7 +22,7 @@ function get_basename_with_cp($path, $cp, $echo = true)
 
 	if ($echo) echo "getting basename of $path\n";
 
-	$cmd = "powershell -command \"Get-Item -Path $path | Format-Table -HideTableHeaders Name\"";
+	$cmd = "powershell -command \"Get-Item -Path '$path' | Format-Table -HideTableHeaders Name\"";
 	$out = trim(shell_exec($cmd));
 
 	if ($echo) var_dump($out, $out == basename($path));
