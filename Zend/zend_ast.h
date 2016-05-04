@@ -24,6 +24,8 @@
 #define ZEND_AST_H
 
 #include "zend.h"
+#include "zend_operators.h"
+#include "zend_string.h"
 
 #define ZEND_AST_SPECIAL_SHIFT      6
 #define ZEND_AST_IS_LIST_SHIFT      7
@@ -264,8 +266,42 @@ static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, z
 static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
 }
-static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast *op0) {
-	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
+
+static zend_always_inline zend_ast *zend_ast_create_cast(zend_ast *cast_ast, zend_ast *op0) {
+	uint32_t cast_type;
+	zend_string *cast_name = zend_ast_get_str(cast_ast);
+
+	if (zend_string_equals_literal_ci(cast_name, "unset")) {
+		cast_type = IS_NULL;
+	} else if (zend_string_equals_literal_ci(cast_name, "bool")) {
+		cast_type = _IS_BOOL;
+	} else if (zend_string_equals_literal_ci(cast_name, "boolean")) {
+		cast_type = _IS_BOOL;
+	} else if (zend_string_equals_literal_ci(cast_name, "int")) {
+		cast_type = IS_LONG;
+	} else if (zend_string_equals_literal_ci(cast_name, "integer")) {
+		cast_type = IS_LONG;
+	} else if (zend_string_equals_literal_ci(cast_name, "real")) {
+		cast_type = IS_DOUBLE;
+	} else if (zend_string_equals_literal_ci(cast_name, "double")) {
+		cast_type = IS_DOUBLE;
+	} else if (zend_string_equals_literal_ci(cast_name, "float")) {
+		cast_type = IS_DOUBLE;
+	} else if (zend_string_equals_literal_ci(cast_name, "string")) {
+		cast_type = IS_STRING;
+	} else if (zend_string_equals_literal_ci(cast_name, "binary")) {
+		cast_type = IS_STRING;
+	} else if (zend_string_equals_literal_ci(cast_name, "array")) {
+		cast_type = IS_ARRAY ;
+	} else if (zend_string_equals_literal_ci(cast_name, "object")) {
+		cast_type = IS_OBJECT;
+	} else {
+		ZEND_ASSERT(0);
+	}
+
+	zend_ast_destroy(cast_ast);
+
+	return zend_ast_create_ex(ZEND_AST_CAST, cast_type, op0);
 }
 
 #endif

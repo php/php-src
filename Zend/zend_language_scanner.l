@@ -1322,32 +1322,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_VAR);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
-	RETURN_TOKEN(T_INT_CAST);
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
-	RETURN_TOKEN(T_DOUBLE_CAST);
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
-	RETURN_TOKEN(T_STRING_CAST);
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
-	RETURN_TOKEN(T_ARRAY_CAST);
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
-	RETURN_TOKEN(T_OBJECT_CAST);
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
-	RETURN_TOKEN(T_BOOL_CAST);
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
-	RETURN_TOKEN(T_UNSET_CAST);
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}(
+	"int"|"integer"|
+	"bool"|"boolean"|
+	"real"|"double"|"float"|
+	"string"|"binary"|
+	"array"|
+	"object"|
+	"unset"
+){TABS_AND_SPACES}")" {
+	zend_copy_value(zendlval, (yytext+1), (yyleng-2));
+	RETURN_TOKEN(T_CAST);
 }
 
 <ST_IN_SCRIPTING>"eval" {
