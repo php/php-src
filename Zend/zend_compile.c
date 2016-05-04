@@ -4819,15 +4819,16 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl) /* {{{ */
 {
 	zend_ast *params_ast = decl->child[0];
-	zend_string *name = decl->name, *lcname;
+	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
 
-	op_array->function_name = name = zend_prefix_with_ns(name);
-
+	unqualified_name = decl->name;
+	op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
 	lcname = zend_string_tolower(name);
 
 	if (FC(imports_function)) {
-		zend_string *import_name = zend_hash_find_ptr(FC(imports_function), lcname);
+		zend_string *import_name = zend_hash_find_ptr_lc(
+			FC(imports_function), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", ZSTR_VAL(name));
@@ -5210,7 +5211,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
-	zend_string *name, *lcname, *import_name = NULL;
+	zend_string *name, *lcname;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
@@ -5219,31 +5220,25 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	znode original_implementing_class = FC(implementing_class);
 
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
+		zend_string *unqualified_name = decl->name;
+
 		if (CG(active_class_entry)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 		}
-		name = decl->name;
-		zend_assert_valid_class_name(name);
-		lcname = zend_string_tolower(name);
-		if (FC(current_namespace)) {
-			name = zend_prefix_with_ns(name);
 
-			zend_string_release(lcname);
-			lcname = zend_string_tolower(name);
-		} else {
-			zend_string_addref(name);
-		}
+		zend_assert_valid_class_name(unqualified_name);
+		name = zend_prefix_with_ns(unqualified_name);
+		name = zend_new_interned_string(name);
+		lcname = zend_string_tolower(name);
 
 		if (FC(imports)) {
-			import_name = zend_hash_find_ptr(FC(imports), lcname);
+			zend_string *import_name = zend_hash_find_ptr_lc(
+				FC(imports), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+			if (import_name && !zend_string_equals_ci(lcname, import_name)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+						"because the name is already in use", ZSTR_VAL(name));
+			}
 		}
-
-		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-					"because the name is already in use", ZSTR_VAL(name));
-		}
-
-		name = zend_new_interned_string(name);
 	} else {
 		name = zend_generate_anon_class_name(decl->lex_pos);
 		lcname = zend_string_tolower(name);
@@ -5594,26 +5589,26 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
-		zend_string *name = zend_ast_get_str(name_ast);
+		zend_string *unqualified_name = zend_ast_get_str(name_ast);
 
-		zend_string *import_name;
+		zend_string *name;
 		znode name_node, value_node;
 		zval *value_zv = &value_node.u.constant;
 
 		value_node.op_type = IS_CONST;
 		zend_const_expr_to_zval(value_zv, value_ast);
 
-		if (zend_lookup_reserved_const(ZSTR_VAL(name), ZSTR_LEN(name))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", ZSTR_VAL(name));
+		if (zend_lookup_reserved_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot redeclare constant '%s'", ZSTR_VAL(unqualified_name));
 		}
 
-		name = zend_prefix_with_ns(name);
+		name = zend_prefix_with_ns(unqualified_name);
 		name = zend_new_interned_string(name);
 
-		if (FC(imports_const)
-			&& (import_name = zend_hash_find_ptr(FC(imports_const), name))
-		) {
-			if (!zend_string_equals(import_name, name)) {
+		if (FC(imports_const)) {
+			zend_string *import_name = zend_hash_find_ptr(FC(imports_const), unqualified_name);
+			if (import_name && !zend_string_equals(import_name, name)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
 					"the name is already in use", ZSTR_VAL(name));
 			}

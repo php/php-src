@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #71737 (Memory leak in closure with parameter named $this).
     (Nikita)
   . Fixed bug #72059 (?? is not allowed on constant expressions). (Bob, Marcio)
+  . Fixed bug #72159 (Imported Class Overrides Local Class Name). (Nikita)
 
 - Curl:
   . Fixed bug #68658 (Define CURLE_SSL_CACERT_BADFILE). (Pierrick)
