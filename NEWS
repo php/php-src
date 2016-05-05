@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.7
 
 - Core:
+  . Fixed bug #72162 (use-after-free - error_reporting). (Laruence)
   . Add compiler option to disable special case function calls. (Joe)
   . Fixed bug #72101 (crash on complex code). (Dmitry)
   . Fixed bug #72100 (implode() inserts garbage into resulting string when
