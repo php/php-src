@@ -667,7 +667,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 	zend_destroy_file_handle(&file_handle);
 
 	if (filename==&tmp) {
-		zval_dtor(&tmp);
+		zval_ptr_dtor_nogc(&tmp);
 	}
 	return retval;
 }
@@ -761,7 +761,7 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
-	zval_dtor(&tmp);
+	zval_ptr_dtor_nogc(&tmp);
 
 	return op_array;
 }
@@ -812,7 +812,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 		SCNG(script_filtered) = NULL;
 	}
 	zend_restore_lexical_state(&original_lex_state);
-	zval_dtor(str);
+	zval_ptr_dtor_nogc(str);
 	return SUCCESS;
 }
 

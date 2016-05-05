@@ -1017,7 +1017,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	zend_exception_restore();
 
 	zval_ptr_dtor(&args[0]);
-	zval_dtor(&fcall_info.function_name);
+	zval_ptr_dtor_nogc(&fcall_info.function_name);
 
 	zend_hash_del(EG(in_autoload), lc_name);
 
@@ -1127,7 +1127,7 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 	} else {
 		retval = FAILURE;
 	}
-	zval_dtor(&pv);
+	zval_ptr_dtor_nogc(&pv);
 	return retval;
 }
 /* }}} */

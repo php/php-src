@@ -3906,7 +3906,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
+				zval_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -4457,7 +4457,7 @@ ZEND_VM_C_LABEL(send_again):
 						ZEND_VM_C_GOTO(unpack_iter_dtor);
 					}
 
-					zval_dtor(&key);
+					zval_ptr_dtor_nogc(&key);
 				}
 
 				if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
@@ -5396,7 +5396,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH|ISSET)
 
 			if (!--GC_REFCOUNT(garbage)) {
 				ZVAL_UNDEF(var);
-				zval_dtor_func_for_ptr(garbage);
+				zval_dtor_func(garbage);
 			} else {
 				zval *z = var;
 				ZVAL_DEREF(z);
@@ -7624,7 +7624,7 @@ ZEND_VM_C_LABEL(check_indirect):
 			}
 			if (refcnt == 0) {
 				SAVE_OPLINE();
-				zval_dtor_func_for_ptr(Z_COUNTED_P(variable_ptr));
+				zval_dtor_func(Z_COUNTED_P(variable_ptr));
 				if (UNEXPECTED(EG(exception))) {
 					ZVAL_NULL(variable_ptr);
 					HANDLE_EXCEPTION();
