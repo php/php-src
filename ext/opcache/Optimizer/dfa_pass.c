@@ -429,8 +429,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 						int op_2 = ssa->vars[src_var].definition;
 
-// op_2: #src_var.T = OP ...                                        => #var0.CV = OP ...
-// op_1: ASSIGN #orig_var.CV [undef,scalar] -> #var0.CV, #src_var.T    NOP
+// op_2: #src_var.T = OP ...                                     => #v.CV = OP ...
+// op_1: ASSIGN #orig_var.CV [undef,scalar] -> #v.CV, #src_var.T    NOP
 
 						if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
 							/* Reconstruct SSA */
@@ -457,7 +457,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					     && ssa->ops[op_1].op2_def < 0)
 					) {
 
-// op_1: ASSIGN #orig_var.CV [undef,scalar] -> #var0.CV, CONST|TMPVAR => QM_ASSIGN v.CV, CONST|TMPVAR
+// op_1: ASSIGN #orig_var.CV [undef,scalar] -> #v.CV, CONST|TMPVAR => QM_ASSIGN v.CV, CONST|TMPVAR
 
 						if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
 							/* Reconstruct SSA */
@@ -489,7 +489,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			 && ssa->ops[op_1].op1_use >= 0
 			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 
-// op_1: ASSIGN_ADD #?.CV [undef,null,int,foat] ->#var0.CV, int(1) => PRE_INC #?.CV ->#var0.CV
+// op_1: ASSIGN_ADD #?.CV [undef,null,int,foat] ->#v.CV, int(1) => PRE_INC #?.CV ->#v.CV
 
 				opline->opcode = ZEND_PRE_INC;
 				SET_UNUSED(opline->op2);
@@ -503,7 +503,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			 && ssa->ops[op_1].op1_use >= 0
 			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 
-// op_1: ASSIGN_SUB #?.CV [undef,null,int,foat] -> #var0.CV, int(1) => PRE_DEC #?.CV ->#var0.CV
+// op_1: ASSIGN_SUB #?.CV [undef,null,int,foat] -> #v.CV, int(1) => PRE_DEC #?.CV ->#v.CV
 
 				opline->opcode = ZEND_PRE_DEC;
 				SET_UNUSED(opline->op2);
@@ -515,7 +515,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			 && ssa->vars[v].use_chain >= 0
 			 && (ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_ANY|MAY_BE_UNDEF)) == (ssa->var_info[ssa->ops[op_1].op1_def].type & MAY_BE_ANY)) {
 
-// op_1: VERIFY_RETURN_TYPE #orig_var.CV [T] -> #var0.CV [T] => NOP
+// op_1: VERIFY_RETURN_TYPE #orig_var.CV [T] -> #v.CV [T] => NOP
 
 				int orig_var = ssa->ops[op_1].op1_use;
 				int ret = ssa->vars[v].use_chain;
@@ -548,7 +548,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			  || opline->opcode == ZEND_ASSIGN_BW_XOR)
 			 && opline->extended_value == 0) {
 
-// op_1: ASSIGN_ADD #orig_var.CV [undef,null,bool,int,double] -> #var0.CV, ? => #var0.CV = ADD #orig_var.CV, ?
+// op_1: ASSIGN_ADD #orig_var.CV [undef,null,bool,int,double] -> #v.CV, ? => #v.CV = ADD #orig_var.CV, ?
 
 				/* Reconstruct SSA */
 				ssa->ops[op_1].result_def = ssa->ops[op_1].op1_def;
