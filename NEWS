@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug #68658 (Define CURLE_SSL_CACERT_BADFILE). (Pierrick)
 
+- DBA:
+  . Fixed bug #72157 (use-after-free caused by dba_open). (Shm, Laruence)
+
 - JSON:
   . Fixed bug #72069 (Behavior \JsonSerializable different from json_encode).
     (Laruence)
