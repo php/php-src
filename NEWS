@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #71600 (oci_fetch_all segfaults when selecting more than eight
     columns). (Tian Yang)
 
+- PCNTL:
+  . Fixed bug #72154 (pcntl_wait/pcntl_waitpid array internal structure
+    overwrite). (Laruence)
+
 - Opcache:
   . Fixed bug #72014 (Including a file with anonymous classes multiple times
     leads to fatal error). (Laruence)
