@@ -1162,6 +1162,10 @@ ZEND_API int zend_gc_collect_cycles(void)
 				zend_array *arr = (zend_array*)p;
 
 				GC_TYPE(arr) = IS_NULL;
+
+				/* GC may destroy arrays with rc>1. This is valid and safe. */
+				HT_ALLOW_COW_VIOLATION(arr);
+
 				zend_hash_destroy(arr);
 			}
 			current = GC_G(next_to_free);
