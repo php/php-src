@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #72069 (Behavior \JsonSerializable different from json_encode).
     (Laruence)
 
+- Mbstring:
+  . Fixed bug #72164 (Null Pointer Dereference - mb_ereg_replace). (Laruence)
+
 - OCI8:
   . Fixed bug #71600 (oci_fetch_all segfaults when selecting more than eight
     columns). (Tian Yang)
