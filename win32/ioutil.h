@@ -48,6 +48,7 @@
 #include <sys/stat.h>
 #include <io.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "win32/winutil.h"
 #include "win32/codepage.h"
@@ -62,7 +63,7 @@ extern "C" {
 # define PW32IO __declspec(dllimport)
 #endif
 
-#define PHP_WIN32_IOUTIL_MAXPATHLEN 2048
+#define PHP_WIN32_IOUTIL_MAXPATHLEN _MAX_PATH
 
 #if !defined(MAXPATHLEN) || MAXPATHLEN < PHP_WIN32_IOUTIL_MAXPATHLEN
 # undef MAXPATHLEN
