@@ -2425,12 +2425,12 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			orig = 0;
 			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = MAY_BE_ANY;
 				t2 = OP1_DATA_INFO();
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
@@ -2524,7 +2524,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				goto unknown_opcode;
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
@@ -2587,7 +2587,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				goto unknown_opcode;
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
@@ -2641,7 +2641,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				goto unknown_opcode;
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
@@ -2689,7 +2689,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				goto unknown_opcode;
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
@@ -2736,7 +2736,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				goto unknown_opcode;
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
@@ -2785,7 +2785,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				goto unknown_opcode;
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				tmp = MAY_BE_RC1;
-				orig = t1;
+				orig = t1 & ~MAY_BE_UNDEF;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
