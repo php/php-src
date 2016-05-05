@@ -1,7 +1,5 @@
 --TEST--
 bug #71428.1: inheritance with null default values
---XFAIL--
-This is a BC break
 --FILE--
 <?php
 class A {
