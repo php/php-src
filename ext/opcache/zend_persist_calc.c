@@ -30,6 +30,7 @@
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
 
 #define ADD_ARENA_SIZE(m)        ZCG(current_persistent_script)->arena_size += ZEND_ALIGNED_SIZE(m)
+#define ADD_ARENA_OFFSET()       ZCG(current_persistent_script)->arena_offsets_size += sizeof(size_t)
 
 # define ADD_STRING(str) ADD_DUP_SIZE((str), _ZSTR_STRUCT_SIZE(ZSTR_LEN(str)))
 
@@ -164,12 +165,23 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	if (op_array->static_variables) {
+		/* note that static_variables are mutable and thus need to be copied directly into process memory */
 		if (!zend_shared_alloc_get_xlat_entry(op_array->static_variables)) {
-			HashTable *old = op_array->static_variables;
+			zend_static_var *cur = op_array->static_variables->vars, *end = op_array->static_variables->vars + op_array->static_variables->count;
 
-			ADD_DUP_SIZE(op_array->static_variables, sizeof(HashTable));
-			zend_hash_persist_calc(op_array->static_variables, zend_persist_zval_calc);
-			zend_shared_alloc_register_xlat_entry(old, op_array->static_variables);
+			do {
+				ADD_INTERNED_STRING(cur->name, 1);
+				if (Z_ISREF(cur->val)) {
+					zend_persist_zval_calc(Z_REFVAL(cur->val));
+					ADD_ARENA_SIZE(sizeof(zend_reference));
+					ADD_ARENA_OFFSET();
+				} else {
+					zend_persist_zval_calc(&cur->val);
+				}
+			} while (++cur < end);
+
+			ADD_ARENA_SIZE(sizeof(*op_array->static_variables) + sizeof(zend_static_var) * (op_array->static_variables->count - 1));
+			ADD_ARENA_OFFSET();
 		}
 	}
 
@@ -426,6 +438,9 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 #ifdef __SSE2__
 	/* Align size to 64-byte boundary */
 	new_persistent_script->arena_size = (new_persistent_script->arena_size + 63) & ~63;
+	new_persistent_script->size += (new_persistent_script->arena_offsets_size + 63) & ~63;
+#else
+	new_persistent_script->size += new_persistent_script->arena_offsets_size;
 #endif
 
 	new_persistent_script->size += new_persistent_script->arena_size;

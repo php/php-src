@@ -45,11 +45,11 @@ int(6)
 int(11)
 array(3) {
   ["c"]=>
-  NULL
+  &NULL
   ["a"]=>
-  int(1)
+  &int(1)
   ["b"]=>
-  string(5) "hello"
+  &string(5) "hello"
 }
 string(3) "bar"
 bool(false)

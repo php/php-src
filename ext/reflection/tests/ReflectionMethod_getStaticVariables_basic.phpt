@@ -41,17 +41,17 @@ var_dump($methodInfo->getStaticVariables());
 Public method:
 array(3) {
   ["c"]=>
-  NULL
+  &NULL
   ["a"]=>
-  int(1)
+  &int(1)
   ["b"]=>
-  string(5) "hello"
+  &string(5) "hello"
 }
 
 Private method:
 array(1) {
   ["a"]=>
-  int(1)
+  &int(1)
 }
 
 Method with no static variables:

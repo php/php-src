@@ -56,9 +56,9 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 
 static zend_function *zend_duplicate_function(zend_function *func, zend_class_entry *ce) /* {{{ */
 {
-	zend_function *new_function;
-
 	if (UNEXPECTED(func->type == ZEND_INTERNAL_FUNCTION)) {
+		zend_function *new_function;
+
 		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 			new_function = pemalloc(sizeof(zend_internal_function), 1);
 			memcpy(new_function, func, sizeof(zend_internal_function));
@@ -70,21 +70,14 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 		if (EXPECTED(new_function->common.function_name)) {
 			zend_string_addref(new_function->common.function_name);
 		}
+
+		return new_function;
 	} else {
 		if (func->op_array.refcount) {
 			(*func->op_array.refcount)++;
 		}
-		if (EXPECTED(!func->op_array.static_variables)) {
-			/* reuse the same op_array structure */
-			return func;
-		}
-		if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(func->op_array.static_variables)++;
-		}
-		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-		memcpy(new_function, func, sizeof(zend_op_array));
+		return func;
 	}
-	return new_function;
 }
 /* }}} */
 
@@ -1117,6 +1110,34 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 }
 /* }}} */
 
+/* duplicate statics for traits - they are literally copy paste, thus each use of them has its own statics */
+static void zend_copy_statics(zend_function *dest, zend_function *src) {
+	uint32_t count, i;
+
+	if (!ZEND_USER_CODE(src->type) || !src->op_array.static_variables) {
+		return;
+	}
+
+	count = src->op_array.static_variables->count;
+	dest->op_array.static_variables = zend_arena_alloc(&CG(arena), sizeof(*dest->op_array.static_variables) + sizeof(zend_static_var) * (count - 1));
+	dest->op_array.static_variables->count = count;
+
+	for (i = 0; i < count; i++) {
+		zend_static_var *old = &src->op_array.static_variables->vars[i], *new = &dest->op_array.static_variables->vars[i];
+
+		new->name = zend_string_copy(old->name);
+		if (Z_ISREF(old->val) && Z_GC_FLAGS(old->val) == IS_REF_ARENA_ALLOCATED) {
+			zend_reference *ref = zend_arena_alloc(&CG(arena), sizeof(zend_reference));
+			GC_REFCOUNT(ref) = 1;
+			GC_TYPE_INFO(ref) = IS_REFERENCE | (IS_REF_ARENA_ALLOCATED << Z_TYPE_FLAGS_SHIFT);
+			ZVAL_COPY(&ref->val, Z_REFVAL(old->val));
+			ZVAL_REF(&new->val, ref);
+		} else {
+			ZVAL_COPY(&new->val, &old->val);
+		}
+	}
+}
+
 static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_string *key, zend_function *fn, HashTable **overriden) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
@@ -1189,6 +1210,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	function_add_ref(fn);
 	new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_fn, fn, sizeof(zend_op_array));
+	zend_copy_statics(new_fn, fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);
 }

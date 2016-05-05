@@ -455,6 +455,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OBJ_INC_APPLY_COUNT_P(zv) Z_OBJ_INC_APPLY_COUNT(*(zv))
 #define Z_OBJ_DEC_APPLY_COUNT_P(zv) Z_OBJ_DEC_APPLY_COUNT(*(zv))
 
+/* reference flags (static_variables, reference) */
+#define IS_REF_ARENA_ALLOCATED	(1<<0)
+
 /* All data types < IS_STRING have their constructor/destructors skipped */
 #define Z_CONSTANT(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_CONSTANT) != 0)
 #define Z_CONSTANT_P(zval_p)		Z_CONSTANT(*(zval_p))

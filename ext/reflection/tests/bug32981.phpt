@@ -28,7 +28,7 @@ array(1) {
   [0]=>
   array(1) {
     ["enabled"]=>
-    bool(true)
+    &bool(true)
   }
 }
 ===DONE===

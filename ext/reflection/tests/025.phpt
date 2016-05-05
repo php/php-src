@@ -83,7 +83,7 @@ hoho
 --getStaticVariables--
 array(1) {
   ["var"]=>
-  int(1)
+  &int(1)
 }
 --invoke--
 NULL

@@ -25,7 +25,7 @@ object(Closure)#%d (1) {
   [%u|b%"static"]=>
   array(1) {
     [%u|b%"instance"]=>
-    object(Closure)#%d (0) {
+    &object(Closure)#%d (0) {
     }
   }
 }

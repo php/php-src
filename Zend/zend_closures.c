@@ -43,6 +43,7 @@ typedef struct _zend_closure {
 	zval              this_ptr;
 	zend_class_entry *called_scope;
 	void (*orig_internal_handler)(INTERNAL_FUNCTION_PARAMETERS);
+	zval             *gc_data;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -346,7 +347,23 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 			efree(closure->func.op_array.run_time_cache);
 			closure->func.op_array.run_time_cache = NULL;
 		}
+
+		/* normally op_array destruction takes care, but only if last reference to it removed */
+		if (closure->func.op_array.static_variables) {
+			zend_static_var *start = closure->func.op_array.static_variables->vars, *end = closure->func.op_array.static_variables->vars + closure->func.op_array.static_variables->count;
+			do {
+				zval_ptr_dtor(&start->val);
+				zend_string_release(start->name);
+			} while (++start < end);
+			efree(closure->func.op_array.static_variables);
+			closure->func.op_array.static_variables = NULL;
+		}
+		
 		destroy_op_array(&closure->func.op_array);
+
+		if (closure->gc_data) {
+			efree(closure->gc_data);
+		}
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
@@ -409,9 +426,19 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
-		HashTable *static_variables = closure->func.op_array.static_variables;
-		ZVAL_ARR(&val, zend_array_dup(static_variables));
-		zend_hash_str_update(debug_info, "static", sizeof("static")-1, &val);
+		do {
+			array_init(&val);
+			zend_static_var *cur = closure->func.op_array.static_variables->vars, *end = closure->func.op_array.static_variables->vars + closure->func.op_array.static_variables->count;
+			do {
+				if (Z_ISREF(cur->val) && Z_CONSTANT_P(Z_REFVAL(cur->val)) && UNEXPECTED(zval_update_constant_ex(Z_REFVAL(cur->val), closure->func.common.scope) != SUCCESS)) {
+					zval_dtor(&val);
+					break;
+				}
+				Z_TRY_ADDREF(cur->val);
+				zend_hash_add(Z_ARRVAL(val), cur->name, &cur->val);
+			} while (++cur < end);
+			zend_hash_str_update(debug_info, "static", sizeof("static")-1, &val);
+		} while (0);
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
@@ -458,10 +485,22 @@ static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
 
-	*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
-	*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;
-	return (closure->func.type == ZEND_USER_FUNCTION) ?
-		closure->func.op_array.static_variables : NULL;
+	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
+		uint32_t count = closure->func.op_array.static_variables->count, i;
+		*n = count + 1;
+		if (!closure->gc_data) {
+			closure->gc_data = emalloc(sizeof(zval) * *n);
+			for (i = 0; i < count; i++) {
+				ZVAL_COPY_VALUE(closure->gc_data + i, &closure->func.op_array.static_variables->vars[i].val);
+			}
+			ZVAL_COPY_VALUE(closure->gc_data + i, &closure->this_ptr);
+		}
+		*table = closure->gc_data;
+	} else {
+		*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;
+		*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
+	}
+	return NULL;
 }
 /* }}} */
 
@@ -553,8 +592,15 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		closure->func.common.prototype = (zend_function*)closure;
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		if (closure->func.op_array.static_variables) {
-			closure->func.op_array.static_variables =
-				zend_array_dup(closure->func.op_array.static_variables);
+			uint32_t count = closure->func.op_array.static_variables->count, i;
+			zend_static_var *vars = closure->func.op_array.static_variables->vars, *new_vars;
+			closure->func.op_array.static_variables = emalloc(sizeof(*closure->func.op_array.static_variables) + (count - 1) * sizeof(zend_static_var));
+			new_vars = closure->func.op_array.static_variables->vars;
+			closure->func.op_array.static_variables->count = count;
+			for (i = 0; i < count; i++) {
+				new_vars[i].name = zend_string_copy(vars[i].name);
+				ZVAL_COPY(&new_vars[i].val, &vars[i].val);
+			}
 		}
 		if (UNEXPECTED(!closure->func.op_array.run_time_cache)) {
 			closure->func.op_array.run_time_cache = func->op_array.run_time_cache = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
@@ -585,6 +631,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	}
 
 	ZVAL_UNDEF(&closure->this_ptr);
+	closure->gc_data = NULL;
 	/* Invariant:
 	 * If the closure is unscoped or static, it has no bound object. */
 	closure->func.common.scope = scope;
@@ -609,11 +656,11 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 }
 /* }}} */
 
-void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /* {{{ */
+void zend_closure_bind_var(zval *closure_zv, uint32_t num, zval *var) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
-	HashTable *static_variables = closure->func.op_array.static_variables;
-	zend_hash_update(static_variables, var_name, var);
+	zend_static_var *vars = closure->func.op_array.static_variables->vars;
+	ZVAL_COPY_VALUE(&vars[num].val, var);
 }
 /* }}} */
 

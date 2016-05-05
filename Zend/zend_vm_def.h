@@ -7938,17 +7938,14 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 		Z_TRY_ADDREF_P(var);
 	}
 
-	var_name = CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var));
-	zend_closure_bind_var(closure, var_name, var);
+	zend_closure_bind_var(closure, opline->result.num, var);
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
+ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, UNUSED, REF)
 {
 	USE_OPLINE
-	zend_free_op free_op1, free_op2;
-	HashTable *ht;
-	zval *varname;
+	zend_free_op free_op1;
 	zval *value;
 	zval *variable_ptr;
 
@@ -7956,40 +7953,21 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	zval_ptr_dtor(variable_ptr);
 
-	ht = EX(func)->op_array.static_variables;
-	ZEND_ASSERT(ht != NULL);
-	if (GC_REFCOUNT(ht) > 1) {
-		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(ht)--;
-		}
-		EX(func)->op_array.static_variables = ht = zend_array_dup(ht);
-	}
-
-	varname = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	value = zend_hash_find(ht, Z_STR_P(varname));
+	value = &EX(func)->op_array.static_variables->vars[opline->op2.num].val;
 
 	if (opline->extended_value) {
-		if (Z_CONSTANT_P(value)) {
-			if (UNEXPECTED(zval_update_constant_ex(value, EX(func)->op_array.scope) != SUCCESS)) {
-				ZVAL_NULL(variable_ptr);
-				HANDLE_EXCEPTION();
-			}
-		}
+		zval *ref;
 		if (UNEXPECTED(!Z_ISREF_P(value))) {
-			zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
-			GC_REFCOUNT(ref) = 2;
-			GC_TYPE_INFO(ref) = IS_REFERENCE;
-			ZVAL_COPY_VALUE(&ref->val, value);
-			Z_REF_P(value) = ref;
-			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
-			ZVAL_REF(variable_ptr, ref);
-		} else {
-			Z_ADDREF_P(value);
-			ZVAL_REF(variable_ptr, Z_REF_P(value));
+			ZVAL_NEW_REF(value, value);
 		}
-	} else {
-		ZVAL_COPY(variable_ptr, value);
+		ref = Z_REFVAL_P(value);
+		if (UNEXPECTED(Z_CONSTANT_P(ref)) && UNEXPECTED(zval_update_constant_ex(ref, EX(func)->op_array.scope) != SUCCESS)) {
+			ZVAL_NULL(variable_ptr);
+			HANDLE_EXCEPTION();
+		}
 	}
+
+	ZVAL_COPY(variable_ptr, value);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }

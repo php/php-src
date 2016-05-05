@@ -314,6 +314,11 @@ typedef struct _zend_class_constant {
 	zend_class_entry *ce;
 } zend_class_constant;
 
+typedef struct _zend_static_var {
+	zval val;
+	zend_string *name;
+} zend_static_var;
+
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
@@ -361,8 +366,6 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
-	uint32_t *refcount;
-
 	uint32_t this_var;
 
 	uint32_t last;
@@ -378,7 +381,12 @@ struct _zend_op_array {
 	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */
-	HashTable *static_variables;
+	struct {
+		uint32_t count;
+		zend_static_var vars[1];
+	} *static_variables;
+
+	uint32_t *refcount;
 
 	zend_string *filename;
 	uint32_t line_start;

@@ -1033,11 +1033,6 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 		if (op_array->refcount) {
 			(*op_array->refcount)++;
 		}
-		if (op_array->static_variables) {
-			if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(op_array->static_variables)++;
-			}
-		}
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
 		if (function->common.function_name) {
@@ -1046,6 +1041,18 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 	}
 }
 /* }}} */
+
+/* keep close in memory; drastically improves bind_static performance */
+static inline void move_statics_to_arena(zend_op_array *dest, zend_op_array *src, zend_bool free) {
+	if (src->static_variables) {
+		size_t size = sizeof(*src->static_variables) + sizeof(zend_static_var) * (src->static_variables->count - 1);
+		void *arena_mem = zend_arena_alloc(&CG(arena), size);
+		memcpy(arena_mem, src->static_variables, size);
+		if (free) efree(src->static_variables);
+		src->static_variables = NULL;
+		dest->static_variables = arena_mem;
+	}
+}
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
 {
@@ -1082,7 +1089,7 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		if (function->op_array.refcount) {
 			(*function->op_array.refcount)++;
 		}
-		function->op_array.static_variables = NULL; /* NULL out the unbound function */
+		move_statics_to_arena(&new_function->op_array, &function->op_array, 0);
 		return SUCCESS;
 	}
 }
@@ -3886,6 +3893,8 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 {
 	znode var_node;
 	zend_op *opline;
+	uint32_t count;
+	zend_static_var *var;
 
 	zend_compile_expr(&var_node, var_ast);
 
@@ -3893,21 +3902,23 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 		if (CG(active_op_array)->scope) {
 			CG(active_op_array)->scope->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
 		}
-		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
-		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
+		CG(active_op_array)->static_variables = emalloc(sizeof(*CG(active_op_array)->static_variables));
+		CG(active_op_array)->static_variables->count = 1;
+		count = 0;
+	} else {
+		count = CG(active_op_array)->static_variables->count++;
+		CG(active_op_array)->static_variables = erealloc(CG(active_op_array)->static_variables,
+			sizeof(*CG(active_op_array)->static_variables) + count * sizeof(zend_static_var));
 	}
 
-	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {
-		if (!(GC_FLAGS(CG(active_op_array)->static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(CG(active_op_array)->static_variables)--;
-		}
-		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
-	}
-	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
+	var = CG(active_op_array)->static_variables->vars + count;
+	var->name = zend_new_interned_string(Z_STR(var_node.u.constant));
+	ZVAL_COPY_VALUE(&var->val, value);
 
-	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, &var_node);
+	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, NULL);
 	opline->op1_type = IS_CV;
-	opline->op1.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR(var_node.u.constant)));
+	opline->op1.var = lookup_cv(CG(active_op_array), zend_string_copy(var->name));
+	opline->op2.num = count;
 	opline->extended_value = by_ref;
 }
 /* }}} */
@@ -3916,7 +3927,8 @@ void zend_compile_static_var(zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
 	zend_ast *value_ast = ast->child[1];
-	zval value_zv;
+	zval value_zv, *value;
+	zend_reference *ref;
 
 	if (value_ast) {
 		zend_const_expr_to_zval(&value_zv, value_ast);
@@ -3925,6 +3937,16 @@ void zend_compile_static_var(zend_ast *ast) /* {{{ */
 	}
 
 	zend_compile_static_var_common(var_ast, &value_zv, 1);
+
+	/* no references required for top-level code being run only once */
+	if (CG(active_op_array)->function_name) {
+		value = &CG(active_op_array)->static_variables->vars[CG(active_op_array)->static_variables->count - 1].val;
+		ref = zend_arena_alloc(&CG(arena), sizeof(zend_reference));
+		GC_REFCOUNT(ref) = 1;
+		GC_TYPE_INFO(ref) = IS_REFERENCE | (IS_REF_ARENA_ALLOCATED << Z_TYPE_FLAGS_SHIFT);
+		ZVAL_COPY_VALUE(&ref->val, value);
+		ZVAL_REF(value, ref);
+	}
 }
 /* }}} */
 
@@ -5095,6 +5117,7 @@ static void zend_compile_closure_binding(znode *closure, zend_ast *uses_ast) /* 
 		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
 		opline->op2_type = IS_CV;
 		opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(var_name));
+		opline->result.num = i;
 		opline->extended_value = by_ref;
 	}
 }
@@ -5110,22 +5133,23 @@ void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 		zend_ast *var_ast = list->child[i];
 		zend_string *var_name = zend_ast_get_str(var_ast);
 		zend_bool by_ref = var_ast->attr;
+		int j;
 		zval zv;
 		ZVAL_NULL(&zv);
 
-		if (op_array->static_variables
-				&& zend_hash_exists(op_array->static_variables, var_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+		if (op_array->static_variables) {
+			for (j = 0; j < op_array->static_variables->count; j++) {
+				if (zend_string_equals(op_array->static_variables->vars[j].name, var_name)) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+				}
+			}
 		}
 
-		{
-			int i;
-			for (i = 0; i < op_array->last_var; i++) {
-				if (zend_string_equals(op_array->vars[i], var_name)) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use lexical variable $%s as a parameter name", ZSTR_VAL(var_name));
-				}
+		for (j = 0; j < op_array->last_var; j++) {
+			if (zend_string_equals(op_array->vars[j], var_name)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use lexical variable $%s as a parameter name", ZSTR_VAL(var_name));
 			}
 		}
 
@@ -5413,6 +5437,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		zend_check_magic_method_implementation(
 			CG(active_class_entry), (zend_function *) op_array, E_COMPILE_ERROR);
 	}
+
+	move_statics_to_arena(op_array, op_array, 1);
 
 	/* put the implicit return on the really last line */
 	CG(zend_lineno) = decl->end_lineno;
