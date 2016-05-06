@@ -2813,7 +2813,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_HANDLER(ZEND
 		if (IS_CONST & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
+				zval_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -7521,7 +7521,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HA
 
 			if (!--GC_REFCOUNT(garbage)) {
 				ZVAL_UNDEF(var);
-				zval_dtor_func_for_ptr(garbage);
+				zval_dtor_func(garbage);
 			} else {
 				zval *z = var;
 				ZVAL_DEREF(z);
@@ -11917,7 +11917,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_O
 		if (IS_TMP_VAR & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
+				zval_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -15193,7 +15193,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_O
 		if (IS_VAR & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
+				zval_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -34839,7 +34839,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OP
 		if (IS_CV & (IS_VAR|IS_TMP_VAR)) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
-				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
+				zval_dtor_func(Z_COUNTED_P(free_op1));
 			}
 		}
 	} else {
@@ -40109,7 +40109,7 @@ check_indirect:
 			}
 			if (refcnt == 0) {
 				SAVE_OPLINE();
-				zval_dtor_func_for_ptr(Z_COUNTED_P(variable_ptr));
+				zval_dtor_func(Z_COUNTED_P(variable_ptr));
 				if (UNEXPECTED(EG(exception))) {
 					ZVAL_NULL(variable_ptr);
 					HANDLE_EXCEPTION();
@@ -42314,7 +42314,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDL
 
 			if (!--GC_REFCOUNT(garbage)) {
 				ZVAL_UNDEF(var);
-				zval_dtor_func_for_ptr(garbage);
+				zval_dtor_func(garbage);
 			} else {
 				zval *z = var;
 				ZVAL_DEREF(z);
@@ -52442,7 +52442,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_H
 
 			if (!--GC_REFCOUNT(garbage)) {
 				ZVAL_UNDEF(var);
-				zval_dtor_func_for_ptr(garbage);
+				zval_dtor_func(garbage);
 			} else {
 				zval *z = var;
 				ZVAL_DEREF(z);

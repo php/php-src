@@ -98,7 +98,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 						Z_ADDREF_P(variable_ptr);
 					}
 				}
-				zval_dtor_func_for_ptr(garbage);
+				zval_dtor_func(garbage);
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
@@ -220,7 +220,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 				if (!Z_DELREF_P(p)) {
 					zend_refcounted *r = Z_COUNTED_P(p);
 					ZVAL_NULL(p);
-					zval_dtor_func_for_ptr(r);
+					zval_dtor_func(r);
 				} else {
 					GC_ZVAL_CHECK_POSSIBLE_ROOT(p);
 				}
@@ -248,7 +248,7 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 				if (!Z_DELREF_P(p)) {
 					zend_refcounted *r = Z_COUNTED_P(p);
 					ZVAL_NULL(p);
-					zval_dtor_func_for_ptr(r);
+					zval_dtor_func(r);
 				}
 			}
 		} while (p != end);
