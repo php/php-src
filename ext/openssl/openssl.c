@@ -2764,18 +2764,17 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			}
 		}
 		if (attribs) {
-			zend_long numindex;
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), numindex, strindex, item) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
 				int nid;
 
-				convert_to_string_ex(item);
 				if (NULL == strindex) {
-					char tmp[ZEND_LTOA_BUF_LEN];
-					ZEND_LTOA(numindex, tmp, ZEND_LTOA_BUF_LEN);
-					nid = OBJ_txt2nid(tmp);
-				} else {
-					nid = OBJ_txt2nid(ZSTR_VAL(strindex));
+					php_error_docref(NULL, E_WARNING, "dn: numeric fild names are not supported");
+					continue;
 				}
+
+				convert_to_string_ex(item);
+
+				nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8, (unsigned char*)Z_STRVAL_P(item), -1, -1, 0)) {
 						php_error_docref(NULL, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_P(item));
