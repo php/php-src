@@ -689,22 +689,23 @@ ZEND_FUNCTION(each)
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
-	zend_long err;
+	zval *err;
 	int old_error_reporting;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &err) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &err) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(err)
+		Z_PARAM_ZVAL(err)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
 	old_error_reporting = EG(error_reporting);
 	if (ZEND_NUM_ARGS() != 0) {
+		zend_string *new_val = zval_get_string(err);
 		do {
 			zend_ini_entry *p = EG(error_reporting_ini_entry);
 
@@ -730,8 +731,12 @@ ZEND_FUNCTION(error_reporting)
 				zend_string_release(p->value);
 			}
 
-			p->value = zend_long_to_str(err);
-			EG(error_reporting) = err;
+			p->value = new_val;
+			if (Z_TYPE_P(err) == IS_LONG) {
+				EG(error_reporting) = Z_LVAL_P(err);
+			} else {
+				EG(error_reporting) = atoi(ZSTR_VAL(p->value));
+			}
 		} while (0);
 	}
 
