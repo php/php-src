@@ -38,6 +38,9 @@ PHP                                                                        NEWS
   . Fixed bug #72014 (Including a file with anonymous classes multiple times
     leads to fatal error). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #72165 (Null pointer dereference - openssl_csr_new). (Anatol)
+
 - PCNTL:
   . Fixed bug #72154 (pcntl_wait/pcntl_waitpid array internal structure
     overwrite). (Laruence)
