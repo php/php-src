@@ -30,6 +30,10 @@
 
 ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
+	if (--GC_REFCOUNT(p)) {
+		return;
+	}
+
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
 		case IS_CONSTANT: {
@@ -75,13 +79,61 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 	}
 }
 
-ZEND_API void _zval_internal_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
-	switch (Z_TYPE_P(zval_ptr)) {
+	switch (GC_TYPE(p)) {
+		case IS_STRING:
+		case IS_CONSTANT: {
+				zend_string *str = (zend_string*)p;
+				CHECK_ZVAL_STRING_REL(str);
+				zend_string_free(str);
+				break;
+			}
+		case IS_ARRAY: {
+				zend_array *arr = (zend_array*)p;
+
+				zend_array_destroy(arr);
+				break;
+			}
+		case IS_CONSTANT_AST: {
+				zend_ast_ref *ast = (zend_ast_ref*)p;
+
+				zend_ast_destroy_and_free(ast->ast);
+				efree_size(ast, sizeof(zend_ast_ref));
+				break;
+			}
+		case IS_OBJECT: {
+				zend_object *obj = (zend_object*)p;
+
+				zend_objects_store_del(obj);
+				break;
+			}
+		case IS_RESOURCE: {
+				zend_resource *res = (zend_resource*)p;
+
+				/* destroy resource */
+				zend_list_free(res);
+				break;
+			}
+		case IS_REFERENCE: {
+				zend_reference *ref = (zend_reference*)p;
+
+				i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC);
+				efree_size(ref, sizeof(zend_reference));
+				break;
+			}
+		default:
+			break;
+	}
+}
+
+ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+{
+	switch (Z_TYPE_P(zvalue)) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			CHECK_ZVAL_STRING_REL(Z_STR_P(zval_ptr));
-			zend_string_release(Z_STR_P(zval_ptr));
+			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
+			zend_string_release(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_AST:
@@ -90,7 +142,7 @@ ZEND_API void _zval_internal_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
-				zend_reference *ref = (zend_reference*)Z_REF_P(zval_ptr);
+				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
 
 				zval_internal_ptr_dtor(&ref->val);
 				free(ref);
@@ -106,13 +158,13 @@ ZEND_API void _zval_internal_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 	}
 }
 
-ZEND_API void _zval_internal_dtor_for_ptr(zval *zval_ptr ZEND_FILE_LINE_DC)
+ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (Z_TYPE_P(zval_ptr)) {
+	switch (Z_TYPE_P(zvalue)) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			CHECK_ZVAL_STRING_REL(Z_STR_P(zval_ptr));
-			zend_string_free(Z_STR_P(zval_ptr));
+			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
+			zend_string_free(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_AST:
@@ -121,7 +173,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zval_ptr ZEND_FILE_LINE_DC)
 			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
-				zend_reference *ref = (zend_reference*)Z_REF_P(zval_ptr);
+				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
 
 				zval_internal_ptr_dtor(&ref->val);
 				free(ref);
@@ -163,17 +215,17 @@ ZEND_API void zval_add_ref_unref(zval *p)
 	}
 }
 
-ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zval_ptr ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	if (EXPECTED(Z_TYPE_P(zval_ptr) == IS_ARRAY)) {
-		ZVAL_ARR(zval_ptr, zend_array_dup(Z_ARRVAL_P(zval_ptr)));
-	} else if (EXPECTED(Z_TYPE_P(zval_ptr) == IS_STRING) ||
-	           EXPECTED(Z_TYPE_P(zval_ptr) == IS_CONSTANT)) {
-		CHECK_ZVAL_STRING_REL(Z_STR_P(zval_ptr));
-		Z_STR_P(zval_ptr) = zend_string_dup(Z_STR_P(zval_ptr), 0);
-	} else if (EXPECTED(Z_TYPE_P(zval_ptr) == IS_CONSTANT_AST)) {
-		zend_ast *copy = zend_ast_copy(Z_ASTVAL_P(zval_ptr));
-		ZVAL_NEW_AST(zval_ptr, copy);
+	if (EXPECTED(Z_TYPE_P(zvalue) == IS_ARRAY)) {
+		ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING) ||
+	           EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT)) {
+		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
+		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
+		zend_ast *copy = zend_ast_copy(Z_ASTVAL_P(zvalue));
+		ZVAL_NEW_AST(zvalue, copy);
 	}
 }
 
@@ -184,16 +236,16 @@ ZEND_API size_t zend_print_variable(zval *var)
 }
 
 
-ZEND_API void _zval_dtor_wrapper(zval *zval_ptr)
+ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 {
-	zval_dtor(zval_ptr);
+	zval_dtor(zvalue);
 }
 
 
 #if ZEND_DEBUG
-ZEND_API void _zval_internal_dtor_wrapper(zval *zval_ptr)
+ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
 {
-	zval_internal_dtor(zval_ptr);
+	zval_internal_dtor(zvalue);
 }
 
 

@@ -463,7 +463,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 
 			Z_ADDREF_P(z);
 			if (Z_TYPE_P(z) != IS_OBJECT) {
-				zval_ptr_dtor_nogc(arg);
+				zval_dtor(arg);
 				ZVAL_NULL(arg);
 				if (!zend_make_printable_zval(z, arg)) {
 					ZVAL_COPY_VALUE(arg, z);
@@ -3386,7 +3386,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_nam
 
 	if (zend_is_callable_ex(callable, NULL, IS_CALLABLE_STRICT, callable_name, &fcc, NULL)) {
 		if (Z_TYPE_P(callable) == IS_STRING && fcc.calling_scope) {
-			zval_ptr_dtor_nogc(callable);
+			zval_dtor(callable);
 			array_init(callable);
 			add_next_index_str(callable, zend_string_copy(fcc.calling_scope->name));
 			add_next_index_str(callable, zend_string_copy(fcc.function_handler->common.function_name));
@@ -3951,7 +3951,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 	} else {
 		if (property != value) {
 			if (Z_ISREF_P(property)) {
-				zval_ptr_dtor_nogc(property);
+				zval_dtor(property);
 				ZVAL_COPY_VALUE(property, value);
 				if (Z_REFCOUNTED_P(value) && Z_REFCOUNT_P(value) > 0) {
 					zval_opt_copy_ctor(property);

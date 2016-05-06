@@ -427,7 +427,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name) /* {{{ */{
 
 void zend_del_literal(zend_op_array *op_array, int n) /* {{{ */
 {
-	zval_ptr_dtor_nogc(CT_CONSTANT_EX(op_array, n));
+	zval_dtor(CT_CONSTANT_EX(op_array, n));
 	if (n + 1 == op_array->last_literal) {
 		op_array->last_literal--;
 	} else {
@@ -3276,7 +3276,7 @@ int zend_compile_func_strlen(znode *result, zend_ast_list *args) /* {{{ */
 	if (arg_node.op_type == IS_CONST && Z_TYPE(arg_node.u.constant) == IS_STRING) {
 		result->op_type = IS_CONST;
 		ZVAL_LONG(&result->u.constant, Z_STRLEN(arg_node.u.constant));
-		zval_ptr_dtor_nogc(&arg_node.u.constant);
+		zval_dtor(&arg_node.u.constant);
 	} else {
 		zend_emit_op_tmp(result, ZEND_STRLEN, &arg_node, NULL);
 	}
@@ -4147,7 +4147,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
 	}
 
-	zval_ptr_dtor_nogc(label);
+	zval_dtor(label);
 	ZVAL_NULL(label);
 
 	current = opline->extended_value;
@@ -4535,7 +4535,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		SET_NODE(opline->op1, &expr_node);
 		SET_UNUSED(opline->op2);
 	} else if (expr_node.op_type == IS_CONST) {
-		zval_ptr_dtor_nogc(&expr_node.u.constant);
+		zval_dtor(&expr_node.u.constant);
 	}
 
 	efree(jmpnz_opnums);
@@ -4779,7 +4779,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zval value_zv;
 			zend_const_expr_to_zval(&value_zv, value_ast);
 			FC(declarables).ticks = zval_get_long(&value_zv);
-			zval_ptr_dtor_nogc(&value_zv);
+			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
 			if (FAILURE == zend_declare_is_first_statement(ast)) {

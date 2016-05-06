@@ -479,7 +479,7 @@ $op2_free_op = array(
 );
 
 $op1_free_op_if_var = array(
-	"ANY"      => "if (opline->op1_type == IS_VAR) { zval_ptr_dtor_nogc(free_op1); }",
+	"ANY"      => "if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(free_op1);}",
 	"TMP"      => "",
 	"VAR"      => "zval_ptr_dtor_nogc(free_op1)",
 	"CONST"    => "",
@@ -490,7 +490,7 @@ $op1_free_op_if_var = array(
 );
 
 $op2_free_op_if_var = array(
-	"ANY"      => "if (opline->op2_type == IS_VAR) { zval_ptr_dtor_nogc(free_op2); }",
+	"ANY"      => "if (opline->op2_type == IS_VAR) {zval_ptr_dtor_nogc(free_op2);}",
 	"TMP"      => "",
 	"VAR"      => "zval_ptr_dtor_nogc(free_op2)",
 	"CONST"    => "",
@@ -501,9 +501,9 @@ $op2_free_op_if_var = array(
 );
 
 $op1_free_op_var_ptr = array(
-	"ANY"      => "if (free_op1) { zval_ptr_dtor_nogc(free_op1); }",
+	"ANY"      => "if (free_op1) {zval_ptr_dtor_nogc(free_op1);}",
 	"TMP"      => "",
-	"VAR"      => "if (UNEXPECTED(free_op1)) { zval_ptr_dtor_nogc(free_op1); }",
+	"VAR"      => "if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);}",
 	"CONST"    => "",
 	"UNUSED"   => "",
 	"CV"       => "",
@@ -512,9 +512,9 @@ $op1_free_op_var_ptr = array(
 );
 
 $op2_free_op_var_ptr = array(
-	"ANY"      => "if (free_op2) { zval_ptr_dtor_nogc(free_op2); }",
+	"ANY"      => "if (free_op2) {zval_ptr_dtor_nogc(free_op2);}",
 	"TMP"      => "",
-	"VAR"      => "if (UNEXPECTED(free_op2)) { zval_ptr_dtor_nogc(free_op2); }",
+	"VAR"      => "if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);}",
 	"CONST"    => "",
 	"UNUSED"   => "",
 	"CV"       => "",

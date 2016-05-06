@@ -185,7 +185,7 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			break;
 		case IS_STRING:
 			zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(offset), expr);
-			zval_ptr_dtor_nogc(offset);
+			zval_dtor(offset);
 			break;
 		case IS_NULL:
 			zend_symtable_update(Z_ARRVAL_P(result), ZSTR_EMPTY_ALLOC(), expr);
@@ -219,13 +219,13 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
 			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-				zval_ptr_dtor_nogc(&op1);
+				zval_dtor(&op1);
 				ret = FAILURE;
 			} else {
 				binary_op_type op = get_binary_op(ast->attr);
 				ret = op(result, &op1, &op2);
-				zval_ptr_dtor_nogc(&op1);
-				zval_ptr_dtor_nogc(&op2);
+				zval_dtor(&op1);
+				zval_dtor(&op2);
 			}
 			break;
 		case ZEND_AST_GREATER:
@@ -233,15 +233,15 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
 			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-				zval_ptr_dtor_nogc(&op1);
+				zval_dtor(&op1);
 				ret = FAILURE;
 			} else {
 				/* op1 > op2 is the same as op2 < op1 */
 				binary_op_type op = ast->kind == ZEND_AST_GREATER
 					? is_smaller_function : is_smaller_or_equal_function;
 				ret = op(result, &op2, &op1);
-				zval_ptr_dtor_nogc(&op1);
-				zval_ptr_dtor_nogc(&op2);
+				zval_dtor(&op1);
+				zval_dtor(&op2);
 			}
 			break;
 		case ZEND_AST_UNARY_OP:
@@ -250,7 +250,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			} else {
 				unary_op_type op = get_unary_op(ast->attr);
 				ret = op(result, &op1);
-				zval_ptr_dtor_nogc(&op1);
+				zval_dtor(&op1);
 			}
 			break;
 		case ZEND_AST_ZVAL:
@@ -283,16 +283,16 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			}
 			if (zend_is_true(&op1)) {
 				if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-					zval_ptr_dtor_nogc(&op1);
+					zval_dtor(&op1);
 					ret = FAILURE;
 					break;
 				}
 				ZVAL_BOOL(result, zend_is_true(&op2));
-				zval_ptr_dtor_nogc(&op2);
+				zval_dtor(&op2);
 			} else {
 				ZVAL_FALSE(result);
 			}
-			zval_ptr_dtor_nogc(&op1);
+			zval_dtor(&op1);
 			break;
 		case ZEND_AST_OR:
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
@@ -303,14 +303,14 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				ZVAL_TRUE(result);
 			} else {
 				if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-					zval_ptr_dtor_nogc(&op1);
+					zval_dtor(&op1);
 					ret = FAILURE;
 					break;
 				}
 				ZVAL_BOOL(result, zend_is_true(&op2));
-				zval_ptr_dtor_nogc(&op2);
+				zval_dtor(&op2);
 			}
-			zval_ptr_dtor_nogc(&op1);
+			zval_dtor(&op1);
 			break;
 		case ZEND_AST_CONDITIONAL:
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
@@ -322,19 +322,19 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 					*result = op1;
 				} else {
 					if (UNEXPECTED(zend_ast_evaluate(result, ast->child[1], scope) != SUCCESS)) {
-						zval_ptr_dtor_nogc(&op1);
+						zval_dtor(&op1);
 						ret = FAILURE;
 						break;
 					}
-					zval_ptr_dtor_nogc(&op1);
+					zval_dtor(&op1);
 				}
 			} else {
 				if (UNEXPECTED(zend_ast_evaluate(result, ast->child[2], scope) != SUCCESS)) {
-					zval_ptr_dtor_nogc(&op1);
+					zval_dtor(&op1);
 					ret = FAILURE;
 					break;
 				}
-				zval_ptr_dtor_nogc(&op1);
+				zval_dtor(&op1);
 			}
 			break;
 		case ZEND_AST_COALESCE:
@@ -346,11 +346,11 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				*result = op1;
 			} else {
 				if (UNEXPECTED(zend_ast_evaluate(result, ast->child[1], scope) != SUCCESS)) {
-					zval_ptr_dtor_nogc(&op1);
+					zval_dtor(&op1);
 					ret = FAILURE;
 					break;
 				}
-				zval_ptr_dtor_nogc(&op1);
+				zval_dtor(&op1);
 			}
 			break;
 		case ZEND_AST_UNARY_PLUS:
@@ -359,7 +359,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			} else {
 				ZVAL_LONG(&op1, 0);
 				ret = add_function(result, &op1, &op2);
-				zval_ptr_dtor_nogc(&op2);
+				zval_dtor(&op2);
 			}
 			break;
 		case ZEND_AST_UNARY_MINUS:
@@ -368,7 +368,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			} else {
 				ZVAL_LONG(&op1, 0);
 				ret = sub_function(result, &op1, &op2);
-				zval_ptr_dtor_nogc(&op2);
+				zval_dtor(&op2);
 			}
 			break;
 		case ZEND_AST_ARRAY:
@@ -380,21 +380,21 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 					zend_ast *elem = list->child[i];
 					if (elem->child[1]) {
 						if (UNEXPECTED(zend_ast_evaluate(&op1, elem->child[1], scope) != SUCCESS)) {
-							zval_ptr_dtor_nogc(result);
+							zval_dtor(result);
 							return FAILURE;
 						}
 					} else {
 						ZVAL_UNDEF(&op1);
 					}
 					if (UNEXPECTED(zend_ast_evaluate(&op2, elem->child[0], scope) != SUCCESS)) {
-						zval_ptr_dtor_nogc(&op1);
-						zval_ptr_dtor_nogc(result);
+						zval_dtor(&op1);
+						zval_dtor(result);
 						return FAILURE;
 					}
 					if (UNEXPECTED(zend_ast_add_array_element(result, &op1, &op2) != SUCCESS)) {
-						zval_ptr_dtor_nogc(&op1);
-						zval_ptr_dtor_nogc(&op2);
-						zval_ptr_dtor_nogc(result);
+						zval_dtor(&op1);
+						zval_dtor(&op2);
+						zval_dtor(result);
 						return FAILURE;
 					}
 				}
@@ -408,7 +408,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
 			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-				zval_ptr_dtor_nogc(&op1);
+				zval_dtor(&op1);
 				ret = FAILURE;
 			} else {
 				zval tmp;
@@ -425,8 +425,8 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 					ZVAL_DUP(result, &tmp);
 				}
 				zval_ptr_dtor(&tmp);
-				zval_ptr_dtor_nogc(&op1);
-				zval_ptr_dtor_nogc(&op2);
+				zval_dtor(&op1);
+				zval_dtor(&op2);
 			}
 			break;
 		default:

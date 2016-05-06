@@ -313,7 +313,7 @@ statement:
 			if (Z_TYPE($2) == IS_STRING) {
 				zend_string_release(Z_STR($2));
 			} else {
-				zval_ptr_dtor_nogc(&$2);
+				zval_dtor(&$2);
 			}
 			zval_ptr_dtor(&$5);
 		}
