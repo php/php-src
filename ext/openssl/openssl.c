@@ -2767,6 +2767,11 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
 				int nid;
 
+				if (NULL == strindex) {
+					php_error_docref(NULL, E_WARNING, "dn: numeric fild names are not supported");
+					continue;
+				}
+
 				convert_to_string_ex(item);
 
 				nid = OBJ_txt2nid(ZSTR_VAL(strindex));
