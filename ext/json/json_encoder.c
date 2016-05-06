@@ -157,8 +157,26 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 				ZEND_HASH_INC_APPLY_COUNT(tmp_ht);
 			}
 
-			zend_try {
-				if (r == PHP_JSON_OUTPUT_ARRAY) {
+			if (r == PHP_JSON_OUTPUT_ARRAY) {
+				if (need_comma) {
+					smart_str_appendc(buf, ',');
+				} else {
+					need_comma = 1;
+				}
+
+				php_json_pretty_print_char(buf, options, '\n');
+				php_json_pretty_print_indent(buf, options);
+				php_json_encode(buf, data, options);
+			} else if (r == PHP_JSON_OUTPUT_OBJECT) {
+				if (key) {
+					if (ZSTR_VAL(key)[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
+						/* Skip protected and private members. */
+						if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
+							ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
+						}
+						continue;
+					}
+
 					if (need_comma) {
 						smart_str_appendc(buf, ',');
 					} else {
@@ -167,58 +185,33 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 
 					php_json_pretty_print_char(buf, options, '\n');
 					php_json_pretty_print_indent(buf, options);
+
+					php_json_escape_string(buf, ZSTR_VAL(key), ZSTR_LEN(key), options & ~PHP_JSON_NUMERIC_CHECK);
+					smart_str_appendc(buf, ':');
+
+					php_json_pretty_print_char(buf, options, ' ');
+
 					php_json_encode(buf, data, options);
-				} else if (r == PHP_JSON_OUTPUT_OBJECT) {
-					if (key) {
-						if (ZSTR_VAL(key)[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
-							/* Skip protected and private members. */
-							if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
-								ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
-							}
-							continue;
-						}
-
-						if (need_comma) {
-							smart_str_appendc(buf, ',');
-						} else {
-							need_comma = 1;
-						}
-
-						php_json_pretty_print_char(buf, options, '\n');
-						php_json_pretty_print_indent(buf, options);
-
-						php_json_escape_string(buf, ZSTR_VAL(key), ZSTR_LEN(key), options & ~PHP_JSON_NUMERIC_CHECK);
-						smart_str_appendc(buf, ':');
-
-						php_json_pretty_print_char(buf, options, ' ');
-
-						php_json_encode(buf, data, options);
+				} else {
+					if (need_comma) {
+						smart_str_appendc(buf, ',');
 					} else {
-						if (need_comma) {
-							smart_str_appendc(buf, ',');
-						} else {
-							need_comma = 1;
-						}
-
-						php_json_pretty_print_char(buf, options, '\n');
-						php_json_pretty_print_indent(buf, options);
-
-						smart_str_appendc(buf, '"');
-						smart_str_append_long(buf, (zend_long) index);
-						smart_str_appendc(buf, '"');
-						smart_str_appendc(buf, ':');
-
-						php_json_pretty_print_char(buf, options, ' ');
-
-						php_json_encode(buf, data, options);
+						need_comma = 1;
 					}
+
+					php_json_pretty_print_char(buf, options, '\n');
+					php_json_pretty_print_indent(buf, options);
+
+					smart_str_appendc(buf, '"');
+					smart_str_append_long(buf, (zend_long) index);
+					smart_str_appendc(buf, '"');
+					smart_str_appendc(buf, ':');
+
+					php_json_pretty_print_char(buf, options, ' ');
+
+					php_json_encode(buf, data, options);
 				}
-			} zend_catch {
-				if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
-					ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
-				}
-				zend_bailout();
-			} zend_end_try();
+			}
 
 			if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
 				ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
