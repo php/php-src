@@ -24,8 +24,6 @@ PHP                                                                        NEWS
   . Fixed bug #72157 (use-after-free caused by dba_open). (Shm, Laruence)
 
 - JSON:
-  . Fixed bug #72170 (JsonSerializable may inc apply count without dec it).
-    (Laruence)
   . Fixed bug #72069 (Behavior \JsonSerializable different from json_encode).
     (Laruence)
 
