@@ -1068,6 +1068,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
 {
+	size_t mname_len;
 	zend_op_array *func;
 	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
 
@@ -1100,8 +1101,8 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 
 	//??? keep compatibility for "\0" characters
 	//??? see: Zend/tests/bug46238.phpt
-	if (UNEXPECTED(strlen(ZSTR_VAL(method_name)) != ZSTR_LEN(method_name))) {
-		func->function_name = zend_string_init(ZSTR_VAL(method_name), strlen(ZSTR_VAL(method_name)), 0);
+	if (UNEXPECTED((mname_len = strlen(ZSTR_VAL(method_name))) != ZSTR_LEN(method_name))) {
+		func->function_name = zend_string_init(ZSTR_VAL(method_name), mname_len, 0);
 	} else {
 		func->function_name = zend_string_copy(method_name);
 	}
