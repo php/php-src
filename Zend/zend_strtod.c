@@ -2590,7 +2590,7 @@ ZEND_API double zend_hex_strtod(const char *str, const char **endptr)
 	int any = 0;
 	double value = 0;
 
-	if (strlen(str) < 2) {
+	if (s[0] == '\0' || s[1] == '\0') {
 		*endptr = str;
 		return 0.0;
 	}

@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 5.6.22
 
+ - Core:
+  . Fixed bug #72172 (zend_hex_strtod should not use strlen).
+    (bwitz at hotmail dot com )
+
 28 Apr 2016, PHP 5.6.21
 
 - Core: 
