@@ -80,8 +80,11 @@ __forceinline static char *php_win32_cp_w_to_any(wchar_t* w_source_ptr)
 	int i; \
 	aa_len = aw_len; \
 	aa = (char **) malloc(aw_len * sizeof(char *)); \
+	if (!aa) { \
+		break; \
+	} \
 	for (i = 0; i < aw_len; i++) { \
-		argv[i] = php_win32_cp_w_to_any(argv_wide[i]); \
+		aa[i] = php_win32_cp_w_to_any(aw[i]); \
 	} \
 } while (0);
 
