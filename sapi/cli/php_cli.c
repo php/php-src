@@ -39,6 +39,7 @@
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
+#include <shellapi.h>
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1409,6 +1410,7 @@ out:
 
 	if (using_wide_argv) {
 		PHP_WIN32_FREE_ARRAY(argv, argc);
+		LocalFree(argv_wide);
 	}
 	argv = argv_save;
 #endif
