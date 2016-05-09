@@ -933,8 +933,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			int bufindex = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
-			char printname[MAX_PATH];
-			char substitutename[MAX_PATH];
+			char *printname = NULL, *substitutename = NULL;
 			int printname_len, substitutename_len;
 			int substitutename_off = 0;
 
@@ -967,59 +966,49 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
-				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
-					reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR),
-					printname_len + 1,
-					printname, MAX_PATH, NULL, NULL
-				)) {
+				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
+				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
 					FREE_PATHW();
 					return -1;
-				};
-				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
-				printname[printname_len] = 0;
+				}
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
-				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
-					reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR),
-					substitutename_len + 1,
-					substitutename, MAX_PATH, NULL, NULL
-				)) {
+				substitutename = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR));
+				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
+					free(printname);
 					FREE_PATHW();
 					return -1;
-				};
-				substitutename[substitutename_len] = 0;
+				}
 			}
 			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
 				isabsolute = 1;
 				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
-				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
-					reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR),
-					printname_len + 1,
-					printname, MAX_PATH, NULL, NULL
-				)) {
+				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
 					FREE_PATHW();
 					return -1;
-				};
-				printname[pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR)] = 0;
+				}
+
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
-				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
-					reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR),
-					substitutename_len + 1,
-					substitutename, MAX_PATH, NULL, NULL
-				)) {
+				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
+					free(printname);
 					FREE_PATHW();
 					return -1;
-				};
-				substitutename[substitutename_len] = 0;
+				}
 			}
 			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP) {
 				isabsolute = 1;
+				substitutename = malloc((len + 1) * sizeof(char));
+				if (!substitutename) {
+					free_alloca(pbuffer, use_heap_large);
+					FREE_PATHW();
+					return -1;
+				}
 				memcpy(substitutename, path, len + 1);
 				substitutename_len = len;
 			} else {
@@ -1070,6 +1059,8 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			fprintf(stderr, "resolved: %s ", path);
 #endif
 			free_alloca(pbuffer, use_heap_large);
+			free(printname);
+			free(substitutename);
 
 			if(isabsolute == 1) {
 				if (!((j == 3) && (path[1] == ':') && (path[2] == '\\'))) {
