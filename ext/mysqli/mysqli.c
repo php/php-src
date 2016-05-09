@@ -1295,13 +1295,9 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 		zval *retval_ptr;
-		zend_bool props_merged = 0;
 
 		object_and_properties_init(return_value, ce, NULL);
-		if (!ce->__set) {
-			props_merged = 1;
-			zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
-		}
+		zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
 
 		if (ce->constructor) {
 			fci.size = sizeof(fci);
@@ -1335,10 +1331,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
-				if (fci.params) {
-					efree(fci.params);
-				}
-				return;
 			} else {
 				if (retval_ptr) {
 					zval_ptr_dtor(&retval_ptr);
@@ -1349,11 +1341,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 		} else if (ctor_params) {
 			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
-			return;
-		}
-
-		if (!props_merged) {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
 		}
 	}
 }
