@@ -63,7 +63,7 @@ extern "C" {
 # define PW32IO __declspec(dllimport)
 #endif
 
-#define PHP_WIN32_IOUTIL_MAXPATHLEN _MAX_PATH
+#define PHP_WIN32_IOUTIL_MAXPATHLEN 2048
 
 #if !defined(MAXPATHLEN) || MAXPATHLEN < PHP_WIN32_IOUTIL_MAXPATHLEN
 # undef MAXPATHLEN
@@ -87,13 +87,56 @@ typedef enum {
 	PHP_WIN32_IOUTIL_IS_UTF8
 } php_win32_ioutil_encoding;
 
+
+#define PHP_WIN32_IOUTIL_DEFAULT_SLASHW L'\\'
+#define PHP_WIN32_IOUTIL_DEFAULT_DIR_SEPARATORW	L';'
+#define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == L'\\' || (c) == L'/')
+#define PHP_WIN32_IOUTIL_IS_LETTERW(c) (((c) >= L'a' && (c) <= L'z') || ((c) >= L'A' && (c) <= L'Z'))
+#define PHP_WIN32_IOUTIL_JUNCTION_PREFIXW L"\\??\\"
+#define PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW 4
+#define PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW L"\\\\?\\"
+#define PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW 4
+#define PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW L"\\\\?\\UNC\\"
+#define PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW 8
+
 /* Keep these functions aliased for case some additional handling
    is needed later. */
-#define php_win32_ioutil_any_to_w php_win32_cp_any_to_w
+__forceinline static wchar_t *php_win32_ioutil_any_to_w(const char* in)
+{
+	wchar_t *mb, *ret;
+	size_t mb_len;
+	
+	mb = php_win32_cp_any_to_w(in);
+	if (!mb) {
+		return NULL;
+	}
+
+	mb_len = wcslen(mb);
+	/* Only prefix with long if it's needed. */
+	if (mb_len > _MAX_PATH) {
+		ret = malloc((mb_len + 1 + 4) * sizeof(wchar_t));
+		if (!ret) {
+			return NULL;
+		}
+		memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+		memmove(ret+4, mb, mb_len * sizeof(wchar_t));
+		ret[mb_len + 4] = L'\0';
+
+		free(mb);
+	} else {
+		ret = mb;
+	}
+
+	return ret;
+}
 #define php_win32_ioutil_ascii_to_w php_win32_cp_ascii_to_w
 #define php_win32_ioutil_mb_to_w php_win32_cp_mb_to_w
 #define php_win32_ioutil_thread_to_w php_win32_cp_thread_to_w
 #define php_win32_ioutil_w_to_any php_win32_cp_w_to_any
+/*__forceinline static char *php_win32_ioutil_w_to_any(wchar_t* w_source_ptr)
+{
+	return php_win32_cp_w_to_any(w_source_ptr);
+}*/
 #define php_win32_ioutil_w_to_utf8 php_win32_cp_w_to_utf8
 #define php_win32_ioutil_w_to_thread php_win32_cp_w_to_thread
 
@@ -110,17 +153,6 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
 #if 0
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 #endif
-
-#define PHP_WIN32_IOUTIL_DEFAULT_SLASHW L'\\'
-#define PHP_WIN32_IOUTIL_DEFAULT_DIR_SEPARATORW	L';'
-#define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == L'\\' || (c) == L'/')
-#define PHP_WIN32_IOUTIL_IS_LETTERW(c) (((c) >= L'a' && (c) <= L'z') || ((c) >= L'A' && (c) <= L'Z'))
-#define PHP_WIN32_IOUTIL_JUNCTION_PREFIXW L"\\??\\"
-#define PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW 4
-#define PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW L"\\\\?\\"
-#define PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW 4
-#define PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW L"\\\\?\\UNC\\"
-#define PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW 8
 
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
