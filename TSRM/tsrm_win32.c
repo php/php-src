@@ -480,8 +480,8 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	DWORD dwCreateFlags = 0;
 	BOOL res;
 	process_pair *proc;
-	char *cmd;
-	wchar_t *cmdw, *cwdw = NULL;
+	char *cmd = NULL;
+	wchar_t *cmdw = NULL, *cwdw = NULL;
 	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
@@ -511,7 +511,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	}
 
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
-	cmdw = php_win32_ioutil_any_to_w(cmd);
+	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
 		return NULL;
@@ -581,12 +581,8 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
 	}
 	free(cmd);
-	if (cmdw) {
-		free(cmdw);
-	}
-	if (cwdw) {
-		free(cwdw);
-	}
+	free(cmdw);
+	free(cwdw);
 
 	if (!res) {
 		return NULL;
