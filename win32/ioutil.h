@@ -99,6 +99,29 @@ typedef enum {
 #define PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW L"\\\\?\\UNC\\"
 #define PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW 8
 
+
+#define PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) (path_lenw >= PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW \
+	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW))
+#define PHP_WIN32_IOUTIL_IS_ABSOLUTEW(pathw, path_lenw) (PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) \
+	|| path_lenw >= 3 && PHP_WIN32_IOUTIL_IS_LETTERW(pathw[0]) && L':' == pathw[1] && IS_SLASHW(pathw[2]))
+
+#define PHP_WIN32_IOUTIL_INIT_W(path) \
+	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
+
+#define PHP_WIN32_IOUTIL_CLEANUP_W() \
+		free(pathw); \
+		pathw = NULL;
+
+#define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
+		size_t len = wcslen(pathw); \
+		if (len >= 1 && L' ' == pathw[len-1] || \
+			len > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[len-2]) && L'.' != pathw[len-2] && L'.' == pathw[len-1] \
+			) { \
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
+			return ret; \
+		} \
+} while (0);
+
 /* Keep these functions aliased for case some additional handling
    is needed later. */
 __forceinline static wchar_t *php_win32_ioutil_any_to_w(const char* in)
@@ -153,23 +176,6 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
 #if 0
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 #endif
-
-#define PHP_WIN32_IOUTIL_INIT_W(path) \
-	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
-
-#define PHP_WIN32_IOUTIL_CLEANUP_W() \
-		free(pathw); \
-		pathw = NULL;
-
-#define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
-		size_t len = wcslen(pathw); \
-		if (len >= 1 && L' ' == pathw[len-1] || \
-			len > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[len-2]) && L'.' != pathw[len-2] && L'.' == pathw[len-1] \
-			) { \
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
-			return ret; \
-		} \
-} while (0);
 
 #define php_win32_ioutil_access_cond(path, mode) _waccess(pathw, mode)
 #define php_win32_ioutil_unlink_cond(path) php_win32_ioutil_unlink_w(pathw)
