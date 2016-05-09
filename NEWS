@@ -54,6 +54,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #71062 (pg_convert() doesn't accept ISO 8601 for datatype
     timestamp). (denver at timothy dot io)
+  . Fixed bug #72151 (mysqli_fetch_object changed behaviour). (Anatol)
 
 - Session:
   . Fixed bug #71972 (Cyclic references causing session_start(): Failed to
