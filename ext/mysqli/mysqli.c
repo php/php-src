@@ -1278,13 +1278,15 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		zval dataset, retval;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
-		zend_bool props_handled = 0;
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
+
 		object_and_properties_init(return_value, ce, NULL);
 		if (!ce->default_properties_count && !ce->__set) {
 			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
-			props_handled = 1;
+		} else {
+			zend_merge_properties(return_value, Z_ARRVAL(dataset));
+			zval_ptr_dtor(&dataset);
 		}
 
 		if (ce->constructor) {
@@ -1306,9 +1308,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					 * single value is an array. Also we'd have to make that one
 					 * argument passed by reference.
 					 */
-					if (!props_handled) {
-						zval_ptr_dtor(&dataset);
-					}
 					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
 					return;
 				}
@@ -1321,14 +1320,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fcc.object = Z_OBJ_P(return_value);
 
 			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				if (fci.params) {
-					efree(fci.params);
-				}
-				if (!props_handled) {
-					zval_ptr_dtor(&dataset);
-				}
 				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
-				return;
 			} else {
 				zval_ptr_dtor(&retval);
 			}
@@ -1336,16 +1328,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				efree(fci.params);
 			}
 		} else if (ctor_params) {
-			if (!props_handled) {
-				zval_ptr_dtor(&dataset);
-			}
 			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
-			return;
-		}
-
-		if (!props_handled) {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset));
-			zval_ptr_dtor(&dataset);
 		}
 	}
 }
