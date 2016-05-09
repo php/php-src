@@ -14,7 +14,9 @@ else
 fi
 
 if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
-  for i in $PHP_READLINE /usr/local /usr; do
+  dnl /opt/local     macports prefix
+  dnl /usr/local/opt homebrew link prefix
+  for i in $PHP_READLINE /opt/local /usr/local/opt /usr/local /usr; do
     test -f $i/include/readline/readline.h && READLINE_DIR=$i && break
   done
 
@@ -71,7 +73,7 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
 
 elif test "$PHP_LIBEDIT" != "no"; then
 
-  for i in $PHP_LIBEDIT /usr/local /usr; do
+  for i in $PHP_LIBEDIT /opt/local /usr/local/opt /usr/local /usr; do
     test -f $i/include/editline/readline.h && LIBEDIT_DIR=$i && break
   done
 
