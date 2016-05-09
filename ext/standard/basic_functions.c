@@ -2676,21 +2676,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_version_compare, 0, 0, 2)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ win32/codepage.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_set_cp, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_set_cp, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_get_cp, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_get_cp, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_is_cp_utf8, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_is_cp_utf8, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_cp_conv_utf8_to_thread, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv_utf8_to_thread, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_cp_conv_thread_to_utf8, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv_thread_to_utf8, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -3388,11 +3388,11 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
 
 #ifdef PHP_WIN32
-	PHP_FE(proc_set_cp, arginfo_proc_set_cp)
-	PHP_FE(proc_get_cp, arginfo_proc_get_cp)
-	PHP_FE(proc_is_cp_utf8, arginfo_proc_is_cp_utf8)
-	PHP_FE(proc_cp_conv_utf8_to_thread, arginfo_proc_cp_conv_utf8_to_thread)
-	PHP_FE(proc_cp_conv_thread_to_utf8, arginfo_proc_cp_conv_thread_to_utf8)
+	PHP_FE(sapi_windows_set_cp, arginfo_sapi_windows_set_cp)
+	PHP_FE(sapi_windows_get_cp, arginfo_sapi_windows_get_cp)
+	PHP_FE(sapi_windows_is_cp_utf8, arginfo_sapi_windows_is_cp_utf8)
+	PHP_FE(sapi_windows_cp_conv_utf8_to_thread, arginfo_sapi_windows_cp_conv_utf8_to_thread)
+	PHP_FE(sapi_windows_cp_conv_thread_to_utf8, arginfo_sapi_windows_cp_conv_thread_to_utf8)
 #endif
 	PHP_FE_END
 };

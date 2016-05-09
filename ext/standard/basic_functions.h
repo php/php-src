@@ -134,11 +134,11 @@ PHP_FUNCTION(config_get_hash);
 #endif
 
 #if defined(PHP_WIN32)
-PHP_FUNCTION(proc_set_cp);
-PHP_FUNCTION(proc_get_cp);
-PHP_FUNCTION(proc_is_cp_utf8);
-PHP_FUNCTION(proc_cp_conv_thread_to_utf8);
-PHP_FUNCTION(proc_cp_conv_utf8_to_thread);
+PHP_FUNCTION(sapi_windows_set_cp);
+PHP_FUNCTION(sapi_windows_get_cp);
+PHP_FUNCTION(sapi_windows_is_cp_utf8);
+PHP_FUNCTION(sapi_windows_cp_conv_thread_to_utf8);
+PHP_FUNCTION(sapi_windows_cp_conv_utf8_to_thread);
 #endif
 
 PHP_FUNCTION(str_rot13);

@@ -183,9 +183,9 @@ PW32CP BOOL php_win32_cp_use_unicode(void)
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
 
-/* {{{ proto bool proc_set_cp(int cp)
+/* {{{ proto bool sapi_windows_set_cp(int cp)
  * Set process codepage. */
-PHP_FUNCTION(proc_set_cp) 
+PHP_FUNCTION(sapi_windows_set_cp) 
 {
 	zend_long cp;
 
@@ -197,9 +197,9 @@ PHP_FUNCTION(proc_set_cp)
 }
 /* }}} */
 
-/* {{{ proto int proc_set_cp(void)
+/* {{{ proto int sapi_windows_set_cp(void)
  * Get process codepage. */
-PHP_FUNCTION(proc_get_cp)
+PHP_FUNCTION(sapi_windows_get_cp)
 {
 	UINT in_cp, out_cp;
 
@@ -215,9 +215,9 @@ PHP_FUNCTION(proc_get_cp)
 /* }}} */
 
 
-/* {{{ proto bool proc_is_cp_utf8(void)
+/* {{{ proto bool sapi_windows_is_cp_utf8(void)
  * Indicates whether the codepage is UTF-8 compatible. */
-PHP_FUNCTION(proc_is_cp_utf8)
+PHP_FUNCTION(sapi_windows_is_cp_utf8)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -227,9 +227,9 @@ PHP_FUNCTION(proc_is_cp_utf8)
 }
 /* }}} */
 
-/* {{{ proto string proc_cp_conv_utf8_to_thread(string subject)
+/* {{{ proto string sapi_windows_cp_conv_utf8_to_thread(string subject)
  * Convert string from UTF-8 to the current thread codepage. */
-PHP_FUNCTION(proc_cp_conv_utf8_to_thread)
+PHP_FUNCTION(sapi_windows_cp_conv_utf8_to_thread)
 {
 	char *subj;
 	size_t subj_len;
@@ -256,9 +256,9 @@ PHP_FUNCTION(proc_cp_conv_utf8_to_thread)
 }
 /* }}} */
 
-/* {{{ proto string proc_cp_conv_thread_to_utf8(string subject)
+/* {{{ proto string sapi_windows_cp_conv_thread_to_utf8(string subject)
  * Convert string from the current thread codepage to UTF-8. */
-PHP_FUNCTION(proc_cp_conv_thread_to_utf8)
+PHP_FUNCTION(sapi_windows_cp_conv_thread_to_utf8)
 {
 	char *subj;
 	size_t subj_len;

@@ -2,12 +2,12 @@
 
 function get_active_cp()
 {
-	return proc_get_cp();
+	return sapi_windows_get_cp();
 }
 
 function set_active_cp($cp, $echo = true)
 {
-	if (!proc_set_cp($cp)) {
+	if (!sapi_windows_set_cp($cp)) {
 		echo "Failed to set cp $cp\n";
 		return;
 	}
