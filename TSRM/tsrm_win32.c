@@ -519,7 +519,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 
 	if (cwd) {
 		cwdw = php_win32_ioutil_any_to_w(cwd);
-		if (!cmdw) {
+		if (!cwdw) {
 			free(cmd);
 			return NULL;
 		}
