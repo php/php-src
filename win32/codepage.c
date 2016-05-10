@@ -30,10 +30,10 @@ PW32CP wchar_t *php_win32_cp_mb_to_w(const char* path)
 		return NULL;
 	}
 
-    ret_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, NULL, 0);
-    if (ret_len == 0) {
+	ret_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, NULL, 0);
+	if (ret_len == 0) {
 		return NULL;
-    }
+	}
 
 	ret = malloc(ret_len * sizeof(wchar_t));
 	if (!ret) {
@@ -42,7 +42,7 @@ PW32CP wchar_t *php_win32_cp_mb_to_w(const char* path)
 
 	tmp_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, ret, ret_len);
 
-    assert(tmp_len == ret_len);
+	assert(tmp_len == ret_len);
 
 	return ret;
 }/*}}}*/
@@ -56,10 +56,10 @@ PW32CP wchar_t *php_win32_cp_thread_to_w(const char* path)
 		return NULL;
 	}
 
-    ret_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, NULL, 0);
-    if (ret_len == 0) {
+	ret_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, NULL, 0);
+	if (ret_len == 0) {
 		return NULL;
-    }
+	}
 
 	ret = malloc(ret_len * sizeof(wchar_t));
 	if (!ret) {
@@ -68,7 +68,7 @@ PW32CP wchar_t *php_win32_cp_thread_to_w(const char* path)
 
 	tmp_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, ret, ret_len);
 
-    assert(tmp_len == ret_len);
+	assert(tmp_len == ret_len);
 
 	return ret;
 
