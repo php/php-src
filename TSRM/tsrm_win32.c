@@ -387,6 +387,7 @@ Finished:
 			real_path = NULL;
 		}
 
+		PHP_WIN32_IOUTIL_CLEANUP_W();
 		if(fAccess == FALSE) {
 			errno = EACCES;
 			return errno;
@@ -521,6 +522,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		cwdw = php_win32_ioutil_any_to_w(cwd);
 		if (!cwdw) {
 			free(cmd);
+			free(cmdw);
 			return NULL;
 		}
 	}
@@ -530,12 +532,9 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	security.lpSecurityDescriptor	= NULL;
 
 	if (!type_len || !CreatePipe(&in, &out, &security, 2048L)) {
-		if (cmdw) {
-			free(cmdw);
-		}
-		if (cwdw) {
-			free(cwdw);
-		}
+		free(cmdw);
+		free(cwdw);
+		free(cmd);
 		return NULL;
 	}
 
