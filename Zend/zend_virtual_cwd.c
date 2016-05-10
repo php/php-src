@@ -221,12 +221,14 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	HANDLE hFile;
 	DWORD dwRet;
 	wchar_t *linkw = php_win32_ioutil_any_to_w(link), targetw[MAXPATHLEN];
+	char *_tmp;
 
 	if (!linkw) {
 		return -1;
 	}
 
 	if (!target_len) {
+		free(linkw);
 		return -1;
 	}
 
@@ -250,20 +252,20 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		overflown. */
 	dwRet = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
 	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
-		if (linkw) {
-			free(linkw);
-		}
+		free(linkw);
+		CloseHandle(hFile);
 		return -1;
 	}
-	if (linkw) {
-		char *_tmp = php_win32_ioutil_w_to_any(targetw);
-		if (!_tmp) {
-			free(linkw);
-			return -1;
-		}
-		memcpy(target, _tmp, dwRet);
-		target[dwRet] = '\0';
+
+	_tmp = php_win32_ioutil_w_to_any(targetw);
+	if (!_tmp) {
+		CloseHandle(hFile);
+		free(linkw);
+		return -1;
 	}
+	memcpy(target, _tmp, dwRet);
+	target[dwRet] = '\0';
+	free(_tmp);
 
 	CloseHandle(hFile);
 	free(linkw);
@@ -912,11 +914,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				}
 				/* continue resolution anyway but don't save result in the cache */
 				save = 0;
+			} else {
+				FindClose(hFind);
 			}
-		}
-
-		if (save) {
-			FindClose(hFind);
 		}
 
 		tmp = do_alloca(len+1, use_heap);
@@ -950,6 +950,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 			if (pbuffer == NULL) {
+				CloseHandle(hLink);
 				FREE_PATHW();
 				return -1;
 			}
@@ -1212,7 +1213,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 		free_alloca(tmp, use_heap);
 #ifdef ZEND_WIN32
-		FREE_PATHW();	
+		FREE_PATHW();
 #undef FREE_PATHW
 #endif
 		return j;
