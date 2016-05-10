@@ -806,7 +806,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 	ALLOCA_FLAG(use_heap_large)
 	wchar_t *pathw = NULL;
 #define FREE_PATHW() \
-	free(pathw);
+	do { free(pathw); } while(0)
 
 #else
 	zend_stat_t st;
@@ -938,12 +938,14 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			int substitutename_off = 0;
 
 			if(++(*ll) > LINK_MAX) {
+				free_alloca(tmp, use_heap);
 				FREE_PATHW();
 				return -1;
 			}
 
 			hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 			if(hLink == INVALID_HANDLE_VALUE) {
+				free_alloca(tmp, use_heap);
 				FREE_PATHW();
 				return -1;
 			}
@@ -951,11 +953,13 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 			if (pbuffer == NULL) {
 				CloseHandle(hLink);
+				free_alloca(tmp, use_heap);
 				FREE_PATHW();
 				return -1;
 			}
 			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
 				free_alloca(pbuffer, use_heap_large);
+				free_alloca(tmp, use_heap);
 				CloseHandle(hLink);
 				FREE_PATHW();
 				return -1;
@@ -970,6 +974,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
+					free_alloca(tmp, use_heap);
 					FREE_PATHW();
 					return -1;
 				}
@@ -978,6 +983,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				substitutename = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR));
 				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
+					free_alloca(tmp, use_heap);
 					free(printname);
 					FREE_PATHW();
 					return -1;
@@ -990,6 +996,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
+					free_alloca(tmp, use_heap);
 					FREE_PATHW();
 					return -1;
 				}
@@ -999,6 +1006,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				substitutename = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR));
 				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
+					free_alloca(tmp, use_heap);
 					free(printname);
 					FREE_PATHW();
 					return -1;
@@ -1009,6 +1017,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				substitutename = malloc((len + 1) * sizeof(char));
 				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
+					free_alloca(tmp, use_heap);
 					FREE_PATHW();
 					return -1;
 				}
@@ -1017,6 +1026,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			} else {
 				/* XXX this might be not the end, restart handling with REPARSE_GUID_DATA_BUFFER should be implemented. */
 				free_alloca(pbuffer, use_heap_large);
+				free_alloca(tmp, use_heap);
 				FREE_PATHW();
 				return -1;
 			}
@@ -1104,6 +1114,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				directory = (dataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 				if (is_dir && !directory) {
 					/* not a directory */
+					free_alloca(tmp, use_heap);
 					FREE_PATHW();
 					return -1;
 				}
