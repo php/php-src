@@ -108,9 +108,10 @@ typedef enum {
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
 
-#define PHP_WIN32_IOUTIL_CLEANUP_W() \
+#define PHP_WIN32_IOUTIL_CLEANUP_W() do { \
 		free(pathw); \
-		pathw = NULL;
+		pathw = NULL; \
+} while (0)
 
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
 		size_t len = wcslen(pathw); \
