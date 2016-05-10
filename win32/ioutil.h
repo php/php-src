@@ -137,8 +137,8 @@ __forceinline static wchar_t *php_win32_ioutil_any_to_w(const char* in)
 	mb_len = wcslen(mb);
 	/* Only prefix with long if it's needed. */
 	if (mb_len > _MAX_PATH) {
-		mb = php_win32_ioutil_normalize_path(mb, mb_len);
-		mb_len = wcslen(mb);
+		/*mb = php_win32_ioutil_normalize_path(mb, mb_len);
+		mb_len = wcslen(mb);*/
 
 		ret = malloc((mb_len + 1 + 4) * sizeof(wchar_t));
 		if (!ret) {
