@@ -740,8 +740,11 @@ finish:
 
 	while (!body && !php_stream_eof(stream)) {
 		size_t http_header_line_length;
+		
 		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
+			char* http_header_value;
+			size_t http_header_value_length;
 			if (*e != '\n') {
 				do { /* partial header */
 					if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) == NULL) {
@@ -762,19 +765,26 @@ finish:
 			> Each header field consists of a case-insensitive field name followed
 			> by a colon (":"), optional leading whitespace, the field value, and
 			> optional trailing whitespace. */
-			char *http_header_value = http_header_line + 1;
+			http_header_value = http_header_line + 1;
 			while ( *http_header_value != ':' && http_header_value < http_header_line + http_header_line_length ) {
 				http_header_value++;
 			}
 			http_header_value++;
-			while ( (*http_header_value == ' ' || *http_header_value == '\t') && http_header_value < http_header_line + http_header_line_length ) {
-				http_header_value++;
+			/* If there is no : in the line, don't leave http_header_value as something bogus */
+			if ( http_header_value == http_header_line + http_header_line_length ) {
+				http_header_value_length = 0;
 			}
-			size_t http_header_value_length = http_header_line - http_header_value + http_header_line_length;
-			e = http_header_value + http_header_value_length - 1;
-			while ( *e == ' ' || *e == '\t' ) {
-				e--;
-				http_header_value_length--;
+			else {
+				while ( (*http_header_value == ' ' || *http_header_value == '\t') && http_header_value < http_header_line + http_header_line_length ) {
+					http_header_value++;
+				}
+				http_header_value_length = http_header_line - http_header_value + http_header_line_length;
+				e = http_header_value + http_header_value_length - 1;
+				while ( *e == ' ' || *e == '\t' ) {
+					e--;
+					http_header_value_length--;
+				}
+				http_header_value[http_header_value_length] = '\0';
 			}
 
 			if (!strncasecmp(http_header_line, "Location:", 9)) {
