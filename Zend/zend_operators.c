@@ -1254,6 +1254,10 @@ ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) 
 	int length = Z_STRLEN_P(op1) + 1;
 	char *buf;
 
+	if (UNEXPECTED(length < 0)) {
+		zend_error(E_ERROR, "String size overflow");
+	}
+
 	if (IS_INTERNED(Z_STRVAL_P(op1))) {
 		buf = (char *) emalloc(length + 1);
 		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
@@ -1273,6 +1277,9 @@ ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2
 	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 	char *buf;
 
+	if (UNEXPECTED(length < 0)) {
+		zend_error(E_ERROR, "String size overflow");
+	}
 	if (IS_INTERNED(Z_STRVAL_P(op1))) {
 		buf = (char *) emalloc(length+1);
 		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
