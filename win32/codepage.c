@@ -42,7 +42,7 @@ PW32CP wchar_t *php_win32_cp_mb_to_w(const char* path)
 
 	tmp_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, ret, ret_len);
 
-    /* assert(tmp_len == ret_len); */
+    assert(tmp_len == ret_len);
 
 	return ret;
 }/*}}}*/
@@ -68,7 +68,7 @@ PW32CP wchar_t *php_win32_cp_thread_to_w(const char* path)
 
 	tmp_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, -1, ret, ret_len);
 
-    /* assert(tmp_len == ret_len); */
+    assert(tmp_len == ret_len);
 
 	return ret;
 
@@ -121,7 +121,7 @@ PW32CP char *php_win32_cp_w_to_utf8(wchar_t* w_source_ptr)
 
 	r = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, w_source_ptr, -1, target, target_len, NULL, NULL);
 
-	/*assert(r == target_len);*/
+	assert(r == target_len);
 
 	return target;
 }/*}}}*/
@@ -147,7 +147,7 @@ PW32CP char *php_win32_cp_w_to_thread(wchar_t* w_source_ptr)
 
 	r = WideCharToMultiByte(CP_THREAD_ACP, 0, w_source_ptr, -1, target, target_len, NULL, NULL);
 
-	/*assert(r == target_len);*/
+	assert(r == target_len);
 
 	return target;
 }/*}}}*/
