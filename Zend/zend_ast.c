@@ -1821,7 +1821,9 @@ ZEND_API void zend_ast_convert_to_object(zval *ret, zend_ast *ast)
 		obj = Z_OBJ_P(ret);
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 0), list->kind);
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 1), list->attr);
-		ZVAL_LONG(OBJ_PROP_NUM(obj, 2), list->lineno);
+		/* PHP parser doesn't capture positions of all AST nodes */
+		/* ZVAL_LONG(OBJ_PROP_NUM(obj, 2), list->lineno); */
+		ZVAL_NULL(OBJ_PROP_NUM(obj, 2));
 		children = list->children;
 		array_init_size(OBJ_PROP_NUM(obj, 3), children);
 		ht = Z_ARR_P(OBJ_PROP_NUM(obj, 3));
@@ -1834,7 +1836,9 @@ ZEND_API void zend_ast_convert_to_object(zval *ret, zend_ast *ast)
 		obj = Z_OBJ_P(ret);
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 0), ast->kind);
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 1), ast->attr);
-		ZVAL_LONG(OBJ_PROP_NUM(obj, 2), ast->lineno);
+		/* PHP parser doesn't capture positions of all AST nodes */
+		/* ZVAL_LONG(OBJ_PROP_NUM(obj, 2), ast->lineno); */
+		ZVAL_NULL(OBJ_PROP_NUM(obj, 2));
 		children = zend_ast_get_num_children(ast);
 		array_init_size(OBJ_PROP_NUM(obj, 3), children);
 		ht = Z_ARR_P(OBJ_PROP_NUM(obj, 3));

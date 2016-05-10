@@ -103,7 +103,7 @@ array(4) {
       ["flags"]=>
       int(1)
       ["lineno"]=>
-      int(0)
+      NULL
       ["children"]=>
       array(2) {
         [0]=>
@@ -122,7 +122,7 @@ array(4) {
       ["flags"]=>
       int(1)
       ["lineno"]=>
-      int(0)
+      NULL
       ["children"]=>
       array(2) {
         [0]=>
@@ -138,7 +138,7 @@ array(4) {
       ["flags"]=>
       int(1)
       ["lineno"]=>
-      int(0)
+      NULL
       ["children"]=>
       array(2) {
         [0]=>
@@ -157,7 +157,7 @@ array(4) {
       ["flags"]=>
       int(0)
       ["lineno"]=>
-      int(0)
+      NULL
       ["children"]=>
       array(2) {
         [0]=>
@@ -167,7 +167,7 @@ array(4) {
           ["flags"]=>
           int(0)
           ["lineno"]=>
-          int(0)
+          NULL
           ["children"]=>
           array(2) {
             [0]=>
@@ -183,7 +183,7 @@ array(4) {
           ["flags"]=>
           int(0)
           ["lineno"]=>
-          int(0)
+          NULL
           ["children"]=>
           array(2) {
             [0]=>
