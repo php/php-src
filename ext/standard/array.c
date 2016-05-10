@@ -1843,8 +1843,11 @@ PHP_FUNCTION(extract)
 				if (var_exists && ZSTR_LEN(var_name) == sizeof("GLOBALS")-1 && !strcmp(ZSTR_VAL(var_name), "GLOBALS")) {
 					break;
 				}
-				if (var_exists && ZSTR_LEN(var_name) == sizeof("this")-1  && !strcmp(ZSTR_VAL(var_name), "this") && EG(scope) && ZSTR_LEN(EG(scope)->name) != 0) {
-					break;
+				if (var_exists && ZSTR_LEN(var_name) == sizeof("this")-1  && !strcmp(ZSTR_VAL(var_name), "this")) {
+					zend_class_entry *scope = zend_get_executed_scope();
+					if (scope && ZSTR_LEN(scope->name) != 0) {
+						break;
+					}
 				}
 				ZVAL_STR_COPY(&final_name, var_name);
 				break;
@@ -2023,6 +2026,7 @@ PHP_FUNCTION(array_fill)
 			Z_ARRVAL_P(return_value)->nNumUsed = start_key + num;
 			Z_ARRVAL_P(return_value)->nNumOfElements = num;
 			Z_ARRVAL_P(return_value)->nInternalPointer = start_key;
+			Z_ARRVAL_P(return_value)->nNextFreeElement = start_key + num;
 
 			if (Z_REFCOUNTED_P(val)) {
 				GC_REFCOUNT(Z_COUNTED_P(val)) += num;

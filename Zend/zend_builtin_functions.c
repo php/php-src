@@ -526,13 +526,13 @@ ZEND_FUNCTION(func_get_arg)
 
 	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
-	if (requested_offset >= arg_count) {
+	if ((zend_ulong)requested_offset >= arg_count) {
 		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 
 	first_extra_arg = ex->func->op_array.num_args;
-	if (requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
+	if ((zend_ulong)requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
 		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
@@ -770,7 +770,8 @@ ZEND_FUNCTION(error_reporting)
 #endif
 
 	old_error_reporting = EG(error_reporting);
-	if(ZEND_NUM_ARGS() != 0) {
+	if (ZEND_NUM_ARGS() != 0) {
+		zend_string *new_val = zval_get_string(err);
 		do {
 			zend_ini_entry *p = EG(error_reporting_ini_entry);
 
@@ -796,7 +797,7 @@ ZEND_FUNCTION(error_reporting)
 				zend_string_release(p->value);
 			}
 
-			p->value = zval_get_string(err);
+			p->value = new_val;
 			if (Z_TYPE_P(err) == IS_LONG) {
 				EG(error_reporting) = Z_LVAL_P(err);
 			} else {
@@ -982,7 +983,7 @@ ZEND_FUNCTION(defined)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (zend_get_constant_ex(name, NULL, ZEND_FETCH_CLASS_SILENT)) {
+	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1001,8 +1002,10 @@ ZEND_FUNCTION(get_class)
 	}
 
 	if (!obj) {
-		if (EG(scope)) {
-			RETURN_STR_COPY(EG(scope)->name);
+		zend_class_entry *scope = zend_get_executed_scope();
+
+		if (scope) {
+			RETURN_STR_COPY(scope->name);
 		} else {
 			zend_error(E_WARNING, "get_class() called without object from outside a class");
 			RETURN_FALSE;
@@ -1026,8 +1029,11 @@ ZEND_FUNCTION(get_called_class)
 	called_scope = zend_get_called_scope(execute_data);
 	if (called_scope) {
 		RETURN_STR_COPY(called_scope->name);
-	} else if (!EG(scope))  {
-		zend_error(E_WARNING, "get_called_class() called from outside a class");
+	} else {
+		zend_class_entry *scope = zend_get_executed_scope();
+		if (!scope)  {
+			zend_error(E_WARNING, "get_called_class() called from outside a class");
+		}
 	}
 	RETURN_FALSE;
 }
@@ -1045,7 +1051,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (!ZEND_NUM_ARGS()) {
-		ce = EG(scope);
+		ce = zend_get_executed_scope();
 		if (ce && ce->parent) {
 			RETURN_STR_COPY(ce->parent->name);
 		} else {
@@ -1142,7 +1148,7 @@ ZEND_FUNCTION(is_a)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value)
+static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int statics, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -1150,12 +1156,12 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
-		     prop_info->ce != EG(scope)) ||
+		     prop_info->ce != scope) ||
 		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
-		     !zend_check_protected(prop_info->ce, EG(scope))) ||
+		     !zend_check_protected(prop_info->ce, scope)) ||
 		    ((prop_info->flags & ZEND_ACC_PRIVATE) &&
-		      ce != EG(scope) &&
-			  prop_info->ce != EG(scope))) {
+		      ce != scope &&
+			  prop_info->ce != scope)) {
 			continue;
 		}
 		prop = NULL;
@@ -1180,7 +1186,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
 		if (Z_OPT_CONSTANT_P(prop)) {
-			if (UNEXPECTED(zval_update_constant_ex(prop, 0, NULL) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(prop, NULL) != SUCCESS)) {
 				return;
 			}
 		}
@@ -1195,7 +1201,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 ZEND_FUNCTION(get_class_vars)
 {
 	zend_string *class_name;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *scope;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &class_name) == FAILURE) {
 		return;
@@ -1211,8 +1217,9 @@ ZEND_FUNCTION(get_class_vars)
 				return;
 			}
 		}
-		add_class_vars(ce, 0, return_value);
-		add_class_vars(ce, 1, return_value);
+		scope = zend_get_executed_scope();
+		add_class_vars(scope, ce, 0, return_value);
+		add_class_vars(scope, ce, 1, return_value);
 	}
 }
 /* }}} */
@@ -1310,6 +1317,7 @@ ZEND_FUNCTION(get_class_methods)
 	zval *klass;
 	zval method_name;
 	zend_class_entry *ce = NULL;
+	zend_class_entry *scope;
 	zend_function *mptr;
 	zend_string *key;
 
@@ -1328,15 +1336,16 @@ ZEND_FUNCTION(get_class_methods)
 	}
 
 	array_init(return_value);
+	scope = zend_get_executed_scope();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
 
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (EG(scope) &&
+		 || (scope &&
 		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
-		       zend_check_protected(mptr->common.scope, EG(scope)))
+		       zend_check_protected(mptr->common.scope, scope))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
-		       EG(scope) == mptr->common.scope)))) {
+		       scope == mptr->common.scope)))) {
 			size_t len = ZSTR_LEN(mptr->common.function_name);
 
 			/* Do not display old-style inherited constructors */

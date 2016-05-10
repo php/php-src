@@ -1030,7 +1030,7 @@ static int preg_get_backref(char **str, int *backref)
 	}
 
 	if (in_brace) {
-		if (*walk == 0 || *walk != '}')
+		if (*walk != '}')
 			return 0;
 		else
 			walk++;

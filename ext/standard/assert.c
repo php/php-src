@@ -164,7 +164,6 @@ PHP_FUNCTION(assert)
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
-		zend_class_entry *orig_scope = EG(scope);
 
 		myeval = Z_STRVAL_P(assertion);
 
@@ -193,8 +192,6 @@ PHP_FUNCTION(assert)
 		if (ASSERTG(quiet_eval)) {
 			EG(error_reporting) = old_error_reporting;
 		}
-
-		EG(scope) = orig_scope;
 
 		convert_to_boolean(&retval);
 		val = Z_TYPE(retval) == IS_TRUE;

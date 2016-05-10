@@ -2812,18 +2812,18 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 		zval retval;
-		zend_bool props_handled = 0;
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_and_properties_init(return_value, ce, NULL);
 		if (!ce->default_properties_count && !ce->__set) {
 			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
-			props_handled = 1;
+		} else {
+			zend_merge_properties(return_value, Z_ARRVAL(dataset));
+			zval_ptr_dtor(&dataset);
 		}
 
 		if (ce->constructor) {
 			fci.size = sizeof(fci);
-			fci.function_table = &ce->function_table;
 			ZVAL_UNDEF(&fci.function_name);
 			fci.object = Z_OBJ_P(return_value);
 			fci.retval = &retval;
@@ -2840,28 +2840,18 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 					 * argument passed by reference.
 					 */
 					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
-					if (!props_handled) {
-						zval_ptr_dtor(&dataset);
-					}
 					return;
 				}
 			}
 
 			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
-			fcc.calling_scope = EG(scope);
+			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);
 			fcc.object = Z_OBJ_P(return_value);
 
 			if (zend_call_function(&fci, &fcc) == FAILURE) {
 				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
-				if (fci.params) {
-					efree(fci.params);
-				}
-				if (!props_handled) {
-					zval_ptr_dtor(&dataset);
-				}
-				return;
 			} else {
 				zval_ptr_dtor(&retval);
 			}
@@ -2870,15 +2860,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			}
 		} else if (ctor_params) {
 			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
-			if (!props_handled) {
-				zval_ptr_dtor(&dataset);
-			}
-			return;
-		}
-
-		if (!props_handled) {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset));
-			zval_ptr_dtor(&dataset);
 		}
 	}
 }

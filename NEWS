@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0
 
 - Core:
+  . Change statement and fcall extension handlers to accept frame. (Joe)
   . Implemented safe execution timeout handling, that prevents rundom crashes
     after "Maximum execution time exceeded" error. (Dmitry)
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
@@ -11,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
   . Fixed bug #71572 (String offset assignment from an empty string inserts
     null byte). (Francois)
+  . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
+    identifiers). (Andrea)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
@@ -22,6 +25,8 @@ PHP                                                                        NEWS
   . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
     decoct(), dechex(), integer operators and other conversions now always
     respect scientific notation in numeric strings. (Andrea)
+  . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
+    Pierrick)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
@@ -70,5 +75,6 @@ PHP                                                                        NEWS
   . Implemented FR #69359 (Provide a way to fetch the current environment
     variables). (Ferenc)
   . unpack() function accepts an additional optional argument $offset. (Dmitry)
+  . Implemented #51879 stream context socket option tcp_nodelay (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

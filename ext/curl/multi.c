@@ -417,6 +417,13 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 #if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
 		case CURLMOPT_MAXCONNECTS:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x071e00 /* 7.30.0 */
+		case CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE:
+		case CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE:
+		case CURLMOPT_MAX_HOST_CONNECTIONS:
+		case CURLMOPT_MAX_PIPELINE_LENGTH:
+		case CURLMOPT_MAX_TOTAL_CONNECTIONS:
+#endif
 			error = curl_multi_setopt(mh->multi, option, zval_get_long(zvalue));
 			break;
 

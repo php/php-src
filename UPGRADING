@@ -25,6 +25,8 @@ PHP 7.1 UPGRADE NOTES
     decoct(), dechex(), integer operators and other conversions now always
     respect scientific notation in numeric strings.
     (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
+  . The ASCII 0x7F Delete control character is no longer permitted in unquoted
+    identifiers in source code.
 
 - JSON:
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and

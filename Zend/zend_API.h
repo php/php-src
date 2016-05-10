@@ -43,7 +43,6 @@ typedef struct _zend_function_entry {
 
 typedef struct _zend_fcall_info {
 	size_t size;
-	HashTable *function_table;
 	zval function_name;
 	zval *retval;
 	zval *params;
@@ -468,19 +467,19 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, size_t key_len, zv
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key), __value)
 
 
-ZEND_API int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[]);
-ZEND_API int _call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation);
+ZEND_API int _call_user_function_ex(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation);
 
+#define call_user_function(function_table, object, function_name, retval_ptr, param_count, params) \
+	_call_user_function_ex(object, function_name, retval_ptr, param_count, params, 1)
 #define call_user_function_ex(function_table, object, function_name, retval_ptr, param_count, params, no_separation, symbol_table) \
-	_call_user_function_ex(function_table, object, function_name, retval_ptr, param_count, params, no_separation)
+	_call_user_function_ex(object, function_name, retval_ptr, param_count, params, no_separation)
 
 ZEND_API extern const zend_fcall_info empty_fcall_info;
 ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
 
 /** Build zend_call_info/cache from a zval*
  *
- * Caller is responsible to provide a return value, otherwise the we will crash.
- * fci->retval_ptr_ptr = NULL;
+ * Caller is responsible to provide a return value (fci->retval), otherwise the we will crash.
  * In order to pass parameters the following members need to be set:
  * fci->param_count = 0;
  * fci->params = NULL;

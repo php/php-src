@@ -3834,20 +3834,21 @@ PHP_FUNCTION(constant)
 {
 	zend_string *const_name;
 	zval *c;
+	zend_class_entry *scope;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &const_name) == FAILURE) {
 		return;
 	}
 
-	c = zend_get_constant_ex(const_name, NULL, ZEND_FETCH_CLASS_SILENT);
+	scope = zend_get_executed_scope();
+	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
 	if (c) {
-		ZVAL_COPY_VALUE(return_value, c);
+		ZVAL_DUP(return_value, c);
 		if (Z_CONSTANT_P(return_value)) {
-			if (UNEXPECTED(zval_update_constant_ex(return_value, 1, NULL) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
 				return;
 			}
 		}
-		zval_copy_ctor(return_value);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
 		RETURN_NULL();

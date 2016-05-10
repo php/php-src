@@ -871,6 +871,7 @@ zend_string *zend_resolve_non_class_name(
 
 	if (ZSTR_VAL(name)[0] == '\\') {
 		/* Remove \ prefix (only relevant if this is a string rather than a label) */
+		*is_fully_qualified = 1;
 		return zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
 	}
 
@@ -3657,6 +3658,14 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return FAILURE;
 	}
 
+	if (zend_string_equals_literal(lcname, "assert")) {
+		return zend_compile_assert(result, args, lcname, fbc);
+	}
+
+	if (CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS) {
+		return FAILURE;
+	}
+
 	if (zend_string_equals_literal(lcname, "strlen")) {
 		return zend_compile_func_strlen(result, args);
 	} else if (zend_string_equals_literal(lcname, "is_null")) {
@@ -3691,8 +3700,6 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_cufa(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "call_user_func")) {
 		return zend_compile_func_cuf(result, args, lcname);
-	} else if (zend_string_equals_literal(lcname, "assert")) {
-		return zend_compile_assert(result, args, lcname, fbc);
 	} else {
 		return FAILURE;
 	}
@@ -3769,6 +3776,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	znode obj_node, method_node;
 	zend_op *opline;
+	zend_function *fbc = NULL;
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
@@ -3792,7 +3800,20 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		SET_NODE(opline->op2, &method_node);
 	}
 
-	zend_compile_call_common(result, args_ast, NULL);
+	/* Check if this calls a known method on $this */
+	if (opline->op1_type == IS_UNUSED && opline->op2_type == IS_CONST &&
+			CG(active_class_entry) && zend_is_scope_known()) {
+		zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op2) + 1);
+		fbc = zend_hash_find_ptr(&CG(active_class_entry)->function_table, lcname);
+
+		/* We only know the exact method that is being called if it is either private or final.
+		 * Otherwise an overriding method in a child class may be called. */
+		if (fbc && !(fbc->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_FINAL))) {
+			fbc = NULL;
+		}
+	}
+
+	zend_compile_call_common(result, args_ast, fbc);
 }
 /* }}} */
 
@@ -4622,7 +4643,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	zend_ast_list *catches = zend_ast_get_list(ast->child[1]);
 	zend_ast *finally_ast = ast->child[2];
 
-	uint32_t i;
+	uint32_t i, j;
 	zend_op *opline;
 	uint32_t try_catch_offset;
 	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), catches->children, 0);
@@ -4667,34 +4688,53 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < catches->children; ++i) {
 		zend_ast *catch_ast = catches->child[i];
-		zend_ast *class_ast = catch_ast->child[0];
+		zend_ast_list *classes = zend_ast_get_list(catch_ast->child[0]);
 		zend_ast *var_ast = catch_ast->child[1];
 		zend_ast *stmt_ast = catch_ast->child[2];
 		zval *var_name = zend_ast_get_zval(var_ast);
 		zend_bool is_last_catch = (i + 1 == catches->children);
 
+		uint32_t *jmp_multicatch = safe_emalloc(sizeof(uint32_t), classes->children - 1, 0);
 		uint32_t opnum_catch;
-
-		if (!zend_is_const_default_class_ref(class_ast)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
-		}
-
-		opnum_catch = get_next_op_number(CG(active_op_array));
-		if (i == 0) {
-			CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
-		}
 
 		CG(zend_lineno) = catch_ast->lineno;
 
-		opline = get_next_op(CG(active_op_array));
-		opline->opcode = ZEND_CATCH;
-		opline->op1_type = IS_CONST;
-		opline->op1.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name_ast(class_ast));
+		for (j = 0; j < classes->children; j++) {
 
-		opline->op2_type = IS_CV;
-		opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR_P(var_name)));
-		opline->result.num = is_last_catch;
+			zend_ast *class_ast = classes->child[j];
+			zend_bool is_last_class = (j + 1 == classes->children);
+
+			if (!zend_is_const_default_class_ref(class_ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
+			}
+
+			opnum_catch = get_next_op_number(CG(active_op_array));
+			if (i == 0 && j == 0) {
+				CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = opnum_catch;
+			}
+
+			opline = get_next_op(CG(active_op_array));
+			opline->opcode = ZEND_CATCH;
+			opline->op1_type = IS_CONST;
+			opline->op1.constant = zend_add_class_name_literal(CG(active_op_array),
+					zend_resolve_class_name_ast(class_ast));
+
+			opline->op2_type = IS_CV;
+			opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR_P(var_name)));
+
+			opline->result.num = is_last_catch && is_last_class;
+
+			if (!is_last_class) {
+				jmp_multicatch[j] = zend_emit_jump(0);
+				opline->extended_value = get_next_op_number(CG(active_op_array));
+			}
+		}
+
+		for (j = 0; j < classes->children - 1; j++) {
+			zend_update_jump_target_to_next(jmp_multicatch[j]);
+		}
+
+		efree(jmp_multicatch);
 
 		zend_compile_stmt(stmt_ast);
 
@@ -5368,15 +5408,16 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl) /* {{{ */
 {
 	zend_ast *params_ast = decl->child[0];
-	zend_string *name = decl->name, *lcname, *key;
+	zend_string *unqualified_name, *name, *lcname, *key;
 	zend_op *opline;
 
-	op_array->function_name = name = zend_prefix_with_ns(name);
-
+	unqualified_name = decl->name;
+	op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
 	lcname = zend_string_tolower(name);
 
 	if (FC(imports_function)) {
-		zend_string *import_name = zend_hash_find_ptr(FC(imports_function), lcname);
+		zend_string *import_name = zend_hash_find_ptr_lc(
+			FC(imports_function), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", ZSTR_VAL(name));
@@ -5783,7 +5824,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
-	zend_string *name, *lcname, *import_name = NULL;
+	zend_string *name, *lcname;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
@@ -5792,31 +5833,25 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	znode original_implementing_class = FC(implementing_class);
 
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
+		zend_string *unqualified_name = decl->name;
+
 		if (CG(active_class_entry)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 		}
-		name = decl->name;
-		zend_assert_valid_class_name(name);
-		lcname = zend_string_tolower(name);
-		if (FC(current_namespace)) {
-			name = zend_prefix_with_ns(name);
 
-			zend_string_release(lcname);
-			lcname = zend_string_tolower(name);
-		} else {
-			zend_string_addref(name);
-		}
+		zend_assert_valid_class_name(unqualified_name);
+		name = zend_prefix_with_ns(unqualified_name);
+		name = zend_new_interned_string(name);
+		lcname = zend_string_tolower(name);
 
 		if (FC(imports)) {
-			import_name = zend_hash_find_ptr(FC(imports), lcname);
+			zend_string *import_name = zend_hash_find_ptr_lc(
+				FC(imports), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+			if (import_name && !zend_string_equals_ci(lcname, import_name)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+						"because the name is already in use", ZSTR_VAL(name));
+			}
 		}
-
-		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-					"because the name is already in use", ZSTR_VAL(name));
-		}
-
-		name = zend_new_interned_string(name);
 	} else {
 		name = zend_generate_anon_class_name(decl->lex_pos);
 		lcname = zend_string_tolower(name);
@@ -6169,26 +6204,26 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
-		zend_string *name = zend_ast_get_str(name_ast);
+		zend_string *unqualified_name = zend_ast_get_str(name_ast);
 
-		zend_string *import_name;
+		zend_string *name;
 		znode name_node, value_node;
 		zval *value_zv = &value_node.u.constant;
 
 		value_node.op_type = IS_CONST;
 		zend_const_expr_to_zval(value_zv, value_ast);
 
-		if (zend_lookup_reserved_const(ZSTR_VAL(name), ZSTR_LEN(name))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", ZSTR_VAL(name));
+		if (zend_lookup_reserved_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot redeclare constant '%s'", ZSTR_VAL(unqualified_name));
 		}
 
-		name = zend_prefix_with_ns(name);
+		name = zend_prefix_with_ns(unqualified_name);
 		name = zend_new_interned_string(name);
 
-		if (FC(imports_const)
-			&& (import_name = zend_hash_find_ptr(FC(imports_const), name))
-		) {
-			if (!zend_string_equals(import_name, name)) {
+		if (FC(imports_const)) {
+			zend_string *import_name = zend_hash_find_ptr(FC(imports_const), unqualified_name);
+			if (import_name && !zend_string_equals(import_name, name)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
 					"the name is already in use", ZSTR_VAL(name));
 			}
@@ -7132,7 +7167,7 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 
 	/* Add a flag to INIT_ARRAY if we know this array cannot be packed */
 	if (!packed) {
-		ZEND_ASSERT(opnum_init != -1);
+		ZEND_ASSERT(opnum_init != (uint32_t)-1);
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
 	}
@@ -7396,11 +7431,11 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		while (opline != init_opline) {
 			opline--;
 			if (opline->opcode == ZEND_ROPE_ADD &&
-			    opline->result.var == -1) {
+			    opline->result.var == (uint32_t)-1) {
 				opline->op1.var = var;
 				opline->result.var = var;
 			} else if (opline->opcode == ZEND_ROPE_INIT &&
-			           opline->result.var == -1) {
+			           opline->result.var == (uint32_t)-1) {
 				opline->result.var = var;
 			}
 		}
