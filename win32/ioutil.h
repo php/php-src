@@ -137,6 +137,9 @@ __forceinline static wchar_t *php_win32_ioutil_any_to_w(const char* in)
 	mb_len = wcslen(mb);
 	/* Only prefix with long if it's needed. */
 	if (mb_len > _MAX_PATH) {
+		mb = php_win32_ioutil_normalize_path(mb, mb_len);
+		mb_len = wcslen(mb);
+
 		ret = malloc((mb_len + 1 + 4) * sizeof(wchar_t));
 		if (!ret) {
 			return NULL;
@@ -196,8 +199,6 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 	/* TODO set errno. */
 	ret = _waccess(pathw, mode);
 	PHP_WIN32_IOUTIL_CLEANUP_W();
-
-	free(pathw);
 
 	return ret;
 }
@@ -299,6 +300,8 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 	int err = 0;
 
 	if (!pathw || !modew) {
+		free(pathw);
+		free(modew);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
@@ -324,6 +327,8 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 	DWORD err = 0;
 
 	if (!oldnamew || !newnamew) {
+		free(oldnamew);
+		free(newnamew);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
@@ -384,10 +389,12 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 	if (!tmp_bufa) {
 		err = GetLastError();
 		buf = NULL;
+		free(tmp_bufw);
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return buf;
 	} else if (strlen(tmp_bufa) > len) {
 		free(tmp_bufa);
+		free(tmp_bufw);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
 		return NULL;
 	}
