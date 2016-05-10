@@ -56,6 +56,10 @@ PHP                                                                        NEWS
     timestamp). (denver at timothy dot io)
   . Fixed bug #72151 (mysqli_fetch_object changed behaviour). (Anatol)
 
+- Reflection:
+  . Fixed bug #72174 (ReflectionProperty#getValue() causes __isset call).
+    (Nikita)
+
 - Session:
   . Fixed bug #71972 (Cyclic references causing session_start(): Failed to
     decode session object). (Laruence)

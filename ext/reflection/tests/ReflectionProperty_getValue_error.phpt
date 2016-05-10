@@ -78,4 +78,6 @@ Protected property:
 Cannot access non-public member TestClass::prot
 
 Instance without property:
+
+Notice: Undefined property: AnotherClass::$pub2 in %s on line %d
 NULL
