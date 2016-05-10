@@ -482,7 +482,11 @@ static inline void accel_restart_enter(TSRMLS_D)
 #ifdef ZEND_WIN32
 	INCREMENT(restart_in);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
+# else
 	static const FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
+#endif
 
 	if (fcntl(lock_file, F_SETLK, &restart_in_progress) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(+1):  %s (%d)", strerror(errno), errno);
@@ -497,7 +501,11 @@ static inline void accel_restart_leave(TSRMLS_D)
 	ZCSG(restart_in_progress) = 0;
 	DECREMENT(restart_in);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
+# else
 	static const FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
+# endif
 
 	ZCSG(restart_in_progress) = 0;
 	if (fcntl(lock_file, F_SETLK, &restart_finished) == -1) {
@@ -535,7 +543,11 @@ static inline void accel_activate_add(TSRMLS_D)
 #ifdef ZEND_WIN32
 	INCREMENT(mem_usage);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
+# else
 	static const FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
+# endif
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_lock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
@@ -552,7 +564,11 @@ static inline void accel_deactivate_sub(TSRMLS_D)
 		ZCG(counted) = 0;
 	}
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
+# else
 	static const FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
+# endif
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(-1):  %s (%d)", strerror(errno), errno);
@@ -565,7 +581,11 @@ static inline void accel_unlock_all(TSRMLS_D)
 #ifdef ZEND_WIN32
 	accel_deactivate_sub(TSRMLS_C);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
+# else
 	static const FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
+# endif
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock_all) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
