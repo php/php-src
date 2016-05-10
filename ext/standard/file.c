@@ -1758,6 +1758,12 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
+	if (len > INT_MAX) {
+		/* string length is int in 5.x so we can not read more than int */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be no more than %d", INT_MAX);
+		RETURN_FALSE;
+	}
+
 	Z_STRVAL_P(return_value) = emalloc(len + 1);
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
