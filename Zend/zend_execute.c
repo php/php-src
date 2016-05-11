@@ -2343,31 +2343,18 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	 * though this behavior would be suboptimal, because the (rather large)
 	 * structure would have to be copied back and forth every time execution is
 	 * suspended or resumed. That's why for generators the execution context
-	 * is allocated using a separate VM stack, thus allowing to save and
-	 * restore it simply by replacing a pointer.
+	 * is allocated using a separate VM stack frame.
 	 */
 	zend_execute_data *execute_data;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
-	uint32_t call_info;
+	uint32_t used_stack = (ZEND_CALL_FRAME_SLOT + num_args + op_array->last_var + op_array->T - MIN(op_array->num_args, num_args)) * sizeof(zval);
 
-	EG(vm_stack) = zend_vm_stack_new_page(
-		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE(1)) ?
-			ZEND_VM_STACK_PAGE_SIZE(1) :
-			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(1, stack_size),
-		NULL);
-	EG(vm_stack_top) = EG(vm_stack)->top;
-	EG(vm_stack_end) = EG(vm_stack)->end;
-
-	call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
-	execute_data = zend_vm_stack_push_call_frame(
-		call_info,
-		(zend_function*)op_array,
-		num_args,
-		Z_TYPE(call->This) != IS_OBJECT ? Z_CE(call->This) : NULL,
-		Z_TYPE(call->This) == IS_OBJECT ? Z_OBJ(call->This) : NULL);
+	execute_data = (zend_execute_data*)emalloc(used_stack);
+	ZEND_SET_CALL_INFO(execute_data, Z_TYPE(call->This) == IS_OBJECT, ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS)));
+	EX(func) = (zend_function*)op_array;
+	Z_OBJ(EX(This)) = Z_OBJ(call->This);
+	ZEND_CALL_NUM_ARGS(execute_data) = num_args;
 	EX(prev_execute_data) = NULL;
-	EX_NUM_ARGS() = num_args;
 
 	/* copy arguments */
 	if (num_args > 0) {
