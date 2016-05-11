@@ -12,8 +12,8 @@ var_dump($im);
 ?>
 --EXPECTF--
 Warning: imagecreatefromxbm(): gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
- in %slibgd00094.php on line %d
+ in %slibgd00094-mb.php on line %d
 
-Warning: imagecreatefromxbm(): '%slibgd00094.xbm' is not a valid XBM file in %slibgd00094.php on line %d
+Warning: imagecreatefromxbm(): '%slibgd00094私はガラスを食べられます.xbm' is not a valid XBM file in %slibgd00094-mb.php on line %d
 bool(false)
 

@@ -4,6 +4,8 @@ Bug #66339 (PHP segfaults in imagexbm)
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
 ?>
+--XFAIL--
+libxpbm works different way linux an dwindows, to investigate
 --FILE--
 <?php
 $im = imagecreate(8, 8);
@@ -13,7 +15,7 @@ imagefilledrectangle($im, 2, 2, 6, 6, $white);
 imagexbm($im, NULL);
 echo "------------\n";
 imagexbm($im, './bug66339私はガラスを食べられます.xbm');
-echo file_get_contents('./bug66339.xbm');
+echo file_get_contents('./bug66339私はガラスを食べられます.xbm');
 ?>
 --CLEAN--
 <?php
