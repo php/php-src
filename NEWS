@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #71573 (Segfault (core dumped) if paramno beyond bound).
     (Laruence)
 
+- Standard:
+  . Fixed bug #72193 (dns_get_record returns array containing elements of
+    type 'unknown'). (Laruence)
+
 
 26 May 2016 PHP 7.0.7
 
