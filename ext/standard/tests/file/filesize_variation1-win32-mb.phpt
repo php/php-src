@@ -24,7 +24,7 @@ for($size = 1; $size <10000; $size = $size+1000)
   create_files($file_path, 1, "numeric", 0755, $size, "w", "私はガラスを食べられますfilesize_variation");
   var_dump( filesize( $file_path."/私はガラスを食べられますfilesize_variation1.tmp") );
   clearstatcache();
-  delete_files($file_path, 1, "filesize_variation");
+  delete_files($file_path, 1, "私はガラスを食べられますfilesize_variation");
 }
 
 echo "*** Done ***\n";
