@@ -14,7 +14,7 @@ var_dump(exif_read_data($infile));
 --EXPECTF--
 array(7) {
   ["FileName"]=>
-  string(12) "bug34704.jpg"
+  string(48) "bug34704私はガラスを食べられます.jpg"
   ["FileDateTime"]=>
   int(%d)
   ["FileSize"]=>
