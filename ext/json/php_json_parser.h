@@ -81,5 +81,7 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser);
 
+int php_json_yyparse(php_json_parser *parser);
+
 #endif	/* PHP_JSON_PARSER_H */
 
