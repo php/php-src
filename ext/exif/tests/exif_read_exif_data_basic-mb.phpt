@@ -21,7 +21,7 @@ print_r(read_exif_data(dirname(__FILE__).'/test2私はガラスを食べられ�
 *** Testing read_exif_data() : basic functionality ***
 Array
 (
-    [FileName] => test2.jpg
+    [FileName] => test2私はガラスを食べられます.jpg
     [FileDateTime] => %d
     [FileSize] => 1240
     [FileType] => 2

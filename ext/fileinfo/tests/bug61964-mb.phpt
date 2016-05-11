@@ -50,24 +50,24 @@ resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 bool(false)
 
-Notice: finfo_open(): Warning: offset `string' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: offset `string' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset ` Core' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: offset ` Core' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: type `Core' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: type `Core' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset ` Me' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: offset ` Me' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: type `Me' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: type `Me' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset `a' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: offset `a' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: type `a' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: type `a' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: offset `b' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: offset `b' invalid in %sbug61964-mb.php on line %d
 
-Notice: finfo_open(): Warning: type `b' invalid in %sbug61964.php on line %d
+Notice: finfo_open(): Warning: type `b' invalid in %sbug61964-mb.php on line %d
 
-Warning: finfo_open(): Failed to load magic database at '%stest-folder'. in %sbug61964.php on line %d
+Warning: finfo_open(): Failed to load magic database at '%stest-folder'. in %sbug61964-mb.php on line %d
 DONE: testing dir with files
 ===DONE===
