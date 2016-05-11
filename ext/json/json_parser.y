@@ -309,7 +309,7 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 	}
 }
 
-php_json_error_code php_json_parser_error_code(const php_json_parser *parser)
+PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser)
 {
 	return parser->scanner.errcode;
 }
@@ -326,7 +326,7 @@ static const php_json_parser_methods default_parser_methods =
 	NULL,
 };
 
-void php_json_parser_init_ex(php_json_parser *parser,
+PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 		zval *return_value,
 		char *str,
 		size_t str_len,
@@ -342,7 +342,7 @@ void php_json_parser_init_ex(php_json_parser *parser,
 	memcpy(&parser->methods, parser_methods, sizeof(php_json_parser_methods));
 }
 
-void php_json_parser_init(php_json_parser *parser,
+PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 		zval *return_value,
 		char *str,
 		size_t str_len,
@@ -357,4 +357,9 @@ void php_json_parser_init(php_json_parser *parser,
 			options,
 			max_depth,
 			&default_parser_methods);
+}
+
+PHP_JSON_API int php_json_parse(php_json_parser *parser)
+{
+	return php_json_yyparse(parser);
 }
