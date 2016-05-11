@@ -147,11 +147,10 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 
 	{
 		wchar_t *cwdw = php_win32_ioutil_any_to_w(new_state.cwd);
-		wchar_t *pathw = php_win32_ioutil_any_to_w(opened_path);
 		wchar_t *pfxw = php_win32_ioutil_any_to_w(pfx);
-		if (!cwdw || !pathw || !pfxw) {
+		wchar_t pathw[MAXPATHLEN];
+		if (!cwdw || !pfxw) {
 			free(cwdw);
-			free(pathw);
 			free(pfxw);
 			efree(new_state.cwd);
 			return -1;
@@ -162,7 +161,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 			size_t tmp_len;
 			if (!tmp) {
 				free(cwdw);
-				free(pathw);
 				free(pfxw);
 				efree(new_state.cwd);
 				return -1;
@@ -178,7 +176,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 			 * which means that opening it will fail... */
 			if (VCWD_CHMOD(opened_path, 0600)) {
 				free(cwdw);
-				free(pathw);
 				free(pfxw);
 				efree(new_state.cwd);
 				return -1;
@@ -187,7 +184,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		}
 
 		free(cwdw);
-		free(pathw);
 		free(pfxw);
 	}
 
@@ -239,14 +235,22 @@ PHPAPI const char* php_get_temporary_directory(void)
 	 * the environment values TMP and TEMP (in order) first.
 	 */
 	{
-		char sTemp[MAX_PATH];
-		DWORD len = GetTempPath(sizeof(sTemp),sTemp);
+		wchar_t sTemp[MAXPATHLEN];
+		char *tmp;
+		DWORD len = GetTempPathW(MAXPATHLEN, sTemp);
 		assert(0 < len);  /* should *never* fail! */
-		if (sTemp[len - 1] == DEFAULT_SLASH) {
-			PG(php_sys_temp_dir) = estrndup(sTemp, len - 1);
-		} else {
-			PG(php_sys_temp_dir) = estrndup(sTemp, len);
+
+		if (NULL == (tmp = php_win32_ioutil_w_to_any(sTemp))) {
+			return NULL;
 		}
+		len = (DWORD)strlen(tmp);
+
+		if (tmp[len - 1] == DEFAULT_SLASH) {
+			PG(php_sys_temp_dir) = estrndup(tmp, len - 1);
+		} else {
+			PG(php_sys_temp_dir) = estrndup(tmp, len);
+		}
+		free(tmp);
 		return PG(php_sys_temp_dir);
 	}
 #else
