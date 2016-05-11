@@ -65,7 +65,7 @@ echo "\n---Done---";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink("$file_path/stat_basic/stat_basic_私はガラスを食べられます.tmp");
+unlink("$file_path/stat_basic_私はガラスを食べられます/stat_basic_私はガラスを食べられます.tmp");
 rmdir("$file_path/stat_basic_私はガラスを食べられます");
 ?>
 --EXPECTF--

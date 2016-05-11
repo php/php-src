@@ -16,7 +16,7 @@ echo "*** Testing readdir() : usage variations ***\n";
 
 // include the file.inc for Function: function create_files()
 chdir(dirname(__FILE__));
-include(dirname(__FILE__)."/../私はガラスを食べられますfile/私はガラスを食べられますfile.inc");
+include(dirname(__FILE__)."/../file/file.inc");
 
 $path_top = dirname(__FILE__) . '/readdir_variation3';
 $path_sub = $path_top . '/私はガラスを食べられますsub_folder';
@@ -46,7 +46,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$path_top = dirname(__FILE__) . '/私はガラスを食べられますreaddir_variation3';
+$path_top = dirname(__FILE__) . '/readdir_variation3';
 $path_sub = $path_top . '/私はガラスを食べられますsub_folder';
 rmdir($path_sub);
 rmdir($path_top);
@@ -63,6 +63,6 @@ array(5) {
   [3]=>
   string(9) "file2.tmp"
   [4]=>
-  string(10) "sub_folder"
+  string(46) "私はガラスを食べられますsub_folder"
 }
 ===DONE===

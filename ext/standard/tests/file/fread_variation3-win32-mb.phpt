@@ -68,7 +68,7 @@ foreach($file_content_types as $file_content_type) {
        create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "私はガラスを食べられますfread_variation", 3);
     }
     
-    $filename = dirname(__FILE__)."/fread_variation3.tmp"; // this is name of the file created by create_files()
+    $filename = dirname(__FILE__)."/私はガラスを食べられますfread_variation3.tmp"; // this is name of the file created by create_files()
     echo "-- File opened in mode ".$file_mode." --\n";
     $file_handle = fopen($filename, $file_mode);
     if (!$file_handle) {

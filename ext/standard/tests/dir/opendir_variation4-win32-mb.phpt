@@ -25,7 +25,7 @@ $level_two_dir_path = "$base_dir_path/$level_one_dir_name/$level_two_dir_name";
 mkdir($level_one_dir_path);
 mkdir($level_two_dir_path);
 
-echo "\n-- \$path = './level_one': --\n";
+echo "\n-- \$path = './私はガラスを食べられますlevel_one': --\n";
 var_dump(chdir($base_dir_path));
 var_dump($dh = opendir("./$level_one_dir_name"));
 clean_dh($dh);

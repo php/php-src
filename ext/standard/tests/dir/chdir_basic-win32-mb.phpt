@@ -37,8 +37,9 @@ var_dump(getcwd());
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-rmdir("$file_path/level_one/level_two");
-rmdir("$file_path/level_one");
+chdir($file_path);
+rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
+rmdir("$file_path/私はガラスを食べられますlevel_one");
 ?>
 --EXPECTF--
 *** Testing chdir() : basic functionality ***

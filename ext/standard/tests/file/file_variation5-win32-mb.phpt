@@ -32,8 +32,8 @@ var_dump(file("../$filename"));
 chdir($script_directory);
 
 chdir($script_directory);
-rmdir($test_dirname);
 unlink($filepath);
+rmdir($test_dirname);
 
 ?>
 --EXPECT--

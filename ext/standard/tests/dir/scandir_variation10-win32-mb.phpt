@@ -19,12 +19,12 @@ printf("SCANDIR_SORT_NONE: %d\n", SCANDIR_SORT_NONE);
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include(dirname(__FILE__) . '/../私はガラスを食べられますfile/私はガラスを食べられますfile.inc');
+include(dirname(__FILE__) . '/../file/file.inc');
 
 // create directory and files
 $dir = dirname(__FILE__) . '/私はガラスを食べられますscandir_variation10';
 mkdir($dir);
-@create_files($dir, 2);
+@create_files($dir, 2, "numeric", 0755, 1, "w", "私はガラスを食べられますfile");
 
 // Deterministic tests.
 var_dump(scandir($dir, SCANDIR_SORT_ASCENDING));
@@ -35,10 +35,10 @@ $files = scandir($dir, SCANDIR_SORT_NONE);
 var_dump(count($files));
 var_dump(in_array('.', $files));
 var_dump(in_array('..', $files));
-var_dump(in_array('file1.tmp', $files));
-var_dump(in_array('file2.tmp', $files));
+var_dump(in_array('私はガラスを食べられますfile1.tmp', $files));
+var_dump(in_array('私はガラスを食べられますfile2.tmp', $files));
 
-delete_files($dir, 2);
+delete_files($dir, 2, "私はガラスを食べられますfile");
 ?>
 ===DONE===
 --CLEAN--
@@ -57,15 +57,15 @@ array(4) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(9) "私はガラスを食べられますfile1.tmp"
+  string(45) "私はガラスを食べられますfile1.tmp"
   [3]=>
-  string(9) "私はガラスを食べられますfile2.tmp"
+  string(45) "私はガラスを食べられますfile2.tmp"
 }
 array(4) {
   [0]=>
-  string(9) "私はガラスを食べられますfile2.tmp"
+  string(45) "私はガラスを食べられますfile2.tmp"
   [1]=>
-  string(9) "私はガラスを食べられますfile1.tmp"
+  string(45) "私はガラスを食べられますfile1.tmp"
   [2]=>
   string(2) ".."
   [3]=>

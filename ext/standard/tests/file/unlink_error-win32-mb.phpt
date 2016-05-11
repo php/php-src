@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description : Deletes filename
 */
 
-$file_path = dirname(__FILE__).PATH_SEPARATOR."私はガラスを食べられます";
+$file_path = dirname(__FILE__).DIRECTORY_SEPARATOR."私はガラスを食べられます";
 
 @mkdir($file_path);
 
@@ -63,8 +63,9 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/unlink_error.tmp");
-rmdir(dirname(__FILE__)."/unlink_error");
+unlink(dirname(__FILE__)."/私はガラスを食べられます/unlink_error.tmp");
+rmdir(dirname(__FILE__)."/私はガラスを食べられます/unlink_error");
+rmdir(dirname(__FILE__)."/私はガラスを食べられます");
 ?>
 --EXPECTF--
 *** Testing unlink() : error conditions ***

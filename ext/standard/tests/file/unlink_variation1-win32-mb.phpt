@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 */
 
 
-$file_path = dirname(__FILE__).PATH_SEPARATOR."私はガラスを食べられます";
+$file_path = dirname(__FILE__).DIRECTORY_SEPARATOR."私はガラスを食べられます";
 @mkdir($file_path);
 
 // temp dir name used here
@@ -65,6 +65,7 @@ var_dump( unlink($filename) );
 var_dump( file_exists($filename) );  // confirm file is deleted
 // remove temp dir
 rmdir($dirname);
+rmdir($file_path);
 
 echo "Done\n";
 ?>

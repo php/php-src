@@ -51,7 +51,7 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
 	echo "\n-- Iteration $iterator --\n";
 	$handle = "fp{$iterator}";
-	var_dump( $$handle = fopen(@"$dir_path私はガラスを食べられます$input.tmp", 'w') );
+	var_dump( $$handle = @fopen($dir_path . "私はガラスを食べられます$input.tmp", 'w') );
 	var_dump( fwrite($$handle, $key));
 	fclose($$handle);
 	$iterator++;
@@ -143,36 +143,36 @@ int(2)
 -- Call to readdir() --
 array(16) {
   [0]=>
-  string(9) "私はガラスを食べられます-10.5.tmp"
-  [1]=>
-  string(9) "私はガラスを食べられます-2345.tmp"
-  [2]=>
   string(1) "."
-  [3]=>
+  [1]=>
   string(2) ".."
+  [2]=>
+  string(45) "私はガラスを食べられます-10.5.tmp"
+  [3]=>
+  string(45) "私はガラスを食べられます-2345.tmp"
   [4]=>
-  string(4) "私はガラスを食べられます.tmp"
+  string(40) "私はガラスを食べられます.tmp"
   [5]=>
-  string(7) "私はガラスを食べられます0.5.tmp"
+  string(43) "私はガラスを食べられます0.5.tmp"
   [6]=>
-  string(5) "私はガラスを食べられます0.tmp"
+  string(41) "私はガラスを食べられます0.tmp"
   [7]=>
-  string(17) "私はガラスを食べられます1.23456789E-9.tmp"
+  string(53) "私はガラスを食べられます1.23456789E-9.tmp"
   [8]=>
-  string(5) "私はガラスを食べられます1.tmp"
+  string(41) "私はガラスを食べられます1.tmp"
   [9]=>
-  string(8) "私はガラスを食べられます10.5.tmp"
+  string(44) "私はガラスを食べられます10.5.tmp"
   [10]=>
-  string(9) "私はガラスを食べられます12345.tmp"
+  string(45) "私はガラスを食べられます12345.tmp"
   [11]=>
-  string(16) "私はガラスを食べられます123456789000.tmp"
+  string(52) "私はガラスを食べられます123456789000.tmp"
   [12]=>
-  string(9) "私はガラスを食べられますArray.tmp"
+  string(45) "私はガラスを食べられますArray.tmp"
   [13]=>
-  string(15) "私はガラスを食べられますdouble_file.tmp"
+  string(51) "私はガラスを食べられますdouble_file.tmp"
   [14]=>
-  string(11) "私はガラスを食べられますhd_file.tmp"
+  string(47) "私はガラスを食べられますhd_file.tmp"
   [15]=>
-  string(15) "私はガラスを食べられますsingle_file.tmp"
+  string(51) "私はガラスを食べられますsingle_file.tmp"
 }
 ===DONE===

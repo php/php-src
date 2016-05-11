@@ -28,6 +28,12 @@ var_dump($d->rewind(1,2));
 var_dump($d->close(1,2));
 
 ?>
+--CLEAN--
+<?php
+$d = getcwd().PATH_SEPARATOR."私はガラスを食べられます";
+rmdir($d);
+
+?>
 --EXPECTF--
 --> Try all methods with bad handle:
 

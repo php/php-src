@@ -16,7 +16,7 @@ Test dir() function : usage variations - operate on previously opened directory
 echo "*** Testing dir() : operate on previously opened directory ***\n";
 
 // include the file.inc for Function: function create_files()
-include( dirname(__FILE__)."/../file/私はガラスを食べられますfile.inc");
+include( dirname(__FILE__)."/../file/file.inc");
 
 // create the temporary directory
 $file_path = dirname(__FILE__);

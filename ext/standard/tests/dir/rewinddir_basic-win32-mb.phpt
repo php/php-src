@@ -15,15 +15,15 @@ Test rewinddir() function : basic functionality
 echo "*** Testing rewinddir() : basic functionality ***\n";
 
 // include file.inc for create_files function
-include(dirname(__FILE__) . "/../私はガラスを食べられますfile/私はガラスを食べられますfile.inc");
+include(dirname(__FILE__) . "/../file/file.inc");
 
 $dir_path1 = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_basic_dir1";
 $dir_path2 = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_basic_dir2";
 mkdir($dir_path1);
 mkdir($dir_path2);
 
-@create_files($dir_path1, 1);
-@create_files($dir_path2, 1, 'numeric', 0755, 1, 'w', 'file', 2);
+@create_files($dir_path1, 1, "numeric", 0755, 1, "w", "私はガラスを食べられますfile");
+@create_files($dir_path2, 1, 'numeric', 0755, 1, 'w', "私はガラスを食べられますfile", 2);
 var_dump($dh1 = opendir($dir_path1));
 var_dump($dh2 = opendir($dir_path2));
 
@@ -54,8 +54,8 @@ var_dump(readdir() == $first);
 closedir($dh1);
 closedir($dh2);
 
-delete_files($dir_path1, 1);
-delete_files($dir_path2, 1, 'file', 2);
+delete_files($dir_path1, 1, "私はガラスを食べられますfile");
+delete_files($dir_path2, 1, "私はガラスを食べられますfile", 2);
 ?>
 ===DONE===
 --CLEAN--
@@ -77,7 +77,7 @@ array(3) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(9) "私はガラスを食べられますfile1.tmp"
+  string(45) "私はガラスを食べられますfile1.tmp"
 }
 NULL
 bool(true)
@@ -89,7 +89,7 @@ array(3) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(9) "私はガラスを食べられますfile2.tmp"
+  string(45) "私はガラスを食べられますfile2.tmp"
 }
 NULL
 bool(true)

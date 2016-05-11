@@ -11,7 +11,7 @@ Test dir() function : basic functionality
 echo "*** Testing dir() : basic functionality ***\n";
 
 // include the file.inc for Function: function create_files()
-include(dirname(__FILE__)."/../file/私はガラスを食べられますfile.inc");
+include(dirname(__FILE__)."/../file/file.inc");
 
 // create the temporary directory
 $file_path = dirname(__FILE__);
@@ -42,7 +42,7 @@ echo "\nTest read after closing the dir:";
 var_dump( $d->read() );
 
 // delete temp files
-delete_files($dir_path, 3, "dir_basic", 1, ".tmp");
+delete_files($dir_path, 3, "私はガラスを食べられますdir_basic", 1, ".tmp");
 echo "Done";
 ?>
 --CLEAN--
@@ -75,12 +75,12 @@ Close directory:
 NULL
 object(Directory)#%d (2) {
   ["path"]=>
-  string(%d) "%s/dir_basic"
+  string(%d) "%s私はガラスを食べられますdir_basic"
   ["handle"]=>
   resource(%d) of type (Unknown)
 }
 
 Test read after closing the dir:
-Warning: Directory::read(): %d is not a valid Directory resource in %s on line %d
+Warning: Directory::read(): %s is not a valid Directory resource in %s on line %d
 bool(false)
 Done

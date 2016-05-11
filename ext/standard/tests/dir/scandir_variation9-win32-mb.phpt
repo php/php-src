@@ -15,12 +15,12 @@ Test scandir() function : usage variations - different ints as $sorting_order ar
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include(dirname(__FILE__) . '/../私はガラスを食べられますfile/私はガラスを食べられますfile.inc');
+include(dirname(__FILE__) . '/../file/file.inc');
 
 // create directory and files
 $dir = dirname(__FILE__) . '/私はガラスを食べられますscandir_variation9';
 mkdir($dir);
-@create_files($dir, 2);
+@create_files($dir, 2, "numeric", 0755, 1, "w", "私はガラスを食べられますfile");
 
 // different ints to pass as $sorting_order argument
 $ints = array (PHP_INT_MAX, -PHP_INT_MAX, 0);
@@ -29,7 +29,7 @@ foreach($ints as $sorting_order) {
 	var_dump( scandir($dir, $sorting_order) );
 }
 
-delete_files($dir, 2);
+delete_files($dir, 2, "私はガラスを食べられますfile");
 ?>
 ===DONE===
 --CLEAN--
@@ -41,9 +41,9 @@ rmdir($dir);
 *** Testing scandir() : usage variations ***
 array(4) {
   [0]=>
-  string(9) "私はガラスを食べられますfile2.tmp"
+  string(45) "私はガラスを食べられますfile2.tmp"
   [1]=>
-  string(9) "私はガラスを食べられますfile1.tmp"
+  string(45) "私はガラスを食べられますfile1.tmp"
   [2]=>
   string(2) ".."
   [3]=>
@@ -51,9 +51,9 @@ array(4) {
 }
 array(4) {
   [0]=>
-  string(9) "私はガラスを食べられますfile2.tmp"
+  string(45) "私はガラスを食べられますfile2.tmp"
   [1]=>
-  string(9) "私はガラスを食べられますfile1.tmp"
+  string(45) "私はガラスを食べられますfile1.tmp"
   [2]=>
   string(2) ".."
   [3]=>
@@ -65,8 +65,8 @@ array(4) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(9) "私はガラスを食べられますfile1.tmp"
+  string(45) "私はガラスを食べられますfile1.tmp"
   [3]=>
-  string(9) "私はガラスを食べられますfile2.tmp"
+  string(45) "私はガラスを食べられますfile2.tmp"
 }
 ===DONE===

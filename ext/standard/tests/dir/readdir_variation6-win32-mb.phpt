@@ -15,7 +15,7 @@ Test readdir() function : usage variations - operate on previously opened direct
 echo "*** Testing readdir() : usage variations ***\n";
 
 // include the file.inc for Function: function create_files()
-include( dirname(__FILE__)."/../私はガラスを食べられますfile/私はガラスを食べられますfile.inc");
+include( dirname(__FILE__)."/../file/file.inc");
 
 // create the temporary directory
 $dir_path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_variation6";
@@ -67,14 +67,14 @@ rmdir($dir_path);
 -- Reading Directory Contents with Previous Handle --
 string(1) "."
 string(2) ".."
-string(23) "私はガラスを食べられますreaddir_variation61.tmp"
-string(23) "私はガラスを食べられますreaddir_variation62.tmp"
-string(23) "私はガラスを食べられますreaddir_variation63.tmp"
+string(59) "私はガラスを食べられますreaddir_variation61.tmp"
+string(59) "私はガラスを食べられますreaddir_variation62.tmp"
+string(59) "私はガラスを食べられますreaddir_variation63.tmp"
 
 -- Reading Directory Contents with Current Handle (no arguments supplied) --
 string(1) "."
 string(2) ".."
-string(23) "私はガラスを食べられますreaddir_variation61.tmp"
-string(23) "私はガラスを食べられますreaddir_variation62.tmp"
-string(23) "私はガラスを食べられますreaddir_variation63.tmp"
+string(59) "私はガラスを食べられますreaddir_variation61.tmp"
+string(59) "私はガラスを食べられますreaddir_variation62.tmp"
+string(59) "私はガラスを食べられますreaddir_variation63.tmp"
 ===DONE===

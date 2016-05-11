@@ -31,7 +31,7 @@ class object_temp {
     $this->filename = $file;
   }
 }
-$obj1 = new object_temp("$name_prefix/realpath_variation_私はガラスを食べられます/../././realpath_variation_私はガラスを食べられます/home/tests/realpath_variation.tmp");
+$obj1 = new object_temp("$name_prefix/realpath_variation_私はガラスを食べられます/../././realpath_variation_私はガラスを食べられます/home/tests/realpath_variation_私はガラスを食べられます.tmp");
 $obj2 = new object_temp("$name_prefix/realpath_variation_私はガラスを食べられます/home/..///realpath_variation_私はガラスを食べられます.tmp");
 
 var_dump( realpath($obj1->filename) );
@@ -79,11 +79,11 @@ rmdir("$name_prefix/");
 *** Testing realpath(): usage variations ***
 
 *** Testing realpath() with filename stored inside a object ***
-string(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
+string(%d) "%s\realpath_variation_私はガラスを食べられます\home\tests\realpath_variation_私はガラスを食べられます.tmp"
 bool(false)
 
 *** Testing realpath() with filename stored in an array ***
-string(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
+string(%d) "%s\realpath_variation_私はガラスを食べられます\home\tests\realpath_variation_私はガラスを食べられます.tmp"
 bool(false)
 
 *** Testing realpath() with filename as empty string, NULL and single space ***

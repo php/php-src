@@ -74,8 +74,8 @@ echo "\n*** Done ***";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink("$file_path/stat_variation1a.tmp");
-rmdir("$file_path/stat_variation1a");
+unlink("$file_path/stat_variation1a_私はガラスを食べられます.tmp");
+rmdir("$file_path/stat_variation1a_私はガラスを食べられます");
 ?>
 --EXPECTF--
 *** Testing stat(): on file and directory ater renaming them ***

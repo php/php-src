@@ -15,7 +15,7 @@ echo "*** Testing readdir() : basic functionality ***\n";
 
 // include the file.inc for Function: function create_files()
 chdir(dirname(__FILE__));
-include(dirname(__FILE__)."/../file/私はガラスを食べられますfile.inc");
+include(dirname(__FILE__)."/../file/file.inc");
 
 $path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_basic';
 mkdir($path);

@@ -11,75 +11,78 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 chdir(dirname(__FILE__));
-@unlink('test_私はガラスを食べられます.file');
-if (file_exists('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file exists\n";
+
+$fname = 'test_私はガラスを食べられます.file';
+
+@unlink($fname);
+if (file_exists($fname)) {
+    echo "$fname exists\n";
 } else {
-    echo "test_私はガラスを食べられます.file does not exist\n";
+    echo "$fname does not exist\n";
 }
-fclose (fopen('test_私はガラスを食べられます.file', 'w'));
-chmod ('test_私はガラスを食べられます.file', 0744);
-if (file_exists('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file exists\n";
+fclose (fopen($fname, 'w'));
+chmod ($fname, 0744);
+if (file_exists($fname)) {
+    echo "$fname exists\n";
 } else {
-    echo "test_私はガラスを食べられます.file does not exist\n";
+    echo "$fname does not exist\n";
 }
-if (is_link('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file is a symlink\n";
+if (is_link($fname)) {
+    echo "$fname is a symlink\n";
 } else {
-    echo "test_私はガラスを食べられます.file is not a symlink\n";
+    echo "$fname is not a symlink\n";
 }
-if (file_exists('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file exists\n";
+if (file_exists($fname)) {
+    echo "$fname exists\n";
 } else {
-    echo "test_私はガラスを食べられます.file does not exist\n";
+    echo "$fname does not exist\n";
 }
-$s = stat ('test_私はガラスを食べられます.file');
-$ls = lstat ('test_私はガラスを食べられます.file');
+$s = stat ($fname);
+$ls = lstat ($fname);
 for ($i = 0; $i <= 12; $i++) {
     if ($ls[$i] != $s[$i]) {
-        echo "test_私はガラスを食べられます.file lstat and stat differ at element $i\n";
+        echo "$fname lstat and stat differ at element $i\n";
     }
 }
-echo "test_私はガラスを食べられます.file is " . filetype('test_私はガラスを食べられます.file') . "\n";
-printf ("test_私はガラスを食べられます.file permissions are 0%o\n", 0777 & fileperms('test_私はガラスを食べられます.file'));
-echo "test_私はガラスを食べられます.file size is " . filesize('test_私はガラスを食べられます.file') . "\n";
-if (is_writeable('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file is writeable\n";
+echo "$fname is " . filetype($fname) . "\n";
+printf ("$fname permissions are 0%o\n", 0777 & fileperms($fname));
+echo "$fname size is " . filesize($fname) . "\n";
+if (is_writeable($fname)) {
+    echo "$fname is writeable\n";
 } else {
-    echo "test_私はガラスを食べられます.file is not writeable\n";
+    echo "$fname is not writeable\n";
 }
-if (is_readable('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file is readable\n";
+if (is_readable($fname)) {
+    echo "$fname is readable\n";
 } else {
-    echo "test_私はガラスを食べられます.file is not readable\n";
+    echo "$fname is not readable\n";
 }
-if (is_file('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file is a regular file\n";
+if (is_file($fname)) {
+    echo "$fname is a regular file\n";
 } else {
-    echo "test_私はガラスを食べられます.file is not a regular file\n";
+    echo "$fname is not a regular file\n";
 }
 if (is_dir('../file')) {
     echo "../file is a directory\n";
 } else {
     echo "../file is not a directory\n";
 }
-if (is_dir('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file is a directory\n";
+if (is_dir($fname)) {
+    echo "$fname is a directory\n";
 } else {
-    echo "test_私はガラスを食べられます.file is not a directory\n";
+    echo "$fname is not a directory\n";
 }
-unlink('test_私はガラスを食べられます.file');
-if (file_exists('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file exists (cached)\n";
+unlink($fname);
+if (file_exists($fname)) {
+    echo "$fname exists (cached)\n";
 } else {
-    echo "test_私はガラスを食べられます.file does not exist\n";
+    echo "$fname does not exist\n";
 }
 clearstatcache();
-if (file_exists('test_私はガラスを食べられます.file')) {
-    echo "test_私はガラスを食べられます.file exists\n";
+if (file_exists($fname)) {
+    echo "$fname exists\n";
 } else {
-    echo "test_私はガラスを食べられます.file does not exist\n";
+    echo "$fname does not exist\n";
 }
 ?>
 --EXPECT--

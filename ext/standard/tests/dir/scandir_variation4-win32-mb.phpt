@@ -14,7 +14,7 @@ Test scandir() function : usage variations - different relative paths
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include (dirname(__FILE__) . '/../私はガラスを食べられますfile/私はガラスを食べられますfile.inc');
+include (dirname(__FILE__) . '/../file/file.inc');
 
 $base_dir_path = dirname(__FILE__);
 
@@ -76,14 +76,14 @@ array(5) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(14) "私はガラスを食べられますlevel_one1.tmp"
+  string(50) "私はガラスを食べられますlevel_one1.tmp"
   [3]=>
-  string(14) "私はガラスを食べられますlevel_one2.tmp"
+  string(50) "私はガラスを食べられますlevel_one2.tmp"
   [4]=>
-  string(9) "私はガラスを食べられますlevel_two"
+  string(45) "私はガラスを食べられますlevel_two"
 }
 
--- $path = 'level_one/level_two': --
+-- $path = 'level_one/私はガラスを食べられますlevel_two': --
 bool(true)
 array(4) {
   [0]=>
@@ -91,9 +91,9 @@ array(4) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(14) "私はガラスを食べられますlevel_two1.tmp"
+  string(50) "私はガラスを食べられますlevel_two1.tmp"
   [3]=>
-  string(14) "私はガラスを食べられますlevel_two2.tmp"
+  string(50) "私はガラスを食べられますlevel_two2.tmp"
 }
 
 -- $path = '..': --
@@ -104,14 +104,14 @@ array(5) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(14) "私はガラスを食べられますlevel_one1.tmp"
+  string(50) "私はガラスを食べられますlevel_one1.tmp"
   [3]=>
-  string(14) "私はガラスを食べられますlevel_one2.tmp"
+  string(50) "私はガラスを食べられますlevel_one2.tmp"
   [4]=>
-  string(9) "私はガラスを食べられますlevel_two"
+  string(45) "私はガラスを食べられますlevel_two"
 }
 
--- $path = 'level_two', '.': --
+-- $path = '私はガラスを食べられますlevel_two', '.': --
 bool(true)
 array(4) {
   [0]=>
@@ -119,9 +119,9 @@ array(4) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(14) "私はガラスを食べられますlevel_two1.tmp"
+  string(50) "私はガラスを食べられますlevel_two1.tmp"
   [3]=>
-  string(14) "私はガラスを食べられますlevel_two2.tmp"
+  string(50) "私はガラスを食べられますlevel_two2.tmp"
 }
 
 -- $path = '../': --
@@ -132,11 +132,11 @@ array(5) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(14) "私はガラスを食べられますlevel_one1.tmp"
+  string(50) "私はガラスを食べられますlevel_one1.tmp"
   [3]=>
-  string(14) "私はガラスを食べられますlevel_one2.tmp"
+  string(50) "私はガラスを食べられますlevel_one2.tmp"
   [4]=>
-  string(9) "私はガラスを食べられますlevel_two"
+  string(45) "私はガラスを食べられますlevel_two"
 }
 
 -- $path = './': --
@@ -147,12 +147,12 @@ array(4) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(14) "私はガラスを食べられますlevel_two1.tmp"
+  string(50) "私はガラスを食べられますlevel_two1.tmp"
   [3]=>
-  string(14) "私はガラスを食べられますlevel_two2.tmp"
+  string(50) "私はガラスを食べられますlevel_two2.tmp"
 }
 
--- $path = '../../'level_one': --
+-- $path = '../../'私はガラスを食べられますlevel_one': --
 bool(true)
 array(5) {
   [0]=>
@@ -160,10 +160,10 @@ array(5) {
   [1]=>
   string(2) ".."
   [2]=>
-  string(14) "私はガラスを食べられますlevel_one1.tmp"
+  string(50) "私はガラスを食べられますlevel_one1.tmp"
   [3]=>
-  string(14) "私はガラスを食べられますlevel_one2.tmp"
+  string(50) "私はガラスを食べられますlevel_one2.tmp"
   [4]=>
-  string(9) "私はガラスを食べられますlevel_two"
+  string(45) "私はガラスを食べられますlevel_two"
 }
 ===DONE===

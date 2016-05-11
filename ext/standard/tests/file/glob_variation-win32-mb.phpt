@@ -17,7 +17,8 @@ echo "*** Testing glob() : usage variations ***\n";
 $file_path = dirname(__FILE__);
 
 // temp dir created
-mkdir("$file_path/glob_variation");
+//mkdir("$file_path/glob_variation");
+mkdir("$file_path/glob_variation私はガラスを食べられます");
 mkdir("$file_path/glob_variation私はガラスを食べられます/wonder");
 
 // temp files created
@@ -326,22 +327,22 @@ array(0) {
 
 -- Iteration 8 --
 
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
 NULL
 
 -- Iteration 9 --
@@ -446,7 +447,7 @@ array(0) {
 }
 -- Iteration 8 --
 
-Warning: glob() expects parameter 1 to be a valid path, string given in %sglob_variation-win32.php on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %sglob_variation-win32-mb.php on line %d
 NULL
 -- Iteration 9 --
 array(0) {
