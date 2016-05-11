@@ -27,5 +27,5 @@ Test 8: Stream Wrapper Includes
 <html><body>bar
 a1 b1 c1 <br/> 
 a2 c2 <br/> 
-a3 b3 c3 <br/> 
+ä3 b3 c3 <br/> 
 </body></html>
