@@ -146,7 +146,7 @@ __forceinline static wchar_t *php_win32_ioutil_any_to_w(const char* in)
 		/*mb = php_win32_ioutil_normalize_path(mb, mb_len);
 		mb_len = wcslen(mb);*/
 
-		ret = malloc((mb_len + 1 + 4) * sizeof(wchar_t));
+		ret = (wchar_t *) malloc((mb_len + 1 + 4) * sizeof(wchar_t));
 		if (!ret) {
 			return NULL;
 		}
