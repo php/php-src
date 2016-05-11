@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.8
 
+- Intl
+  . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
+
 - PDO_pgsql:
   . Fixed bug #71573 (Segfault (core dumped) if paramno beyond bound).
     (Laruence)
