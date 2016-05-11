@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.8
 
+- PDO_pgsql:
+  . Fixed bug #71573 (Segfault (core dumped) if paramno beyond bound).
+    (Laruence)
+
 
 26 May 2016 PHP 7.0.7
 
