@@ -228,14 +228,15 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 		return ret;
 	} else {
 		if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
-			real_path = (char *)malloc(MAX_PATH);
+			real_path = (char *)malloc(MAXPATHLEN);
 			if(tsrm_realpath(pathname, real_path) == NULL) {
 				goto Finished;
 			}
 			pathname = real_path;
+			PHP_WIN32_IOUTIL_REINIT_W(pathname);
  		}
 
-		if(php_win32_ioutil_access_cond(pathname, mode)) {
+		if(php_win32_ioutil_access(pathname, mode)) {
 			PHP_WIN32_IOUTIL_CLEANUP_W();
 			free(real_path);
 			return errno;
@@ -299,10 +300,11 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 			if(bucket == NULL && real_path == NULL) {
 				/* We used the pathname directly. Call tsrm_realpath */
 				/* so that entry is created in realpath cache */
-				real_path = (char *)malloc(MAX_PATH);
+				real_path = (char *)malloc(MAXPATHLEN);
 				if(tsrm_realpath(pathname, real_path) != NULL) {
 					pathname = real_path;
 					bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
+					PHP_WIN32_IOUTIL_REINIT_W(pathname);
 				}
 			}
  		}
@@ -339,13 +341,13 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 		}
 
 		/* Get size of security buffer. Call is expected to fail */
-		if(GetFileSecurity(pathname, sec_info, NULL, 0, &sec_desc_length)) {
+		if(GetFileSecurityW(pathw, sec_info, NULL, 0, &sec_desc_length)) {
 			goto Finished;
 		}
 
 		psec_desc = (BYTE *)malloc(sec_desc_length);
 		if(psec_desc == NULL ||
-			 !GetFileSecurity(pathname, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
+			 !GetFileSecurityW(pathw, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
 			goto Finished;
 		}
 
