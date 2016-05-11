@@ -145,14 +145,50 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 
 #ifdef PHP_WIN32
 
-	if (GetTempFileName(new_state.cwd, pfx, 0, opened_path)) {
-		/* Some versions of windows set the temp file to be read-only,
-		 * which means that opening it will fail... */
-		if (VCWD_CHMOD(opened_path, 0600)) {
+	{
+		wchar_t *cwdw = php_win32_ioutil_any_to_w(new_state.cwd);
+		wchar_t *pathw = php_win32_ioutil_any_to_w(opened_path);
+		wchar_t *pfxw = php_win32_ioutil_any_to_w(pfx);
+		if (!cwdw || !pathw || !pfxw) {
+			free(cwdw);
+			free(pathw);
+			free(pfxw);
 			efree(new_state.cwd);
 			return -1;
 		}
-		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
+
+		if (GetTempFileNameW(cwdw, pfxw, 0, pathw)) {
+			char *tmp = php_win32_ioutil_w_to_any(pathw);
+			size_t tmp_len;
+			if (!tmp) {
+				free(cwdw);
+				free(pathw);
+				free(pfxw);
+				efree(new_state.cwd);
+				return -1;
+			}
+
+			tmp_len = strlen(tmp);
+
+			memmove(opened_path, tmp, tmp_len);
+			opened_path[tmp_len] = '\0';
+			free(tmp);
+
+			/* Some versions of windows set the temp file to be read-only,
+			 * which means that opening it will fail... */
+			if (VCWD_CHMOD(opened_path, 0600)) {
+				free(cwdw);
+				free(pathw);
+				free(pfxw);
+				efree(new_state.cwd);
+				return -1;
+			}
+			fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
+		}
+
+		free(cwdw);
+		free(pathw);
+		free(pfxw);
 	}
 
 #elif defined(HAVE_MKSTEMP)
