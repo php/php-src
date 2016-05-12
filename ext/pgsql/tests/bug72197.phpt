@@ -28,7 +28,7 @@ pg_close($conn);
 ?>
 ==DONE==
 --EXPECTF--
-Warning: pg_lo_create(): supplied resource is not a valid PostgreSQL link resource in %sbug72197.php on line %d
+Warning: pg_lo_create(): supplied resource is not a valid PostgreSQL link resource in %sbug72197.php on line %d%w
 int(%d)
 int(%d)
 ==DONE==
