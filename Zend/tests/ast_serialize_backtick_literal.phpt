@@ -8,4 +8,4 @@ zend.assertions=1
 assert_options(ASSERT_WARNING);
 assert(false && `echo -n ""`);
 --EXPECTF--
-Warning: assert(): assert(false && `echo -n ""`) failed in %s/ast_serialize_backtick_literal.php on line 4
+Warning: assert(): assert(false && `echo -n ""`) failed in %s%east_serialize_backtick_literal.php on line %d
