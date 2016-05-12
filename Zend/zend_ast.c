@@ -1217,7 +1217,11 @@ simple_list:
 			if (ast->child[0]->kind == ZEND_AST_ENCAPS_LIST) {
 				zend_ast_export_encaps_list(str, '`', (zend_ast_list*)ast->child[0], indent);
 			} else {
-				zend_ast_export_ex(str, ast->child[0], 0, indent);
+				zval *zv;
+				ZEND_ASSERT(ast->child[0]->kind == ZEND_AST_ZVAL);
+				zv = zend_ast_get_zval(ast->child[0]);
+				ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+				zend_ast_export_qstr(str, '`', Z_STR_P(zv));
 			}
 			smart_str_appendc(str, '`');
 			break;
