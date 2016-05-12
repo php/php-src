@@ -2544,7 +2544,7 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		if (ast->kind != ZEND_AST_ZVAL
 			&& CG(active_op_array)->scope && CG(active_op_array)->this_var == (uint32_t)-1
 		) {
-			zend_string *key = zend_string_init("this", sizeof("this") - 1, 0);
+			zend_string *key = CG(known_strings)[ZEND_STR_THIS];
 			CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key);
 		}
 	}

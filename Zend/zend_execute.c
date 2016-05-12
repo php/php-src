@@ -2227,7 +2227,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
-		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+		if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))--;
 		}
 	}
@@ -2256,7 +2256,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
-			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+			if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
 				GC_REFCOUNT(Z_OBJ(EX(This)))--;
 			}
 		}

@@ -523,6 +523,9 @@ static void accel_use_shm_interned_strings(void)
 		s[1] = 0;
 		CG(one_char_string)[j] = accel_new_interned_string(zend_string_init(s, 1, 0));
 	}
+	for (j = 0; j < CG(known_strings_count); j++) {
+		CG(known_strings)[j] = accel_new_interned_string(CG(known_strings)[j]);
+	}
 
 	/* function table hash keys */
 	for (idx = 0; idx < CG(function_table)->nNumUsed; idx++) {

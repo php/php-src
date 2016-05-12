@@ -1019,7 +1019,7 @@ function_call:
 
 class_name:
 		T_STATIC
-			{ zval zv; ZVAL_STRINGL(&zv, "static", sizeof("static")-1);
+			{ zval zv; ZVAL_INTERNED_STR(&zv, CG(known_strings)[ZEND_STR_STATIC]);
 			  $$ = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$ = $1; }
 ;
