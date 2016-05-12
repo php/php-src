@@ -71,8 +71,8 @@ echo "Done\n";
 7
 Destroyed
 
-Fatal error: Uncaught Error: Using $this when not in object context in %sclosure_005.php:28
-Stack trace:
-#0 %s(%d): A::{closure}()
-#1 {main}
-  thrown in %sclosure_005.php on line 28
+Notice: Undefined variable: this in %s on line %d
+
+Notice: Trying to get property of non-object in %s on line %d
+
+Done

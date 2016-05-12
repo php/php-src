@@ -13,10 +13,4 @@ call_user_func(array('foo', 'teste'));
 
 ?>
 --EXPECTF--
-Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
-
-Fatal error: Uncaught Error: Using $this when not in object context in %s:%d
-Stack trace:
-#0 %s(%d): foo::teste()
-#1 {main}
-  thrown in %s on line %d
+Warning: call_user_func() expects parameter 1 to be a valid callback, non-static method foo::teste() cannot be called statically in %s on line %d

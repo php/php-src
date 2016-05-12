@@ -87,9 +87,11 @@ static zend_bool zend_valid_closure_binding(
 					ZSTR_VAL(Z_OBJCE_P(newthis)->name));
 			return 0;
 		}
-	} else if (!(func->common.fn_flags & ZEND_ACC_STATIC) && func->common.scope
-			&& func->type == ZEND_INTERNAL_FUNCTION) {
-		zend_error(E_WARNING, "Cannot unbind $this of internal method");
+	} else if (is_fake_closure && func->common.scope
+			&& !(func->common.fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_ALLOW_STATIC))) {
+		zend_error(E_WARNING, "Cannot unbind $this of method %s::%s()",
+				ZSTR_VAL(func->common.scope->name),
+				ZSTR_VAL(func->common.function_name));
 		return 0;
 	}
 

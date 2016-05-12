@@ -3181,11 +3181,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_
 	SAVE_OPLINE();
 	obj = EX_CONSTANT(opline->op1);
 
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		HANDLE_EXCEPTION();
-	}
-
 	do {
 		if (IS_CONST == IS_CONST ||
 		    (IS_CONST != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
@@ -4881,13 +4876,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_H
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_CONST == IS_CONST ||
@@ -4953,13 +4941,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = EX_CONSTANT(opline->op2);
 
 	if (IS_CONST == IS_CONST ||
@@ -5029,11 +5010,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		property = EX_CONSTANT(opline->op2);
 		container = NULL;
 
-		if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -5170,12 +5146,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 	}
 
 	object = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_CONST != IS_UNUSED) {
 		do {
@@ -5904,13 +5874,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CON
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_CONST != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -6043,13 +6006,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CO
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_CONST == IS_CONST ||
@@ -8634,13 +8590,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CV_HAND
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CONST == IS_CONST ||
@@ -8706,13 +8655,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HAN
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CONST == IS_CONST ||
@@ -8782,11 +8724,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 		container = NULL;
 
-		if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -8923,12 +8860,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 	}
 
 	object = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_CONST != IS_UNUSED) {
 		do {
@@ -9485,13 +9416,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CON
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 	if (IS_CONST != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -9624,13 +9548,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CO
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CONST == IS_CONST ||
@@ -10471,13 +10388,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_TMPVAR_
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CONST == IS_CONST ||
@@ -10544,13 +10454,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_TMPVAR
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CONST == IS_CONST ||
@@ -10621,11 +10524,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 		container = NULL;
 
-		if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 			zval_ptr_dtor_nogc(free_op2);
@@ -10762,12 +10660,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 	}
 
 	object = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_CONST != IS_UNUSED) {
 		do {
@@ -11276,13 +11168,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CON
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CONST != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -11415,13 +11300,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CO
 
 	SAVE_OPLINE();
 	container = EX_CONSTANT(opline->op1);
-
-	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CONST == IS_CONST ||
@@ -12892,13 +12770,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CONST_HAN
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_TMP_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_TMP_VAR == IS_CONST ||
@@ -12968,11 +12839,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 		property = EX_CONSTANT(opline->op2);
 		container = NULL;
 
-		if (IS_TMP_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -14114,13 +13980,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CV_HANDLE
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_TMP_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_TMP_VAR == IS_CONST ||
@@ -14190,11 +14049,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 		container = NULL;
 
-		if (IS_TMP_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -14637,13 +14491,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_TMPVAR_HA
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_TMP_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_TMP_VAR == IS_CONST ||
@@ -14714,11 +14561,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 		container = NULL;
 
-		if (IS_TMP_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 			zval_ptr_dtor_nogc(free_op2);
@@ -16733,13 +16575,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -16793,12 +16628,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_VAR != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -17167,13 +16996,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -17245,13 +17067,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -17409,13 +17224,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CONST_HAN
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_VAR == IS_CONST ||
@@ -17480,13 +17288,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
-
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
@@ -17508,11 +17310,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 	property = EX_CONSTANT(opline->op2);
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -17536,11 +17333,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 		property = EX_CONSTANT(opline->op2);
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-		if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -17567,13 +17359,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -17593,13 +17378,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -17764,13 +17542,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -17935,13 +17706,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -18106,13 +17870,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -19124,11 +18881,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDL
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = EX_CONSTANT(opline->op2);
 
 	do {
@@ -19218,11 +18970,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = EX_CONSTANT(opline->op2);
 
 	do {
@@ -19903,12 +19650,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_VAR != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -21271,13 +21012,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -21331,12 +21065,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_VAR != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -21705,13 +21433,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -21783,13 +21504,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -21947,13 +21661,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CV_HANDLE
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_VAR == IS_CONST ||
@@ -22018,13 +21725,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
@@ -22046,11 +21747,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -22074,11 +21770,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-		if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -22105,13 +21796,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -22131,13 +21815,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -22302,13 +21979,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -22473,13 +22143,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -22644,13 +22307,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -23635,11 +23291,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 	do {
@@ -23729,11 +23380,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -23906,13 +23552,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -23966,12 +23605,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_VAR != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -24342,13 +23975,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -24421,13 +24047,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -24586,13 +24205,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_TMPVAR_HA
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_VAR == IS_CONST ||
@@ -24658,13 +24270,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	zval_ptr_dtor_nogc(free_op2);
@@ -24686,11 +24292,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -24714,11 +24315,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 		container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-		if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 			zval_ptr_dtor_nogc(free_op2);
@@ -24745,13 +24341,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -24771,13 +24360,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -24942,13 +24524,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -25113,13 +24688,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -25284,13 +24852,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -26165,11 +25726,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_VAR_TMPVAR_HAND
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -26260,11 +25816,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -26365,11 +25916,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 
 	SAVE_OPLINE();
 	obj = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		HANDLE_EXCEPTION();
-	}
 
 	do {
 		if (IS_UNUSED == IS_CONST ||
@@ -26472,13 +26018,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
 
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -26532,12 +26071,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_UNUSED != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -26876,13 +26409,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -26954,13 +26480,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -27027,13 +26546,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -27098,13 +26610,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
-
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
@@ -27126,11 +26632,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 	property = EX_CONSTANT(opline->op2);
 	container = _get_obj_zval_ptr_unused(execute_data);
 
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -27150,13 +26651,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = EX_CONSTANT(opline->op2);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -27226,11 +26720,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		property = EX_CONSTANT(opline->op2);
 		container = _get_obj_zval_ptr_unused(execute_data);
 
-		if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -27257,13 +26746,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CO
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -27283,13 +26765,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -27454,13 +26929,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -27625,13 +27093,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -27796,13 +27257,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -28030,12 +27484,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_UNUSED != IS_UNUSED) {
 		do {
@@ -28439,11 +27887,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HA
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = EX_CONSTANT(opline->op2);
 
 	do {
@@ -28533,11 +27976,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HA
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = EX_CONSTANT(opline->op2);
 
 	do {
@@ -28573,13 +28011,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNU
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_UNUSED != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -28712,13 +28143,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -29162,12 +28586,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_UNUSED != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -29887,13 +29305,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
 
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -29947,12 +29358,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_UNUSED != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -30291,13 +29696,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -30369,13 +29767,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -30442,13 +29833,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HAN
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -30513,13 +29897,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
@@ -30541,11 +29919,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	container = _get_obj_zval_ptr_unused(execute_data);
 
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -30565,13 +29938,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HA
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -30641,11 +30007,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 		container = _get_obj_zval_ptr_unused(execute_data);
 
-		if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -30672,13 +30033,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -30698,13 +30052,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -30869,13 +30216,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -31040,13 +30380,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -31211,13 +30544,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -31445,12 +30771,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_UNUSED != IS_UNUSED) {
 		do {
@@ -31729,11 +31049,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDL
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 	do {
@@ -31823,11 +31138,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDL
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -31863,13 +31173,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNU
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 	if (IS_UNUSED != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -32002,13 +31305,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -32185,13 +31481,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
 
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -32245,12 +31534,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_UNUSED != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -32590,13 +31873,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -32669,13 +31945,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -32743,13 +32012,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMPVAR
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -32815,13 +32077,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	zval_ptr_dtor_nogc(free_op2);
@@ -32843,11 +32099,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	container = _get_obj_zval_ptr_unused(execute_data);
 
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -32867,13 +32118,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMPVA
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -32944,11 +32188,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 		container = _get_obj_zval_ptr_unused(execute_data);
 
-		if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 			zval_ptr_dtor_nogc(free_op2);
@@ -32975,13 +32214,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TM
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -33001,13 +32233,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -33172,13 +32397,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -33343,13 +32561,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -33514,13 +32725,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -33748,12 +32952,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_UNUSED != IS_UNUSED) {
 		do {
@@ -34033,11 +33231,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_UNUSED_TMPVAR_H
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -34128,11 +33321,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_H
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -34169,13 +33357,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNU
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_UNUSED != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -34308,13 +33489,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data);
-
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_UNUSED == IS_CONST ||
@@ -35273,11 +34447,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 
 	SAVE_OPLINE();
 	obj = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		HANDLE_EXCEPTION();
-	}
 
 	do {
 		if (IS_CV == IS_CONST ||
@@ -36731,13 +35900,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -36791,12 +35953,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_CV != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -37165,13 +36321,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -37243,13 +36392,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	do {
@@ -37574,13 +36716,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CONST_HAND
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_CV == IS_CONST ||
@@ -37645,13 +36780,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
-
 	container = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
@@ -37673,11 +36802,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 	property = EX_CONSTANT(opline->op2);
 	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -37697,13 +36821,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HAN
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = EX_CONSTANT(opline->op2);
 
 	if (IS_CV == IS_CONST ||
@@ -37773,11 +36890,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 		property = EX_CONSTANT(opline->op2);
 		container = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 
-		if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -37804,13 +36916,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = EX_CONSTANT(opline->op2);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -37843,13 +36948,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -38014,13 +37112,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -38185,13 +37276,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -38356,13 +37440,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = EX_CONSTANT(opline->op2);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -39105,12 +38182,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 
 	object = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	if (IS_CV != IS_UNUSED) {
 		do {
 			if (IS_CV == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
@@ -39456,11 +38527,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLE
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_UNSET(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = EX_CONSTANT(opline->op2);
 
 	do {
@@ -39550,11 +38616,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLE
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = EX_CONSTANT(opline->op2);
 
 	do {
@@ -39673,13 +38734,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_CV != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -39812,13 +38866,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if (IS_CV == IS_CONST ||
@@ -41024,12 +40071,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_CV != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -43385,13 +42426,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -43445,12 +42479,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_CV != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -43819,13 +42847,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -43897,13 +42918,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -44089,13 +43103,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_CONST ||
@@ -44160,13 +43167,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-
 	container = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
@@ -44188,11 +43189,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -44212,13 +43208,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLE
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_CONST ||
@@ -44288,11 +43277,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 		container = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 
-		if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 
@@ -44319,13 +43303,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -44358,13 +43335,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -44529,13 +43499,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -44700,13 +43663,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -44871,13 +43827,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -45673,12 +44622,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 
 	object = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	if (IS_CV != IS_UNUSED) {
 		do {
 			if (IS_CV == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
@@ -45966,11 +44909,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(Z
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_UNSET(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 	do {
@@ -46060,11 +44998,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(Z
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	do {
@@ -46100,13 +45033,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 	if (IS_CV != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -46239,13 +45165,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if (IS_CV == IS_CONST ||
@@ -47023,13 +45942,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -47083,12 +45995,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_dim_helper_SP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 
 	if (IS_CV != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 assign_dim_op_array:
@@ -47459,13 +46365,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -47538,13 +46437,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -47731,13 +46623,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_TMPVAR_HAN
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CV == IS_CONST ||
@@ -47803,13 +46688,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-
 	container = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	zval_ptr_dtor_nogc(free_op2);
@@ -47831,11 +46710,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
@@ -47855,13 +46729,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_TMPVAR_HA
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CV == IS_CONST ||
@@ -47932,11 +46799,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 		container = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 
-		if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			zend_throw_error(NULL, "Using $this when not in object context");
-			zval_ptr_dtor_nogc(free_op2);
-			HANDLE_EXCEPTION();
-		}
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 			zval_ptr_dtor_nogc(free_op2);
@@ -47963,13 +46825,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -48002,13 +46857,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = EX_CONSTANT((opline+1)->op1);
 
@@ -48173,13 +47021,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -48344,13 +47185,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
@@ -48515,13 +47349,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
@@ -49208,12 +48035,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 
 	object = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
 
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
-
 	if (IS_CV != IS_UNUSED) {
 		do {
 			if (IS_CV == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
@@ -49502,11 +48323,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_CV_TMPVAR_HANDL
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_UNSET(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -49597,11 +48413,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDL
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	do {
@@ -49638,13 +48449,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CV != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -49777,13 +48581,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var);
-
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if (IS_CV == IS_CONST ||
@@ -50129,11 +48926,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 
 	SAVE_OPLINE();
 	obj = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		HANDLE_EXCEPTION();
-	}
 
 	do {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -51109,13 +49901,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CONST
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = EX_CONSTANT(opline->op2);
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -51289,12 +50074,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	}
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		do {
@@ -51601,13 +50380,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_TMP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -51740,13 +50512,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = EX_CONSTANT(opline->op2);
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -53370,13 +52135,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CV_HA
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -53551,12 +52309,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		do {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
@@ -53720,13 +52472,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_TMP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -53859,13 +52604,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -54534,13 +53272,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_TMPVA
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset  = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -54716,12 +53447,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		HANDLE_EXCEPTION();
-	}
-
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		do {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
@@ -54886,13 +53611,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_TMP
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -55025,13 +53743,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		HANDLE_EXCEPTION();
-	}
-
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||

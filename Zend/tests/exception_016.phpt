@@ -11,9 +11,13 @@ try {
 $this->foo();
 ?>
 --EXPECTF--
-Exception: Using $this when not in object context in %sexception_016.php on line %d
+Notice: Undefined variable: this in %s on line %d
 
-Fatal error: Uncaught Error: Using $this when not in object context in %sexception_016.php:%d
+Exception: Call to a member function foo() on null in %s on line %d
+
+Notice: Undefined variable: this in %s on line %d
+
+Fatal error: Uncaught Error: Call to a member function foo() on null in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %sexception_016.php on line %d
+  thrown in %s on line %d

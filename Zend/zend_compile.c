@@ -2509,6 +2509,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 
 		if (zend_string_equals_literal(name, "this")) {
 			CG(active_op_array)->this_var = result->u.op.var;
+			CG(active_op_array)->fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		return SUCCESS;
 	}
@@ -2544,8 +2545,10 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		if (ast->kind != ZEND_AST_ZVAL
 			&& CG(active_op_array)->scope && CG(active_op_array)->this_var == (uint32_t)-1
 		) {
+			uint32_t orig_allow_static = CG(active_op_array)->fn_flags & ZEND_ACC_ALLOW_STATIC;
 			zend_string *key = zend_string_init("this", sizeof("this") - 1, 0);
 			CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key);
+			CG(active_op_array)->fn_flags |= orig_allow_static;
 		}
 	}
 
@@ -2638,6 +2641,11 @@ void zend_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 
 static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
 {
+	if (!CG(active_op_array)->scope) {
+		/* This would be simply a variable called $this, not a real $this */
+		return 0;
+	}
+
 	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
 		zval *name = zend_ast_get_zval(ast->child[0]);
 		return Z_TYPE_P(name) == IS_STRING && zend_string_equals_literal(Z_STR_P(name), "this");
@@ -2657,6 +2665,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
+		CG(active_op_array)->fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 	} else {
 		zend_delayed_compile_var(&obj_node, obj_ast, type);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
@@ -3685,6 +3694,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
+		CG(active_op_array)->fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 	} else {
 		zend_compile_expr(&obj_node, obj_ast);
 	}

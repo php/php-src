@@ -37,7 +37,6 @@ class Magic3 {
 }
 
 $f = array('Hello','world');
-var_dump($f('you'));
 var_dump(call_user_func($f, 'you'));
 
 printf("-----\n");
@@ -99,16 +98,7 @@ var_dump(call_user_func($f, 'you'));
 
 ?>
 --EXPECTF--
-Deprecated: Non-static method Hello::world() should not be called statically in %s on line %d
-Hello, you
-
-Notice: Undefined variable: this in %s on line %d
-NULL
-
-Deprecated: %son-static method Hello::world() should not be called statically in %s on line %d
-Hello, you
-
-Notice: Undefined variable: this in %s on line %d
+Warning: call_user_func() expects parameter 1 to be a valid callback, non-static method Hello::world() cannot be called statically in %s on line %d
 NULL
 -----
 Hello, again
