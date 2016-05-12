@@ -476,7 +476,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 {
 	FILE *stream = NULL;
 	int fno, type_len, read, mode;
-	STARTUPINFO startup;
+	STARTUPINFOW startup;
 	PROCESS_INFORMATION process;
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
@@ -484,7 +484,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	BOOL res;
 	process_pair *proc;
 	char *cmd = NULL;
-	wchar_t *cmdw = NULL, *cwdw = NULL;
+	wchar_t *cmdw = NULL, *cwdw = NULL, *envw = NULL;
 	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
@@ -540,10 +540,10 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	memset(&startup, 0, sizeof(STARTUPINFO));
+	memset(&startup, 0, sizeof(STARTUPINFOW));
 	memset(&process, 0, sizeof(PROCESS_INFORMATION));
 
-	startup.cb			= sizeof(STARTUPINFO);
+	startup.cb			= sizeof(STARTUPINFOW);
 	startup.dwFlags		= STARTF_USESTDHANDLES;
 	startup.hStdError	= GetStdHandle(STD_ERROR_HANDLE);
 
@@ -575,15 +575,28 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		}
 	}
 
+	envw = php_win32_cp_env_any_to_w(env);
+	if (envw) {
+		dwCreateFlags |= CREATE_UNICODE_ENVIRONMENT;
+	} else {
+		if (env) {
+			free(cmd);
+			free(cmdw);
+			free(cwdw);
+			return NULL;
+		}
+	}
+
 	if (asuser) {
-		res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
+		res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, envw, cwdw, &startup, &process);
 		CloseHandle(token_user);
 	} else {
-		res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwdw, (STARTUPINFOW *)&startup, &process);
+		res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, envw, cwdw, &startup, &process);
 	}
 	free(cmd);
 	free(cmdw);
 	free(cwdw);
+	free(envw);
 
 	if (!res) {
 		return NULL;
