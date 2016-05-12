@@ -798,7 +798,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	zend_ssa_block *ssa_blocks;
 	int blocks_count = ssa->cfg.blocks_count;
 	uint32_t set_size;
-	zend_bitset tmp, def, in;
+	zend_bitset def, in, phi;
 	int *var = NULL;
 	int i, j, k, changed;
 	zend_dfg dfg;
@@ -831,9 +831,12 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		zend_dump_dfg(op_array, &ssa->cfg, &dfg);
 	}
 
-	tmp = dfg.tmp;
 	def = dfg.def;
 	in  = dfg.in;
+
+	/* Reuse the "use" set, as we no longer need it */
+	phi = dfg.use;
+	zend_bitset_clear(phi, set_size * blocks_count);
 
 	/* Place e-SSA pis. This will add additional "def" points, so it must
 	 * happen before def propagation. */
@@ -843,20 +846,28 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	do {
 		changed = 0;
 		for (j = 0; j < blocks_count; j++) {
+			zend_bitset def_j = def + j * set_size, phi_j = phi + j * set_size;
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
-			if (blocks[j].predecessors_count > 1 || j == 0) {
-				zend_bitset_copy(tmp, def + (j * set_size), set_size);
-				for (k = 0; k < blocks[j].predecessors_count; k++) {
-					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
-					while (i != -1 && i != blocks[j].idom) {
-						zend_bitset_union_with_intersection(tmp, tmp, def + (i * set_size), in + (j * set_size), set_size);
-						i = blocks[i].idom;
+			if (blocks[j].predecessors_count > 1) {
+				if (blocks[j].flags & ZEND_BB_IRREDUCIBLE_LOOP) {
+					/* Prevent any values from flowing into irreducible loops by
+					   replacing all incoming values with explicit phis.  The
+					   register allocator depends on this property.  */
+					zend_bitset_union(phi_j, in + (j * set_size), set_size);
+				} else {
+					for (k = 0; k < blocks[j].predecessors_count; k++) {
+						i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
+						while (i != -1 && i != blocks[j].idom) {
+							zend_bitset_union_with_intersection(
+								phi_j, phi_j, def + (i * set_size), in + (j * set_size), set_size);
+							i = blocks[i].idom;
+						}
 					}
 				}
-				if (!zend_bitset_equal(def + (j * set_size), tmp, set_size)) {
-					zend_bitset_copy(def + (j * set_size), tmp, set_size);
+				if (!zend_bitset_subset(phi_j, def_j, set_size)) {
+					zend_bitset_union(def_j, phi_j, set_size);
 					changed = 1;
 				}
 			}
@@ -869,58 +880,39 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
 	}
-	zend_bitset_clear(tmp, set_size);
 
 	for (j = 0; j < blocks_count; j++) {
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
-		if (blocks[j].predecessors_count > 1) {
-			zend_bitset_clear(tmp, set_size);
-			if (blocks[j].flags & ZEND_BB_IRREDUCIBLE_LOOP) {
-				/* Prevent any values from flowing into irreducible loops by
-				   replacing all incoming values with explicit phis.  The
-				   register allocator depends on this property.  */
-				zend_bitset_copy(tmp, in + (j * set_size), set_size);
-			} else {
-				for (k = 0; k < blocks[j].predecessors_count; k++) {
-					i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
-					while (i != -1 && i != blocks[j].idom) {
-						zend_bitset_union_with_intersection(tmp, tmp, def + (i * set_size), in + (j * set_size), set_size);
-						i = blocks[i].idom;
-					}
-				}
-			}
+		if (!zend_bitset_empty(phi + j * set_size, set_size)) {
+			ZEND_BITSET_REVERSE_FOREACH(phi + j * set_size, set_size, i) {
+				zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
+					sizeof(zend_ssa_phi) +
+					sizeof(int) * blocks[j].predecessors_count +
+					sizeof(void*) * blocks[j].predecessors_count);
 
-			if (!zend_bitset_empty(tmp, set_size)) {
-				ZEND_BITSET_REVERSE_FOREACH(tmp, set_size, i) {
-					zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
-						sizeof(zend_ssa_phi) +
-						sizeof(int) * blocks[j].predecessors_count +
-						sizeof(void*) * blocks[j].predecessors_count);
+				phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
+				memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
+				phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
 
-					phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
-					memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
-					phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
+				phi->pi = -1;
+				phi->var = i;
+				phi->ssa_var = -1;
 
-					phi->pi = -1;
-					phi->var = i;
-					phi->ssa_var = -1;
-
-					/* Place phis after pis */
-					{
-						zend_ssa_phi **pp = &ssa_blocks[j].phis;
-						while (*pp) {
-							if ((*pp)->pi < 0) {
-								break;
-							}
-							pp = &(*pp)->next;
+				/* Place phis after pis */
+				{
+					zend_ssa_phi **pp = &ssa_blocks[j].phis;
+					while (*pp) {
+						if ((*pp)->pi < 0) {
+							break;
 						}
-						phi->next = *pp;
-						*pp = phi;
+						pp = &(*pp)->next;
 					}
-				} ZEND_BITSET_FOREACH_END();
-			}
+					phi->next = *pp;
+					*pp = phi;
+				}
+			} ZEND_BITSET_FOREACH_END();
 		}
 	}
 
