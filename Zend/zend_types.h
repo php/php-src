@@ -405,6 +405,8 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_RESOURCE_EX				(IS_RESOURCE       | ((                   IS_TYPE_REFCOUNTED                                         ) << Z_TYPE_FLAGS_SHIFT))
 #define IS_REFERENCE_EX				(IS_REFERENCE      | ((                   IS_TYPE_REFCOUNTED                                         ) << Z_TYPE_FLAGS_SHIFT))
 
+#define IS_IMMUTABLE_ARRAY_EX		(IS_ARRAY          | (IS_TYPE_IMMUTABLE << Z_TYPE_FLAGS_SHIFT))
+
 #define IS_CONSTANT_EX				(IS_CONSTANT       | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
 
@@ -660,6 +662,12 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zval *__z = (z);						\
 		Z_ARR_P(__z) = (a);						\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
+	} while (0)
+
+#define ZVAL_IMMUTABLE_ARR(z, a) do {				\
+		zval *__z = (z);							\
+		Z_ARR_P(__z) = (a);							\
+		Z_TYPE_INFO_P(__z) = IS_IMMUTABLE_ARRAY_EX;	\
 	} while (0)
 
 #define ZVAL_NEW_ARR(z) do {									\

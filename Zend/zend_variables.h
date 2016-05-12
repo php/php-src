@@ -52,6 +52,15 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 	}
 }
 
+static zend_always_inline void zend_array_ptr_dtor(zend_array *array)
+{
+	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
+		if (--GC_REFCOUNT(array) == 0) {
+			zend_array_destroy(array);
+		}
+	}
+}
+
 static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (Z_REFCOUNTED_P(zvalue) || Z_IMMUTABLE_P(zvalue)) {

@@ -1908,6 +1908,25 @@ ZEND_METHOD(reflection_function, getDocComment)
 }
 /* }}} */
 
+/* {{{ proto public array ReflectionFunction::getAttributes()
+   Returns the attributes of this function */
+ZEND_METHOD(reflection_function, getAttributes)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.attributes) {
+		zend_ast_convert_attributes(return_value, fptr->op_array.attributes);
+	} else {
+		array_init(return_value);
+	}
+}
+/* }}} */
+
 /* {{{ proto public array ReflectionFunction::getStaticVariables()
    Returns an associative array containing this function's static variables and their values */
 ZEND_METHOD(reflection_function, getStaticVariables)
@@ -3865,6 +3884,25 @@ ZEND_METHOD(reflection_class_constant, getDocComment)
 }
 /* }}} */
 
+/* {{{ proto public array ReflectionClassConstant::getAttributes()
+   Returns the attributes of this constant */
+ZEND_METHOD(reflection_class_constant, getAttributes)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->attributes) {
+		zend_ast_convert_attributes(return_value, ref->attributes);
+	} else {
+		array_init(return_value);
+	}
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionClass::export(mixed argument [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_class, export)
@@ -4221,6 +4259,25 @@ ZEND_METHOD(reflection_class, getDocComment)
 		RETURN_STR_COPY(ce->info.user.doc_comment);
 	}
 	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto public array ReflectionClass::getAttributes()
+   Returns the attributes for this class */
+ZEND_METHOD(reflection_class, getAttributes)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+	if (ce->type == ZEND_USER_CLASS && ce->info.user.attributes) {
+		zend_ast_convert_attributes(return_value, ce->info.user.attributes);
+	} else {
+		array_init(return_value);
+	}
 }
 /* }}} */
 
@@ -5781,6 +5838,25 @@ ZEND_METHOD(reflection_property, getDocComment)
 }
 /* }}} */
 
+/* {{{ proto public array ReflectionProperty::getAttributes()
+   Returns the attributes of this property */
+ZEND_METHOD(reflection_property, getAttributes)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop.attributes) {
+		zend_ast_convert_attributes(return_value, ref->prop.attributes);
+	} else {
+		array_init(return_value);
+	}
+}
+/* }}} */
+
 /* {{{ proto public int ReflectionProperty::setAccessible(bool visible)
    Sets whether non-public properties can be requested */
 ZEND_METHOD(reflection_property, setAccessible)
@@ -6378,6 +6454,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, getAttributes, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtensionName, arginfo_reflection__void, 0)
@@ -6567,6 +6644,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getStartLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, getAttributes, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getConstructor, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, hasMethod, arginfo_reflection_class_hasMethod, 0)
 	ZEND_ME(reflection_class, getMethod, arginfo_reflection_class_getMethod, 0)
@@ -6666,6 +6744,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, getAttributes, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_property_setAccessible, 0)
 	PHP_FE_END
 };
@@ -6694,6 +6773,7 @@ static const zend_function_entry reflection_class_constant_functions[] = {
 	ZEND_ME(reflection_class_constant, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class_constant, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class_constant, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class_constant, getAttributes, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 
