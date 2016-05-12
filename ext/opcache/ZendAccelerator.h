@@ -147,6 +147,7 @@ typedef struct _zend_persistent_script {
 	size_t         size;                   /* size of used shared memory */
 	void          *arena_mem;              /* part that should be copied into process */
 	size_t         arena_size;
+	size_t         arena_offsets_size;     /* count of offsets into arena memory which need to be added process arena offset after copying */
 
 	/* All entries that shouldn't be counted in the ADLER32
 	 * checksum must be declared in this struct
@@ -237,6 +238,7 @@ typedef struct _zend_accel_globals {
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	void                   *arena_mem;
+	size_t                 *arena_offsets;
 	zend_persistent_script *current_persistent_script;
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;

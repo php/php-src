@@ -127,6 +127,8 @@ void *zend_shared_alloc(size_t size);
 /* copy into shared memory */
 void *_zend_shared_memdup(void *p, size_t size, zend_bool free_source);
 int  zend_shared_memdup_size(void *p, size_t size);
+/* copy into shared memory to be copied into non-shared process memory */
+void *zend_nonshared_memdup(void **source_ptr, size_t size);
 
 int zend_accel_in_shm(void *ptr);
 

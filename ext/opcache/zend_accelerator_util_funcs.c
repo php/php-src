@@ -44,17 +44,6 @@ static void zend_accel_destroy_zend_function(zval *zv)
 {
 	zend_function *function = Z_PTR_P(zv);
 
-	if (function->type == ZEND_USER_FUNCTION) {
-		if (function->op_array.static_variables) {
-			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
-					FREE_HASHTABLE(function->op_array.static_variables);
-				}
-			}
-			function->op_array.static_variables = NULL;
-		}
-	}
-
 	destroy_zend_function(function);
 }
 
@@ -648,6 +637,16 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			ZCG(arena_mem) = zend_arena_alloc(&CG(arena), persistent_script->arena_size);
 			memcpy(ZCG(arena_mem), persistent_script->arena_mem, persistent_script->arena_size);
 #endif
+		}
+
+		/* Relocate pointers from within arena_mem to CG(arena) mem */
+		if (persistent_script->arena_offsets_size > 0) {
+			size_t *cur = (size_t *)((char *) persistent_script->arena_mem + persistent_script->arena_size);
+			size_t *end = (size_t *)((char *) cur + persistent_script->arena_offsets_size);
+			do {
+				void **ptr = (void **) (ZCG(arena_mem) + *cur);
+				*ptr = ARENA_REALLOC(*ptr);
+			} while (++cur < end);
 		}
 
 		/* Copy all the necessary stuff from shared memory to regular memory, and protect the shared script */

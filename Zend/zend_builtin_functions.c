@@ -2077,7 +2077,7 @@ ZEND_FUNCTION(create_function)
 
 	if (retval==SUCCESS) {
 		zend_op_array *func;
-		HashTable *static_variables;
+		void *static_variables;
 
 		func = zend_hash_str_find_ptr(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
 		if (!func) {

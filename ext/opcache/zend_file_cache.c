@@ -351,12 +351,17 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
                                                void                     *buf)
 {
 	if (op_array->static_variables && !IS_SERIALIZED(op_array->static_variables)) {
-		HashTable *ht;
+		zend_static_var *cur, *end;
 
 		SERIALIZE_PTR(op_array->static_variables);
-		ht = op_array->static_variables;
-		UNSERIALIZE_PTR(ht);
-		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
+		cur = op_array->static_variables->vars;
+		UNSERIALIZE_PTR(cur);
+		end = cur + op_array->static_variables->count;
+
+		do {
+			SERIALIZE_STR(cur->name);
+			zend_file_cache_serialize_zval(&cur->val, script, info, buf);
+		} while (++cur < end);
 	}
 
 	if (op_array->literals && !IS_SERIALIZED(op_array->literals)) {
@@ -927,12 +932,16 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
                                                  void                    *buf)
 {
 	if (op_array->static_variables && !IS_UNSERIALIZED(op_array->static_variables)) {
-		HashTable *ht;
+		zend_static_var *cur, *end;
 
 		UNSERIALIZE_PTR(op_array->static_variables);
-		ht = op_array->static_variables;
-		zend_file_cache_unserialize_hash(ht,
-				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
+		cur = op_array->static_variables->vars;
+		end = cur + op_array->static_variables->count;
+
+		do {
+			UNSERIALIZE_STR(cur->name);
+			zend_file_cache_unserialize_zval(&cur->val, script, buf);
+		} while (++cur < end);
 	}
 
 	if (op_array->literals && !IS_UNSERIALIZED(op_array->literals)) {

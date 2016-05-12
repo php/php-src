@@ -135,9 +135,16 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
-	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		zend_hash_clean(op_array->static_variables);
+	if (op_array->static_variables) {
+		zend_static_var *start = op_array->static_variables->vars, *end = op_array->static_variables->vars + op_array->static_variables->count;
+		do {
+			if (Z_ISREF(start->val) && Z_REFCOUNT(start->val) == 1 && Z_GC_FLAGS(start->val) == IS_REF_ARENA_ALLOCATED) {
+				zval_ptr_dtor(Z_REFVAL(start->val));
+			} else {
+				zval_ptr_dtor(&start->val);
+			}
+			ZVAL_NULL(&start->val); /* prevent faults if called repeatedly */
+		} while (++start < end);
 	}
 }
 
@@ -366,23 +373,36 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	zval *end;
 	uint32_t i;
 
-	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		if (--GC_REFCOUNT(op_array->static_variables) == 0) {
-			zend_array_destroy(op_array->static_variables);
-		}
-	}
-
 	if (op_array->run_time_cache && !op_array->function_name) {
 		efree(op_array->run_time_cache);
 		op_array->run_time_cache = NULL;
 	}
+
+	if (op_array->static_variables) {
+		zend_static_var *start = op_array->static_variables->vars, *end = op_array->static_variables->vars + op_array->static_variables->count;
+		do {
+			if (Z_ISREF(start->val) && Z_REFCOUNT(start->val) == 1 && Z_GC_FLAGS(start->val) == IS_REF_ARENA_ALLOCATED) {
+				zval_ptr_dtor(Z_REFVAL(start->val));
+			} else {
+				zval_ptr_dtor(&start->val);
+			}
+			zend_string_release(start->name);
+		} while (++start < end);
+
+		/* static vars are arena allocated - do not free */
+	}
+
 
 	if (!op_array->refcount || --(*op_array->refcount) > 0) {
 		return;
 	}
 
 	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
+
+	if (op_array->static_variables && !op_array->function_name) {
+		/* no arena allocation for top-level code (which may not persist during whole execution) */
+		efree(op_array->static_variables);
+	}
 
 	if (op_array->vars) {
 		i = op_array->last_var;

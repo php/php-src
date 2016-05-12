@@ -356,24 +356,38 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		EG(current_execute_data) = orig_execute_data;
 	}
 
-	if (op_array->static_variables) {
-		HashTable *stored = zend_shared_alloc_get_xlat_entry(op_array->static_variables);
-
-		if (stored) {
-			op_array->static_variables = stored;
-		} else {
-			zend_hash_persist(op_array->static_variables, zend_persist_zval);
-			zend_accel_store(op_array->static_variables, sizeof(HashTable));
-			/* make immutable array */
-			GC_REFCOUNT(op_array->static_variables) = 2;
-			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
-			op_array->static_variables->u.flags |= HASH_FLAG_STATIC_KEYS;
-			op_array->static_variables->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
-		}
-	}
-
 	if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
 		already_stored = 1;
+	}
+
+	if (op_array->static_variables) {
+		void *orig = op_array->static_variables;
+		uint32_t count = op_array->static_variables->count;
+		op_array->static_variables = zend_nonshared_memdup((void **) &op_array->static_variables, sizeof(*op_array->static_variables) + sizeof(zend_static_var) * (count - 1));
+
+		if (already_stored) {
+			ZEND_ASSERT(op_array->static_variables != NULL);
+		} else {
+			zend_static_var *cur, *end;
+
+			cur = op_array->static_variables->vars;
+			end = cur + count;
+
+			do {
+				zend_accel_store_interned_string(cur->name);
+				if (Z_ISREF(cur->val)) {
+					zend_persist_zval(Z_REFVAL(cur->val));
+					Z_REF(cur->val) = zend_nonshared_memdup((void **) &Z_REF(cur->val), sizeof(zend_reference));
+				} else {
+					zend_persist_zval(&cur->val);
+				}
+			} while (++cur < end);
+
+			if (op_array->function_name == NULL) {
+				/* top-level op_array statics cannot be arena allocated as they may need to be freed */
+				efree(orig);
+			}
+		}
 	}
 
 	if (op_array->literals) {
@@ -830,6 +844,8 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 	zend_accel_store_string(script->script.filename);
 
+	ZCG(current_persistent_script) = script;
+
 #ifdef __SSE2__
 	/* Align to 64-byte boundary */
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
@@ -838,12 +854,19 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 #endif
 
 	script->arena_mem = ZCG(arena_mem) = ZCG(mem);
-	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
+	ZCG(arena_offsets) = (void*)((char*)ZCG(mem) + script->arena_size);
+
+#ifdef __SSE2__
+	ZCG(mem) = (void*)((char*)ZCG(arena_offsets) + ((script->arena_offsets_size + 63L) & ~63L));
+#else
+	ZCG(mem) = (void*)((char*)ZCG(arena_offsets) + script->arena_offsets_size);
+#endif
 
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table, zend_persist_op_array);
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
 
+	ZCG(current_persistent_script) = NULL;
 	return script;
 }
 

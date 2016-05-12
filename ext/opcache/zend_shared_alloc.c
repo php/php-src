@@ -364,6 +364,23 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source)
 	return retval;
 }
 
+void *zend_nonshared_memdup(void **source_ptr, size_t size)
+{
+	void *old_p, *retval;
+
+	*(ZCG(arena_offsets)++) = (size_t)((uintptr_t)source_ptr - (uintptr_t)ZCG(current_persistent_script)->arena_mem);
+
+	if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), (zend_ulong) *source_ptr)) != NULL) {
+		/* we already duplicated this pointer */
+		return old_p;
+	}
+	retval = ZCG(arena_mem);
+	ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(size));
+	memcpy(retval, *source_ptr, size);
+	zend_shared_alloc_register_xlat_entry(*source_ptr, retval);
+	return retval;
+}
+
 void zend_shared_alloc_safe_unlock(void)
 {
 	if (ZCG(locked)) {

@@ -772,25 +772,20 @@ static void _function_closure_string(string *str, zend_function *fptr, char* ind
 {
 	uint32_t i, count;
 	zend_string *key;
-	HashTable *static_variables;
+	zend_static_var *static_var;
 
 	if (fptr->type != ZEND_USER_FUNCTION || !fptr->op_array.static_variables) {
 		return;
 	}
 
-	static_variables = fptr->op_array.static_variables;
-	count = zend_hash_num_elements(static_variables);
-
-	if (!count) {
-		return;
-	}
+	static_var = fptr->op_array.static_variables->vars;
+	count = fptr->op_array.static_variables->count;
 
 	string_printf(str, "\n");
-	string_printf(str, "%s- Bound Variables [%d] {\n", indent, zend_hash_num_elements(static_variables));
-	i = 0;
-	ZEND_HASH_FOREACH_STR_KEY(static_variables, key) {
-		string_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i++, ZSTR_VAL(key));
-	} ZEND_HASH_FOREACH_END();
+	string_printf(str, "%s- Bound Variables [%d] {\n", indent, count);
+	for (i = 0; i < count; i++) {
+		string_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i, ZSTR_VAL(static_var[i].name));
+	}
 	string_printf(str, "%s}\n", indent);
 }
 /* }}} */
@@ -1914,7 +1909,6 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 {
 	reflection_object *intern;
 	zend_function *fptr;
-	zval *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1924,18 +1918,15 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	/* Return an empty array in case no static variables exist */
 	array_init(return_value);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.static_variables != NULL) {
-		if (GC_REFCOUNT(fptr->op_array.static_variables) > 1) {
-			if (!(GC_FLAGS(fptr->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(fptr->op_array.static_variables)--;
-			}
-			fptr->op_array.static_variables = zend_array_dup(fptr->op_array.static_variables);
-		}
-		ZEND_HASH_FOREACH_VAL(fptr->op_array.static_variables, val) {
-			if (UNEXPECTED(zval_update_constant_ex(val, fptr->common.scope) != SUCCESS)) {
+		zend_static_var *cur = fptr->op_array.static_variables->vars, *end = fptr->op_array.static_variables->vars + fptr->op_array.static_variables->count;
+		do {
+			if (Z_ISREF(cur->val) && Z_CONSTANT_P(Z_REFVAL(cur->val)) && UNEXPECTED(zval_update_constant_ex(Z_REFVAL(cur->val), fptr->common.scope) != SUCCESS)) {
 				return;
 			}
-		} ZEND_HASH_FOREACH_END();
-		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, zval_add_ref);
+
+			Z_TRY_ADDREF(cur->val);
+			zend_hash_add(Z_ARRVAL_P(return_value), cur->name, &cur->val);
+		} while (++cur < end);
 	}
 }
 /* }}} */

@@ -27,4 +27,4 @@ foreach (array($gen1, $gen2, $gen3) as $gen) {
 --EXPECT--
 int(1)
 int(2)
-int(1)
+int(3)
