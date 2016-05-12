@@ -145,6 +145,7 @@ static void php_pack_memcpy(int is_little_endian, void * dst, void * src, size_t
 
 /* pack() idea stolen from Perl (implemented formats behave the same as there except J and P)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
+ * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
  */
 /* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
    Takes one or more arguments and packs them into a binary string according to the format argument */
@@ -637,6 +638,7 @@ static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
  * Numeric pack types will return numbers, a and A will return strings,
  * f and d will return doubles.
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
+ * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
  */
 /* {{{ proto array unpack(string format, string input)
    Unpack binary string into named array elements according to format argument */
