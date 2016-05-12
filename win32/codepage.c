@@ -181,6 +181,37 @@ PW32CP BOOL php_win32_cp_use_unicode(void)
 	return 0;
 }/*}}}*/
 
+PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
+{
+	wchar_t *envw = NULL, ew[32760];
+	char *cur = env, *prev;
+	size_t bin_len = 0;
+
+	if (!env) {
+		return NULL;
+	}
+
+	do {
+		wchar_t *tmp;
+		size_t tmp_len;
+
+		tmp = php_win32_cp_any_to_w(cur);
+		tmp_len = wcslen(tmp) + 1;
+		memmove(ew + bin_len, tmp, tmp_len * sizeof(wchar_t));
+		free(tmp);
+
+		bin_len += tmp_len;
+		prev = cur;
+
+	} while (NULL != (cur = strchr(prev, '\0')) && cur++ && *cur && bin_len + (cur - prev) < 32760);
+
+	envw = (wchar_t *) malloc((bin_len + 1) * sizeof(wchar_t));	
+	memmove(envw, ew, bin_len * sizeof(wchar_t));
+	envw[bin_len] = L'\0';
+
+	return envw;
+}
+
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
 
 /* {{{ proto bool sapi_windows_set_cp(int cp)

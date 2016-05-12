@@ -35,6 +35,7 @@ PW32CP wchar_t *php_win32_cp_thread_to_w(const char* path);
 PW32CP wchar_t *php_win32_cp_ascii_to_w(const char* path);
 PW32CP char *php_win32_cp_w_to_utf8(wchar_t* w_source_ptr);
 PW32CP char *php_win32_cp_w_to_thread(wchar_t* w_source_ptr);
+PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env);
 
 /* This function tries to make the best guess to convert any
    given string to a wide char, also prefering the fastest code
