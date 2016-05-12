@@ -104,6 +104,45 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 }
 /* }}} */
 
+
+/* {{{ php_pack_is_little_endian
+ */
+static int php_pack_is_little_endian()
+{
+	int machine_endian_check = 1;
+	
+	return ((char *)&machine_endian_check)[0];
+}
+/* }}} */
+
+
+/* {{{ php_pack_memcpy
+ */
+static void php_pack_memcpy(int is_little_endian, void * dst, void * src, size_t size)
+{
+	int is_sys_little_endian = php_pack_is_little_endian();
+	
+	if (is_little_endian == is_sys_little_endian) {
+		/* 
+		  System and input uses same endian, simply perform memcpy 
+		*/
+		memcpy(dst, src, size);
+	} else {
+		/*
+		  Copy to dst from last to first 
+		*/
+		int i = 0;
+		src = src + size - 1;
+		do {
+			*(char *) dst = *(char *)src;
+			++dst;
+			--src; 
+		} while (-- size);
+	}
+	
+}
+/* }}} */
+
 /* pack() idea stolen from Perl (implemented formats behave the same as there except J and P)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  */
@@ -215,8 +254,12 @@ PHP_FUNCTION(pack)
 			case 'N':
 			case 'v':
 			case 'V':
-			case 'f':
-			case 'd':
+			case 'f': /* float */
+			case 'g': /* little endian float */
+			case 'G': /* big endian float */
+			case 'd': /* double */
+			case 'e': /* little endian double */
+			case 'E': /* big endian double */
 				if (arg < 0) {
 					arg = num_args - currentarg;
 				}
@@ -294,11 +337,15 @@ PHP_FUNCTION(pack)
 				break;
 #endif
 
-			case 'f':
+			case 'f': /* float */
+			case 'g': /* little endian float */
+			case 'G': /* big endian float */
 				INC_OUTPUTPOS(arg,sizeof(float))
 				break;
 
-			case 'd':
+			case 'd': /* double */
+			case 'e': /* little endian float */
+			case 'E': /* big endian float */
 				INC_OUTPUTPOS(arg,sizeof(double))
 				break;
 
@@ -473,11 +520,59 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
+			
+			case 'g': {
+				/* pack little endian float */
+				while (arg-- > 0) {
+					float v = (float) zval_get_double(&argv[currentarg++]);
+					char *buf = emalloc(sizeof(float));
+					php_pack_memcpy(1, &buf, &v, sizeof(float));
+					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(float));
+					outputpos += sizeof(v);
+				}
+				
+				break;
+			}
+			case 'G': {
+				/* pack big endian float */
+				while (arg-- > 0) {
+					float v = (float) zval_get_double(&argv[currentarg++]);
+					char *buf = emalloc(sizeof(float));
+					php_pack_memcpy(0, &buf, &v, sizeof(float));
+					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(float));
+					outputpos += sizeof(v);
+				}
+				break;
+			}
 
 			case 'd': {
 				while (arg-- > 0) {
 					double v = (double) zval_get_double(&argv[currentarg++]);
 					memcpy(&ZSTR_VAL(output)[outputpos], &v, sizeof(v));
+					outputpos += sizeof(v);
+				}
+				break;
+			}
+			
+			case 'e': {
+				/* pack little endian double */
+				while (arg-- > 0) {
+					double v = (double) zval_get_double(&argv[currentarg++]);					
+					char *buf = emalloc(sizeof(double));
+					php_pack_memcpy(1, &buf, &v, sizeof(double));					
+					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(double));
+					outputpos += sizeof(v);
+				}
+				break;
+			}
+			
+			case 'E': {
+				/* pack big endian double */
+				while (arg-- > 0) {
+					double v = (double) zval_get_double(&argv[currentarg++]);
+					char *buf = emalloc(sizeof(double));
+					php_pack_memcpy(0, &buf, &v, sizeof(double));
+					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(double));
 					outputpos += sizeof(v);
 				}
 				break;
@@ -682,11 +777,15 @@ PHP_FUNCTION(unpack)
 
 			/* Use sizeof(float) bytes of input */
 			case 'f':
+			case 'g':
+			case 'G':
 				size = sizeof(float);
 				break;
 
 			/* Use sizeof(double) bytes of input */
 			case 'd':
+			case 'e':
+			case 'E':
 				size = sizeof(double);
 				break;
 
@@ -942,18 +1041,45 @@ PHP_FUNCTION(unpack)
 					}
 #endif
 
-					case 'f': {
+					case 'f': /* float */ 
+					case 'g': /* little endian float*/
+					case 'G': /* big endian float*/
+					{
 						float v;
 
-						memcpy(&v, &input[inputpos], sizeof(float));
+						if (type == 'g') {
+							char *buf = emalloc(sizeof(float));
+							php_pack_memcpy(1, &buf, &input[inputpos], sizeof(float));
+							memcpy(&v, &buf, sizeof(float));
+						} else if (type == 'G') {
+							char *buf = emalloc(sizeof(float));
+							php_pack_memcpy(0, &buf, &input[inputpos], sizeof(float));
+							memcpy(&v, &buf, sizeof(float));
+						} else {
+							memcpy(&v, &input[inputpos], sizeof(float));
+						}
+						
 						add_assoc_double(return_value, n, (double)v);
 						break;
 					}
+					
 
-					case 'd': {
+					case 'd': /* double */
+					case 'e': /* little endian float */
+					case 'E': /* big endian float */ 
+					{
 						double v;
-
-						memcpy(&v, &input[inputpos], sizeof(double));
+						if (type == 'e') {
+							char *buf = emalloc(sizeof(double));
+							php_pack_memcpy(1, &buf, &input[inputpos], sizeof(double));
+							memcpy(&v, &buf, sizeof(double));
+						} else if (type == 'E') {
+							char *buf = emalloc(sizeof(double));
+							php_pack_memcpy(0, &buf, &input[inputpos], sizeof(double));
+							memcpy(&v, &buf, sizeof(double));
+						} else {
+							memcpy(&v, &input[inputpos], sizeof(double));
+						}
 						add_assoc_double(return_value, n, v);
 						break;
 					}
