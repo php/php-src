@@ -677,7 +677,7 @@ try_again:
 			zval tmp;
 			ZVAL_COPY_VALUE(&tmp, op);
 			object_init(op);
-			zend_hash_str_add_new(Z_OBJPROP_P(op), "scalar", sizeof("scalar")-1, &tmp);
+			zend_hash_add_new(Z_OBJPROP_P(op), CG(known_strings)[ZEND_STR_SCALAR], &tmp);
 			break;
 		}
 	}

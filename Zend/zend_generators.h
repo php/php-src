@@ -62,8 +62,8 @@ struct _zend_generator {
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
-	/* The separate stack used by generator */
-	zend_vm_stack stack;
+	/* Frozen call stack for "yield" used in context of other calls */
+	zend_execute_data *frozen_call_stack;
 
 	/* Current value */
 	zval value;
