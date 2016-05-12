@@ -379,38 +379,6 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 }
 /* }}} */
 
-/* Requires globals EG(current_execute_data). */
-ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value) /* {{{ */
-{
-	zend_generator *generator;
-	zend_execute_data *current_execute_data;
-	zend_execute_data *execute_data;
-
-	/* Create new execution context. We have to back up and restore  EG(current_execute_data) here. */
-	current_execute_data = EG(current_execute_data);
-	execute_data = zend_create_generator_execute_data(call, op_array, return_value);
-	EG(current_execute_data) = current_execute_data;
-
-	object_init_ex(return_value, zend_ce_generator);
-
-	if (Z_TYPE(EX(This)) == IS_OBJECT && !(EX_CALL_INFO() & ZEND_CALL_CLOSURE)) {
-		ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_RELEASE_THIS);
-		Z_ADDREF(EX(This));
-	}
-
-	/* Save execution context in generator object. */
-	generator = (zend_generator *) Z_OBJ_P(return_value);
-	generator->execute_data = execute_data;
-	generator->frozen_call_stack = NULL;
-
-	/* EX(return_value) keeps pointer to zend_object (not a real zval) */
-	execute_data->return_value = (zval*)generator;
-
-	memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
-	ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
-}
-/* }}} */
-
 static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
 {
 	zend_throw_error(NULL, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");

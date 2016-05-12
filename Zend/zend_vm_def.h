@@ -3612,27 +3612,16 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 	EX(call) = call->prev_execute_data;
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(RETURN_VALUE_USED(opline))) {
-				ret = EX_VAR(opline->result.var);
-				zend_generator_create_zval(call, &fbc->op_array, ret);
-			} else {
-				zend_vm_stack_free_args(call);
-			}
-
-			zend_vm_stack_free_call_frame(call);
-		} else {
-			ret = NULL;
-			if (RETURN_VALUE_USED(opline)) {
-				ret = EX_VAR(opline->result.var);
-				ZVAL_NULL(ret);
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, ret, 0);
-
-			ZEND_VM_ENTER();
+		ret = NULL;
+		if (RETURN_VALUE_USED(opline)) {
+			ret = EX_VAR(opline->result.var);
+			ZVAL_NULL(ret);
 		}
+
+		call->prev_execute_data = execute_data;
+		i_init_func_execute_data(call, &fbc->op_array, ret, 0);
+
+		ZEND_VM_ENTER();
 	} else {
 		zval retval;
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
@@ -3720,32 +3709,20 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 	LOAD_OPLINE();
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(RETURN_VALUE_USED(opline))) {
-				ret = EX_VAR(opline->result.var);
-				zend_generator_create_zval(call, &fbc->op_array, ret);
-			} else {
-				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
-					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
-				}
-				zend_vm_stack_free_args(call);
-			}
+		ret = NULL;
+		if (RETURN_VALUE_USED(opline)) {
+			ret = EX_VAR(opline->result.var);
+			ZVAL_NULL(ret);
+		}
+
+		call->prev_execute_data = execute_data;
+		i_init_func_execute_data(call, &fbc->op_array, ret, 1);
+
+		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			ZEND_VM_ENTER();
 		} else {
-			ret = NULL;
-			if (RETURN_VALUE_USED(opline)) {
-				ret = EX_VAR(opline->result.var);
-				ZVAL_NULL(ret);
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, ret, 1);
-
-			if (EXPECTED(zend_execute_ex == execute_ex)) {
-				ZEND_VM_ENTER();
-			} else {
-				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
-				zend_execute_ex(call);
-			}
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			zend_execute_ex(call);
 		}
 	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
 		zval retval;
@@ -4008,6 +3985,72 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC)
 	} while (0);
 
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+}
+
+ZEND_VM_HANDLER(41, ZEND_GENERATOR_CREATE, ANY, ANY)
+{
+	zval *return_value = EX(return_value);
+
+	if (EXPECTED(return_value)) {
+		USE_OPLINE
+		zend_generator *generator;
+		zend_execute_data *gen_execute_data;
+		uint32_t num_args, used_stack, call_info;
+
+		object_init_ex(return_value, zend_ce_generator);
+
+		/*
+		 * Normally the execute_data is allocated on the VM stack (because it does
+		 * not actually do any allocation and thus is faster). For generators
+		 * though this behavior would be suboptimal, because the (rather large)
+		 * structure would have to be copied back and forth every time execution is
+		 * suspended or resumed. That's why for generators the execution context
+		 * is allocated on heap.
+		 */
+		num_args = EX_NUM_ARGS();
+		used_stack = (ZEND_CALL_FRAME_SLOT + num_args + EX(func)->op_array.last_var + EX(func)->op_array.T - MIN(EX(func)->op_array.num_args, num_args)) * sizeof(zval);
+		gen_execute_data = (zend_execute_data*)emalloc(used_stack);
+		memcpy(gen_execute_data, execute_data, used_stack);
+
+		/* Save execution context in generator object. */
+		generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+		generator->execute_data = gen_execute_data;
+		generator->frozen_call_stack = NULL;
+		memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
+		ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
+
+		gen_execute_data->opline = opline + 1;
+		/* EX(return_value) keeps pointer to zend_object (not a real zval) */
+		gen_execute_data->return_value = (zval*)generator;
+		call_info = Z_TYPE_INFO(EX(This));
+		if ((call_info & Z_TYPE_MASK) == IS_OBJECT
+		 && !(call_info & ((ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS) << ZEND_CALL_INFO_SHIFT))) {
+			ZEND_ADD_CALL_FLAG_EX(call_info, ZEND_CALL_RELEASE_THIS);
+			Z_ADDREF(gen_execute_data->This);
+		}
+		ZEND_ADD_CALL_FLAG_EX(call_info, (ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED));
+		Z_TYPE_INFO(gen_execute_data->This) = call_info;
+		gen_execute_data->prev_execute_data = NULL;
+
+		call_info = EX_CALL_INFO();
+		EG(current_execute_data) = EX(prev_execute_data);
+		if (EXPECTED(!(call_info & (ZEND_CALL_TOP|ZEND_CALL_ALLOCATED)))) {
+			EG(vm_stack_top) = (zval*)execute_data;
+			execute_data = EX(prev_execute_data);
+			LOAD_NEXT_OPLINE();
+			ZEND_VM_LEAVE();
+		} else if (EXPECTED(!(call_info & ZEND_CALL_TOP))) {
+			zend_execute_data *old_execute_data = execute_data;
+			execute_data = EX(prev_execute_data);
+			zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
+			LOAD_NEXT_OPLINE();
+			ZEND_VM_LEAVE();
+		} else {
+			ZEND_VM_RETURN();
+		}
+	} else {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+	}
 }
 
 ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY)

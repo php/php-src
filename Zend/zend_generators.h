@@ -102,7 +102,6 @@ static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 static const zend_uchar ZEND_GENERATOR_DO_INIT           = 0x8;
 
 void zend_register_generator_ce(void);
-ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution);
 ZEND_API void zend_generator_resume(zend_generator *generator);
 

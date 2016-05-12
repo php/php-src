@@ -257,7 +257,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <num> returns_ref function is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
-%type <num> class_modifiers class_modifier use_type
+%type <num> class_modifiers class_modifier use_type backup_fn_flags
 
 %type <str> backup_doc_comment
 
@@ -481,9 +481,9 @@ unset_variable:
 
 function_declaration_statement:
 	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
-	'{' inner_statement_list '}'
-		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2, $1, $4,
-		      zend_ast_get_str($3), $6, NULL, $10, $8); }
+	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
+		      zend_ast_get_str($3), $6, NULL, $11, $8); CG(extra_fn_flags) = $9; }
 ;
 
 is_reference:
@@ -713,9 +713,9 @@ class_statement:
 	|	T_USE name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
 	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
-		return_type method_body
-			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1, $2, $5,
-				  zend_ast_get_str($4), $7, NULL, $10, $9); }
+		return_type backup_fn_flags method_body backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
+				  zend_ast_get_str($4), $7, NULL, $11, $9); CG(extra_fn_flags) = $10; }
 ;
 
 name_list:
@@ -962,20 +962,20 @@ expr_without_variable:
 	|	scalar { $$ = $1; }
 	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
 	|	T_PRINT expr { $$ = zend_ast_create(ZEND_AST_PRINT, $2); }
-	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); }
-	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); }
-	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); }
-	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); }
+	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
-		'{' inner_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2, $1, $3,
+		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-			      $5, $7, $10, $8); }
+			      $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
 	|	T_STATIC function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars
-		return_type '{' inner_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | ZEND_ACC_STATIC, $2, $4,
+		return_type backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | $14 | ZEND_ACC_STATIC, $2, $4,
 			      zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-			      $6, $8, $11, $9); }
+			      $6, $8, $12, $9); CG(extra_fn_flags) = $10; }
 ;
 
 function:
@@ -984,6 +984,10 @@ function:
 
 backup_doc_comment:
 	/* empty */ { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
+;
+
+backup_fn_flags:
+	/* empty */ { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
 ;
 
 returns_ref:
