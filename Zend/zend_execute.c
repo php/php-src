@@ -2335,50 +2335,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 }
 /* }}} */
 
-ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value) /* {{{ */
-{
-	/*
-	 * Normally the execute_data is allocated on the VM stack (because it does
-	 * not actually do any allocation and thus is faster). For generators
-	 * though this behavior would be suboptimal, because the (rather large)
-	 * structure would have to be copied back and forth every time execution is
-	 * suspended or resumed. That's why for generators the execution context
-	 * is allocated using a separate VM stack frame.
-	 */
-	zend_execute_data *execute_data;
-	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	uint32_t used_stack = (ZEND_CALL_FRAME_SLOT + num_args + op_array->last_var + op_array->T - MIN(op_array->num_args, num_args)) * sizeof(zval);
-
-	execute_data = (zend_execute_data*)emalloc(used_stack);
-	ZEND_SET_CALL_INFO(execute_data, Z_TYPE(call->This) == IS_OBJECT, ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS)));
-	EX(func) = (zend_function*)op_array;
-	Z_OBJ(EX(This)) = Z_OBJ(call->This);
-	ZEND_CALL_NUM_ARGS(execute_data) = num_args;
-	EX(prev_execute_data) = NULL;
-
-	/* copy arguments */
-	if (num_args > 0) {
-		zval *arg_src = ZEND_CALL_ARG(call, 1);
-		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
-		zval *end = arg_src + num_args;
-
-		do {
-			ZVAL_COPY_VALUE(arg_dst, arg_src);
-			arg_src++;
-			arg_dst++;
-		} while (arg_src != end);
-	}
-
-	if (UNEXPECTED(!op_array->run_time_cache)) {
-		init_func_run_time_cache(op_array);
-	}
-
-	i_init_func_execute_data(execute_data, op_array, return_value, 1);
-
-	return execute_data;
-}
-/* }}} */
-
 ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
 	EX(prev_execute_data) = EG(current_execute_data);

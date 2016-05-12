@@ -744,27 +744,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_U
 	EX(call) = call->prev_execute_data;
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(0)) {
-				ret = EX_VAR(opline->result.var);
-				zend_generator_create_zval(call, &fbc->op_array, ret);
-			} else {
-				zend_vm_stack_free_args(call);
-			}
-
-			zend_vm_stack_free_call_frame(call);
-		} else {
-			ret = NULL;
-			if (0) {
-				ret = EX_VAR(opline->result.var);
-				ZVAL_NULL(ret);
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, ret, 0);
-
-			ZEND_VM_ENTER();
+		ret = NULL;
+		if (0) {
+			ret = EX_VAR(opline->result.var);
+			ZVAL_NULL(ret);
 		}
+
+		call->prev_execute_data = execute_data;
+		i_init_func_execute_data(call, &fbc->op_array, ret, 0);
+
+		ZEND_VM_ENTER();
 	} else {
 		zval retval;
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
@@ -834,27 +823,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_U
 	EX(call) = call->prev_execute_data;
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(1)) {
-				ret = EX_VAR(opline->result.var);
-				zend_generator_create_zval(call, &fbc->op_array, ret);
-			} else {
-				zend_vm_stack_free_args(call);
-			}
-
-			zend_vm_stack_free_call_frame(call);
-		} else {
-			ret = NULL;
-			if (1) {
-				ret = EX_VAR(opline->result.var);
-				ZVAL_NULL(ret);
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, ret, 0);
-
-			ZEND_VM_ENTER();
+		ret = NULL;
+		if (1) {
+			ret = EX_VAR(opline->result.var);
+			ZVAL_NULL(ret);
 		}
+
+		call->prev_execute_data = execute_data;
+		i_init_func_execute_data(call, &fbc->op_array, ret, 0);
+
+		ZEND_VM_ENTER();
 	} else {
 		zval retval;
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
@@ -942,32 +920,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HA
 	LOAD_OPLINE();
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(0)) {
-				ret = EX_VAR(opline->result.var);
-				zend_generator_create_zval(call, &fbc->op_array, ret);
-			} else {
-				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
-					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
-				}
-				zend_vm_stack_free_args(call);
-			}
+		ret = NULL;
+		if (0) {
+			ret = EX_VAR(opline->result.var);
+			ZVAL_NULL(ret);
+		}
+
+		call->prev_execute_data = execute_data;
+		i_init_func_execute_data(call, &fbc->op_array, ret, 1);
+
+		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			ZEND_VM_ENTER();
 		} else {
-			ret = NULL;
-			if (0) {
-				ret = EX_VAR(opline->result.var);
-				ZVAL_NULL(ret);
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, ret, 1);
-
-			if (EXPECTED(zend_execute_ex == execute_ex)) {
-				ZEND_VM_ENTER();
-			} else {
-				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
-				zend_execute_ex(call);
-			}
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			zend_execute_ex(call);
 		}
 	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
 		zval retval;
@@ -1083,32 +1049,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_USED_HAND
 	LOAD_OPLINE();
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (EXPECTED(1)) {
-				ret = EX_VAR(opline->result.var);
-				zend_generator_create_zval(call, &fbc->op_array, ret);
-			} else {
-				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
-					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
-				}
-				zend_vm_stack_free_args(call);
-			}
+		ret = NULL;
+		if (1) {
+			ret = EX_VAR(opline->result.var);
+			ZVAL_NULL(ret);
+		}
+
+		call->prev_execute_data = execute_data;
+		i_init_func_execute_data(call, &fbc->op_array, ret, 1);
+
+		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			ZEND_VM_ENTER();
 		} else {
-			ret = NULL;
-			if (1) {
-				ret = EX_VAR(opline->result.var);
-				ZVAL_NULL(ret);
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, ret, 1);
-
-			if (EXPECTED(zend_execute_ex == execute_ex)) {
-				ZEND_VM_ENTER();
-			} else {
-				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
-				zend_execute_ex(call);
-			}
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			zend_execute_ex(call);
 		}
 	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
 		zval retval;
@@ -1193,6 +1147,72 @@ fcall_end:
 
 	ZEND_VM_SET_OPCODE(opline + 1);
 	ZEND_VM_CONTINUE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zval *return_value = EX(return_value);
+
+	if (EXPECTED(return_value)) {
+		USE_OPLINE
+		zend_generator *generator;
+		zend_execute_data *gen_execute_data;
+		uint32_t num_args, used_stack, call_info;
+
+		object_init_ex(return_value, zend_ce_generator);
+
+		/*
+		 * Normally the execute_data is allocated on the VM stack (because it does
+		 * not actually do any allocation and thus is faster). For generators
+		 * though this behavior would be suboptimal, because the (rather large)
+		 * structure would have to be copied back and forth every time execution is
+		 * suspended or resumed. That's why for generators the execution context
+		 * is allocated on heap.
+		 */
+		num_args = EX_NUM_ARGS();
+		used_stack = (ZEND_CALL_FRAME_SLOT + num_args + EX(func)->op_array.last_var + EX(func)->op_array.T - MIN(EX(func)->op_array.num_args, num_args)) * sizeof(zval);
+		gen_execute_data = (zend_execute_data*)emalloc(used_stack);
+		memcpy(gen_execute_data, execute_data, used_stack);
+
+		/* Save execution context in generator object. */
+		generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+		generator->execute_data = gen_execute_data;
+		generator->frozen_call_stack = NULL;
+		memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
+		ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
+
+		gen_execute_data->opline = opline + 1;
+		/* EX(return_value) keeps pointer to zend_object (not a real zval) */
+		gen_execute_data->return_value = (zval*)generator;
+		call_info = Z_TYPE_INFO(EX(This));
+		if ((call_info & Z_TYPE_MASK) == IS_OBJECT
+		 && !(call_info & ((ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS) << ZEND_CALL_INFO_SHIFT))) {
+			ZEND_ADD_CALL_FLAG_EX(call_info, ZEND_CALL_RELEASE_THIS);
+			Z_ADDREF(gen_execute_data->This);
+		}
+		ZEND_ADD_CALL_FLAG_EX(call_info, (ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED));
+		Z_TYPE_INFO(gen_execute_data->This) = call_info;
+		gen_execute_data->prev_execute_data = NULL;
+
+		call_info = EX_CALL_INFO();
+		EG(current_execute_data) = EX(prev_execute_data);
+		if (EXPECTED(!(call_info & (ZEND_CALL_TOP|ZEND_CALL_ALLOCATED)))) {
+			EG(vm_stack_top) = (zval*)execute_data;
+			execute_data = EX(prev_execute_data);
+			LOAD_NEXT_OPLINE();
+			ZEND_VM_LEAVE();
+		} else if (EXPECTED(!(call_info & ZEND_CALL_TOP))) {
+			zend_execute_data *old_execute_data = execute_data;
+			execute_data = EX(prev_execute_data);
+			zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
+			LOAD_NEXT_OPLINE();
+			ZEND_VM_LEAVE();
+		} else {
+			ZEND_VM_RETURN();
+		}
+	} else {
+		ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -56848,6 +56868,7 @@ void zend_init_opcodes_handlers(void)
 		ZEND_ECHO_SPEC_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ECHO_SPEC_CV_HANDLER,
+		ZEND_GENERATOR_CREATE_SPEC_HANDLER,
 		ZEND_JMP_SPEC_HANDLER,
 		ZEND_JMPZ_SPEC_CONST_HANDLER,
 		ZEND_JMPZ_SPEC_TMPVAR_HANDLER,
@@ -59881,150 +59902,150 @@ void zend_init_opcodes_handlers(void)
 		776 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
 		826 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		851 | SPEC_RULE_OP1,
-		3845,
 		856,
-		857 | SPEC_RULE_OP1,
-		862 | SPEC_RULE_OP1,
-		867 | SPEC_RULE_OP1,
-		872 | SPEC_RULE_OP1,
-		877 | SPEC_RULE_OP1,
-		882 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		3845,
-		3845,
-		3845,
-		907 | SPEC_RULE_OP1,
-		912 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		937 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		962 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		987 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1012,
-		1013 | SPEC_RULE_OP1,
-		1018 | SPEC_RULE_OP2,
-		1023 | SPEC_RULE_RETVAL,
-		1025 | SPEC_RULE_OP2,
-		1030 | SPEC_RULE_OP1,
-		1035,
-		1036 | SPEC_RULE_OP2,
-		1041 | SPEC_RULE_OP1,
-		1046 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
-		1056 | SPEC_RULE_OP1,
-		1061 | SPEC_RULE_OP1,
-		1066 | SPEC_RULE_OP2,
-		1071 | SPEC_RULE_OP1,
-		1076 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1101 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1126 | SPEC_RULE_OP1,
-		1131 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1156 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1181 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1206 | SPEC_RULE_OP1,
-		1211 | SPEC_RULE_OP1,
-		1216 | SPEC_RULE_OP1,
-		1221 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1246 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1271 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1296 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1321 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1346 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1371 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1396 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1421 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1446 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1471 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1496 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1521 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1546 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1571 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1596 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1621 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1646 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1671 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1696 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		3845,
-		1721,
+		857,
+		858 | SPEC_RULE_OP1,
+		863 | SPEC_RULE_OP1,
+		868 | SPEC_RULE_OP1,
+		873 | SPEC_RULE_OP1,
+		878 | SPEC_RULE_OP1,
+		883 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3846,
+		3846,
+		3846,
+		908 | SPEC_RULE_OP1,
+		913 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		938 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		963 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		988 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1013,
+		1014 | SPEC_RULE_OP1,
+		1019 | SPEC_RULE_OP2,
+		1024 | SPEC_RULE_RETVAL,
+		1026 | SPEC_RULE_OP2,
+		1031 | SPEC_RULE_OP1,
+		1036,
+		1037 | SPEC_RULE_OP2,
+		1042 | SPEC_RULE_OP1,
+		1047 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1057 | SPEC_RULE_OP1,
+		1062 | SPEC_RULE_OP1,
+		1067 | SPEC_RULE_OP2,
+		1072 | SPEC_RULE_OP1,
+		1077 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1102 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1127 | SPEC_RULE_OP1,
+		1132 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1157 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1182 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1207 | SPEC_RULE_OP1,
+		1212 | SPEC_RULE_OP1,
+		1217 | SPEC_RULE_OP1,
+		1222 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1247 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1272 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1297 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1322 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1347 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1372 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1397 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1422 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1447 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1472 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1497 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1522 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1547 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1572 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1597 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1622 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1647 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1672 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1697 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3846,
 		1722,
 		1723,
 		1724,
 		1725,
-		1726 | SPEC_RULE_OP1,
-		1731 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1756 | SPEC_RULE_OP1,
-		1761 | SPEC_RULE_OP2,
-		1766 | SPEC_RULE_OP1,
-		1771 | SPEC_RULE_OP1,
-		1776 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1801 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1826 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1851 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1876 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
-		1886 | SPEC_RULE_OP1,
-		1891 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1916,
-		1917 | SPEC_RULE_OP1,
-		1922 | SPEC_RULE_OP1,
-		1927 | SPEC_RULE_OP1,
-		1932 | SPEC_RULE_OP1,
-		1937 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1962 | SPEC_RULE_OP1,
-		1967 | SPEC_RULE_OP1,
-		1972 | SPEC_RULE_OP1,
-		1977 | SPEC_RULE_OP2,
-		1982 | SPEC_RULE_RETVAL,
-		1984 | SPEC_RULE_RETVAL,
-		1986 | SPEC_RULE_RETVAL,
-		1988 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2013 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2038 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2063 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2088 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		2213,
-		2214 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2239,
-		2240 | SPEC_RULE_OP2,
-		2245,
-		2246 | SPEC_RULE_OP1,
-		2251 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2276 | SPEC_RULE_OP2,
-		2281 | SPEC_RULE_OP2,
-		2286,
-		2287 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		2412 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2437,
+		1726,
+		1727 | SPEC_RULE_OP1,
+		1732 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1757 | SPEC_RULE_OP1,
+		1762 | SPEC_RULE_OP2,
+		1767 | SPEC_RULE_OP1,
+		1772 | SPEC_RULE_OP1,
+		1777 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1802 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1827 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1852 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1877 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1887 | SPEC_RULE_OP1,
+		1892 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1917,
+		1918 | SPEC_RULE_OP1,
+		1923 | SPEC_RULE_OP1,
+		1928 | SPEC_RULE_OP1,
+		1933 | SPEC_RULE_OP1,
+		1938 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1963 | SPEC_RULE_OP1,
+		1968 | SPEC_RULE_OP1,
+		1973 | SPEC_RULE_OP1,
+		1978 | SPEC_RULE_OP2,
+		1983 | SPEC_RULE_RETVAL,
+		1985 | SPEC_RULE_RETVAL,
+		1987 | SPEC_RULE_RETVAL,
+		1989 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2014 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2039 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2064 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2089 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		2214,
+		2215 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2240,
+		2241 | SPEC_RULE_OP2,
+		2246,
+		2247 | SPEC_RULE_OP1,
+		2252 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2277 | SPEC_RULE_OP2,
+		2282 | SPEC_RULE_OP2,
+		2287,
+		2288 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		2413 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2438,
 		2439,
-		2440 | SPEC_RULE_OP1,
-		2445 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2470,
+		2440,
+		2441 | SPEC_RULE_OP1,
+		2446 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2471,
-		2472 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2497,
+		2472,
+		2473 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2498,
 		2499,
-		2500 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2525 | SPEC_RULE_OP1,
-		2530,
+		2500,
+		2501 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2526 | SPEC_RULE_OP1,
 		2531,
 		2532,
 		2533,
-		2534 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2559 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2584 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2609 | SPEC_RULE_OP1,
-		2614 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2639,
-		2640 | SPEC_RULE_OP2,
-		2645 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2670 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2695 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2720 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2745 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2770 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2795 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2820 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2845 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2870 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2895 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		3845
+		2534,
+		2535 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2560 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2585 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2610 | SPEC_RULE_OP1,
+		2615 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2640,
+		2641 | SPEC_RULE_OP2,
+		2646 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2671 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2696 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2721 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2746 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2771 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2796 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2821 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2846 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2871 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2896 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3846
 	};
 	zend_opcode_handlers = labels;
 		zend_handlers_count = sizeof(labels) / sizeof(void*);
@@ -60123,7 +60144,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2920 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2921 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60131,7 +60152,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2945 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2946 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60139,7 +60160,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2970 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2971 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60150,17 +60171,17 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2995 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2996 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3020 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3021 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3045 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3046 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -60168,7 +60189,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3070 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3071 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60176,7 +60197,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3095 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3096 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60184,7 +60205,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3120 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3121 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60195,7 +60216,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3145 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3146 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60203,7 +60224,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3220 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3221 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60214,7 +60235,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3295 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3296 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60222,7 +60243,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3370 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3371 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -60233,12 +60254,12 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3445 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3446 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3520 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3521 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -60246,55 +60267,55 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3595 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3596 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3670 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3671 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if ((op1_info == MAY_BE_DOUBLE)) {
-				spec = 3835 | SPEC_RULE_OP1;
+				spec = 3836 | SPEC_RULE_OP1;
 			} else if ((!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 3840 | SPEC_RULE_OP1;
+				spec = 3841 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
-				spec = 3745 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 3746 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if ((op1_info == MAY_BE_LONG)) {
-				spec = 3755 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 3756 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
-				spec = 3765 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 3766 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
-				spec = 3775 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 3776 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if ((op1_info == MAY_BE_LONG)) {
-				spec = 3785 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 3786 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
-				spec = 3795 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 3796 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
-				spec = 3805 | SPEC_RULE_OP1;
+				spec = 3806 | SPEC_RULE_OP1;
 			} else if ((op1_info == MAY_BE_LONG)) {
-				spec = 3810 | SPEC_RULE_OP1;
+				spec = 3811 | SPEC_RULE_OP1;
 			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
-				spec = 3815 | SPEC_RULE_OP1;
+				spec = 3816 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
-				spec = 3820 | SPEC_RULE_OP1;
+				spec = 3821 | SPEC_RULE_OP1;
 			} else if ((op1_info == MAY_BE_LONG)) {
-				spec = 3825 | SPEC_RULE_OP1;
+				spec = 3826 | SPEC_RULE_OP1;
 			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
-				spec = 3830 | SPEC_RULE_OP1;
+				spec = 3831 | SPEC_RULE_OP1;
 			}
 			break;
 		default:

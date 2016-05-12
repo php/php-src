@@ -834,12 +834,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
-		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
-			zend_init_execute_data(call, &func->op_array, fci->retval);
-			zend_execute_ex(call);
-		} else {
-			zend_generator_create_zval(call, &func->op_array, fci->retval);
-		}
+		zend_init_execute_data(call, &func->op_array, fci->retval);
+		zend_execute_ex(call);
 		if (call_via_handler) {
 			/* We must re-initialize function again */
 			fci_cache->initialized = 0;

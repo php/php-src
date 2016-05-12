@@ -63,7 +63,7 @@ static const char *zend_vm_opcodes_names[184] = {
 	"ZEND_ASSIGN",
 	"ZEND_ASSIGN_REF",
 	"ZEND_ECHO",
-	NULL,
+	"ZEND_GENERATOR_CREATE",
 	"ZEND_JMP",
 	"ZEND_JMPZ",
 	"ZEND_JMPNZ",
