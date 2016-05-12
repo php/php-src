@@ -279,6 +279,7 @@ PW32IO int php_win32_ioutil_close(int fd)
 	return result;
 }/*}}}*/
 
+#if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
 	int ret = 0;
@@ -295,7 +296,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 
 	return ret;
 }/*}}}*/
-
+#endif
 
 PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 {/*{{{*/

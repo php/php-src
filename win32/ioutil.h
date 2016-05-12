@@ -176,13 +176,13 @@ PW32IO int php_win32_ioutil_close(int fd);
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts);
 PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode);
 
-PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
 
 #if 0
+PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 #endif
 
