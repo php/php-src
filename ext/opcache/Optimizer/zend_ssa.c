@@ -95,6 +95,13 @@ static zend_ssa_phi *add_pi(
 	 * If there is a back-edge to "to" this may result in non-minimal SSA form. */
 	DFG_SET(dfg->def, dfg->size, to, var);
 
+	/* If there are multiple predecessors in the target block, we need to place a phi there.
+	 * However this can (generally) not be expressed in terms of dominance frontiers, so place it
+	 * explicitly. dfg->use here really is dfg->phi, we're reusing the set. */
+	if (ssa->cfg.blocks[to].predecessors_count > 1) {
+		DFG_SET(dfg->use, dfg->size, to, var);
+	}
+
 	return phi;
 }
 /* }}} */
