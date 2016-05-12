@@ -3252,8 +3252,10 @@ PHP_FUNCTION(pg_lo_create)
 	if (pgsql_link == NULL) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if ((Z_TYPE_P(pgsql_link) == IS_RESOURCE)) {
 		link = Z_RES_P(pgsql_link);
+	} else {
+		link = NULL;
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
