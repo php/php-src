@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0
 
 - Core:
+  . Added DFA optimization framework based on e-SSA form. (Dmitry, Nikita)
+  . Added specialized opcode handlers (e.g. ZEND_ADD_LONG_NO_OVERFLOW).
+    (Dmitry)
   . Change statement and fcall extension handlers to accept frame. (Joe)
   . Implemented safe execution timeout handling, that prevents rundom crashes
     after "Maximum execution time exceeded" error. (Dmitry)
