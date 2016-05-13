@@ -2691,7 +2691,7 @@ EOF
         continue;
       fi
       for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do
-       if test `expr $arg : ".*${var}.*"` != 0;
+       if test `expr "X$arg" : "X.*${var}.*"` != 0;
 	   then
          continue 2
 	   fi
@@ -2703,7 +2703,7 @@ EOF
         continue;
       fi
       for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do
-       if test `expr $arg : ".*${var}.*"` != 0;
+       if test `expr "X$arg" : "X.*${var}.*"` != 0;
 	   then
          continue 2
 	   fi
