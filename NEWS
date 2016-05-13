@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     null byte). (Francois)
   . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
     identifiers). (Andrea)
+  . Fixed bug #72188 (Nested try/finally blocks losing return value). (Dmitry)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)

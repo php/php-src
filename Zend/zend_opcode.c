@@ -550,7 +550,6 @@ static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
 		/* Must be ZEND_FAST_CALL */
 		ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[finally_num].finally_op - 2].opcode == ZEND_FAST_CALL);
 		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-		op_array->opcodes[op_num].op2.num = finally_num;
 	}
 }
 
