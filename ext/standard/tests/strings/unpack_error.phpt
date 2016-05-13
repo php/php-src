@@ -19,7 +19,7 @@ var_dump(unpack("I", pack("I", 65534), 0, $extra_arg));
 
 echo "\n-- Testing unpack() function with invalid format character --\n";
 $extra_arg = 10;
-var_dump(unpack("G", pack("I", 65534)));
+var_dump(unpack("B", pack("I", 65534)));
 ?>
 ===DONE===
 --EXPECTF--
