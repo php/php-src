@@ -1,5 +1,5 @@
 --TEST--
-proc_open
+proc_open with bypass_shell subprocess parameter passing
 --SKIPIF--
 <?php # vim:syn=php
 if (substr(PHP_OS, 0, 3) != 'WIN') die("skip Valid only on Windows");
