@@ -7531,7 +7531,7 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(162, ZEND_FAST_CALL, JMP_ADDR, TRY_CATCH, FAST_CALL)
+ZEND_VM_HANDLER(162, ZEND_FAST_CALL, JMP_ADDR, ANY, FAST_CALL)
 {
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->result.var);
@@ -7554,9 +7554,6 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, TRY_CATCH, FAST_RET)
 
 	if (fast_call->u2.lineno != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
-		if (fast_ret->extended_value & ZEND_FAST_CALL_FROM_FINALLY) {
-			fast_call->u2.lineno = EX(func)->op_array.try_catch_array[fast_ret->op2.num].finally_op - 2;
-		}
 		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		ZEND_VM_CONTINUE();
 	} else {
@@ -7565,7 +7562,11 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, TRY_CATCH, FAST_RET)
 
 		if (opline->extended_value == ZEND_FAST_RET_TO_FINALLY) {
 			uint32_t finally_op = EX(func)->op_array.try_catch_array[opline->op2.num].finally_op;
+			uint32_t finally_end = EX(func)->op_array.try_catch_array[opline->op2.num].finally_end;
+			zval *next_fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_end].op1.var);
 
+			Z_OBJ_P(next_fast_call) = Z_OBJ_P(fast_call);
+			next_fast_call->u2.lineno = (uint32_t)-1;
 			cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, finally_op);
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[finally_op]);
 			ZEND_VM_CONTINUE();
