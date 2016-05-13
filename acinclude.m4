@@ -2699,7 +2699,7 @@ EOF
     break
    fi
    for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do
-    if test `expr $CURRENT_ARG : ".*${var}.*"` != 0;
+    if test `expr "X$CURRENT_ARG" : "X.*${var}.*"` != 0;
 	then
       continue 2
 	fi
