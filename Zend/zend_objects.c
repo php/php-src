@@ -91,7 +91,9 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	if (destructor) {
 		zend_object *old_exception;
 		zval obj;
+		zend_class_entry *orig_fake_scope = NULL;
 
+		EG(fake_scope) = NULL;
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				/* Ensure that if we're calling a private function, we're allowed to do so.
@@ -104,12 +106,14 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 							"Call to private %s::__destruct() from context '%s'",
 							ZSTR_VAL(object->ce->name),
 							scope ? ZSTR_VAL(scope->name) : "");
+						EG(fake_scope) = orig_fake_scope;
 						return;
 					}
 				} else {
 					zend_error(E_WARNING,
 						"Call to private %s::__destruct() from context '' during shutdown ignored",
 						ZSTR_VAL(object->ce->name));
+					EG(fake_scope) = orig_fake_scope;
 					return;
 				}
 			} else {
@@ -123,12 +127,14 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 							"Call to protected %s::__destruct() from context '%s'",
 							ZSTR_VAL(object->ce->name),
 							scope ? ZSTR_VAL(scope->name) : "");
+						EG(fake_scope) = orig_fake_scope;
 						return;
 					}
 				} else {
 					zend_error(E_WARNING,
 						"Call to protected %s::__destruct() from context '' during shutdown ignored",
 						ZSTR_VAL(object->ce->name));
+					EG(fake_scope) = orig_fake_scope;
 					return;
 				}
 			}
@@ -159,6 +165,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			}
 		}
 		zval_ptr_dtor(&obj);
+		EG(fake_scope) = orig_fake_scope;
 	}
 }
 
