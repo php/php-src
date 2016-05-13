@@ -89,6 +89,8 @@ typedef enum {
 
 
 #define PHP_WIN32_IOUTIL_DEFAULT_SLASHW L'\\'
+#define PHP_WIN32_IOUTIL_DEFAULT_SLASH '\\'
+
 #define PHP_WIN32_IOUTIL_DEFAULT_DIR_SEPARATORW	L';'
 #define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == L'\\' || (c) == L'/')
 #define PHP_WIN32_IOUTIL_IS_LETTERW(c) (((c) >= L'a' && (c) <= L'z') || ((c) >= L'A' && (c) <= L'Z'))
@@ -98,7 +100,6 @@ typedef enum {
 #define PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW 4
 #define PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW L"\\\\?\\UNC\\"
 #define PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW 8
-
 
 #define PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) (path_lenw >= PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW \
 	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW))
@@ -175,6 +176,7 @@ __forceinline static wchar_t *php_win32_ioutil_any_to_w(const char* in)
 PW32IO int php_win32_ioutil_close(int fd);
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts);
 PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode);
+PW32IO size_t php_win32_ioutil_dirname(char *buf, size_t len);
 
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);

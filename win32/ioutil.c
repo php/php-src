@@ -424,6 +424,77 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	return (wchar_t *)buf;
 }/*}}}*/
 
+/* based on zend_dirname() */
+PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
+{/*{{{*/
+	char *ret = NULL, *start;
+	size_t ret_len, len_adjust = 0;
+	wchar_t *endw, *pathw, *startw;
+
+	if (len == 0) {
+		return 0;
+	}
+	
+	start = path;
+
+	startw = pathw = php_win32_ioutil_any_to_w(path);
+	if (!pathw) {
+		return 0;
+	}
+
+	endw = pathw + wcslen(pathw) - 1;
+
+	if ((2 <= len) && isalpha((int)((unsigned char *)path)[0]) && (':' == path[1])) {
+		pathw += 2;
+		path += 2;
+		len_adjust += 2;
+		if (2 == len) {
+			free(startw);
+			return len;
+		}
+	}
+
+	/* Strip trailing slashes */
+	while (endw >= pathw && PHP_WIN32_IOUTIL_IS_SLASHW(*endw)) {
+		endw--;
+	}
+	if (endw < pathw) {
+		/* The path only contained slashes */
+		path[0] = PHP_WIN32_IOUTIL_DEFAULT_SLASH;
+		path[1] = '\0';
+		return 1 + len_adjust;
+	}
+
+	/* Strip filename */
+	while (endw >= pathw && !PHP_WIN32_IOUTIL_IS_SLASHW(*endw)) {
+		endw--;
+	}
+	if (endw < pathw) {
+		path[0] = '.';
+		path[1] = '\0';
+		return 1 + len_adjust;
+	}
+
+	/* Strip slashes which came before the file name */
+	while (endw >= pathw && PHP_WIN32_IOUTIL_IS_SLASHW(*endw)) {
+		endw--;
+	}
+	if (endw < pathw) {
+		path[0] = PHP_WIN32_IOUTIL_DEFAULT_SLASH;
+		path[1] = '\0';
+		return 1 + len_adjust;
+	}
+	*(endw+1) = '\0';
+
+	ret = php_win32_ioutil_w_to_any(startw);
+	ret_len = strlen(ret);
+	memmove(start, ret, ret_len + 1);
+	free(ret);
+	free(startw);
+
+	return ret_len;
+}/*}}}*/
+
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
