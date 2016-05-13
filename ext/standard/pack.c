@@ -1053,10 +1053,12 @@ PHP_FUNCTION(unpack)
 							char *buf = emalloc(sizeof(float));
 							php_pack_memcpy(1, &buf, &input[inputpos], sizeof(float));
 							memcpy(&v, &buf, sizeof(float));
+							efree(buf);
 						} else if (type == 'G') {
 							char *buf = emalloc(sizeof(float));
 							php_pack_memcpy(0, &buf, &input[inputpos], sizeof(float));
 							memcpy(&v, &buf, sizeof(float));
+							efree(buf);
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
@@ -1075,10 +1077,12 @@ PHP_FUNCTION(unpack)
 							char *buf = emalloc(sizeof(double));
 							php_pack_memcpy(1, &buf, &input[inputpos], sizeof(double));
 							memcpy(&v, &buf, sizeof(double));
+							efree(buf);
 						} else if (type == 'E') {
 							char *buf = emalloc(sizeof(double));
 							php_pack_memcpy(0, &buf, &input[inputpos], sizeof(double));
 							memcpy(&v, &buf, sizeof(double));
+							efree(buf);
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(double));
 						}
