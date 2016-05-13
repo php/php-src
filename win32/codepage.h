@@ -40,7 +40,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env);
 /* This function tries to make the best guess to convert any
    given string to a wide char, also prefering the fastest code
    path to unicode. It returns NULL on fail. */
-__forceinline wchar_t *php_win32_cp_any_to_w(const char* in)
+__forceinline static wchar_t *php_win32_cp_any_to_w(const char* in)
 {
 	wchar_t *ret;
 
