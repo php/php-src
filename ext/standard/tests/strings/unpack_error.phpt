@@ -37,6 +37,6 @@ NULL
 
 -- Testing unpack() function with invalid format character --
 
-Warning: unpack(): Invalid format type G in %s on line %d
+Warning: unpack(): Invalid format type B in %s on line %d
 bool(false)
 ===DONE===
