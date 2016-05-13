@@ -182,7 +182,7 @@ PW32CP BOOL php_win32_cp_use_unicode(void)
 }/*}}}*/
 
 PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
-{
+{/*{{{*/
 	wchar_t *envw = NULL, ew[32760];
 	char *cur = env, *prev;
 	size_t bin_len = 0;
@@ -212,7 +212,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	envw[bin_len + 2] = L'\0';
 
 	return envw;
-}
+}/*}}}*/
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
 
