@@ -748,28 +748,30 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	if (bypass_shell) {
-		cmdw = php_win32_cp_any_to_w(command);
-		if (!cmdw) {
-			php_error_docref(NULL, E_WARNING, "Command conversion failed");
-			goto exit_fail;
-		}
+	cmdw = php_win32_cp_any_to_w(command);
+	if (!cmdw) {
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		goto exit_fail;
+	}
 
+	if (bypass_shell) {
 		newprocok = CreateProcessW(NULL, cmdw, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
 	} else {
 		int ret;
 		size_t len;
+		wchar_t *cmdw2;
 
-		len = (sizeof(COMSPEC_NT) + 4 + command_len + 1);
-		cmdw = (wchar_t *)malloc(len * sizeof(wchar_t));
-		ret = swprintf(cmdw, len, L"%hs /C %hs", COMSPEC_NT, command);
+		len = (sizeof(COMSPEC_NT) + 4 + wcslen(cmdw) + 1);
+		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
+		ret = swprintf(cmdw2, len, L"%hs /c %s", COMSPEC_NT, cmdw);
 
 		if (-1 == ret) {
 			php_error_docref(NULL, E_WARNING, "Command conversion failed");
 			goto exit_fail;
 		}
 
-		newprocok = CreateProcessW(NULL, cmdw, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
+		newprocok = CreateProcessW(NULL, cmdw2, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
+		free(cmdw2);
 	}
 
 	free(cwdw);
