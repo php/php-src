@@ -12,7 +12,7 @@ if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 $php = PHP_BINARY;
 
 $f = dirname(__FILE__) . DIRECTORY_SEPARATOR . "proc_only_mb0.php";
-file_put_contents($f,'<?php var_dump($argv); foreach($argv as $a) {file_put_contents(dirname(__FILE__) . \'/tmp.txt\', $a, FILE_APPEND);}  ?>');
+file_put_contents($f,'<?php var_dump($argv); ?>');
 
 $ds = array(
 		0 => array("pipe", "r"),
