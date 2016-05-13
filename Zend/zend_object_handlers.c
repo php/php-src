@@ -191,6 +191,9 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	/* __get handler is called with one argument:
 	      property name
@@ -202,6 +205,8 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{
 	zend_call_method_with_1_params(object, ce, &ce->__get, ZEND_GET_FUNC_NAME, retval, member);
 
 	zval_ptr_dtor(member);
+
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
@@ -210,6 +215,9 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	zval retval;
 	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
 	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
@@ -228,8 +236,10 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		result = i_zend_is_true(&retval) ? SUCCESS : FAILURE;
 		zval_ptr_dtor(&retval);
+		EG(fake_scope) = orig_fake_scope;
 		return result;
 	} else {
+		EG(fake_scope) = orig_fake_scope;
 		return FAILURE;
 	}
 }
@@ -238,6 +248,9 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 static void zend_std_call_unsetter(zval *object, zval *member) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	/* __unset handler is called with one argument:
 	      property name
@@ -248,12 +261,17 @@ static void zend_std_call_unsetter(zval *object, zval *member) /* {{{ */
 	zend_call_method_with_1_params(object, ce, &ce->__unset, ZEND_UNSET_FUNC_NAME, NULL, member);
 
 	zval_ptr_dtor(member);
+
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
 static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	/* __isset handler is called with one argument:
 	      property name
@@ -266,6 +284,8 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 	zend_call_method_with_1_params(object, ce, &ce->__isset, ZEND_ISSET_FUNC_NAME, retval, member);
 
 	zval_ptr_dtor(member);
+
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
