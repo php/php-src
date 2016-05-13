@@ -131,7 +131,6 @@ static void php_pack_memcpy(int is_little_endian, void * dst, void * src, size_t
 		/*
 		  Copy to dst from last to first 
 		*/
-		int i = 0;
 		src = src + size - 1;
 		do {
 			*(char *) dst = *(char *)src;
@@ -345,8 +344,8 @@ PHP_FUNCTION(pack)
 				break;
 
 			case 'd': /* double */
-			case 'e': /* little endian float */
-			case 'E': /* big endian float */
+			case 'e': /* little endian double */
+			case 'E': /* big endian double */
 				INC_OUTPUTPOS(arg,sizeof(double))
 				break;
 
@@ -526,9 +525,7 @@ PHP_FUNCTION(pack)
 				/* pack little endian float */
 				while (arg-- > 0) {
 					float v = (float) zval_get_double(&argv[currentarg++]);
-					char *buf = emalloc(sizeof(float));
-					php_pack_memcpy(1, &buf, &v, sizeof(float));
-					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(float));
+					php_pack_memcpy(1, &ZSTR_VAL(output)[outputpos], &v, sizeof(float));
 					outputpos += sizeof(v);
 				}
 				
@@ -538,9 +535,7 @@ PHP_FUNCTION(pack)
 				/* pack big endian float */
 				while (arg-- > 0) {
 					float v = (float) zval_get_double(&argv[currentarg++]);
-					char *buf = emalloc(sizeof(float));
-					php_pack_memcpy(0, &buf, &v, sizeof(float));
-					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(float));
+					php_pack_memcpy(0, &ZSTR_VAL(output)[outputpos], &v, sizeof(float));
 					outputpos += sizeof(v);
 				}
 				break;
@@ -558,10 +553,8 @@ PHP_FUNCTION(pack)
 			case 'e': {
 				/* pack little endian double */
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);					
-					char *buf = emalloc(sizeof(double));
-					php_pack_memcpy(1, &buf, &v, sizeof(double));					
-					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(double));
+					double v = (double) zval_get_double(&argv[currentarg++]);
+					php_pack_memcpy(1, &ZSTR_VAL(output)[outputpos], &v, sizeof(double));
 					outputpos += sizeof(v);
 				}
 				break;
@@ -571,9 +564,7 @@ PHP_FUNCTION(pack)
 				/* pack big endian double */
 				while (arg-- > 0) {
 					double v = (double) zval_get_double(&argv[currentarg++]);
-					char *buf = emalloc(sizeof(double));
-					php_pack_memcpy(0, &buf, &v, sizeof(double));
-					memcpy(&ZSTR_VAL(output)[outputpos], &buf, sizeof(double));
+					php_pack_memcpy(0, &ZSTR_VAL(output)[outputpos], &v, sizeof(double));
 					outputpos += sizeof(v);
 				}
 				break;
@@ -1050,15 +1041,9 @@ PHP_FUNCTION(unpack)
 						float v;
 
 						if (type == 'g') {
-							char *buf = emalloc(sizeof(float));
-							php_pack_memcpy(1, &buf, &input[inputpos], sizeof(float));
-							memcpy(&v, &buf, sizeof(float));
-							efree(buf);
+							php_pack_memcpy(1, &v, &input[inputpos], sizeof(float));
 						} else if (type == 'G') {
-							char *buf = emalloc(sizeof(float));
-							php_pack_memcpy(0, &buf, &input[inputpos], sizeof(float));
-							memcpy(&v, &buf, sizeof(float));
-							efree(buf);
+							php_pack_memcpy(0, &v, &input[inputpos], sizeof(float));
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
@@ -1074,15 +1059,9 @@ PHP_FUNCTION(unpack)
 					{
 						double v;
 						if (type == 'e') {
-							char *buf = emalloc(sizeof(double));
-							php_pack_memcpy(1, &buf, &input[inputpos], sizeof(double));
-							memcpy(&v, &buf, sizeof(double));
-							efree(buf);
+							php_pack_memcpy(1, &v, &input[inputpos], sizeof(double));
 						} else if (type == 'E') {
-							char *buf = emalloc(sizeof(double));
-							php_pack_memcpy(0, &buf, &input[inputpos], sizeof(double));
-							memcpy(&v, &buf, sizeof(double));
-							efree(buf);
+							php_pack_memcpy(0, &v, &input[inputpos], sizeof(double));
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(double));
 						}
