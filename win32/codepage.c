@@ -88,7 +88,6 @@ PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* path, size_t path_len,
 
 }/*}}}*/
 
-/* \0 terminated string is expected! */
 PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* path, size_t path_len, size_t *pathw_len)
 {/*{{{*/
 	wchar_t *ret = NULL;

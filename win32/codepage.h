@@ -33,6 +33,7 @@ extern "C" {
 #define PHP_WIN32_CP_IGNORE_LEN_P ((size_t *)-1)
 
 PW32CP BOOL php_win32_cp_use_unicode(void);
+/* This API is binary safe and expects a \0 terminated input. The returned length doesn't count \0. */
 PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* path, size_t path_len, size_t *pathw_len);
 #define php_win32_cp_mb_to_w(path) php_win32_cp_mb_to_w_full(path, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* path, size_t path_len, size_t *pathw_len);
