@@ -132,7 +132,7 @@ typedef enum {
 /* Keep these functions aliased for case some additional handling
    is needed later. */
 __forceinline static wchar_t *php_win32_ioutil_any_to_w_full(const char* in, size_t in_len, size_t *out_len)
-{
+{/*{{{*/
 	wchar_t *mb, *ret;
 	size_t mb_len;
 	
@@ -149,7 +149,7 @@ __forceinline static wchar_t *php_win32_ioutil_any_to_w_full(const char* in, siz
 		}
 		memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
 		memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
-		ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1] = L'\0';
+		ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
 
 		mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 
@@ -163,7 +163,7 @@ __forceinline static wchar_t *php_win32_ioutil_any_to_w_full(const char* in, siz
 	}
 
 	return ret;
-}
+}/*}}}*/
 #define php_win32_ioutil_any_to_w(in) php_win32_ioutil_any_to_w_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
 #define php_win32_ioutil_ascii_to_w php_win32_cp_ascii_to_w
@@ -198,7 +198,7 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 #define php_win32_ioutil_rmdir_cond(path) php_win32_ioutil_rmdir_w(pathw)
 
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
-{
+{/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path);
 	int ret;
 
@@ -214,10 +214,10 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 	PHP_WIN32_IOUTIL_CLEANUP_W();
 
 	return ret;
-}
+}/*}}}*/
 
 __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
-{
+{/*{{{*/
 	mode_t mode = 0;
 	PHP_WIN32_IOUTIL_INIT_W(path);
 	int ret = -1;
@@ -247,10 +247,10 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 __forceinline static int php_win32_ioutil_unlink(const char *path)
-{
+{/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path);
 	int ret = 0;
 	DWORD err = 0;
@@ -273,10 +273,10 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 __forceinline static int php_win32_ioutil_rmdir(const char *path)
-{
+{/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path);
 	int ret = 0;
 	DWORD err = 0;
@@ -300,13 +300,13 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 /* This needs to be improved once long path support is implemented. Use ioutil_open() and then
 fdopen() might be the way, if we learn how to convert the mode options (maybe grab the routine
  from the streams). That will allow to split for _a and _w. */
 __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
-{
+{/*{{{*/
 	FILE *ret;
 	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
 	wchar_t *modew = php_win32_ioutil_ascii_to_w(modea);
@@ -330,10 +330,10 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 		_set_errno(err);
 	}
 	return ret;
-}
+}/*}}}*/
 
 __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
-{
+{/*{{{*/
 	wchar_t *oldnamew = php_win32_ioutil_any_to_w(oldnamea);
 	wchar_t *newnamew = php_win32_ioutil_any_to_w(newnamea);
 	int ret;
@@ -360,10 +360,10 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 __forceinline static int php_win32_ioutil_chdir(const char *patha)
-{
+{/*{{{*/
 	int ret;
 	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
 	DWORD err = 0;
@@ -383,10 +383,10 @@ __forceinline static int php_win32_ioutil_chdir(const char *patha)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
-{
+{/*{{{*/
 	wchar_t *tmp_bufw = NULL;
 	char *tmp_bufa = NULL;
 	DWORD err = 0;
@@ -423,11 +423,11 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 	free(tmp_bufw);
 
 	return buf;
-}
+}/*}}}*/
 
 /* TODO improve with usage of native APIs, split for _a and _w. */
 __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
-{
+{/*{{{*/
 	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
 	int err = 0;
 	int ret;
@@ -449,7 +449,7 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 
 #if 0
