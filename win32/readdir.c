@@ -43,6 +43,7 @@ DIR *opendir(const char *dir)
 	HANDLE handle;
 	int index;
 	char resolved_path_buff[MAXPATHLEN];
+	size_t resolvedw_len, filespecw_len;
 
 	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
 		return NULL;
@@ -53,19 +54,21 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	resolvedw = php_win32_ioutil_any_to_w(resolved_path_buff);
-
+	resolvedw = php_win32_ioutil_any_to_w_full(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
 	if (!resolvedw) {
 		return NULL;
 	}
-	filespecw = (wchar_t *)malloc((wcslen(resolvedw) + 2 + 1)*sizeof(wchar_t));
+
+	filespecw_len = resolvedw_len + 2;
+	filespecw = (wchar_t *)malloc((filespecw_len + 1)*sizeof(wchar_t));
 	if (filespecw == NULL) {
+		free(resolvedw);
 		return NULL;
 	}
+
 	wcscpy(filespecw, resolvedw);
-	index = (int)wcslen(filespecw) - 1;
-	if (index >= 0 && (filespecw[index] == L'/' ||
-	   (filespecw[index] == L'\\' && index == 0)))
+	index = (int)filespecw_len - 1;
+	if (index >= 0 && filespecw[index] == L'/' || index == 0 && filespecw[index] == L'\\')
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
 
@@ -76,6 +79,7 @@ DIR *opendir(const char *dir)
 		} else {
 			free(dp);
 			free(filespecw);
+			free(resolvedw);
 			return NULL;
 		}
 	}
