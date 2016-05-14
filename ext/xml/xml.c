@@ -1573,9 +1573,10 @@ PHP_FUNCTION(xml_parser_free)
 		RETURN_FALSE;
 	}
 
-	res = Z_RES(parser->index);
-	ZVAL_UNDEF(&parser->index);
-	zend_list_close(res);
+	if (zend_list_delete(Z_RES(parser->index)) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */

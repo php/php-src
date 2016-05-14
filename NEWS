@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   . Fixed bug #72193 (dns_get_record returns array containing elements of
     type 'unknown'). (Laruence)
 
+- XML:
+  . Fixed #72206 (xml_parser_create/xml_parser_free leaks mem). (Joe)
 
 26 May 2016 PHP 7.0.7
 
