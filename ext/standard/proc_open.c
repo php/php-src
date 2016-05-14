@@ -444,7 +444,6 @@ PHP_FUNCTION(proc_open)
 	BOOL newprocok;
 	SECURITY_ATTRIBUTES security;
 	DWORD dwCreateFlags = 0;
-	char *command_with_cmd;
 	UINT old_error_mode;
 	char cur_cwd[MAXPATHLEN];
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
