@@ -237,19 +237,15 @@ PHPAPI const char* php_get_temporary_directory(void)
 	{
 		wchar_t sTemp[MAXPATHLEN];
 		char *tmp;
-		DWORD len = GetTempPathW(MAXPATHLEN, sTemp);
+		size_t len = GetTempPathW(MAXPATHLEN, sTemp);
 		assert(0 < len);  /* should *never* fail! */
 
-		if (NULL == (tmp = php_win32_ioutil_w_to_any(sTemp))) {
+		if (NULL == (tmp = php_win32_ioutil_w_to_any_full(sTemp, len, &len))) {
 			return NULL;
 		}
-		len = (DWORD)strlen(tmp);
 
-		if (tmp[len - 1] == DEFAULT_SLASH) {
-			PG(php_sys_temp_dir) = estrndup(tmp, len - 1);
-		} else {
-			PG(php_sys_temp_dir) = estrndup(tmp, len);
-		}
+		PG(php_sys_temp_dir) = estrndup(tmp, len - 1);
+
 		free(tmp);
 		return PG(php_sys_temp_dir);
 	}
