@@ -2236,12 +2236,12 @@ static uint32_t assign_dim_result_type(
 static uint32_t binary_op_result_type(
 		zend_ssa *ssa, zend_uchar opcode, uint32_t t1, uint32_t t2, uint32_t result_var) {
 	uint32_t tmp;
+	uint32_t t1_type = (t1 & MAY_BE_ANY) | (t1 & MAY_BE_UNDEF ? MAY_BE_NULL : 0);
+	uint32_t t2_type = (t2 & MAY_BE_ANY) | (t2 & MAY_BE_UNDEF ? MAY_BE_NULL : 0);
 	switch (opcode) {
 		case ZEND_ADD:
 			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
-				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
-
+			if (t1_type == MAY_BE_LONG && t2_type == MAY_BE_LONG) {
 				if (!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
@@ -2250,17 +2250,15 @@ static uint32_t binary_op_result_type(
 				} else {
 					tmp |= MAY_BE_LONG;
 				}
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+			} else if (t1_type == MAY_BE_DOUBLE || t2_type == MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_DOUBLE;
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY &&
-					   (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
+			} else if (t1_type == MAY_BE_ARRAY && t2_type == MAY_BE_ARRAY) {
 				tmp |= MAY_BE_ARRAY;
 				tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 				tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 			} else {
 				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-				if ((t1 & MAY_BE_ARRAY) && (t2 & MAY_BE_ARRAY)) {
+				if ((t1_type & MAY_BE_ARRAY) && (t2_type & MAY_BE_ARRAY)) {
 					tmp |= MAY_BE_ARRAY;
 					tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 					tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
@@ -2270,8 +2268,7 @@ static uint32_t binary_op_result_type(
 		case ZEND_SUB:
 		case ZEND_MUL:
 			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
-				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
+			if (t1_type == MAY_BE_LONG && t2_type == MAY_BE_LONG) {
 				if (!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
@@ -2280,8 +2277,7 @@ static uint32_t binary_op_result_type(
 				} else {
 					tmp |= MAY_BE_LONG;
 				}
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+			} else if (t1_type == MAY_BE_DOUBLE || t2_type == MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_DOUBLE;
 			} else {
 				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
@@ -2290,8 +2286,7 @@ static uint32_t binary_op_result_type(
 		case ZEND_DIV:
 		case ZEND_POW:
 			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-			    (t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+			if (t1_type == MAY_BE_DOUBLE || t2_type == MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_DOUBLE;
 			} else {
 				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
@@ -2307,10 +2302,10 @@ static uint32_t binary_op_result_type(
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
 			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING)) {
+			if ((t1_type & MAY_BE_STRING) && (t2_type & MAY_BE_STRING)) {
 				tmp |= MAY_BE_STRING;
 			}
-			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t2 & (MAY_BE_ANY-MAY_BE_STRING))) {
+			if ((t1_type & ~MAY_BE_STRING) || (t2_type & ~MAY_BE_STRING)) {
 				tmp |= MAY_BE_LONG;
 			}
 			break;
