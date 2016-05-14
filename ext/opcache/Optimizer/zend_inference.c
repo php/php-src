@@ -2232,6 +2232,120 @@ static uint32_t assign_dim_result_type(
 	return tmp;
 }
 
+/* For binary ops that have compound assignment operators */
+static uint32_t binary_op_result_type(
+		zend_ssa *ssa, zend_uchar opcode, uint32_t t1, uint32_t t2, uint32_t result_var) {
+	uint32_t tmp;
+	switch (opcode) {
+		case ZEND_ADD:
+			tmp = MAY_BE_RC1;
+			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
+				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
+
+				if (!ssa->var_info[result_var].has_range ||
+				    ssa->var_info[result_var].range.underflow ||
+				    ssa->var_info[result_var].range.overflow) {
+					/* may overflow */
+					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+				} else {
+					tmp |= MAY_BE_LONG;
+				}
+			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
+				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+				tmp |= MAY_BE_DOUBLE;
+			} else if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY &&
+					   (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
+				tmp |= MAY_BE_ARRAY;
+				tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
+				tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
+			} else {
+				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+				if ((t1 & MAY_BE_ARRAY) && (t2 & MAY_BE_ARRAY)) {
+					tmp |= MAY_BE_ARRAY;
+					tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
+					tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
+				}
+			}
+			break;
+		case ZEND_SUB:
+		case ZEND_MUL:
+			tmp = MAY_BE_RC1;
+			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
+				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
+				if (!ssa->var_info[result_var].has_range ||
+				    ssa->var_info[result_var].range.underflow ||
+				    ssa->var_info[result_var].range.overflow) {
+					/* may overflow */
+					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+				} else {
+					tmp |= MAY_BE_LONG;
+				}
+			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
+				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+				tmp |= MAY_BE_DOUBLE;
+			} else {
+				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+			}
+			break;
+		case ZEND_DIV:
+		case ZEND_POW:
+			tmp = MAY_BE_RC1;
+			if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
+			    (t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+				tmp |= MAY_BE_DOUBLE;
+			} else {
+				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+			}
+			/* Division by zero results in Inf/-Inf/Nan (double), so it doesn't need any special
+			 * handling */
+			break;
+		case ZEND_MOD:
+			tmp = MAY_BE_RC1 | MAY_BE_LONG;
+			/* Division by zero results in an exception, so it doesn't need any special handling */
+			break;
+		case ZEND_BW_OR:
+		case ZEND_BW_AND:
+		case ZEND_BW_XOR:
+			tmp = MAY_BE_RC1;
+			if ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING)) {
+				tmp |= MAY_BE_STRING;
+			}
+			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t2 & (MAY_BE_ANY-MAY_BE_STRING))) {
+				tmp |= MAY_BE_LONG;
+			}
+			break;
+		case ZEND_SL:
+		case ZEND_SR:
+			tmp = MAY_BE_RC1|MAY_BE_LONG;
+			break;
+		case ZEND_CONCAT:
+			/* TODO: +MAY_BE_OBJECT ??? */
+			tmp = MAY_BE_RC1|MAY_BE_STRING;
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+	return tmp;
+}
+
+/* Get the normal op corresponding to a compound assignment op */
+static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
+	switch (opcode) {
+		case ZEND_ASSIGN_ADD: return ZEND_ADD;
+		case ZEND_ASSIGN_SUB: return ZEND_SUB;
+		case ZEND_ASSIGN_MUL: return ZEND_MUL;
+		case ZEND_ASSIGN_DIV: return ZEND_DIV;
+		case ZEND_ASSIGN_MOD: return ZEND_MOD;
+		case ZEND_ASSIGN_SL: return ZEND_SL;
+		case ZEND_ASSIGN_SR: return ZEND_SR;
+		case ZEND_ASSIGN_CONCAT: return ZEND_CONCAT; // TODO
+		case ZEND_ASSIGN_BW_OR: return ZEND_BW_OR;
+		case ZEND_ASSIGN_BW_AND: return ZEND_BW_AND;
+		case ZEND_ASSIGN_BW_XOR: return ZEND_BW_XOR;
+		case ZEND_ASSIGN_POW: return ZEND_POW;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
 static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname) {
 	zend_class_entry *ce = zend_hash_find_ptr(&script->class_table, lcname);
 	if (ce) {
@@ -2304,73 +2418,18 @@ static void zend_update_type_info(const zend_op_array *op_array,
 
 	switch (opline->opcode) {
 		case ZEND_ADD:
-			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
-				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
-
-				if (!ssa_var_info[ssa_ops[i].result_def].has_range ||
-				    ssa_var_info[ssa_ops[i].result_def].range.underflow ||
-				    ssa_var_info[ssa_ops[i].result_def].range.overflow) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-				} else {
-					tmp |= MAY_BE_LONG;
-				}
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				tmp |= MAY_BE_DOUBLE;
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY &&
-					   (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
-				tmp |= MAY_BE_ARRAY;
-				tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-				tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-				if ((t1 & MAY_BE_ARRAY) && (t2 & MAY_BE_ARRAY)) {
-					tmp |= MAY_BE_ARRAY;
-					tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-					tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-				}
-			}
-			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			break;
 		case ZEND_SUB:
 		case ZEND_MUL:
-			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
-				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
-				if (!ssa_var_info[ssa_ops[i].result_def].has_range ||
-				    ssa_var_info[ssa_ops[i].result_def].range.underflow ||
-				    ssa_var_info[ssa_ops[i].result_def].range.overflow) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-				} else {
-					tmp |= MAY_BE_LONG;
-				}
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				tmp |= MAY_BE_DOUBLE;
-			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-			}
-			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			break;
 		case ZEND_DIV:
 		case ZEND_POW:
-			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-			    (t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				tmp |= MAY_BE_DOUBLE;
-			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-			}
-			/* Division by zero results in Inf/-Inf/Nan (double), so it doesn't need any special
-			 * handling */
-			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			break;
 		case ZEND_MOD:
-			tmp = MAY_BE_RC1 | MAY_BE_LONG;
-			/* Division by zero results in an exception, so it doesn't need any special handling */
+		case ZEND_BW_OR:
+		case ZEND_BW_AND:
+		case ZEND_BW_XOR:
+		case ZEND_SL:
+		case ZEND_SR:
+		case ZEND_CONCAT:
+			tmp = binary_op_result_type(ssa, opline->opcode, t1, t2, ssa_ops[i].result_def);
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
 		case ZEND_BW_NOT:
@@ -2383,20 +2442,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
-		case ZEND_BW_OR:
-		case ZEND_BW_AND:
-		case ZEND_BW_XOR:
-			tmp = MAY_BE_RC1;
-			if ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING)) {
-				tmp |= MAY_BE_STRING;
-			}
-			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t2 & (MAY_BE_ANY-MAY_BE_STRING))) {
-				tmp |= MAY_BE_LONG;
-			}
-			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			break;
-		case ZEND_SL:
-		case ZEND_SR:
 		case ZEND_BEGIN_SILENCE:
 			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_LONG, ssa_ops[i].result_def);
 			break;
@@ -2461,6 +2506,17 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].result_def);
 			break;
 		case ZEND_ASSIGN_ADD:
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_POW:
+		case ZEND_ASSIGN_MOD:
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
+		case ZEND_ASSIGN_CONCAT:
 			orig = 0;
 			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 				tmp = MAY_BE_RC1;
@@ -2484,33 +2540,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					tmp |= MAY_BE_REF;
 				}
 			}
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
-				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
 
-				if (!ssa_var_info[ssa_ops[i].op1_def].has_range ||
-				    ssa_var_info[ssa_ops[i].op1_def].range.underflow ||
-				    ssa_var_info[ssa_ops[i].op1_def].range.overflow) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-				} else {
-					tmp |= MAY_BE_LONG;
-				}
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				tmp |= MAY_BE_DOUBLE;
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY &&
-					   (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
-				tmp |= MAY_BE_ARRAY;
-				tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-				tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-				if ((t1 & MAY_BE_ARRAY) && (t2 & MAY_BE_ARRAY)) {
-					tmp |= MAY_BE_ARRAY;
-					tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-					tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
-				}
-			}
+			tmp |= binary_op_result_type(
+				ssa, get_compound_assign_op(opline->opcode), t1, t2, ssa_ops[i].op1_def);
+
 			if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if (opline->op1_type == IS_CV) {
 					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
@@ -2525,242 +2558,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					if (orig & MAY_BE_RCN) {
 						orig |= MAY_BE_RC1;
 					}
-					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
-					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
-				}
-			} else {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-			}
-			if (ssa_ops[i].result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			}
-			break;
-		case ZEND_ASSIGN_SUB:
-		case ZEND_ASSIGN_MUL:
-			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-				goto unknown_opcode;
-			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				tmp = MAY_BE_RC1;
-				orig = t1 & ~MAY_BE_UNDEF;
-				t1 = zend_array_element_type(t1, 1, 0);
-				t2 = OP1_DATA_INFO();
-			} else {
-				tmp = 0;
-				if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
-					tmp |= MAY_BE_RC1;
-					if (ssa_ops[i].result_def >= 0) {
-						tmp |= MAY_BE_RCN;
-					}
-				}
-				if (t1 & MAY_BE_REF) {
-					tmp |= MAY_BE_REF;
-				}
-			}
-			if ((t1 & MAY_BE_ANY) == MAY_BE_LONG &&
-				(t2 & MAY_BE_ANY) == MAY_BE_LONG) {
-				if (!ssa_var_info[ssa_ops[i].op1_def].has_range ||
-				    ssa_var_info[ssa_ops[i].op1_def].range.underflow ||
-				    ssa_var_info[ssa_ops[i].op1_def].range.overflow) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-				} else {
-					tmp |= MAY_BE_LONG;
-				}
-			} else if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				tmp |= MAY_BE_DOUBLE;
-			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-			}
-			if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
-					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
-					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
-				}
-			} else {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-			}
-			if (ssa_ops[i].result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			}
-			break;
-		case ZEND_ASSIGN_DIV:
-		case ZEND_ASSIGN_POW:
-			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-				goto unknown_opcode;
-			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				tmp = MAY_BE_RC1;
-				orig = t1 & ~MAY_BE_UNDEF;
-				t1 = zend_array_element_type(t1, 1, 0);
-				t2 = OP1_DATA_INFO();
-			} else {
-				tmp = 0;
-				if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
-					tmp |= MAY_BE_RC1;
-					if (ssa_ops[i].result_def >= 0) {
-						tmp |= MAY_BE_RCN;
-					}
-				}
-				if (t1 & MAY_BE_REF) {
-					tmp |= MAY_BE_REF;
-				}
-			}
-			if ((t1 & MAY_BE_ANY) == MAY_BE_DOUBLE ||
-				(t2 & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				tmp |= MAY_BE_DOUBLE;
-			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
-			}
-			/* Division by zero results in Inf/-Inf/Nan (double), so it doesn't need any special
-			 * handling */
-			if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
-					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
-					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
-				}
-			} else {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-			}
-			if (ssa_ops[i].result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			}
-			break;
-		case ZEND_ASSIGN_MOD:
-			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-				goto unknown_opcode;
-			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				tmp = MAY_BE_RC1;
-				orig = t1 & ~MAY_BE_UNDEF;
-				t1 = zend_array_element_type(t1, 1, 0);
-				t2 = OP1_DATA_INFO();
-			} else {
-				tmp = 0;
-				if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
-					tmp |= MAY_BE_RC1;
-					if (ssa_ops[i].result_def >= 0) {
-						tmp |= MAY_BE_RCN;
-					}
-				}
-				if (t1 & MAY_BE_REF) {
-					tmp |= MAY_BE_REF;
-				}
-			}
-			tmp |= MAY_BE_LONG;
-			if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
-					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
-					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
-				}
-			} else {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-			}
-			if (ssa_ops[i].result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			}
-			break;
-		case ZEND_ASSIGN_SL:
-		case ZEND_ASSIGN_SR:
-			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-				goto unknown_opcode;
-			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				tmp = MAY_BE_RC1;
-				orig = t1 & ~MAY_BE_UNDEF;
-				t1 = zend_array_element_type(t1, 1, 0);
-				t2 = OP1_DATA_INFO();
-			} else {
-				tmp = 0;
-				if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
-					tmp |= MAY_BE_RC1;
-					if (ssa_ops[i].result_def >= 0) {
-						tmp |= MAY_BE_RCN;
-					}
-				}
-				if (t1 & MAY_BE_REF) {
-					tmp |= MAY_BE_REF;
-				}
-			}
-			tmp |= MAY_BE_LONG;
-			if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
-					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
-					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
-				}
-			} else {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-			}
-			if (ssa_ops[i].result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			}
-			break;
-		case ZEND_ASSIGN_CONCAT:
-			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-				goto unknown_opcode;
-			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				tmp = MAY_BE_RC1;
-				orig = t1 & ~MAY_BE_UNDEF;
-				t1 = zend_array_element_type(t1, 1, 0);
-				t2 = OP1_DATA_INFO();
-			} else {
-				tmp = 0;
-				if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
-					tmp |= MAY_BE_RC1;
-					if (ssa_ops[i].result_def >= 0) {
-						tmp |= MAY_BE_RCN;
-					}
-				}
-				if (t1 & MAY_BE_REF) {
-					tmp |= MAY_BE_REF;
-				}
-			}
-			tmp |= MAY_BE_STRING;
-			if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
-					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
-					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
-				}
-			} else {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-			}
-			if (ssa_ops[i].result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-			}
-			break;
-		case ZEND_ASSIGN_BW_OR:
-		case ZEND_ASSIGN_BW_AND:
-		case ZEND_ASSIGN_BW_XOR:
-			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-				goto unknown_opcode;
-			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				tmp = MAY_BE_RC1;
-				orig = t1 & ~MAY_BE_UNDEF;
-				t1 = zend_array_element_type(t1, 1, 0);
-				t2 = OP1_DATA_INFO();
-			} else {
-				tmp = 0;
-				if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
-					tmp |= MAY_BE_RC1;
-					if (ssa_ops[i].result_def >= 0) {
-						tmp |= MAY_BE_RCN;
-					}
-				}
-				if (t1 & MAY_BE_REF) {
-					tmp |= MAY_BE_REF;
-				}
-			}
-			if ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING)) {
-				tmp |= MAY_BE_STRING;
-			}
-			if ((t1 & (MAY_BE_ANY-MAY_BE_STRING)) || (t1 & (MAY_BE_ANY-MAY_BE_STRING))) {
-				tmp |= MAY_BE_LONG;
-			}
-			if (opline->extended_value == ZEND_ASSIGN_DIM) {
-				if (opline->op1_type == IS_CV) {
-					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op1_type);
 					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 				}
@@ -3066,10 +2863,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
-			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_STRING, ssa_ops[i].result_def);
-			break;
-		case ZEND_CONCAT:
-			/* TODO: +MAY_BE_OBJECT ??? */
 			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_STRING, ssa_ops[i].result_def);
 			break;
 		case ZEND_RECV:
