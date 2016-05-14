@@ -424,11 +424,12 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	return (wchar_t *)buf;
 }/*}}}*/
 
-/* based on zend_dirname() */
+/* based on zend_dirname().
+ 	TODO support long path if needed. */
 PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 {/*{{{*/
 	char *ret = NULL, *start;
-	size_t ret_len, len_adjust = 0;
+	size_t ret_len, len_adjust = 0, pathw_len;
 	wchar_t *endw, *pathw, *startw;
 
 	if (len == 0) {
@@ -437,12 +438,12 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	
 	start = path;
 
-	startw = pathw = php_win32_ioutil_any_to_w(path);
+	startw = pathw = php_win32_ioutil_any_to_w_full(path, len, &pathw_len);
 	if (!pathw) {
 		return 0;
 	}
 
-	endw = pathw + wcslen(pathw) - 1;
+	endw = pathw + pathw_len - 1;
 
 	if ((2 <= len) && isalpha((int)((unsigned char *)path)[0]) && (':' == path[1])) {
 		pathw += 2;
@@ -484,11 +485,12 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 		path[1] = '\0';
 		return 1 + len_adjust;
 	}
-	*(endw+1) = '\0';
+	*(endw+1) = L'\0';
 
-	ret = php_win32_ioutil_w_to_any(startw);
-	ret_len = strlen(ret);
-	memmove(start, ret, ret_len + 1);
+	ret_len = (endw + 1 - startw);
+	ret = php_win32_ioutil_w_to_any_full(startw, ret_len, &ret_len);
+	memmove(start, ret, ret_len+1);
+	start[ret_len] = '\0';
 	free(ret);
 	free(startw);
 

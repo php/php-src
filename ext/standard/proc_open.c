@@ -448,6 +448,7 @@ PHP_FUNCTION(proc_open)
 	UINT old_error_mode;
 	char cur_cwd[MAXPATHLEN];
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
+	size_t tmp_len;
 #endif
 #ifdef NETWARE
 	char** child_argv = NULL;
@@ -748,7 +749,7 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	cmdw = php_win32_cp_any_to_w(command);
+	cmdw = php_win32_cp_any_to_w_full(command, command_len, &tmp_len);
 	if (!cmdw) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		goto exit_fail;
@@ -761,9 +762,10 @@ PHP_FUNCTION(proc_open)
 		size_t len;
 		wchar_t *cmdw2;
 
-		len = (sizeof(COMSPEC_NT) + 4 + wcslen(cmdw) + 1);
+
+		len = (sizeof(COMSPEC_NT) + sizeof(" /c ") + tmp_len + 1);
 		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
-		ret = swprintf(cmdw2, len, L"%hs /c %s", COMSPEC_NT, cmdw);
+		ret = _snwprintf(cmdw2, len, L"%hs /c %S", COMSPEC_NT, cmdw);
 
 		if (-1 == ret) {
 			php_error_docref(NULL, E_WARNING, "Command conversion failed");

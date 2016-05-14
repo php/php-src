@@ -131,41 +131,46 @@ typedef enum {
 
 /* Keep these functions aliased for case some additional handling
    is needed later. */
-__forceinline static wchar_t *php_win32_ioutil_any_to_w(const char* in)
+__forceinline static wchar_t *php_win32_ioutil_any_to_w_full(const char* in, size_t in_len, size_t *out_len)
 {
 	wchar_t *mb, *ret;
 	size_t mb_len;
 	
-	mb = php_win32_cp_any_to_w(in);
+	mb = php_win32_cp_any_to_w_full(in, in_len, &mb_len);
 	if (!mb) {
 		return NULL;
 	}
 
-	mb_len = wcslen(mb);
 	/* Only prefix with long if it's needed. */
 	if (mb_len > _MAX_PATH) {
-		/*mb = php_win32_ioutil_normalize_path(mb, mb_len);
-		mb_len = wcslen(mb);*/
-
-		ret = (wchar_t *) malloc((mb_len + 1 + 4) * sizeof(wchar_t));
+		ret = (wchar_t *) malloc((mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 		if (!ret) {
 			return NULL;
 		}
 		memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-		memmove(ret+4, mb, mb_len * sizeof(wchar_t));
-		ret[mb_len + 4] = L'\0';
+		memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
+		ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1] = L'\0';
+
+		mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 
 		free(mb);
 	} else {
 		ret = mb;
 	}
 
+	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
+		*out_len = mb_len;
+	}
+
 	return ret;
 }
+#define php_win32_ioutil_any_to_w(in) php_win32_ioutil_any_to_w_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+
 #define php_win32_ioutil_ascii_to_w php_win32_cp_ascii_to_w
 #define php_win32_ioutil_mb_to_w php_win32_cp_mb_to_w
 #define php_win32_ioutil_thread_to_w php_win32_cp_thread_to_w
 #define php_win32_ioutil_w_to_any php_win32_cp_w_to_any
+#define php_win32_ioutil_w_to_any_full php_win32_cp_w_to_any_full
 /*__forceinline static char *php_win32_ioutil_w_to_any(wchar_t* w_source_ptr)
 {
 	return php_win32_cp_w_to_any(w_source_ptr);

@@ -29,53 +29,63 @@ extern "C" {
 # define PW32CP __declspec(dllimport)
 #endif
 
+#define PHP_WIN32_CP_IGNORE_LEN (0)
+#define PHP_WIN32_CP_IGNORE_LEN_P ((size_t *)-1)
+
 PW32CP BOOL php_win32_cp_use_unicode(void);
-PW32CP wchar_t *php_win32_cp_mb_to_w(const char* path);
-PW32CP wchar_t *php_win32_cp_thread_to_w(const char* path);
-PW32CP wchar_t *php_win32_cp_ascii_to_w(const char* path);
-PW32CP char *php_win32_cp_w_to_utf8(wchar_t* w_source_ptr);
-PW32CP char *php_win32_cp_w_to_thread(wchar_t* w_source_ptr);
+PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* path, size_t path_len, size_t *pathw_len);
+#define php_win32_cp_mb_to_w(path) php_win32_cp_mb_to_w_full(path, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* path, size_t path_len, size_t *pathw_len);
+#define php_win32_cp_thread_to_w(path) php_win32_cp_thread_to_w_full(path, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* path, size_t path_len, size_t *pathw_len);
+#define php_win32_cp_ascii_to_w(path) php_win32_cp_ascii_to_w_full(path, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+PW32CP char *php_win32_cp_w_to_utf8_full(wchar_t* in, size_t in_len, size_t *out_len);
+#define php_win32_cp_w_to_utf8(in) php_win32_cp_w_to_utf8_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *out_len);
+#define php_win32_cp_w_to_thread(in) php_win32_cp_w_to_thread_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env);
 
 /* This function tries to make the best guess to convert any
    given string to a wide char, also prefering the fastest code
    path to unicode. It returns NULL on fail. */
-__forceinline static wchar_t *php_win32_cp_any_to_w(const char* in)
+__forceinline static wchar_t *php_win32_cp_any_to_w_full(const char* in, size_t in_len, size_t *out_len)
 {
-	wchar_t *ret;
+	wchar_t *ret = NULL;
 
 	/* First try the pure ascii conversion. This is the fastest way to do the
 		thing. */
-	ret = php_win32_cp_ascii_to_w(in);
-
+	ret = php_win32_cp_ascii_to_w_full(in, in_len, out_len);
 	/* If that failed, try to convert to multibyte. */
 	if (!ret) {
 
-		ret = php_win32_cp_mb_to_w(in);
+		ret = php_win32_cp_mb_to_w_full(in, in_len, out_len);
 
 		if (!ret) {
-			ret = php_win32_cp_thread_to_w(in);
+			/* Fallback to the thread cp conversion. */
+			ret = php_win32_cp_thread_to_w_full(in, in_len, out_len);
 		}
 	}
 
 	return ret;
 }
+#define php_win32_cp_any_to_w(in) php_win32_cp_any_to_w_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
 /* This function converts from unicode function output back to PHP. If
 	the PHP's current charset is not compatible with unicode, so the current
 	thread CP will be used. The latter is the default behavior in PHP < 7.1,
 	as only ANSI complaint functions was used previously. */
-__forceinline static char *php_win32_cp_w_to_any(wchar_t* w_source_ptr)
+__forceinline static char *php_win32_cp_w_to_any_full(wchar_t* in, size_t in_len, size_t *out_len)
 {
 	if (php_win32_cp_use_unicode()) {
-		return php_win32_cp_w_to_utf8(w_source_ptr);
+		return php_win32_cp_w_to_utf8_full(in, in_len, out_len);
 	} else {
-		return php_win32_cp_w_to_thread(w_source_ptr);
+		return php_win32_cp_w_to_thread_full(in, in_len, out_len);
 	}
 
 	/* Never happens. */
 	return NULL;
 }
+#define php_win32_cp_w_to_any(in) php_win32_cp_w_to_any_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
 #define PHP_WIN32_CP_W_TO_A_ARRAY(aw, aw_len, aa, aa_len) do { \
 	int i; \
