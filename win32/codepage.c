@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#define _CRT_STDIO_ISO_WIDE_SPECIFIERS 1
-
 #include <assert.h>
 
 #include "php.h"
