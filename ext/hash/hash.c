@@ -1007,6 +1007,8 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("sha224",		&php_hash_sha224_ops);
 	php_hash_register_algo("sha256",		&php_hash_sha256_ops);
 	php_hash_register_algo("sha384",		&php_hash_sha384_ops);
+	php_hash_register_algo("sha512/224",            &php_hash_sha512_224_ops);
+	php_hash_register_algo("sha512/256",            &php_hash_sha512_256_ops);
 	php_hash_register_algo("sha512",		&php_hash_sha512_ops);
 	php_hash_register_algo("sha3-224",		&php_hash_sha3_224_ops);
 	php_hash_register_algo("sha3-256",		&php_hash_sha3_256_ops);
