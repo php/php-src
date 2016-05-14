@@ -145,6 +145,7 @@ __forceinline static wchar_t *php_win32_ioutil_any_to_w_full(const char* in, siz
 	if (mb_len > _MAX_PATH) {
 		ret = (wchar_t *) malloc((mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 		if (!ret) {
+			free(mb);
 			return NULL;
 		}
 		memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
