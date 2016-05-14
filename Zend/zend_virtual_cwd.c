@@ -1197,6 +1197,11 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 			if (save) {
 				char *tmp_path = php_win32_ioutil_w_to_any(dataw.cFileName);
+				if (!tmp_path) {
+					free_alloca(tmp, use_heap);
+					FREE_PATHW();
+					return -1;
+				}
 				i = (int)strlen(tmp_path);
 				memcpy(path+j, tmp_path, i+1);
 				free(tmp_path);
