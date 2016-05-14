@@ -1196,13 +1196,14 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 			if (save) {
-				char *tmp_path = php_win32_ioutil_w_to_any(dataw.cFileName);
+				size_t sz;
+				char *tmp_path = php_win32_ioutil_w_to_any_full(dataw.cFileName, PHP_WIN32_CP_IGNORE_LEN, &sz);
 				if (!tmp_path) {
 					free_alloca(tmp, use_heap);
 					FREE_PATHW();
 					return -1;
 				}
-				i = (int)strlen(tmp_path);
+				i = (int)sz;
 				memcpy(path+j, tmp_path, i+1);
 				free(tmp_path);
 				j += i;
