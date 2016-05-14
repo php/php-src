@@ -2215,18 +2215,22 @@ static uint32_t assign_dim_result_type(
 		if (value_type & MAY_BE_UNDEF) {
 			tmp |= MAY_BE_ARRAY_OF_NULL;
 		}
-		if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
+		if (dim_op_type == IS_UNUSED) {
 			tmp |= MAY_BE_ARRAY_KEY_LONG;
-		}
-		if (dim_type & MAY_BE_STRING) {
-			tmp |= MAY_BE_ARRAY_KEY_STRING;
-			if (dim_op_type != IS_CONST) {
-				// FIXME: numeric string
+		} else {
+			if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
 				tmp |= MAY_BE_ARRAY_KEY_LONG;
 			}
-		}
-		if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
-			tmp |= MAY_BE_ARRAY_KEY_STRING;
+			if (dim_type & MAY_BE_STRING) {
+				tmp |= MAY_BE_ARRAY_KEY_STRING;
+				if (dim_op_type != IS_CONST) {
+					// FIXME: numeric string
+					tmp |= MAY_BE_ARRAY_KEY_LONG;
+				}
+			}
+			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+				tmp |= MAY_BE_ARRAY_KEY_STRING;
+			}
 		}
 	}
 	return tmp;
@@ -2474,7 +2478,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					tmp |= (t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
+					tmp |= ((t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT) | MAY_BE_ARRAY_KEY_LONG;
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
