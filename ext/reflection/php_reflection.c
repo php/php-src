@@ -5648,6 +5648,11 @@ ZEND_METHOD(reflection_property, getValue)
 			return;
 		}
 
+		if (!instanceof_function(Z_OBJCE_P(object), ref->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			/* Returns from this function */
+		}
+
 		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
 		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 0, &rv);
 		if (member_p != &rv) {
