@@ -58,6 +58,9 @@ PHP                                                                        NEWS
     messages). (Yasuo)
   . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
 
+- Reflection:
+  . Fix #72209 (ReflectionProperty::getValue() doesn't fail if object doesn't match type). (Joe)
+
 - Session:
   . Improved fix for bug #68063 (Empty session IDs do still start sessions).
     (Yasuo)
