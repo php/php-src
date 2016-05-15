@@ -673,21 +673,26 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC)
 {
 	char *type;
-	zval value_copy;
-	int use_copy;
-
 	type = zend_zval_type_name(value);
 
-	zend_make_printable_zval(value, &value_copy, &use_copy);
-	if (use_copy) {
-		value = &value_copy;
-	}
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		string_printf(str, "%s    Constant [ %s %s ] { Array }\n",
+						indent, type, name);
+	} else {
+		zval value_copy;
+		int use_copy;
 
-	string_printf(str, "%s    Constant [ %s %s ] { %s }\n",
-					indent, type, name, Z_STRVAL_P(value));
+		zend_make_printable_zval(value, &value_copy, &use_copy);
+		if (use_copy) {
+			value = &value_copy;
+		}
 
-	if (use_copy) {
-		zval_dtor(value);
+		string_printf(str, "%s    Constant [ %s %s ] { %s }\n",
+						indent, type, name, Z_STRVAL_P(value));
+
+		if (use_copy) {
+			zval_dtor(value);
+		}
 	}
 }
 /* }}} */
