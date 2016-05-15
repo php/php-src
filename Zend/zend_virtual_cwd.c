@@ -221,6 +221,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	HANDLE hFile;
 	DWORD dwRet;
 	wchar_t *linkw = php_win32_ioutil_any_to_w(link), targetw[MAXPATHLEN];
+	size_t _tmp_len;
 	char *_tmp;
 
 	if (!linkw) {
@@ -257,14 +258,13 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		return -1;
 	}
 
-	_tmp = php_win32_ioutil_w_to_any(targetw);
-	if (!_tmp) {
+	_tmp = php_win32_ioutil_w_to_any_full(targetw, dwRet, &_tmp_len);
+	if (!_tmp || _tmp_len >= MAXPATHLEN) {
 		CloseHandle(hFile);
 		free(linkw);
 		return -1;
 	}
-	memcpy(target, _tmp, dwRet);
-	target[dwRet] = '\0';
+	memcpy(target, _tmp, _tmp_len);
 	free(_tmp);
 
 	CloseHandle(hFile);
