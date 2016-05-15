@@ -97,7 +97,13 @@
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
 	char *trailing_slash;
+#ifdef PHP_WIN32
+	char *opened_path = NULL;
+	size_t opened_path_len;
+	wchar_t *cwdw, *pfxw, pathw[MAXPATHLEN];
+#else
 	char opened_path[MAXPATHLEN];
+#endif
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
 	int fd = -1;
@@ -138,55 +144,46 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		trailing_slash = "/";
 	}
 
+#ifndef PHP_WIN32
 	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(new_state.cwd);
 		return -1;
 	}
+#endif
 
 #ifdef PHP_WIN32
+	cwdw = php_win32_ioutil_any_to_w(new_state.cwd);
+	pfxw = php_win32_ioutil_any_to_w(pfx);
+	if (!cwdw || !pfxw) {
+		free(cwdw);
+		free(pfxw);
+		efree(new_state.cwd);
+		return -1;
+	}
 
-	{
-		wchar_t *cwdw = php_win32_ioutil_any_to_w(new_state.cwd);
-		wchar_t *pfxw = php_win32_ioutil_any_to_w(pfx);
-		wchar_t pathw[MAXPATHLEN];
-		if (!cwdw || !pfxw) {
+	if (GetTempFileNameW(cwdw, pfxw, 0, pathw)) {
+		opened_path = php_win32_ioutil_w_to_any_full(pathw, PHP_WIN32_CP_IGNORE_LEN, &opened_path_len);
+		if (!opened_path || opened_path_len >= MAXPATHLEN) {
 			free(cwdw);
 			free(pfxw);
 			efree(new_state.cwd);
 			return -1;
 		}
 
-		if (GetTempFileNameW(cwdw, pfxw, 0, pathw)) {
-			char *tmp = php_win32_ioutil_w_to_any(pathw);
-			size_t tmp_len;
-			if (!tmp) {
-				free(cwdw);
-				free(pfxw);
-				efree(new_state.cwd);
-				return -1;
-			}
-
-			tmp_len = strlen(tmp);
-
-			memmove(opened_path, tmp, tmp_len);
-			opened_path[tmp_len] = '\0';
-			free(tmp);
-
-			/* Some versions of windows set the temp file to be read-only,
-			 * which means that opening it will fail... */
-			if (VCWD_CHMOD(opened_path, 0600)) {
-				free(cwdw);
-				free(pfxw);
-				efree(new_state.cwd);
-				return -1;
-			}
-			fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
+		/* Some versions of windows set the temp file to be read-only,
+		 * which means that opening it will fail... */
+		if (VCWD_CHMOD(opened_path, 0600)) {
+			free(cwdw);
+			free(pfxw);
+			efree(new_state.cwd);
+			free(opened_path);
+			return -1;
 		}
-
-		free(cwdw);
-		free(pfxw);
+		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
 	}
 
+	free(cwdw);
+	free(pfxw);
 #elif defined(HAVE_MKSTEMP)
 	fd = mkstemp(opened_path);
 #else
@@ -195,9 +192,16 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 #endif
 
+#ifdef PHP_WIN32
+	if (fd != -1 && opened_path_p) {
+		*opened_path_p = zend_string_init(opened_path, opened_path_len, 0);
+	}
+	free(opened_path);
+#else
 	if (fd != -1 && opened_path_p) {
 		*opened_path_p = zend_string_init(opened_path, strlen(opened_path), 0);
 	}
+#endif
 	efree(new_state.cwd);
 	return fd;
 }
