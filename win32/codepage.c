@@ -21,18 +21,18 @@
 #include "php.h"
 #include "SAPI.h"
 
-PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* path, size_t path_len, size_t *pathw_len)
+PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* in, size_t in_len, size_t *inw_len)
 {/*{{{*/
 	wchar_t *ret;
 	int ret_len, tmp_len;
 
-	if (!path || path_len > (size_t)INT_MAX) {
+	if (!in || in_len > (size_t)INT_MAX) {
 		return NULL;
 	}
 
-	tmp_len = !path_len ? -1 : (int)path_len + 1;
+	tmp_len = !in_len ? -1 : (int)in_len + 1;
 
-	ret_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, tmp_len, NULL, 0);
+	ret_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, in, tmp_len, NULL, 0);
 	if (ret_len == 0) {
 		return NULL;
 	}
@@ -42,29 +42,29 @@ PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* path, size_t path_len, siz
 		return NULL;
 	}
 
-	tmp_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, tmp_len, ret, ret_len);
+	tmp_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, in, tmp_len, ret, ret_len);
 
 	assert(tmp_len == ret_len);
 
-	if (PHP_WIN32_CP_IGNORE_LEN_P != pathw_len) {
-		*pathw_len = ret_len - 1;
+	if (PHP_WIN32_CP_IGNORE_LEN_P != inw_len) {
+		*inw_len = ret_len - 1;
 	}
 
 	return ret;
 }/*}}}*/
 
-PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* path, size_t path_len, size_t *pathw_len)
+PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, size_t *inw_len)
 {/*{{{*/
 	wchar_t *ret;
 	int ret_len, tmp_len;
 
-	if (!path || path_len > (size_t)INT_MAX) {
+	if (!in || in_len > (size_t)INT_MAX) {
 		return NULL;
 	}
 
-	tmp_len = !path_len ? -1 : (int)path_len + 1;
+	tmp_len = !in_len ? -1 : (int)in_len + 1;
 
-	ret_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, tmp_len, NULL, 0);
+	ret_len = MultiByteToWideChar(CP_THREAD_ACP, 0, in, tmp_len, NULL, 0);
 	if (ret_len == 0) {
 		return NULL;
 	}
@@ -74,32 +74,32 @@ PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* path, size_t path_len,
 		return NULL;
 	}
 
-	tmp_len = MultiByteToWideChar(CP_THREAD_ACP, 0, path, tmp_len, ret, ret_len);
+	tmp_len = MultiByteToWideChar(CP_THREAD_ACP, 0, in, tmp_len, ret, ret_len);
 
 	assert(tmp_len == ret_len);
 
-	if (PHP_WIN32_CP_IGNORE_LEN_P != pathw_len) {
-		*pathw_len = ret_len - 1;
+	if (PHP_WIN32_CP_IGNORE_LEN_P != inw_len) {
+		*inw_len = ret_len - 1;
 	}
 
 	return ret;
 
 }/*}}}*/
 
-PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* path, size_t path_len, size_t *pathw_len)
+PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size_t *inw_len)
 {/*{{{*/
 	wchar_t *ret = NULL;
-	const char *idx = path, *end; 
+	const char *idx = in, *end; 
 	size_t it;
 
-	if (!path) {
+	if (!in) {
 		return NULL;
-	} else if (0 == (size_t)path_len) {
+	} else if (0 == (size_t)in_len) {
 		/* Not binary safe. */
-		path_len = strlen(path);
+		in_len = strlen(in);
 	}
 
-	end = path + path_len;
+	end = in + in_len;
 
 	while (idx != end) {
 		if (!__isascii(*idx) && '\0' != *idx) {
@@ -113,14 +113,14 @@ PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* path, size_t path_len, 
 		int k = 0;
 		wchar_t *ret_idx;
 
-		ret = malloc((path_len+1)*sizeof(wchar_t));
+		ret = malloc((in_len+1)*sizeof(wchar_t));
 		if (!ret) {
 			return NULL;
 		}
 
 		ret_idx = ret;
 		do {
-			k = _snwprintf(ret_idx, path_len - i, L"%.*hs", (int)path_len - i, path);
+			k = _snwprintf(ret_idx, in_len - i, L"%.*hs", (int)in_len - i, in);
 
 			if (-1 == k) {
 				free(ret);
@@ -129,19 +129,19 @@ PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* path, size_t path_len, 
 
 			i += k + 1;
 
-			if (i < path_len) {
+			if (i < in_len) {
 				/* Advance as this seems to be a string with \0 in it. */
-				path += k + 1;
+				in += k + 1;
 				ret_idx += k + 1;
 			}
 
 
-		} while (i < path_len);
-		ret[path_len] = L'\0';
+		} while (i < in_len);
+		ret[in_len] = L'\0';
 	}
 
-	if (PHP_WIN32_CP_IGNORE_LEN_P != pathw_len) {
-		*pathw_len = path_len;
+	if (PHP_WIN32_CP_IGNORE_LEN_P != inw_len) {
+		*inw_len = in_len;
 	}
 
 	return ret;
