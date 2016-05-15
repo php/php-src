@@ -301,7 +301,7 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 
 
 /* {{{ proto Closure Closure::fromCallable(callable callable)
-   Create a closure from a callabl using the current scope. */
+   Create a closure from a callable using the current scope. */
 ZEND_METHOD(Closure, fromCallable)
 {
 	zval *callable;
