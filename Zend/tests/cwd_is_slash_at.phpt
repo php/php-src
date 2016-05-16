@@ -38,18 +38,21 @@ if ($fp === false) {
 } else {
     fclose($fp);
 }
+$splFileObject = null;
 try {
     $splFileObject = new \SplFileObject($path);
     echo mb_convert_encoding($splFileObject->getPathname(), 'UTF-8', 'CP932'), PHP_EOL;
 } catch (\RuntimeException $e) {
     echo 'Failure: SplFileObject', PHP_EOL;
+    unset($e);
 }
+unset($splFileObject);
 echo mb_convert_encoding(
     shell_exec(mb_convert_encoding($php.' "表/ン/機能.php"', 'CP932', 'UTF-8')),
     'UTF-8',
     'CP932'
 ), PHP_EOL;
-//shell_exec(mb_convert_encoding('rmdir /S /Q "表"', 'CP932', 'UTF-8'));
+shell_exec(mb_convert_encoding('rmdir /S /Q "表"', 'CP932', 'UTF-8'));
 ?>
 --EXPECTF--
 表/ン/機能.php
