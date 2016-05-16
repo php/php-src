@@ -806,7 +806,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 	ALLOCA_FLAG(use_heap_large)
 	wchar_t *pathw = NULL;
 #define FREE_PATHW() \
-	do { free(pathw); } while(0)
+	do { free(pathw); } while(0);
 
 #else
 	zend_stat_t st;
