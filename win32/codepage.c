@@ -76,6 +76,9 @@ PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size
 	} else if (0 == (size_t)in_len) {
 		/* Not binary safe. */
 		in_len = strlen(in);
+		if (in_len > (size_t)INT_MAX) {
+			return NULL;
+		}
 	}
 
 	end = in + in_len;
@@ -99,7 +102,7 @@ PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size
 
 		ret_idx = ret;
 		do {
-			k = _snwprintf(ret_idx, in_len - i, L"%.*hs", (int)in_len - i, in);
+			k = _snwprintf(ret_idx, in_len - i, L"%.*hs", (int)(in_len - i), in);
 
 			if (-1 == k) {
 				free(ret);
