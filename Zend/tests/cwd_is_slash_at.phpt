@@ -2,9 +2,10 @@
 Test IS_SLASH_AT for multibyte path
 --SKIPIF--
 <?php 
-include "skipif.inc"; 
-if (substr(PHP_OS, 0, 3) != 'WIN' || !extension_loaded('mbstring')) {
-	die ("skip only for Windows");
+if (substr(PHP_OS, 0, 3) != 'WIN' || !extension_loaded('mbstring')
+ || empty(system('chcp 932 | find "932"', $returnVar)) || ($returnVar !== 0)
+) {
+    die('skip only for Windows');
 }
 ?>
 --FILE--
@@ -18,7 +19,7 @@ if (setlocale(LC_CTYPE, 'Japanese_Japan.932') === false) {
 // Create "表/ン/機能.php"
 shell_exec(
     mb_convert_encoding(
-        'mkdir "表/ン" & echo ^<?php echo __FILE__, PHP_EOL, dirname(__FILE__);> "表/ン/機能.php"',
+        'chcp 932 & mkdir "表/ン" & echo ^<?php echo __FILE__, PHP_EOL, dirname(__FILE__);> "表/ン/機能.php"',
         'CP932',
         'UTF-8'
     )
