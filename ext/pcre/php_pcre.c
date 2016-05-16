@@ -1119,8 +1119,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	char 			**subpat_names;		/* Array for named subpatterns */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int				 size_offsets;		/* Size of the offsets array */
-	size_t			 new_len;			/* Length of needed storage */
-	size_t			 alloc_len;			/* Actual allocated length */
+	int				 new_len;			/* Length of needed storage */
+	int				 alloc_len;			/* Actual allocated length */
 	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	int				 start_offset;		/* Where the new search starts */
