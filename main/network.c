@@ -253,7 +253,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 		}
 		if (host_info == NULL) {
 			if (error_string) {
-				error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
+				*error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
 				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 			} else {
 				php_error_docref(NULL, E_WARNING, "php_network_getaddresses: gethostbyname failed");
