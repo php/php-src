@@ -209,7 +209,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BYTE * psec_desc = NULL;
 	BOOL fAccess = FALSE;
 
-	PHP_WIN32_IOUTIL_INIT_W(pathname);
+	PHP_WIN32_IOUTIL_INIT_W(pathname)
 	if (!pathw) {
 		return -1;
 	}
@@ -223,7 +223,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 
 		ret = GetBinaryTypeW(pathw, &type) ? 0 : -1;
 
-		PHP_WIN32_IOUTIL_CLEANUP_W();
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 
 		return ret;
 	} else {
@@ -237,14 +237,14 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
  		}
 
 		if(php_win32_ioutil_access(pathname, mode)) {
-			PHP_WIN32_IOUTIL_CLEANUP_W();
+			PHP_WIN32_IOUTIL_CLEANUP_W()
 			free(real_path);
 			return errno;
 		}
 
  		/* If only existence check is made, return now */
  		if (mode == 0) {
-			PHP_WIN32_IOUTIL_CLEANUP_W();
+			PHP_WIN32_IOUTIL_CLEANUP_W()
 			free(real_path);
 			return 0;
 		}
@@ -389,7 +389,7 @@ Finished:
 			real_path = NULL;
 		}
 
-		PHP_WIN32_IOUTIL_CLEANUP_W();
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		if(fAccess == FALSE) {
 			errno = EACCES;
 			return errno;
@@ -800,7 +800,7 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	FILETIME mtime, atime;
 	HANDLE hFile;
-	PHP_WIN32_IOUTIL_INIT_W(filename);
+	PHP_WIN32_IOUTIL_INIT_W(filename)
 
 	if (!pathw) {
 		return -1;
@@ -809,7 +809,7 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	hFile = CreateFileW(pathw, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
 				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 
-	PHP_WIN32_IOUTIL_CLEANUP_W();
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but
 	   the CreateFile operation succeeds */

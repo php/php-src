@@ -112,12 +112,12 @@ typedef enum {
 #define PHP_WIN32_IOUTIL_CLEANUP_W() do { \
 		free(pathw); \
 		pathw = NULL; \
-} while (0)
+} while (0);
 
 #define PHP_WIN32_IOUTIL_REINIT_W(path) do { \
-	PHP_WIN32_IOUTIL_CLEANUP_W(); \
+	PHP_WIN32_IOUTIL_CLEANUP_W() \
 	pathw = php_win32_ioutil_any_to_w(path); \
-} while (0)
+} while (0);
 
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
 		size_t len = wcslen(pathw); \
@@ -200,7 +200,7 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
-	PHP_WIN32_IOUTIL_INIT_W(path);
+	PHP_WIN32_IOUTIL_INIT_W(path)
 	int ret;
 
 	if (!pathw) {
@@ -212,7 +212,7 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 
 	/* TODO set errno. */
 	ret = _waccess(pathw, mode);
-	PHP_WIN32_IOUTIL_CLEANUP_W();
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	return ret;
 }/*}}}*/
@@ -220,7 +220,7 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 {/*{{{*/
 	mode_t mode = 0;
-	PHP_WIN32_IOUTIL_INIT_W(path);
+	PHP_WIN32_IOUTIL_INIT_W(path)
 	int ret = -1;
 	DWORD err;
 
@@ -241,7 +241,7 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 
 	ret = php_win32_ioutil_open_w(pathw, flags, mode);
 	err = GetLastError();
-	PHP_WIN32_IOUTIL_CLEANUP_W();
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
@@ -252,7 +252,7 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 
 __forceinline static int php_win32_ioutil_unlink(const char *path)
 {/*{{{*/
-	PHP_WIN32_IOUTIL_INIT_W(path);
+	PHP_WIN32_IOUTIL_INIT_W(path)
 	int ret = 0;
 	DWORD err = 0;
 
@@ -267,7 +267,7 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 		err = GetLastError();
 		ret = -1;
 	}
-	PHP_WIN32_IOUTIL_CLEANUP_W();
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
@@ -278,7 +278,7 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 
 __forceinline static int php_win32_ioutil_rmdir(const char *path)
 {/*{{{*/
-	PHP_WIN32_IOUTIL_INIT_W(path);
+	PHP_WIN32_IOUTIL_INIT_W(path)
 	int ret = 0;
 	DWORD err = 0;
 
@@ -294,7 +294,7 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 		ret = -1;
 	}
 
-	PHP_WIN32_IOUTIL_CLEANUP_W();
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);

@@ -909,7 +909,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			if (INVALID_HANDLE_VALUE == hFind) {
 				if (use_realpath == CWD_REALPATH) {
 					/* file not found */
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 				/* continue resolution anyway but don't save result in the cache */
@@ -939,14 +939,14 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			if(++(*ll) > LINK_MAX) {
 				free_alloca(tmp, use_heap);
-				FREE_PATHW();
+				FREE_PATHW()
 				return -1;
 			}
 
 			hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 			if(hLink == INVALID_HANDLE_VALUE) {
 				free_alloca(tmp, use_heap);
-				FREE_PATHW();
+				FREE_PATHW()
 				return -1;
 			}
 
@@ -954,14 +954,14 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			if (pbuffer == NULL) {
 				CloseHandle(hLink);
 				free_alloca(tmp, use_heap);
-				FREE_PATHW();
+				FREE_PATHW()
 				return -1;
 			}
 			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
 				free_alloca(pbuffer, use_heap_large);
 				free_alloca(tmp, use_heap);
 				CloseHandle(hLink);
-				FREE_PATHW();
+				FREE_PATHW()
 				return -1;
 			}
 
@@ -975,7 +975,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 
@@ -985,7 +985,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
 					free(printname);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 			}
@@ -997,7 +997,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 
@@ -1008,7 +1008,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
 					free(printname);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 			}
@@ -1018,7 +1018,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 				memcpy(substitutename, path, len + 1);
@@ -1027,7 +1027,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				/* XXX this might be not the end, restart handling with REPARSE_GUID_DATA_BUFFER should be implemented. */
 				free_alloca(pbuffer, use_heap_large);
 				free_alloca(tmp, use_heap);
-				FREE_PATHW();
+				FREE_PATHW()
 				return -1;
 			}
 
@@ -1081,7 +1081,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					j = tsrm_realpath_r(path, 0, j, ll, t, 0, is_dir, &directory);
 					if(j < 0) {
 						free_alloca(tmp, use_heap);
-						FREE_PATHW();
+						FREE_PATHW()
 						return -1;
 					}
 				}
@@ -1089,7 +1089,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			else {
 				if(i + j >= MAXPATHLEN - 1) {
 					free_alloca(tmp, use_heap);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 
@@ -1099,7 +1099,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				j  = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory);
 				if(j < 0) {
 					free_alloca(tmp, use_heap);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 			}
@@ -1115,7 +1115,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				if (is_dir && !directory) {
 					/* not a directory */
 					free_alloca(tmp, use_heap);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 			}
@@ -1192,7 +1192,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #ifdef ZEND_WIN32
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
 				free_alloca(tmp, use_heap);
-				FREE_PATHW();
+				FREE_PATHW()
 				return -1;
 			}
 			if (save) {
@@ -1200,7 +1200,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				char *tmp_path = php_win32_ioutil_w_to_any_full(dataw.cFileName, PHP_WIN32_CP_IGNORE_LEN, &sz);
 				if (!tmp_path) {
 					free_alloca(tmp, use_heap);
-					FREE_PATHW();
+					FREE_PATHW()
 					return -1;
 				}
 				i = (int)sz;
@@ -1230,7 +1230,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 		free_alloca(tmp, use_heap);
 #ifdef ZEND_WIN32
-		FREE_PATHW();
+		FREE_PATHW()
 #undef FREE_PATHW
 #endif
 		return j;
