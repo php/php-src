@@ -34,11 +34,11 @@ extern "C" {
 
 PW32CP BOOL php_win32_cp_use_unicode(void);
 /* This API is binary safe and expects a \0 terminated input. The returned length doesn't count \0. */
-PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* in, size_t in_len, size_t *inw_len);
+PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_mb_to_w(in) php_win32_cp_mb_to_w_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
-PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, size_t *inw_len);
+PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_thread_to_w(in) php_win32_cp_thread_to_w_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
-PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size_t *inw_len);
+PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_ascii_to_w(in) php_win32_cp_ascii_to_w_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP char *php_win32_cp_w_to_utf8_full(wchar_t* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_w_to_utf8(in) php_win32_cp_w_to_utf8_full(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)

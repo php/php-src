@@ -490,7 +490,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	ret_len = (endw + 1 - startw);
 	ret = php_win32_ioutil_w_to_any_full(startw, ret_len, &ret_len);
 	memmove(start, ret, ret_len+1);
-	start[ret_len] = '\0';
+	assert(start[ret_len] == '\0');
 	free(ret);
 	free(startw);
 

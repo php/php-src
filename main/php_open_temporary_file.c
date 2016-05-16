@@ -169,6 +169,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 			efree(new_state.cwd);
 			return -1;
 		}
+		assert(strlen(opened_path) == opened_path_len);
 
 		/* Some versions of windows set the temp file to be read-only,
 		 * which means that opening it will fail... */
