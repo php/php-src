@@ -70,7 +70,6 @@ PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size
 {/*{{{*/
 	wchar_t *ret = NULL;
 	const char *idx = in, *end; 
-	size_t it;
 
 	if (!in) {
 		return NULL;
