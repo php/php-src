@@ -19,7 +19,7 @@ skip_if_no_required_exts();
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 $prefix = create_data("file_eucjp");
-$fn = $prefix . DIRECTORY_SEPARATOR . "\テストマルチバイト・パス"; // EUCJP string
+$fn = $prefix . DIRECTORY_SEPARATOR . "テストマルチバイト・パス"; // EUCJP string
 $fnw = iconv('eucjp', 'utf-8', $fn);
 
 $f = fopen($fnw, 'r');

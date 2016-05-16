@@ -82,11 +82,9 @@ function create_verify_dir($prefix, $basename, $cp = 65001)
 	}
 }
 
-function create_data($id)
+function create_data($id, $item)
 {
 	$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . $id;
-
-	$zend_mb = ini_get("zend.multibyte");
 
 	if (!is_dir($prefix)) {
 		mkdir($prefix);
@@ -127,11 +125,7 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "file_cp1251":
-			if ($zend_mb) {
-				create_verify_file($prefix, "привет", "opened an utf8 filename for reading");
-			} else {
-				create_verify_file($prefix, "РїСЂРёРІРµС‚", "opened an utf8 filename for reading");
-			}
+			create_verify_file($prefix, $item, "opened an utf8 filename for reading");
 			break;
 
 		case "file_eucjp":
@@ -155,11 +149,7 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "dir_cp1251":
-			if ($zend_mb) {
-				create_verify_dir($prefix, "привет3");
-			} else {
-				create_verify_dir($prefix, "РїСЂРёРІРµС‚3");
-			}
+			create_verify_dir($prefix, $item);
 			break;
 
 		case "dir_mb":

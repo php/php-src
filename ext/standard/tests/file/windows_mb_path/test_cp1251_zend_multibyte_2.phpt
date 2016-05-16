@@ -21,8 +21,9 @@ skip_if_no_required_exts("mbstring");
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("file_cp1251");
-$fn = $prefix . DIRECTORY_SEPARATOR . "привет7"; // cp1251 string
+$item = "привет7"; // cp1251 string
+$prefix = create_data("file_cp1251", $item);
+$fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 $f = fopen($fn, 'w');
 if ($f) {

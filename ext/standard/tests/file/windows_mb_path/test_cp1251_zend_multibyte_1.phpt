@@ -21,10 +21,11 @@ skip_if_no_required_exts("mbstring");
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("dir_cp1251");
-$path = $prefix . DIRECTORY_SEPARATOR . "привет3"; // cp1251 string
+$item = "привет"; // cp1251 string
+$prefix = create_data("dir_cp1251", $item . "3");
+$path = $prefix . DIRECTORY_SEPARATOR . "${item}3";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "привет4";
+$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));

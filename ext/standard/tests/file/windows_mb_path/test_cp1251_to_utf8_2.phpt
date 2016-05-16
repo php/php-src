@@ -18,11 +18,11 @@ skip_if_no_required_exts();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("file_cp1251");
-$fn = $prefix . DIRECTORY_SEPARATOR . "привет7"; // cp1251 string
-$fnw = iconv('cp1251', 'utf-8', $fn);
+$item = iconv('cp1251', 'utf-8', "привет"); // cp1251 string
+$prefix = create_data("file_cp1251", $item . "7");
+$fn = $prefix . DIRECTORY_SEPARATOR . "${item}7";
 
-$f = fopen($fnw, 'w');
+$f = fopen($fn, 'w');
 if ($f) {
 	var_dump($f, fwrite($f, "writing to an mb filename"));
 	var_dump(fclose($f));
@@ -30,11 +30,11 @@ if ($f) {
 	echo "open utf8 failed\n";
 }
 
-var_dump(file_get_contents($fnw));
+var_dump(file_get_contents($fn));
 
-get_basename_with_cp($fnw, 65001);
+get_basename_with_cp($fn, 65001);
 
-var_dump(unlink($fnw));
+var_dump(unlink($fn));
 remove_data("file_cp1251");
 
 ?>

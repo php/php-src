@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(932);
 
 ?>
+--INI--
+default_charset=932
 --FILE--
 <?php
 /*
@@ -20,7 +22,7 @@ skip_if_wrong_cp(932);
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 $prefix = create_data("file_eucjp");
-$fn = $prefix . DIRECTORY_SEPARATOR . "\テストマルチバイト・パス"; // EUCJP string
+$fn = $prefix . DIRECTORY_SEPARATOR . "テストマルチバイト・パス"; // cp932 string
 
 $f = fopen($fn, 'r');
 if ($f) {
