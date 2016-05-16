@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #72218 (If host name cannot be resolved then PHP 7 crashes). 
-    (Laruence)
+    (Esminis at esminis dot lt)
 
 - Intl:
   . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
