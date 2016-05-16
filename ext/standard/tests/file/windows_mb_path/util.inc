@@ -82,7 +82,7 @@ function create_verify_dir($prefix, $basename, $cp = 65001)
 	}
 }
 
-function create_data($id, $item)
+function create_data($id, $item = "")
 {
 	$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . $id;
 
@@ -103,7 +103,7 @@ echo \"hello there from the include\n\";";
 		case "bug71509":
 			$content = "that's my file with swedish filename
 ";
-			create_verify_file($prefix, "Röd_Statistics.txt", $content);
+			create_verify_file($prefix, $item, $content);
 			break;
 
 		case "file_mb4":
@@ -128,9 +128,10 @@ echo \"hello there from the include\n\";";
 			create_verify_file($prefix, $item, "opened an utf8 filename for reading");
 			break;
 
+		case "file_cp932":
 		case "file_eucjp":
 		case "file_mb":
-			$content = "reading file wihh eucjp filename
+			$content = "reading file wihh multibyte filename
 ";
 			create_verify_file($prefix, $item, $content);
 			break;
@@ -144,6 +145,7 @@ echo \"hello there from the include\n\";";
 			create_verify_dir($prefix, "テストマルチバイト・パス42");
 			break;
 
+		case "dir_cp932":
 		case "dir_eucjp":
 		case "dir2_cp1252":
 		case "dir_cp1252":

@@ -36,7 +36,7 @@ remove_data("file_eucjp");
 ===DONE===
 --EXPECTF--	
 resource(%d) of type (stream)
-string(33) "reading file wihh eucjp filename
+string(37) "reading file wihh multibyte filename
 "
 bool(true)
 ===DONE===

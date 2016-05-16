@@ -15,12 +15,10 @@ skip_if_no_required_exts("zip");
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("bug71509");
-$testfile = $prefix . DIRECTORY_SEPARATOR . "Röd_Statistics.txt"; // cp1252
-$outputfile = $prefix . DIRECTORY_SEPARATOR . "Röd_Statistics.zip"; // cp1252
-
-$testfile_zip = iconv("ISO-8859-1", "UTF-8", $testfile);
-$outputfile_zip = iconv("ISO-8859-1", "UTF-8", $outputfile);
+$item = iconv("ISO-8859-1", "UTF-8", "Röd_Statistics"); // cp1252
+$prefix = create_data("bug71509", "$item.txt");
+$testfile_zip = $prefix . DIRECTORY_SEPARATOR . "$item.txt";
+$outputfile_zip = $prefix . DIRECTORY_SEPARATOR . "$item.zip";
 
 var_dump(file_exists($testfile_zip));
 

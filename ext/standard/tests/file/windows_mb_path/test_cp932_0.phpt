@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for reading cp932 path without conversion 
+Test fopen() for reading cp932 path 
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -10,8 +10,6 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(932);
 
 ?>
---INI--
-default_charset=932
 --FILE--
 <?php
 /*
@@ -21,24 +19,25 @@ default_charset=932
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("file_eucjp");
-$fn = $prefix . DIRECTORY_SEPARATOR . "テストマルチバイト・パス"; // cp932 string
+$item = "テストマルチバイト・パス"; // cp932 string
+$prefix = create_data("file_cp932", iconv('cp932', 'utf-8', $item));
+$fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 $f = fopen($fn, 'r');
 if ($f) {
 	var_dump($f, fread($f, 42));
 	var_dump(fclose($f));
 } else {
-	echo "open cp932 failed\n";
+	echo "open utf8 failed\n";
 } 
 
-remove_data("file_eucjp");
+remove_data("file_cp932");
 
 ?>
 ===DONE===
 --EXPECTF--	
 resource(%d) of type (stream)
-string(33) "reading file wihh eucjp filename
+string(37) "reading file wihh multibyte filename
 "
 bool(true)
 ===DONE===
