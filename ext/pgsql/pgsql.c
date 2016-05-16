@@ -1306,7 +1306,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				smart_str_append_long(&str, Z_LVAL(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
 			}
 		}
-		convert_to_string_ex(&args[i]);
+		ZVAL_STR(&args[i], zval_get_string(&args[i]));
 		smart_str_appendc(&str, '_');
 		smart_str_appendl(&str, Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 	}
@@ -1333,7 +1333,6 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			break;
 		}
 	}
-	efree(args);
 
 	if (persistent && PGG(allow_persistent)) {
 		zend_resource *le;
@@ -1377,7 +1376,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			PGG(num_persistent)++;
 		} else {  /* we do */
 			if (le->type != le_plink) {
-				RETURN_FALSE;
+				goto err;
 			}
 			/* ensure that the link did not die */
 			if (PGG(auto_reset_persistent) & 1) {
@@ -1428,7 +1427,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			zend_resource *link;
 
 			if (index_ptr->type != le_index_ptr) {
-				RETURN_FALSE;
+				goto err;
 			}
 
 			link = (zend_resource *)index_ptr->ptr;
@@ -1494,10 +1493,18 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	php_pgsql_set_default_link(Z_RES_P(return_value));
 
 cleanup:
+	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
+		zval_dtor(&args[i]);
+	}
+	efree(args);
 	smart_str_free(&str);
 	return;
 
 err:
+	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
+		zval_dtor(&args[i]);
+	}
+	efree(args);
 	smart_str_free(&str);
 	RETURN_FALSE;
 }
@@ -2812,13 +2819,14 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 		zval retval;
-		zend_bool props_handled = 0;
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_and_properties_init(return_value, ce, NULL);
 		if (!ce->default_properties_count && !ce->__set) {
 			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
-			props_handled = 1;
+		} else {
+			zend_merge_properties(return_value, Z_ARRVAL(dataset));
+			zval_ptr_dtor(&dataset);
 		}
 
 		if (ce->constructor) {
@@ -2839,9 +2847,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 					 * argument passed by reference.
 					 */
 					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
-					if (!props_handled) {
-						zval_ptr_dtor(&dataset);
-					}
 					return;
 				}
 			}
@@ -2854,13 +2859,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 
 			if (zend_call_function(&fci, &fcc) == FAILURE) {
 				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
-				if (fci.params) {
-					efree(fci.params);
-				}
-				if (!props_handled) {
-					zval_ptr_dtor(&dataset);
-				}
-				return;
 			} else {
 				zval_ptr_dtor(&retval);
 			}
@@ -2869,15 +2867,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			}
 		} else if (ctor_params) {
 			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
-			if (!props_handled) {
-				zval_ptr_dtor(&dataset);
-			}
-			return;
-		}
-
-		if (!props_handled) {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset));
-			zval_ptr_dtor(&dataset);
 		}
 	}
 }
@@ -3263,8 +3252,10 @@ PHP_FUNCTION(pg_lo_create)
 	if (pgsql_link == NULL) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if ((Z_TYPE_P(pgsql_link) == IS_RESOURCE)) {
 		link = Z_RES_P(pgsql_link);
+	} else {
+		link = NULL;
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {

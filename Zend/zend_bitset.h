@@ -137,6 +137,18 @@ static inline void zend_bitset_union_with_difference(zend_bitset set1, zend_bits
 	}
 }
 
+static inline zend_bool zend_bitset_subset(zend_bitset set1, zend_bitset set2, uint32_t len)
+{
+	uint32_t i;
+
+	for (i = 0; i < len; i++) {
+		if (set1[i] & ~set2[i]) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
 static inline int zend_bitset_first(zend_bitset set, uint32_t len)
 {
 	uint32_t i;

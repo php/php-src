@@ -660,7 +660,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
 				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
 
-				/* Don't keep default properties in GC (thry may be freed by opcache) */
+				/* Don't keep default properties in GC (they may be freed by opcache) */
 				zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
 				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);

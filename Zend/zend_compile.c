@@ -2544,7 +2544,7 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		if (ast->kind != ZEND_AST_ZVAL
 			&& CG(active_op_array)->scope && CG(active_op_array)->this_var == (uint32_t)-1
 		) {
-			zend_string *key = zend_string_init("this", sizeof("this") - 1, 0);
+			zend_string *key = CG(known_strings)[ZEND_STR_THIS];
 			CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key);
 		}
 	}
@@ -3489,24 +3489,6 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 }
 /* }}} */
 
-static void zend_compile_assert_side_effects(zend_ast *ast) /* {{{ */
-{
-	int i;
-	int children = zend_ast_is_list(ast) ? zend_ast_get_list(ast)->children : zend_ast_get_num_children(ast);
-
-	for (i = 0; i < children; i++) {
-		zend_ast *child = (zend_ast_is_list(ast) ? zend_ast_get_list(ast)->child : ast->child)[i];
-		if (child) {
-			if (child->kind == ZEND_AST_YIELD) {
-				zend_mark_function_as_generator();
-			} else if (ast->kind >= ZEND_AST_IS_LIST_SHIFT) {
-				zend_compile_assert_side_effects(child);
-			}
-		}
-	}
-}
-/* }}} */
-
 static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc) /* {{{ */
 {
 	if (EG(assertions) >= 0) {
@@ -3549,8 +3531,6 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 		}
 		result->op_type = IS_CONST;
 		ZVAL_TRUE(&result->u.constant);
-
-		zend_compile_assert_side_effects((zend_ast *) args);
 	}
 
 	return SUCCESS;
@@ -3560,6 +3540,14 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
 {
 	if (fbc->internal_function.handler == ZEND_FN(display_disabled_function)) {
+		return FAILURE;
+	}
+
+	if (zend_string_equals_literal(lcname, "assert")) {
+		return zend_compile_assert(result, args, lcname, fbc);
+	}
+
+	if (CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS) {
 		return FAILURE;
 	}
 
@@ -3597,8 +3585,6 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_cufa(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "call_user_func")) {
 		return zend_compile_func_cuf(result, args, lcname);
-	} else if (zend_string_equals_literal(lcname, "assert")) {
-		return zend_compile_assert(result, args, lcname, fbc);
 	} else {
 		return FAILURE;
 	}
@@ -4546,6 +4532,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	zend_op *opline;
 	uint32_t try_catch_offset;
 	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), catches->children, 0);
+	uint32_t orig_fast_call_var = CG(context).fast_call_var;
 
 	if (catches->children == 0 && !finally_ast) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use try without catch or finally");
@@ -4568,8 +4555,8 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		zend_loop_var fast_call;
 		if (!(CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 			CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_FINALLY_BLOCK;
-			CG(context).fast_call_var = get_temporary_variable(CG(active_op_array));
 		}
+		CG(context).fast_call_var = get_temporary_variable(CG(active_op_array));
 
 		/* Push FAST_CALL on unwind stack */
 		fast_call.opcode = ZEND_FAST_CALL;
@@ -4679,6 +4666,8 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		opline->op1.var = CG(context).fast_call_var;
 
 		zend_update_jump_target_to_next(opnum_jmp);
+
+		CG(context).fast_call_var = orig_fast_call_var;
 	}
 
 	efree(jmp_opnums);
@@ -5307,15 +5296,16 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl) /* {{{ */
 {
 	zend_ast *params_ast = decl->child[0];
-	zend_string *name = decl->name, *lcname, *key;
+	zend_string *unqualified_name, *name, *lcname, *key;
 	zend_op *opline;
 
-	op_array->function_name = name = zend_prefix_with_ns(name);
-
+	unqualified_name = decl->name;
+	op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
 	lcname = zend_string_tolower(name);
 
 	if (FC(imports_function)) {
-		zend_string *import_name = zend_hash_find_ptr(FC(imports_function), lcname);
+		zend_string *import_name = zend_hash_find_ptr_lc(
+			FC(imports_function), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", ZSTR_VAL(name));
@@ -5404,6 +5394,10 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	zend_compile_params(params_ast, return_type_ast);
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		zend_mark_function_as_generator();
+		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
+	}
 	if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
 	}
@@ -5700,7 +5694,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
-	zend_string *name, *lcname, *import_name = NULL;
+	zend_string *name, *lcname;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
@@ -5709,31 +5703,25 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	znode original_implementing_class = FC(implementing_class);
 
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
+		zend_string *unqualified_name = decl->name;
+
 		if (CG(active_class_entry)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 		}
-		name = decl->name;
-		zend_assert_valid_class_name(name);
-		lcname = zend_string_tolower(name);
-		if (FC(current_namespace)) {
-			name = zend_prefix_with_ns(name);
 
-			zend_string_release(lcname);
-			lcname = zend_string_tolower(name);
-		} else {
-			zend_string_addref(name);
-		}
+		zend_assert_valid_class_name(unqualified_name);
+		name = zend_prefix_with_ns(unqualified_name);
+		name = zend_new_interned_string(name);
+		lcname = zend_string_tolower(name);
 
 		if (FC(imports)) {
-			import_name = zend_hash_find_ptr(FC(imports), lcname);
+			zend_string *import_name = zend_hash_find_ptr_lc(
+				FC(imports), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+			if (import_name && !zend_string_equals_ci(lcname, import_name)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+						"because the name is already in use", ZSTR_VAL(name));
+			}
 		}
-
-		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-					"because the name is already in use", ZSTR_VAL(name));
-		}
-
-		name = zend_new_interned_string(name);
 	} else {
 		name = zend_generate_anon_class_name(decl->lex_pos);
 		lcname = zend_string_tolower(name);
@@ -6081,26 +6069,26 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
-		zend_string *name = zend_ast_get_str(name_ast);
+		zend_string *unqualified_name = zend_ast_get_str(name_ast);
 
-		zend_string *import_name;
+		zend_string *name;
 		znode name_node, value_node;
 		zval *value_zv = &value_node.u.constant;
 
 		value_node.op_type = IS_CONST;
 		zend_const_expr_to_zval(value_zv, value_ast);
 
-		if (zend_lookup_reserved_const(ZSTR_VAL(name), ZSTR_LEN(name))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", ZSTR_VAL(name));
+		if (zend_lookup_reserved_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot redeclare constant '%s'", ZSTR_VAL(unqualified_name));
 		}
 
-		name = zend_prefix_with_ns(name);
+		name = zend_prefix_with_ns(unqualified_name);
 		name = zend_new_interned_string(name);
 
-		if (FC(imports_const)
-			&& (import_name = zend_hash_find_ptr(FC(imports_const), name))
-		) {
-			if (!zend_string_equals(import_name, name)) {
+		if (FC(imports_const)) {
+			zend_string *import_name = zend_hash_find_ptr(FC(imports_const), unqualified_name);
+			if (import_name && !zend_string_equals(import_name, name)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
 					"the name is already in use", ZSTR_VAL(name));
 			}

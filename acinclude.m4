@@ -2698,6 +2698,12 @@ EOF
    else
     break
    fi
+   for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do
+    if test `expr "X$CURRENT_ARG" : "X.*${var}.*"` != 0;
+	then
+      continue 2
+	fi
+   done
    $as_echo "$CURRENT_ARG \\" >>$1
    CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS $CURRENT_ARG"
   done

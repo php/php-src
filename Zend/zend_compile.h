@@ -472,9 +472,12 @@ struct _zend_execute_data {
 #define ZEND_CALL_CLOSURE            (1 << 5)
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)
+#define ZEND_CALL_GENERATOR          (1 << 8)
+
+#define ZEND_CALL_INFO_SHIFT         16
 
 #define ZEND_CALL_INFO(call) \
-	(Z_TYPE_INFO((call)->This) >> 24)
+	(Z_TYPE_INFO((call)->This) >> ZEND_CALL_INFO_SHIFT)
 
 #define ZEND_CALL_KIND_EX(call_info) \
 	(call_info & (ZEND_CALL_CODE | ZEND_CALL_TOP))
@@ -483,11 +486,11 @@ struct _zend_execute_data {
 	ZEND_CALL_KIND_EX(ZEND_CALL_INFO(call))
 
 #define ZEND_SET_CALL_INFO(call, object, info) do { \
-		Z_TYPE_INFO((call)->This) = ((object) ? IS_OBJECT_EX : IS_UNDEF) | ((info) << 24); \
+		Z_TYPE_INFO((call)->This) = ((object) ? IS_OBJECT_EX : IS_UNDEF) | ((info) << ZEND_CALL_INFO_SHIFT); \
 	} while (0)
 
 #define ZEND_ADD_CALL_FLAG_EX(call_info, flag) do { \
-		call_info |= ((flag) << 24); \
+		call_info |= ((flag) << ZEND_CALL_INFO_SHIFT); \
 	} while (0)
 
 #define ZEND_ADD_CALL_FLAG(call, flag) do { \
@@ -1018,6 +1021,9 @@ END_EXTERN_C()
 
 /* force IS_OBJ_USE_GUARDS for all classes */
 #define ZEND_COMPILE_GUARDS						(1<<9)
+
+/* disable builtin special case function calls */
+#define ZEND_COMPILE_NO_BUILTINS				(1<<10)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

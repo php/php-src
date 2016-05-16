@@ -65,9 +65,9 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 #define get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type)
 
 /* Prototypes */
-static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array);
+static void zend_extension_statement_handler(const zend_extension *extension, zend_execute_data *frame);
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_execute_data *frame);
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_execute_data *frame);
 
 #define RETURN_VALUE_USED(opline) ((opline)->result_type != IS_UNUSED)
 
@@ -1508,26 +1508,26 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 }
 
 /* Utility Functions for Extensions */
-static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_statement_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->statement_handler) {
-		extension->statement_handler(op_array);
+		extension->statement_handler(frame);
 	}
 }
 
 
-static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->fcall_begin_handler) {
-		extension->fcall_begin_handler(op_array);
+		extension->fcall_begin_handler(frame);
 	}
 }
 
 
-static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->fcall_end_handler) {
-		extension->fcall_end_handler(op_array);
+		extension->fcall_end_handler(frame);
 	}
 }
 
@@ -1559,24 +1559,24 @@ try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
 num_index:
-		retval = zend_hash_index_find(ht, hval);
-		if (retval == NULL) {
-			switch (type) {
-				case BP_VAR_R:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					/* break missing intentionally */
-				case BP_VAR_UNSET:
-				case BP_VAR_IS:
-					retval = &EG(uninitialized_zval);
-					break;
-				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-					break;
-				case BP_VAR_W:
-					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-					break;
-			}
+		ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+		return retval;
+num_undef:
+		switch (type) {
+			case BP_VAR_R:
+				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				/* break missing intentionally */
+			case BP_VAR_UNSET:
+			case BP_VAR_IS:
+				retval = &EG(uninitialized_zval);
+				break;
+			case BP_VAR_RW:
+				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+				break;
+			case BP_VAR_W:
+				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+				break;
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
@@ -2091,7 +2091,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 			if (!Z_DELREF_P(cv)) {
 				zend_refcounted *r = Z_COUNTED_P(cv);
 				ZVAL_NULL(cv);
-				zval_dtor_func_for_ptr(r);
+				zval_dtor_func(r);
 			} else {
 				GC_ZVAL_CHECK_POSSIBLE_ROOT(cv);
 			}
@@ -2227,7 +2227,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
-		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+		if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))--;
 		}
 	}
@@ -2256,7 +2256,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
-			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+			if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
 				GC_REFCOUNT(Z_OBJ(EX(This)))--;
 			}
 		}
@@ -2332,63 +2332,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
-}
-/* }}} */
-
-ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value) /* {{{ */
-{
-	/*
-	 * Normally the execute_data is allocated on the VM stack (because it does
-	 * not actually do any allocation and thus is faster). For generators
-	 * though this behavior would be suboptimal, because the (rather large)
-	 * structure would have to be copied back and forth every time execution is
-	 * suspended or resumed. That's why for generators the execution context
-	 * is allocated using a separate VM stack, thus allowing to save and
-	 * restore it simply by replacing a pointer.
-	 */
-	zend_execute_data *execute_data;
-	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
-	uint32_t call_info;
-
-	EG(vm_stack) = zend_vm_stack_new_page(
-		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE(1)) ?
-			ZEND_VM_STACK_PAGE_SIZE(1) :
-			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(1, stack_size),
-		NULL);
-	EG(vm_stack_top) = EG(vm_stack)->top;
-	EG(vm_stack_end) = EG(vm_stack)->end;
-
-	call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
-	execute_data = zend_vm_stack_push_call_frame(
-		call_info,
-		(zend_function*)op_array,
-		num_args,
-		Z_TYPE(call->This) != IS_OBJECT ? Z_CE(call->This) : NULL,
-		Z_TYPE(call->This) == IS_OBJECT ? Z_OBJ(call->This) : NULL);
-	EX(prev_execute_data) = NULL;
-	EX_NUM_ARGS() = num_args;
-
-	/* copy arguments */
-	if (num_args > 0) {
-		zval *arg_src = ZEND_CALL_ARG(call, 1);
-		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
-		zval *end = arg_src + num_args;
-
-		do {
-			ZVAL_COPY_VALUE(arg_dst, arg_src);
-			arg_src++;
-			arg_dst++;
-		} while (arg_src != end);
-	}
-
-	if (UNEXPECTED(!op_array->run_time_cache)) {
-		init_func_run_time_cache(op_array);
-	}
-
-	i_init_func_execute_data(execute_data, op_array, return_value, 1);
-
-	return execute_data;
 }
 /* }}} */
 

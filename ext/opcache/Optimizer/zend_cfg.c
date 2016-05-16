@@ -57,6 +57,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_basic_block *blocks, zend
 					//TODO: support for stackless CFG???
 					if (0/*stackless*/) {
 						if (opcode == ZEND_INCLUDE_OR_EVAL ||
+						    opcode == ZEND_GENERATOR_CREATE ||
 						    opcode == ZEND_YIELD ||
 						    opcode == ZEND_YIELD_FROM ||
 						    opcode == ZEND_DO_FCALL ||
@@ -268,6 +269,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				break;
 			case ZEND_INCLUDE_OR_EVAL:
 				flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+			case ZEND_GENERATOR_CREATE:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
 				if (build_flags & ZEND_CFG_STACKLESS) {

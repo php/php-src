@@ -1509,7 +1509,11 @@ TEST $file
 		$loaded = explode(",", `$php -n -r 'echo join(",", get_loaded_extensions());'`);
 		foreach ($extensions as $req_ext) {
 			if (!in_array($req_ext, $loaded)) {
-				$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				if ($req_ext == 'opcache') {
+					$ini_settings['zend_extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				} else {
+					$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				}
 			}
 		}
 	}
@@ -2336,7 +2340,7 @@ function settings2array($settings, &$ini_settings)
 			$name = trim($setting[0]);
 			$value = trim($setting[1]);
 
-			if ($name == 'extension') {
+			if ($name == 'extension' || $name == 'zend_extension') {
 
 				if (!isset($ini_settings[$name])) {
 					$ini_settings[$name] = array();
@@ -2792,7 +2796,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	} elseif ('WARN' == $type) {
 		junit_suite_record($suite, 'test_warn');
 		$JUNIT['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
-	} elseif('FAIL' == $type) {
+	} elseif ('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
 		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
 	} else {

@@ -4031,7 +4031,7 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
+ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zval *object, zend_string *name, zend_bool silent, zval *rv) /* {{{ */
 {
 	zval property, *value;
 	zend_class_entry *old_scope = EG(fake_scope);
@@ -4042,11 +4042,22 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be read", name, ZSTR_VAL(Z_OBJCE_P(object)->name));
 	}
 
-	ZVAL_STRINGL(&property, name, name_length);
+	ZVAL_STR(&property, name);
 	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
-	zval_ptr_dtor(&property);
 
 	EG(fake_scope) = old_scope;
+	return value;
+}
+/* }}} */
+
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
+{
+	zval *value;
+	zend_string *str;
+
+	str = zend_string_init(name, name_length, 0);
+	value = zend_read_property_ex(scope, object, str, silent, rv);
+	zend_string_release(str);
 	return value;
 }
 /* }}} */
