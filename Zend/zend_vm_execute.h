@@ -1756,7 +1756,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		if (catch_op_num) {
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
 			ZEND_VM_CONTINUE();
-		} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+		} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)
+		 /* check if generator object is created by GENERATOR_CREATE */
+		 && EX(return_value)
+		 && Z_TYPE_P(EX(return_value)) == IS_OBJECT) {
 			zend_generator *generator = zend_get_running_generator(execute_data);
 			zend_generator_close(generator, 1);
 			ZEND_VM_RETURN();
