@@ -310,7 +310,13 @@ PHP_FUNCTION(sapi_windows_cp_conv_utf8_to_thread)
 		RETURN_NULL();
 	}
 
-	RETVAL_STRING(php_win32_cp_w_to_thread(tmp));
+	subj = php_win32_cp_w_to_thread_full(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
+	if (!subj) {
+		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
+		RETURN_NULL();
+	}
+
+	RETVAL_STRINGL(subj, subj_len);
 
 	free(tmp);
 }
@@ -339,7 +345,13 @@ PHP_FUNCTION(sapi_windows_cp_conv_thread_to_utf8)
 		RETURN_NULL();
 	}
 
-	RETVAL_STRING(php_win32_cp_w_to_utf8(tmp));
+	subj = php_win32_cp_w_to_utf8_full(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
+	if (!subj) {
+		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
+		RETURN_NULL();
+	}
+
+	RETVAL_STRINGL(subj, subj_len);
 
 	free(tmp);
 }
