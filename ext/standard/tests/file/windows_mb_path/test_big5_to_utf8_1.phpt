@@ -18,22 +18,21 @@ skip_if_no_required_exts();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("dir_big5");
-$path = $prefix . DIRECTORY_SEPARATOR . "測試多字節路徑5"; // BIG5 string
-$pathw = iconv('big5', 'utf-8', $path);
+$item = iconv('big5', 'utf-8', "測試多字節路徑"); // BIG5 string
+$prefix = create_data("dir_big5", $item . "5");
+$path = $prefix . DIRECTORY_SEPARATOR . "${item}5";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "測試多字節路徑4";
-$subpathw = iconv('big5', 'utf-8', $subpath);
+$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
 
 /* The mb dirname exists*/
-var_dump(file_exists($pathw));
+var_dump(file_exists($path));
 
-var_dump(mkdir($subpathw));
-var_dump(file_exists($subpathw));
+var_dump(mkdir($subpath));
+var_dump(file_exists($subpath));
 
-get_basename_with_cp($subpathw, 65001);
+get_basename_with_cp($subpath, 65001);
 
-var_dump(rmdir($subpathw));
+var_dump(rmdir($subpath));
 remove_data("dir_big5");
 
 ?>

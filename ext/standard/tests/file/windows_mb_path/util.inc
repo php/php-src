@@ -117,7 +117,7 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "file2_cp1252":
-			create_verify_file($prefix, "Voláçao", "hola");
+			create_verify_file($prefix, $item, "hola");
 			break;
 
 		case "file2_mb":
@@ -132,33 +132,24 @@ echo \"hello there from the include\n\";";
 		case "file_mb":
 			$content = "reading file wihh eucjp filename
 ";
-			create_verify_file($prefix, "テストマルチバイト・パス", $content);
+			create_verify_file($prefix, $item, $content);
 			break;
 
 		case "file_big5":
 			$content = "read from a file with big5 filename";
-			create_verify_file($prefix, "測試多字節路徑", $content);
-			break;
-
-		case "dir_cp1252":
-			create_verify_dir($prefix, "tschüß3");
-			break;
-
-		case "dir2_cp1252":
-			create_verify_dir($prefix, "Voláçao3");
-			break;
-
-		case "dir_cp1251":
-			create_verify_dir($prefix, $item);
+			create_verify_file($prefix, $item, $content);
 			break;
 
 		case "dir_mb":
-		case "dir_eucjp":
 			create_verify_dir($prefix, "テストマルチバイト・パス42");
 			break;
 
+		case "dir_eucjp":
+		case "dir2_cp1252":
+		case "dir_cp1252":
+		case "dir_cp1251":
 		case "dir_big5":
-			create_verify_dir($prefix, "測試多字節路徑5");
+			create_verify_dir($prefix, $item);
 			break;
 	}
 

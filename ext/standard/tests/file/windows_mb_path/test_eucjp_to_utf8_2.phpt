@@ -18,11 +18,11 @@ skip_if_no_required_exts();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("dir_eucjp");
-$fn = $prefix . DIRECTORY_SEPARATOR . "テストマルチバイト・パス33"; // EUCJP string
-$fnw = iconv('eucjp', 'utf-8', $fn);
+$item = iconv('eucjp', 'utf-8', "テストマルチバイト・パス"); // EUCJP string
+$prefix = create_data("dir_eucjp", "${item}42}");
+$fn = $prefix . DIRECTORY_SEPARATOR . "${item}33";
 
-$f = fopen($fnw, 'w');
+$f = fopen($fn, 'w');
 if ($f) {
 	var_dump($f, fwrite($f, "writing to an mb filename"));
 	var_dump(fclose($f));
@@ -30,9 +30,9 @@ if ($f) {
 	echo "open utf8 failed\n";
 }
 
-var_dump(file_get_contents($fnw));
+var_dump(file_get_contents($fn));
 
-get_basename_with_cp($fnw, 65001);
+get_basename_with_cp($fn, 65001);
 
 remove_data("dir_eucjp");
 

@@ -18,11 +18,11 @@ skip_if_no_required_exts();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = create_data("file2_cp1252");
-$fn = $prefix . DIRECTORY_SEPARATOR . "Voláçao"; // cp1252 string
-$fnw = iconv('cp1252', 'utf-8', $fn);
+$item = iconv('cp1252', 'utf-8', "Voláçao"); // cp1252 string
+$prefix = create_data("file2_cp1252", $item);
+$fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
-$f = fopen($fnw, 'r');
+$f = fopen($fn, 'r');
 if ($f) {
 	var_dump($f, fread($f, 42));
 	var_dump(fclose($f));
