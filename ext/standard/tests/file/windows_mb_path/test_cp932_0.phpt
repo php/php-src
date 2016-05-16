@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for reading eucjp to UTF-8 path 
+Test fopen() for reading cp932 path without conversion 
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
