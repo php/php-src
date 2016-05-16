@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
 
+- PCRE:
+  . Fixed bug #72143 (preg_replace uses int instead of size_t). (Joe)
+
 - PDO_pgsql:
   . Fixed bug #71573 (Segfault (core dumped) if paramno beyond bound).
     (Laruence)
