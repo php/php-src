@@ -184,7 +184,6 @@ int closedir(DIR *dp)
 int rewinddir(DIR *dp)
 {
 	/* Re-set to the beginning */
-	char *filespec;
 	wchar_t *filespecw;
 	HANDLE handle;
 	int index;
