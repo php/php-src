@@ -958,7 +958,7 @@ again:
 					}
 
 					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-						ZVAL_UNREF(data);
+						data = Z_REFVAL_P(data);
 					}
 
 					/* we should still add element even if it's not OK,
