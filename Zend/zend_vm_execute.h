@@ -1694,7 +1694,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 {
 	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
 	int i;
-	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0, prev_finally_op_end = 0;
+	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 	int in_finally = 0;
 
 	{
@@ -1725,7 +1725,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		if (op_num >= EX(func)->op_array.try_catch_array[i].finally_op &&
 				op_num < EX(func)->op_array.try_catch_array[i].finally_end) {
 			finally_op_end = EX(func)->op_array.try_catch_array[i].finally_end;
-			prev_finally_op_end = finally_op_end;
 			in_finally = 1;
 		}
 	}
@@ -1736,13 +1735,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
 
 		cleanup_live_vars(execute_data, op_num, finally_op_num);
-		if (prev_finally_op_end) {
-			zval *prev_fast_call = EX_VAR(EX(func)->op_array.opcodes[prev_finally_op_end].op1.var);
-
-			if (Z_OBJ_P(prev_fast_call)) {
-				zend_exception_set_previous(EG(exception), Z_OBJ_P(prev_fast_call));
-				Z_OBJ_P(prev_fast_call) = NULL;
-			}
+		if (in_finally && Z_OBJ_P(fast_call)) {
+			zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call));
 		}
 		Z_OBJ_P(fast_call) = EG(exception);
 		EG(exception) = NULL;
