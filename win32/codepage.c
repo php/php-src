@@ -179,6 +179,8 @@ PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *o
 	return php_win32_cp_from_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
 }/*}}}*/
 
+/* #define PHP_WIN32_CP_ENC_STR_UTF8(enc) ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len && (zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0))*/
+
 PW32CP BOOL php_win32_cp_use_unicode(void)
 {/*{{{*/
 	char *enc = NULL;
@@ -257,20 +259,28 @@ PHP_FUNCTION(sapi_windows_set_cp)
 }
 /* }}} */
 
-/* {{{ proto int sapi_windows_set_cp(void)
+/* {{{ proto int sapi_windows_get_cp(void)
  * Get process codepage. */
 PHP_FUNCTION(sapi_windows_get_cp)
 {
 	UINT in_cp, out_cp;
+	char *kind;
+	size_t kind_len = 0;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &kind, &kind_len) == FAILURE) {
 		return;
 	}
 
-	in_cp = GetConsoleCP();
-	out_cp = GetConsoleOutputCP();
+	if (kind_len == sizeof("a")-1 && !strncasecmp(kind, "a", kind_len)) {
+		RETURN_LONG(GetACP());
+	} else if (kind_len == sizeof("oem")-1 && !strncasecmp(kind, "oem", kind_len)) {
+		RETURN_LONG(GetOEMCP());
+	} else {
+		in_cp = GetConsoleCP();
+		out_cp = GetConsoleOutputCP();
 
-	RETURN_LONG(in_cp == out_cp ? in_cp : -1);
+		RETURN_LONG(in_cp == out_cp ? in_cp : -1);
+	}
 }
 /* }}} */
 
