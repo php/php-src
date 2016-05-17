@@ -259,7 +259,7 @@ PHP_FUNCTION(sapi_windows_set_cp)
 }
 /* }}} */
 
-/* {{{ proto int sapi_windows_get_cp(void)
+/* {{{ proto int sapi_windows_get_cp([string kind])
  * Get process codepage. */
 PHP_FUNCTION(sapi_windows_get_cp)
 {
@@ -267,7 +267,7 @@ PHP_FUNCTION(sapi_windows_get_cp)
 	char *kind;
 	size_t kind_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &kind, &kind_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &kind, &kind_len) == FAILURE) {
 		return;
 	}
 
