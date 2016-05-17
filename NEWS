@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Fixed bug #72197 (pg_lo_create arbitrary read). (Anatol)
 
 - Standard:
+  . Fixed bug #72229 (Wrong reference when serialize/unserialize an object).
+    (Laruence)
   . Fixed bug #72193 (dns_get_record returns array containing elements of
     type 'unknown'). (Laruence)
   . Fixed bug #72017 (range() with float step produces unexpected result).
