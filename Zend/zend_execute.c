@@ -1812,19 +1812,21 @@ static zend_never_inline void zend_fetch_dimension_address_UNSET(zval *result, z
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET);
 }
 
-static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, int support_strings)
+static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, int support_strings, int slow)
 {
 	zval *retval;
 
-	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-try_array:
-		retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
-		ZVAL_COPY(result, retval);
-		return;
-	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
-		container = Z_REFVAL_P(container);
+	if (!slow) {
 		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-			goto try_array;
+try_array:
+			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
+			ZVAL_COPY(result, retval);
+			return;
+		} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+			container = Z_REFVAL_P(container);
+			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+				goto try_array;
+			}
 		}
 	}
 	if (support_strings && EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
@@ -1921,17 +1923,22 @@ try_string_offset:
 
 static zend_never_inline void zend_fetch_dimension_address_read_R(zval *result, zval *container, zval *dim, int dim_type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1, 0);
+}
+
+static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *result, zval *container, zval *dim)
+{
+	zend_fetch_dimension_address_read(result, container, dim, IS_CV, BP_VAR_R, 1, 1);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result, zval *container, zval *dim, int dim_type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_read_LIST(zval *result, zval *container, zval *dim)
 {
-	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0);
+	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0, 0);
 }
 
 ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim)
@@ -1941,7 +1948,7 @@ ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *
 
 ZEND_API void zend_fetch_dimension_by_zval_is(zval *result, zval *container, zval *dim, int dim_type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0);
 }
 
 
