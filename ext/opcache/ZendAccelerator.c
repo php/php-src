@@ -2934,7 +2934,7 @@ void accelerator_shm_read_unlock(void)
 
 ZEND_EXT_API zend_extension zend_extension_entry = {
 	ACCELERATOR_PRODUCT_NAME,               /* name */
-	ACCELERATOR_VERSION,					/* version */
+	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
 	"Copyright (c) 1999-2016",				/* copyright */

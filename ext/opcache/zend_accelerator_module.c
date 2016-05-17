@@ -517,7 +517,7 @@ static zend_module_entry accel_module_entry = {
 	NULL,
 	NULL,
 	zend_accel_info,
-	ACCELERATOR_VERSION "FE",
+	PHP_VERSION,
 	NO_MODULE_GLOBALS,
 	accel_post_deactivate,
 	STANDARD_MODULE_PROPERTIES_EX
@@ -727,7 +727,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 
 	/*version */
 	array_init(&version);
-	add_assoc_string(&version, "version", ACCELERATOR_VERSION);
+	add_assoc_string(&version, "version", PHP_VERSION);
 	add_assoc_string(&version, "opcache_product_name", ACCELERATOR_PRODUCT_NAME);
 	add_assoc_zval(return_value, "version", &version);
 
