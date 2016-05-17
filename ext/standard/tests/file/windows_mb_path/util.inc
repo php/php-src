@@ -33,9 +33,9 @@ function get_basename_with_cp($path, $cp, $echo = true)
 	return $out;
 }
 
-function skip_if_wrong_cp($cp)
+function skip_if_wrong_cp($cp, $kind = "")
 {
-	if (get_active_cp() != $cp) {
+	if (get_active_cp($kind) != $cp) {
 		die("skip this test expect codepage $cp");
 	}
 }
