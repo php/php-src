@@ -1,8 +1,8 @@
 <?php
 
-function get_active_cp()
+function get_active_cp($kind = "")
 {
-	return sapi_windows_get_cp();
+	return sapi_windows_get_cp($kind);
 }
 
 function set_active_cp($cp, $echo = true)
