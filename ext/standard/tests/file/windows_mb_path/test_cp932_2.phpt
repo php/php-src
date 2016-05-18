@@ -46,7 +46,7 @@ resource(%d) of type (stream)
 int(25)
 bool(true)
 string(25) "writing to an mb filename"
-Active code page: 65001
+Active code page: 932
 getting basename of %s\テストマルチバイト・パス33
 string(%d) "テストマルチバイト・パス33"
 bool(true)
