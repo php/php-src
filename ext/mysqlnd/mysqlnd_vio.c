@@ -538,7 +538,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	if (net->data->options.ssl_cn) {
 		zval cn_zval;
 		ZVAL_STRING(&cn_zval, net->data->options.ssl_cn);
-		php_stream_context_set_option(context, "ssl", "peer_name", &capath_zval);
+		php_stream_context_set_option(context, "ssl", "peer_name", &cn_zval);
 		zval_ptr_dtor(&cn_zval);
 		any_flag = TRUE;
 	}
