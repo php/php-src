@@ -46,6 +46,8 @@ PHP                                                                        NEWS
   . Added SHA512/256 and SHA512/224 algorithms. (Sara)
 
 - JSON:
+  . Exported JSON parser API including json_parser_method that can be used
+    for implementing custom logic when parsing JSON. (Jakub Zelenka)
   . Escaped U+2028 and U+2029 when JSON_UNESCAPED_UNICODE is supplied as
     json_encode options and added JSON_UNESCAPED_LINE_TERMINATORS to restore
     the previous behaviour. (Eddie Kohler)
