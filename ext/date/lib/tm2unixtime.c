@@ -152,9 +152,17 @@ static void do_adjust_for_weekday(timelib_time* time)
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	if (time->relative.weekday_behavior == 2)
 	{
-		if (time->relative.weekday == 0) {
+		/* To make "this week" work, where the current DOW is a "sunday" */
+		if (current_dow == 0 && time->relative.weekday != 0) {
+			time->relative.weekday = -6;
+		}
+
+		/* To make "sunday this week" work, where the current DOW is not a
+		 * "sunday" */
+		if (time->relative.weekday == 0 && current_dow != 0) {
 			time->relative.weekday = 7;
 		}
+
 		time->d -= current_dow;
 		time->d += time->relative.weekday;
 		return;

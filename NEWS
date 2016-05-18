@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     (Michael Sierks)    
 
 - Date:
+  . Fixed bug #63740 (strtotime seems to use both sunday and monday as start of
+    week). (Derick)
   . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
 
 - EXIF:
