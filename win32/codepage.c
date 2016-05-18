@@ -271,7 +271,7 @@ PHP_FUNCTION(sapi_windows_get_cp)
 		return;
 	}
 
-	if (kind_len == sizeof("a")-1 && !strncasecmp(kind, "a", kind_len)) {
+	if (kind_len == sizeof("ansi")-1 && !strncasecmp(kind, "ansi", kind_len)) {
 		RETURN_LONG(GetACP());
 	} else if (kind_len == sizeof("oem")-1 && !strncasecmp(kind, "oem", kind_len)) {
 		RETURN_LONG(GetOEMCP());
