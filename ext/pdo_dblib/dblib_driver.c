@@ -173,6 +173,8 @@ static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	RETCODE ret;
+
+	dbsetuserdata(H->link, (BYTE*)&H->err);
 	
 	if (FAIL == dbcmd(H->link, cmd)) {
 		return 0;
