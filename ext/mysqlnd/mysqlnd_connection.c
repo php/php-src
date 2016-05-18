@@ -1020,7 +1020,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CERT, cert) &&
 			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CA, ca) &&
 			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CAPATH, capath) &&
-                        PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CAPATH, cn) &&
+                        PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CN, cn) &&
 			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CIPHER, cipher)) ? PASS : FAIL;
 
 		conn->m->local_tx_end(conn, this_func, ret);
