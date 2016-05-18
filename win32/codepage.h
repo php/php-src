@@ -53,20 +53,20 @@ __forceinline static wchar_t *php_win32_cp_any_to_w_full(const char* in, size_t 
 {/*{{{*/
 	wchar_t *ret = NULL;
 
-	/* First try the pure ascii conversion. This is the fastest way to do the
-		thing. */
-	ret = php_win32_cp_ascii_to_w_full(in, in_len, out_len);
-	/* If that failed, try to convert to multibyte. */
-	if (!ret) {
+	if (php_win32_cp_use_unicode()) {
+		/* First try the pure ascii conversion. This is the fastest way to do the
+			thing. Only applicable if the source string is UTF-8 in general. 
+			While it could possibly be ok with European encodings, usage with 
+			Asian encodings can cause unintended side effects. */
+		ret = php_win32_cp_ascii_to_w_full(in, in_len, out_len);
 
-		if (php_win32_cp_use_unicode()) {
+		/* If that failed, try to convert to multibyte. */
+		if (!ret) {
 			ret = php_win32_cp_mb_to_w_full(in, in_len, out_len);
 		}
-
-		if (!ret) {
-			/* Fallback to the thread cp conversion. */
-			ret = php_win32_cp_thread_to_w_full(in, in_len, out_len);
-		}
+	} else {
+		/* No unicode, convert from the current thread cp. */
+		ret = php_win32_cp_thread_to_w_full(in, in_len, out_len);
 	}
 
 	return ret;
