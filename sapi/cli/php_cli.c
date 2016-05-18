@@ -1365,8 +1365,13 @@ exit_loop:
 		PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
 		using_wide_argv = 1;
 	} else {
-		SetConsoleOutputCP(prev_cp);
-		SetConsoleCP(prev_cp);
+		/* This retains the old beavior. If Unicode is disabled in a nested call,
+		   the current process could still inherit 65001 from the parent. An
+		   improvement could be to get the default charset (or an aggregated
+		   value) to be mapped to the correspending Windows codepage. For now,
+		   the OEM CP is used, so the old behavior. */
+		SetConsoleOutputCP(GetOEMCP());
+		SetConsoleCP(GetOEMCP());
 	}
 #endif
 
