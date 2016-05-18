@@ -702,7 +702,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 					ssl_ca? ZSTR_VAL(ssl_ca) : NULL,
 					ssl_capath? ZSTR_VAL(ssl_capath) : NULL,
 					ssl_cipher? ZSTR_VAL(ssl_cipher) : NULL,
-                                        ssl_cipher? ZSTR_VAL(ssl_server_cn) : NULL);
+                                        ssl_server_cn? ZSTR_VAL(ssl_server_cn) : NULL);
 			if (ssl_key) {
 				zend_string_release(ssl_key);
 			}
