@@ -63,8 +63,14 @@ function create_verify_file($prefix, $basename, $content = "", $cp = 65001)
 {
 	$full = $prefix . DIRECTORY_SEPARATOR . $basename;
 
-	if (!touch($full) || get_basename_with_cp($full, $cp, false) !== $basename) {
-		echo "failed to touch create $full";
+	if (!touch($full)) {
+		echo "failed to touch create $full\n";
+		return;
+	}
+
+	$now = get_basename_with_cp($full, $cp, false);
+	if ($now !== $basename) {
+		echo "expected '$basename', got '$now'\n";
 		return;
 	}
 
@@ -78,11 +84,11 @@ function create_verify_dir($prefix, $basename, $cp = 65001)
 	$full = $prefix . DIRECTORY_SEPARATOR . $basename;
 
 	if (!mkdir($full) || get_basename_with_cp($full, $cp, false) !== $basename) {
-		echo "failed to create dir $full";
+		echo "failed to create dir '$full'\n";
 	}
 }
 
-function create_data($id, $item = "")
+function create_data($id, $item = "", $cp = 65001)
 {
 	$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . $id;
 
@@ -133,7 +139,7 @@ echo \"hello there from the include\n\";";
 		case "file_mb":
 			$content = "reading file wihh multibyte filename
 ";
-			create_verify_file($prefix, $item, $content);
+			create_verify_file($prefix, $item, $content, $cp);
 			break;
 
 		case "file_big5":
@@ -151,7 +157,7 @@ echo \"hello there from the include\n\";";
 		case "dir_cp1252":
 		case "dir_cp1251":
 		case "dir_big5":
-			create_verify_dir($prefix, $item);
+			create_verify_dir($prefix, $item, $cp);
 			break;
 	}
 
