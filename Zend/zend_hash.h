@@ -159,7 +159,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulo
 #define ZEND_HASH_INDEX_FIND(_ht, _h, _ret, _not_found) do { \
 		if (EXPECTED((_ht)->u.flags & HASH_FLAG_PACKED)) { \
 			if (EXPECTED((_h) < (_ht)->nNumUsed)) { \
-				_ret = &ht->arData[_h].val; \
+				_ret = &_ht->arData[_h].val; \
 				if (UNEXPECTED(Z_TYPE_P(_ret) == IS_UNDEF)) { \
 					goto _not_found; \
 				} \
