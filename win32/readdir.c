@@ -142,7 +142,7 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 		}
 	}
 
-	_tmp = php_win32_ioutil_w_to_utf8(dp->fileinfo.w.cFileName);
+	_tmp = php_win32_ioutil_w_to_any(dp->fileinfo.w.cFileName);
 	if (!_tmp) {
 		/* wide to utf8 failed, should never happen. */
 		result = NULL;
