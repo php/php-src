@@ -255,7 +255,8 @@ typedef enum mysqlnd_client_option
 	MYSQLND_OPT_SSL_CIPHER = 208,
 	MYSQLND_OPT_SSL_PASSPHRASE = 209,
 	MYSQLND_OPT_MAX_ALLOWED_PACKET = 210,
-	MYSQLND_OPT_AUTH_PROTOCOL = 211
+	MYSQLND_OPT_AUTH_PROTOCOL = 211,
+        MYSQLND_OPT_SSL_CN = 212
 } enum_mysqlnd_client_option;
 
 typedef enum mysqlnd_session_protocol_type

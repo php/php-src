@@ -164,7 +164,7 @@ PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQL
 PHPAPI const char *	mysqlnd_get_client_info();
 PHPAPI unsigned int	mysqlnd_get_client_version();
 
-#define mysqlnd_ssl_set(conn, key, cert, ca, capath, cipher) ((conn)->data)->m->ssl_set((conn)->data, (key), (cert), (ca), (capath), (cipher))
+#define mysqlnd_ssl_set(conn, key, cert, ca, capath, cipher, cn) ((conn)->data)->m->ssl_set((conn)->data, (key), (cert), (ca), (capath), (cn), (cipher))
 
 /* PS */
 #define mysqlnd_stmt_insert_id(stmt)		(stmt)->m->get_last_insert_id((stmt))
