@@ -63,7 +63,19 @@ PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* in, size_t in_len, size_t 
 
 PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
-	return php_win32_cp_to_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
+	wchar_t *ret;
+
+	ret = php_win32_cp_to_w_int(in, in_len, out_len, CP_ACP, 0);
+
+	if (!ret) {
+		ret = php_win32_cp_to_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
+
+		if (!ret) {
+			ret = php_win32_cp_to_w_int(in, in_len, out_len, CP_OEMCP, 0);
+		}
+	}
+
+	return ret;
 }/*}}}*/
 
 PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size_t *out_len)
@@ -176,7 +188,19 @@ PW32CP char *php_win32_cp_w_to_utf8_full(wchar_t* in, size_t in_len, size_t *out
 
 PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *out_len)
 {/*{{{*/
-	return php_win32_cp_from_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
+	char *ret;
+
+	ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_ACP, 0);
+
+	if (!ret) {
+		ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
+
+		if (!ret) {
+			ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_OEMCP, 0);
+		}
+	}
+
+	return ret;
 }/*}}}*/
 
 /* #define PHP_WIN32_CP_ENC_STR_UTF8(enc) ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len && (zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0))*/
