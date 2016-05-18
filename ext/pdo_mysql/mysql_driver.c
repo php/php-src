@@ -695,7 +695,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		ssl_cipher = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CIPHER, NULL);
                 ssl_server_cn = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_SERVER_CN, NULL);
 
-		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher) {
+		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher || ssl_server_cn) {
 			mysql_ssl_set(H->server,
 					ssl_key? ZSTR_VAL(ssl_key) : NULL,
 					ssl_cert? ZSTR_VAL(ssl_cert) : NULL,
