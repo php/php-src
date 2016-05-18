@@ -43,7 +43,8 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
     /* Build SSA */
 	memset(ssa, 0, sizeof(zend_ssa));
 
-	if (zend_build_cfg(&ctx->arena, op_array, 0, &ssa->cfg, flags) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array,
+			ZEND_CFG_NO_ENTRY_PREDECESSORS, &ssa->cfg, flags) != SUCCESS) {
 		return FAILURE;
 	}
 
