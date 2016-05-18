@@ -129,9 +129,10 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 	memset(shiftlist, 0, sizeof(uint32_t) * op_array->last);
 	for (b = blocks; b < end; b++) {
 		if (b->flags & ZEND_BB_REACHABLE) {
+			uint32_t end = b->start + b->len;
 			i = b->start;
 			b->start = target;
-			while (i <= b->end) {
+			while (i < end) {
 				if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
 				   /*keep NOP to support ZEND_VM_SMART_BRANCH */
 				   (i > 0 &&
@@ -161,13 +162,13 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 				}
 				i++;
 			}
-			if (b->end != target - 1) {
+			if (target != end && b->len != 0) {
 				zend_op *opline;
 				zend_op *new_opline;
 
-				opline = op_array->opcodes + b->end;
-				b->end = target - 1;
-				new_opline = op_array->opcodes + b->end;
+				opline = op_array->opcodes + end - 1;
+				b->len = target - b->start;
+				new_opline = op_array->opcodes + target - 1;
 				switch (new_opline->opcode) {
 					case ZEND_JMP:
 					case ZEND_FAST_CALL:
@@ -232,8 +233,8 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 
 		/* update branch targets */
 		for (b = blocks; b < end; b++) {
-			if (b->flags & ZEND_BB_REACHABLE) {
-				zend_op *opline = op_array->opcodes + b->end;
+			if ((b->flags & ZEND_BB_REACHABLE) && b->len != 0) {
+				zend_op *opline = op_array->opcodes + b->start + b->len - 1;
 
 				switch (opline->opcode) {
 					case ZEND_JMP:

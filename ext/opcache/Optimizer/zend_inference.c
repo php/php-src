@@ -3613,8 +3613,8 @@ void zend_func_return_info(const zend_op_array   *op_array,
 	}
 
 	for (j = 0; j < blocks_count; j++) {
-		if (blocks[j].flags & ZEND_BB_REACHABLE) {
-			zend_op *opline = op_array->opcodes + blocks[j].end;
+		if ((blocks[j].flags & ZEND_BB_REACHABLE) && blocks[j].len != 0) {
+			zend_op *opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
 
 			if (opline->opcode == ZEND_RETURN || opline->opcode == ZEND_RETURN_BY_REF) {
 				if (!recursive &&
