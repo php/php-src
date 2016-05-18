@@ -39,15 +39,17 @@ static void zend_mark_reachable(zend_op *opcodes, zend_basic_block *blocks, zend
 				if (!(b0->flags & ZEND_BB_REACHABLE)) {
 					zend_mark_reachable(opcodes, blocks, b0);
 				}
-				opcode = opcodes[b->end].opcode;
+
+				ZEND_ASSERT(b->len != 0);
+				opcode = opcodes[b->start + b->len - 1].opcode;
 				b = blocks + successor_1;
 				if (opcode == ZEND_JMPZNZ) {
 					b->flags |= ZEND_BB_TARGET;
 				} else {
 					b->flags |= ZEND_BB_FOLLOW;
 				}
-			} else {
-				opcode = opcodes[b->end].opcode;
+			} else if (b->len != 0) {
+				opcode = opcodes[b->start + b->len - 1].opcode;
 				b = blocks + successor_0;
 				if (opcode == ZEND_JMP) {
 					b->flags |= ZEND_BB_TARGET;
@@ -67,6 +69,9 @@ static void zend_mark_reachable(zend_op *opcodes, zend_basic_block *blocks, zend
 						}
 					}
 				}
+			} else {
+				b = blocks + successor_0;
+				b->flags |= ZEND_BB_FOLLOW;
 			}
 			if (b->flags & ZEND_BB_REACHABLE) return;
 		} else {
@@ -94,24 +99,24 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 
 			/* Add live range paths */
 			for (j = 0; j < op_array->last_live_range; j++) {
-				if (op_array->live_range[j].var == (uint32_t)-1) {
+				zend_live_range *live_range = &op_array->live_range[j];
+				if (live_range->var == (uint32_t)-1) {
 					/* this live range already removed */
 					continue;
 				}
-				b = blocks + block_map[op_array->live_range[j].start];
+				b = blocks + block_map[live_range->start];
 				if (b->flags & ZEND_BB_REACHABLE) {
-					while (op_array->opcodes[b->start].opcode == ZEND_NOP && b->start != b->end) {
+					while (b->len > 0 && op_array->opcodes[b->start].opcode == ZEND_NOP) {
 						b->start++;
+						b->len--;
 					}
-					if (op_array->opcodes[b->start].opcode == ZEND_NOP &&
-						b->start == b->end &&
-						b->successors[0] == block_map[op_array->live_range[j].end]) {
+					if (b->len == 0 && b->successors[0] == block_map[live_range->end]) {
 						/* mark as removed (empty live range) */
-						op_array->live_range[j].var = (uint32_t)-1;
+						live_range->var = (uint32_t)-1;
 						continue;
 					}
 					b->flags |= ZEND_BB_GEN_VAR;
-					b = blocks + block_map[op_array->live_range[j].end];
+					b = blocks + block_map[live_range->end];
 					b->flags |= ZEND_BB_KILL_VAR;
 					if (!(b->flags & ZEND_BB_REACHABLE)) {
 						if (cfg->split_at_live_ranges) {
@@ -119,12 +124,12 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 							zend_mark_reachable(op_array->opcodes, blocks, b);
 						} else {
 							ZEND_ASSERT(!(b->flags & ZEND_BB_UNREACHABLE_FREE));
-							ZEND_ASSERT(b->start == op_array->live_range[j].end);
+							ZEND_ASSERT(b->start == live_range->end);
 							b->flags |= ZEND_BB_UNREACHABLE_FREE;
 						}
 					}
 				} else {
-					ZEND_ASSERT(!(blocks[block_map[op_array->live_range[j].end]].flags & ZEND_BB_REACHABLE));
+					ZEND_ASSERT(!(blocks[block_map[live_range->end]].flags & ZEND_BB_REACHABLE));
 				}
 			}
 
@@ -435,7 +440,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	for (i = 0, blocks_count = -1; i < op_array->last; i++) {
 		if (block_map[i]) {
 			if (blocks_count >= 0) {
-				blocks[blocks_count].end = i - 1;
+				blocks[blocks_count].len = i - blocks[blocks_count].start;
 			}
 			blocks_count++;
 			blocks[blocks_count].flags = 0;
@@ -453,13 +458,19 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		block_map[i] = blocks_count;
 	}
 
-	blocks[blocks_count].end = i - 1;
+	blocks[blocks_count].len = i - blocks[blocks_count].start;
 	blocks_count++;
 
 	/* Build CFG, Step 3: Calculate successors */
 	for (j = 0; j < blocks_count; j++) {
-		zend_op *opline = op_array->opcodes + blocks[j].end;
-		switch(opline->opcode) {
+		zend_op *opline;
+		if (blocks[j].len == 0) {
+			record_successor(blocks, j, 0, j + 1);
+			continue;
+		}
+
+		opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
+		switch (opline->opcode) {
 			case ZEND_FAST_RET:
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:

@@ -722,7 +722,11 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_IRREDUCIBLE_LOOP) {
 		fprintf(stderr, " irreducible");
 	}
-	fprintf(stderr, " lines=[%d-%d]", b->start, b->end);
+	if (b->len != 0) {
+		fprintf(stderr, " lines=[%d-%d]", b->start, b->start + b->len - 1);
+	} else {
+		fprintf(stderr, " empty");
+	}
 	fprintf(stderr, "\n");
 
 	if (b->predecessors_count) {
@@ -936,13 +940,11 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 				const zend_op *end;
 
 				zend_dump_block_header(cfg, op_array, ssa, n, dump_flags);
-				if (!(b->flags & ZEND_BB_EMPTY)) {
-					opline = op_array->opcodes + b->start;
-					end = op_array->opcodes + b->end + 1;
-					while (opline < end) {
-						zend_dump_op(op_array, b, opline, dump_flags, data);
-						opline++;
-					}
+				opline = op_array->opcodes + b->start;
+				end = opline + b->len;
+				while (opline < end) {
+					zend_dump_op(op_array, b, opline, dump_flags, data);
+					opline++;
 				}
 			}
 		}
