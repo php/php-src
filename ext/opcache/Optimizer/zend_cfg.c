@@ -240,9 +240,22 @@ static void record_successor(zend_basic_block *blocks, int pred, int n, int succ
 	blocks[pred].successors[n] = succ;
 }
 
+static void initialize_block(zend_basic_block *block) {
+	block->flags = 0;
+	block->successors[0] = -1;
+	block->successors[1] = -1;
+	block->predecessors_count = 0;
+	block->predecessor_offset = -1;
+	block->idom = -1;
+	block->loop_header = -1;
+	block->level = -1;
+	block->children = -1;
+	block->next_child = -1;
+}
+
 #define BB_START(i) do { \
 		if (!block_map[i]) { blocks_count++;} \
-		block_map[i] = 1; \
+		block_map[i]++; \
 	} while (0)
 
 int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg, uint32_t *func_flags) /* {{{ */
@@ -255,6 +268,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	int blocks_count = 0;
 	zend_basic_block *blocks;
 	zval *zv;
+	zend_bool extra_entry_block = 0;
 
 	cfg->split_at_live_ranges = (build_flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES) != 0;
 	cfg->map = block_map = zend_arena_calloc(arena, op_array->last, sizeof(uint32_t));
@@ -407,6 +421,12 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		}
 	}
 
+	/* If the entry block has predecessors, we may need to split it */
+	if ((build_flags & ZEND_CFG_NO_ENTRY_PREDECESSORS)
+			&& op_array->last > 0 && block_map[0] > 1) {
+		extra_entry_block = 1;
+	}
+
 	if (cfg->split_at_live_ranges) {
 		for (j = 0; j < op_array->last_live_range; j++) {
 			BB_START(op_array->live_range[j].start);
@@ -429,6 +449,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		}
 	}
 
+	blocks_count += extra_entry_block;
 	cfg->blocks_count = blocks_count;
 
 	/* Build CFG, Step 2: Build Array of Basic Blocks */
@@ -437,23 +458,23 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		return FAILURE;
 	}
 
-	for (i = 0, blocks_count = -1; i < op_array->last; i++) {
+	blocks_count = -1;
+
+	if (extra_entry_block) {
+		initialize_block(&blocks[0]);
+		blocks[0].start = 0;
+		blocks[0].len = 0;
+		blocks_count++;
+	}
+
+	for (i = 0; i < op_array->last; i++) {
 		if (block_map[i]) {
 			if (blocks_count >= 0) {
 				blocks[blocks_count].len = i - blocks[blocks_count].start;
 			}
 			blocks_count++;
-			blocks[blocks_count].flags = 0;
+			initialize_block(&blocks[blocks_count]);
 			blocks[blocks_count].start = i;
-			blocks[blocks_count].successors[0] = -1;
-			blocks[blocks_count].successors[1] = -1;
-			blocks[blocks_count].predecessors_count = 0;
-			blocks[blocks_count].predecessor_offset = -1;
-			blocks[blocks_count].idom = -1;
-			blocks[blocks_count].loop_header = -1;
-			blocks[blocks_count].level = -1;
-			blocks[blocks_count].children = -1;
-			blocks[blocks_count].next_child = -1;
 		}
 		block_map[i] = blocks_count;
 	}
