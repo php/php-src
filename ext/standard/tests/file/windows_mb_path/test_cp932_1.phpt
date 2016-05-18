@@ -33,7 +33,7 @@ var_dump(file_exists($path));
 var_dump(mkdir($subpath));
 var_dump(file_exists($subpath));
 
-get_basename_with_cp($subpath, 65001);
+get_basename_with_cp($subpath, 932);
 
 var_dump(rmdir($subpath));
 remove_data("dir_cp932");
