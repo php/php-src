@@ -18,7 +18,7 @@ skip_if_no_required_exts();
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$item = "مسار متعدد البايت اختبار"; // cp1256 string
+$item = "مسار متعدد البايت اختبار";
 $prefix = create_data("file_cp1256", $item);
 $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
