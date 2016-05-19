@@ -38,6 +38,8 @@ extern PHPAPI zend_class_entry *reflection_function_abstract_ptr;
 extern PHPAPI zend_class_entry *reflection_function_ptr;
 extern PHPAPI zend_class_entry *reflection_parameter_ptr;
 extern PHPAPI zend_class_entry *reflection_type_ptr;
+extern PHPAPI zend_class_entry *reflection_callable_type_ptr;
+extern PHPAPI zend_class_entry *reflection_callable_parameter_ptr;
 extern PHPAPI zend_class_entry *reflection_class_ptr;
 extern PHPAPI zend_class_entry *reflection_object_ptr;
 extern PHPAPI zend_class_entry *reflection_method_ptr;

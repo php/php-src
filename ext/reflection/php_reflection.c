@@ -60,6 +60,8 @@ PHPAPI zend_class_entry *reflection_function_ptr;
 PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
+PHPAPI zend_class_entry *reflection_callable_type_ptr;
+PHPAPI zend_class_entry *reflection_callable_parameter_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
 PHPAPI zend_class_entry *reflection_method_ptr;
@@ -215,6 +217,8 @@ typedef enum {
 	REF_TYPE_GENERATOR,
 	REF_TYPE_PARAMETER,
 	REF_TYPE_TYPE,
+	REF_TYPE_CALLABLE_TYPE,
+	REF_TYPE_CALLABLE_PARAMETER,
 	REF_TYPE_PROPERTY,
 	REF_TYPE_DYNAMIC_PROPERTY,
 	REF_TYPE_CLASS_CONSTANT
@@ -319,6 +323,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_TYPE:
+		case REF_TYPE_CALLABLE_TYPE:
 			typ_reference = (type_reference*)intern->ptr;
 			_free_function(typ_reference->fptr);
 			efree(intern->ptr);
@@ -337,6 +342,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 		case REF_TYPE_GENERATOR:
 		case REF_TYPE_CLASS_CONSTANT:
 		case REF_TYPE_OTHER:
+		/* TODO */ case REF_TYPE_CALLABLE_PARAMETER:
 			break;
 		}
 	}
@@ -3029,6 +3035,38 @@ ZEND_METHOD(reflection_type, __toString)
 		case IS_VOID:     RETURN_STRINGL("void", sizeof("void") - 1);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionCallableType::hasReturnType()
+   Tells if the callable has return type defined */
+ZEND_METHOD(reflection_callable_type, hasReturnType)
+{
+	
+}
+/* }}} */
+
+/* {{{ proto public ReflectionType ReflectionCallableType::getReturnType()
+   Returns return type of callable typehint */
+ZEND_METHOD(reflection_callable_type, getReturnType)
+{
+	
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionCallableType::hasParameters()
+   Tells if the callable has parameters defined */
+ZEND_METHOD(reflection_callable_type, hasParameters)
+{
+	
+}
+/* }}} */
+
+/* {{{ proto public array ReflectionCallableType::getParameters()
+   Returns parameters of callable typehint */
+ZEND_METHOD(reflection_callable_type, getParameters)
+{
+	
 }
 /* }}} */
 
@@ -6746,6 +6784,16 @@ static const zend_function_entry reflection_type_functions[] = {
 	PHP_FE_END
 };
 
+static const zend_function_entry reflection_callable_type_functions[] = {
+	ZEND_ME(reflection, __clone, arg_info_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(reflection_callable_type, hasReturnType, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_callable_type, getReturnType, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_callable_type, hasParameters, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_callable_type, getParameters, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_callable_type, __toString, arginfo_reflection__void, 0)
+	PHP_FE_END
+};
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_extension_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, return)
@@ -6862,6 +6910,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionType", reflection_type_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_type_ptr = zend_register_internal_class(&_reflection_entry);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionCallableType", reflection_callable_type_functions);
+	_reflection_entry.create_object = reflection_object_new;
+	reflection_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
 	_reflection_entry.create_object = reflection_objects_new;
