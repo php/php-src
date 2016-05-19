@@ -36,6 +36,7 @@ remove_data("file_big5");
 ===DONE===
 --EXPECTF--	
 resource(%d) of type (stream)
-string(35) "read from a file with big5 filename"
+string(%d) "reading file wihh multibyte filename
+"
 bool(true)
 ===DONE===
