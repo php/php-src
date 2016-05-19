@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(874, "ansi");
 
 ?>
+--INI--
+internal_encoding=cp874
 --FILE--
 <?php
 /*
