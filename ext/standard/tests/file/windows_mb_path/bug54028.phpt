@@ -16,7 +16,7 @@ skip_if_no_required_exts("mbstring");
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . "testBug64699" . DIRECTORY_SEPARATOR;
+$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . "testBug54028" . DIRECTORY_SEPARATOR;
 
 $dirs = array("a", "ソ", "ゾ", "şŞıİğĞ", "多国語", "王", "汚れて掘る");
 
