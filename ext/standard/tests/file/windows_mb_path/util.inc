@@ -131,7 +131,7 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "file_cp1251":
-			create_verify_file($prefix, $item, "opened an utf8 filename for reading");
+			create_verify_file($prefix, $item, "opened an utf8 filename for reading", $cp);
 			break;
 
 		case "file_big5":

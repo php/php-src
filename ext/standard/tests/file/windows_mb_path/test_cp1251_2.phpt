@@ -7,9 +7,11 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
-skip_if_wrong_cp(1251, "oem");
+skip_if_wrong_cp(1251, "ansi");
 
 ?>
+--INI--
+internal_encoding=cp1251
 --FILE--
 <?php
 /*
