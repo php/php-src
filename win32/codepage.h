@@ -63,6 +63,15 @@ __forceinline static wchar_t *php_win32_cp_any_to_w_full(const char* in, size_t 
 		/* If that failed, try to convert to multibyte. */
 		if (!ret) {
 			ret = php_win32_cp_mb_to_w_full(in, in_len, out_len);
+
+			/* Still need this fallback with regard to possible broken data
+				in the existing scripts. Broken data might be hardcoded in
+				the user scripts, as UTF-8 settings was de facto ignored in
+				older PHP versions. The fallback can be removed later for 
+				the sake of purity, keep now for BC reasons. */
+			if (!ret) {
+				ret = php_win32_cp_thread_to_w_full(in, in_len, out_len);
+			}
 		}
 	} else {
 		/* No unicode, convert from the current thread cp. */

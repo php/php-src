@@ -249,13 +249,6 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 		size_t tmp_len;
 
 		tmp = php_win32_cp_any_to_w(cur);
-#if 0
-		if (!tmp && php_win32_cp_use_unicode()) {
-			/* Extra fallback. Basically it's a quirk mode for proc_open(),
-			 	as some invalid data might land here.*/
-			tmp = php_win32_cp_thread_to_w(cur);
-		}
-#endif
 		if (tmp) {
 			tmp_len = wcslen(tmp) + 1;
 			memmove(ew + bin_len, tmp, tmp_len * sizeof(wchar_t));
