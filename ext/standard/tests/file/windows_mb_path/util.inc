@@ -134,6 +134,7 @@ echo \"hello there from the include\n\";";
 			create_verify_file($prefix, $item, "opened an utf8 filename for reading", $cp);
 			break;
 
+		case "file_kartuli":
 		case "file_cp1250":
 		case "file_cp1256":
 		case "file_cp874":
@@ -151,6 +152,7 @@ echo \"hello there from the include\n\";";
 			create_verify_dir($prefix, "テストマルチバイト・パス42");
 			break;
 
+		case "dir_kartuli":
 		case "dir_cp1250":
 		case "dir_cp1256":
 		case "dir_cp874":
