@@ -24,7 +24,7 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "テストマルチバイト・パス77"; // cp932 string
 $prefix = create_data("file_cp932", $item, 932);
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . $item;
+$fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 var_dump($fn);
 var_dump(touch($fn));
