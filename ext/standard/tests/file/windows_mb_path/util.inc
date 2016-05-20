@@ -2,17 +2,28 @@
 
 function get_active_cp($kind = "")
 {
-	return sapi_windows_get_cp($kind);
+	if (version_compare(PHP_VERSION, '7.1', '<')) {
+		$s = exec("chcp");
+		preg_match(",.*: (\d+),", $s, $m);
+
+		return $m[1];
+	} else {
+		return sapi_windows_get_cp($kind);
+	}
 }
 
 function set_active_cp($cp, $echo = true)
 {
-	if (!sapi_windows_set_cp($cp)) {
-		echo "Failed to set cp $cp\n";
-		return;
-	}
+	if (version_compare(PHP_VERSION, '7.1', '<')) {
+		$ret = exec("chcp $cp");
+	} else {
+		if (!sapi_windows_set_cp($cp)) {
+			echo "Failed to set cp $cp\n";
+			return;
+		}
 
-	if ($echo) echo "Active code page: ", get_active_cp(), "\n";
+		if ($echo) echo "Active code page: ", get_active_cp(), "\n";
+	}
 }
 
 function get_basename_with_cp($path, $cp, $echo = true)
