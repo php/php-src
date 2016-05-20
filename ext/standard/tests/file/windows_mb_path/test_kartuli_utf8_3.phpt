@@ -21,7 +21,7 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "ქართველები55"; 
 $prefix = create_data("file_kartuli", $item);
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . $item;
+$fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 var_dump($fn);
 var_dump(touch($fn));
