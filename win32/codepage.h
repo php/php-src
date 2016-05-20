@@ -57,7 +57,8 @@ __forceinline static wchar_t *php_win32_cp_any_to_w_full(const char* in, size_t 
 		/* First try the pure ascii conversion. This is the fastest way to do the
 			thing. Only applicable if the source string is UTF-8 in general. 
 			While it could possibly be ok with European encodings, usage with 
-			Asian encodings can cause unintended side effects. */
+			Asian encodings can cause unintended side effects. Lookup the term
+			"mojibake" if need more. */
 		ret = php_win32_cp_ascii_to_w_full(in, in_len, out_len);
 
 		/* If that failed, try to convert to multibyte. */
