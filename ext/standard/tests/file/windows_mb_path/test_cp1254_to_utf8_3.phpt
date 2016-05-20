@@ -9,10 +9,6 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
---XFAIL--
-same fail with PHP 7.0, probably some deeper issue. UTF-8 variant is error free however.
---INI--
-default_charset=cp1254
 --FILE--
 <?php
 /*
@@ -23,8 +19,8 @@ default_charset=cp1254
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
 
 
-$item = "çokbaytlý iþleri";
-$prefix = create_data("file_cp1254", $item, 1254);
+$item = "Ã§okbaytlÄ± iÅŸleri";
+$prefix = create_data("file_cp1254", $item);
 $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 var_dump($fn);
@@ -37,8 +33,8 @@ remove_data("file_cp1254");
 ?>
 ===DONE===
 --EXPECTF--	
-string(%d) "%s\çokbaytlý iþleri"
+string(%d) "%s\Ã§okbaytlÄ± iÅŸleri"
 bool(true)
 bool(true)
-çokbaytlý iþleri
+Ã§okbaytlÄ± iÅŸleri
 ===DONE===
