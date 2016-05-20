@@ -25,7 +25,7 @@ typedef struct php_url {
 	char *user;
 	char *pass;
 	char *host;
-	unsigned short port;
+	uint32_t port;
 	char *path;
 	char *query;
 	char *fragment;
