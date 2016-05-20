@@ -43,6 +43,8 @@ PHP 7.1 UPGRADE NOTES
     (RFC: https://wiki.php.net/rfc/negative-string-offsets)
   . Added a form of the list() construct where keys can be specified.
     (RFC: https://wiki.php.net/rfc/list_keys)
+  . Added [] = as alternative construct to list() =.
+    (RFC: https://wiki.php.net/rfc/short_list_syntax)
   . Number operators taking numeric strings now emit "A non well formed numeric
     value encountered" E_NOTICEs for leading-numeric strings, and "A
     non-numeric value encountered" E_WARNINGs for non-numeric strings.
