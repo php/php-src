@@ -225,11 +225,11 @@ static void place_essa_pis(
 	int j, blocks_count = ssa->cfg.blocks_count;
 	for (j = 0; j < blocks_count; j++) {
 		zend_ssa_phi *pi;
-		zend_op *opline = op_array->opcodes + ssa->cfg.blocks[j].end;
+		zend_op *opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
 		int bt; /* successor block number if a condition is true */
 		int bf; /* successor block number if a condition is false */
 
-		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
+		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0 || blocks[j].len == 0) {
 			continue;
 		}
 		/* the last instruction of basic block is conditional branch,
@@ -238,12 +238,12 @@ static void place_essa_pis(
 		switch (opline->opcode) {
 			case ZEND_JMPZ:
 			case ZEND_JMPZNZ:
-				bf = ssa->cfg.blocks[j].successors[0];
-				bt = ssa->cfg.blocks[j].successors[1];
+				bf = blocks[j].successors[0];
+				bt = blocks[j].successors[1];
 				break;
 			case ZEND_JMPNZ:
-				bt = ssa->cfg.blocks[j].successors[0];
-				bf = ssa->cfg.blocks[j].successors[1];
+				bt = blocks[j].successors[0];
+				bf = blocks[j].successors[1];
 				break;
 			default:
 				continue;
@@ -493,8 +493,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 	zend_ssa_op *ssa_ops = ssa->ops;
 	int ssa_vars_count = ssa->vars_count;
 	int i, j;
-	uint32_t k;
-	zend_op *opline;
+	zend_op *opline, *end;
 	int *tmp = NULL;
 	ALLOCA_FLAG(use_heap);
 
@@ -519,12 +518,13 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 		} while (phi);
 	}
 
-	for (k = blocks[n].start; k <= blocks[n].end; k++) {
-		opline = op_array->opcodes + k;
+	opline = op_array->opcodes + blocks[n].start;
+	end = opline + blocks[n].len;
+	for (; opline < end; opline++) {
+		uint32_t k = opline - op_array->opcodes;
 		if (opline->opcode != ZEND_OP_DATA) {
 			zend_op *next = opline + 1;
-			if (k < blocks[n].end &&
-			    next->opcode == ZEND_OP_DATA) {
+			if (next < end && next->opcode == ZEND_OP_DATA) {
 				if (next->op1_type == IS_CV) {
 					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
 					//USE_SSA_VAR(next->op1.var);
