@@ -1370,8 +1370,8 @@ exit_loop:
 		   improvement could be to get the default charset (or an aggregated
 		   value) to be mapped to the correspending Windows codepage. For now,
 		   the OEM CP is used, so the old behavior. */
-		SetConsoleOutputCP(GetOEMCP());
-		SetConsoleCP(GetOEMCP());
+		SetConsoleOutputCP(GetACP());
+		SetConsoleCP(GetACP());
 	}
 #endif
 
