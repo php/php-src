@@ -452,15 +452,6 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 	return ret;
 }/*}}}*/
 
-
-#if 0
-zend_always_inline static HANDLE php_win32_ioutil_get_file_handle(char *path, WIN32_FIND_DATA *data)
-{
-		HANDLE ret = FindFirstFileA(path, data);
-
-}
-#endif
-
 #ifdef __cplusplus
 }
 #endif
