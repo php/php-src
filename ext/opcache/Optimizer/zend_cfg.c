@@ -92,35 +92,33 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 		do {
 			changed = 0;
 
-			if (cfg->split_at_live_ranges) {
-				/* Add live range paths */
-				for (j = 0; j < op_array->last_live_range; j++) {
-					if (op_array->live_range[j].var == (uint32_t)-1) {
-						/* this live range already removed */
+			/* Add live range paths */
+			for (j = 0; j < op_array->last_live_range; j++) {
+				if (op_array->live_range[j].var == (uint32_t)-1) {
+					/* this live range already removed */
+					continue;
+				}
+				b = blocks + block_map[op_array->live_range[j].start];
+				if (b->flags & ZEND_BB_REACHABLE) {
+					while (op_array->opcodes[b->start].opcode == ZEND_NOP && b->start != b->end) {
+						b->start++;
+					}
+					if (op_array->opcodes[b->start].opcode == ZEND_NOP &&
+						b->start == b->end &&
+						b->successors[0] == block_map[op_array->live_range[j].end]) {
+						/* mark as removed (empty live range) */
+						op_array->live_range[j].var = (uint32_t)-1;
 						continue;
 					}
-					b = blocks + block_map[op_array->live_range[j].start];
-					if (b->flags & ZEND_BB_REACHABLE) {
-						while (op_array->opcodes[b->start].opcode == ZEND_NOP && b->start != b->end) {
-							b->start++;
-						}
-						if (op_array->opcodes[b->start].opcode == ZEND_NOP &&
-							b->start == b->end &&
-							b->successors[0] == block_map[op_array->live_range[j].end]) {
-							/* mark as removed (empty live range) */
-							op_array->live_range[j].var = (uint32_t)-1;
-							continue;
-						}
-						b->flags |= ZEND_BB_GEN_VAR;
-						b = blocks + block_map[op_array->live_range[j].end];
-						b->flags |= ZEND_BB_KILL_VAR;
-						if (!(b->flags & ZEND_BB_REACHABLE)) {
-							changed = 1;
-							zend_mark_reachable(op_array->opcodes, blocks, b);
-						}
-					} else {
-						ZEND_ASSERT(!(blocks[block_map[op_array->live_range[j].end]].flags & ZEND_BB_REACHABLE));
+					b->flags |= ZEND_BB_GEN_VAR;
+					b = blocks + block_map[op_array->live_range[j].end];
+					b->flags |= ZEND_BB_KILL_VAR;
+					if (!(b->flags & ZEND_BB_REACHABLE)) {
+						changed = 1;
+						zend_mark_reachable(op_array->opcodes, blocks, b);
 					}
+				} else {
+					ZEND_ASSERT(!(blocks[block_map[op_array->live_range[j].end]].flags & ZEND_BB_REACHABLE));
 				}
 			}
 
@@ -445,10 +443,8 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			blocks[blocks_count].level = -1;
 			blocks[blocks_count].children = -1;
 			blocks[blocks_count].next_child = -1;
-			block_map[i] = blocks_count;
-		} else {
-			block_map[i] = (uint32_t)-1;
 		}
+		block_map[i] = blocks_count;
 	}
 
 	blocks[blocks_count].end = i - 1;
