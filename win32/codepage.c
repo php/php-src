@@ -21,7 +21,7 @@
 #include "php.h"
 #include "SAPI.h"
 
-ZEND_TLS DWORD prev_cp;
+ZEND_TLS DWORD prev_cp = 0;
 
 __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
