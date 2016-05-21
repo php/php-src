@@ -114,8 +114,14 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 					b = blocks + block_map[op_array->live_range[j].end];
 					b->flags |= ZEND_BB_KILL_VAR;
 					if (!(b->flags & ZEND_BB_REACHABLE)) {
-						changed = 1;
-						zend_mark_reachable(op_array->opcodes, blocks, b);
+						if (cfg->split_at_live_ranges) {
+							changed = 1;
+							zend_mark_reachable(op_array->opcodes, blocks, b);
+						} else {
+							ZEND_ASSERT(!(b->flags & ZEND_BB_UNREACHABLE_FREE));
+							ZEND_ASSERT(b->start == op_array->live_range[j].end);
+							b->flags |= ZEND_BB_UNREACHABLE_FREE;
+						}
 					}
 				} else {
 					ZEND_ASSERT(!(blocks[block_map[op_array->live_range[j].end]].flags & ZEND_BB_REACHABLE));
