@@ -36,7 +36,7 @@ remove_data("file_cp932");
 ?>
 ===DONE===
 --EXPECTF--	
-string(%d) "テストマルチバイト・パス77"
+string(%d) "%s\テストマルチバイト・パス77"
 bool(true)
 bool(true)
 テストマルチバイト・パス77
