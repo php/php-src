@@ -2927,6 +2927,9 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 		if (i == needle_len) {
 			return p;
 		}
+		if (UNEXPECTED(p == end)) {
+			return NULL;
+		}
 		p += td[(unsigned char)(p[needle_len])];
 	}
 
