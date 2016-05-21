@@ -31,35 +31,28 @@ struct cp {
 	uint16_t bytes;
 	/*enum cp_type type;*/
 	char *cp_name;
-};
-
-struct cs {
 	char *cs;
-	char *desc;
+	char *info;
 };
 
-struct cp_ansi_to_cs {
-	struct cp cp;
-	struct cs cs;
-};
-
-static const struct cp_ansi_to_cs cp_to_cs_map[] = {
-	{ { 437, 1, "IBM437" }, { "US-ASCII", "OEM United States" } },
-	{ { 874, 1, "windows-874" }, { "CP874", "ANSI/OEM Thai" } },
-	{ { 932, 2, "shift_jis" }, { "SHIFT-JIS", "ANSI/OEM Japanese" } },
-	{ { 936, 2, "gb2312" }, { "GB2312", "ANSI/OEM Simplified Chinese" } },
-	{ { 949, 2, "ks_c_5601-1987" }, { "KS_C_5601-1987", "ANSI/OEM Korean" } },
-	{ { 950, 2, "big5" }, { "BIG-5", "ANSI/OEM Traditional Chinese" } },
-	{ { 1250, 1, "windows-1250" }, { "cp1250", "ANSI Central European" } },
-	{ { 1251, 1, "windows-1251" }, { "cp1251", "ANSI Cyrillic" } },
-	{ { 1252, 1, "windows-1252" }, { "cp1252", "ANSI Latin 1" } },
-	{ { 1253, 1, "windows-1253" }, { "cp1253", "ANSI Greek" } },
-	{ { 1254, 1, "windows-1254" }, { "cp1254", "ANSI Turkish" } },
-	{ { 1255, 1, "windows-1255" }, { "cp1255", "ANSI Hebrew" } },
-	{ { 1256, 1, "windows-1256" }, { "cp1256", "ANSI Arabic" } },
-	{ { 1257, 1, "windows-1257" }, { "cp1257", "ANSI Baltic" } },
-	{ { 1258, 1, "windows-1258" }, { "cp1258", "ANSI/OEM Vietnamese" } },
-	{ { 0, 0, NULL }, { NULL, NULL } },
+static const struct cp cp_map[] = {
+	{ 437, 1, "IBM437" "US-ASCII", "OEM United States" },
+	{ 874, 1, "windows-874" "CP874", "ANSI/OEM Thai (ISO 8859-11); Thai (Windows)" },
+	{ 932, 2, "shift_jis" "CP932", "ANSI/OEM Japanese; Japanese (Shift-JIS)" },
+	{ 936, 2, "gb2312" "GB2312", "ANSI/OEM Simplified Chinese (PRC, Singapore); Chinese Simplified (GB2312)" },
+	{ 949, 2, "ks_c_5601-1987" "KS_C_5601-1987", "ANSI/OEM Korean (Unified Hangul Code)" },
+	{ 950, 2, "big5" "BIG-5", "ANSI/OEM Traditional Chinese (Taiwan; Hong Kong SAR, PRC); Chinese Traditional (Big5)" },
+	{ 1250, 1, "windows-1250" "cp1250", "ANSI Central European; Central European (Windows)" },
+	{ 1251, 1, "windows-1251" "cp1251", "ANSI Cyrillic; Cyrillic (Windows)" },
+	{ 1252, 1, "windows-1252" "cp1252", "ANSI Latin 1; Western European (Windows)" },
+	{ 1253, 1, "windows-1253" "cp1253", "ANSI Greek; Greek (Windows)" },
+	{ 1254, 1, "windows-1254" "cp1254", "ANSI Turkish; Turkish (Windows)" },
+	{ 1255, 1, "windows-1255" "cp1255", "ANSI Hebrew; Hebrew (Windows)" },
+	{ 1256, 1, "windows-1256" "cp1256", "ANSI Arabic; Arabic (Windows)" },
+	{ 1257, 1, "windows-1257" "cp1257", "ANSI Baltic; Baltic (Windows)" },
+	{ 1258, 1, "windows-1258" "cp1258", "ANSI/OEM Vietnamese; Vietnamese (Windows)" },
+	{ 65001, 3, "utf-8" "UTF-8", "Unicode (UTF-8)" },
+	{ 0, 0, NULL }, { NULL, NULL } },
 };
 #endif
 
