@@ -194,10 +194,6 @@ PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *o
 
 	if (!ret) {
 		ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
-
-		if (!ret) {
-			ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_OEMCP, 0);
-		}
 	}
 
 	return ret;
