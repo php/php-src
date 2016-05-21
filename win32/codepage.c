@@ -316,20 +316,17 @@ PW32CP DWORD php_win32_cp_cli_setup(void)
 	if (php_win32_cp_use_unicode()) {
 		cp = 65001U;
 	} else {
-		cp = GetACP();
-	}
-	if (php_win32_cp_use_unicode()) {
-		SetConsoleOutputCP(cp);
-		SetConsoleCP(cp);
-	} else {
 		/* This retains the old beavior. If Unicode is disabled in a nested call,
 		   the current process could still inherit 65001 from the parent. An
 		   improvement could be to get the default charset (or an aggregated
 		   value) to be mapped to the correspending Windows codepage. For now,
 		   the ANSI CP is used, so the old behavior. */
 		SetConsoleOutputCP(cp);
-		SetConsoleCP(cp);
+		cp = GetACP();
 	}
+
+	SetConsoleOutputCP(cp);
+	SetConsoleCP(cp);
 
 	return cp;
 }/*}}}*/
