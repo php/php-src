@@ -176,7 +176,12 @@ echo \"hello there from the include\n\";";
 		case "dir_cp1252":
 		case "dir_cp1251":
 		case "dir_big5":
+		case "dir":
 			create_verify_dir($prefix, $item, $cp);
+			break;
+
+		case "file":
+			create_verify_file($prefix, $item, "", $cp);
 			break;
 	}
 
