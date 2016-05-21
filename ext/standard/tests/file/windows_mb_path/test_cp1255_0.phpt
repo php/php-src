@@ -22,7 +22,7 @@ internal_encoding=cp1255
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "כללים מרובים";
-$prefix = create_data("file_cp1255", $item);
+$prefix = create_data("file_cp1255", $item, 1255);
 $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 $f = fopen($fn, 'r');

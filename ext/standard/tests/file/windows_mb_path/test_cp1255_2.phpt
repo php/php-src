@@ -11,7 +11,7 @@ skip_if_wrong_cp(1255, "ansi");
 
 ?>
 --INI--
-internal_charset=cp1255
+internal_encoding=cp1255
 --FILE--
 <?php
 /*
