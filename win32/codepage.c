@@ -23,6 +23,46 @@
 
 ZEND_TLS DWORD prev_cp = 0;
 
+#if 0
+/* enum cp_type { OEM, ANSI }; */
+
+struct cp {
+	DWORD cp;
+	uint16_t bytes;
+	/*enum cp_type type;*/
+	char *cp_name;
+};
+
+struct cs {
+	char *cs;
+	char *desc;
+};
+
+struct cp_ansi_to_cs {
+	struct cp cp;
+	struct cs cs;
+};
+
+static const struct cp_ansi_to_cs cp_to_cs_map[] = {
+	{ { 437, 1, "IBM437" }, { "US-ASCII", "OEM United States" } },
+	{ { 874, 1, "windows-874" }, { "CP874", "ANSI/OEM Thai" } },
+	{ { 932, 2, "shift_jis" }, { "SHIFT-JIS", "ANSI/OEM Japanese" } },
+	{ { 936, 2, "gb2312" }, { "GB2312", "ANSI/OEM Simplified Chinese" } },
+	{ { 949, 2, "ks_c_5601-1987" }, { "KS_C_5601-1987", "ANSI/OEM Korean" } },
+	{ { 950, 2, "big5" }, { "BIG-5", "ANSI/OEM Traditional Chinese" } },
+	{ { 1250, 1, "windows-1250" }, { "cp1250", "ANSI Central European" } },
+	{ { 1251, 1, "windows-1251" }, { "cp1251", "ANSI Cyrillic" } },
+	{ { 1252, 1, "windows-1252" }, { "cp1252", "ANSI Latin 1" } },
+	{ { 1253, 1, "windows-1253" }, { "cp1253", "ANSI Greek" } },
+	{ { 1254, 1, "windows-1254" }, { "cp1254", "ANSI Turkish" } },
+	{ { 1255, 1, "windows-1255" }, { "cp1255", "ANSI Hebrew" } },
+	{ { 1256, 1, "windows-1256" }, { "cp1256", "ANSI Arabic" } },
+	{ { 1257, 1, "windows-1257" }, { "cp1257", "ANSI Baltic" } },
+	{ { 1258, 1, "windows-1258" }, { "cp1258", "ANSI/OEM Vietnamese" } },
+	{ { 0, 0, NULL }, { NULL, NULL } },
+};
+#endif
+
 __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	wchar_t *ret;
