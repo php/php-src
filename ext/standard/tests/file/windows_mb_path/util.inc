@@ -146,6 +146,7 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "file_cp1254":
+		case "file_cp1253":
 		case "file_kartuli":
 		case "file_cp1250":
 		case "file_cp1256":
@@ -165,6 +166,7 @@ echo \"hello there from the include\n\";";
 			break;
 
 		case "dir_cp1254":
+		case "dir_cp1253":
 		case "dir_kartuli":
 		case "dir_cp1250":
 		case "dir_cp1256":
