@@ -7,10 +7,9 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
+skip_if_wrong_cp(1254, "ansi");
 
 ?>
---XFAIL--
-same fail with PHP 7.0, probably some deeper issue. UTF-8 variant is error free however.
 --INI--
 default_charset=cp1254
 --FILE--
