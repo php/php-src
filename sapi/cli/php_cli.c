@@ -180,10 +180,6 @@ const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-ZEND_TLS DWORD prev_cp;
-#endif
-
 static int print_module_info(zval *element) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(element);
@@ -1353,25 +1349,13 @@ exit_loop:
 	module_started = 1;
 
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-	prev_cp = GetConsoleCP();
-	if (php_win32_cp_use_unicode()) {
-		SetConsoleOutputCP(65001U);
-		SetConsoleCP(65001U);
-
+	if (php_win32_cp_cli_setup() == 65001U) {
 		/* Ignore the delivered argv and argc, read from W API. This place
 		 	might be too late though, but this is the earliest place ATW
 			we can access the internal charset information from PHP. */
 		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
 		PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
 		using_wide_argv = 1;
-	} else {
-		/* This retains the old beavior. If Unicode is disabled in a nested call,
-		   the current process could still inherit 65001 from the parent. An
-		   improvement could be to get the default charset (or an aggregated
-		   value) to be mapped to the correspending Windows codepage. For now,
-		   the OEM CP is used, so the old behavior. */
-		SetConsoleOutputCP(GetACP());
-		SetConsoleCP(GetACP());
 	}
 #endif
 
@@ -1409,9 +1393,7 @@ out:
 #endif
 
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-	/* Restore the original console CP */
-	SetConsoleOutputCP(prev_cp);
-	SetConsoleCP(prev_cp);
+	(void)php_win32_cp_cli_restore();
 
 	if (using_wide_argv) {
 		PHP_WIN32_FREE_ARRAY(argv, argc);

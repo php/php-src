@@ -21,6 +21,8 @@
 #include "php.h"
 #include "SAPI.h"
 
+ZEND_TLS DWORD prev_cp;
+
 __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	wchar_t *ret;
@@ -264,6 +266,40 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	envw[bin_len + 2] = L'\0';
 
 	return envw;
+}/*}}}*/
+
+PW32CP DWORD php_win32_cp_cli_setup(void)
+{/*{{{*/
+	DWORD cp;
+	prev_cp = GetConsoleCP();
+
+	if (php_win32_cp_use_unicode()) {
+		cp = 65001U;
+	} else {
+		cp = GetACP();
+	}
+	if (php_win32_cp_use_unicode()) {
+		SetConsoleOutputCP(cp);
+		SetConsoleCP(cp);
+	} else {
+		/* This retains the old beavior. If Unicode is disabled in a nested call,
+		   the current process could still inherit 65001 from the parent. An
+		   improvement could be to get the default charset (or an aggregated
+		   value) to be mapped to the correspending Windows codepage. For now,
+		   the ANSI CP is used, so the old behavior. */
+		SetConsoleOutputCP(cp);
+		SetConsoleCP(cp);
+	}
+
+	return cp;
+}/*}}}*/
+
+PW32CP DWORD php_win32_cp_cli_restore(void)
+{/*{{{*/
+	SetConsoleOutputCP(prev_cp);
+	SetConsoleCP(prev_cp);
+
+	return prev_cp;
 }/*}}}*/
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
