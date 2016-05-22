@@ -128,7 +128,14 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 	shiftlist = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last, use_heap);
 	memset(shiftlist, 0, sizeof(uint32_t) * op_array->last);
 	for (b = blocks; b < end; b++) {
-		if (b->flags & ZEND_BB_REACHABLE) {
+		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
+			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
+				/* Only keep the FREE for the loop var */
+				ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
+						|| op_array->opcodes[b->start].opcode == ZEND_FE_FREE);
+				b->end = b->start;
+			}
+
 			i = b->start;
 			b->start = target;
 			while (i <= b->end) {
