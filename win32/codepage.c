@@ -23,6 +23,7 @@
 
 ZEND_TLS DWORD prev_cp = 0;
 
+/* {{{ */
 #if 0
 /* enum cp_type { OEM, ANSI }; */
 
@@ -36,25 +37,28 @@ struct cp {
 };
 
 static const struct cp cp_map[] = {
-	{ 437, 1, "IBM437" "US-ASCII", "OEM United States" },
 	{ 874, 1, "windows-874" "CP874", "ANSI/OEM Thai (ISO 8859-11); Thai (Windows)" },
 	{ 932, 2, "shift_jis" "CP932", "ANSI/OEM Japanese; Japanese (Shift-JIS)" },
 	{ 936, 2, "gb2312" "GB2312", "ANSI/OEM Simplified Chinese (PRC, Singapore); Chinese Simplified (GB2312)" },
 	{ 949, 2, "ks_c_5601-1987" "KS_C_5601-1987", "ANSI/OEM Korean (Unified Hangul Code)" },
 	{ 950, 2, "big5" "BIG-5", "ANSI/OEM Traditional Chinese (Taiwan; Hong Kong SAR, PRC); Chinese Traditional (Big5)" },
-	{ 1250, 1, "windows-1250" "cp1250", "ANSI Central European; Central European (Windows)" },
-	{ 1251, 1, "windows-1251" "cp1251", "ANSI Cyrillic; Cyrillic (Windows)" },
-	{ 1252, 1, "windows-1252" "cp1252", "ANSI Latin 1; Western European (Windows)" },
-	{ 1253, 1, "windows-1253" "cp1253", "ANSI Greek; Greek (Windows)" },
-	{ 1254, 1, "windows-1254" "cp1254", "ANSI Turkish; Turkish (Windows)" },
-	{ 1255, 1, "windows-1255" "cp1255", "ANSI Hebrew; Hebrew (Windows)" },
-	{ 1256, 1, "windows-1256" "cp1256", "ANSI Arabic; Arabic (Windows)" },
-	{ 1257, 1, "windows-1257" "cp1257", "ANSI Baltic; Baltic (Windows)" },
-	{ 1258, 1, "windows-1258" "cp1258", "ANSI/OEM Vietnamese; Vietnamese (Windows)" },
-	{ 65001, 3, "utf-8" "UTF-8", "Unicode (UTF-8)" },
+	{ 1250, 1, "windows-1250" "CP1250", "ANSI Central European; Central European (Windows)" },
+	{ 1251, 1, "windows-1251" "CP1251", "ANSI Cyrillic; Cyrillic (Windows)" },
+	{ 1252, 1, "windows-1252" "CP1252", "ANSI Latin 1; Western European (Windows)" },
+	{ 1253, 1, "windows-1253" "CP1253", "ANSI Greek; Greek (Windows)" },
+	{ 1254, 1, "windows-1254" "CP1254", "ANSI Turkish; Turkish (Windows)" },
+	{ 1255, 1, "windows-1255" "CP1255", "ANSI Hebrew; Hebrew (Windows)" },
+	{ 1256, 1, "windows-1256" "CP1256", "ANSI Arabic; Arabic (Windows)" },
+	{ 1257, 1, "windows-1257" "CP1257", "ANSI Baltic; Baltic (Windows)" },
+	{ 1258, 1, "windows-1258" "CP1258", "ANSI/OEM Vietnamese; Vietnamese (Windows)" },
+	{ 20127, 1, "us-ascii" "US-ASCII", "US-ASCII (7-bit)" },
+	{ 51932, 2, "euc-jp" "CP51932", "EUC Japanese" },
+	{ 54936, 4, "GB18030" "GB18030", "GB18030 Simplified Chinese (4 byte); Chinese Simplified (GB18030)" },
+	{ 65001, 4, "utf-8" "UTF-8", "Unicode (UTF-8)" },
 	{ 0, 0, NULL }, { NULL, NULL } },
 };
 #endif
+/* }}} */
 
 __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
@@ -78,10 +82,10 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	}
 
 	tmp_len = MultiByteToWideChar(cp, flags, in, tmp_len, ret, ret_len);
+	ret[ret_len-1] = L'\0';
 
 	assert(ret ? tmp_len == ret_len : 1);
 	assert(ret ? wcslen(ret) == ret_len - 1 : 1);
-	assert(ret ? ret[ret_len-1] == L'\0' : 1);
 
 
 	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
@@ -200,10 +204,10 @@ __forceinline static char *php_win32_cp_from_w_int(wchar_t* in, size_t in_len, s
 	}
 
 	r = WideCharToMultiByte(cp, flags, in, tmp_len, target, target_len, NULL, NULL);
+	target[target_len-1] = '\0';
 
 	assert(target ? r == target_len : 1);
 	assert(target ? strlen(target) == target_len - 1 : 1);
-	assert(target ? target[target_len-1] == '\0' : 1);
 
 	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
 		*out_len = target_len - 1;
