@@ -314,7 +314,6 @@ PW32CP DWORD php_win32_cp_cli_setup(void)
 		   improvement could be to get the default charset (or an aggregated
 		   value) to be mapped to the correspending Windows codepage. For now,
 		   the ANSI CP is used, so the old behavior. */
-		SetConsoleOutputCP(cp);
 		cp = GetACP();
 	}
 
