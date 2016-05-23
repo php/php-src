@@ -31,6 +31,7 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	if (!in || in_len > (size_t)INT_MAX) {
 		return NULL;
 	}
+	assert(in_len ? in[in_len] == L'\0' : 1);
 
 	tmp_len = !in_len ? -1 : (int)in_len + 1;
 
@@ -85,9 +86,11 @@ PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size
 	wchar_t *ret = NULL;
 	const char *idx = in, *end; 
 
+	assert(in && in_len ? in[in_len] == '\0' : 1);
+
 	if (!in) {
 		return NULL;
-	} else if (0 == (size_t)in_len) {
+	} else if (0 == in_len) {
 		/* Not binary safe. */
 		in_len = strlen(in);
 		if (in_len > (size_t)INT_MAX) {
@@ -155,6 +158,7 @@ __forceinline static char *php_win32_cp_from_w_int(wchar_t* in, size_t in_len, s
 	if (!in || in_len > INT_MAX) {
 		return NULL;
 	}
+	assert(in_len ? in[in_len] == '\0' : 1);
 
 	tmp_len = !in_len ? -1 : (int)in_len + 1;
 
