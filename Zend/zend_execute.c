@@ -843,7 +843,6 @@ void zend_verify_property_type_error(zend_property_info *info, zend_string *name
 
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
 	if (EXPECTED(ZEND_SAME_FAKE_TYPE(info->type, Z_TYPE_P(property)) && Z_TYPE_P(property) != IS_OBJECT)) {
-		Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 		return 1;
 	}
 
@@ -859,34 +858,26 @@ zend_bool zend_verify_property_type(zend_property_info *info, zval *property, ze
 				return 0;
 			}
 
-			Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 			return 1;
 		}
 
-		case IS_CALLABLE: switch (Z_TYPE_P(property)) {
-			case IS_OBJECT:
-				if (instanceof_function(zend_ce_closure, Z_OBJCE_P(property))) {
-					Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
-					return 1;
-				}
+		case IS_CALLABLE:
+			switch (Z_TYPE_P(property)) {
+				case IS_OBJECT:
+					if (instanceof_function(zend_ce_closure, Z_OBJCE_P(property))) {
+						return 1;
+					}
 
-			case IS_STRING:
-			case IS_ARRAY:
-				if (zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL)) {
-					Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
-					return 1;
-				}
+				case IS_STRING:
+				case IS_ARRAY:
+					return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL);
 
-			default:
-				return 0;
+				default:
+					return 0;
 		}
 
 		default:
-			if (!zend_verify_scalar_property_type(info->type, property, strict)) {
-				return 0;
-			}
-			Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
-			return 1;
+			return zend_verify_scalar_property_type(info->type, property, strict);
 	}
 }
 
@@ -1617,6 +1608,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 
 			zval_ptr_dtor(z);
 			ZVAL_COPY_VALUE(z, &tmp);
+			Z_TYPE_FLAGS_P(z) |= IS_TYPE_VERIFIED;
 
 			if (UNEXPECTED(result)) {
 				ZVAL_COPY(result, z);
@@ -1695,6 +1687,7 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 					return;
 				}
 				zval_ptr_dtor(z);
+				Z_TYPE_FLAGS(tmp) |= IS_TYPE_VERIFIED;
 				ZVAL_COPY(z, &tmp);
 			} else {
 				binary_op(z, z, value);

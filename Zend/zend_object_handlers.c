@@ -413,7 +413,9 @@ exit_dynamic:
 exit:
 	if (cache_slot) {
 		CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)(intptr_t)property_info->offset);
-		CACHE_PTR_EX(cache_slot + 2, property_info);
+		if (property_info->type) {
+			CACHE_PTR_EX(cache_slot + 2, property_info);
+		}
 	}
 	return property_info->offset;
 }
@@ -757,6 +759,7 @@ found:
 					}
 				}
 				zend_assign_to_variable(variable_ptr, value, IS_CV);
+				Z_TYPE_FLAGS_P(variable_ptr) |= IS_TYPE_VERIFIED; /* we can also assign this to untyped properties in order to avoid a ce fetch upon reading */
 				goto exit;
 			}
 		}
