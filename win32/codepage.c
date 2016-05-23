@@ -45,11 +45,15 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	}
 
 	tmp_len = MultiByteToWideChar(cp, flags, in, tmp_len, ret, ret_len);
-	ret[ret_len-1] = L'\0';
+	if (tmp_len == 0) {
+		free(ret);
+		return NULL;
+	}
 
 	assert(ret ? tmp_len == ret_len : 1);
 	assert(ret ? wcslen(ret) == ret_len - 1 : 1);
 
+	ret[ret_len-1] = L'\0';
 
 	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
 		*out_len = ret_len - 1;
@@ -167,10 +171,15 @@ __forceinline static char *php_win32_cp_from_w_int(wchar_t* in, size_t in_len, s
 	}
 
 	r = WideCharToMultiByte(cp, flags, in, tmp_len, target, target_len, NULL, NULL);
-	target[target_len-1] = '\0';
+	if (r == 0) {
+		free(target);
+		return NULL;
+	}
 
 	assert(target ? r == target_len : 1);
 	assert(target ? strlen(target) == target_len - 1 : 1);
+
+	target[target_len-1] = '\0';
 
 	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
 		*out_len = target_len - 1;
