@@ -92,7 +92,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	if (ZEND_VM_OP_NUM == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " %u", op.num);
 	} else if (ZEND_VM_OP_TRY_CATCH == (flags & ZEND_VM_OP_MASK)) {
-		if (opline->opcode != ZEND_FAST_RET || opline->extended_value) {
+		if (op.num != (uint32_t)-1) {
 			fprintf(stderr, " try-catch(%u)", op.num);
 		}
 	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
@@ -497,16 +497,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			default:
 				fprintf(stderr, " (\?\?\?)");
 				break;
-		}
-	} else if (ZEND_VM_EXT_FAST_CALL == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value == ZEND_FAST_CALL_FROM_FINALLY) {
-			fprintf(stderr, " (from-finally)");
-		}
-	} else if (ZEND_VM_EXT_FAST_RET == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value == ZEND_FAST_RET_TO_CATCH) {
-			fprintf(stderr, " (to-catch)");
-		} else if (opline->extended_value == ZEND_FAST_RET_TO_FINALLY) {
-			fprintf(stderr, " (to-finally)");
 		}
 	} else if (ZEND_VM_EXT_SRC == (flags & ZEND_VM_EXT_MASK)) {
 		if (opline->extended_value == ZEND_RETURNS_VALUE) {

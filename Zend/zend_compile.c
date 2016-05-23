@@ -234,6 +234,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).backpatch_count = 0;
 	CG(context).in_finally = 0;
 	CG(context).fast_call_var = -1;
+	CG(context).try_catch_offset = -1;
 	CG(context).current_brk_cont = -1;
 	CG(context).last_brk_cont = 0;
 	CG(context).brk_cont_array = NULL;
@@ -4061,6 +4062,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);
 		opline->op1_type = IS_TMP_VAR;
 		opline->op1.var = CG(context).fast_call_var;
+		opline->op2.num = CG(context).try_catch_offset;
 	}
 
 	/* Generator return types are handled separately */
@@ -4573,6 +4575,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	uint32_t try_catch_offset;
 	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), catches->children, 0);
 	uint32_t orig_fast_call_var = CG(context).fast_call_var;
+	uint32_t orig_try_catch_offset = CG(context).try_catch_offset;
 
 	if (catches->children == 0 && !finally_ast) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use try without catch or finally");
@@ -4605,6 +4608,8 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		fast_call.u.try_catch_offset = try_catch_offset;
 		zend_stack_push(&CG(loop_var_stack), &fast_call);
 	}
+
+	CG(context).try_catch_offset = try_catch_offset;
 
 	zend_compile_stmt(try_ast);
 
@@ -4704,11 +4709,14 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		opline = zend_emit_op(NULL, ZEND_FAST_RET, NULL, NULL);
 		opline->op1_type = IS_TMP_VAR;
 		opline->op1.var = CG(context).fast_call_var;
+		opline->op2.num = orig_try_catch_offset;
 
 		zend_update_jump_target_to_next(opnum_jmp);
 
 		CG(context).fast_call_var = orig_fast_call_var;
 	}
+
+	CG(context).try_catch_offset = try_catch_offset;
 
 	efree(jmp_opnums);
 }
