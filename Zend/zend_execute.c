@@ -836,10 +836,6 @@ void zend_verify_property_type_error(zend_property_info *info, zend_string *name
 }
 
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
-	if (EXPECTED((Z_TYPE_FLAGS_P(property) & IS_TYPE_VERIFIED) != 0)) {
-		return 1;
-	}
-
 	if (EXPECTED(ZEND_SAME_FAKE_TYPE(info->type, Z_TYPE_P(property)) && Z_TYPE_P(property) != IS_OBJECT)) {
 		Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 		return 1;
@@ -1522,7 +1518,7 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		ZVAL_DEREF(z);
 		SEPARATE_ZVAL_NOREF(z);
 
-		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE(obj))  && Z_TYPE_P(property) == IS_STRING)) {
+		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE(obj)) && Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
 
 			if (prop_info) {
@@ -1536,7 +1532,7 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 					OBJ_RELEASE(Z_OBJ(obj));
 					return;
 				}
-				
+
 				binary_op(&tmp, z, value);
 				if (!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
