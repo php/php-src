@@ -440,7 +440,7 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 }
 
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
-void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property);
+ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property);
 
 END_EXTERN_C()
 
