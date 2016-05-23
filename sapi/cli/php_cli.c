@@ -647,6 +647,17 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 }
 /* }}} */
 
+/*{{{ php_cli_win32_ctrl_handler */
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
+{
+	(void)php_win32_cp_cli_restore();
+
+	exit(0);
+}
+#endif
+/*}}}*/
+
 static int do_cli(int argc, char **argv) /* {{{ */
 {
 	int c;
@@ -1357,6 +1368,8 @@ exit_loop:
 		PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
 		using_wide_argv = 1;
 	}
+
+	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif
 
 	/* -e option */
