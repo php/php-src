@@ -1611,7 +1611,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 			if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 				zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
 				OBJ_RELEASE(Z_OBJ(obj));
-				zval_ptr_dtor(z);
+				zval_dtor(&tmp);
 				return;
 			}
 
