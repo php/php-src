@@ -4889,7 +4889,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
 
 		if (type != 0) {
-			if (ast->attr != ZEND_NAME_NOT_FQ) {
+			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Scalar type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
@@ -4928,6 +4928,11 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_infos->type_hint = 0;
 		arg_infos->allow_null = 0;
 		arg_infos->class_name = NULL;
+
+		if (return_type_ast->attr & ZEND_TYPE_NULLABLE) {
+			arg_infos->allow_null = 1;
+			return_type_ast->attr &= ~ZEND_TYPE_NULLABLE;
+		}
 
 		zend_compile_typename(return_type_ast, arg_infos);
 
@@ -5017,9 +5022,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 				&& (Z_TYPE(default_node.u.constant) == IS_NULL
 					|| (Z_TYPE(default_node.u.constant) == IS_CONSTANT
 						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL") == 0));
+			zend_bool is_explicitly_nullable = (type_ast->attr & ZEND_TYPE_NULLABLE) == ZEND_TYPE_NULLABLE;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->allow_null = has_null_default;
+			arg_info->allow_null = has_null_default || is_explicitly_nullable;
 
 			zend_compile_typename(type_ast, arg_info);
 
