@@ -251,7 +251,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list
-%type <ast> isset_variable type return_type
+%type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
 
 %type <num> returns_ref function is_reference is_variadic variable_modifiers
@@ -644,7 +644,12 @@ parameter:
 
 optional_type:
 		/* empty */	{ $$ = NULL; }
-	|	type		{ $$ = $1; }
+	|	type_expr	{ $$ = $1; }
+;
+
+type_expr:
+		type		{ $$ = $1; }
+	|	'?' type	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 type:
@@ -655,7 +660,7 @@ type:
 
 return_type:
 		/* empty */	{ $$ = NULL; }
-	|	':' type	{ $$ = $2; }
+	|	':' type_expr	{ $$ = $2; }
 ;
 
 argument_list:
