@@ -653,7 +653,7 @@ BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
 {
 	(void)php_win32_cp_cli_restore();
 
-	exit(0);
+	ExitProcess(0);
 }
 #endif
 /*}}}*/
