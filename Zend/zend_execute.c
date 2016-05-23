@@ -1691,6 +1691,7 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 				if (!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
 					OBJ_RELEASE(Z_OBJ(obj));
+					zval_dtor(&tmp);
 					return;
 				}
 				zval_ptr_dtor(z);
