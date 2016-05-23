@@ -793,53 +793,6 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 	return 1;
 }
 
-zend_property_info* zend_object_fetch_property_type_info_ex(zval *object, zend_string *property, void **cache_slot) {
-	zend_property_info *info = NULL;
-	
-	if (cache_slot && EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
-		zend_property_info *cached = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-
-		return (cached && cached->type) ? cached : NULL;
-	}
-
-	info = zend_get_property_info(Z_OBJCE_P(object), property, 1);
-
-	if (UNEXPECTED(info && info != ZEND_WRONG_PROPERTY_INFO && info->type)) {
-		return info;
-	}
-
-	return NULL;
-}
-
-zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *property, void **cache_slot)
-{
-	if (cache_slot && EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
-		zend_property_info *info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-
-		return (info && info->type) ? info : NULL;
-	}
-
-	do {
-		if (UNEXPECTED(Z_TYPE_P(property) != IS_STRING)) {
-			break;
-		}
-
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (Z_ISREF_P(object)) {
-				object = Z_REFVAL_P(object);
-				if (Z_TYPE_P(object) != IS_OBJECT)
-					break;
-			} else {
-				break;
-			}
-		}
-
-		return zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
-	} while (0);
-
-	return NULL;
-}
-
 static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *property, zend_bool strict) {
 	if (EXPECTED(!strict)) {
 		if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property)))) {
@@ -883,7 +836,12 @@ void zend_verify_property_type_error(zend_property_info *info, zend_string *name
 }
 
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
+	if (EXPECTED((Z_TYPE_FLAGS_P(property) & IS_TYPE_VERIFIED) != 0)) {
+		return 1;
+	}
+
 	if (EXPECTED(ZEND_SAME_FAKE_TYPE(info->type, Z_TYPE_P(property)) && Z_TYPE_P(property) != IS_OBJECT)) {
+		Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 		return 1;
 	}
 
@@ -898,23 +856,34 @@ zend_bool zend_verify_property_type(zend_property_info *info, zval *property, ze
 			if (!info->type_ce || Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(property), info->type_ce)) {
 				return 0;
 			}
+
+			Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 			return 1;
 		}
 
 		case IS_CALLABLE: switch (Z_TYPE_P(property)) {
 			case IS_OBJECT:
-				if (instanceof_function(zend_ce_closure, Z_OBJCE_P(property)))
+				if (instanceof_function(zend_ce_closure, Z_OBJCE_P(property))) {
+					Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 					return 1;
+				}
 
+			case IS_STRING:
 			case IS_ARRAY:
-				if (zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL))
+				if (zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL)) {
+					Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 					return 1;
+				}
+
+			default:
+				return 0;
 		}
 
 		default:
 			if (!zend_verify_scalar_property_type(info->type, property, strict)) {
 				return 0;
 			}
+			Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 			return 1;
 	}
 }
@@ -1552,7 +1521,7 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		zptr = z;
 		ZVAL_DEREF(z);
 		SEPARATE_ZVAL_NOREF(z);
-		
+
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE(obj))  && Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
 

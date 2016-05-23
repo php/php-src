@@ -392,8 +392,53 @@ static zend_always_inline zend_bool _zend_object_has_type_hints(zval *object) {
 
 #define ZEND_OBJECT_HAS_TYPE_HINTS(object) _zend_object_has_type_hints(object)
 
-zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *property, void **cache);
-zend_property_info* zend_object_fetch_property_type_info_ex(zval *object, zend_string *property, void **cache);
+static zend_always_inline zend_property_info* zend_object_fetch_property_type_info_ex(zval *object, zend_string *property, void **cache_slot) {
+	zend_property_info *info = NULL;
+	
+	if (cache_slot && EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
+		zend_property_info *cached = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+
+		return (cached && cached->type) ? cached : NULL;
+	}
+
+	info = zend_get_property_info(Z_OBJCE_P(object), property, 1);
+
+	if (UNEXPECTED(info && info != ZEND_WRONG_PROPERTY_INFO && info->type)) {
+		return info;
+	}
+
+	return NULL;
+}
+
+static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *property, void **cache_slot)
+{
+	if (cache_slot && EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
+		zend_property_info *info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+
+		return (info && info->type) ? info : NULL;
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(property) != IS_STRING)) {
+			break;
+		}
+
+		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (Z_ISREF_P(object)) {
+				object = Z_REFVAL_P(object);
+				if (Z_TYPE_P(object) != IS_OBJECT)
+					break;
+			} else {
+				break;
+			}
+		}
+
+		return zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
+	} while (0);
+
+	return NULL;
+}
+
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
 void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property);
 

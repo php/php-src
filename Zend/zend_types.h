@@ -398,6 +398,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_TYPE_REFCOUNTED			(1<<2)
 #define IS_TYPE_COLLECTABLE			(1<<3)
 #define IS_TYPE_COPYABLE			(1<<4)
+#define IS_TYPE_VERIFIED			(1<<5)
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
