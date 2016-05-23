@@ -624,12 +624,11 @@ PHP_FUNCTION(pcntl_waitpid)
 	struct rusage rusage;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz/|lz/", &pid, &z_status, &options, &z_rusage) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz/|lz/", &pid, &z_status, &options, &z_rusage) == FAILURE) {
 		return;
+	}
 
-	convert_to_long_ex(z_status);
-
-	status = Z_LVAL_P(z_status);
+	status = zval_get_long(z_status);
 
 #ifdef HAVE_WAIT4
 	if (z_rusage) {
@@ -659,7 +658,8 @@ PHP_FUNCTION(pcntl_waitpid)
 	}
 #endif
 
-	Z_LVAL_P(z_status) = status;
+	zval_dtor(z_status);
+	ZVAL_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
 }
@@ -677,12 +677,11 @@ PHP_FUNCTION(pcntl_wait)
 	struct rusage rusage;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz/", &z_status, &options, &z_rusage) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz/", &z_status, &options, &z_rusage) == FAILURE) {
 		return;
+	}
 
-	convert_to_long_ex(z_status);
-
-	status = Z_LVAL_P(z_status);
+	status = zval_get_long(z_status);
 #ifdef HAVE_WAIT3
 	if (z_rusage) {
 		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
@@ -711,7 +710,9 @@ PHP_FUNCTION(pcntl_wait)
 		PHP_RUSAGE_TO_ARRAY(rusage, z_rusage);
 	}
 #endif
-	Z_LVAL_P(z_status) = status;
+
+	zval_dtor(z_status);
+	ZVAL_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
 }

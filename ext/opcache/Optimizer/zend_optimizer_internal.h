@@ -106,5 +106,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 void zend_optimizer_nop_removal(zend_op_array *op_array);
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 int zend_optimizer_is_disabled_func(const char *name, size_t len);
+zend_function *zend_optimizer_get_called_func(
+		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants);
 
 #endif

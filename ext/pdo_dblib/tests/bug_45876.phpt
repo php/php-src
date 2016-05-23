@@ -14,7 +14,7 @@ $stmt->execute();
 var_dump($stmt->getColumnMeta(0));
 $stmt = null;
 ?>
---EXPECT--
+--EXPECTF--
 array(10) {
   ["max_length"]=>
   int(255)
@@ -27,13 +27,13 @@ array(10) {
   ["native_type"]=>
   string(4) "char"
   ["native_type_id"]=>
-  int(47)
+  int(%d)
   ["native_usertype_id"]=>
+  int(%d)
+  ["pdo_type"]=>
   int(2)
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>
   int(255)
-  ["pdo_type"]=>
-  int(2)
 }

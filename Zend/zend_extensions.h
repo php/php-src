@@ -67,9 +67,9 @@ typedef void (*message_handler_func_t)(int message, void *arg);
 
 typedef void (*op_array_handler_func_t)(zend_op_array *op_array);
 
-typedef void (*statement_handler_func_t)(zend_op_array *op_array);
-typedef void (*fcall_begin_handler_func_t)(zend_op_array *op_array);
-typedef void (*fcall_end_handler_func_t)(zend_op_array *op_array);
+typedef void (*statement_handler_func_t)(zend_execute_data *frame);
+typedef void (*fcall_begin_handler_func_t)(zend_execute_data *frame);
+typedef void (*fcall_end_handler_func_t)(zend_execute_data *frame);
 
 typedef void (*op_array_ctor_func_t)(zend_op_array *op_array);
 typedef void (*op_array_dtor_func_t)(zend_op_array *op_array);

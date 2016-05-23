@@ -253,11 +253,6 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		return 0;
 	}
 
-	if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
-		/* incompatible nullability */
-		return 0;
-	}
-
 	return 1;
 }
 /* }}} */
@@ -334,6 +329,12 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 
+		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
+		if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
+			/* incompatible nullability */
+			return 0;
+		}
+
 		/* by-ref constraints on arguments are invariant */
 		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
 			return 0;
@@ -351,6 +352,10 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			return 0;
 		}
+
+		if (fe->common.arg_info[-1].allow_null && !proto->common.arg_info[-1].allow_null) {
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -358,6 +363,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
+
+	if (arg_info->type_hint != IS_UNDEF && arg_info->allow_null) {
+		smart_str_appendc(str, '?');
+	}
+
 	if (arg_info->class_name) {
 		const char *class_name;
 		size_t class_name_len;
@@ -498,8 +508,6 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 				} else {
 					smart_str_appends(&str, "NULL");
 				}
-			} else if (arg_info->type_hint && arg_info->allow_null) {
-				smart_str_appends(&str, " = NULL");
 			}
 
 			if (++i < num_args) {
@@ -580,17 +588,32 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	}
 
 	if (child->common.prototype && (
-		child->common.prototype->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_HAS_RETURN_TYPE)
+		child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
 	)) {
-		if (UNEXPECTED(!zend_do_perform_implementation_check(child, child->common.prototype))) {
-			zend_string *method_prototype = zend_get_function_declaration(child->common.prototype);
-			zend_string *child_prototype = zend_get_function_declaration(child);
-			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s", ZSTR_VAL(child_prototype), ZSTR_VAL(method_prototype));
-		}
-	} else if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
+		parent = child->common.prototype;
+	}
+	if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
+		int error_level;
+		const char *error_verb;
 		zend_string *method_prototype = zend_get_function_declaration(parent);
 		zend_string *child_prototype = zend_get_function_declaration(child);
-		zend_error(E_WARNING, "Declaration of %s should be compatible with %s", ZSTR_VAL(child_prototype), ZSTR_VAL(method_prototype));
+
+		if (child->common.prototype && (
+			child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
+		)) {
+			error_level = E_COMPILE_ERROR;
+			error_verb = "must";
+		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
+                   (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
+		            (child->common.arg_info[-1].allow_null && !parent->common.arg_info[-1].allow_null))) {
+			error_level = E_COMPILE_ERROR;
+			error_verb = "must";
+		} else {
+			error_level = E_WARNING;
+			error_verb = "should";
+		}
+		zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
 		zend_string_free(child_prototype);
 		zend_string_free(method_prototype);
 	}
@@ -677,7 +700,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
 				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
 
-				zval_ptr_dtor(&(ce->default_properties_table[parent_num]));
+				/* Don't keep default properties in GC (they may be freed by opcache) */
+				zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
 				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 				child_info->offset = parent_info->offset;

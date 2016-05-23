@@ -118,6 +118,7 @@ typedef struct {
 typedef struct {
 	pdo_dblib_db_handle *H;
 	pdo_dblib_err err;
+	unsigned int computed_column_name_count;
 } pdo_dblib_stmt;
 
 typedef struct {
@@ -138,6 +139,11 @@ ZEND_END_MODULE_GLOBALS(dblib)
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(dblib)
+
+enum {
+	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_DBLIB_ATTR_QUERY_TIMEOUT
+};
 
 #endif
 

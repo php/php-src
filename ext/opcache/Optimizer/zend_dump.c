@@ -399,9 +399,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 
 	if (!ssa || !ssa->ops || ssa->ops[opline - op_array->opcodes].result_use < 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-			if (ssa && ssa->ops) {
+			if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_def >= 0) {
 				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_def;
-				ZEND_ASSERT(ssa_var_num >= 0);
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->result_type, EX_VAR_TO_NUM(opline->result.var), dump_flags);
 			} else {
 				zend_dump_var(op_array, opline->result_type, EX_VAR_TO_NUM(opline->result.var));
@@ -1143,7 +1142,6 @@ void zend_dump_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zen
 
 	for (j = 0; j < cfg->blocks_count; j++) {
 		fprintf(stderr, "  BB%d:\n", j);
-		zend_dump_var_set(op_array, "gen", DFG_BITSET(dfg->gen, dfg->size, j));
 		zend_dump_var_set(op_array, "def", DFG_BITSET(dfg->def, dfg->size, j));
 		zend_dump_var_set(op_array, "use", DFG_BITSET(dfg->use, dfg->size, j));
 		zend_dump_var_set(op_array, "in ", DFG_BITSET(dfg->in,  dfg->size, j));

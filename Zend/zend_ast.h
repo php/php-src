@@ -42,7 +42,6 @@ enum _zend_ast_kind {
 
 	/* list nodes */
 	ZEND_AST_ARG_LIST = 1 << ZEND_AST_IS_LIST_SHIFT,
-	ZEND_AST_LIST,
 	ZEND_AST_ARRAY,
 	ZEND_AST_ENCAPS_LIST,
 	ZEND_AST_EXPR_LIST,
