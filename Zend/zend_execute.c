@@ -1526,7 +1526,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			ZVAL_COPY(result, z);
 		}
 
-		if (Z_TYPE_P(property) == IS_STRING && !Z_VERIFIED_P(property) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object))) {
+		if (Z_TYPE_P(property) == IS_STRING && !Z_VERIFIED_P(result) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object))) {
 			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
 
 			if (prop_info) {
