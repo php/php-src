@@ -6977,8 +6977,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	retval = zend_hash_find(target_symbol_table, name);
 	if (retval == NULL) {
 		if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-			zval *result = EX_VAR(opline->result.var);
+			zval *result;
 
+fetch_this:
+			result = EX_VAR(opline->result.var);
 			switch (type) {
 				case BP_VAR_R:
 					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
@@ -7032,6 +7034,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 		retval = Z_INDIRECT_P(retval);
 		if (Z_TYPE_P(retval) == IS_UNDEF) {
+			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+				goto fetch_this;
+			}
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
@@ -44351,8 +44356,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	retval = zend_hash_find(target_symbol_table, name);
 	if (retval == NULL) {
 		if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-			zval *result = EX_VAR(opline->result.var);
+			zval *result;
 
+fetch_this:
+			result = EX_VAR(opline->result.var);
 			switch (type) {
 				case BP_VAR_R:
 					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
@@ -44406,6 +44413,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 		retval = Z_INDIRECT_P(retval);
 		if (Z_TYPE_P(retval) == IS_UNDEF) {
+			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+				goto fetch_this;
+			}
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
@@ -56353,8 +56363,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	retval = zend_hash_find(target_symbol_table, name);
 	if (retval == NULL) {
 		if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-			zval *result = EX_VAR(opline->result.var);
+			zval *result;
 
+fetch_this:
+			result = EX_VAR(opline->result.var);
 			switch (type) {
 				case BP_VAR_R:
 					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
@@ -56408,6 +56420,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 		retval = Z_INDIRECT_P(retval);
 		if (Z_TYPE_P(retval) == IS_UNDEF) {
+			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+				goto fetch_this;
+			}
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:

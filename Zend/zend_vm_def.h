@@ -1494,8 +1494,10 @@ ZEND_VM_HELPER(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED, int type)
 	retval = zend_hash_find(target_symbol_table, name);
 	if (retval == NULL) {
 		if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-			zval *result = EX_VAR(opline->result.var);
+			zval *result;
 
+ZEND_VM_C_LABEL(fetch_this):
+			result = EX_VAR(opline->result.var);
 			switch (type) {
 				case BP_VAR_R:
 					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
@@ -1549,6 +1551,9 @@ ZEND_VM_HELPER(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED, int type)
 	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 		retval = Z_INDIRECT_P(retval);
 		if (Z_TYPE_P(retval) == IS_UNDEF) {
+			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+				ZEND_VM_C_GOTO(fetch_this);
+			}
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
