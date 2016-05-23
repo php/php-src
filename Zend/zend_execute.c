@@ -817,9 +817,14 @@ static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *
 	return ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property));
 }
 
-void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property) {
+ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property) {
 	zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
-	
+
+	/* we _may_ land here in case reading already errored and runtime cache thus has not been updated (i.e. it contains a valid but unrelated info) */
+	if (EG(exception)) {
+		return;
+	}
+
 	if (info->type == IS_OBJECT) {
 		zend_throw_exception_ex(zend_ce_type_error, info->type, 
 					"Typed property %s::$%s must be an instance of %s, %s used",
@@ -1517,22 +1522,6 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			ZVAL_COPY(result, z);
 		}
 
-		if (Z_TYPE_P(property) == IS_STRING && !Z_VERIFIED_P(result) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
-
-			if (prop_info) {
-				if (Z_TYPE_P(result) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(prop_info->ce->name),
-						Z_STRVAL_P(property));
-					OBJ_RELEASE(Z_OBJ(obj));
-					zval_ptr_dtor(z);
-					return;
-				}
-			}
-		}
-
 		ZVAL_DUP(&z_copy, result);
 		if (inc) {
 			increment_function(&z_copy);
@@ -1553,10 +1542,9 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc, zval *result)
 {
 	zval rv;
-	zend_property_info *prop_info = NULL;
 
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-		zval *z, obj;
+		zval *z, obj, prev;
 				
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
 		Z_ADDREF(obj);
@@ -1577,56 +1565,21 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		}
 		ZVAL_DEREF(z);
 		SEPARATE_ZVAL_NOREF(z);
-		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object)) && 
-			(Z_TYPE_P(property) == IS_STRING) && 
-			(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot)))) {
-			zval tmp;
-
-			if (Z_TYPE_P(z) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(property));
-				OBJ_RELEASE(Z_OBJ(obj));
-				return;
-			}
-
-			ZVAL_DUP(&tmp, z);
-
-			if (inc) {
-				increment_function(&tmp);
-			} else {
-				decrement_function(&tmp);
-			}
-
-			if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
-				OBJ_RELEASE(Z_OBJ(obj));
-				zval_dtor(&tmp);
-				return;
-			}
-
-			zval_ptr_dtor(z);
-			ZVAL_COPY_VALUE(z, &tmp);
-			Z_TYPE_FLAGS_P(z) |= IS_TYPE_VERIFIED;
-
-			if (UNEXPECTED(result)) {
-				ZVAL_COPY(result, z);
-			}
-			
-			Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+		ZVAL_COPY_VALUE(&prev, z);
+		if (inc) {
+			increment_function(z);
 		} else {
-			if (inc) {
-				increment_function(z);
-			} else {
-				decrement_function(z);
-			}
-			if (UNEXPECTED(result)) {
-				ZVAL_COPY(result, z);
-			}
-			Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+			decrement_function(z);
 		}
-		
+		if (UNEXPECTED(result)) {
+			ZVAL_COPY(result, z);
+		}
+		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+
+		if (UNEXPECTED(EG(exception))) {
+			ZVAL_COPY_VALUE(z, &prev);
+		}
+
 		OBJ_RELEASE(Z_OBJ(obj));
 		zval_ptr_dtor(z);
 	} else {
@@ -1640,12 +1593,14 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value, binary_op_type binary_op, zval *result)
 {
 	zval *z;
-	zval rv, obj;
+	zval rv, obj, prev;
 	zval *zptr;
 
 	ZVAL_OBJ(&obj, Z_OBJ_P(object));
 	Z_ADDREF(obj);
 	if (EXPECTED(Z_OBJ_HT(obj)->read_property)) {
+		zend_property_info *prop_info;
+
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
@@ -1664,41 +1619,15 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		ZVAL_DEREF(z);
 		SEPARATE_ZVAL_NOREF(z);
 
-		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE(obj)) && Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
-
-			if (prop_info) {
-				zval tmp;
-				
-				if (Z_TYPE_P(z) == IS_NULL) {
-					zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-						"Typed property %s::$%s must not be accessed before initialization",
-						ZSTR_VAL(prop_info->ce->name),
-						Z_STRVAL_P(property));
-					OBJ_RELEASE(Z_OBJ(obj));
-					return;
-				}
-
-				binary_op(&tmp, z, value);
-				if (!zend_verify_property_type(prop_info, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(property), &tmp);
-					OBJ_RELEASE(Z_OBJ(obj));
-					zval_dtor(&tmp);
-					return;
-				}
-				zval_ptr_dtor(z);
-				Z_TYPE_FLAGS(tmp) |= IS_TYPE_VERIFIED;
-				ZVAL_COPY(z, &tmp);
-			} else {
-				binary_op(z, z, value);
-			}
-		} else {
-			binary_op(z, z, value);
-		}
+		ZVAL_COPY_VALUE(&prev, z);
+		binary_op(z, z, value);
 
 		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
 		if (UNEXPECTED(result)) {
 			ZVAL_COPY(result, z);
+		}
+		if (UNEXPECTED(EG(exception))) {
+			ZVAL_COPY_VALUE(z, &prev);
 		}
 		zval_ptr_dtor(zptr);
 	} else {

@@ -7,6 +7,7 @@ class Foo {
 
 	public function __get($name) {
 		var_dump($name);
+		/* implicit return null, weakly cast to int(0) */
 	}
 }
 
@@ -18,10 +19,4 @@ var_dump($foo->bar);
 ?>
 --EXPECTF--
 string(3) "bar"
-
-Fatal error: Uncaught TypeError: Typed property Foo::$bar must not be accessed before initialization in %s:14
-Stack trace:
-#0 {main}
-  thrown in %s on line 14
-
-
+int(0)

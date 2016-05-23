@@ -388,9 +388,14 @@ static zend_always_inline zend_bool _zend_object_has_type_hints(zval *object) {
 
 static zend_always_inline zend_property_info* zend_object_fetch_property_type_info_ex(zval *object, zend_string *property, void **cache_slot) {
 	zend_property_info *info;
-	
-	if (cache_slot && EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
+
+	/* if we have a cache_slot, let's assume it's valid. Callers task to ensure validity! */
+	if (EXPECTED(cache_slot)) {
 		return (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+	}
+
+	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object)))) {
+		return NULL;
 	}
 
 	info = zend_get_property_info(Z_OBJCE_P(object), property, 1);
@@ -404,18 +409,12 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 
 static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *property, void **cache_slot)
 {
-	if (UNEXPECTED(Z_TYPE_P(property) != IS_STRING)) {
-		return NULL;
+	if (EXPECTED(cache_slot)) {
+		return (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		if (Z_ISREF_P(object)) {
-			object = Z_REFVAL_P(object);
-			if (Z_TYPE_P(object) != IS_OBJECT)
-				return NULL;
-		} else {
-			return NULL;
-		}
+	if (UNEXPECTED(Z_TYPE_P(property) != IS_STRING)) {
+		return NULL;
 	}
 
 	return zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);

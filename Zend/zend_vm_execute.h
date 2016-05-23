@@ -4995,24 +4995,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 
@@ -5100,6 +5082,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = EX_CONSTANT(opline->op2);
@@ -5117,19 +5100,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CONST, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_CONST == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -8848,24 +8827,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 
@@ -8953,6 +8914,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -8970,19 +8932,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CONST, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_CONST == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -10787,24 +10745,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -10893,6 +10833,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -10910,19 +10851,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CONST, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 
-		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CONST, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_CONST == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -13298,24 +13236,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -13331,6 +13251,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = EX_CONSTANT(opline->op2);
@@ -13348,19 +13269,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_TMP_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_TMP_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -14550,24 +14467,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -14583,6 +14482,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -14600,19 +14500,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_TMP_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_TMP_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -15105,24 +15001,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 	zval_ptr_dtor_nogc(free_op2);
 	zval_ptr_dtor_nogc(free_op1);
@@ -15138,6 +15016,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -15155,19 +15034,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_TMP_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 
-		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_TMP_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_TMP_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -16599,24 +16475,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 				}
 				pos++;
 				p++;
-			}
-
-			if (UNEXPECTED(p->key && !Z_VERIFIED_P(value) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(array)))) {
-				zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(array, p->key, NULL);
-
-				if (UNEXPECTED(prop_info)) {
-					if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
-						zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-							"Typed property %s::$%s must not be accessed before initialization",
-							ZSTR_VAL(prop_info->ce->name),
-							ZSTR_VAL(p->key));
-						HANDLE_EXCEPTION();
-					} else if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
-						zend_verify_property_type_error(prop_info, p->key, value);
-						HANDLE_EXCEPTION();
-					}
-				}
-				Z_TYPE_FLAGS_P(value) |= IS_TYPE_VERIFIED;
 			}
 
 			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
@@ -18422,24 +18280,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -18452,6 +18292,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -18465,17 +18306,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if ((IS_CONST != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -18492,6 +18329,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -18503,21 +18341,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -18535,6 +18369,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = EX_CONSTANT(opline->op2);
@@ -18552,19 +18387,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -18683,13 +18514,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -18881,13 +18711,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -19079,13 +18908,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -19277,13 +19105,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -23612,24 +23439,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -23642,6 +23451,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -23655,17 +23465,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if ((IS_CV != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -23682,6 +23488,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -23693,21 +23500,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -23725,6 +23528,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -23742,19 +23546,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -23873,13 +23673,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -24071,13 +23870,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -24269,13 +24067,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -24467,13 +24264,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -26905,24 +26701,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 	zval_ptr_dtor_nogc(free_op2);
 	zval_ptr_dtor_nogc(free_op1);
@@ -26935,6 +26713,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -26948,17 +26727,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (((IS_TMP_VAR|IS_VAR) != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -26976,6 +26751,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -26987,21 +26763,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -27019,6 +26792,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -27036,19 +26810,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 
-		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -27167,13 +26938,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -27365,13 +27135,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -27563,13 +27332,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -27761,13 +27529,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -29760,24 +29527,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 
@@ -29790,6 +29539,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -29803,17 +29553,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if ((IS_CONST != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -29830,6 +29576,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -29841,21 +29588,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -29945,6 +29688,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = EX_CONSTANT(opline->op2);
@@ -29962,19 +29706,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -30093,13 +29833,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -30291,13 +30030,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -30489,13 +30227,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -30687,13 +30424,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -33591,24 +33327,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 
@@ -33621,6 +33339,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -33634,17 +33353,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if ((IS_CV != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -33661,6 +33376,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -33672,21 +33388,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -33776,6 +33488,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -33793,19 +33506,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -33924,13 +33633,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -34122,13 +33830,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -34320,13 +34027,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -34518,13 +34224,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -36308,24 +36013,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -36338,6 +36025,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -36351,17 +36039,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (((IS_TMP_VAR|IS_VAR) != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -36379,6 +36063,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -36390,21 +36075,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -36495,6 +36177,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -36512,19 +36195,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 
-		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -36643,13 +36323,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -36841,13 +36520,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -37039,13 +36717,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -37237,13 +36914,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -41828,24 +41504,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 
@@ -41858,6 +41516,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -41871,17 +41530,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if ((IS_CONST != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -41898,6 +41553,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -41909,21 +41565,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -42013,6 +41665,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = EX_CONSTANT(opline->op2);
@@ -42030,19 +41683,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -42174,13 +41823,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -42372,13 +42020,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -42570,13 +42217,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -42768,13 +42414,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -49065,24 +48710,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 
 
@@ -49095,6 +48722,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -49108,17 +48736,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if ((IS_CV != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -49135,6 +48759,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -49146,21 +48771,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -49250,6 +48871,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -49267,19 +48889,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
-		}
-
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
+		}
 
 		if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -49411,13 +49029,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -49609,13 +49226,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -49807,13 +49423,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -50005,13 +49620,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -53431,24 +53045,6 @@ fetch_obj_r_no_object:
 		}
 	} while (0);
 
-	if (UNEXPECTED(!Z_VERIFIED_P(EX_VAR(opline->result.var)) && ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(container))) && EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, offset, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-
-		if (prop_info) {
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_NULL) {
-				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be accessed before initialization",
-					ZSTR_VAL(prop_info->ce->name),
-					Z_STRVAL_P(offset));
-				HANDLE_EXCEPTION();
-			} else if (!zend_verify_property_type(prop_info, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES())) {
-				zend_verify_property_type_error(prop_info, Z_STR_P(offset), EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		}
-		Z_TYPE_FLAGS_P(EX_VAR(opline->result.var)) |= IS_TYPE_VERIFIED;
-	}
-
 fetch_obj_r_exit:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -53461,6 +53057,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -53474,17 +53071,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (((IS_TMP_VAR|IS_VAR) != IS_CONST || UNEXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(property) + 2 * sizeof(void *)) != NULL)) && UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -53502,6 +53095,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
+	zend_property_info *prop_info
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -53513,21 +53107,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-		zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-		if (UNEXPECTED(prop_info)) {
-			if (zend_vm_is_fetching_reference(opline)) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be referenced",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+	if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+		if (zend_vm_is_fetching_reference(opline)) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be referenced",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 	}
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -53618,6 +53209,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
+		zend_property_info *prop_info;
 
 		SAVE_OPLINE();
 		property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -53635,19 +53227,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 			HANDLE_EXCEPTION();
 		}
 
-		if (UNEXPECTED(ZEND_OBJECT_HAS_TYPE_HINTS(container))) {
-			zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
+		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-			if (prop_info) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, prop_info->type,
-					"Typed property %s::$%s must not be passed by reference",
-					ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
-				HANDLE_EXCEPTION();
-			}
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(container, property, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL)))) {
+			zend_throw_exception_ex(
+				zend_ce_type_error, prop_info->type,
+				"Typed property %s::$%s must not be passed by reference",
+				ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+			HANDLE_EXCEPTION();
 		}
 
-		zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 		zval_ptr_dtor_nogc(free_op2);
 		if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
 			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
@@ -53779,13 +53368,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CONST == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -53977,13 +53565,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_TMP_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -54175,13 +53762,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_VAR == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
@@ -54373,13 +53959,12 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
-					/* will remain valid */
+					/* will remain valid, thus no need to check prop_info in future here */
 					if (IS_CV == IS_CONST) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
-				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), value);
 				}
