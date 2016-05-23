@@ -2292,6 +2292,10 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (OP_DATA_TYPE == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, OP_DATA_TYPE);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;

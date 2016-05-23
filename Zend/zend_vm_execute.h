@@ -18683,6 +18683,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -18876,6 +18880,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -19071,6 +19079,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -19264,6 +19276,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -23857,6 +23873,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -24050,6 +24070,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -24245,6 +24269,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -24438,6 +24466,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -27135,6 +27167,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -27328,6 +27364,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -27523,6 +27563,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -27716,6 +27760,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -30045,6 +30093,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -30238,6 +30290,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -30433,6 +30489,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -30626,6 +30686,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -33860,6 +33924,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -34053,6 +34121,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -34248,6 +34320,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -34441,6 +34517,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -36563,6 +36643,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -36756,6 +36840,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -36951,6 +37039,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -37144,6 +37236,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -42078,6 +42174,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -42271,6 +42371,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -42466,6 +42570,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -42659,6 +42767,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -49299,6 +49411,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -49492,6 +49608,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -49687,6 +49807,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -49880,6 +50004,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
@@ -53651,6 +53779,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_CONST == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CONST);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -53844,6 +53976,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_TMP_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_TMP_VAR);
@@ -54039,6 +54175,10 @@ fast_assign_obj:
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
 					}
+					/* will remain valid */
+					if (IS_VAR == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 				}
 				value = zend_assign_to_variable(property, value, IS_VAR);
 				Z_TYPE_FLAGS_P(property) |= IS_TYPE_VERIFIED;
@@ -54232,6 +54372,10 @@ fast_assign_obj:
 					if (!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES())) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						HANDLE_EXCEPTION();
+					}
+					/* will remain valid */
+					if (IS_CV == IS_CONST) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
 				value = zend_assign_to_variable(property, value, IS_CV);
