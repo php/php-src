@@ -601,7 +601,6 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		return (tmp->min <= tmp->max);
 	} else if (ssa->vars[var].definition < 0) {
 		if (var < op_array->last_var &&
-		    var != EX_VAR_TO_NUM(op_array->this_var) &&
 		    op_array->function_name) {
 
 			tmp->min = 0;
@@ -3842,13 +3841,7 @@ int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const 
 		}
 	} else {
 		for (i = 0; i < op_array->last_var; i++) {
-			if (i == EX_VAR_TO_NUM(op_array->this_var)) {
-				ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
-				ssa_var_info[i].ce = op_array->scope;
-				ssa_var_info[i].is_instanceof = 1;
-			} else {
-				ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RCN;
-			}
+			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RCN;
 			ssa_var_info[i].has_range = 0;
 		}
 	}
