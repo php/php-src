@@ -1816,10 +1816,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DISCARD_EXCEPTION_SPEC_HANDLER
 {
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->op1.var);
-	SAVE_OPLINE();
 
 	/* check for delayed exception */
 	if (Z_OBJ_P(fast_call) != NULL) {
+		SAVE_OPLINE();
 		/* discard the previously thrown exception */
 		OBJ_RELEASE(Z_OBJ_P(fast_call));
 		Z_OBJ_P(fast_call) = NULL;

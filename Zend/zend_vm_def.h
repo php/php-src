@@ -7537,10 +7537,10 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
 {
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->op1.var);
-	SAVE_OPLINE();
 
 	/* check for delayed exception */
 	if (Z_OBJ_P(fast_call) != NULL) {
+		SAVE_OPLINE();
 		/* discard the previously thrown exception */
 		OBJ_RELEASE(Z_OBJ_P(fast_call));
 		Z_OBJ_P(fast_call) = NULL;
