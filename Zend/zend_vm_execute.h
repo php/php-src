@@ -1690,37 +1690,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_TRAITS_SPEC_HANDLER(ZEND_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_helper_SPEC(uint32_t try_catch_offset, uint32_t op_num ZEND_OPCODE_HANDLER_ARGS_DC)
 {
-	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
-	uint32_t i, try_catch_offset = (uint32_t) -1;
 	zend_object *ex = EG(exception);
-
-	{
-		const zend_op *exc_opline = EG(opline_before_exception);
-		if ((exc_opline->opcode == ZEND_FREE || exc_opline->opcode == ZEND_FE_FREE)
-			&& exc_opline->extended_value & ZEND_FREE_ON_RETURN) {
-			/* exceptions thrown because of loop var destruction on return/break/...
-			 * are logically thrown at the end of the foreach loop, so adjust the
-			 * op_num.
-			 */
-			op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
-		}
-	}
-
-	/* Find the innermost try/catch/finally the exception was thrown in */
-	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
-		zend_try_catch_element *try_catch = &EX(func)->op_array.try_catch_array[i];
-		if (try_catch->try_op > op_num) {
-			/* further blocks will not be relevant... */
-			break;
-		}
-		if (op_num < try_catch->catch_op || op_num < try_catch->finally_end) {
-			try_catch_offset = i;
-		}
-	}
-
-	cleanup_unfinished_calls(execute_data, op_num);
 
 	/* Walk try/catch/finally structures upwards, performing the necessary actions */
 	while (try_catch_offset != (uint32_t) -1) {
@@ -1732,9 +1704,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 			cleanup_live_vars(execute_data, op_num, try_catch->catch_op);
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->catch_op]);
 			ZEND_VM_CONTINUE();
-		}
 
-		if (op_num < try_catch->finally_op) {
+		} else if (op_num < try_catch->finally_op) {
 			/* Go to finally block */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 			cleanup_live_vars(execute_data, op_num, try_catch->finally_op);
@@ -1743,9 +1714,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 			fast_call->u2.lineno = (uint32_t)-1;
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->finally_op]);
 			ZEND_VM_CONTINUE();
-		}
 
-		if (op_num < try_catch->finally_end) {
+		} else if (op_num < try_catch->finally_end) {
 			/* Chain potential exception from wrapping finally block */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 			if (Z_OBJ_P(fast_call)) {
@@ -1766,6 +1736,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 	} else {
 		ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	uint32_t throw_op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
+	uint32_t i, current_try_catch_offset = (uint32_t) -1;
+
+	{
+		const zend_op *exc_opline = EG(opline_before_exception);
+		if ((exc_opline->opcode == ZEND_FREE || exc_opline->opcode == ZEND_FE_FREE)
+			&& exc_opline->extended_value & ZEND_FREE_ON_RETURN) {
+			/* exceptions thrown because of loop var destruction on return/break/...
+			 * are logically thrown at the end of the foreach loop, so adjust the
+			 * throw_op_num.
+			 */
+			throw_op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
+		}
+	}
+
+	/* Find the innermost try/catch/finally the exception was thrown in */
+	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
+		zend_try_catch_element *try_catch = &EX(func)->op_array.try_catch_array[i];
+		if (try_catch->try_op > throw_op_num) {
+			/* further blocks will not be relevant... */
+			break;
+		}
+		if (throw_op_num < try_catch->catch_op || throw_op_num < try_catch->finally_end) {
+			current_try_catch_offset = i;
+		}
+	}
+
+	cleanup_unfinished_calls(execute_data, throw_op_num);
+
+	ZEND_VM_TAIL_CALL(zend_dispatch_try_catch_finally_helper_SPEC(current_try_catch_offset, throw_op_num ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_ABSTRACT_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -1840,56 +1844,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPC
 {
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->op1.var);
+	uint32_t current_try_catch_offset, current_op_num;
 
 	if (fast_call->u2.lineno != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
 
 		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		ZEND_VM_CONTINUE();
-	} else {
-		/* special case for unhandled exceptions */
-		uint32_t try_catch_offset = opline->op2.num;
-		while (try_catch_offset != (uint32_t)-1) {
-			/* check upper try block */
-			zend_try_catch_element *try_catch = EX(func)->op_array.try_catch_array + try_catch_offset;
-
-			if (try_catch->catch_op && opline < &EX(func)->op_array.opcodes[try_catch->catch_op]) {
-				EG(exception) = Z_OBJ_P(fast_call);
-				cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, try_catch->catch_op);
-				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->catch_op]);
-				ZEND_VM_CONTINUE();
-			} else if (try_catch->finally_op) {
-				uint32_t target;
-				zval *next_fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
-
-				if (opline < &EX(func)->op_array.opcodes[try_catch->finally_op]) {
-					target = try_catch->finally_op;
-				} else {
-					target = try_catch->finally_end;
-					if (Z_OBJ_P(next_fast_call)) {
-						zend_exception_set_previous(Z_OBJ_P(fast_call), Z_OBJ_P(next_fast_call));
-					}
-				}
-				Z_OBJ_P(next_fast_call) = Z_OBJ_P(fast_call);
-				next_fast_call->u2.lineno = (uint32_t)-1;
-				cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, target);
-				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[target]);
-				ZEND_VM_CONTINUE();
-			}
-			try_catch_offset = try_catch->parent;
-		}
-
-		/* leave function with exception */
-		EG(exception) = Z_OBJ_P(fast_call);
-		cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, 0);
-		if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
-			zend_generator *generator = zend_get_running_generator(execute_data);
-			zend_generator_close(generator, 1);
-			ZEND_VM_RETURN();
-		} else {
-			ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-		}
 	}
+
+	/* special case for unhandled exceptions */
+	EG(exception) = Z_OBJ_P(fast_call);
+	Z_OBJ_P(fast_call) = NULL;
+	current_try_catch_offset = opline->op2.num;
+	current_op_num = opline - EX(func)->op_array.opcodes;
+	ZEND_VM_TAIL_CALL(zend_dispatch_try_catch_finally_helper_SPEC(current_try_catch_offset, current_op_num ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSERT_CHECK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
