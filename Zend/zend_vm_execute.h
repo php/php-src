@@ -18486,7 +18486,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -18674,7 +18674,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -18862,7 +18862,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -19050,7 +19050,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -23590,7 +23590,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -23778,7 +23778,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -23966,7 +23966,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -24154,7 +24154,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -26801,7 +26801,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 						zval_ptr_dtor_nogc(free_op2);
@@ -26989,7 +26989,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
@@ -27177,7 +27177,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
@@ -27365,7 +27365,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 						zval_ptr_dtor_nogc(free_op2);
@@ -29641,7 +29641,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -29829,7 +29829,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -30017,7 +30017,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -30205,7 +30205,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -33386,7 +33386,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -33574,7 +33574,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -33762,7 +33762,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -33950,7 +33950,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -36022,7 +36022,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 						zval_ptr_dtor_nogc(free_op2);
@@ -36210,7 +36210,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
@@ -36398,7 +36398,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
@@ -36586,7 +36586,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 						zval_ptr_dtor_nogc(free_op2);
@@ -41477,7 +41477,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -41665,7 +41665,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -41853,7 +41853,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -42041,7 +42041,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -48628,7 +48628,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -48816,7 +48816,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -49004,7 +49004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
@@ -49192,7 +49192,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 
@@ -52913,7 +52913,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 						zval_ptr_dtor_nogc(free_op2);
@@ -53101,7 +53101,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
@@ -53289,7 +53289,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
@@ -53477,7 +53477,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 
 						zval_ptr_dtor_nogc(free_op2);

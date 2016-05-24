@@ -2245,7 +2245,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						FREE_OP_DATA();
 						FREE_OP2();

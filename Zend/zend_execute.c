@@ -812,7 +812,8 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 	return 1;
 }
 
-ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property) {
+ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property)
+{
 	zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
 
 	/* we _may_ land here in case reading already errored and runtime cache thus has not been updated (i.e. it contains a valid but unrelated info) */
@@ -841,44 +842,41 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	}
 }
 
-zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
-	if (EXPECTED(ZEND_SAME_FAKE_TYPE(info->type, Z_TYPE_P(property)) && Z_TYPE_P(property) != IS_OBJECT)) {
-		return 1;
-	}
-
-	switch (info->type) {
-		case IS_OBJECT: {
+static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+{
+    if (EXPECTED(info->type == Z_TYPE_P(property))) {
+		if (info->type_name) {
 			zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
 
 			if (!info->type_ce) {
 				info->type_ce = zend_lookup_class(resolved);
+				if (!info->type_ce) {
+					return 0;
+				}
 			}
 
-			if (!info->type_ce || Z_TYPE_P(property) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(property), info->type_ce)) {
+			if (!instanceof_function(Z_OBJCE_P(property), info->type_ce)) {
 				return 0;
 			}
-
-			return 1;
 		}
-
-		case IS_CALLABLE:
-			switch (Z_TYPE_P(property)) {
-				case IS_OBJECT:
-					if (instanceof_function(zend_ce_closure, Z_OBJCE_P(property))) {
-						return 1;
-					}
-
-				case IS_STRING:
-				case IS_ARRAY:
-					return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL);
-
-				default:
-					return 0;
+		return 1;
+	} else if (EXPECTED(info->type == IS_CALLABLE)) {
+		if (Z_TYPE_P(property) == IS_OBJECT) {
+			return instanceof_function(zend_ce_closure, Z_OBJCE_P(property));
+		} else {
+			return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL);
 		}
-
-		default:
-			return zend_verify_scalar_type_hint(info->type, property, strict);
+	} else if (info->type == _IS_BOOL &&
+          EXPECTED(Z_TYPE_P(property) == IS_FALSE || Z_TYPE_P(property) == IS_TRUE)) {
+		return 1;
+	} else {
+		return zend_verify_scalar_type_hint(info->type, property, strict);
 	}
+}
+
+zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+{
+	return i_zend_verify_property_type(info, property, strict);
 }
 
 static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
