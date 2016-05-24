@@ -7555,6 +7555,9 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, TRY_CATCH)
 		zend_try_catch_element *try_catch = EX(func)->op_array.try_catch_array + try_catch_offset;
 		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 
+		if (try_catch->finally_op && try_catch->finally_op > opline - EX(func)->op_array.opcodes) {
+			break;
+		}
 		if (Z_OBJ_P(fast_call) != NULL) {
 			/* discard the previously thrown exception */
 			OBJ_RELEASE(Z_OBJ_P(fast_call));
@@ -7585,6 +7588,11 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, TRY_CATCH)
 
 	if (fast_call->u2.lineno != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
+
+		if (Z_OBJ_P(fast_call)) {
+			OBJ_RELEASE(Z_OBJ_P(fast_call));
+			Z_OBJ_P(fast_call) = NULL;
+		}
 		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		ZEND_VM_CONTINUE();
 	} else {
