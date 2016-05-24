@@ -2691,7 +2691,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		init_func_run_time_cache(&fbc->op_array);
 	}
 
-	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC,
 		fbc, num_args, called_scope, NULL);
 }
 /* }}} */
@@ -2701,7 +2701,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zval *
 	zend_function *fbc;
 	zend_class_entry *called_scope;
 	zend_object *object;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
+	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 
 	if (EXPECTED(Z_OBJ_HANDLER_P(function, get_closure)) &&
 	    EXPECTED(Z_OBJ_HANDLER_P(function, get_closure)(function, &called_scope, &fbc, &object) == SUCCESS)) {
@@ -2734,7 +2734,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 	zend_function *fbc;
 	zend_class_entry *called_scope;
 	zend_object *object;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
+	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 
 	if (zend_hash_num_elements(function) == 2) {
 		zval *obj;

@@ -1805,6 +1805,10 @@ PHP_FUNCTION(extract)
 		}
 	}
 
+	if (zend_forbid_dynamic_call("extract()") == FAILURE) {
+		return;
+	}
+
 	symbol_table = zend_rebuild_symbol_table();
 #if 0
 	if (!symbol_table) {
@@ -1969,8 +1973,11 @@ PHP_FUNCTION(compact)
 		return;
 	}
 
-	symbol_table = zend_rebuild_symbol_table();
+	if (zend_forbid_dynamic_call("compact()") == FAILURE) {
+		return;
+	}
 
+	symbol_table = zend_rebuild_symbol_table();
 	if (UNEXPECTED(symbol_table == NULL)) {
 		return;
 	}
