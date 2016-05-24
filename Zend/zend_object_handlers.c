@@ -758,8 +758,13 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 				zend_property_info *prop_info;
+				zval val;
 found:
 				if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot))) {
+					if (!Z_REFCOUNTED_P(value) || Z_REFCOUNT_P(value) > 1) {
+						ZVAL_COPY_VALUE(&val, value);
+						value = &val;
+					}
 					if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
 						goto exit;
@@ -816,7 +821,12 @@ write_std_property:
 
 		if (EXPECTED(property_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			zend_property_info *prop_info;
+			zval val;
 			if (cache_slot ? UNEXPECTED(prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2)) : UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), NULL))) {
+				if (!Z_REFCOUNTED_P(value) || Z_REFCOUNT_P(value) > 1) {
+					ZVAL_COPY_VALUE(&val, value);
+					value = &val;
+				}
 				if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
 					goto exit;
