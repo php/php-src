@@ -7,7 +7,8 @@ class Foo {
 
 	public function __get($name) {
 		var_dump($name);
-		/* implicit return null, weakly cast to int(0) */
+		/* return value has to be compatible with int */
+		return 0;
 	}
 }
 
