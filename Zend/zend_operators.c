@@ -1397,7 +1397,13 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	int length = Z_STRLEN_P(op1) + 1;
-	char *buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
+	char *buf;
+
+	if (UNEXPECTED(length < 0)) {
+		zend_error(E_ERROR, "String size overflow");
+	}
+
+	buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
 
 	buf[length - 1] = (char) Z_LVAL_P(op2);
 	buf[length] = 0;
@@ -1410,7 +1416,13 @@ ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) 
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-	char *buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
+	char *buf;
+
+	if (UNEXPECTED(length < 0)) {
+		zend_error(E_ERROR, "String size overflow");
+	}
+
+	buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
 
 	memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 	buf[length] = 0;
