@@ -18292,7 +18292,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -18329,7 +18329,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -23451,7 +23451,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -23488,7 +23488,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -26713,7 +26713,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -26751,7 +26751,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -29539,7 +29539,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -29576,7 +29576,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -33339,7 +33339,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -33376,7 +33376,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -36025,7 +36025,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -36063,7 +36063,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -41516,7 +41516,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -41553,7 +41553,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = EX_CONSTANT(opline->op2);
@@ -48722,7 +48722,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -48759,7 +48759,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 	zend_free_op free_op1;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
@@ -53057,7 +53057,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
@@ -53095,7 +53095,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);

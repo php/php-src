@@ -1956,7 +1956,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
@@ -1994,7 +1994,7 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval *property;
 	zval *container;
-	zend_property_info *prop_info
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
