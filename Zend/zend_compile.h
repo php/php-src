@@ -169,7 +169,6 @@ typedef struct _zend_try_catch_element {
 	uint32_t catch_op;  /* ketchup! */
 	uint32_t finally_op;
 	uint32_t finally_end;
-	uint32_t parent;
 } zend_try_catch_element;
 
 #define ZEND_LIVE_TMPVAR  0

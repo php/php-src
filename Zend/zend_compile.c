@@ -1021,7 +1021,6 @@ static uint32_t zend_add_try_element(uint32_t try_op) /* {{{ */
 	elem->catch_op = 0;
 	elem->finally_op = 0;
 	elem->finally_end = 0;
-	elem->parent = CG(context).try_catch_offset;
 
 	return try_catch_offset;
 }

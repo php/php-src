@@ -7114,7 +7114,10 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 		zend_try_catch_element *try_catch =
 			&EX(func)->op_array.try_catch_array[try_catch_offset];
 
-		if (op_num < try_catch->catch_op) {
+		if (op_num < try_catch->try_op) {
+			/* further blocks will not be relevant... */
+			break;
+		} else if (op_num < try_catch->catch_op) {
 			/* Go to catch block */
 			cleanup_live_vars(execute_data, op_num, try_catch->catch_op);
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->catch_op]);
@@ -7139,7 +7142,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 			}
 		}
 
-		try_catch_offset = try_catch->parent;
+		try_catch_offset--;
 	}
 
 	/* Uncaught exception */
