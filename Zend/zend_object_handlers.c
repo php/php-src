@@ -761,7 +761,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 				zval val;
 found:
 				if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot))) {
-					if (!Z_REFCOUNTED_P(value) || Z_REFCOUNT_P(value) > 1) {
+					if (!Z_REFCOUNTED_P(value) || Z_IMMUTABLE_P(value) || Z_REFCOUNT_P(value) > 1) {
 						ZVAL_COPY_VALUE(&val, value);
 						value = &val;
 					}
@@ -823,7 +823,7 @@ write_std_property:
 			zend_property_info *prop_info;
 			zval val;
 			if (cache_slot ? UNEXPECTED(prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2)) : UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), NULL))) {
-				if (!Z_REFCOUNTED_P(value) || Z_REFCOUNT_P(value) > 1) {
+				if (!Z_REFCOUNTED_P(value) || Z_IMMUTABLE_P(value) || Z_REFCOUNT_P(value) > 1) {
 					ZVAL_COPY_VALUE(&val, value);
 					value = &val;
 				}
