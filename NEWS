@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
     identifiers). (Andrea)
   . Fixed bug #72188 (Nested try/finally blocks losing return value). (Dmitry)
+  . Fixed bug #72213 (Finally leaks on nested exceptions). (Dmitry, Nikita)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
