@@ -829,6 +829,7 @@ write_std_property:
 				}
 				if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
+					zval_ptr_dtor(value);
 					goto exit;
 				}
 			}
