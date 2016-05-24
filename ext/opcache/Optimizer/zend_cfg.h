@@ -31,8 +31,7 @@
 #define ZEND_BB_FINALLY_END      (1<<8)  /* end of finally block   */
 #define ZEND_BB_GEN_VAR          (1<<9)  /* start of live range    */
 #define ZEND_BB_KILL_VAR         (1<<10) /* end of live range      */
-#define ZEND_BB_EMPTY            (1<<11)
-#define ZEND_BB_UNREACHABLE_FREE (1<<12) /* unreachable loop free  */
+#define ZEND_BB_UNREACHABLE_FREE (1<<11) /* unreachable loop free  */
 
 #define ZEND_BB_LOOP_HEADER      (1<<16)
 #define ZEND_BB_IRREDUCIBLE_LOOP (1<<17)
@@ -44,7 +43,7 @@
 typedef struct _zend_basic_block {
 	uint32_t          flags;
 	uint32_t          start;              /* first opcode number         */
-	uint32_t          end;                /* last opcode number          */
+	uint32_t          len;                /* number of opcodes           */
 	int               successors[2];      /* up to 2 successor blocks    */
 	int               predecessors_count; /* number of predecessors      */
 	int               predecessor_offset; /* offset of 1-st predecessor  */
@@ -97,6 +96,7 @@ typedef struct _zend_cfg {
 #define ZEND_SSA_DEBUG_PHI_PLACEMENT   (1<<28)
 #define ZEND_SSA_RC_INFERENCE          (1<<27)
 #define ZEND_CFG_SPLIT_AT_LIVE_RANGES  (1<<26)
+#define ZEND_CFG_NO_ENTRY_PREDECESSORS (1<<25)
 
 #define CRT_CONSTANT_EX(op_array, node, rt_constants) \
 	((rt_constants) ? \
