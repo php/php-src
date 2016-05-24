@@ -1423,6 +1423,11 @@ encode_amp:
 	}
 	replaced[len] = '\0';
 	*newlen = len;
+	if(len > INT_MAX) {
+		zend_error_noreturn(E_ERROR, "Escaped string is too long");
+		efree(replaced);
+		return NULL;
+	}
 
 	return replaced;
 }
@@ -1444,10 +1449,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	}
 
 	replaced = php_escape_html_entities_ex(str, str_len, &new_len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
-	if (new_len > INT_MAX) {
-		efree(replaced);
-		RETURN_FALSE;
-	}
 	RETVAL_STRINGL(replaced, (int)new_len, 0);
 }
 /* }}} */
