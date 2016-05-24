@@ -1183,16 +1183,24 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 {
 	object->properties = properties;
 	if (object->ce->default_properties_count) {
-	    zval *prop;
-    	zend_string *key;
-    	zend_property_info *property_info;
+		zval *prop;
+		zend_string *key;
+		zend_property_info *property_info;
 
-    	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
 			property_info = zend_get_property_info(object->ce, key, 1);
 			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
 			    property_info &&
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 				zval *slot = OBJ_PROP(object, property_info->offset);
+
+				if (UNEXPECTED(property_info->type)) {
+					if (UNEXPECTED(!zend_verify_property_type(property_info, prop, 0))) {
+						zend_verify_property_type_error(property_info, key, prop);
+						continue;
+					}
+				}
+
 				ZVAL_COPY_VALUE(slot, prop);
 				ZVAL_INDIRECT(prop, slot);
 			}

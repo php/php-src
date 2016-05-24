@@ -3742,6 +3742,8 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 #endif
 	BG(user_shutdown_function_names) = NULL;
 
+	zend_hash_init(&BG(unserialize_refs), 8, NULL, ZVAL_PTR_DTOR, 0);
+
 	PHP_RINIT(filestat)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H
 	BASIC_RINIT_SUBMODULE(syslog)
@@ -3770,6 +3772,8 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 #ifdef HAVE_PUTENV
 	zend_hash_destroy(&BG(putenv_ht));
 #endif
+
+	zend_hash_destroy(&BG(unserialize_refs));
 
 	if (BG(umask) != -1) {
 		umask(BG(umask));

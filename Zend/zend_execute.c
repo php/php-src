@@ -1599,8 +1599,6 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 	ZVAL_OBJ(&obj, Z_OBJ_P(object));
 	Z_ADDREF(obj);
 	if (EXPECTED(Z_OBJ_HT(obj)->read_property)) {
-		zend_property_info *prop_info;
-
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));

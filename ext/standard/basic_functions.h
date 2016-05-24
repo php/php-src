@@ -208,6 +208,7 @@ typedef struct _php_basic_globals {
 		struct php_unserialize_data *data;
 		unsigned level;
 	} unserialize;
+	HashTable unserialize_refs;
 
 	/* url_scanner_ex.re */
 	url_adapt_state_ex_t url_adapt_state_ex;

@@ -72,7 +72,7 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 		ZEND_PUTS("]=>\n");
 	}
 
-	if (prop_info && Z_TYPE_P(zv) == IS_UNDEF) {
+	if (Z_TYPE_P(zv) == IS_UNDEF) {
 		if (prop_info->type) {
 			php_printf("%*cuninitialized(%s)\n", 
 				level + 1, ' ',
@@ -180,7 +180,9 @@ again:
 						prop_info = zend_object_fetch_property_type_info_ex(struc, key, NULL);
 					}
 
-					php_object_property_dump(prop_info, val, num, key, level);
+					if (!Z_ISUNDEF_P(val) || prop_info) {
+						php_object_property_dump(prop_info, val, num, key, level);
+					}
 				} ZEND_HASH_FOREACH_END();
 				if (is_temp) {
 					zend_hash_destroy(myht);
@@ -368,7 +370,9 @@ again:
 					prop_info = zend_object_fetch_property_type_info_ex(struc, key, NULL);
 				}
 
-				zval_object_property_dump(prop_info, val, index, key, level);
+				if (!Z_ISUNDEF_P(val) || prop_info) {
+					zval_object_property_dump(prop_info, val, index, key, level);
+				}
 			} ZEND_HASH_FOREACH_END();
 			myht->u.v.nApplyCount--;
 			if (is_temp) {
@@ -1120,6 +1124,7 @@ PHP_FUNCTION(unserialize)
 			zend_hash_destroy(class_hash);
 			FREE_HASHTABLE(class_hash);
 		}
+		zend_hash_clean(&BG(unserialize_refs));
 		zval_ptr_dtor(return_value);
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
@@ -1141,6 +1146,7 @@ PHP_FUNCTION(unserialize)
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}
+	zend_hash_clean(&BG(unserialize_refs));
 }
 /* }}} */
 

@@ -951,9 +951,9 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), ZSTR_VAL(name));
 #endif
 
-	if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+	if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce))) {
 		zend_property_info *prop_info = zend_hash_find_ptr(&zobj->ce->properties_info, name);
-		
+
 		if (prop_info && prop_info->type) {
 			return NULL;
 		}
