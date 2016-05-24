@@ -5508,7 +5508,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 				"Typed property %s::$%s must not be static",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(name));
-			}		
+			}
 
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				optional_type = type_ast->attr;
@@ -5547,7 +5547,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 				}
 			}
 		}
-		
+
 		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */
 		if (doc_comment_ast) {
 			doc_comment = zend_string_copy(zend_ast_get_str(doc_comment_ast));
@@ -5570,7 +5570,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 			if (optional_type && !Z_CONSTANT(value_zv)) {
 				if (optional_type == IS_ARRAY) {
 					if (Z_TYPE(value_zv) != IS_ARRAY) {
-						zend_error_noreturn(E_COMPILE_ERROR, 
+						zend_error_noreturn(E_COMPILE_ERROR,
 							"Default value for properties with array type can only be an array");
 					}
 				} else if (optional_type == IS_CALLABLE) {

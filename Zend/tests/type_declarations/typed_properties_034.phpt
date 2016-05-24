@@ -5,12 +5,12 @@ Test typed properties add array element guard
 $foo = new class
 {
     public int $bar = 42;
-    
+
     public function getIterator()
     {
         foreach(['1', &$this->bar] as $item)
         {
-            yield $item;    
+            yield $item;
         }
     }
 };

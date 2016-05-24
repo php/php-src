@@ -90,7 +90,7 @@ $reflector = new ReflectionClass(PropTypeTest::class);
 
 foreach ($reflector->getProperties() as $name => $property) {
 	if ($property->hasType()) {
-		printf("public %s $%s;\n", 
+		printf("public %s $%s;\n",
 			$property->getType(), $property->getName());
 	} else printf("public $%s;\n", $property->getName());
 }

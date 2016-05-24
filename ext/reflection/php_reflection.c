@@ -1287,17 +1287,17 @@ static void reflection_type_factory(void *scope, zval *closure_object, void *inf
 	reference->type = type;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
-	
+
 	switch (type) {
 		case REF_INFO_ARG: {
 			zend_function *fptr = (zend_function*) scope;
-			
+
 			reference->scope.fptr = fptr;
 			intern->ce = fptr->common.scope;
 
 			reference->info.arg = info;
 		} break;
-		
+
 		case REF_INFO_PROP:
 			reference->scope.ce = scope;
 			intern->ce = scope;
@@ -3002,14 +3002,12 @@ ZEND_METHOD(reflection_type, allowsNull)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	switch (param->type) {
-		case REF_INFO_ARG: {
+		case REF_INFO_ARG:
 			RETVAL_BOOL(param->info.arg->allow_null);
-		} break;
-			
-
+			break;
 		case REF_INFO_PROP:
 			RETVAL_FALSE;
-		break;
+			break;
 	}
 }
 /* }}} */
@@ -3045,7 +3043,7 @@ ZEND_METHOD(reflection_type, __toString)
 	reflection_object *intern;
 	type_reference *param;
 	zend_uchar type = IS_UNDEF;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -3058,7 +3056,7 @@ ZEND_METHOD(reflection_type, __toString)
 			if (type == IS_OBJECT) {
 				zend_function *fptr = param->scope.fptr;
 
-				if (fptr->type == ZEND_INTERNAL_FUNCTION && 
+				if (fptr->type == ZEND_INTERNAL_FUNCTION &&
 					!(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 					RETURN_STRING(((zend_internal_arg_info*) param->info.arg)->class_name);
 				} else RETURN_STR_COPY(param->info.arg->class_name);
@@ -5883,7 +5881,7 @@ ZEND_METHOD(reflection_property, getType)
 	if (!ref->prop.type) {
 		RETURN_NULL();
 	}
-	
+
 	reflection_type_factory(ref->prop.ce, Z_ISUNDEF(intern->obj) ? NULL : &intern->obj, &ref->prop, REF_INFO_PROP, return_value);
 }
 /* }}} */

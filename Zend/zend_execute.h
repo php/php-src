@@ -374,7 +374,7 @@ static zend_always_inline zend_bool _zend_object_has_type_hints(zval *object) {
 				if (Z_TYPE_P(object) != IS_OBJECT)
 					break;
 			} else {
-				break;			
+				break;
 			}
 		}
 

@@ -187,7 +187,7 @@ _zend_vm_is_fetching_reference:
 		case ZEND_TICKS:
 		case ZEND_EXT_STMT:
 		case ZEND_FETCH_DIM_W:
-		case ZEND_FETCH_W: 
+		case ZEND_FETCH_W:
 		case ZEND_FETCH_OBJ_W: {
 			next++;
 		} goto _zend_vm_is_fetching_reference;
@@ -197,8 +197,8 @@ _zend_vm_is_fetching_reference:
 		case ZEND_SEND_REF:
 		case ZEND_RETURN_BY_REF:
 		case ZEND_ASSIGN_REF:
-		case ZEND_INIT_ARRAY:	
-		case ZEND_ADD_ARRAY_ELEMENT: 
+		case ZEND_INIT_ARRAY:
+		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_YIELD: {
 			return 1;
 		} break;
@@ -826,7 +826,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	}
 
 	if (info->type == IS_OBJECT) {
-		zend_throw_exception_ex(zend_ce_type_error, info->type, 
+		zend_throw_exception_ex(zend_ce_type_error, info->type,
 					"Typed property %s::$%s must be an instance of %s, %s used",
 						ZSTR_VAL(info->ce->name),
 						ZSTR_VAL(name),
@@ -835,7 +835,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 							ZSTR_VAL(Z_OBJCE_P(property)->name) :
 							zend_get_type_by_const(Z_TYPE_P(property)));
 	} else {
-		zend_throw_exception_ex(zend_ce_type_error, info->type, 
+		zend_throw_exception_ex(zend_ce_type_error, info->type,
 					"Typed property %s::$%s must be %s, %s used",
 						ZSTR_VAL(info->ce->name),
 						ZSTR_VAL(name),
@@ -854,7 +854,7 @@ zend_bool zend_verify_property_type(zend_property_info *info, zval *property, ze
 	switch (info->type) {
 		case IS_OBJECT: {
 			zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
-			
+
 			if (!info->type_ce) {
 				info->type_ce = zend_lookup_class(resolved);
 			}

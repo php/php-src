@@ -126,11 +126,11 @@ static int clean_non_persistent_type_info(zval *zv) /* {{{ */
 					prop_info->type_ce = NULL;
 				}
 			} ZEND_HASH_FOREACH_END();
-		}	
+		}
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	return ZEND_HASH_APPLY_STOP;	
+	return ZEND_HASH_APPLY_STOP;
 } /* }}} */
 
 static int clean_non_persistent_class(zval *zv) /* {{{ */

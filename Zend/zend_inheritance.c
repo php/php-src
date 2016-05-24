@@ -657,7 +657,7 @@ zend_string* zend_resolve_property_type(zend_string *name, zend_class_entry *sco
 	if (!type) {
 		return NULL;
 	}
-	
+
 	if (zend_string_equals_literal_ci(type, "parent")) {
 		if (scope && scope->parent) {
 			return scope->parent->name;
@@ -680,7 +680,6 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-	
 		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
@@ -711,8 +710,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		if (!(child_info->flags & ZEND_ACC_CHANGED)) {
 			if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
 				if (parent_info->type == IS_OBJECT) {
-					if (child_info->type != IS_OBJECT || 
-						!zend_string_equals_ci(zend_resolve_property_type(parent_info->type_name, parent_info->ce), 
+					if (child_info->type != IS_OBJECT ||
+						!zend_string_equals_ci(zend_resolve_property_type(parent_info->type_name, parent_info->ce),
 											   zend_resolve_property_type(child_info->type_name, child_info->ce))) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 						"Type of %s::$%s must be %s (as in class %s)",

@@ -5925,7 +5925,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
 			HANDLE_EXCEPTION();
 		}
-		
+
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
 			if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 				if (array_ptr == array_ref) {

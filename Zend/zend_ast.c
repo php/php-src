@@ -1150,7 +1150,7 @@ simple_list:
 					str, type_ast, 0, indent);
 				smart_str_appendc(str, ' ');
 			}
-			
+
 			goto simple_list;
 		}
 
