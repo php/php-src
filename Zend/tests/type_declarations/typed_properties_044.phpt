@@ -1,5 +1,5 @@
 --TEST--
-Proper source duplication on assignment to typed property
+Error message should be the same independently of called function
 --FILE--
 <?php
 class Foo {

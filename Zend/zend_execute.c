@@ -178,32 +178,45 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 	return ptr;
 }
 
-zend_bool zend_vm_is_fetching_reference(const zend_op * opline) {
+static zend_bool zend_vm_is_fetching_reference(const zend_op * opline)
+{
 	zend_op const *next = opline + 1;
 
-_zend_vm_is_fetching_reference:
-	switch (next->opcode) {
-		case ZEND_NOP:
-		case ZEND_TICKS:
-		case ZEND_EXT_STMT:
-		case ZEND_FETCH_DIM_W:
-		case ZEND_FETCH_W:
-		case ZEND_FETCH_OBJ_W: {
-			next++;
-		} goto _zend_vm_is_fetching_reference;
+	while (1) {
+		switch (next->opcode) {
+			case ZEND_NOP:
+			case ZEND_TICKS:
+			case ZEND_EXT_STMT:
+			case ZEND_FETCH_DIM_W:
+			case ZEND_FETCH_W:
+			case ZEND_FETCH_OBJ_W:
+				next++;
+				break;
+			case ZEND_SEND_REF:
+			case ZEND_RETURN_BY_REF:
+			case ZEND_ASSIGN_REF:
+			case ZEND_INIT_ARRAY:
+			case ZEND_ADD_ARRAY_ELEMENT:
+			case ZEND_YIELD:
+				return 1;
+			default:
+				return 0;
+		}
 	}
+}
 
-	switch (next->opcode) {
-		case ZEND_SEND_REF:
-		case ZEND_RETURN_BY_REF:
-		case ZEND_ASSIGN_REF:
-		case ZEND_INIT_ARRAY:
-		case ZEND_ADD_ARRAY_ELEMENT:
-		case ZEND_YIELD: {
-			return 1;
-		} break;
+static zend_always_inline zend_bool zend_is_referenced_typed_property(zval *container, zval *property, void **cache_slot, const zend_op *opline, int check_opline)
+{
+	zend_property_info *prop_info = zend_object_fetch_property_type_info(container, property, cache_slot);
+
+	if (UNEXPECTED(prop_info)
+	 && (!check_opline || UNEXPECTED(zend_vm_is_fetching_reference(opline)))) {
+		zend_throw_exception_ex(
+			zend_ce_type_error, prop_info->type,
+			"Typed property %s::$%s must not be referenced",
+			ZSTR_VAL(prop_info->ce->name), Z_STRVAL_P(property));
+		return 1;
 	}
-
 	return 0;
 }
 
