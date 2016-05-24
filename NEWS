@@ -10,7 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #72135 (Integer Overflow in php_html_entities). (Stas)
 
 - GD:
-   . Fixed bug ##72227 (imagescale out-of-bounds read). (Stas)
+   . Fixed bug #72227 (imagescale out-of-bounds read). (Stas)
 
 - Intl:
    . Fixed bug #72241 (get_icu_value_internal out-of-bounds read). (Stas)
