@@ -5904,6 +5904,11 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			if (OP1_TYPE == IS_VAR) {
+				FREE_OP1_VAR_PTR();
+			} else {
+				FREE_OP1();
+			}
 			HANDLE_EXCEPTION();
 		}
 
@@ -5951,6 +5956,11 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 					zend_ce_type_error, 0,
 					"Typed properties exist in %s: foreach by reference is disallowed",
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				if (OP1_TYPE == IS_VAR) {
+					FREE_OP1_VAR_PTR();
+				} else {
+					FREE_OP1();
+				}
 				HANDLE_EXCEPTION();
 			}
 

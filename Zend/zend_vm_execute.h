@@ -3588,6 +3588,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			if (IS_CONST == IS_VAR) {
+
+			} else {
+
+			}
 			HANDLE_EXCEPTION();
 		}
 
@@ -3634,6 +3639,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 					zend_ce_type_error, 0,
 					"Typed properties exist in %s: foreach by reference is disallowed",
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				if (IS_CONST == IS_VAR) {
+
+				} else {
+
+				}
 				HANDLE_EXCEPTION();
 			}
 
@@ -12702,6 +12712,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			if (IS_TMP_VAR == IS_VAR) {
+
+			} else {
+				zval_ptr_dtor_nogc(free_op1);
+			}
 			HANDLE_EXCEPTION();
 		}
 
@@ -12748,6 +12763,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 					zend_ce_type_error, 0,
 					"Typed properties exist in %s: foreach by reference is disallowed",
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				if (IS_TMP_VAR == IS_VAR) {
+
+				} else {
+					zval_ptr_dtor_nogc(free_op1);
+				}
 				HANDLE_EXCEPTION();
 			}
 
@@ -16240,6 +16260,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			if (IS_VAR == IS_VAR) {
+				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+			} else {
+				zval_ptr_dtor_nogc(free_op1);
+			}
 			HANDLE_EXCEPTION();
 		}
 
@@ -16287,6 +16312,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 					zend_ce_type_error, 0,
 					"Typed properties exist in %s: foreach by reference is disallowed",
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				if (IS_VAR == IS_VAR) {
+					if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+				} else {
+					zval_ptr_dtor_nogc(free_op1);
+				}
 				HANDLE_EXCEPTION();
 			}
 
@@ -38842,6 +38872,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
 				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+			if (IS_CV == IS_VAR) {
+
+			} else {
+
+			}
 			HANDLE_EXCEPTION();
 		}
 
@@ -38888,6 +38923,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 					zend_ce_type_error, 0,
 					"Typed properties exist in %s: foreach by reference is disallowed",
 					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
+				if (IS_CV == IS_VAR) {
+
+				} else {
+
+				}
 				HANDLE_EXCEPTION();
 			}
 
