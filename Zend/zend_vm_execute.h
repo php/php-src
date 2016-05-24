@@ -18486,15 +18486,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -18674,15 +18687,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -18862,15 +18888,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -19050,15 +19089,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -23590,15 +23642,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -23778,15 +23843,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -23966,15 +24044,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -24154,15 +24245,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -26801,15 +26905,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -26989,15 +27106,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -27177,15 +27307,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -27365,15 +27508,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -29641,15 +29797,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -29829,15 +29998,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -30017,15 +30199,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -30205,15 +30400,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -33386,15 +33594,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -33574,15 +33795,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -33762,15 +33996,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -33950,15 +34197,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -36022,15 +36282,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -36210,15 +36483,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -36398,15 +36684,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -36586,15 +36885,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -41477,15 +41789,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -41665,15 +41990,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -41853,15 +42191,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -42041,15 +42392,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -48628,15 +48992,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -48816,15 +49193,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -49004,15 +49394,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -49192,15 +49595,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -52913,15 +53329,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CONST & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CONST & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CONST == IS_CONST) {
+					if (IS_CONST == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -53101,15 +53530,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_TMP_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_TMP_VAR == IS_CONST) {
+					if (IS_TMP_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -53289,15 +53731,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_VAR & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_VAR & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_VAR == IS_CONST) {
+					if (IS_VAR == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
@@ -53477,15 +53932,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (IS_CV & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 
 						zval_ptr_dtor_nogc(free_op2);
 
 						HANDLE_EXCEPTION();
 					}
+					if (IS_CV & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (IS_CV == IS_CONST) {
+					if (IS_CV == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}

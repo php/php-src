@@ -2245,15 +2245,28 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 				if (UNEXPECTED(prop_info != NULL)) {
+					zval val, *orig;
+					/* avoid overwriting source (does not matter for TMP/VAR) */
+					if (OP_DATA_TYPE & (IS_CONST | IS_CV)) {
+						orig = value;
+						ZVAL_COPY(&val, value);
+						value = &val;
+					}
 					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						if (OP_DATA_TYPE & (IS_CONST | IS_CV)) {
+							zval_ptr_dtor_nogc(&val);
+						}
 						FREE_OP_DATA();
 						FREE_OP2();
 						FREE_OP1_VAR_PTR();
 						HANDLE_EXCEPTION();
 					}
+					if (OP_DATA_TYPE & (IS_CONST | IS_CV)) {
+						zval_ptr_dtor_nogc(&val);
+					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (OP_DATA_TYPE == IS_CONST) {
+					if (OP_DATA_TYPE == IS_CONST && Z_TYPE(val) == Z_TYPE_P(orig)) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
 				}
