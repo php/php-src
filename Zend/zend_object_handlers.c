@@ -747,20 +747,10 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 		if (EXPECTED(property_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 			if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-				goto found;
-			}
-		} else if (EXPECTED(zobj->properties != NULL)) {
-			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
-				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(zobj->properties)--;
-				}
-				zobj->properties = zend_array_dup(zobj->properties);
-			}
-			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
-				zend_property_info *prop_info;
+				zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot);;
 				zval val;
-found:
-				if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot))) {
+
+				if (UNEXPECTED(prop_info)) {
 					if (!Z_REFCOUNTED_P(value) || Z_IMMUTABLE_P(value) || Z_REFCOUNT_P(value) > 1) {
 						ZVAL_COPY_VALUE(&val, value);
 						value = &val;
@@ -770,8 +760,19 @@ found:
 						goto exit;
 					}
 				}
+found:
 				zend_assign_to_variable(variable_ptr, value, IS_CV);
 				goto exit;
+			}
+		} else if (EXPECTED(zobj->properties != NULL)) {
+			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(zobj->properties)--;
+				}
+				zobj->properties = zend_array_dup(zobj->properties);
+			}
+			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
+				goto found;
 			}
 		}
 	} else if (UNEXPECTED(EG(exception))) {
