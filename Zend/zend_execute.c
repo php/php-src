@@ -812,24 +812,6 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 	return 1;
 }
 
-static inline zend_bool zend_verify_scalar_property_type(zend_uchar type, zval *property, zend_bool strict) {
-	if (EXPECTED(!strict)) {
-		if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property)))) {
-			return zend_verify_weak_scalar_type_hint(type, property);
-		}
-		return 1;
-	}
-
-	if (UNEXPECTED(type == IS_DOUBLE && Z_TYPE_P(property) == IS_LONG)) {
-		double dest = (double) Z_LVAL_P(property);
-		zval_ptr_dtor(property);
-		ZVAL_DOUBLE(property, dest);
-		return 1;
-	}
-
-	return ZEND_SAME_FAKE_TYPE(type, Z_TYPE_P(property));
-}
-
 ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property) {
 	zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
 
@@ -895,7 +877,7 @@ zend_bool zend_verify_property_type(zend_property_info *info, zval *property, ze
 		}
 
 		default:
-			return zend_verify_scalar_property_type(info->type, property, strict);
+			return zend_verify_scalar_type_hint(info->type, property, strict);
 	}
 }
 
