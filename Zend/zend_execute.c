@@ -1521,7 +1521,6 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 		} else {
 			ZVAL_COPY(result, z);
 		}
-
 		ZVAL_DUP(&z_copy, result);
 		if (inc) {
 			increment_function(&z_copy);
@@ -1529,7 +1528,6 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			decrement_function(&z_copy);
 		}
 		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
-
 		OBJ_RELEASE(Z_OBJ(obj));
 		zval_ptr_dtor(&z_copy);
 		zval_ptr_dtor(z);
