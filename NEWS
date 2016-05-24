@@ -2,12 +2,22 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
 
-??? 2016, PHP 5.5.36
+26 May 2016, PHP 5.5.36
+
+- Core:
+  . Fixed bug #72114 (Integer underflow / arbitrary null write in
+    fread/gzread). (Stas)
+  . Fixed bug #72135 (Integer Overflow in php_html_entities). (Stas)
+
+- GD:
+   . Fixed bug ##72227 (imagescale out-of-bounds read). (Stas)
+
+- Intl:
+   . Fixed bug #72241 (get_icu_value_internal out-of-bounds read). (Stas)
 
 - Phar:
   . Fixed bug #71331 (Uninitialized pointer in phar_make_dirstream()).
     (CVE-2016-4343) (Stas)
-
 
 28 Apr 2016, PHP 5.5.35
 
