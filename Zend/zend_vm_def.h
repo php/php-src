@@ -7105,12 +7105,58 @@ ZEND_VM_HANDLER(155, ZEND_BIND_TRAITS, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_catch_offset, uint32_t op_num)
+{
+	zend_object *ex = EG(exception);
+
+	/* Walk try/catch/finally structures upwards, performing the necessary actions */
+	while (try_catch_offset != (uint32_t) -1) {
+		zend_try_catch_element *try_catch =
+			&EX(func)->op_array.try_catch_array[try_catch_offset];
+
+		if (op_num < try_catch->catch_op) {
+			/* Go to catch block */
+			cleanup_live_vars(execute_data, op_num, try_catch->catch_op);
+			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->catch_op]);
+			ZEND_VM_CONTINUE();
+
+		} else if (op_num < try_catch->finally_op) {
+			/* Go to finally block */
+			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
+			cleanup_live_vars(execute_data, op_num, try_catch->finally_op);
+			Z_OBJ_P(fast_call) = EG(exception);
+			EG(exception) = NULL;
+			fast_call->u2.lineno = (uint32_t)-1;
+			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->finally_op]);
+			ZEND_VM_CONTINUE();
+
+		} else if (op_num < try_catch->finally_end) {
+			/* Chain potential exception from wrapping finally block */
+			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
+			if (Z_OBJ_P(fast_call)) {
+				zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
+				ex = Z_OBJ_P(fast_call);
+			}
+		}
+
+		try_catch_offset--;
+	}
+
+	/* Uncaught exception */
+	cleanup_live_vars(execute_data, op_num, 0);
+	if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
+		zend_generator *generator = zend_get_running_generator(execute_data);
+		zend_generator_close(generator, 1);
+		ZEND_VM_RETURN();
+	} else {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+	}
+}
+
 ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 {
-	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
-	int i;
-	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
-	int in_finally = 0;
+	uint32_t throw_op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
+	uint32_t i, current_try_catch_offset = (uint32_t) -1;
 
 	{
 		const zend_op *exc_opline = EG(opline_before_exception);
@@ -7118,68 +7164,27 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			&& exc_opline->extended_value & ZEND_FREE_ON_RETURN) {
 			/* exceptions thrown because of loop var destruction on return/break/...
 			 * are logically thrown at the end of the foreach loop, so adjust the
-			 * op_num.
+			 * throw_op_num.
 			 */
-			op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
+			throw_op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
 		}
 	}
 
+	/* Find the innermost try/catch/finally the exception was thrown in */
 	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
-		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
+		zend_try_catch_element *try_catch = &EX(func)->op_array.try_catch_array[i];
+		if (try_catch->try_op > throw_op_num) {
 			/* further blocks will not be relevant... */
 			break;
 		}
-		in_finally = 0;
-		if (op_num < EX(func)->op_array.try_catch_array[i].catch_op) {
-			catch_op_num = EX(func)->op_array.try_catch_array[i].catch_op;
-		}
-		if (op_num < EX(func)->op_array.try_catch_array[i].finally_op) {
-			finally_op_num = EX(func)->op_array.try_catch_array[i].finally_op;
-			finally_op_end = EX(func)->op_array.try_catch_array[i].finally_end;
-		}
-		if (op_num >= EX(func)->op_array.try_catch_array[i].finally_op &&
-				op_num < EX(func)->op_array.try_catch_array[i].finally_end) {
-			finally_op_end = EX(func)->op_array.try_catch_array[i].finally_end;
-			in_finally = 1;
+		if (throw_op_num < try_catch->catch_op || throw_op_num < try_catch->finally_end) {
+			current_try_catch_offset = i;
 		}
 	}
 
-	cleanup_unfinished_calls(execute_data, op_num);
+	cleanup_unfinished_calls(execute_data, throw_op_num);
 
-	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
-		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
-
-		cleanup_live_vars(execute_data, op_num, finally_op_num);
-		if (in_finally && Z_OBJ_P(fast_call)) {
-			zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call));
-		}
-		Z_OBJ_P(fast_call) = EG(exception);
-		EG(exception) = NULL;
-		fast_call->u2.lineno = (uint32_t)-1;
-		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[finally_op_num]);
-		ZEND_VM_CONTINUE();
-	} else {
-		cleanup_live_vars(execute_data, op_num, catch_op_num);
-		if (in_finally) {
-			/* we are going out of current finally scope */
-			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
-
-			if (Z_OBJ_P(fast_call)) {
-				zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call));
-				Z_OBJ_P(fast_call) = NULL;
-			}
-		}
-		if (catch_op_num) {
-			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
-			ZEND_VM_CONTINUE();
-		} else if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
-			zend_generator *generator = zend_get_running_generator(execute_data);
-			zend_generator_close(generator, 1);
-			ZEND_VM_RETURN();
-		} else {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-		}
-	}
+	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, current_try_catch_offset, op_num, throw_op_num);
 }
 
 ZEND_VM_HANDLER(146, ZEND_VERIFY_ABSTRACT_CLASS, ANY, ANY)
@@ -7539,71 +7544,43 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
 		/* discard the previously thrown exception */
 		OBJ_RELEASE(Z_OBJ_P(fast_call));
 		Z_OBJ_P(fast_call) = NULL;
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(162, ZEND_FAST_CALL, JMP_ADDR, ANY, FAST_CALL)
+ZEND_VM_HANDLER(162, ZEND_FAST_CALL, JMP_ADDR, ANY)
 {
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->result.var);
 
-	if (opline->extended_value == ZEND_FAST_CALL_FROM_FINALLY && UNEXPECTED(Z_OBJ_P(fast_call) != NULL)) {
-		fast_call->u2.lineno = (uint32_t)-1;
-	} else {
-		Z_OBJ_P(fast_call) = NULL;
-		/* set return address */
-		fast_call->u2.lineno = opline - EX(func)->op_array.opcodes;
-	}
+	Z_OBJ_P(fast_call) = NULL;
+	/* set return address */
+	fast_call->u2.lineno = opline - EX(func)->op_array.opcodes;
 	ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op1));
 	ZEND_VM_CONTINUE();
 }
 
-ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, TRY_CATCH, FAST_RET)
+ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, TRY_CATCH)
 {
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->op1.var);
+	uint32_t current_try_catch_offset, current_op_num;
 
 	if (fast_call->u2.lineno != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
+
 		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		ZEND_VM_CONTINUE();
-	} else {
-		/* special case for unhandled exceptions */
-		USE_OPLINE
-
-		if (opline->extended_value == ZEND_FAST_RET_TO_FINALLY) {
-			uint32_t finally_op = EX(func)->op_array.try_catch_array[opline->op2.num].finally_op;
-			uint32_t finally_end = EX(func)->op_array.try_catch_array[opline->op2.num].finally_end;
-			zval *next_fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_end].op1.var);
-
-			Z_OBJ_P(next_fast_call) = Z_OBJ_P(fast_call);
-			next_fast_call->u2.lineno = (uint32_t)-1;
-			cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, finally_op);
-			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[finally_op]);
-			ZEND_VM_CONTINUE();
-		} else {
-			EG(exception) = Z_OBJ_P(fast_call);
-			Z_OBJ_P(fast_call) = NULL;
-			if (opline->extended_value == ZEND_FAST_RET_TO_CATCH) {
-				uint32_t catch_op = EX(func)->op_array.try_catch_array[opline->op2.num].catch_op;
-
-				cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, catch_op);
-				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op]);
-				ZEND_VM_CONTINUE();
-			} else {
-				cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, 0);
-				if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
-					zend_generator *generator = zend_get_running_generator(execute_data);
-					zend_generator_close(generator, 1);
-					ZEND_VM_RETURN();
-				} else {
-					ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-				}
-			}
-		}
 	}
+
+	/* special case for unhandled exceptions */
+	EG(exception) = Z_OBJ_P(fast_call);
+	Z_OBJ_P(fast_call) = NULL;
+	current_try_catch_offset = opline->op2.num;
+	current_op_num = opline - EX(func)->op_array.opcodes;
+	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, current_try_catch_offset, op_num, current_op_num);
 }
 
 ZEND_VM_HANDLER(168, ZEND_BIND_GLOBAL, CV, CONST)
