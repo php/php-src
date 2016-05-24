@@ -73,11 +73,11 @@ PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, siz
 	wchar_t *ret;
 
 	ret = php_win32_cp_to_w_int(in, in_len, out_len, CP_ACP, 0);
-
+#if 0
 	if (!ret) {
 		ret = php_win32_cp_to_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
 	}
-
+#endif
 	return ret;
 }/*}}}*/
 
@@ -202,11 +202,11 @@ PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *o
 	char *ret;
 
 	ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_ACP, 0);
-
+#if 0
 	if (!ret) {
 		ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
 	}
-
+#endif
 	return ret;
 }/*}}}*/
 
