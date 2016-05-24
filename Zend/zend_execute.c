@@ -860,6 +860,8 @@ static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_in
 			}
 		}
 		return 1;
+	} else if (info->allow_null && Z_TYPE_P(property) == IS_NULL) {
+		return 1;
 	} else if (EXPECTED(info->type == IS_CALLABLE)) {
 		if (Z_TYPE_P(property) == IS_OBJECT) {
 			return instanceof_function(zend_ce_closure, Z_OBJCE_P(property));

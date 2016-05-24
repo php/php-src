@@ -711,20 +711,24 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
 				if (parent_info->type == IS_OBJECT) {
 					if (child_info->type != IS_OBJECT ||
+					    child_info->allow_null != parent_info->allow_null ||
 						!zend_string_equals_ci(zend_resolve_property_type(parent_info->type_name, parent_info->ce),
 											   zend_resolve_property_type(child_info->type_name, child_info->ce))) {
 						zend_error_noreturn(E_COMPILE_ERROR,
-						"Type of %s::$%s must be %s (as in class %s)",
+						"Type of %s::$%s must be %s%s (as in class %s)",
 							ZSTR_VAL(ce->name),
 							ZSTR_VAL(key),
+							parent_info->allow_null ? "?" : "",
 							ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
 							ZSTR_VAL(ce->parent->name));
 					}
-				} else if (parent_info->type != child_info->type) {
+				} else if (parent_info->type != child_info->type ||
+				           parent_info->allow_null != child_info->allow_null) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Type of %s::$%s must be %s (as in class %s)",
+						"Type of %s::$%s must be %s%s (as in class %s)",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(key),
+						parent_info->allow_null ? "?" : "",
 						zend_get_type_by_const(parent_info->type),
 						ZSTR_VAL(ce->parent->name));
 				}
@@ -740,16 +744,18 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
 			if (parent_info->type == IS_OBJECT) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s (as in class %s)",
+					"Type of %s::$%s must be %s%s (as in class %s)",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(key),
+					parent_info->allow_null ? "?" : "",
 					ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
 					ZSTR_VAL(ce->parent->name));
 			} else {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s (as in class %s)",
+					"Type of %s::$%s must be %s%s (as in class %s)",
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(key),
+					parent_info->allow_null ? "?" : "",
 					zend_get_type_by_const(parent_info->type),
 					ZSTR_VAL(ce->parent->name));
 			}
@@ -1675,7 +1681,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 				if (Z_TYPE_P(prop_value) == IS_NULL) {
 					ZVAL_UNDEF(prop_value);
 				}
-				zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type, property_info->type_name);
+				zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type, property_info->type_name, property_info->allow_null);
 			} else {
 				zend_declare_property_ex(ce, prop_name, prop_value, flags, doc_comment);
 			}

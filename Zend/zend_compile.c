@@ -5500,6 +5500,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 		zend_string *doc_comment = NULL;
 		zval value_zv;
 		zend_uchar optional_type = 0;
+		zend_bool allow_null = 0;
 		zend_string *optional_type_name = NULL;
 
 		if (type_ast) {
@@ -5516,6 +5517,10 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 				zend_string *class_name = zend_ast_get_str(type_ast);
 				zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
 
+				if (type_ast->attr & ZEND_TYPE_NULLABLE) {
+					allow_null = 1;
+					type_ast->attr &= ~ZEND_TYPE_NULLABLE;
+				}
 				if (type != 0) {
 					if (type_ast->attr != ZEND_NAME_NOT_FQ) {
 						zend_error_noreturn(E_COMPILE_ERROR,
@@ -5568,7 +5573,9 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
 			if (optional_type && !Z_CONSTANT(value_zv)) {
-				if (optional_type == IS_ARRAY) {
+			    if (allow_null && Z_TYPE(value_zv) == IS_NULL) {
+					/* pass */
+				} else if (optional_type == IS_ARRAY) {
 					if (Z_TYPE(value_zv) != IS_ARRAY) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 							"Default value for properties with array type can only be an array");
@@ -5594,7 +5601,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 
 		name = zend_new_interned_string_safe(name);
 		if (optional_type) {
-			zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, optional_type, optional_type_name);
+			zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, optional_type, optional_type_name, allow_null);
 		} else {
 			zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment);
 		}

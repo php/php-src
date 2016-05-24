@@ -74,8 +74,9 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 
 	if (Z_TYPE_P(zv) == IS_UNDEF) {
 		if (prop_info->type) {
-			php_printf("%*cuninitialized(%s)\n",
+			php_printf("%*cuninitialized(%s%s)\n",
 				level + 1, ' ',
+				prop_info->allow_null ? "?" : "",
 				(prop_info->type == IS_OBJECT) ?
 					ZSTR_VAL(prop_info->type_name) :
 					zend_get_type_by_const(prop_info->type));
@@ -269,8 +270,9 @@ static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, z
 	}
 	if (prop_info && Z_TYPE_P(zv) == IS_UNDEF) {
 		if (prop_info->type) {
-			php_printf("%*cuninitialized(%s)\n",
+			php_printf("%*cuninitialized(%s%s)\n",
 				level + 1, ' ',
+				prop_info->allow_null ? "?" : "",
 				(prop_info->type == IS_OBJECT) ?
 					ZSTR_VAL(prop_info->type_name) :
 					zend_get_type_by_const(prop_info->type));
