@@ -1,7 +1,5 @@
 --TEST--
 Bug #72213 (Finally leaks on nested exceptions)
---XFAIL--
-See https://bugs.php.net/bug.php?id=72213
 --FILE--
 <?php
 function test() {
