@@ -815,11 +815,19 @@ static zend_always_inline zval* i_zend_verify_property_type(zend_property_info *
     if (EXPECTED(info->type == Z_TYPE_P(property))) {
 		if (info->type_name) {
 			if (!info->type_ce) {
-				zend_string *resolved = zend_resolve_property_type(info->type_name, info->ce);
-
-				info->type_ce = zend_lookup_class(resolved);
-				if (!info->type_ce) {
-					return NULL;
+				if (zend_string_equals_literal_ci(info->type_name, "self")) {
+					info->type_ce = info->ce;
+				} else if (zend_string_equals_literal_ci(info->type_name, "parent")) {
+					if (UNEXPECTED(!info->ce->parent)) {
+						zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
+						return NULL;
+					}
+					info->type_ce = info->ce->parent;
+				} else {
+					info->type_ce = zend_lookup_class(info->type_name);
+					if (!info->type_ce) {
+						return NULL;
+					}
 				}
 			}
 
