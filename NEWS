@@ -54,6 +54,12 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed bug #72157 (use-after-free caused by dba_open). (Shm, Laruence)
 
+- GD:
+  . Fixed bug #72227 (imagescale out-of-bounds read). (Stas)
+
+- Intl:
+  . Fixed #72241 (get_icu_value_internal out-of-bounds read). (Stas)
+
 - JSON:
   . Fixed bug #72069 (Behavior \JsonSerializable different from json_encode).
     (Laruence)
