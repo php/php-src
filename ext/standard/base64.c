@@ -136,7 +136,7 @@ PHPAPI zend_string *php_base64_decode(const unsigned char *str, size_t length) /
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
-	int ch, i = 0, j = 0;
+	int ch, i = 0, j = 0, padding = 0;
 	zend_string *result;
 
 	result = zend_string_alloc(length, 0);
@@ -155,26 +155,26 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 				zend_string_free(result);
 				return NULL;
 			}
-			if (length > 0 && *current != '=' && strict) {
-				while (length > 0 && isspace(*current)) {
-					current++;
-					length--;
-				}
-				if (length == 0 || *current == '\0') {
-					continue;
-				}
-				zend_string_free(result);
-				return NULL;
-			}
+			padding++;
 			continue;
 		}
 
 		ch = base64_reverse_table[ch];
-		if ((!strict && ch < 0) || ch == -1) { /* a space or some other separator character, we simply skip over */
-			continue;
-		} else if (ch == -2) {
-			zend_string_free(result);
-			return NULL;
+		if (!strict) {
+			/* skip unknown characters and whitespace */
+			if (ch < 0) {
+				continue;
+			}
+		} else {
+			/* skip whitespace */
+			if (ch == -1) {
+				continue;
+			}
+			/* fail on bad characters or if any data follows padding */
+			if (ch == -2 || padding) {
+				zend_string_free(result);
+				return NULL;
+			}
 		}
 
 		switch(i % 4) {
