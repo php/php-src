@@ -21,13 +21,17 @@ try {
 	echo $e->getMessage() . "\n";
 }
 
-try {
-	$o = new B();
-	var_dump($o->foo);
-} catch (Throwable $e) {
-	echo $e->getMessage() . "\n";
+for ($i = 0; $i < 2; $i++) {
+	try {
+		$o = new B();
+		var_dump($o->foo);
+	} catch (Throwable $e) {
+		echo $e->getMessage() . "\n";
+	}
 }
 ?>
 --EXPECT--
 int(5)
 Typed property B::$foo must be string, integer used
+Typed property B::$foo must be string, integer used
+
