@@ -1061,6 +1061,9 @@ tail_call:
 			zend_ast_export_ex(str, decl->child[1], 0, indent);
 			if (decl->child[3]) {
 				smart_str_appends(str, ": ");
+				if (decl->child[3]->attr & ZEND_TYPE_NULLABLE) {
+					smart_str_appendc(str, '?');
+				}
 				zend_ast_export_ns_name(str, decl->child[3], 0, indent);
 			}
 			if (decl->child[2]) {
@@ -1146,6 +1149,9 @@ simple_list:
 			}
 
 			if (type_ast) {
+				if (type_ast->attr & ZEND_TYPE_NULLABLE) {
+					smart_str_appendc(str, '?');
+				}
 				zend_ast_export_name(
 					str, type_ast, 0, indent);
 				smart_str_appendc(str, ' ');
@@ -1610,6 +1616,9 @@ simple_list:
 			break;
 		case ZEND_AST_PARAM:
 			if (ast->child[0]) {
+				if (ast->child[0]->attr & ZEND_TYPE_NULLABLE) {
+					smart_str_appendc(str, '?');
+				}
 				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 				smart_str_appendc(str, ' ');
 			}
