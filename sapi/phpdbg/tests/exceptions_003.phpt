@@ -25,7 +25,7 @@ prompt> [L7 %s ECHO                    "ok "                                    
  00008: 	}
  00009: } catch (Error $e) {
 prompt> ok
-[L7 %s FAST_RET<TO_CATCH>      ~%d                   try-catch(0)                             %s]
+[L7 %s FAST_RET                ~%d                   try-catch(0)                             %s]
 [L9 %s CATCH                   "Error"              $e                   1                    %s]
 >00005: 		x();
  00006: 	} finally {

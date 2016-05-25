@@ -491,12 +491,16 @@ ZEND_FUNCTION(func_num_args)
 {
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (!(ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
-		RETURN_LONG(ZEND_CALL_NUM_ARGS(ex));
-	} else {
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
 		RETURN_LONG(-1);
 	}
+
+	if (zend_forbid_dynamic_call("func_num_args()") == FAILURE) {
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(ZEND_CALL_NUM_ARGS(ex));
 }
 /* }}} */
 
@@ -521,6 +525,10 @@ ZEND_FUNCTION(func_get_arg)
 	ex = EX(prev_execute_data);
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
+		RETURN_FALSE;
+	}
+
+	if (zend_forbid_dynamic_call("func_get_arg()") == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -555,6 +563,10 @@ ZEND_FUNCTION(func_get_args)
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
+		RETURN_FALSE;
+	}
+
+	if (zend_forbid_dynamic_call("func_get_args()") == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2024,8 +2036,12 @@ ZEND_FUNCTION(get_defined_functions)
    Returns an associative array of names and values of all currently defined variable names (variables in the current scope) */
 ZEND_FUNCTION(get_defined_vars)
 {
-	zend_array *symbol_table = zend_rebuild_symbol_table();
+	zend_array *symbol_table;
+	if (zend_forbid_dynamic_call("get_defined_vars()") == FAILURE) {
+		return;
+	}
 
+	symbol_table = zend_rebuild_symbol_table();
 	if (UNEXPECTED(symbol_table == NULL)) {
 		return;
 	}
