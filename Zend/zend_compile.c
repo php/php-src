@@ -2693,7 +2693,7 @@ void zend_compile_prop(znode *result, zend_ast *ast, uint32_t type, int by_ref) 
 	zend_op *opline = zend_compile_prop_common(result, ast, type);
 	zend_adjust_for_fetch_type(opline, type);
 	if (by_ref) {
-		opline->extended_value = 1;
+		opline->extended_value |= ZEND_FETCH_REF;
 	}
 }
 /* }}} */
@@ -3137,7 +3137,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 				}
 			} else {
 				zend_compile_var(&arg_node, arg,
-					BP_VAR_FUNC_ARG | (arg_num << BP_VAR_SHIFT), 0);
+					BP_VAR_FUNC_ARG | (arg_num << BP_VAR_SHIFT), 1);
 				opcode = ZEND_SEND_VAR_EX;
 			}
 		} else {
@@ -3515,7 +3515,7 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		zend_bool send_user = 0;
 
 		if (zend_is_variable(arg_ast) && !zend_is_call(arg_ast)) {
-			zend_compile_var(&arg_node, arg_ast, BP_VAR_FUNC_ARG | (i << BP_VAR_SHIFT), 0);
+			zend_compile_var(&arg_node, arg_ast, BP_VAR_FUNC_ARG | (i << BP_VAR_SHIFT), 1);
 			send_user = 1;
 		} else {
 			zend_compile_expr(&arg_node, arg_ast);
@@ -7978,7 +7978,7 @@ void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, int b
 			opline = zend_delayed_compile_prop(result, ast, type);
 			zend_adjust_for_fetch_type(opline, type);
 			if (by_ref) {
-				opline->extended_value = 1;
+				opline->extended_value |= ZEND_FETCH_REF;
 			}
 			return;
 		case ZEND_AST_STATIC_PROP:

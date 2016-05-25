@@ -2046,7 +2046,7 @@ ZEND_API void zend_fetch_dimension_by_zval_is(zval *result, zval *container, zva
 }
 
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, int by_ref)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t by_ref)
 {
 	zval *ptr;
 
@@ -2087,7 +2087,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			if (EXPECTED(Z_TYPE_P(ptr) != IS_UNDEF)) {
 return_indirect:
 				ZVAL_INDIRECT(result, ptr);
-				if (by_ref
+				if ((by_ref & ZEND_FETCH_REF)
 				 && (prop_op_type == IS_CONST
 				  || EXPECTED(Z_TYPE_P(prop_ptr) == IS_STRING))) {
 					zend_property_info *prop_info;

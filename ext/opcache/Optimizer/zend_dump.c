@@ -555,6 +555,11 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (ref)");
 			}
 		}
+		if (ZEND_VM_EXT_FETCH_REF & flags) {
+			if (opline->extended_value & ZEND_FETCH_REF) {
+				fprintf(stderr, " (ref)");
+			}
+		}
 	}
 
 	if (opline->op1_type == IS_CONST) {
