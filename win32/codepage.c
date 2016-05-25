@@ -137,13 +137,16 @@ PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size
 
 		} while (i < in_len);
 		ret[in_len] = L'\0';
-	}
 
-	assert(ret ? wcslen(ret) == in_len : 1);
-	assert(ret ? ret[in_len] == L'\0' : 1);
+		assert(ret ? wcslen(ret) == in_len : 1);
 
-	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
-		*out_len = in_len;
+		if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
+			*out_len = in_len;
+		}
+	} else {
+		if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
+			*out_len = 0;
+		}
 	}
 
 	return ret;
