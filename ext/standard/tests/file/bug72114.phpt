@@ -1,5 +1,7 @@
 --TEST--
 Bug #72114 (Integer underflow / arbitrary null write in fread/gzread)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 ini_set('memory_limit', "2500M");
