@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-12 May 2016 PHP 7.0.7RC1
+26 May 2016 PHP 7.0.7R
 
 - Core:
   . Fixed bug #72162 (use-after-free - error_reporting). (Laruence)
@@ -26,6 +26,12 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed bug #72069 (Behavior \JsonSerializable different from json_encode).
     (Laruence)
+
+- GD:
+  . Fixed bug #72227 (imagescale out-of-bounds read). (Stas)
+
+- Intl:
+  . Fixed #72241 (get_icu_value_internal out-of-bounds read). (Stas)
 
 - Mbstring:
   . Fixed bug #72164 (Null Pointer Dereference - mb_ereg_replace). (Laruence)
