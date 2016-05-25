@@ -5598,9 +5598,9 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 							"Default value for properties with array type can only be an array");
 					}
 				} else if (optional_type == IS_CALLABLE) {
-					if (Z_TYPE(value_zv) != IS_ARRAY) {
+					if (Z_TYPE(value_zv) != IS_STRING && Z_TYPE(value_zv) != IS_ARRAY) {
 						zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for properties with callable type can only be an array");
+							"Default value for properties with callable type can only be a string or an array");
 					}
 				} else if (optional_type == IS_OBJECT) {
 					zend_error_noreturn(E_COMPILE_ERROR,
