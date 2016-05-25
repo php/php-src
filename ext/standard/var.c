@@ -178,7 +178,7 @@ again:
 					}
 
 					if (key) {
-						prop_info = zend_object_fetch_property_type_info_ex(struc, key, NULL);
+						prop_info = zend_object_fetch_property_type_info(struc, key, NULL);
 					}
 
 					if (!Z_ISUNDEF_P(val) || prop_info) {
@@ -369,7 +369,7 @@ again:
 				}
 
 				if (key) {
-					prop_info = zend_object_fetch_property_type_info_ex(struc, key, NULL);
+					prop_info = zend_object_fetch_property_type_info(struc, key, NULL);
 				}
 
 				if (!Z_ISUNDEF_P(val) || prop_info) {

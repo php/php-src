@@ -366,7 +366,8 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 
-static zend_always_inline zend_property_info* zend_object_fetch_property_type_info_ex(zval *object, zend_string *property, void **cache_slot) {
+static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zval *object, zend_string *property, void **cache_slot)
+{
 	zend_property_info *info;
 
 	/* if we have a cache_slot, let's assume it's valid. Callers task to ensure validity! */
@@ -385,19 +386,6 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 	}
 
 	return NULL;
-}
-
-static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zval *object, zval *property, void **cache_slot)
-{
-	if (EXPECTED(cache_slot)) {
-		return (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-	}
-
-	if (UNEXPECTED(Z_TYPE_P(property) != IS_STRING)) {
-		return NULL;
-	}
-
-	return zend_object_fetch_property_type_info_ex(object, Z_STR_P(property), cache_slot);
 }
 
 zval* zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict);
