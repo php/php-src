@@ -366,26 +366,6 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 
-static zend_always_inline zend_bool _zend_object_has_type_hints(zval *object) {
-	do {
-		if (Z_TYPE_P(object) != IS_OBJECT) {
-			if (Z_ISREF_P(object)) {
-				object = Z_REFVAL_P(object);
-				if (Z_TYPE_P(object) != IS_OBJECT)
-					break;
-			} else {
-				break;
-			}
-		}
-
-		return ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object));
-	} while (0);
-
-	return 0;
-}
-
-#define ZEND_OBJECT_HAS_TYPE_HINTS(object) _zend_object_has_type_hints(object)
-
 static zend_always_inline zend_property_info* zend_object_fetch_property_type_info_ex(zval *object, zend_string *property, void **cache_slot) {
 	zend_property_info *info;
 
