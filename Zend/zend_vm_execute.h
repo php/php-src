@@ -3561,6 +3561,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(array_ptr)))) {
+fe_reset_rw_typed:
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -3612,16 +3613,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, 0,
-					"Typed properties exist in %s: foreach by reference is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
-				if (IS_CONST == IS_VAR) {
-
-				} else {
-
-				}
-				HANDLE_EXCEPTION();
+				goto fe_reset_rw_typed;
 			}
 
 			iter = ce->get_iterator(ce, array_ptr, 1);
@@ -12685,6 +12677,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(array_ptr)))) {
+fe_reset_rw_typed:
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -12736,16 +12729,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, 0,
-					"Typed properties exist in %s: foreach by reference is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
-				if (IS_TMP_VAR == IS_VAR) {
-
-				} else {
-					zval_ptr_dtor_nogc(free_op1);
-				}
-				HANDLE_EXCEPTION();
+				goto fe_reset_rw_typed;
 			}
 
 			iter = ce->get_iterator(ce, array_ptr, 1);
@@ -16233,6 +16217,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(array_ptr)))) {
+fe_reset_rw_typed:
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -16285,16 +16270,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, 0,
-					"Typed properties exist in %s: foreach by reference is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
-				if (IS_VAR == IS_VAR) {
-					if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-				} else {
-					zval_ptr_dtor_nogc(free_op1);
-				}
-				HANDLE_EXCEPTION();
+				goto fe_reset_rw_typed;
 			}
 
 			iter = ce->get_iterator(ce, array_ptr, 1);
@@ -38687,6 +38663,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(array_ptr)))) {
+fe_reset_rw_typed:
 			zend_throw_exception_ex(
 				zend_ce_type_error, 0,
 				"Typed properties exist in %s: foreach by reference is disallowed",
@@ -38738,16 +38715,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			zend_bool is_empty;
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-				zend_throw_exception_ex(
-					zend_ce_type_error, 0,
-					"Typed properties exist in %s: foreach by reference is disallowed",
-					ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
-				if (IS_CV == IS_VAR) {
-
-				} else {
-
-				}
-				HANDLE_EXCEPTION();
+				goto fe_reset_rw_typed;
 			}
 
 			iter = ce->get_iterator(ce, array_ptr, 1);
