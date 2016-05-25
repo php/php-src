@@ -41,8 +41,8 @@
 	downscaling using the fixed point implementations are usually much faster
 	than the existing gdImageCopyResampled while having a similar or better
 	quality.
-	
-	For image rotations, the optimized versions have a lazy antialiasing for 
+
+	For image rotations, the optimized versions have a lazy antialiasing for
 	the edges of the images. For a much better antialiased result, the affine
 	function is recommended.
 */
@@ -635,7 +635,7 @@ static inline int _color_blend (const int dst, const int src)
 	}
 }
 
-static inline int _setEdgePixel(const gdImagePtr src, unsigned int x, unsigned int y, gdFixed coverage, const int bgColor) 
+static inline int _setEdgePixel(const gdImagePtr src, unsigned int x, unsigned int y, gdFixed coverage, const int bgColor)
 {
 	const gdFixed f_127 = gd_itofx(127);
 	register int c = src->tpixels[y][x];
@@ -932,9 +932,6 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
         double dTotalWeight = 0.0;
 		int iSrc;
 
-        res->ContribRow[u].Left = iLeft;
-        res->ContribRow[u].Right = iRight;
-
         /* Cut edge points to fit in filter window in case of spill-off */
         if (iRight - iLeft + 1 > windows_size)  {
             if (iLeft < ((int)src_size - 1 / 2))  {
@@ -943,6 +940,9 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
                 iRight--;
             }
         }
+
+        res->ContribRow[u].Left = iLeft;
+        res->ContribRow[u].Right = iRight;
 
         for (iSrc = iLeft; iSrc <= iRight; iSrc++) {
             dTotalWeight += (res->ContribRow[u].Weights[iSrc-iLeft] =  scale_f_d * (*pFilter)(scale_f_d * (dCenter - (double)iSrc)));
@@ -1096,7 +1096,7 @@ gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsig
 	_gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
 	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
 
-	gdFree(tmp_im);
+	gdImageDestroy(tmp_im);
 	return dst;
 }
 
@@ -2284,7 +2284,7 @@ int gdTransformAffineGetImage(gdImagePtr *dst,
 	if (!src->trueColor) {
 		gdImagePaletteToTrueColor(src);
 	}
-	
+
 	/* Translate to dst origin (0,0) */
 	gdAffineTranslate(m, -bbox.x, -bbox.y);
 	gdAffineConcat(m, affine, m);
@@ -2343,7 +2343,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
 	if (src->interpolation_id == GD_BILINEAR_FIXED || src->interpolation_id == GD_BICUBIC_FIXED || src->interpolation_id == GD_NEAREST_NEIGHBOUR) {
 		interpolation_id_bak = src->interpolation_id;
 		interpolation_bak = src->interpolation;
-		
+
 		gdImageSetInterpolationMethod(src, GD_BICUBIC);
 	}
 
