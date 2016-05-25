@@ -1195,13 +1195,17 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 				zval *slot = OBJ_PROP(object, property_info->offset);
 
 				if (UNEXPECTED(property_info->type)) {
-					if (UNEXPECTED(!zend_verify_property_type(property_info, prop, 0))) {
+					zval tmp, *val;
+
+					val = zend_verify_property_type(property_info, prop, &tmp, 0);
+					if (UNEXPECTED(!val)) {
 						zend_verify_property_type_error(property_info, key, prop);
 						continue;
 					}
+					ZVAL_COPY_VALUE(slot, val);
+				} else {
+					ZVAL_COPY_VALUE(slot, prop);
 				}
-
-				ZVAL_COPY_VALUE(slot, prop);
 				ZVAL_INDIRECT(prop, slot);
 			}
 		} ZEND_HASH_FOREACH_END();

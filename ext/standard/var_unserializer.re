@@ -308,7 +308,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_class_entry *ce)
 {
 	while (elements-- > 0) {
-		zval key, *data, d, *old_data;
+		zval key, *data, d, *old_data, tmp;
 		zend_ulong idx;
 		zend_property_info *info = NULL;
 
@@ -403,7 +403,8 @@ string_key:
 		}
 
 		if (UNEXPECTED(info)) {
-			if (UNEXPECTED(!zend_verify_property_type(info, data, 1))) {
+			data = zend_verify_property_type(info, data, &tmp, 1);
+			if (UNEXPECTED(!data)) {
 				zval_dtor(&key);
 				return 0;
 			}

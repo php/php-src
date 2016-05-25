@@ -2243,9 +2243,11 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 			property = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property) != IS_UNDEF) {
 				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+				zval tmp, *val;
 
 				if (UNEXPECTED(prop_info != NULL)) {
-					if (UNEXPECTED(!i_zend_verify_property_type(prop_info, value, EX_USES_STRICT_TYPES()))) {
+					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(!val)) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
 						FREE_OP_DATA();
 						FREE_OP2();
@@ -2253,9 +2255,10 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 						HANDLE_EXCEPTION();
 					}
 					/* will remain valid, thus no need to check prop_info in future here */
-					if (OP_DATA_TYPE == IS_CONST) {
+					if (OP_DATA_TYPE == IS_CONST && val == value) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
+					value = val;
 				}
 
 ZEND_VM_C_LABEL(fast_assign_obj):

@@ -705,7 +705,7 @@ static int is_null_constant(zend_class_entry *scope, zval *default_value)
 	return 0;
 }
 
-static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg)
+static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg, zval *ret)
 {
 	switch (type_hint) {
 		case _IS_BOOL: {
@@ -715,7 +715,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 				return 0;
 			}
 			zval_ptr_dtor(arg);
-			ZVAL_BOOL(arg, dest);
+			ZVAL_BOOL(ret, dest);
 			return 1;
 		}
 		case IS_LONG: {
@@ -725,7 +725,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 				return 0;
 			}
 			zval_ptr_dtor(arg);
-			ZVAL_LONG(arg, dest);
+			ZVAL_LONG(ret, dest);
 			return 1;
 		}
 		case IS_DOUBLE: {
@@ -735,14 +735,24 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 				return 0;
 			}
 			zval_ptr_dtor(arg);
-			ZVAL_DOUBLE(arg, dest);
+			ZVAL_DOUBLE(ret, dest);
 			return 1;
 		}
 		case IS_STRING: {
 			zend_string *dest;
 
+			if (arg != ret) {
+				ZVAL_COPY(ret, arg);
+				/* on success "arg" is converted to IS_STRING */
+				if (!zend_parse_arg_str_weak(ret, &dest)) {
+					zval_ptr_dtor(ret);
+					return 0;
+				}
+				zval_ptr_dtor(arg);
+				return 1;
+			}
 			/* on success "arg" is converted to IS_STRING */
-			if (!zend_parse_arg_str_weak(arg, &dest)) {
+			if (!zend_parse_arg_str_weak(ret, &dest)) {
 				return 0;
 			}
 			return 1;
@@ -752,7 +762,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 	}
 }
 
-static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict)
+static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zval *ret, zend_bool strict)
 {
 	if (UNEXPECTED(strict)) {
 		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
@@ -763,7 +773,7 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 		/* NULL may be accepted only by nullable hints (this is already checked) */
 		return 0;
 	}
-	return zend_verify_weak_scalar_type_hint(type_hint, arg);
+	return zend_verify_weak_scalar_type_hint(type_hint, arg, ret);
 }
 
 static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
@@ -803,7 +813,7 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 			} else if (cur_arg_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 				/* pass */
-			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, arg, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "");
 				return 0;
 			}
@@ -842,7 +852,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	}
 }
 
-static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+static zend_always_inline zval* i_zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict)
 {
     if (EXPECTED(info->type == Z_TYPE_P(property))) {
 		if (info->type_name) {
@@ -851,34 +861,37 @@ static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_in
 			if (!info->type_ce) {
 				info->type_ce = zend_lookup_class(resolved);
 				if (!info->type_ce) {
-					return 0;
+					return NULL;
 				}
 			}
 
 			if (!instanceof_function(Z_OBJCE_P(property), info->type_ce)) {
-				return 0;
+				return NULL;
 			}
 		}
-		return 1;
+		return property;
 	} else if (info->allow_null && Z_TYPE_P(property) == IS_NULL) {
-		return 1;
+		return property;
 	} else if (EXPECTED(info->type == IS_CALLABLE)) {
 		if (Z_TYPE_P(property) == IS_OBJECT) {
-			return instanceof_function(zend_ce_closure, Z_OBJCE_P(property));
+			return instanceof_function(zend_ce_closure, Z_OBJCE_P(property)) ?
+				property : NULL;
 		} else {
-			return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL);
+			return zend_is_callable(property, IS_CALLABLE_CHECK_SILENT, NULL) ?
+				property : NULL;
 		}
 	} else if (info->type == _IS_BOOL &&
           EXPECTED(Z_TYPE_P(property) == IS_FALSE || Z_TYPE_P(property) == IS_TRUE)) {
-		return 1;
+		return property;
 	} else {
-		return zend_verify_scalar_type_hint(info->type, property, strict);
+		return zend_verify_scalar_type_hint(info->type, property, tmp, strict) ?
+			tmp : NULL;
 	}
 }
 
-zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+zval* zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict)
 {
-	return i_zend_verify_property_type(info, property, strict);
+	return i_zend_verify_property_type(info, property, tmp, strict);
 }
 
 static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
@@ -963,7 +976,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 			} else if (cur_arg_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 				/* pass */
-			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, ZEND_ARG_USES_STRICT_TYPES()))) {
+			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, arg, ZEND_ARG_USES_STRICT_TYPES()))) {
 				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "");
 				return 0;
 			}
@@ -1180,7 +1193,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 			 * that bans `return ...;` within a void function. Thus we can skip
 			 * this part of the runtime check for non-internal functions.
 			 */
-			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(ret_info->type_hint, ret, ZEND_RET_USES_STRICT_TYPES()))) {
+			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(ret_info->type_hint, ret, ret, ZEND_RET_USES_STRICT_TYPES()))) {
 				zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
 			}
 		}
