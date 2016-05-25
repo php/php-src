@@ -234,6 +234,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).backpatch_count = 0;
 	CG(context).in_finally = 0;
 	CG(context).fast_call_var = -1;
+	CG(context).try_catch_offset = -1;
 	CG(context).current_brk_cont = -1;
 	CG(context).last_brk_cont = 0;
 	CG(context).brk_cont_array = NULL;
@@ -4008,6 +4009,12 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 			SET_UNUSED(opline->op1);
 			SET_UNUSED(opline->op2);
 			opline->op1.num = loop_var->u.try_catch_offset;
+		} else if (loop_var->opcode == ZEND_DISCARD_EXCEPTION) {
+			zend_op *opline = get_next_op(CG(active_op_array));
+			opline->opcode = ZEND_DISCARD_EXCEPTION;
+			opline->op1_type = IS_TMP_VAR;
+			opline->op1.var = loop_var->var_num;
+			SET_UNUSED(opline->op2);
 		} else if (loop_var->opcode == ZEND_RETURN) {
 			/* Stack separator */
 			break;
@@ -4055,12 +4062,6 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
-	}
-
-	if (CG(context).in_finally) {
-		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);
-		opline->op1_type = IS_TMP_VAR;
-		opline->op1.var = CG(context).fast_call_var;
 	}
 
 	/* Generator return types are handled separately */
@@ -4573,6 +4574,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	uint32_t try_catch_offset;
 	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), catches->children, 0);
 	uint32_t orig_fast_call_var = CG(context).fast_call_var;
+	uint32_t orig_try_catch_offset = CG(context).try_catch_offset;
 
 	if (catches->children == 0 && !finally_ast) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use try without catch or finally");
@@ -4605,6 +4607,8 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		fast_call.u.try_catch_offset = try_catch_offset;
 		zend_stack_push(&CG(loop_var_stack), &fast_call);
 	}
+
+	CG(context).try_catch_offset = try_catch_offset;
 
 	zend_compile_stmt(try_ast);
 
@@ -4679,10 +4683,17 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 	}
 
 	if (finally_ast) {
+		zend_loop_var discard_exception;
 		uint32_t opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;
 		
 		/* Pop FAST_CALL from unwind stack */
 		zend_stack_del_top(&CG(loop_var_stack));
+
+		/* Push DISCARD_EXCEPTION on unwind stack */
+		discard_exception.opcode = ZEND_DISCARD_EXCEPTION;
+		discard_exception.var_type = IS_TMP_VAR;
+		discard_exception.var_num = CG(context).fast_call_var;
+		zend_stack_push(&CG(loop_var_stack), &discard_exception);
 
 		CG(zend_lineno) = finally_ast->lineno;
 
@@ -4704,11 +4715,17 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		opline = zend_emit_op(NULL, ZEND_FAST_RET, NULL, NULL);
 		opline->op1_type = IS_TMP_VAR;
 		opline->op1.var = CG(context).fast_call_var;
+		opline->op2.num = orig_try_catch_offset;
 
 		zend_update_jump_target_to_next(opnum_jmp);
 
 		CG(context).fast_call_var = orig_fast_call_var;
+
+		/* Pop DISCARD_EXCEPTION from unwind stack */
+		zend_stack_del_top(&CG(loop_var_stack));
 	}
+
+	CG(context).try_catch_offset = orig_try_catch_offset;
 
 	efree(jmp_opnums);
 }

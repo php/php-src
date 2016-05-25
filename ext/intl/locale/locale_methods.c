@@ -335,6 +335,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 		if( U_FAILURE( status ) ) {
 			if( status == U_BUFFER_OVERFLOW_ERROR ) {
 				status = U_ZERO_ERROR;
+				buflen++; /* add space for \0 */
 				continue;
 			}
 

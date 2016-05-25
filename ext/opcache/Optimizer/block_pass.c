@@ -898,9 +898,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				zend_op *opline = new_opcodes;
 				zend_op *end = opline + len;
 				while (opline < end) {
-					if ((opline->opcode == ZEND_FAST_CALL ||
-					     opline->opcode == ZEND_FAST_RET) &&
-					    opline->extended_value &&
+					if (opline->opcode == ZEND_FAST_RET &&
+					    opline->op2.num != (uint32_t)-1 &&
 					    opline->op2.num < (uint32_t)j) {
 						opline->op2.num = map[opline->op2.num];
 					}
