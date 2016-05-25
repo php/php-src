@@ -1147,6 +1147,17 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 							if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
 								return FAILURE;
 							}
+							if (prop_info->type) {
+								zval tmp, *v;
+
+								v = zend_verify_property_type(prop_info, val, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
+								if (UNEXPECTED(!v)) {
+									zend_verify_property_type_error(prop_info, prop_info->name, val);
+									return FAILURE;
+								} else if (val != v) {
+									ZVAL_COPY_VALUE(val, v);
+								}
+							}
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
