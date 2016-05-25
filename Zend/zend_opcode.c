@@ -282,6 +282,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (prop_info->doc_comment) {
 						zend_string_release(prop_info->doc_comment);
 					}
+					if (prop_info->type_name) {
+						zend_string_release(prop_info->type_name);
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
