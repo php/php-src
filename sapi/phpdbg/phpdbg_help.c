@@ -780,7 +780,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"run",
-"Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
+"Enter the vm, starting execution. Execution will then continue until the next breakpoint "
 "or completion of the script. Add parameters you want to use as $argv" CR CR
 
 "**Examples**" CR CR
