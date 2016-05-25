@@ -143,16 +143,19 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	result = zend_string_alloc(length, 0);
 
 	/* run through the whole string, converting as we go */
-	while ((ch = *current++) != '\0' && length-- > 0) {
+	while (length-- > 0 && (ch = *current++) != '\0') {
 		if (ch == base64_pad) {
-			if (*current != '=' && ((i % 4) == 1 || (strict && length > 0))) {
-				if ((i % 4) != 1) {
-					while (isspace(*(++current))) {
-						continue;
-					}
-					if (*current == '\0') {
-						continue;
-					}
+			if (i % 4 == 1) {
+				if (length == 0 || *current != '=') {
+					zend_string_free(result);
+					return NULL;
+				}
+			} else if (length > 0 && *current != '=' && strict) {
+				while (--length > 0 && isspace(*++current)) {
+					continue;
+				}
+				if (length == 0 || *current == '\0') {
+					continue;
 				}
 				zend_string_free(result);
 				return NULL;
