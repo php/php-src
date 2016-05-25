@@ -136,8 +136,7 @@ PHPAPI zend_string *php_base64_decode(const unsigned char *str, size_t length) /
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
-	int ch, i = 0, j = 0, k;
-	/* this sucks for threaded environments */
+	int ch, i = 0, j = 0;
 	zend_string *result;
 
 	result = zend_string_alloc(length, 0);
@@ -197,19 +196,6 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 		i++;
 	}
 
-	k = j;
-	/* mop things up if we ended on a boundary */
-	if (ch == base64_pad) {
-		switch(i % 4) {
-		case 1:
-			zend_string_free(result);
-			return NULL;
-		case 2:
-			k++;
-		case 3:
-			ZSTR_VAL(result)[k] = 0;
-		}
-	}
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
