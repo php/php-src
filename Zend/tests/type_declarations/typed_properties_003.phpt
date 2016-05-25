@@ -9,11 +9,7 @@ $thing = new class() {
 $var = &$thing->int;
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property class@anonymous::$int must not be accessed before initialization in %s:%d
-Stack trace:
-#0 {main}
-
-Next TypeError: Typed property class@anonymous::$int must not be referenced in %s:%d
+Fatal error: Uncaught TypeError: Typed property class@anonymous::$int must not be referenced in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
