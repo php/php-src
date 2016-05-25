@@ -157,8 +157,9 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 				return NULL;
 			}
 			if (length > 0 && *current != '=' && strict) {
-				while (--length > 0 && isspace(*++current)) {
-					continue;
+				while (length > 0 && isspace(*current)) {
+					current++;
+					length--;
 				}
 				if (length == 0 || *current == '\0') {
 					continue;
