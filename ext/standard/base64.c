@@ -143,7 +143,12 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	result = zend_string_alloc(length, 0);
 
 	/* run through the whole string, converting as we go */
-	while (length-- > 0 && (ch = *current++) != '\0') {
+	while (length-- > 0) {
+		ch = *current++;
+		/* stop on null byte in non-strict mode (FIXME: is this really desired?) */
+		if (ch == 0 && !strict) {
+			break;
+		}
 		if (ch == base64_pad) {
 			/* fail if the padding character is second in a group (like V===) */
 			/* FIXME: why do we still allow invalid padding in other places in the middle of the string? */
