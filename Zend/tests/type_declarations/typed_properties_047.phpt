@@ -48,13 +48,15 @@ try {
 	echo $e->getMessage()."\n";
 }
 ?>
---EXPECT--
-object(Foo)#1 (0) {
+--EXPECTF--
+object(Foo)#1 (1) {
   ["foo"]=>
-  uninitialized(?integer)
+  NULL
 }
-Typed property Foo::$foo must not be accessed before initialization
+NULL
 int(5)
 NULL
-Typed property Foo::$foo must not be accessed before initialization
+
+Notice: Undefined property: Foo::$foo in %styped_properties_047.php on line 38
+NULL
 Typed property Foo::$foo must be integer, string used

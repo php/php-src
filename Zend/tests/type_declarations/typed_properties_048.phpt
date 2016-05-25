@@ -48,7 +48,7 @@ try {
 	echo $e->getMessage()."\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 object(Foo)#1 (1) {
   ["foo"]=>
   NULL
@@ -56,5 +56,7 @@ object(Foo)#1 (1) {
 NULL
 int(5)
 NULL
-Typed property Foo::$foo must not be accessed before initialization
+
+Notice: Undefined property: Foo::$foo in %styped_properties_048.php on line 38
+NULL
 Typed property Foo::$foo must be integer, string used

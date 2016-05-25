@@ -694,7 +694,8 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		}
 	}
 	if ((type != BP_VAR_IS)) {
-		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot))) {
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot))
+		 && UNEXPECTED(!prop_info->allow_null)) {
 			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),

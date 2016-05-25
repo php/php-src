@@ -3638,7 +3638,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 		}
 	}
 
-	if (Z_ISUNDEF_P(property) && !optional_type) {
+	if (Z_ISUNDEF_P(property) && (!optional_type || allow_null)) {
 		ZVAL_NULL(property);
 	}
 
