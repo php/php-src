@@ -591,7 +591,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	zval tmp_member;
 	zval *retval;
 	uint32_t property_offset;
-	zend_property_info *prop_info = NULL;
+	zend_property_info *prop_info;
 
 	zobj = Z_OBJ_P(object);
 
@@ -734,24 +734,11 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 			if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
 				zend_property_info *prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), cache_slot);
-				zval val;
 
 				if (UNEXPECTED(prop_info)) {
-					ZVAL_COPY(&val, value);
-					if (!zend_verify_property_type(prop_info, &val, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(member), &val);
+					if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+						zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
 						goto exit;
-					}
-					if (UNEXPECTED(Z_TYPE(val) != Z_TYPE_P(value))) {
-						/* little hack to avoid checking prop_info or inlining zend_assign_to_variable multiple times */
-						if (UNEXPECTED(Z_REFCOUNTED(tmp_member))) {
-							zval_ptr_dtor(&tmp_member);
-						}
-
-						ZVAL_COPY_VALUE(&tmp_member, &val);
-						value = &val;
-					} else if (Z_OPT_REFCOUNTED_P(value)) {
-						Z_DELREF_P(value);
 					}
 				}
 found:
@@ -808,13 +795,10 @@ write_std_property:
 				Z_ADDREF_P(value);
 			}
 		}
-
 		if (EXPECTED(property_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			zend_property_info *prop_info;
-			zval val;
+
 			if (cache_slot ? UNEXPECTED(prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2)) : UNEXPECTED(prop_info = zend_object_fetch_property_type_info_ex(object, Z_STR_P(member), NULL))) {
-				ZVAL_COPY_VALUE(&val, value);
-				value = &val;
 				if (!zend_verify_property_type(prop_info, value, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
 					zval_ptr_dtor(value);
