@@ -769,6 +769,28 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_resolve_property_types(void) /* {{{ */
+{
+	zend_class_entry *ce;
+	zend_property_info *prop_info;
+
+	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
+		if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS)
+		 && UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
+
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+				if (prop_info->type == IS_OBJECT && prop_info->type_name) {
+					zend_class_entry *prop_ce =
+						zend_hash_find(CG(class_table), prop_info->type_name);
+
+					assert(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
+					prop_info->type_ce = prop_ce;
+				}
+			}ZEND_HASH_FOREACH_END();
+		}
+	} ZEND_HASH_FOREACH_END();
+} /* }}} */
+
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
  */
@@ -779,6 +801,8 @@ void zend_post_startup(void) /* {{{ */
 
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
+
+	zend_resolve_property_types();
 
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
@@ -804,6 +828,7 @@ void zend_post_startup(void) /* {{{ */
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
+	zend_resolve_property_types();
 	virtual_cwd_deactivate();
 #endif
 }
