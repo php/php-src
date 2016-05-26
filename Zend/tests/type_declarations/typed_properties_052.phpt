@@ -4,7 +4,7 @@ Class properties declared in eval() must not leak
 <?php
 
 eval(<<<'EOF'
-class A { 
+class A {
 	public A      $a1;
 	public \B     $b1;
 	public Foo\C  $c1;

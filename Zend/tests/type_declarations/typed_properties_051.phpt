@@ -3,7 +3,7 @@ Weak casts must not leak
 --FILE--
 <?php
 
-class A { 
+class A {
 	public string $a;
 }
 class B {

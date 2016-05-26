@@ -17963,7 +17963,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -18090,7 +18090,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -23187,7 +23187,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -23314,7 +23314,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -26512,7 +26512,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -26640,7 +26640,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -29494,7 +29494,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -29621,7 +29621,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -33359,7 +33359,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -33486,7 +33486,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -36108,7 +36108,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -36236,7 +36236,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -41386,7 +41386,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -41513,7 +41513,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -48796,7 +48796,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -48923,7 +48923,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -53194,7 +53194,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
@@ -53322,7 +53322,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {

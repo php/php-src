@@ -1222,7 +1222,7 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 						 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
 						 && UNEXPECTED(prop_info->type)) {
 						    zval tmp, *val;
-							
+
 							val = zend_verify_property_type(prop_info, zptr, &tmp, EX_USES_STRICT_TYPES());
 							if (UNEXPECTED(!val)) {
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
@@ -1231,12 +1231,12 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-				
+
 					if (OP2_TYPE == IS_CONST) {
 						prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 					} else {
@@ -1350,7 +1350,7 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 						 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
 						 && UNEXPECTED(prop_info->type)) {
 						    zval tmp, *val;
-							
+
 							val = zend_verify_property_type(prop_info, zptr, &tmp, EX_USES_STRICT_TYPES());
 							if (UNEXPECTED(!val)) {
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), zptr);
@@ -1359,7 +1359,7 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 								} else {
 									ZVAL_LONG(zptr, ZEND_LONG_MIN);
 								}
-	                    	}
+							}
 						}
 					}
 				} else {
