@@ -191,6 +191,7 @@ typedef struct _zend_oparray_context {
 	int        backpatch_count;
 	int        in_finally;
 	uint32_t   fast_call_var;
+	uint32_t   try_catch_offset;
 	int        current_brk_cont;
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
@@ -473,6 +474,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)
 #define ZEND_CALL_GENERATOR          (1 << 8)
+#define ZEND_CALL_DYNAMIC            (1 << 9)
 
 #define ZEND_CALL_INFO_SHIFT         16
 
@@ -839,6 +841,8 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
 
+#define ZEND_TYPE_NULLABLE (1<<8)
+
 /* var status for backpatching */
 #define BP_VAR_R			0
 #define BP_VAR_W			1
@@ -955,11 +959,6 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 
 #define ZEND_RETURNS_FUNCTION 1<<0
 #define ZEND_RETURNS_VALUE    1<<1
-
-#define ZEND_FAST_RET_TO_CATCH		1
-#define ZEND_FAST_RET_TO_FINALLY	2
-
-#define ZEND_FAST_CALL_FROM_FINALLY	1
 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)

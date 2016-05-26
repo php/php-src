@@ -90,8 +90,9 @@ static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
 {
 	zend_op *opcodes = op_array->opcodes;
 
-	while (opcodes[b->start].opcode == ZEND_NOP && b->start < b->end) {
+	while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP) {
 		b->start++;
+		b->len--;
 	}
 }
 
@@ -100,10 +101,13 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 	uint32_t i, j;
 
 	strip_leading_nops(op_array, b);
+	if (b->len == 0) {
+		return;
+	}
 
 	/* strip the inside NOPs */
 	i = j = b->start + 1;
-	while (i <= b->end) {
+	while (i < b->start + b->len) {
 		if (op_array->opcodes[i].opcode != ZEND_NOP) {
 			if (i != j) {
 				op_array->opcodes[j] = op_array->opcodes[i];
@@ -112,7 +116,7 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 		}
 		i++;
 	}
-	b->end = j - 1;
+	b->len = j - b->start;
 	while (j < i) {
 		MAKE_NOP(op_array->opcodes + j);
 		j++;
@@ -128,9 +132,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 	strip_leading_nops(op_array, block);
 
 	opline = op_array->opcodes + block->start;
-	end = op_array->opcodes + block->end + 1;
+	end = opline + block->len;
 	while (opline < end) {
-
 		/* Constant Propagation: strip X = QM_ASSIGN(const) */
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR)) &&
 		    opline->opcode != ZEND_FREE) {
@@ -769,34 +772,32 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	int n;
 
 	for (b = blocks; b < end; b++) {
+		if (b->len == 0) {
+			continue;
+		}
 		if (b->flags & ZEND_BB_REACHABLE) {
-			ZEND_ASSERT(b->start <= b->end);
-			opline = op_array->opcodes + b->end;
+			opline = op_array->opcodes + b->start + b->len - 1;
 			if (opline->opcode == ZEND_JMP) {
 				zend_basic_block *next = b + 1;
 
-				while (next < end && (!(next->flags & ZEND_BB_REACHABLE) || next->start > next->end)) {
+				while (next < end && !(next->flags & ZEND_BB_REACHABLE)) {
 					next++;
 				}
 				if (next < end && next == blocks + b->successors[0]) {
 					/* JMP to the next block - strip it */
 					MAKE_NOP(opline);
-					if (b->end == 0) {
-						b->start++;
-					} else {
-						b->end--;
-					}
+					b->len--;
 				}
-			} else if (b->start == b->end && opline->opcode == ZEND_NOP) {
+			} else if (b->len == 1 && opline->opcode == ZEND_NOP) {
 				/* skip empty block */
-				b->start++;
+				b->len--;
 			}
-			len += b->end - b->start + 1;
-		} else if (b->start <= b->end) {
+			len += b->len;
+		} else {
 			/* this block will not be used, delete all constants there */
-			zend_op *op;
-			zend_op *end = op_array->opcodes + b->end ;
-			for (op = op_array->opcodes + b->start; op <= end; op++) {
+			zend_op *op = op_array->opcodes + b->start;
+			zend_op *end = op + b->len;
+			for (; op < end; op++) {
 				if (ZEND_OP1_TYPE(op) == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(op));
 				}
@@ -813,16 +814,9 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	/* Copy code of reachable blocks into a single buffer */
 	for (b = blocks; b < end; b++) {
 		if (b->flags & ZEND_BB_REACHABLE) {
-			if (b->start <= b->end) {
-				uint32_t n = b->end - b->start + 1;
-				memcpy(opline, op_array->opcodes + b->start, n * sizeof(zend_op));
-				b->start = opline - new_opcodes;
-				b->end = opline - new_opcodes + n - 1;
-				opline += n;
-			} else {
-				b->flags |= ZEND_BB_EMPTY;
-				b->start = b->end = opline - new_opcodes;
-			}
+			memcpy(opline, op_array->opcodes + b->start, b->len * sizeof(zend_op));
+			b->start = opline - new_opcodes;
+			opline += b->len;
 		}
 	}
 
@@ -832,10 +826,10 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	op_array->last = len;
 
 	for (b = blocks; b < end; b++) {
-		if (!(b->flags & ZEND_BB_REACHABLE) || b->start > b->end) {
+		if (!(b->flags & ZEND_BB_REACHABLE) || b->len == 0) {
 			continue;
 		}
-		opline = op_array->opcodes + b->end;
+		opline = op_array->opcodes + b->start + b->len - 1;
 		switch (opline->opcode) {
 			case ZEND_FAST_CALL:
 			case ZEND_JMP:
@@ -904,9 +898,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				zend_op *opline = new_opcodes;
 				zend_op *end = opline + len;
 				while (opline < end) {
-					if ((opline->opcode == ZEND_FAST_CALL ||
-					     opline->opcode == ZEND_FAST_RET) &&
-					    opline->extended_value &&
+					if (opline->opcode == ZEND_FAST_RET &&
+					    opline->op2.num != (uint32_t)-1 &&
 					    opline->op2.num < (uint32_t)j) {
 						opline->op2.num = map[opline->op2.num];
 					}
@@ -1002,8 +995,11 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 	zend_basic_block *blocks = cfg->blocks;
 	zend_op *last_op;
 
-	ZEND_ASSERT(block->start <= block->end);
-	last_op = op_array->opcodes + block->end;
+	if (block->len == 0) {
+		return;
+	}
+
+	last_op = op_array->opcodes + block->start + block->len - 1;
 	switch (last_op->opcode) {
 		case ZEND_JMP:
 			{
@@ -1019,9 +1015,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 				/* JMP(next) -> NOP */
 				if (block->successors[0] == next) {
 					MAKE_NOP(last_op);
-					if (block->start != block->end) {
-						block->end--;
-					}
+					block->len--;
 					break;
 				}
 
@@ -1165,7 +1159,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 
 next_target:
 				target = op_array->opcodes + target_block->start;
-				target_end = op_array->opcodes + target_block->end + 1;
+				target_end = target + target_block->len;
 				while (target < target_end && target->opcode == ZEND_NOP) {
 					target++;
 				}
@@ -1301,7 +1295,7 @@ next_target:
 				target_block = blocks + block->successors[0];
 next_target_ex:
 				target = op_array->opcodes + target_block->start;
-				target_end = op_array->opcodes + target_block->end + 1;
+				target_end = target + target_block->len;
 				while (target < target_end && target->opcode == ZEND_NOP) {
 					target++;
 				}
@@ -1424,7 +1418,7 @@ next_target_ex:
 
 next_target_znz:
 				target = op_array->opcodes + target_block->start;
-				target_end = op_array->opcodes + target_block->end + 1;
+				target_end = target + target_block->len;
 				while (target < target_end && target->opcode == ZEND_NOP) {
 					target++;
 				}
@@ -1497,7 +1491,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 		}
 
 		opline = op_array->opcodes + block->start;
-		end = op_array->opcodes + block->end + 1;
+		end = opline + block->len;
 		if (!(block->flags & ZEND_BB_FOLLOW) ||
 		    (block->flags & ZEND_BB_TARGET)) {
 			/* Skip continuation of "extended" BB */
@@ -1572,12 +1566,12 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	for (n = cfg->blocks_count; n > 0;) {
 		block = cfg->blocks + (--n);
 
-		if (!(block->flags & ZEND_BB_REACHABLE)) {
+		if (!(block->flags & ZEND_BB_REACHABLE) || block->len == 0) {
 			continue;
 		}
 
-		opline = op_array->opcodes + block->end;
 		end = op_array->opcodes + block->start;
+		opline = end + block->len - 1;
 		if (!next_block ||
 		    !(next_block->flags & ZEND_BB_FOLLOW) ||
 		    (next_block->flags & ZEND_BB_TARGET)) {
@@ -1697,16 +1691,17 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			if ((b->flags & ZEND_BB_FOLLOW) &&
 			    !(b->flags & (ZEND_BB_TARGET | ZEND_BB_PROTECTED)) &&
 			    prev &&
-			    prev->successors[0] == i && prev->successors[1] == -1) {
-
-				if (op_array->opcodes[prev->end].opcode == ZEND_JMP) {
-					MAKE_NOP(op_array->opcodes + prev->end);
+			    prev->successors[0] == i && prev->successors[1] == -1)
+			{
+				zend_op *last_op = op_array->opcodes + prev->start + prev->len - 1;
+				if (prev->len != 0 && last_op->opcode == ZEND_JMP) {
+					MAKE_NOP(last_op);
 				}
 
 				for (bb = prev + 1; bb != b; bb++) {
 					zend_op *op = op_array->opcodes + bb->start;
-					zend_op *end = op_array->opcodes + bb->end;
-					while (op <= end) {
+					zend_op *end = op + bb->len;
+					while (op < end) {
 						if (ZEND_OP1_TYPE(op) == IS_CONST) {
 							literal_dtor(&ZEND_OP1_LITERAL(op));
 						}
@@ -1717,18 +1712,18 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 						op++;
 					}
 					/* make block empty */
-					bb->start = bb->end + 1;
+					bb->len = 0;
 				}
 
 				/* re-link */
-			    prev->flags |= (b->flags & ZEND_BB_EXIT);
-				prev->end = b->end;
+				prev->flags |= (b->flags & ZEND_BB_EXIT);
+				prev->len = b->start + b->len - prev->start;
 				prev->successors[0] = b->successors[0];
 				prev->successors[1] = b->successors[1];
 
 				/* unlink & make block empty and unreachable */
 				b->flags = 0;
-				b->start = b->end + 1;
+				b->len = 0;
 				b->successors[0] = -1;
 				b->successors[1] = -1;
 			} else {

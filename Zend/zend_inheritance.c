@@ -319,13 +319,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 
-#if 0
 		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
 		if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
 			/* incompatible nullability */
 			return 0;
 		}
-#endif
 
 		/* by-ref constraints on arguments are invariant */
 		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
@@ -344,6 +342,10 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			return 0;
 		}
+
+		if (fe->common.arg_info[-1].allow_null && !proto->common.arg_info[-1].allow_null) {
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -351,6 +353,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
+
+	if (arg_info->type_hint != IS_UNDEF && arg_info->allow_null) {
+		smart_str_appendc(str, '?');
+	}
+
 	if (arg_info->class_name) {
 		const char *class_name;
 		size_t class_name_len;
@@ -491,8 +498,6 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 				} else {
 					smart_str_appends(&str, "NULL");
 				}
-			} else if (arg_info->type_hint && arg_info->allow_null) {
-				smart_str_appends(&str, " = NULL");
 			}
 
 			if (++i < num_args) {
@@ -590,7 +595,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			error_verb = "must";
 		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
                    (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1))) {
+		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
+		            (child->common.arg_info[-1].allow_null && !parent->common.arg_info[-1].allow_null))) {
 			error_level = E_COMPILE_ERROR;
 			error_verb = "must";
 		} else {

@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0
 
 - Core:
+  . Added nullable types. (Levi, Dmitry)
   . Added DFA optimization framework based on e-SSA form. (Dmitry, Nikita)
   . Added specialized opcode handlers (e.g. ZEND_ADD_LONG_NO_OVERFLOW).
     (Dmitry)
@@ -18,6 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
     identifiers). (Andrea)
   . Fixed bug #72188 (Nested try/finally blocks losing return value). (Dmitry)
+  . Fixed bug #72213 (Finally leaks on nested exceptions). (Dmitry, Nikita)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
@@ -32,6 +34,7 @@ PHP                                                                        NEWS
   . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
     Pierrick)
   . Raise a compile-time warning on octal escape sequence overflow. (Sara)
+  . Added [] = as alternative construct to list() =. (Bob)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
