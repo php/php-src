@@ -1,5 +1,5 @@
 --TEST--
-Type change in pre-increment (use-after-free)
+Type change in pre/post-increment (use-after-free)
 --FILE--
 <?php
 declare(strict_types=1);
@@ -16,8 +16,16 @@ try {
 	echo $e->getMessage() . "\n";
 }
 var_dump($o->foo);
+try {
+        $x = $o->foo++;
+} catch (Throwable $e) {
+        echo $e->getMessage() . "\n";
+}
+var_dump($o->foo);
 unset($o);
 ?>
 --EXPECT--
+Typed property A::$foo must be string, integer used
+string(3) "100"
 Typed property A::$foo must be string, integer used
 string(3) "100"
