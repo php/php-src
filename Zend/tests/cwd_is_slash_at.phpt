@@ -49,11 +49,11 @@ try {
 }
 unset($splFileObject);
 echo mb_convert_encoding(
-    shell_exec(mb_convert_encoding($php.' "表/ン/機能.php"', 'CP932', 'UTF-8')),
+    shell_exec(mb_convert_encoding('chcp 932>null & "'.$php.'" "表/ン/機能.php"', 'CP932', 'UTF-8')),
     'UTF-8',
     'CP932'
 ), PHP_EOL;
-shell_exec(mb_convert_encoding('rmdir /S /Q "表"', 'CP932', 'UTF-8'));
+shell_exec(mb_convert_encoding('chcp 932 & rmdir /S /Q "表"', 'CP932', 'UTF-8'));
 ?>
 --EXPECTF--
 表/ン/機能.php
