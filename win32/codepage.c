@@ -21,7 +21,10 @@
 #include "php.h"
 #include "SAPI.h"
 
-ZEND_TLS DWORD prev_cp = 0;
+ZEND_TLS const struct php_win32_cp *cur_cp  = NULL;
+ZEND_TLS const struct php_win32_cp *orig_cp = NULL;
+
+#include "cp_enc_map.c"
 
 __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
@@ -72,7 +75,7 @@ PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, siz
 {/*{{{*/
 	wchar_t *ret;
 
-	ret = php_win32_cp_to_w_int(in, in_len, out_len, CP_ACP, 0);
+	ret = php_win32_cp_to_w_int(in, in_len, out_len, cur_cp->id, cur_cp->from_w_fl);
 #if 0
 	if (!ret) {
 		ret = php_win32_cp_to_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
@@ -204,7 +207,7 @@ PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *o
 {/*{{{*/
 	char *ret;
 
-	ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_ACP, 0);
+	ret = php_win32_cp_from_w_int(in, in_len, out_len, cur_cp->id, cur_cp->from_w_fl);
 #if 0
 	if (!ret) {
 		ret = php_win32_cp_from_w_int(in, in_len, out_len, CP_THREAD_ACP, 0);
@@ -215,10 +218,10 @@ PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *o
 
 /* #define PHP_WIN32_CP_ENC_STR_UTF8(enc) ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len && (zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0))*/
 
-PW32CP BOOL php_win32_cp_use_unicode(void)
+/* This is only usable after the startup phase*/
+__forceinline static char *php_win32_cp_get_enc(void)
 {/*{{{*/
 	char *enc = NULL;
-	size_t len = 0;
 	const zend_encoding *zenc;
 
 	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
@@ -232,22 +235,79 @@ PW32CP BOOL php_win32_cp_use_unicode(void)
 		}
 	}
 
-	if (NULL == enc) {
-		return 1;
+	return enc;
+}/*}}}*/
+
+PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
+{/*{{{*/
+	size_t i;
+
+	for (i = 0; i < sizeof(php_win32_cp_map)/sizeof(struct php_win32_cp); i++) {
+		const struct php_win32_cp *cp = &php_win32_cp_map[i];
+
+		if (cp->id == id) {
+			return cp;
+		}
 	}
 
-	if ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len &&
-		(zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0)) {
-		return 1;
+	return NULL;
+}/*}}}*/
+
+PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(char *enc)
+{/*{{{*/
+	size_t enc_len = 0, i;
+
+	if (!enc || !enc[0]) {
+		return php_win32_cp_get_by_id(65001U);
 	}
 
-	return 0;
+	enc_len = strlen(enc);
+
+	for (i = 0; i < sizeof(php_win32_cp_map)/sizeof(struct php_win32_cp); i++) {
+		const struct php_win32_cp *cp = &php_win32_cp_map[i];
+
+		if (!cp->name || !cp->name[0]) {
+			continue;
+		}
+
+		if (0 == zend_binary_strcasecmp(enc, enc_len, cp->name, sizeof(cp->name) - 1)) {
+			cur_cp = cp;
+			return cp;
+		}
+
+		if (cp->enc) {
+			char *start = cp->enc, *idx;
+
+			idx = strpbrk(start, "|");
+
+			while (NULL != idx) {
+				if (0 == zend_binary_strcasecmp(enc, enc_len, start, idx - start)) {
+					cur_cp = cp;
+					return cp;
+				}
+				start = idx + 1;
+				idx = strpbrk(start, "|");
+			}
+			/* Last in the list, or single charset specified. */
+			if (0 == zend_binary_strcasecmp(enc, enc_len, start, strlen(start))) {
+				cur_cp = cp;
+				return cp;
+			}
+		}
+	}
+
+	return php_win32_cp_get_by_id(GetACP());
+}/*}}}*/
+
+PW32CP BOOL php_win32_cp_use_unicode(void)
+{/*{{{*/
+	return 65001 == cur_cp->id;
 }/*}}}*/
 
 PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 {/*{{{*/
 	wchar_t *envw = NULL, ew[32760];
-	char *cur = env, *prev;
+	char *cur = (char *)env, *prev;
 	size_t bin_len = 0;
 
 	if (!env) {
@@ -280,34 +340,58 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	return envw;
 }/*}}}*/
 
-PW32CP DWORD php_win32_cp_cli_setup(void)
+PW32CP const struct php_win32_cp *php_win32_cp_do_setup(char *enc)
 {/*{{{*/
-	DWORD cp;
-	prev_cp = GetConsoleCP();
-
-	if (php_win32_cp_use_unicode()) {
-		cp = 65001U;
-	} else {
-		/* This retains the old beavior. If Unicode is disabled in a nested call,
-		   the current process could still inherit 65001 from the parent. An
-		   improvement could be to get the default charset (or an aggregated
-		   value) to be mapped to the correspending Windows codepage. For now,
-		   the ANSI CP is used, so the old behavior. */
-		cp = GetACP();
+	if (!enc) {
+		enc = php_win32_cp_get_enc();
 	}
 
-	SetConsoleOutputCP(cp);
-	SetConsoleCP(cp);
+	if (!strcmp(sapi_module.name, "cli")) {
+		orig_cp = php_win32_cp_get_by_id(GetConsoleCP());
+	} else {
+		orig_cp = php_win32_cp_get_by_id(GetACP());
+	}
+	cur_cp = php_win32_cp_get_by_enc(enc);
 
-	return cp;
+	return cur_cp;
+}/*}}}*/
+
+PW32CP const struct php_win32_cp *php_win32_cp_do_update(char *enc)
+{/*{{{*/
+	if (!enc) {
+		enc = php_win32_cp_get_enc();
+	}
+	cur_cp = php_win32_cp_get_by_enc(enc);
+
+	if (!strcmp(sapi_module.name, "cli")) {
+		php_win32_cp_cli_update();
+	}
+
+	return cur_cp;
+}/*}}}*/
+
+PW32CP const struct php_win32_cp *php_win32_cp_shutdown(void)
+{/*{{{*/
+	return orig_cp;
+}/*}}}*/
+
+/* php_win32_cp_setup() needs to have run before! */
+PW32CP DWORD php_win32_cp_cli_setup(void)
+{/*{{{*/
+	//orig_cp = php_win32_cp_get_by_id(GetConsoleCP());
+
+	SetConsoleOutputCP(cur_cp->id);
+	SetConsoleCP(cur_cp->id);
+
+	return cur_cp->id;
 }/*}}}*/
 
 PW32CP DWORD php_win32_cp_cli_restore(void)
 {/*{{{*/
-	SetConsoleOutputCP(prev_cp);
-	SetConsoleCP(prev_cp);
+	SetConsoleOutputCP(orig_cp->id);
+	SetConsoleCP(orig_cp->id);
 
-	return prev_cp;
+	return orig_cp->id;
 }/*}}}*/
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */

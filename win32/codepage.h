@@ -32,8 +32,26 @@ extern "C" {
 #define PHP_WIN32_CP_IGNORE_LEN (0)
 #define PHP_WIN32_CP_IGNORE_LEN_P ((size_t *)-1)
 
+struct php_win32_cp {
+	DWORD id;
+	DWORD to_w_fl;
+	DWORD from_w_fl;
+	DWORD char_size;
+	char *name;
+	char *enc;
+	char *desc;
+};
+
 PW32CP BOOL php_win32_cp_use_unicode(void);
+PW32CP const struct php_win32_cp *php_win32_cp_do_setup(char *);
+#define php_win32_cp_setup() php_win32_cp_do_setup(NULL)
+PW32CP const struct php_win32_cp *php_win32_cp_do_update(char *);
+#define php_win32_cp_update() php_win32_cp_do_update(NULL)
+PW32CP const struct php_win32_cp *php_win32_cp_shutdown(void);
+PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id);
+PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(char *enc);
 PW32CP DWORD php_win32_cp_cli_setup(void);
+#define php_win32_cp_cli_update php_win32_cp_cli_setup
 PW32CP DWORD php_win32_cp_cli_restore(void);
 
 /* This API is binary safe and expects a \0 terminated input.
