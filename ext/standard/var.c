@@ -1126,7 +1126,6 @@ PHP_FUNCTION(unserialize)
 			zend_hash_destroy(class_hash);
 			FREE_HASHTABLE(class_hash);
 		}
-		zend_hash_clean(&BG(unserialize_refs));
 		zval_ptr_dtor(return_value);
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
@@ -1148,7 +1147,6 @@ PHP_FUNCTION(unserialize)
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}
-	zend_hash_clean(&BG(unserialize_refs));
 }
 /* }}} */
 

@@ -162,6 +162,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
+
+	if ((*var_hashx)->refs) {
+		zend_array_destroy((*var_hashx)->refs);
+	}
 }
 
 /* }}} */
@@ -378,7 +382,11 @@ string_key:
 							data = old_data;
 						} else {
 							/* little hack to disallow references */
-							data = zend_hash_next_index_insert(&BG(unserialize_refs), &d);
+							if (!(*var_hash)->refs) {
+								(*var_hash)->refs = emalloc(sizeof(HashTable));
+								zend_hash_init((*var_hash)->refs, 8, NULL, ZVAL_PTR_DTOR, 0);
+							}
+							data = zend_hash_next_index_insert((*var_hash)->refs, &d);
 						}
 					} else {
 						var_push_dtor(var_hash, old_data);
