@@ -1540,12 +1540,10 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		if (EXPECTED(cache_slot)) {
 			prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 		} else {
-			prop_info = zend_get_property_info(Z_OBJCE(obj), Z_STR_P(property), 1);
+			prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
 		}
 
-		if (EXPECTED(prop_info)
-		 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-		 && UNEXPECTED(prop_info->type)) {
+		if (UNEXPECTED(prop_info)) {
 			/* special case for typed properties */
 			zval z_copy;
 
@@ -1613,12 +1611,10 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		if (EXPECTED(cache_slot)) {
 			prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 		} else {
-			prop_info = zend_get_property_info(Z_OBJCE(obj), Z_STR_P(property), 1);
+			prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
 		}
 
-		if (EXPECTED(prop_info)
-		 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-		 && UNEXPECTED(prop_info->type)) {
+		if (UNEXPECTED(prop_info)) {
 			/* special case for typed properties */
 			zval z_copy;
 
@@ -2145,12 +2141,9 @@ return_indirect:
 					if (prop_op_type == IS_CONST) {
 						prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 					} else {
-						prop_info = zend_get_property_info(Z_OBJCE_P(container), Z_STR_P(prop_ptr), 1);
+						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(container), Z_STR_P(prop_ptr), NULL);
 					}
-					if (EXPECTED(prop_info)
-					 && (prop_op_type == IS_CONST
-					  || UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-					 && UNEXPECTED(prop_info->type)) {
+					if (UNEXPECTED(prop_info)) {
 						zend_throw_exception_ex(
 							zend_ce_type_error, prop_info->type,
 							"Typed property %s::$%s must not be referenced",

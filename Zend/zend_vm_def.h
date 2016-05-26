@@ -751,11 +751,9 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 				if (OP2_TYPE == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
-					prop_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR_P(property), 1);
+					prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(property), NULL);
 				}
-				if (EXPECTED(prop_info)
-				 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-				 && UNEXPECTED(prop_info->type)) {
+				if (UNEXPECTED(prop_info)){
 					/* special case for typed properties */
 					zval z_copy, tmp, *val;
 
@@ -1216,11 +1214,9 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 						if (OP2_TYPE == IS_CONST) {
 							prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 						} else {
-							prop_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR_P(property), 1);
+							prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(property), NULL);
 						}
-						if (EXPECTED(prop_info)
-						 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-						 && UNEXPECTED(prop_info->type)) {
+						if (UNEXPECTED(prop_info)) {
 						    zval tmp, *val;
 
 							val = zend_verify_property_type(prop_info, zptr, &tmp, EX_USES_STRICT_TYPES());
@@ -1240,11 +1236,9 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 					if (OP2_TYPE == IS_CONST) {
 						prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 					} else {
-						prop_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR_P(property), 1);
+						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(property), NULL);
 					}
-					if (EXPECTED(prop_info)
-					 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-					 && UNEXPECTED(prop_info->type)) {
+					if (UNEXPECTED(prop_info)) {
 						/* special case for typed properties */
 						zval z_copy, tmp, *val;
 
@@ -1344,11 +1338,9 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 						if (OP2_TYPE == IS_CONST) {
 							prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 						} else {
-							prop_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR_P(property), 1);
+							prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(property), NULL);
 						}
-						if (EXPECTED(prop_info)
-						 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-						 && UNEXPECTED(prop_info->type)) {
+						if (UNEXPECTED(prop_info)) {
 						    zval tmp, *val;
 
 							val = zend_verify_property_type(prop_info, zptr, &tmp, EX_USES_STRICT_TYPES());
@@ -1369,11 +1361,9 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 					if (OP2_TYPE == IS_CONST) {
 						prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 					} else {
-						prop_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR_P(property), 1);
+						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(property), NULL);
 					}
-					if (EXPECTED(prop_info)
-					 && (UNEXPECTED(prop_info != ZEND_WRONG_PROPERTY_INFO))
-					 && UNEXPECTED(prop_info->type)) {
+					if (UNEXPECTED(prop_info)) {
 						/* special case for typed properties */
 						zval z_copy, tmp, *val;
 
