@@ -22,16 +22,64 @@
 #include "php.h"
 #include "php_json_scanner.h"
 
-typedef struct _php_json_parser {
+typedef struct _php_json_parser php_json_parser;
+
+typedef int (*php_json_parser_func_array_create_t)(
+		php_json_parser *parser, zval *array);
+typedef int (*php_json_parser_func_array_append_t)(
+		php_json_parser *parser, zval *array, zval *zvalue);
+typedef int (*php_json_parser_func_array_start_t)(
+		php_json_parser *parser);
+typedef int (*php_json_parser_func_array_end_t)(
+		php_json_parser *parser, zval *object);
+typedef int (*php_json_parser_func_object_create_t)(
+		php_json_parser *parser, zval *object);
+typedef int (*php_json_parser_func_object_update_t)(
+		php_json_parser *parser, zval *object, zend_string *key, zval *zvalue);
+typedef int (*php_json_parser_func_object_start_t)(
+		php_json_parser *parser);
+typedef int (*php_json_parser_func_object_end_t)(
+		php_json_parser *parser, zval *object);
+
+typedef struct _php_json_parser_methods {
+	php_json_parser_func_array_create_t array_create;
+	php_json_parser_func_array_append_t array_append;
+	php_json_parser_func_array_start_t array_start;
+	php_json_parser_func_array_end_t array_end;
+	php_json_parser_func_object_create_t object_create;
+	php_json_parser_func_object_update_t object_update;
+	php_json_parser_func_object_start_t object_start;
+	php_json_parser_func_object_end_t object_end;
+} php_json_parser_methods;
+
+struct _php_json_parser {
 	php_json_scanner scanner;
 	zval *return_value;
-	int depth;
+	unsigned int depth;
 	int max_depth;
-} php_json_parser;
+	php_json_parser_methods methods;
+};
 
-void php_json_parser_init(php_json_parser *parser, zval *return_value, char *str, size_t str_len, int options, int max_depth);
+PHP_JSON_API void php_json_parser_init_ex(
+		php_json_parser *parser,
+		zval *return_value,
+		char *str,
+		size_t str_len,
+		int options,
+		int max_depth,
+		const php_json_parser_methods *methods);
 
-php_json_error_code php_json_parser_error_code(php_json_parser *parser);
+PHP_JSON_API void php_json_parser_init(
+		php_json_parser *parser,
+		zval *return_value,
+		char *str,
+		size_t str_len,
+		int options,
+		int max_depth);
+
+PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser);
+
+PHP_JSON_API int php_json_parse(php_json_parser *parser);
 
 int php_json_yyparse(php_json_parser *parser);
 

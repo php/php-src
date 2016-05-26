@@ -54,8 +54,6 @@
 #define ZEND_VM_EXT_CONST_FETCH  0x06000000
 #define ZEND_VM_EXT_TYPE         0x07000000
 #define ZEND_VM_EXT_EVAL         0x08000000
-#define ZEND_VM_EXT_FAST_CALL    0x09000000
-#define ZEND_VM_EXT_FAST_RET     0x0a000000
 #define ZEND_VM_EXT_SRC          0x0b000000
 #define ZEND_VM_EXT_SEND         0x0c000000
 #define ZEND_VM_NO_CONST_CONST   0x40000000
@@ -111,6 +109,7 @@ END_EXTERN_C()
 #define ZEND_ASSIGN                           38
 #define ZEND_ASSIGN_REF                       39
 #define ZEND_ECHO                             40
+#define ZEND_GENERATOR_CREATE                 41
 #define ZEND_JMP                              42
 #define ZEND_JMPZ                             43
 #define ZEND_JMPNZ                            44

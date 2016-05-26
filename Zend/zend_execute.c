@@ -65,9 +65,9 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 #define get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type)
 
 /* Prototypes */
-static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array);
+static void zend_extension_statement_handler(const zend_extension *extension, zend_execute_data *frame);
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_execute_data *frame);
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_execute_data *frame);
 
 #define RETURN_VALUE_USED(opline) ((opline)->result_type != IS_UNUSED)
 
@@ -75,7 +75,7 @@ static ZEND_FUNCTION(pass)
 {
 }
 
-static const zend_internal_function zend_pass_function = {
+ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
 	{0, 0, 0},              /* arg_flags         */
 	0,                      /* fn_flags          */
@@ -86,7 +86,8 @@ static const zend_internal_function zend_pass_function = {
 	0,                      /* required_num_args */
 	NULL,                   /* arg_info          */
 	ZEND_FN(pass),          /* handler           */
-	NULL                    /* module            */
+	NULL,                   /* module            */
+	{NULL,NULL,NULL,NULL}   /* reserved          */
 };
 
 #undef zval_ptr_dtor
@@ -617,7 +618,7 @@ static zend_always_inline zend_class_entry* zend_verify_arg_class_kind(const zen
 	return zend_fetch_class(cur_arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 }
 
-static ZEND_COLD void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg)
+static ZEND_COLD void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname = ZSTR_VAL(zf->common.function_name);
@@ -645,19 +646,19 @@ static ZEND_COLD void zend_verify_arg_error(const zend_function *zf, uint32_t ar
 	}
 }
 
-static int is_null_constant(zval *default_value)
+static int is_null_constant(zend_class_entry *scope, zval *default_value)
 {
 	if (Z_CONSTANT_P(default_value)) {
 		zval constant;
 
-		ZVAL_COPY_VALUE(&constant, default_value);
-		if (UNEXPECTED(zval_update_constant_ex(&constant, 0, NULL) != SUCCESS)) {
+		ZVAL_COPY(&constant, default_value);
+		if (UNEXPECTED(zval_update_constant_ex(&constant, scope) != SUCCESS)) {
 			return 0;
 		}
 		if (Z_TYPE(constant) == IS_NULL) {
 			return 1;
 		}
-		zval_dtor(&constant);
+		zval_ptr_dtor(&constant);
 	}
 	return 0;
 }
@@ -743,25 +744,25 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 			if (cur_arg_info->class_name) {
 				need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info*)cur_arg_info, &class_name, &ce);
 				if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
-					zend_verify_arg_error(zf, arg_num, need_msg, class_name, "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name), arg);
+					zend_verify_arg_error(zf, arg_num, need_msg, class_name, "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name));
 					return 0;
 				}
 			}
 		} else if (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null) {
 			if (cur_arg_info->class_name) {
 				need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info*)cur_arg_info, &class_name, &ce);
-				zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "");
 				return 0;
 			} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
-					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
+					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "");
 					return 0;
 				}
 			} else if (cur_arg_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 				/* pass */
 			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
-				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "");
 				return 0;
 			}
 		}
@@ -809,7 +810,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 				} else {
 					ce = zend_verify_arg_class_kind(cur_arg_info);
 					if (UNEXPECTED(!ce)) {
-						zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name), arg);
+						zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name));
 						return 0;
 					}
 					*cache_slot = (void*)ce;
@@ -818,11 +819,11 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 					need_msg =
 						(ce->ce_flags & ZEND_ACC_INTERFACE) ?
 						"implement interface " : "be an instance of ";
-					zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name), arg);
+					zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name));
 					return 0;
 				}
 			}
-		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value)))) {
+		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(zf->common.scope, default_value)))) {
 			if (cur_arg_info->class_name) {
 				if (EXPECTED(*cache_slot)) {
 					ce = (zend_class_entry*)*cache_slot;
@@ -830,9 +831,9 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 					ce = zend_verify_arg_class_kind(cur_arg_info);
 					if (UNEXPECTED(!ce)) {
 						if (Z_TYPE_P(arg) == IS_OBJECT) {
-							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name), arg);
+							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)->name));
 						} else {
-							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "", zend_zval_type_name(arg), arg);
+							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "", zend_zval_type_name(arg));
 						}
 						return 0;
 					}
@@ -841,18 +842,18 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 				need_msg =
 					(ce->ce_flags & ZEND_ACC_INTERFACE) ?
 					"implement interface " : "be an instance of ";
-				zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), zend_zval_type_name(arg), "");
 				return 0;
 			} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
-					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
+					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "");
 					return 0;
 				}
 			} else if (cur_arg_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 				/* pass */
 			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, ZEND_ARG_USES_STRICT_TYPES()))) {
-				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "");
 				return 0;
 			}
 		}
@@ -881,7 +882,7 @@ static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, ui
 			} else {
 				ce = zend_verify_arg_class_kind(cur_arg_info);
 				if (UNEXPECTED(!ce)) {
-					zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "none", "", NULL);
+					zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "none", "");
 					return 0;
 				}
 				*cache_slot = (void*)ce;
@@ -889,11 +890,11 @@ static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, ui
 			need_msg =
 				(ce->ce_flags & ZEND_ACC_INTERFACE) ?
 				"implement interface " : "be an instance of ";
-			zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "none", "", NULL);
+			zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "none", "");
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
-			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "", NULL);
+			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "");
 		} else {
-			zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "", NULL);
+			zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "");
 		}
 		return 0;
 	}
@@ -935,6 +936,7 @@ static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const ch
 		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 
+#if ZEND_DEBUG
 static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = ZSTR_VAL(zf->common.function_name);
@@ -971,7 +973,6 @@ static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, con
 		fclass, fsep, fname, returned_msg, returned_kind);
 }
 
-#if ZEND_DEBUG
 static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
@@ -1507,26 +1508,26 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 }
 
 /* Utility Functions for Extensions */
-static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_statement_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->statement_handler) {
-		extension->statement_handler(op_array);
+		extension->statement_handler(frame);
 	}
 }
 
 
-static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->fcall_begin_handler) {
-		extension->fcall_begin_handler(op_array);
+		extension->fcall_begin_handler(frame);
 	}
 }
 
 
-static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_execute_data *frame)
 {
 	if (extension->fcall_end_handler) {
-		extension->fcall_end_handler(op_array);
+		extension->fcall_end_handler(frame);
 	}
 }
 
@@ -1540,7 +1541,7 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_d
 		ht = &EG(symbol_table);
 	} else {
 		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
-		if (!EX(symbol_table)) {
+		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_rebuild_symbol_table();
 		}
 		ht = EX(symbol_table);
@@ -1558,24 +1559,24 @@ try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
 num_index:
-		retval = zend_hash_index_find(ht, hval);
-		if (retval == NULL) {
-			switch (type) {
-				case BP_VAR_R:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					/* break missing intentionally */
-				case BP_VAR_UNSET:
-				case BP_VAR_IS:
-					retval = &EG(uninitialized_zval);
-					break;
-				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-					break;
-				case BP_VAR_W:
-					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-					break;
-			}
+		ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+		return retval;
+num_undef:
+		switch (type) {
+			case BP_VAR_R:
+				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				/* break missing intentionally */
+			case BP_VAR_UNSET:
+			case BP_VAR_IS:
+				retval = &EG(uninitialized_zval);
+				break;
+			case BP_VAR_RW:
+				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+				break;
+			case BP_VAR_W:
+				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+				break;
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
@@ -1811,19 +1812,21 @@ static zend_never_inline void zend_fetch_dimension_address_UNSET(zval *result, z
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET);
 }
 
-static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, int support_strings)
+static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, int support_strings, int slow)
 {
 	zval *retval;
 
-	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-try_array:
-		retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
-		ZVAL_COPY(result, retval);
-		return;
-	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
-		container = Z_REFVAL_P(container);
+	if (!slow) {
 		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-			goto try_array;
+try_array:
+			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
+			ZVAL_COPY(result, retval);
+			return;
+		} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+			container = Z_REFVAL_P(container);
+			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+				goto try_array;
+			}
 		}
 	}
 	if (support_strings && EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
@@ -1920,17 +1923,22 @@ try_string_offset:
 
 static zend_never_inline void zend_fetch_dimension_address_read_R(zval *result, zval *container, zval *dim, int dim_type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1, 0);
+}
+
+static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *result, zval *container, zval *dim)
+{
+	zend_fetch_dimension_address_read(result, container, dim, IS_CV, BP_VAR_R, 1, 1);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result, zval *container, zval *dim, int dim_type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_read_LIST(zval *result, zval *container, zval *dim)
 {
-	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0);
+	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0, 0);
 }
 
 ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim)
@@ -1940,7 +1948,7 @@ ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *
 
 ZEND_API void zend_fetch_dimension_by_zval_is(zval *result, zval *container, zval *dim, int dim_type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0);
 }
 
 
@@ -2090,7 +2098,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 			if (!Z_DELREF_P(cv)) {
 				zend_refcounted *r = Z_COUNTED_P(cv);
 				ZVAL_NULL(cv);
-				zval_dtor_func_for_ptr(r);
+				zval_dtor_func(r);
 			} else {
 				GC_ZVAL_CHECK_POSSIBLE_ROOT(cv);
 			}
@@ -2106,22 +2114,17 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
 static zend_never_inline ZEND_COLD ZEND_NORETURN void ZEND_FASTCALL zend_interrupt(void) /* {{{ */
 {
 	zend_timeout(0);
 }
 /* }}} */
 
-# define ZEND_VM_INTERRUPT_CHECK() do { \
+#define ZEND_VM_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(EG(timed_out))) { \
 			zend_interrupt(); \
 		} \
 	} while (0)
-#else
-# define ZEND_VM_INTERRUPT_CHECK() do { \
-	} while (0)
-#endif
 
 /*
  * Stack Frame Layout (the whole stack frame is allocated at once)
@@ -2231,7 +2234,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
-		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+		if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))--;
 		}
 	}
@@ -2257,10 +2260,10 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	if (UNEXPECTED(EX(symbol_table) != NULL)) {
+	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 			GC_REFCOUNT(Z_OBJ(EX(This)))++;
-			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+			if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
 				GC_REFCOUNT(Z_OBJ(EX(This)))--;
 			}
 		}
@@ -2336,65 +2339,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
-}
-/* }}} */
-
-ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value) /* {{{ */
-{
-	/*
-	 * Normally the execute_data is allocated on the VM stack (because it does
-	 * not actually do any allocation and thus is faster). For generators
-	 * though this behavior would be suboptimal, because the (rather large)
-	 * structure would have to be copied back and forth every time execution is
-	 * suspended or resumed. That's why for generators the execution context
-	 * is allocated using a separate VM stack, thus allowing to save and
-	 * restore it simply by replacing a pointer.
-	 */
-	zend_execute_data *execute_data;
-	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
-	uint32_t call_info;
-
-	EG(vm_stack) = zend_vm_stack_new_page(
-		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE(1)) ?
-			ZEND_VM_STACK_PAGE_SIZE(1) :
-			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(1, stack_size),
-		NULL);
-	EG(vm_stack_top) = EG(vm_stack)->top;
-	EG(vm_stack_end) = EG(vm_stack)->end;
-
-	call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
-	execute_data = zend_vm_stack_push_call_frame(
-		call_info,
-		(zend_function*)op_array,
-		num_args,
-		Z_TYPE(call->This) != IS_OBJECT ? Z_CE(call->This) : NULL,
-		Z_TYPE(call->This) == IS_OBJECT ? Z_OBJ(call->This) : NULL);
-	EX(prev_execute_data) = NULL;
-	EX_NUM_ARGS() = num_args;
-
-	/* copy arguments */
-	if (num_args > 0) {
-		zval *arg_src = ZEND_CALL_ARG(call, 1);
-		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
-		zval *end = arg_src + num_args;
-
-		do {
-			ZVAL_COPY_VALUE(arg_dst, arg_src);
-			arg_src++;
-			arg_dst++;
-		} while (arg_src != end);
-	}
-
-	EX(symbol_table) = NULL;
-
-	if (UNEXPECTED(!op_array->run_time_cache)) {
-		init_func_run_time_cache(op_array);
-	}
-
-	i_init_func_execute_data(execute_data, op_array, return_value, 1);
-
-	return execute_data;
 }
 /* }}} */
 
@@ -2747,7 +2691,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		init_func_run_time_cache(&fbc->op_array);
 	}
 
-	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC,
 		fbc, num_args, called_scope, NULL);
 }
 /* }}} */
@@ -2757,7 +2701,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zval *
 	zend_function *fbc;
 	zend_class_entry *called_scope;
 	zend_object *object;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
+	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 
 	if (EXPECTED(Z_OBJ_HANDLER_P(function, get_closure)) &&
 	    EXPECTED(Z_OBJ_HANDLER_P(function, get_closure)(function, &called_scope, &fbc, &object) == SUCCESS)) {
@@ -2790,7 +2734,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 	zend_function *fbc;
 	zend_class_entry *called_scope;
 	zend_object *object;
-	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
+	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 
 	if (zend_hash_num_elements(function) == 2) {
 		zval *obj;
@@ -2984,7 +2928,6 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 	}
 
 	object = Z_OBJ(call->This);
-	EG(scope) = fbc->common.scope;
 
 	ZVAL_NULL(ret);
 

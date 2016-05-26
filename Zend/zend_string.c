@@ -42,6 +42,32 @@ static void _str_dtor(zval *zv)
 }
 #endif
 
+ZEND_API uint32_t zend_intern_known_strings(const char **strings, uint32_t count)
+{
+	uint32_t i, old_count = CG(known_strings_count);
+
+	CG(known_strings) = perealloc(CG(known_strings), sizeof(char*) * (old_count + count), 1);
+	for (i = 0; i < count; i++) {
+#ifndef ZTS
+		zend_string *str = zend_string_init(strings[i], strlen(strings[i]), 1);
+		CG(known_strings)[CG(known_strings_count) + i] =
+			zend_new_interned_string_int(str);
+#else
+		CG(known_strings)[CG(known_strings_count) + i] =
+			zend_zts_interned_string_init(strings[i], strlen(strings[i]));
+#endif
+	}
+	CG(known_strings_count) = old_count + count;
+	return old_count;
+}
+
+static const char *known_strings[] = {
+#define _ZEND_STR_DSC(id, str) str,
+ZEND_KNOWN_STRINGS(_ZEND_STR_DSC)
+#undef _ZEND_STR_DSC
+	NULL
+};
+
 void zend_interned_strings_init(void)
 {
 #ifndef ZTS
@@ -63,6 +89,11 @@ void zend_interned_strings_init(void)
 	/* one char strings (the actual interned strings are going to be created by ext/opcache) */
 	memset(CG(one_char_string), 0, sizeof(CG(one_char_string)));
 
+	/* known strings */
+	CG(known_strings) = NULL;
+	CG(known_strings_count) = 0;
+	zend_intern_known_strings(known_strings, (sizeof(known_strings) / sizeof(known_strings[0])) - 1);
+
 	zend_new_interned_string = zend_new_interned_string_int;
 	zend_interned_strings_snapshot = zend_interned_strings_snapshot_int;
 	zend_interned_strings_restore = zend_interned_strings_restore_int;
@@ -72,7 +103,16 @@ void zend_interned_strings_dtor(void)
 {
 #ifndef ZTS
 	zend_hash_destroy(&CG(interned_strings));
+#else
+	uint32_t i;
+
+	for (i = 0; i < CG(known_strings_count); i++) {
+		zend_zts_interned_string_free(&CG(known_strings)[i]);
+	}
 #endif
+	free(CG(known_strings));
+	CG(known_strings) = NULL;
+	CG(known_strings_count) = 0;
 }
 
 static zend_string *zend_new_interned_string_int(zend_string *str)

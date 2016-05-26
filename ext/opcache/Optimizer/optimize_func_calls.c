@@ -59,37 +59,13 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
-				if (ZEND_OP2_IS_CONST_STRING(opline)) {
-					zend_function *func;
-					zval *function_name = &ZEND_OP2_LITERAL(opline) + 1;
-					if ((func = zend_hash_find_ptr(&ctx->script->function_table,
-							Z_STR_P(function_name))) != NULL) {
-						call_stack[call].func = func;
-					}
-				}
-				call_stack[call].opline = opline;
-				call++;
-				break;
 			case ZEND_INIT_STATIC_METHOD_CALL:
-				if (ZEND_OP2_IS_CONST_STRING(opline)) {
-					zend_class_entry *ce = NULL;
-					if (ZEND_OP1_IS_CONST_STRING(opline)) {
-						zend_string *class_name = Z_STR_P(&ZEND_OP1_LITERAL(opline) + 1);
-						ce = zend_hash_find_ptr(&ctx->script->class_table, class_name);
-					} else if (opline->op1_type == IS_UNUSED && op_array->scope
-							&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
-							&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
-						ce = op_array->scope;
-					}
-					if (ce) {
-						zend_string *func_name = Z_STR_P(&ZEND_OP2_LITERAL(opline) + 1);
-						call_stack[call].func = zend_hash_find_ptr(&ce->function_table, func_name);
-					}
-				}
+			case ZEND_INIT_METHOD_CALL:
+				call_stack[call].func = zend_optimizer_get_called_func(
+					ctx->script, op_array, opline, 0);
 				/* break missing intentionally */
 			case ZEND_NEW:
 			case ZEND_INIT_DYNAMIC_CALL:
-			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call].opline = opline;
@@ -118,7 +94,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
 						fcall->op2.constant = fcall->op2.constant + 1;
 						opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
-					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
+							|| fcall->opcode == ZEND_INIT_METHOD_CALL) {
 						/* We don't have specialized opcodes for this, do nothing */
 					} else {
 						ZEND_ASSERT(0);

@@ -957,6 +957,10 @@ again:
 						php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
 					}
 
+					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+						data = Z_REFVAL_P(data);
+					}
+
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
 					if ((Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))

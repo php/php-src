@@ -145,9 +145,15 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 		cidx = gdCalloc(sidx, 1);
 		for (i = 0; i < nc; i++) {
 			if (gdGetInt(&cidx[i].offset, in) != 1) {
+				gdFree(cidx);
 				goto fail1;
 			}
 			if (gdGetInt(&cidx[i].size, in) != 1) {
+				gdFree(cidx);
+				goto fail1;
+			}
+			if (cidx[i].offset < 0 || cidx[i].size < 0) {
+				gdFree(cidx);
 				goto fail1;
 			}
 		}

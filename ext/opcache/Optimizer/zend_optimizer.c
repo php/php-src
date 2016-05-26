@@ -527,6 +527,70 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 	return 1;
 }
 
+zend_function *zend_optimizer_get_called_func(
+		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants)
+{
+#define GET_OP(op) CRT_CONSTANT_EX(op_array, opline->op, rt_constants)
+	switch (opline->opcode) {
+		case ZEND_INIT_FCALL:
+		{
+			zend_string *function_name = Z_STR_P(GET_OP(op2));
+			zend_function *func;
+			if ((func = zend_hash_find_ptr(&script->function_table, function_name)) != NULL) {
+				return func;
+			} else if ((func = zend_hash_find_ptr(EG(function_table), function_name)) != NULL) {
+				ZEND_ASSERT(func->type == ZEND_INTERNAL_FUNCTION);
+				return func;
+			}
+			break;
+		}
+		case ZEND_INIT_FCALL_BY_NAME:
+		case ZEND_INIT_NS_FCALL_BY_NAME:
+			if (opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING) {
+				zval *function_name = GET_OP(op2) + 1;
+				return zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name));
+			}
+			break;
+		case ZEND_INIT_STATIC_METHOD_CALL:
+			if (opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING) {
+				zend_class_entry *ce = NULL;
+				if (opline->op1_type == IS_CONST && Z_TYPE_P(GET_OP(op1)) == IS_STRING) {
+					zend_string *class_name = Z_STR_P(GET_OP(op1) + 1);
+					ce = zend_hash_find_ptr(&script->class_table, class_name);
+				} else if (opline->op1_type == IS_UNUSED && op_array->scope
+						&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
+						&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+					ce = op_array->scope;
+				}
+				if (ce) {
+					zend_string *func_name = Z_STR_P(GET_OP(op2) + 1);
+					return zend_hash_find_ptr(&ce->function_table, func_name);
+				}
+			}
+			break;
+		case ZEND_INIT_METHOD_CALL:
+			if (opline->op1_type == IS_UNUSED
+					&& opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING
+					&& op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
+				zend_string *method_name = Z_STR_P(GET_OP(op2) + 1);
+				zend_function *fbc = zend_hash_find_ptr(
+					&op_array->scope->function_table, method_name);
+				if (fbc) {
+					zend_bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
+					zend_bool is_final = (fbc->common.fn_flags & ZEND_ACC_FINAL) != 0;
+					zend_bool same_scope = fbc->common.scope == op_array->scope;
+					if ((is_private && same_scope)
+							|| (is_final && (!is_private || same_scope))) {
+						return fbc;
+					}
+				}
+			}
+			break;
+	}
+	return NULL;
+#undef GET_OP
+}
+
 static void zend_optimize(zend_op_array      *op_array,
                           zend_optimizer_ctx *ctx)
 {
@@ -751,8 +815,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 		while (call_info) {
 			zend_op *opline = call_info->caller_init_opline;
 
-			if (opline && call_info->callee_func) {
-				ZEND_ASSERT(opline->opcode == ZEND_INIT_FCALL);
+			if (opline && call_info->callee_func && opline->opcode == ZEND_INIT_FCALL) {
 				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, call_info->callee_func);
 			}
 			call_info = call_info->next_callee;
