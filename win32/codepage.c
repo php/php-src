@@ -310,7 +310,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(char *enc)
 }/*}}}*/
 
 PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id)
-{
+{/*{{{*/
 	const struct php_win32_cp *tmp;
 	if (!IsValidCodePage(id)) {
 		return NULL;
@@ -322,7 +322,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id)
 	}
 
 	return cur_cp;
-}
+}/*}}}*/
 
 PW32CP BOOL php_win32_cp_use_unicode(void)
 {/*{{{*/
@@ -456,7 +456,16 @@ PHP_FUNCTION(sapi_windows_set_cp)
 		return;
 	}
 
-	cp = php_win32_cp_cli_do_setup(id);
+	if (ZEND_LONG_UINT_OVFL(id)) {
+		php_error_docref(NULL, E_WARNING, "Argument %d is out of range", id);
+		RETURN_FALSE;
+	}
+
+	if (!strcmp(sapi_module.name, "cli")) {
+		cp = php_win32_cp_cli_do_setup((DWORD)id);
+	} else {
+		cp = php_win32_cp_set_by_id((DWORD)id);
+	}
 	if (!cp) {
 		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage %d", id);
 		RETURN_FALSE;
