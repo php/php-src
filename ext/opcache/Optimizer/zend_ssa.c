@@ -159,7 +159,7 @@ static inline uint32_t mask_for_type_check(uint32_t type) {
 
 /* We can interpret $a + 5 == 0 as $a = 0 - 5, i.e. shift the adjustment to the other operand.
  * This negated adjustment is what is written into the "adjustment" parameter. */
-static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_flags, zend_op *opline, uint32_t var_num, zend_long *adjustment)
+static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_flags, zend_op *opline, uint32_t var_num, zend_long *adjustment) /* {{{ */
 {
 	zend_op *op = opline;
 	while (op != op_array->opcodes) {
@@ -204,6 +204,7 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 	}
 	return -1;
 }
+/* }}} */
 
 static inline zend_bool add_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a > ZEND_LONG_MAX - b)
@@ -220,7 +221,7 @@ static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
  */
 static void place_essa_pis(
 		zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa,
-		zend_dfg *dfg) {
+		zend_dfg *dfg) /* {{{ */ {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	int j, blocks_count = ssa->cfg.blocks_count;
 	for (j = 0; j < blocks_count; j++) {
@@ -485,6 +486,7 @@ static void place_essa_pis(
 		}
 	}
 }
+/* }}} */
 
 static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
@@ -930,7 +932,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	/* SSA construction, Step 3: Renaming */
 	ssa->ops = zend_arena_calloc(arena, op_array->last, sizeof(zend_ssa_op));
 	memset(ssa->ops, 0xff, op_array->last * sizeof(zend_ssa_op));
-	memset(var, 0xff, (op_array->last_var + op_array->T) * sizeof(int));
+	memset(var + op_array->last_var, 0xff, op_array->T * sizeof(int));
 	/* Create uninitialized SSA variables for each CV */
 	for (j = 0; j < op_array->last_var; j++) {
 		var[j] = j;
@@ -1050,7 +1052,7 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 }
 /* }}} */
 
-int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var)
+int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 {
 	if (ssa->vars[var].use_chain == op) {
 		ssa->vars[var].use_chain = zend_ssa_next_use(ssa->ops, var, op);
@@ -1089,6 +1091,7 @@ int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var)
 		return 0;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:
