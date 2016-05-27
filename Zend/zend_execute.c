@@ -1537,11 +1537,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 			ZVAL_COPY_VALUE(z, value);
 		}
 
-		if (EXPECTED(cache_slot)) {
-			prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-		} else {
-			prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
-		}
+		prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
 
 		if (UNEXPECTED(prop_info)) {
 			/* special case for typed properties */
@@ -1608,11 +1604,7 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 			ZVAL_COPY_VALUE(z, value);
 		}
 
-		if (EXPECTED(cache_slot)) {
-			prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-		} else {
-			prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
-		}
+		prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
 
 		if (UNEXPECTED(prop_info)) {
 			/* special case for typed properties */
