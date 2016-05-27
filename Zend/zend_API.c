@@ -3655,10 +3655,6 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 		}
 	}
 
-	if (Z_ISUNDEF_P(property) && (!optional_type || allow_null)) {
-		ZVAL_NULL(property);
-	}
-
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
 	}
