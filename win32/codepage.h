@@ -48,11 +48,14 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_setup(char *);
 PW32CP const struct php_win32_cp *php_win32_cp_do_update(char *);
 #define php_win32_cp_update() php_win32_cp_do_update(NULL)
 PW32CP const struct php_win32_cp *php_win32_cp_shutdown(void);
+PW32CP const struct php_win32_cp *php_win32_cp_get_current(void);
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id);
+PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id);
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(char *enc);
-PW32CP DWORD php_win32_cp_cli_setup(void);
-#define php_win32_cp_cli_update php_win32_cp_cli_setup
-PW32CP DWORD php_win32_cp_cli_restore(void);
+PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD);
+#define php_win32_cp_cli_setup() php_win32_cp_cli_do_setup(0)
+#define php_win32_cp_cli_update() php_win32_cp_cli_do_setup(0)
+PW32CP const struct php_win32_cp *php_win32_cp_cli_restore(void);
 
 /* This API is binary safe and expects a \0 terminated input.
    The returned out is \0 terminated, but the length doesn't count \0. */

@@ -1360,14 +1360,13 @@ exit_loop:
 	module_started = 1;
 
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
-	if (php_win32_cp_cli_setup() == 65001U) {
-		/* Ignore the delivered argv and argc, read from W API. This place
-		 	might be too late though, but this is the earliest place ATW
-			we can access the internal charset information from PHP. */
-		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
-		PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
-		using_wide_argv = 1;
-	}
+	php_win32_cp_cli_setup();
+	/* Ignore the delivered argv and argc, read from W API. This place
+		might be too late though, but this is the earliest place ATW
+		we can access the internal charset information from PHP. */
+	argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
+	PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
+	using_wide_argv = 1;
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif

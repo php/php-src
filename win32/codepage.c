@@ -238,6 +238,11 @@ __forceinline static char *php_win32_cp_get_enc(void)
 	return enc;
 }/*}}}*/
 
+PW32CP const struct php_win32_cp *php_win32_cp_get_current(void)
+{
+	return cur_cp;
+}
+
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 {/*{{{*/
 	size_t i;
@@ -298,6 +303,21 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(char *enc)
 
 	return php_win32_cp_get_by_id(GetACP());
 }/*}}}*/
+
+PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id)
+{
+	const struct php_win32_cp *tmp;
+	if (!IsValidCodePage(id)) {
+		return NULL;
+	}
+
+	tmp = php_win32_cp_get_by_id(id);
+	if (tmp) {
+		cur_cp = tmp;
+	}
+
+	return cur_cp;
+}
 
 PW32CP BOOL php_win32_cp_use_unicode(void)
 {/*{{{*/
@@ -376,22 +396,34 @@ PW32CP const struct php_win32_cp *php_win32_cp_shutdown(void)
 }/*}}}*/
 
 /* php_win32_cp_setup() needs to have run before! */
-PW32CP DWORD php_win32_cp_cli_setup(void)
+PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 {/*{{{*/
-	//orig_cp = php_win32_cp_get_by_id(GetConsoleCP());
+	const struct php_win32_cp *cp;
 
-	SetConsoleOutputCP(cur_cp->id);
-	SetConsoleCP(cur_cp->id);
+	if (id) {
+		cp = php_win32_cp_set_by_id(id);
+	} else {
+		cp = cur_cp;
+	}
 
-	return cur_cp->id;
+	if (!cp) {
+		return NULL;
+	}
+
+	if (SetConsoleOutputCP(cp->id) && SetConsoleCP(cp->id)) {
+		return cp;
+	}
+
+	return cp;
 }/*}}}*/
 
-PW32CP DWORD php_win32_cp_cli_restore(void)
+PW32CP const struct php_win32_cp *php_win32_cp_cli_restore(void)
 {/*{{{*/
-	SetConsoleOutputCP(orig_cp->id);
-	SetConsoleCP(orig_cp->id);
+	if (SetConsoleOutputCP(orig_cp->id) && SetConsoleCP(orig_cp->id)) {
+		return orig_cp;
+	}
 
-	return orig_cp->id;
+	return NULL;
 }/*}}}*/
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
@@ -400,13 +432,20 @@ PW32CP DWORD php_win32_cp_cli_restore(void)
  * Set process codepage. */
 PHP_FUNCTION(sapi_windows_set_cp) 
 {
-	zend_long cp;
+	zend_long id;
+	const struct php_win32_cp *cp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &cp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &id) == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(SetConsoleOutputCP((UINT)cp) && SetConsoleCP((UINT)cp));
+	cp = php_win32_cp_cli_do_setup(id);
+	if (!cp) {
+		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage %d", id);
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(cp->id == id);
 }
 /* }}} */
 
@@ -414,7 +453,6 @@ PHP_FUNCTION(sapi_windows_set_cp)
  * Get process codepage. */
 PHP_FUNCTION(sapi_windows_get_cp)
 {
-	UINT in_cp, out_cp;
 	char *kind;
 	size_t kind_len = 0;
 
@@ -427,10 +465,8 @@ PHP_FUNCTION(sapi_windows_get_cp)
 	} else if (kind_len == sizeof("oem")-1 && !strncasecmp(kind, "oem", kind_len)) {
 		RETURN_LONG(GetOEMCP());
 	} else {
-		in_cp = GetConsoleCP();
-		out_cp = GetConsoleOutputCP();
-
-		RETURN_LONG(in_cp == out_cp ? in_cp : -1);
+		const struct php_win32_cp *cp = php_win32_cp_get_current();
+		RETURN_LONG(cp->id);
 	}
 }
 /* }}} */
