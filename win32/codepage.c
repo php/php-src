@@ -239,9 +239,14 @@ __forceinline static char *php_win32_cp_get_enc(void)
 }/*}}}*/
 
 PW32CP const struct php_win32_cp *php_win32_cp_get_current(void)
-{
+{/*{{{*/
 	return cur_cp;
-}
+}/*}}}*/
+
+PW32CP const struct php_win32_cp *php_win32_cp_get_orig(void)
+{/*{{{*/
+	return orig_cp;
+}/*}}}*/
 
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 {/*{{{*/
@@ -400,6 +405,10 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 {/*{{{*/
 	const struct php_win32_cp *cp;
 
+	if (!orig_cp) {
+		php_win32_cp_setup();
+	}
+
 	if (id) {
 		cp = php_win32_cp_set_by_id(id);
 	} else {
@@ -417,10 +426,18 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 	return cp;
 }/*}}}*/
 
-PW32CP const struct php_win32_cp *php_win32_cp_cli_restore(void)
+PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 {/*{{{*/
-	if (SetConsoleOutputCP(orig_cp->id) && SetConsoleCP(orig_cp->id)) {
-		return orig_cp;
+	if (!id && orig_cp) {
+		id = orig_cp->id;
+	}
+
+	if (SetConsoleOutputCP(id) && SetConsoleCP(id)) {
+		if (orig_cp) {
+			return orig_cp;
+		} else {
+			return php_win32_cp_set_by_id(id);
+		}
 	}
 
 	return NULL;
