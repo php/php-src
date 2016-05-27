@@ -66,12 +66,12 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	return ret;
 }/*}}}*/
 
-PW32CP wchar_t *php_win32_cp_mb_to_w_full(const char* in, size_t in_len, size_t *out_len)
+PW32CP wchar_t *php_win32_cp_do_mb_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	return php_win32_cp_to_w_int(in, in_len, out_len, CP_UTF8, MB_ERR_INVALID_CHARS);
 }/*}}}*/
 
-PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, size_t *out_len)
+PW32CP wchar_t *php_win32_cp_do_thread_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret;
 
@@ -84,7 +84,7 @@ PW32CP wchar_t *php_win32_cp_thread_to_w_full(const char* in, size_t in_len, siz
 	return ret;
 }/*}}}*/
 
-PW32CP wchar_t *php_win32_cp_ascii_to_w_full(const char* in, size_t in_len, size_t *out_len)
+PW32CP wchar_t *php_win32_cp_do_ascii_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret = NULL;
 	const char *idx = in, *end; 
@@ -198,12 +198,12 @@ __forceinline static char *php_win32_cp_from_w_int(wchar_t* in, size_t in_len, s
 	return target;
 }/*}}}*/
 
-PW32CP char *php_win32_cp_w_to_utf8_full(wchar_t* in, size_t in_len, size_t *out_len)
+PW32CP char *php_win32_cp_do_w_to_utf8(wchar_t* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	return php_win32_cp_from_w_int(in, in_len, out_len, CP_UTF8, WC_ERR_INVALID_CHARS);
 }/*}}}*/
 
-PW32CP char *php_win32_cp_w_to_thread_full(wchar_t* in, size_t in_len, size_t *out_len)
+PW32CP char *php_win32_cp_do_w_to_thread(wchar_t* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	char *ret;
 
@@ -533,7 +533,7 @@ PHP_FUNCTION(sapi_windows_cp_conv_utf8_to_thread)
 		RETURN_NULL();
 	}
 
-	subj = php_win32_cp_w_to_thread_full(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
+	subj = php_win32_cp_do_w_to_thread(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
 	if (!subj) {
 		free(tmp);
 		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
@@ -569,7 +569,7 @@ PHP_FUNCTION(sapi_windows_cp_conv_thread_to_utf8)
 		RETURN_NULL();
 	}
 
-	subj = php_win32_cp_w_to_utf8_full(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
+	subj = php_win32_cp_do_w_to_utf8(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
 	if (!subj) {
 		free(tmp);
 		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");

@@ -258,7 +258,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		return -1;
 	}
 
-	_tmp = php_win32_ioutil_w_to_any_full(targetw, dwRet, &_tmp_len);
+	_tmp = php_win32_ioutil_do_w_to_any(targetw, dwRet, &_tmp_len);
 	if (!_tmp || _tmp_len >= MAXPATHLEN) {
 		CloseHandle(hFile);
 		free(linkw);
@@ -1197,7 +1197,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 			if (save) {
 				size_t sz;
-				char *tmp_path = php_win32_ioutil_w_to_any_full(dataw.cFileName, PHP_WIN32_CP_IGNORE_LEN, &sz);
+				char *tmp_path = php_win32_ioutil_do_w_to_any(dataw.cFileName, PHP_WIN32_CP_IGNORE_LEN, &sz);
 				if (!tmp_path) {
 					free_alloca(tmp, use_heap);
 					FREE_PATHW()
