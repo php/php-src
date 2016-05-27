@@ -366,7 +366,7 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 
-static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zval *object, zend_string *property, void **cache_slot)
+static zend_always_inline zend_property_info* zend_object_fetch_property_type_info(zend_class_entry *ce, zend_string *property, void **cache_slot)
 {
 	zend_property_info *info;
 
@@ -375,11 +375,11 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 		return (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 	}
 
-	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(object)))) {
+	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 		return NULL;
 	}
 
-	info = zend_get_property_info(Z_OBJCE_P(object), property, 1);
+	info = zend_get_property_info(ce, property, 1);
 
 	if (EXPECTED(info)
 	 && UNEXPECTED(info != ZEND_WRONG_PROPERTY_INFO)
