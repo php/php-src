@@ -331,7 +331,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "get_defined_vars")) {
 							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "assert")) {
+						} else if (EG(assertions) >= 0 && zend_string_equals_literal(Z_STR_P(zv), "assert")) {
 							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_num_args")) {
 							flags |= ZEND_FUNC_VARARG;
