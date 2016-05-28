@@ -162,7 +162,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 
 	if (GetTempFileNameW(cwdw, pfxw, 0, pathw)) {
-		opened_path = php_win32_ioutil_do_w_to_any(pathw, PHP_WIN32_CP_IGNORE_LEN, &opened_path_len);
+		opened_path = php_win32_ioutil_conv_w_to_any(pathw, PHP_WIN32_CP_IGNORE_LEN, &opened_path_len);
 		if (!opened_path || opened_path_len >= MAXPATHLEN) {
 			free(cwdw);
 			free(pfxw);
@@ -245,7 +245,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 		size_t len = GetTempPathW(MAXPATHLEN, sTemp);
 		assert(0 < len);  /* should *never* fail! */
 
-		if (NULL == (tmp = php_win32_ioutil_do_w_to_any(sTemp, len, &len))) {
+		if (NULL == (tmp = php_win32_ioutil_conv_w_to_any(sTemp, len, &len))) {
 			return NULL;
 		}
 

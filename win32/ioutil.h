@@ -169,9 +169,9 @@ __forceinline static wchar_t *php_win32_ioutil_do_any_to_w(const char* in, size_
 
 #define php_win32_ioutil_ascii_to_w php_win32_cp_ascii_to_w
 #define php_win32_ioutil_utf8_to_w php_win32_cp_utf8_to_w
-#define php_win32_ioutil_thread_to_w php_win32_cp_thread_to_w
+#define php_win32_ioutil_cur_to_w php_win32_cp_cur_to_w
 #define php_win32_ioutil_w_to_any php_win32_cp_w_to_any
-#define php_win32_ioutil_do_w_to_any php_win32_cp_do_w_to_any
+#define php_win32_ioutil_conv_w_to_any php_win32_cp_conv_w_to_any
 /*__forceinline static char *php_win32_ioutil_w_to_any(wchar_t* w_source_ptr)
 {
 	return php_win32_cp_w_to_any(w_source_ptr);
