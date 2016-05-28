@@ -7107,6 +7107,7 @@ ZEND_VM_HANDLER(155, ZEND_BIND_TRAITS, ANY, ANY)
 
 ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_catch_offset, uint32_t op_num)
 {
+	/* May be NULL during generator closing (only finally blocks are executed) */
 	zend_object *ex = EG(exception);
 
 	/* Walk try/catch/finally structures upwards, performing the necessary actions */
@@ -7114,7 +7115,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 		zend_try_catch_element *try_catch =
 			&EX(func)->op_array.try_catch_array[try_catch_offset];
 
-		if (op_num < try_catch->catch_op) {
+		if (op_num < try_catch->catch_op && ex) {
 			/* Go to catch block */
 			cleanup_live_vars(execute_data, op_num, try_catch->catch_op);
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->catch_op]);
@@ -7134,7 +7135,11 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 			/* Chain potential exception from wrapping finally block */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 			if (Z_OBJ_P(fast_call)) {
-				zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
+				if (ex) {
+					zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
+				} else {
+					EG(exception) = Z_OBJ_P(fast_call);
+				}
 				ex = Z_OBJ_P(fast_call);
 			}
 		}
