@@ -3816,9 +3816,9 @@ PHP_FUNCTION(array_change_keys)
         }
 
         if (Z_TYPE(result) == IS_STRING) {
-            zend_hash_add_new(Z_ARRVAL_P(return_value), Z_STR(result), value);
+            zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(result), value);
         } else if (Z_TYPE(result) == IS_LONG) {
-            zend_hash_index_add_new(Z_ARRVAL_P(return_value), Z_LVAL(result), value);
+            zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL(result), value);
         } else {
             php_error_docref(NULL, E_WARNING, "callback must return string or integer");
             zval_dtor(return_value);
