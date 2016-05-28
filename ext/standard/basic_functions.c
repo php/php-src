@@ -35,6 +35,7 @@
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
+#include "php_type.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -2563,6 +2564,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
 	ZEND_ARG_INFO(0, syntax_only)
 	ZEND_ARG_INFO(1, callable_name)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_typeof, 0, 0, 1)
+	ZEND_ARG_INFO(0, var)
+	ZEND_ARG_INFO(0, extended)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ uniqid.c */
 #ifdef HAVE_GETTIMEOFDAY
@@ -3060,6 +3066,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_object,														arginfo_is_object)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
+	PHP_FE(typeof,                                                          arginfo_typeof)
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)
@@ -3620,6 +3627,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
+	register_type_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	BASIC_ADD_SUBMODULE(dl)
 	BASIC_ADD_SUBMODULE(mail)
