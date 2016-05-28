@@ -3776,6 +3776,58 @@ PHP_FUNCTION(array_change_key_case)
 }
 /* }}} */
 
+/** {{{ proto array array_change_keys(array input, mixed callback)
+   Retuns an array with all keys modified by a callback */
+PHP_FUNCTION(array_change_keys)
+{
+    zval *array, *value, *params;
+    zval result;
+    zend_fcall_info fci;
+    zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+    zend_ulong num_key;
+    zend_string *str_key;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "af", &array, &fci, &fci_cache) == FAILURE) {
+        return;
+    }
+
+    array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(array)));
+    params = (zval *)safe_emalloc(2, sizeof(zval), 0);
+
+    ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, value) {
+        fci.retval = &result;
+        fci.param_count = 2;
+        fci.params = params;
+        fci.no_separation = 0;
+
+        if (str_key) {
+            ZVAL_STR(&params[0], zend_string_copy(str_key));
+        } else {
+            ZVAL_LONG(&params[0], num_key);
+        }
+        ZVAL_COPY(&params[1], value);
+
+        if (zend_call_function(&fci, &fci_cache) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
+            zval_dtor(return_value);
+            zval_ptr_dtor(&params[0]);
+            RETURN_NULL();
+        } else {
+            zval_ptr_dtor(&params[0]);
+        }
+
+        if (Z_TYPE(result) == IS_STRING) {
+            zend_hash_add_new(Z_ARRVAL_P(return_value), Z_STR(result), value);
+        } else if (Z_TYPE(result) == IS_LONG) {
+            zend_hash_index_add_new(Z_ARRVAL_P(return_value), Z_LVAL(result), value);
+        } else {
+            php_error_docref(NULL, E_WARNING, "callback must return string or integer");
+            zval_dtor(return_value);
+            RETURN_NULL();
+        }
+    } ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
 struct bucketindex {
 	Bucket b;
 	unsigned int i;
