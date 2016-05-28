@@ -741,26 +741,6 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
-			if (parent_info->type == IS_OBJECT) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s%s (as in class %s)",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(key),
-					parent_info->allow_null ? "?" : "",
-					ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
-					ZSTR_VAL(ce->parent->name));
-			} else {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s%s (as in class %s)",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(key),
-					parent_info->allow_null ? "?" : "",
-					zend_get_type_by_const(parent_info->type),
-					ZSTR_VAL(ce->parent->name));
-			}
-		}
-
 		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
