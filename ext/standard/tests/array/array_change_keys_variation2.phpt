@@ -139,7 +139,9 @@ array(0) {
 
 Warning: array_change_keys() expects parameter 2 to be a valid callback, no array or string given in %s on line %d
 NULL
+
 Warning: array_change_keys() expects parameter 2 to be a valid callback, function 'some_function_that_doesnt_exist' not found or invalid function name in %s on line %d
 NULL
+
 Warning: array_change_keys() expects parameter 2 to be a valid callback, class 'foo' not found in %s on line %d
 NULL
