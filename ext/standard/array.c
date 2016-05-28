@@ -3820,9 +3820,8 @@ PHP_FUNCTION(array_change_keys)
         } else if (Z_TYPE(result) == IS_LONG) {
             zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL(result), value);
         } else {
-            php_error_docref(NULL, E_WARNING, "callback must return string or integer");
+            php_error_docref(NULL, E_WARNING, "New key should be either a string or an integer");
             zval_dtor(return_value);
-            RETURN_NULL();
         }
     } ZEND_HASH_FOREACH_END();
 }
