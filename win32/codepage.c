@@ -66,7 +66,7 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	return ret;
 }/*}}}*/
 
-PW32CP wchar_t *php_win32_cp_do_mb_to_w(const char* in, size_t in_len, size_t *out_len)
+PW32CP wchar_t *php_win32_cp_do_utf8_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	return php_win32_cp_to_w_int(in, in_len, out_len, CP_UTF8, MB_ERR_INVALID_CHARS);
 }/*}}}*/
@@ -527,7 +527,7 @@ PHP_FUNCTION(sapi_windows_cp_conv_utf8_to_thread)
 		RETURN_NULL();
 	}
 
-	tmp = php_win32_cp_mb_to_w(subj);
+	tmp = php_win32_cp_utf8_to_w(subj);
 	if (!tmp) {
 		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
 		RETURN_NULL();

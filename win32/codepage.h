@@ -61,8 +61,8 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD);
 
 /* This API is binary safe and expects a \0 terminated input.
    The returned out is \0 terminated, but the length doesn't count \0. */
-PW32CP wchar_t *php_win32_cp_do_mb_to_w(const char* in, size_t in_len, size_t *out_len);
-#define php_win32_cp_mb_to_w(in) php_win32_cp_do_mb_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+PW32CP wchar_t *php_win32_cp_do_utf8_to_w(const char* in, size_t in_len, size_t *out_len);
+#define php_win32_cp_utf8_to_w(in) php_win32_cp_do_utf8_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_do_thread_to_w(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_thread_to_w(in) php_win32_cp_do_thread_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_do_ascii_to_w(const char* in, size_t in_len, size_t *out_len);
@@ -90,7 +90,7 @@ __forceinline static wchar_t *php_win32_cp_do_any_to_w(const char* in, size_t in
 
 		/* If that failed, try to convert to multibyte. */
 		if (!ret) {
-			ret = php_win32_cp_do_mb_to_w(in, in_len, out_len);
+			ret = php_win32_cp_do_utf8_to_w(in, in_len, out_len);
 
 			/* Still need this fallback with regard to possible broken data
 				in the existing scripts. Broken data might be hardcoded in
