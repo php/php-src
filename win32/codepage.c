@@ -573,6 +573,7 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 	RETVAL_STRINGL(ret, ret_len);
 
 	free(tmpw);
+	free(ret);
 }
 /* }}} */
 
