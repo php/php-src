@@ -212,23 +212,6 @@ main(int argc, char **argv)
 	while (rnd <= 2 && ++rnd && (cur = &cp_map[0]))
 #endif
 	while (cur->desc != NULL) {
-#if 0
-		if (!IsValidCodePage(cur->id)) {
-			printf("invalid codepage id: %u\n\n", cur->id);
-			cur++;
-			continue;
-		}
-
-		if (GetCPInfoEx(cur->id, 0, &info)) {
-			printf("CodePageName: %s\n", info.CodePageName);
-			printf("CodePage: %u\n", info.CodePage);
-			printf("MaxCharSize: %u\n", info.MaxCharSize);
-			//wprintf("UnicodeDefaultChar: %s\n", info.UnicodeDefaultChar);
-			printf("\n");
-		}
-
-		cur++;
-#else
 		if (!IsValidCodePage(cur->id)) {
 #ifdef ORDER_IT
 			if (2 == rnd)
@@ -258,7 +241,6 @@ main(int argc, char **argv)
 			}
 		}
 		cur++;
-#endif
 	}
 
 	printf("};\n\n");
