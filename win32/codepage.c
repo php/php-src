@@ -84,6 +84,11 @@ PW32CP wchar_t *php_win32_cp_conv_cur_to_w(const char* in, size_t in_len, size_t
 	return ret;
 }/*}}}*/
 
+PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, size_t in_len, size_t *out_len)
+{/*{{{*/
+	return php_win32_cp_to_w_int(in, in_len, out_len, cp, flags);
+}/*}}}*/
+
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret = NULL;
@@ -203,7 +208,7 @@ PW32CP char *php_win32_cp_conv_w_to_utf8(wchar_t* in, size_t in_len, size_t *out
 	return php_win32_cp_from_w_int(in, in_len, out_len, CP_UTF8, WC_ERR_INVALID_CHARS);
 }/*}}}*/
 
-PW32CP char *php_win32_cp_conv_w_to_thread(wchar_t* in, size_t in_len, size_t *out_len)
+PW32CP char *php_win32_cp_conv_w_to_cur(wchar_t* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	char *ret;
 
@@ -214,6 +219,11 @@ PW32CP char *php_win32_cp_conv_w_to_thread(wchar_t* in, size_t in_len, size_t *o
 	}
 #endif
 	return ret;
+}/*}}}*/
+
+PW32CP char *php_win32_cp_conv_from_w(DWORD cp, DWORD flags, wchar_t* in, size_t in_len, size_t *out_len)
+{/*{{{*/
+	return php_win32_cp_from_w_int(in, in_len, out_len, cp, flags);
 }/*}}}*/
 
 /* #define PHP_WIN32_CP_ENC_STR_UTF8(enc) ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len && (zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0))*/
@@ -510,76 +520,61 @@ PHP_FUNCTION(sapi_windows_is_cp_utf8)
 }
 /* }}} */
 
-/* {{{ proto string sapi_windows_cp_conv_utf8_to_thread(string subject)
- * Convert string from UTF-8 to the current thread codepage. */
-PHP_FUNCTION(sapi_windows_cp_conv_utf8_to_thread)
+/* {{{ proto string sapi_windows_cp_conv(int in_charset, int out_charset, string subject)
+ * Convert string from one codepage to another. */
+PHP_FUNCTION(sapi_windows_cp_conv)
 {
-	char *subj;
-	size_t subj_len;
-	wchar_t *tmp;
+	char *subj, *ret;
+	size_t subj_len, ret_len, tmpw_len;
+	wchar_t *tmpw;
+	zend_long in_cp_id, out_cp_id;
+	const struct php_win32_cp *in_cp, *out_cp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &subj, &subj_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &in_cp_id, &out_cp_id, &subj, &subj_len) == FAILURE) {
 		return;
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(subj_len)) {
 		php_error_docref(NULL, E_WARNING, "String is too long");
 		RETURN_NULL();
+	} else if (ZEND_LONG_UINT_OVFL(in_cp_id)) {
+		php_error_docref(NULL, E_WARNING, "Argument %d is out of range", in_cp_id);
+		RETURN_NULL();
+	} else if (ZEND_LONG_UINT_OVFL(out_cp_id)) {
+		php_error_docref(NULL, E_WARNING, "Argument %d is out of range", out_cp_id);
+		RETURN_NULL();
 	}
 
-	tmp = php_win32_cp_utf8_to_w(subj);
-	if (!tmp) {
+	in_cp = php_win32_cp_get_by_id((DWORD)in_cp_id);
+	if (!in_cp) {
+		php_error_docref(NULL, E_WARNING, "Invalid codepage %d", in_cp_id);
+		RETURN_NULL();
+	}
+
+	out_cp = php_win32_cp_get_by_id((DWORD)out_cp_id);
+	if (!out_cp) {
+		php_error_docref(NULL, E_WARNING, "Invalid codepage %d", out_cp_id);
+		RETURN_NULL();
+	}
+
+	tmpw = php_win32_cp_conv_to_w(in_cp->id, in_cp->to_w_fl, subj, subj_len, &tmpw_len);
+	if (!tmpw) {
 		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
 		RETURN_NULL();
 	}
 
-	subj = php_win32_cp_conv_w_to_thread(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
-	if (!subj) {
-		free(tmp);
+	ret = php_win32_cp_conv_from_w(out_cp->id, out_cp->from_w_fl, tmpw, tmpw_len, &ret_len);
+	if (!ret) {
+		free(tmpw);
 		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
 		RETURN_NULL();
 	}
 
-	RETVAL_STRINGL(subj, subj_len);
+	RETVAL_STRINGL(ret, ret_len);
 
-	free(tmp);
+	free(tmpw);
 }
 /* }}} */
-
-/* {{{ proto string sapi_windows_cp_conv_thread_to_utf8(string subject)
- * Convert string from the current thread codepage to UTF-8. */
-PHP_FUNCTION(sapi_windows_cp_conv_thread_to_utf8)
-{
-	char *subj;
-	size_t subj_len;
-	wchar_t *tmp;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &subj, &subj_len) == FAILURE) {
-		return;
-	}
-
-	if (ZEND_SIZE_T_INT_OVFL(subj_len)) {
-		php_error_docref(NULL, E_WARNING, "String is too long");
-		RETURN_NULL();
-	}
-
-	tmp = php_win32_cp_cur_to_w(subj);
-	if (!tmp) {
-		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
-		RETURN_NULL();
-	}
-
-	subj = php_win32_cp_conv_w_to_utf8(tmp, PHP_WIN32_CP_IGNORE_LEN, &subj_len);
-	if (!subj) {
-		free(tmp);
-		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
-		RETURN_NULL();
-	}
-
-	RETVAL_STRINGL(subj, subj_len);
-
-	free(tmp);
-}
 
 /* }}} */
 /*

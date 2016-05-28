@@ -61,16 +61,18 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD);
 
 /* This API is binary safe and expects a \0 terminated input.
    The returned out is \0 terminated, but the length doesn't count \0. */
+PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, size_t in_len, size_t *out_len);
 PW32CP wchar_t *php_win32_cp_conv_utf8_to_w(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_utf8_to_w(in) php_win32_cp_conv_utf8_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_conv_cur_to_w(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_cur_to_w(in) php_win32_cp_conv_cur_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_ascii_to_w(in) php_win32_cp_conv_ascii_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+PW32CP char *php_win32_cp_conv_from_w(DWORD cp, DWORD flags, wchar_t* in, size_t in_len, size_t *out_len);
 PW32CP char *php_win32_cp_conv_w_to_utf8(wchar_t* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_w_to_utf8(in) php_win32_cp_conv_w_to_utf8(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
-PW32CP char *php_win32_cp_conv_w_to_thread(wchar_t* in, size_t in_len, size_t *out_len);
-#define php_win32_cp_w_to_thread(in) php_win32_cp_conv_w_to_thread(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+PW32CP char *php_win32_cp_conv_w_to_cur(wchar_t* in, size_t in_len, size_t *out_len);
+#define php_win32_cp_w_to_cur(in) php_win32_cp_conv_w_to_cur(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env);
 
 /* This function tries to make the best guess to convert any
@@ -119,7 +121,7 @@ __forceinline static char *php_win32_cp_conv_w_to_any(wchar_t* in, size_t in_len
 	if (php_win32_cp_use_unicode()) {
 		return php_win32_cp_conv_w_to_utf8(in, in_len, out_len);
 	} else {
-		return php_win32_cp_conv_w_to_thread(in, in_len, out_len);
+		return php_win32_cp_conv_w_to_cur(in, in_len, out_len);
 	}
 
 	/* Never happens. */

@@ -2686,11 +2686,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_is_cp_utf8, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv_utf8_to_thread, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv_thread_to_utf8, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
+	ZEND_ARG_TYPE_INFO(0, in_codepage, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, out_codepage, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -3391,8 +3389,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(sapi_windows_set_cp, arginfo_sapi_windows_set_cp)
 	PHP_FE(sapi_windows_get_cp, arginfo_sapi_windows_get_cp)
 	PHP_FE(sapi_windows_is_cp_utf8, arginfo_sapi_windows_is_cp_utf8)
-	PHP_FE(sapi_windows_cp_conv_utf8_to_thread, arginfo_sapi_windows_cp_conv_utf8_to_thread)
-	PHP_FE(sapi_windows_cp_conv_thread_to_utf8, arginfo_sapi_windows_cp_conv_thread_to_utf8)
+	PHP_FE(sapi_windows_cp_conv, arginfo_sapi_windows_cp_conv)
 #endif
 	PHP_FE_END
 };
