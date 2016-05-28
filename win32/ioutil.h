@@ -131,12 +131,12 @@ typedef enum {
 
 /* Keep these functions aliased for case some additional handling
    is needed later. */
-__forceinline static wchar_t *php_win32_ioutil_do_any_to_w(const char* in, size_t in_len, size_t *out_len)
+__forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *mb, *ret;
 	size_t mb_len;
 	
-	mb = php_win32_cp_do_any_to_w(in, in_len, &mb_len);
+	mb = php_win32_cp_conv_any_to_w(in, in_len, &mb_len);
 	if (!mb) {
 		return NULL;
 	}
@@ -165,7 +165,7 @@ __forceinline static wchar_t *php_win32_ioutil_do_any_to_w(const char* in, size_
 
 	return ret;
 }/*}}}*/
-#define php_win32_ioutil_any_to_w(in) php_win32_ioutil_do_any_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+#define php_win32_ioutil_any_to_w(in) php_win32_ioutil_conv_any_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
 #define php_win32_ioutil_ascii_to_w php_win32_cp_ascii_to_w
 #define php_win32_ioutil_utf8_to_w php_win32_cp_utf8_to_w

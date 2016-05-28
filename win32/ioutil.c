@@ -438,7 +438,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	
 	start = path;
 
-	startw = pathw = php_win32_ioutil_do_any_to_w(path, len, &pathw_len);
+	startw = pathw = php_win32_ioutil_conv_any_to_w(path, len, &pathw_len);
 	if (!pathw) {
 		return 0;
 	}

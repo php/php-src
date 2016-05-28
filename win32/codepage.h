@@ -78,7 +78,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env);
 /* This function tries to make the best guess to convert any
    given string to a wide char, also prefering the fastest code
    path to unicode. It returns NULL on fail. */
-__forceinline static wchar_t *php_win32_cp_do_any_to_w(const char* in, size_t in_len, size_t *out_len)
+__forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret = NULL;
 
@@ -110,7 +110,7 @@ __forceinline static wchar_t *php_win32_cp_do_any_to_w(const char* in, size_t in
 
 	return ret;
 }/*}}}*/
-#define php_win32_cp_any_to_w(in) php_win32_cp_do_any_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
+#define php_win32_cp_any_to_w(in) php_win32_cp_conv_any_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
 /* This function converts from unicode function output back to PHP. If
 	the PHP's current charset is not compatible with unicode, so the current

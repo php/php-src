@@ -54,7 +54,7 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	resolvedw = php_win32_ioutil_do_any_to_w(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
+	resolvedw = php_win32_ioutil_conv_any_to_w(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
 	if (!resolvedw) {
 		return NULL;
 	}

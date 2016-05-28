@@ -748,7 +748,7 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	cmdw = php_win32_cp_do_any_to_w(command, command_len, &tmp_len);
+	cmdw = php_win32_cp_conv_any_to_w(command, command_len, &tmp_len);
 	if (!cmdw) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		goto exit_fail;
