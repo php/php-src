@@ -520,41 +520,65 @@ PHP_FUNCTION(sapi_windows_is_cp_utf8)
 }
 /* }}} */
 
-/* {{{ proto string sapi_windows_cp_conv(int in_charset, int out_charset, string subject)
+/* {{{ proto string sapi_windows_cp_conv(int in_codepage, int out_codepage, string subject)
  * Convert string from one codepage to another. */
 PHP_FUNCTION(sapi_windows_cp_conv)
 {
 	char *subj, *ret;
 	size_t subj_len, ret_len, tmpw_len;
 	wchar_t *tmpw;
-	zend_long in_cp_id, out_cp_id;
 	const struct php_win32_cp *in_cp, *out_cp;
+	zval *z_in_cp, *z_out_cp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &in_cp_id, &out_cp_id, &subj, &subj_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzs", &z_in_cp, &z_out_cp, &subj, &subj_len) == FAILURE) {
 		return;
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(subj_len)) {
 		php_error_docref(NULL, E_WARNING, "String is too long");
 		RETURN_NULL();
-	} else if (ZEND_LONG_UINT_OVFL(in_cp_id)) {
-		php_error_docref(NULL, E_WARNING, "Argument %d is out of range", in_cp_id);
-		RETURN_NULL();
-	} else if (ZEND_LONG_UINT_OVFL(out_cp_id)) {
-		php_error_docref(NULL, E_WARNING, "Argument %d is out of range", out_cp_id);
-		RETURN_NULL();
+	}
+	
+	if (IS_LONG == Z_TYPE_P(z_in_cp)) {
+		if (ZEND_LONG_UINT_OVFL(Z_LVAL_P(z_in_cp))) {
+			php_error_docref(NULL, E_WARNING, "Argument %d is out of range", Z_LVAL_P(z_in_cp));
+			RETURN_NULL();
+		} 
+
+		in_cp = php_win32_cp_get_by_id((DWORD)Z_LVAL_P(z_in_cp));
+		if (!in_cp) {
+			php_error_docref(NULL, E_WARNING, "Invalid codepage %d", Z_LVAL_P(z_in_cp));
+			RETURN_NULL();
+		}
+	} else {
+		convert_to_string(z_in_cp);
+
+		in_cp = php_win32_cp_get_by_enc(Z_STRVAL_P(z_in_cp));
+		if (!in_cp) {
+			php_error_docref(NULL, E_WARNING, "Invalid charset %s", Z_STRVAL_P(z_in_cp));
+			RETURN_NULL();
+		}
 	}
 
-	in_cp = php_win32_cp_get_by_id((DWORD)in_cp_id);
-	if (!in_cp) {
-		php_error_docref(NULL, E_WARNING, "Invalid codepage %d", in_cp_id);
-		RETURN_NULL();
-	}
+	if (IS_LONG == Z_TYPE_P(z_out_cp)) {
+		if (ZEND_LONG_UINT_OVFL(Z_LVAL_P(z_out_cp))) {
+			php_error_docref(NULL, E_WARNING, "Argument %d is out of range", Z_LVAL_P(z_out_cp));
+			RETURN_NULL();
+		} 
 
-	out_cp = php_win32_cp_get_by_id((DWORD)out_cp_id);
-	if (!out_cp) {
-		php_error_docref(NULL, E_WARNING, "Invalid codepage %d", out_cp_id);
-		RETURN_NULL();
+		out_cp = php_win32_cp_get_by_id((DWORD)Z_LVAL_P(z_out_cp));
+		if (!out_cp) {
+			php_error_docref(NULL, E_WARNING, "Invalid codepage %d", Z_LVAL_P(z_out_cp));
+			RETURN_NULL();
+		}
+	} else {
+		convert_to_string(z_out_cp);
+
+		out_cp = php_win32_cp_get_by_enc(Z_STRVAL_P(z_out_cp));
+		if (!out_cp) {
+			php_error_docref(NULL, E_WARNING, "Invalid charset %s", Z_STRVAL_P(z_out_cp));
+			RETURN_NULL();
+		}
 	}
 
 	tmpw = php_win32_cp_conv_to_w(in_cp->id, in_cp->to_w_fl, subj, subj_len, &tmpw_len);

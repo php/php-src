@@ -2687,8 +2687,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_is_cp_utf8, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
-	ZEND_ARG_TYPE_INFO(0, in_codepage, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, out_codepage, IS_LONG, 0)
+	ZEND_ARG_INFO(0, in_codepage)
+	ZEND_ARG_INFO(0, out_codepage)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
