@@ -646,6 +646,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_getopt, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, opts) /* ARRAY_INFO(0, opts, 1) */
+	ZEND_ARG_INFO(1, optind)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_flush, 0)
@@ -4269,7 +4270,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 }
 /* }}} */
 
-/* {{{ proto array getopt(string options [, array longopts])
+/* {{{ proto array getopt(string options [, array longopts [, int &optind]])
    Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
@@ -4281,11 +4282,18 @@ PHP_FUNCTION(getopt)
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	zval val, *args = NULL, *p_longopts = NULL;
+	zval *zoptind = NULL;
 	int optname_len = 0;
 	opt_struct *opts, *orig_opts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &options, &options_len, &p_longopts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|az/", &options, &options_len, &p_longopts, &zoptind) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	/* Init zoptind to 1 */
+	if (zoptind) {
+		zval_dtor(zoptind);
+		ZVAL_LONG(zoptind, 1);
 	}
 
 	/* Get argv from the global symbol table. We calculate argc ourselves
@@ -4427,6 +4435,11 @@ PHP_FUNCTION(getopt)
 		}
 
 		php_optarg = NULL;
+	}
+
+	/* Set zoptind to php_optind */
+	if (zoptind) {
+		ZVAL_LONG(zoptind, php_optind);
 	}
 
 	free_longopts(orig_opts);
