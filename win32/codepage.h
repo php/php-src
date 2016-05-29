@@ -43,16 +43,16 @@ struct php_win32_cp {
 };
 
 PW32CP BOOL php_win32_cp_use_unicode(void);
-PW32CP const struct php_win32_cp *php_win32_cp_do_setup(char *);
+PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *);
 #define php_win32_cp_setup() php_win32_cp_do_setup(NULL)
-PW32CP const struct php_win32_cp *php_win32_cp_do_update(char *);
+PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *);
 #define php_win32_cp_update() php_win32_cp_do_update(NULL)
 PW32CP const struct php_win32_cp *php_win32_cp_shutdown(void);
 PW32CP const struct php_win32_cp *php_win32_cp_get_current(void);
 PW32CP const struct php_win32_cp *php_win32_cp_get_orig(void);
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id);
 PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id);
-PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(char *enc);
+PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(const char *enc);
 PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD);
 #define php_win32_cp_cli_setup() php_win32_cp_cli_do_setup(0)
 #define php_win32_cp_cli_update() php_win32_cp_cli_do_setup(0)
@@ -68,10 +68,10 @@ PW32CP wchar_t *php_win32_cp_conv_cur_to_w(const char* in, size_t in_len, size_t
 #define php_win32_cp_cur_to_w(in) php_win32_cp_conv_cur_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_ascii_to_w(in) php_win32_cp_conv_ascii_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
-PW32CP char *php_win32_cp_conv_from_w(DWORD out_cp, DWORD flags, wchar_t* in, size_t in_len, size_t *out_len);
-PW32CP char *php_win32_cp_conv_w_to_utf8(wchar_t* in, size_t in_len, size_t *out_len);
+PW32CP char *php_win32_cp_conv_from_w(DWORD out_cp, DWORD flags, const wchar_t* in, size_t in_len, size_t *out_len);
+PW32CP char *php_win32_cp_conv_w_to_utf8(const wchar_t* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_w_to_utf8(in) php_win32_cp_conv_w_to_utf8(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
-PW32CP char *php_win32_cp_conv_w_to_cur(wchar_t* in, size_t in_len, size_t *out_len);
+PW32CP char *php_win32_cp_conv_w_to_cur(const wchar_t* in, size_t in_len, size_t *out_len);
 #define php_win32_cp_w_to_cur(in) php_win32_cp_conv_w_to_cur(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env);
 
@@ -115,7 +115,7 @@ __forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t 
 /* This function converts from unicode function output back to PHP. If
 	the PHP's current charset is not compatible with unicode, so the currently
 	configured CP will be used. */
-__forceinline static char *php_win32_cp_conv_w_to_any(wchar_t* in, size_t in_len, size_t *out_len)
+__forceinline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	return php_win32_cp_conv_w_to_cur(in, in_len, out_len);
 }/*}}}*/
