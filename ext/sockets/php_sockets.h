@@ -70,6 +70,9 @@ struct	sockaddr_un {
 #endif
 
 PHP_SOCKETS_API int php_sockets_le_socket(void);
+PHP_SOCKETS_API php_socket *php_create_socket(void);
+PHP_SOCKETS_API void php_destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+
 
 #define php_sockets_le_socket_name "Socket"
 

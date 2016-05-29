@@ -384,7 +384,7 @@ PHP_SOCKETS_API int php_sockets_le_socket(void) /* {{{ */
 
 /* allocating function to make programming errors due to uninitialized fields
  * less likely */
-static php_socket *php_create_socket(void) /* {{{ */
+PHP_SOCKETS_API php_socket *php_create_socket(void) /* {{{ */
 {
 	php_socket *php_sock = emalloc(sizeof *php_sock);
 
@@ -398,7 +398,7 @@ static php_socket *php_create_socket(void) /* {{{ */
 }
 /* }}} */
 
-static void php_destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
+PHP_SOCKETS_API void php_destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	php_socket *php_sock = rsrc->ptr;
 
