@@ -134,9 +134,9 @@ PHP_FUNCTION(config_get_hash);
 #endif
 
 #if defined(PHP_WIN32)
-PHP_FUNCTION(sapi_windows_set_cp);
-PHP_FUNCTION(sapi_windows_get_cp);
-PHP_FUNCTION(sapi_windows_is_cp_utf8);
+PHP_FUNCTION(sapi_windows_cp_set);
+PHP_FUNCTION(sapi_windows_cp_get);
+PHP_FUNCTION(sapi_windows_cp_is_utf8);
 PHP_FUNCTION(sapi_windows_cp_conv);
 #endif
 

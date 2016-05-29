@@ -8,7 +8,7 @@ function get_active_cp($kind = "")
 
 		return $m[1];
 	} else {
-		return sapi_windows_get_cp($kind);
+		return sapi_windows_cp_get($kind);
 	}
 }
 
@@ -17,7 +17,7 @@ function set_active_cp($cp, $echo = true)
 	if (version_compare(PHP_VERSION, '7.1', '<')) {
 		$ret = exec("chcp $cp");
 	} else {
-		if (!sapi_windows_set_cp($cp)) {
+		if (!sapi_windows_cp_set($cp)) {
 			echo "Failed to set cp $cp\n";
 			return;
 		}

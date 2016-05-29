@@ -455,9 +455,9 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
 
-/* {{{ proto bool sapi_windows_set_cp(int cp)
+/* {{{ proto bool sapi_windows_cp_set(int cp)
  * Set process codepage. */
-PHP_FUNCTION(sapi_windows_set_cp) 
+PHP_FUNCTION(sapi_windows_cp_set) 
 {
 	zend_long id;
 	const struct php_win32_cp *cp;
@@ -485,9 +485,9 @@ PHP_FUNCTION(sapi_windows_set_cp)
 }
 /* }}} */
 
-/* {{{ proto int sapi_windows_get_cp([string kind])
+/* {{{ proto int sapi_windows_cp_get([string kind])
  * Get process codepage. */
-PHP_FUNCTION(sapi_windows_get_cp)
+PHP_FUNCTION(sapi_windows_cp_get)
 {
 	char *kind;
 	size_t kind_len = 0;
@@ -508,9 +508,9 @@ PHP_FUNCTION(sapi_windows_get_cp)
 /* }}} */
 
 
-/* {{{ proto bool sapi_windows_is_cp_utf8(void)
+/* {{{ proto bool sapi_windows_cp_is_utf8(void)
  * Indicates whether the codepage is UTF-8 compatible. */
-PHP_FUNCTION(sapi_windows_is_cp_utf8)
+PHP_FUNCTION(sapi_windows_cp_is_utf8)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -520,7 +520,7 @@ PHP_FUNCTION(sapi_windows_is_cp_utf8)
 }
 /* }}} */
 
-/* {{{ proto string sapi_windows_cp_conv(int in_codepage, int out_codepage, string subject)
+/* {{{ proto string sapi_windows_cp_conv(int|string in_codepage, int|string out_codepage, string subject)
  * Convert string from one codepage to another. */
 PHP_FUNCTION(sapi_windows_cp_conv)
 {
