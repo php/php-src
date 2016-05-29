@@ -113,19 +113,11 @@ __forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t 
 #define php_win32_cp_any_to_w(in) php_win32_cp_conv_any_to_w(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
 /* This function converts from unicode function output back to PHP. If
-	the PHP's current charset is not compatible with unicode, so the current
-	thread CP will be used. The latter is the default behavior in PHP < 7.1,
-	as only ANSI complaint functions was used previously. */
+	the PHP's current charset is not compatible with unicode, so the currently
+	configured CP will be used. */
 __forceinline static char *php_win32_cp_conv_w_to_any(wchar_t* in, size_t in_len, size_t *out_len)
 {/*{{{*/
-	if (php_win32_cp_use_unicode()) {
-		return php_win32_cp_conv_w_to_utf8(in, in_len, out_len);
-	} else {
-		return php_win32_cp_conv_w_to_cur(in, in_len, out_len);
-	}
-
-	/* Never happens. */
-	return NULL;
+	return php_win32_cp_conv_w_to_cur(in, in_len, out_len);
 }/*}}}*/
 #define php_win32_cp_w_to_any(in) php_win32_cp_conv_w_to_any(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
