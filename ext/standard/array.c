@@ -3801,7 +3801,7 @@ PHP_FUNCTION(array_change_keys)
         fci.no_separation = 0;
 
         if (str_key) {
-            ZVAL_STR(&params[0], zend_string_copy(str_key));
+            ZVAL_STR_COPY(&params[0], str_key);
         } else {
             ZVAL_LONG(&params[0], num_key);
         }
@@ -3809,21 +3809,29 @@ PHP_FUNCTION(array_change_keys)
 
         if (zend_call_function(&fci, &fci_cache) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
             zval_dtor(return_value);
-            zval_ptr_dtor(&params[0]);
+            zval_dtor(&params[0]);
+            zval_dtor(&params[1]);
+            efree(params);
             RETURN_NULL();
-        } else {
-            zval_ptr_dtor(&params[0]);
         }
 
+        zval_dtor(&params[0]);
+        zval_dtor(&params[1]);
+
         if (Z_TYPE(result) == IS_STRING) {
-            zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(result), value);
+            value = zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(result), value);
+            zval_add_ref(value);
         } else if (Z_TYPE(result) == IS_LONG) {
-            zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL(result), value);
+            value = zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL(result), value);
+            zval_add_ref(value);
         } else {
             php_error_docref(NULL, E_WARNING, "New key should be either a string or an integer");
-            zval_dtor(return_value);
         }
+
+        zval_ptr_dtor(&result);
     } ZEND_HASH_FOREACH_END();
+
+    efree(params);
 }
 /* }}} */
 
