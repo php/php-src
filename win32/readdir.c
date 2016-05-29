@@ -29,9 +29,7 @@ struct DIR_W32 {
 	HANDLE handle;				/* _findfirst/_findnext handle */
 	int offset;					/* offset into directory */
 	short finished;				/* 1 if there are not more files */
-	struct {
-		WIN32_FIND_DATAW w;
-	} fileinfo;    /* from _findfirst/_findnext */
+	WIN32_FIND_DATAW fileinfo;  /* from _findfirst/_findnext */
 	wchar_t *dirw;		/* the dir we are reading */
 	struct dirent dent;			/* the dirent to return */
 };
@@ -72,7 +70,7 @@ DIR *opendir(const char *dir)
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
 
-	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo.w))) == INVALID_HANDLE_VALUE) {
+	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
 		DWORD err = GetLastError();
 		if (err == ERROR_NO_MORE_FILES || err == ERROR_FILE_NOT_FOUND) {
 			dp->finished = 1;
@@ -102,13 +100,13 @@ struct dirent *readdir(DIR *dp)
 		return NULL;
 
 	if (dp->offset != 0) {
-		if (FindNextFileW(dp->handle, &(dp->fileinfo.w)) == 0) {
+		if (FindNextFileW(dp->handle, &(dp->fileinfo)) == 0) {
 			dp->finished = 1;
 			return NULL;
 		}
 	}
 
-	_tmp = php_win32_ioutil_w_to_any(dp->fileinfo.w.cFileName);
+	_tmp = php_win32_ioutil_w_to_any(dp->fileinfo.cFileName);
 	if (!_tmp) {
 		/* wide to utf8 failed, should never happen. */
 		return NULL;
@@ -135,14 +133,14 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 	}
 
 	if (dp->offset != 0) {
-		if (FindNextFileW(dp->handle, &(dp->fileinfo.w)) == 0) {
+		if (FindNextFileW(dp->handle, &(dp->fileinfo)) == 0) {
 			dp->finished = 1;
 			*result = NULL;
 			return 0;
 		}
 	}
 
-	_tmp = php_win32_ioutil_w_to_any(dp->fileinfo.w.cFileName);
+	_tmp = php_win32_ioutil_w_to_any(dp->fileinfo.cFileName);
 	if (!_tmp) {
 		/* wide to utf8 failed, should never happen. */
 		result = NULL;
@@ -205,7 +203,7 @@ int rewinddir(DIR *dp)
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"/*");
 
-	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo.w))) == INVALID_HANDLE_VALUE) {
+	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
 		dp->finished = 1;
 	}
 
