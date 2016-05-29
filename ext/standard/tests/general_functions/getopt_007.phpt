@@ -1,7 +1,7 @@
 --TEST--
 getopt#007 (optind #2)
 --ARGS--
--a 1 -b 2 -- test
+-a 1 -b 2 -- -c nope test
 --INI--
 register_argc_argv=On
 variables_order=GPS
