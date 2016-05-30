@@ -1179,7 +1179,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 		generator = (zend_generator *) Z_OBJ_P(EX(return_value));
 		generator->execute_data = gen_execute_data;
 		generator->frozen_call_stack = NULL;
-		memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
+		generator->execute_fake.opline = NULL;
+		generator->execute_fake.func = NULL;
+		generator->execute_fake.prev_execute_data = NULL;
 		ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
 
 		gen_execute_data->opline = opline + 1;
