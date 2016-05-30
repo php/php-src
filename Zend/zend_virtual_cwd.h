@@ -53,6 +53,7 @@
 #endif
 
 #ifdef ZEND_WIN32
+#include <wchar.h>
 #include "readdir.h"
 #include <sys/utime.h>
 /* mode_t isn't defined on Windows */
