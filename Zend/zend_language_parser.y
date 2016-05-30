@@ -1015,6 +1015,7 @@ lexical_var_list:
 lexical_var:
 		T_VARIABLE		{ $$ = $1; }
 	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = 1; }
+	|	'&' '$' '{' T_CONSTANT_ENCAPSED_STRING '}'	{ $$ = $4; $$->attr = 1; }
 	|	'$' '{' T_CONSTANT_ENCAPSED_STRING '}'	{ $$ = $3; }
 ;
 
