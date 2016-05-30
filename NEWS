@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - XMLRPC:
   . Fixed #72155 (use-after-free caused by get_zval_xmlrpc_type). (Joe)
 
+- Zip:
+  . Fixed ug #72258 (ZipArchive converts filenames to unrecoverable form).
+    (Anatol)
+
 26 May 2016 PHP 7.0.7
 
 - Core:
