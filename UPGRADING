@@ -756,6 +756,14 @@ out, that the corresponding SDK isn't available anymore.
       - 'gd PS font'
       - 'gd PS encoding'
 
+- Zip
+  . Filename encoding flags, as of 7.0.8
+    - ZipArchive::FL_ENC_GUESS
+    - ZipArchive::FL_ENC_RAW
+    - ZipArchive::FL_ENC_STRICT
+    - ZipArchive::FL_ENC_UTF_8
+    - ZipArchive::FL_ENC_CP437
+
 ========================================
 11. Changes to INI File Handling
 ========================================
