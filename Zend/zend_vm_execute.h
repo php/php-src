@@ -1692,6 +1692,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_TRAITS_SPEC_HANDLER(ZEND_
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_helper_SPEC(uint32_t try_catch_offset, uint32_t op_num ZEND_OPCODE_HANDLER_ARGS_DC)
 {
+	/* May be NULL during generator closing (only finally blocks are executed) */
 	zend_object *ex = EG(exception);
 
 	/* Walk try/catch/finally structures upwards, performing the necessary actions */
@@ -1699,7 +1700,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_hel
 		zend_try_catch_element *try_catch =
 			&EX(func)->op_array.try_catch_array[try_catch_offset];
 
-		if (op_num < try_catch->catch_op) {
+		if (op_num < try_catch->catch_op && ex) {
 			/* Go to catch block */
 			cleanup_live_vars(execute_data, op_num, try_catch->catch_op);
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->catch_op]);
@@ -1719,7 +1720,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_hel
 			/* Chain potential exception from wrapping finally block */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 			if (Z_OBJ_P(fast_call)) {
-				zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
+				if (ex) {
+					zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
+				} else {
+					EG(exception) = Z_OBJ_P(fast_call);
+				}
 				ex = Z_OBJ_P(fast_call);
 			}
 		}
@@ -3823,6 +3828,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 
 	SAVE_OPLINE();
 	val = EX_CONSTANT(opline->op1);
+
+	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
+		zend_throw_error(NULL, "Cannot use \"yield from\" in a force-closed generator");
+
+		HANDLE_EXCEPTION();
+	}
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);
@@ -12881,6 +12892,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 	SAVE_OPLINE();
 	val = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 
+	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
+		zend_throw_error(NULL, "Cannot use \"yield from\" in a force-closed generator");
+		zval_ptr_dtor_nogc(free_op1);
+		HANDLE_EXCEPTION();
+	}
+
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);
 		if (IS_TMP_VAR != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
@@ -16739,6 +16756,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+
+	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
+		zend_throw_error(NULL, "Cannot use \"yield from\" in a force-closed generator");
+		zval_ptr_dtor_nogc(free_op1);
+		HANDLE_EXCEPTION();
+	}
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);
@@ -38241,6 +38264,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
+
+	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
+		zend_throw_error(NULL, "Cannot use \"yield from\" in a force-closed generator");
+
+		HANDLE_EXCEPTION();
+	}
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);

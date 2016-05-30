@@ -43,7 +43,7 @@ typedef struct _zend_ssa_pi_constraint {
 	int                    min_var;
 	int                    max_var;
 	int                    min_ssa_var; /* ((min_var>0) ? MIN(ssa_var) : 0) + range.min */
-	int                    max_ssa_var; /* ((man_var>0) ? MAX(ssa_var) : 0) + range.man */
+	int                    max_ssa_var; /* ((max_var>0) ? MAX(ssa_var) : 0) + range.max */
 	zend_ssa_negative_lat  negative;
 	uint32_t               type_mask;   /* If -1 this is a range constraint */
 } zend_ssa_pi_constraint;
