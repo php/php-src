@@ -30,7 +30,7 @@ string(4) "bool"
 string(4) "bool"
 
 *** typeof test extended: bool ***
-string(4) "bool"
-string(4) "bool"
-string(4) "bool"
-string(4) "bool"
+string(10) "bool false"
+string(10) "bool false"
+string(9) "bool true"
+string(9) "bool true"

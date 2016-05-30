@@ -472,7 +472,15 @@ PHP_FUNCTION(typeof)
 
 		case IS_FALSE:
 		case IS_TRUE:
-		case _IS_BOOL:
+			if (extended) {
+				if (Z_TYPE_P(var) == IS_FALSE) {
+					RETURN_TYPE_NAME(TYPE_BOOL " " TYPE_FALSE);
+				}
+
+				if (Z_TYPE_P(var) == IS_TRUE) {
+					RETURN_TYPE_NAME(TYPE_BOOL " " TYPE_TRUE);
+				}
+			}
 			RETURN_TYPE_NAME(TYPE_BOOL);
 
 		/* case IS_FLOAT: */
@@ -493,6 +501,8 @@ PHP_FUNCTION(typeof)
 				if (Z_DVAL_P(var) < -0.0) {
 					RETURN_TYPE_NAME("negative " TYPE_FLOAT);
 				}
+
+				RETURN_TYPE_NAME("zero " TYPE_FLOAT);
 			}
 			RETURN_TYPE_NAME(TYPE_FLOAT);
 
@@ -506,11 +516,12 @@ PHP_FUNCTION(typeof)
 				if (Z_LVAL_P(var) < -0) {
 					RETURN_TYPE_NAME("negative " TYPE_INT);
 				}
+
+				RETURN_TYPE_NAME("zero " TYPE_INT);
 			}
 			RETURN_TYPE_NAME(TYPE_INT);
 
 		case IS_NULL:
-		case IS_UNDEF:
 			RETURN_TYPE_NAME(TYPE_NULL);
 
 		case IS_OBJECT:
