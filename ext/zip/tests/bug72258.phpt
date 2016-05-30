@@ -1,5 +1,5 @@
 --TEST--
-Bug #72258 ZipArchive converts fns to unrecoverable form
+Bug #72258 ZipArchive converts filenames to unrecoverable form
 --SKIPIF--
 <?php
 /* $Id$ */
