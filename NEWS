@@ -32,6 +32,9 @@ PHP                                                                        NEWS
 - XML:
   . Fixed #72206 (xml_parser_create/xml_parser_free leaks mem). (Joe)
 
+- XMLRPC:
+  . Fixed #72155 (use-after-free caused by get_zval_xmlrpc_type). (Joe)
+
 26 May 2016 PHP 7.0.7
 
 - Core:
