@@ -93,6 +93,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSIGN_ADD:
 					case ZEND_ASSIGN_SUB:

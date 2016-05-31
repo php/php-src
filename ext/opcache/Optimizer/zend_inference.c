@@ -2841,6 +2841,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_SEND_VAR_EX:
 		case ZEND_SEND_VAR_NO_REF:
+		case ZEND_SEND_VAR_NO_REF_EX:
 		case ZEND_SEND_REF:
 // TODO: ???
 			if (ssa_ops[i].op1_def >= 0) {
@@ -3197,6 +3198,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 							break;
 						case ZEND_SEND_VAR_EX:
 						case ZEND_SEND_VAR_NO_REF:
+						case ZEND_SEND_VAR_NO_REF_EX:
 						case ZEND_SEND_REF:
 						case ZEND_ASSIGN_REF:
 							tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;

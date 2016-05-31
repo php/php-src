@@ -419,17 +419,10 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					opline->opcode = ZEND_SEND_VAL_EX;
 					break;
 				case ZEND_SEND_VAR_NO_REF:
-					if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
-						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
-							zval_dtor(val);
-							return 0;
-						}
-						opline->extended_value = 0;
-						opline->opcode = ZEND_SEND_VAL_EX;
-					} else {
-						opline->extended_value = 0;
-						opline->opcode = ZEND_SEND_VAL;
-					}
+					zval_dtor(val);
+					return 0;
+				case ZEND_SEND_VAR_NO_REF_EX:
+					opline->opcode = ZEND_SEND_VAL;
 					break;
 				case ZEND_SEND_USER:
 					opline->opcode = ZEND_SEND_VAL_EX;
