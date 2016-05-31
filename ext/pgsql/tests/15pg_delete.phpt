@@ -23,5 +23,5 @@ else {
 ?>
 --EXPECT--
 DELETE FROM "php_pgsql_test" WHERE "num"=1234;
-DELETE FROM "php_pgsql_test" WHERE "num='1234';
+DELETE FROM "php_pgsql_test" WHERE "num"='1234';
 Ok
