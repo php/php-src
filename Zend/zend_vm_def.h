@@ -4078,7 +4078,9 @@ ZEND_VM_HANDLER(41, ZEND_GENERATOR_CREATE, ANY, ANY)
 		generator = (zend_generator *) Z_OBJ_P(EX(return_value));
 		generator->execute_data = gen_execute_data;
 		generator->frozen_call_stack = NULL;
-		memset(&generator->execute_fake, 0, sizeof(zend_execute_data));
+		generator->execute_fake.opline = NULL;
+		generator->execute_fake.func = NULL;
+		generator->execute_fake.prev_execute_data = NULL;
 		ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
 
 		gen_execute_data->opline = opline + 1;
@@ -4250,7 +4252,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ADDR)
 	}
 }
 
-ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, NUM)
+ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMPVAR, NUM)
 {
 	USE_OPLINE
 	zval *value, *arg;
@@ -4337,29 +4339,65 @@ ZEND_VM_HANDLER(117, ZEND_SEND_VAR, VAR|CV, NUM)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR, NUM, SEND)
+ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR, NUM)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *varptr, *arg;
 
-	if (!(opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND)) {
-		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_VAR);
-		}
-	}
-
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	if (EXPECTED(Z_ISREF_P(varptr) ||
-	    ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
-	     ((opline->extended_value & ZEND_ARG_SEND_SILENT) != 0) :
-	     ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num
-	    )))) {
+	if (EXPECTED(Z_ISREF_P(varptr))) {
 		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 		ZVAL_COPY_VALUE(arg, varptr);
 
 		ZEND_VM_NEXT_OPCODE();
+	}
+
+	SAVE_OPLINE();
+	zend_error(E_NOTICE, "Only variables should be passed by reference");
+
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	ZVAL_COPY_VALUE(arg, varptr);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HANDLER(50, ZEND_SEND_VAR_NO_REF_EX, VAR, NUM, SPEC(QUICK_ARG))
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *varptr, *arg;
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+		if (!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_VAR);
+		}
+
+		varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+		if (EXPECTED(Z_ISREF_P(varptr) ||
+		    QUICK_ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+			arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+			ZVAL_COPY_VALUE(arg, varptr);
+
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else {
+		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_VAR);
+		}
+
+		varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+		if (EXPECTED(Z_ISREF_P(varptr) ||
+		    ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+			arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+			ZVAL_COPY_VALUE(arg, varptr);
+
+			ZEND_VM_NEXT_OPCODE();
+		}
 	}
 
 	SAVE_OPLINE();
@@ -7147,6 +7185,7 @@ ZEND_VM_HANDLER(155, ZEND_BIND_TRAITS, ANY, ANY)
 
 ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_catch_offset, uint32_t op_num)
 {
+	/* May be NULL during generator closing (only finally blocks are executed) */
 	zend_object *ex = EG(exception);
 
 	/* Walk try/catch/finally structures upwards, performing the necessary actions */
@@ -7154,7 +7193,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 		zend_try_catch_element *try_catch =
 			&EX(func)->op_array.try_catch_array[try_catch_offset];
 
-		if (op_num < try_catch->catch_op) {
+		if (op_num < try_catch->catch_op && ex) {
 			/* Go to catch block */
 			cleanup_live_vars(execute_data, op_num, try_catch->catch_op);
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->catch_op]);
@@ -7174,7 +7213,11 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 			/* Chain potential exception from wrapping finally block */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 			if (Z_OBJ_P(fast_call)) {
-				zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
+				if (ex) {
+					zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
+				} else {
+					EG(exception) = Z_OBJ_P(fast_call);
+				}
 				ex = Z_OBJ_P(fast_call);
 			}
 		}
@@ -7491,6 +7534,12 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+
+	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
+		zend_throw_error(NULL, "Cannot use \"yield from\" in a force-closed generator");
+		FREE_OP1();
+		HANDLE_EXCEPTION();
+	}
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);

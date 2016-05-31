@@ -55,7 +55,6 @@
 #define ZEND_VM_EXT_TYPE         0x07000000
 #define ZEND_VM_EXT_EVAL         0x08000000
 #define ZEND_VM_EXT_SRC          0x0b000000
-#define ZEND_VM_EXT_SEND         0x0c000000
 #define ZEND_VM_NO_CONST_CONST   0x40000000
 #define ZEND_VM_COMMUTATIVE      0x80000000
 #define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)
@@ -117,6 +116,7 @@ END_EXTERN_C()
 #define ZEND_JMPZ_EX                          46
 #define ZEND_JMPNZ_EX                         47
 #define ZEND_CASE                             48
+#define ZEND_SEND_VAR_NO_REF_EX               50
 #define ZEND_BOOL                             52
 #define ZEND_FAST_CONCAT                      53
 #define ZEND_ROPE_INIT                        54

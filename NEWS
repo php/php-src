@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #62814 (It is possible to stiffen child class members visibility).
     (Nikita)
   . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
+  . Fixed bug #71604 (Aborted Generators continue after nested finally).
+    (Nikita)
   . Fixed bug #71572 (String offset assignment from an empty string inserts
     null byte). (Francois)
   . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
