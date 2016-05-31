@@ -103,7 +103,7 @@ __forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t 
 				const struct php_win32_cp *acp = php_win32_cp_get_by_id(GetACP());
 
 				if (acp) {
-					ret = php_win32_cp_conv_to_w(acp->id, acp->from_w_fl, in, in_len, out_len);
+					ret = php_win32_cp_conv_to_w(acp->id, acp->to_w_fl, in, in_len, out_len);
 				}
 			}
 		}
