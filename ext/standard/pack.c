@@ -104,41 +104,126 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 }
 /* }}} */
 
-
-/* {{{ php_pack_is_little_endian
+/* {{{ php_pack_reverse_int32
  */
-static int php_pack_is_little_endian()
+inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
-	int machine_endian_check = 1;
-	
-	return ((char *)&machine_endian_check)[0];
+    uint32_t result;
+    result = ((arg & 0xFF) << 24) | ((arg & 0xFF00) << 8) | ((arg >> 8) & 0xFF00) | ((arg >> 24) & 0xFF);
+
+	return result;
 }
 /* }}} */
 
-
-/* {{{ php_pack_memcpy
+/* {{{ php_pack
  */
-static void php_pack_memcpy(int is_little_endian, void * dst, void * src, size_t size)
+inline uint64_t php_pack_reverse_int64(uint64_t arg)
 {
-	int is_sys_little_endian = php_pack_is_little_endian();
-	
-	if (is_little_endian == is_sys_little_endian) {
-		/* 
-		  System and input uses same endian, simply perform memcpy 
-		*/
-		memcpy(dst, src, size);
-	} else {
-		/*
-		  Copy to dst from last to first 
-		*/
-		src = src + size - 1;
-		do {
-			*(char *) dst = *(char *)src;
-			++dst;
-			--src; 
-		} while (-- size);
+	union Swap64 {
+		uint64_t i;
+		uint32_t ul[2];
+	} tmp, result;
+	tmp.i = arg;
+	result.ul[0] = php_pack_reverse_int32(tmp.ul[1]);
+	result.ul[1] = php_pack_reverse_int32(tmp.ul[0]);
+
+	return result.i;
+}
+/* }}} */
+
+/* {{{ php_pack_copy_float
+ */
+static void php_pack_copy_float(int is_little_endian, void * dst, float f)
+{
+	union Copy32 {
+		float f;
+		uint32_t i;
+	} m;
+	m.f = f;
+
+#ifdef WORDS_BIGENDIAN
+	if (is_little_endian) {
+		m.i = php_pack_reverse_int32(m.i);
 	}
-	
+#else /* WORDS_BIGENDIAN */
+	if (!is_little_endian) {
+		m.i = php_pack_reverse_int32(m.i);
+	}
+#endif /* WORDS_BIGENDIAN */
+
+	memcpy(dst, &m.f, sizeof(float));
+}
+/* }}} */
+
+/* {{{ php_pack_copy_double
+ */
+static void php_pack_copy_double(int is_little_endian, void * dst, double d)
+{
+	union Copy64 {
+		double d;
+		uint64_t i;
+	} m;
+	m.d = d;
+
+#ifdef WORDS_BIGENDIAN
+	if (is_little_endian) {
+		m.i = php_pack_reverse_int64(m.i);
+	}
+#else /* WORDS_BIGENDIAN */
+	if (!is_little_endian) {
+		m.i = php_pack_reverse_int64(m.i);
+	}
+#endif /* WORDS_BIGENDIAN */
+
+	memcpy(dst, &m.d, sizeof(double));
+}
+/* }}} */
+
+/* {{{ php_pack_parse_float
+ */
+static float php_pack_parse_float(int is_little_endian, void * src)
+{
+	union Copy32 {
+		float f;
+		uint32_t i;
+	} m;
+	memcpy(&m.i, src, sizeof(float));
+
+#ifdef WORDS_BIGENDIAN
+	if (is_little_endian) {
+		m.i = php_pack_reverse_int32(m.i);
+	}
+#else /* WORDS_BIGENDIAN */
+	if (!is_little_endian) {
+		m.i = php_pack_reverse_int32(m.i);
+	}
+#endif /* WORDS_BIGENDIAN */
+
+	return m.f;
+}
+/* }}} */
+
+/* {{{ php_pack_parse_double
+ */
+static double php_pack_parse_double(int is_little_endian, void * src)
+{
+	union Copy64 {
+		double d;
+		uint64_t i;
+	} m;
+	memcpy(&m.i, src, sizeof(double));
+
+#ifdef WORDS_BIGENDIAN
+	if (is_little_endian) {
+		m.i = php_pack_reverse_int64(m.i);
+	}
+#else /* WORDS_BIGENDIAN */
+	if (!is_little_endian) {
+		m.i = php_pack_reverse_int64(m.i);
+	}
+#endif /* WORDS_BIGENDIAN */
+
+	return m.d;
 }
 /* }}} */
 
@@ -525,7 +610,7 @@ PHP_FUNCTION(pack)
 				/* pack little endian float */
 				while (arg-- > 0) {
 					float v = (float) zval_get_double(&argv[currentarg++]);
-					php_pack_memcpy(1, &ZSTR_VAL(output)[outputpos], &v, sizeof(float));
+					php_pack_copy_float(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
 				
@@ -535,7 +620,7 @@ PHP_FUNCTION(pack)
 				/* pack big endian float */
 				while (arg-- > 0) {
 					float v = (float) zval_get_double(&argv[currentarg++]);
-					php_pack_memcpy(0, &ZSTR_VAL(output)[outputpos], &v, sizeof(float));
+					php_pack_copy_float(0, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
 				break;
@@ -554,7 +639,7 @@ PHP_FUNCTION(pack)
 				/* pack little endian double */
 				while (arg-- > 0) {
 					double v = (double) zval_get_double(&argv[currentarg++]);
-					php_pack_memcpy(1, &ZSTR_VAL(output)[outputpos], &v, sizeof(double));
+					php_pack_copy_double(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
 				break;
@@ -564,7 +649,7 @@ PHP_FUNCTION(pack)
 				/* pack big endian double */
 				while (arg-- > 0) {
 					double v = (double) zval_get_double(&argv[currentarg++]);
-					php_pack_memcpy(0, &ZSTR_VAL(output)[outputpos], &v, sizeof(double));
+					php_pack_copy_double(0, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
 				break;
@@ -1041,9 +1126,9 @@ PHP_FUNCTION(unpack)
 						float v;
 
 						if (type == 'g') {
-							php_pack_memcpy(1, &v, &input[inputpos], sizeof(float));
+							v = php_pack_parse_float(1, &input[inputpos]);
 						} else if (type == 'G') {
-							php_pack_memcpy(0, &v, &input[inputpos], sizeof(float));
+							v = php_pack_parse_float(0, &input[inputpos]);
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
@@ -1059,9 +1144,9 @@ PHP_FUNCTION(unpack)
 					{
 						double v;
 						if (type == 'e') {
-							php_pack_memcpy(1, &v, &input[inputpos], sizeof(double));
+							v = php_pack_parse_double(1, &input[inputpos]);
 						} else if (type == 'E') {
-							php_pack_memcpy(0, &v, &input[inputpos], sizeof(double));
+							v = php_pack_parse_double(0, &input[inputpos]);
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(double));
 						}
