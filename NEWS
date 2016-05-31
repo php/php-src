@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #72197 (pg_lo_create arbitrary read). (Anatol)
 
 - Standard:
+  . Fixed bug #72300 (ignore_user_abort(false) has no effect). (Laruence)
   . Fixed bug #72229 (Wrong reference when serialize/unserialize an object).
     (Laruence)
   . Fixed bug #72193 (dns_get_record returns array containing elements of
