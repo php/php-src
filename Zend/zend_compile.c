@@ -3083,7 +3083,6 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		znode arg_node;
 		zend_op *opline;
 		zend_uchar opcode;
-		zend_ulong flags = 0;
 
 		if (arg->kind == ZEND_AST_UNPACK) {
 			uses_arg_unpack = 1;
@@ -3109,13 +3108,16 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					/* Function call was converted into builtin instruction */
 					opcode = ZEND_SEND_VAL;
 				} else {
-					opcode = ZEND_SEND_VAR_NO_REF;
-					flags |= ZEND_ARG_SEND_FUNCTION;
-					if (fbc && ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
-						flags |= ZEND_ARG_SEND_BY_REF;
-						if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
-							flags |= ZEND_ARG_SEND_SILENT;
+					if (fbc) {
+						if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
+							opcode = ZEND_SEND_VAR_NO_REF;
+						} else if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
+							opcode = ZEND_SEND_VAL;
+						} else {
+							opcode = ZEND_SEND_VAR;
 						}
+					} else {
+						opcode = ZEND_SEND_VAR_NO_REF_EX;
 					}
 				}
 			} else if (fbc) {
@@ -3135,9 +3137,17 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			zend_compile_expr(&arg_node, arg);
 			ZEND_ASSERT(arg_node.op_type != IS_CV);
 			if (arg_node.op_type == IS_VAR) {
-				opcode = ZEND_SEND_VAR_NO_REF;
-				if (fbc && ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
-					flags |= ZEND_ARG_SEND_BY_REF;
+				/* pass ++$a or something similar */
+				if (fbc) {
+					if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
+						opcode = ZEND_SEND_VAR_NO_REF;
+					} else if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
+						opcode = ZEND_SEND_VAL;
+					} else {
+						opcode = ZEND_SEND_VAR;
+					}
+				} else {
+					opcode = ZEND_SEND_VAR_NO_REF_EX;
 				}
 			} else {
 				if (fbc) {
@@ -3154,20 +3164,6 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		opline = zend_emit_op(NULL, opcode, &arg_node, NULL);
 		opline->op2.opline_num = arg_num;
 		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, arg_num);
-
-		if (opcode == ZEND_SEND_VAR_NO_REF) {
-			if (fbc) {
-				flags |= ZEND_ARG_COMPILE_TIME_BOUND;
-			}
-			if ((flags & ZEND_ARG_COMPILE_TIME_BOUND) && !(flags & ZEND_ARG_SEND_BY_REF)) {
-				opline->opcode = ZEND_SEND_VAR;
-				opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
-			} else {
-				opline->extended_value = flags;
-			}
-		} else if (fbc) {
-			opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
-		}
 	}
 
 	return arg_count;

@@ -86,7 +86,7 @@ $vm_op_flags = array(
 	// unused 0x09000000,
 	// unused 0x0a000000,
 	"ZEND_VM_EXT_SRC"         => 0x0b000000,
-	"ZEND_VM_EXT_SEND"        => 0x0c000000,
+	// unused 0x0c000000,
 	"ZEND_VM_NO_CONST_CONST"  => 0x40000000,
 	"ZEND_VM_COMMUTATIVE"     => 0x80000000,
 );
@@ -128,7 +128,6 @@ $vm_ext_decode = array(
 	"ARG_NUM"              => ZEND_VM_EXT_ARG_NUM,
 	"REF"                  => ZEND_VM_EXT_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
-	"SEND"                 => ZEND_VM_EXT_SEND,
 );
 
 $vm_kind_name = array(

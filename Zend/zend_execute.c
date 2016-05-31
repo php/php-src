@@ -2468,6 +2468,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_SEND_USER:
 						if (level == 0) {
 							ZEND_CALL_NUM_ARGS(call) = opline->op2.num;

@@ -104,6 +104,7 @@ static void zend_collect_args_info(zend_call_info *call_info)
 			case ZEND_SEND_VAR_EX:
 			case ZEND_SEND_REF:
 			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_VAR_NO_REF_EX:
 				num = opline->op2.num;
 				if (num > 0) {
 					num--;
