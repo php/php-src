@@ -4739,9 +4739,29 @@ ZEND_VM_HANDLER(63, ZEND_RECV, NUM, ANY)
 	uint32_t arg_num = opline->op1.num;
 
 	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
+		zend_execute_data *ptr = EX(prev_execute_data);
+
 		SAVE_OPLINE();
-		zend_verify_missing_arg(execute_data, arg_num, CACHE_ADDR(opline->op2.num));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+			zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
+				EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+				EX(func)->common.scope ? "::" : "",
+				ZSTR_VAL(EX(func)->common.function_name),
+				EX_NUM_ARGS(),
+				ZSTR_VAL(ptr->func->op_array.filename),
+				ptr->opline->lineno,
+				EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
+				EX(func)->common.required_num_args);
+		} else {
+			zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed and %s %d expected",
+				EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+				EX(func)->common.scope ? "::" : "",
+				ZSTR_VAL(EX(func)->common.function_name),
+				EX_NUM_ARGS(),
+				EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
+				EX(func)->common.required_num_args);
+		}
+		HANDLE_EXCEPTION();
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 
