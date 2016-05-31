@@ -218,8 +218,6 @@ PW32CP char *php_win32_cp_conv_from_w(DWORD cp, DWORD flags, const wchar_t* in, 
 	return php_win32_cp_from_w_int(in, in_len, out_len, cp, flags);
 }/*}}}*/
 
-/* #define PHP_WIN32_CP_ENC_STR_UTF8(enc) ((len = strlen(enc)) != 0 && sizeof("UTF-8")-1 == len && (zend_binary_strcasecmp(enc, len, "UTF-8", sizeof("UTF-8")-1) == 0))*/
-
 /* This is only usable after the startup phase*/
 __forceinline static char *php_win32_cp_get_enc(void)
 {/*{{{*/
