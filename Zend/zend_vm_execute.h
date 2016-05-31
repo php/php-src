@@ -31851,17 +31851,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDL
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_THIS_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *result = EX_VAR(opline->result.var);
 
 	if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+		zval *result = EX_VAR(opline->result.var);
+
 		ZVAL_OBJ(result, Z_OBJ(EX(This)));
 		Z_ADDREF_P(result);
 		ZEND_VM_NEXT_OPCODE();
 	} else {
-		ZVAL_NULL(result);
 		SAVE_OPLINE();
-		zend_error(E_NOTICE,"Undefined variable: this");
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		zend_throw_error(NULL, "Using $this when not in object context");
+		HANDLE_EXCEPTION();
 	}
 }
 

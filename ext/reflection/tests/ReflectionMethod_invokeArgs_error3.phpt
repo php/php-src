@@ -14,7 +14,11 @@ class TestClass {
 
     public static function staticMethod() {
         echo "Called staticMethod()\n";
-        var_dump($this);
+        try {
+	        var_dump($this);
+		} catch (Throwable $e) {
+			echo "Exception: " . $e->getMessage() . "\n";
+		}
     }
 
     private static function privateMethod() {
@@ -103,9 +107,7 @@ NULL
 Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, boolean given in %s on line %d
 NULL
 Called staticMethod()
-
-Notice: Undefined variable: this in %s on line %d
-NULL
+Exception: Using $this when not in object context
 NULL
 
 Private method:
