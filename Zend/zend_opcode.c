@@ -534,58 +534,6 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	}
 }
 
-static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
-{
-	int i;
-	uint32_t finally_num = (uint32_t)-1;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_num >= op_array->try_catch_array[i].finally_op
-				&& op_num < op_array->try_catch_array[i].finally_end) {
-			finally_num = i;
-		}
-	}
-
-	if (finally_num != (uint32_t)-1) {
-		/* Must be ZEND_FAST_CALL */
-		ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[finally_num].finally_op - 2].opcode == ZEND_FAST_CALL);
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-		op_array->opcodes[op_num].op2.num = finally_num;
-	}
-}
-
-static void zend_resolve_finally_ret(zend_op_array *op_array, uint32_t op_num)
-{
-	int i;
-	uint32_t finally_num = (uint32_t)-1;
-	uint32_t catch_num = (uint32_t)-1;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].try_op > op_num) {
-			break;
-		}
-		if (op_num < op_array->try_catch_array[i].finally_op) {
-			finally_num = i;
-		}
-		if (op_num < op_array->try_catch_array[i].catch_op) {
-			catch_num = i;
-		}
-	}
-
-	if (finally_num != (uint32_t)-1 &&
-	    (catch_num == (uint32_t)-1 ||
-	     op_array->try_catch_array[catch_num].catch_op >=
-	     op_array->try_catch_array[finally_num].finally_op)) {
-		/* in case of unhandled exception return to upward finally block */
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_FINALLY;
-		op_array->opcodes[op_num].op2.num = finally_num;
-	} else if (catch_num != (uint32_t)-1) {
-		/* in case of unhandled exception return to upward catch block */
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_CATCH;
-		op_array->opcodes[op_num].op2.num = catch_num;
-	}
-}
-
 static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const zend_op *opline) {
 	int nest_levels = opline->op2.num;
 	int array_offset = opline->op1.num;
@@ -634,11 +582,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		switch (opline->opcode) {
 			case ZEND_FAST_CALL:
 				opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
-				zend_resolve_fast_call(op_array, opline - op_array->opcodes);
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				break;
-			case ZEND_FAST_RET:
-				zend_resolve_finally_ret(op_array, opline - op_array->opcodes);
 				break;
 			case ZEND_BRK:
 			case ZEND_CONT:

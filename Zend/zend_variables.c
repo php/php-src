@@ -30,10 +30,6 @@
 
 ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
-	if (--GC_REFCOUNT(p)) {
-		return;
-	}
-
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
 		case IS_CONSTANT: {
@@ -44,54 +40,6 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
-				zend_array_destroy(arr);
-				break;
-			}
-		case IS_CONSTANT_AST: {
-				zend_ast_ref *ast = (zend_ast_ref*)p;
-
-				zend_ast_destroy_and_free(ast->ast);
-				efree_size(ast, sizeof(zend_ast_ref));
-				break;
-			}
-		case IS_OBJECT: {
-				zend_object *obj = (zend_object*)p;
-
-				zend_objects_store_del(obj);
-				break;
-			}
-		case IS_RESOURCE: {
-				zend_resource *res = (zend_resource*)p;
-
-				/* destroy resource */
-				zend_list_free(res);
-				break;
-			}
-		case IS_REFERENCE: {
-				zend_reference *ref = (zend_reference*)p;
-
-				i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC);
-				efree_size(ref, sizeof(zend_reference));
-				break;
-			}
-		default:
-			break;
-	}
-}
-
-ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
-{
-	switch (GC_TYPE(p)) {
-		case IS_STRING:
-		case IS_CONSTANT: {
-				zend_string *str = (zend_string*)p;
-				CHECK_ZVAL_STRING_REL(str);
-				zend_string_free(str);
-				break;
-			}
-		case IS_ARRAY: {
-				zend_array *arr = (zend_array*)p;
-
 				zend_array_destroy(arr);
 				break;
 			}

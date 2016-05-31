@@ -677,7 +677,7 @@ try_again:
 			zval tmp;
 			ZVAL_COPY_VALUE(&tmp, op);
 			object_init(op);
-			zend_hash_str_add_new(Z_OBJPROP_P(op), "scalar", sizeof("scalar")-1, &tmp);
+			zend_hash_add_new(Z_OBJPROP_P(op), CG(known_strings)[ZEND_STR_SCALAR], &tmp);
 			break;
 		}
 	}
@@ -2964,6 +2964,9 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 		}
 		if (i == needle_len) {
 			return p;
+		}
+		if (UNEXPECTED(p == end)) {
+			return NULL;
 		}
 		p += td[(unsigned char)(p[needle_len])];
 	}

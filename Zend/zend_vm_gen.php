@@ -83,10 +83,10 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_CONST_FETCH" => 0x06000000,
 	"ZEND_VM_EXT_TYPE"        => 0x07000000,
 	"ZEND_VM_EXT_EVAL"        => 0x08000000,
-	"ZEND_VM_EXT_FAST_CALL"   => 0x09000000,
-	"ZEND_VM_EXT_FAST_RET"    => 0x0a000000,
+	// unused 0x09000000,
+	// unused 0x0a000000,
 	"ZEND_VM_EXT_SRC"         => 0x0b000000,
-	"ZEND_VM_EXT_SEND"        => 0x0c000000,
+	// unused 0x0c000000,
 	"ZEND_VM_NO_CONST_CONST"  => 0x40000000,
 	"ZEND_VM_COMMUTATIVE"     => 0x80000000,
 );
@@ -124,13 +124,10 @@ $vm_ext_decode = array(
 	"ARRAY_INIT"           => ZEND_VM_EXT_ARRAY_INIT,
 	"TYPE"                 => ZEND_VM_EXT_TYPE,
 	"EVAL"                 => ZEND_VM_EXT_EVAL,
-	"FAST_CALL"            => ZEND_VM_EXT_FAST_CALL,
-	"FAST_RET"             => ZEND_VM_EXT_FAST_RET,
 	"ISSET"                => ZEND_VM_EXT_ISSET,
 	"ARG_NUM"              => ZEND_VM_EXT_ARG_NUM,
 	"REF"                  => ZEND_VM_EXT_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
-	"SEND"                 => ZEND_VM_EXT_SEND,
 );
 
 $vm_kind_name = array(
@@ -733,6 +730,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/RETURN_VALUE_USED\(opline\)/",
 			"/arg_num <= MAX_ARG_FLAG_NUM/",
 			"/ZEND_VM_SMART_BRANCH\(\s*([^,)]*)\s*,\s*([^)]*)\s*\)/",
+			"/opline->extended_value\s*==\s*0/",
+			"/opline->extended_value\s*==\s*ZEND_ASSIGN_DIM/",
+			"/opline->extended_value\s*==\s*ZEND_ASSIGN_OBJ/",
 		),
 		array(
 			$op1_type[$op1],
@@ -790,6 +790,15 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					:	($extra_spec['SMART_BRANCH'] == 2 ?
 							"ZEND_VM_SMART_BRANCH_JMPNZ(\\1, \\2)" : ""))
 				: 	"ZEND_VM_SMART_BRANCH(\\1, \\2)",
+			isset($extra_spec['DIM_OBJ']) ?
+				($extra_spec['DIM_OBJ'] == 0 ? "1" : "0")
+				: "\\0",
+			isset($extra_spec['DIM_OBJ']) ?
+				($extra_spec['DIM_OBJ'] == 1 ? "1" : "0")
+				: "\\0",
+			isset($extra_spec['DIM_OBJ']) ?
+				($extra_spec['DIM_OBJ'] == 2 ? "1" : "0")
+				: "\\0",
 		),
 		$code);
 
@@ -934,6 +943,14 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 	    isset($extra_spec["COMMUTATIVE"]) &&
 	    $commutative_order[$op1] > $commutative_order[$op2]) {
 	    // Skip duplicate commutative handlers
+		return;
+	}
+
+	if ($spec &&
+	    isset($extra_spec["DIM_OBJ"]) &&
+		(($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1) ||
+		 ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] == 0))) {
+	    // Skip useless handlers
 		return;
 	}
 
@@ -1165,6 +1182,13 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						gen_null_label($f, $kind, $prolog);
 						$label++;
 						return;
+					} else if (isset($extra_spec["DIM_OBJ"]) &&
+						(($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1) ||
+						 ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] == 0))) {
+					    // Skip useless handlers
+						gen_null_label($f, $kind, $prolog);
+						$label++;
+						return;
 					}
 					
 					// Emit pointer to specialized handler
@@ -1334,6 +1358,13 @@ function extra_spec_name($extra_spec) {
 			$s .= "_JMPNZ";
 		}
 	}
+	if (isset($extra_spec["DIM_OBJ"])) {
+		if ($extra_spec["DIM_OBJ"] == 1) {
+			$s .= "_DIM";
+		} else if ($extra_spec["DIM_OBJ"] == 2) {
+			$s .= "_OBJ";
+		}
+	}
 	return $s;
 }
 
@@ -1350,6 +1381,9 @@ function extra_spec_flags($extra_spec) {
 	}
 	if (isset($extra_spec["SMART_BRANCH"])) {
 		$s[] = "SPEC_RULE_SMART_BRANCH";
+	}
+	if (isset($extra_spec["DIM_OBJ"])) {
+		$s[] = "SPEC_RULE_DIM_OBJ";
 	}
 	return $s;
 }
@@ -1500,6 +1534,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#define SPEC_RULE_RETVAL       0x00080000\n");
 					out($f,"#define SPEC_RULE_QUICK_ARG    0x00100000\n");
 					out($f,"#define SPEC_RULE_SMART_BRANCH 0x00200000\n");
+					out($f,"#define SPEC_RULE_DIM_OBJ      0x00400000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void **zend_opcode_handlers;\n");
@@ -1862,6 +1897,9 @@ function parse_spec_rules($def, $lineno, $str) {
 					break;
 				case "SMART_BRANCH":
 					$ret["SMART_BRANCH"] = array(0, 1, 2);
+					break;
+				case "DIM_OBJ":
+					$ret["DIM_OBJ"] = array(0, 1, 2);
 					break;
 				case "NO_CONST_CONST":
 					$ret["NO_CONST_CONST"] = array(1);
@@ -2253,6 +2291,16 @@ function gen_vm($def, $skel) {
 			out($f, "\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
 			out($f,	"\t\t\toffset += 1;\n");
 			out($f, "\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+			out($f,	"\t\t\toffset += 2;\n");
+			out($f, "\t\t}\n");
+			out($f, "\t}\n");
+		}
+		if (isset($used_extra_spec["DIM_OBJ"])) {
+			out($f, "\tif (spec & SPEC_RULE_DIM_OBJ) {\n");
+			out($f,	"\t\toffset = offset * 3;\n");
+			out($f, "\t\tif (op->extended_value == ZEND_ASSIGN_DIM) {\n");
+			out($f,	"\t\t\toffset += 1;\n");
+			out($f, "\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 			out($f,	"\t\t\toffset += 2;\n");
 			out($f, "\t\t}\n");
 			out($f, "\t}\n");

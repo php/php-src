@@ -954,6 +954,7 @@ cli_server.color = On
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
 ;intl.error_level = E_WARNING
+;intl.use_exceptions = 0
 
 [sqlite3]
 ;sqlite3.extension_dir =

@@ -26,7 +26,6 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
-	zend_op *opline;
 	uint32_t k, var_num;
 	int j;
 
@@ -39,15 +38,17 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 
 	/* Collect "def" and "use" sets */
 	for (j = 0; j < blocks_count; j++) {
+		zend_op *opline, *end;
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
-		for (k = blocks[j].start; k <= blocks[j].end; k++) {
-			opline = op_array->opcodes + k;
+
+		opline = op_array->opcodes + blocks[j].start;
+		end = opline + blocks[j].len;
+		for (; opline < end; opline++) {
 			if (opline->opcode != ZEND_OP_DATA) {
 				zend_op *next = opline + 1;
-				if (k < blocks[j].end &&
-					next->opcode == ZEND_OP_DATA) {
+				if (next < end && next->opcode == ZEND_OP_DATA) {
 					if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 						var_num = EX_VAR_TO_NUM(next->op1.var);
 						if (!DFG_ISSET(def, set_size, j, var_num)) {
@@ -92,6 +93,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSIGN_ADD:
 					case ZEND_ASSIGN_SUB:
@@ -123,7 +125,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_OBJ_UNSET:
 					case ZEND_VERIFY_RETURN_TYPE:
 op1_def:
-						// FIXME: include into "use" too ...?
+						/* `def` always come along with dtor or separation,
+						 * thus the origin var info might be also `use`d in the feature(CG) */
 						DFG_SET(use, set_size, j, var_num);
 						DFG_SET(def, set_size, j, var_num);
 						break;

@@ -104,6 +104,7 @@ static void zend_collect_args_info(zend_call_info *call_info)
 			case ZEND_SEND_VAR_EX:
 			case ZEND_SEND_REF:
 			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_VAR_NO_REF_EX:
 				num = opline->op2.num;
 				if (num > 0) {
 					num--;
@@ -170,7 +171,7 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 						call_info->next_caller = NULL;
 					} else {
 						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
-						call_info->next_caller = callee_func_info->caller_info;
+						call_info->next_caller = callee_func_info ? callee_func_info->caller_info : NULL;
 					}
 				}
 				/* break missing intentionally */

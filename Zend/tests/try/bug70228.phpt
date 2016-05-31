@@ -7,10 +7,10 @@ See https://bugs.php.net/bug.php?id=70228
 
 function foo() {
     try { return str_repeat("a", 2); }
-    finally { return true; }
+    finally { return str_repeat("b", 2); }
 }
 
 var_dump(foo());
 ?>
 --EXPECT--
-string(3) "bar"
+string(2) "bb"

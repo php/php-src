@@ -146,6 +146,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 	type = pRec->wType;
 	ttl = pRec->dwTtl;
 
+	ZVAL_UNDEF(subarray);
+
 	if (type_to_fetch != DNS_TYPE_ANY && type != type_to_fetch) {
 		return;
 	}

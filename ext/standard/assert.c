@@ -165,6 +165,10 @@ PHP_FUNCTION(assert)
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
 
+		if (zend_forbid_dynamic_call("assert() with string argument") == FAILURE) {
+			RETURN_FALSE;
+		}
+
 		myeval = Z_STRVAL_P(assertion);
 
 		if (ASSERTG(quiet_eval)) {

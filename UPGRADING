@@ -18,6 +18,7 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 1. Backward Incompatible Changes
 ========================================
+
 - Core:
   . 'void' can no longer be used as the name of a class, interface, or trait.
     This applies to declarations, class_alias() and use statements.
@@ -25,6 +26,20 @@ PHP 7.1 UPGRADE NOTES
     decoct(), dechex(), integer operators and other conversions now always
     respect scientific notation in numeric strings.
     (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
+  . The ASCII 0x7F Delete control character is no longer permitted in unquoted
+    identifiers in source code.
+  . The following functions may no longer be called dynamically using $func(),
+    call_user_func(), array_map() or similar:
+     . extract()
+     . compact()
+     . get_defined_vars()
+     . func_get_args()
+     . func_get_arg()
+     . func_num_args()
+     . parse_str() with one argument
+     . mb_parse_str() with one argument
+     . assert() with a string argument
+    (RFC: https://wiki.php.net/rfc/forbid_dynamic_scope_introspection)
 
 - JSON:
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
@@ -41,6 +56,8 @@ PHP 7.1 UPGRADE NOTES
     (RFC: https://wiki.php.net/rfc/negative-string-offsets)
   . Added a form of the list() construct where keys can be specified.
     (RFC: https://wiki.php.net/rfc/list_keys)
+  . Added [] = as alternative construct to list() =.
+    (RFC: https://wiki.php.net/rfc/short_list_syntax)
   . Number operators taking numeric strings now emit "A non well formed numeric
     value encountered" E_NOTICEs for leading-numeric strings, and "A
     non-numeric value encountered" E_WARNINGs for non-numeric strings.

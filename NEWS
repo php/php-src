@@ -3,14 +3,25 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0
 
 - Core:
+  . Added nullable types. (Levi, Dmitry)
+  . Added DFA optimization framework based on e-SSA form. (Dmitry, Nikita)
+  . Added specialized opcode handlers (e.g. ZEND_ADD_LONG_NO_OVERFLOW).
+    (Dmitry)
+  . Change statement and fcall extension handlers to accept frame. (Joe)
   . Implemented safe execution timeout handling, that prevents rundom crashes
     after "Maximum execution time exceeded" error. (Dmitry)
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
   . Fixed bug #62814 (It is possible to stiffen child class members visibility).
     (Nikita)
   . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
+  . Fixed bug #71604 (Aborted Generators continue after nested finally).
+    (Nikita)
   . Fixed bug #71572 (String offset assignment from an empty string inserts
     null byte). (Francois)
+  . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
+    identifiers). (Andrea)
+  . Fixed bug #72188 (Nested try/finally blocks losing return value). (Dmitry)
+  . Fixed bug #72213 (Finally leaks on nested exceptions). (Dmitry, Nikita)
   . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
@@ -22,6 +33,10 @@ PHP                                                                        NEWS
   . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
     decoct(), dechex(), integer operators and other conversions now always
     respect scientific notation in numeric strings. (Andrea)
+  . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
+    Pierrick)
+  . Raise a compile-time warning on octal escape sequence overflow. (Sara)
+  . Added [] = as alternative construct to list() =. (Bob)
 
 - FTP:
   . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
@@ -33,8 +48,11 @@ PHP                                                                        NEWS
 
 - Hash:
   . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
+  . Added SHA512/256 and SHA512/224 algorithms. (Sara)
 
 - JSON:
+  . Exported JSON parser API including json_parser_method that can be used
+    for implementing custom logic when parsing JSON. (Jakub Zelenka)
   . Escaped U+2028 and U+2029 when JSON_UNESCAPED_UNICODE is supplied as
     json_encode options and added JSON_UNESCAPED_LINE_TERMINATORS to restore
     the previous behaviour. (Eddie Kohler)
@@ -46,6 +64,9 @@ PHP                                                                        NEWS
   . Implemented FR #31021 (pg_last_notice() is needed to get all notice
     messages). (Yasuo)
   . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
+
+- Reflection:
+  . Fix #72209 (ReflectionProperty::getValue() doesn't fail if object doesn't match type). (Joe)
 
 - Session:
   . Improved fix for bug #68063 (Empty session IDs do still start sessions).

@@ -37,7 +37,6 @@ void init_executor(void);
 void shutdown_executor(void);
 void shutdown_destructors(void);
 ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value);
-ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
@@ -49,6 +48,9 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name);
 ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions);
 ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions);
+
+/* export zend_pass_function to allow comparisons against it */
+extern ZEND_API const zend_internal_function zend_pass_function;
 
 ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
@@ -95,7 +97,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 						Z_ADDREF_P(variable_ptr);
 					}
 				}
-				zval_dtor_func_for_ptr(garbage);
+				zval_dtor_func(garbage);
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
@@ -217,7 +219,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 				if (!Z_DELREF_P(p)) {
 					zend_refcounted *r = Z_COUNTED_P(p);
 					ZVAL_NULL(p);
-					zval_dtor_func_for_ptr(r);
+					zval_dtor_func(r);
 				} else {
 					GC_ZVAL_CHECK_POSSIBLE_ROOT(p);
 				}
@@ -245,7 +247,7 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 				if (!Z_DELREF_P(p)) {
 					zend_refcounted *r = Z_COUNTED_P(p);
 					ZVAL_NULL(p);
-					zval_dtor_func_for_ptr(r);
+					zval_dtor_func(r);
 				}
 			}
 		} while (p != end);
@@ -257,15 +259,15 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 	ZEND_ASSERT_VM_STACK_GLOBAL;
 
 	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
-		zend_vm_stack p = EG(vm_stack);
+		ZEND_ASSERT(call == (zend_execute_data*)ZEND_VM_STACK_ELEMENTS(EG(vm_stack)));
 
+		zend_vm_stack p = EG(vm_stack);
 		zend_vm_stack prev = p->prev;
 
 		EG(vm_stack_top) = prev->top;
 		EG(vm_stack_end) = prev->end;
 		EG(vm_stack) = prev;
 		efree(p);
-
 	} else {
 		EG(vm_stack_top) = (zval*)call;
 	}

@@ -191,6 +191,9 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	/* __get handler is called with one argument:
 	      property name
@@ -202,6 +205,8 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{
 	zend_call_method_with_1_params(object, ce, &ce->__get, ZEND_GET_FUNC_NAME, retval, member);
 
 	zval_ptr_dtor(member);
+
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
@@ -210,6 +215,9 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	zval retval;
 	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
 	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
@@ -228,8 +236,10 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		result = i_zend_is_true(&retval) ? SUCCESS : FAILURE;
 		zval_ptr_dtor(&retval);
+		EG(fake_scope) = orig_fake_scope;
 		return result;
 	} else {
+		EG(fake_scope) = orig_fake_scope;
 		return FAILURE;
 	}
 }
@@ -238,6 +248,9 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 static void zend_std_call_unsetter(zval *object, zval *member) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	/* __unset handler is called with one argument:
 	      property name
@@ -248,12 +261,17 @@ static void zend_std_call_unsetter(zval *object, zval *member) /* {{{ */
 	zend_call_method_with_1_params(object, ce, &ce->__unset, ZEND_UNSET_FUNC_NAME, NULL, member);
 
 	zval_ptr_dtor(member);
+
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
 static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+
+	EG(fake_scope) = NULL;
 
 	/* __isset handler is called with one argument:
 	      property name
@@ -266,6 +284,8 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 	zend_call_method_with_1_params(object, ce, &ce->__isset, ZEND_ISSET_FUNC_NAME, retval, member);
 
 	zval_ptr_dtor(member);
+
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
@@ -319,13 +339,9 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 		return (uint32_t)(intptr_t)CACHED_PTR_EX(cache_slot + 1);
 	}
 
-	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
+	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
 		if (!silent) {
-			if (ZSTR_LEN(member) == 0) {
-				zend_throw_error(NULL, "Cannot access empty property");
-			} else {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
-			}
+			zend_throw_error(NULL, "Cannot access property started with '\\0'");
 		}
 		return ZEND_WRONG_PROPERTY_OFFSET;
 	}
@@ -404,13 +420,9 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 	uint32_t flags;
 	zend_class_entry *scope;
 
-	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
+	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
 		if (!silent) {
-			if (ZSTR_LEN(member) == 0) {
-				zend_throw_error(NULL, "Cannot access empty property");
-			} else {
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
-			}
+			zend_throw_error(NULL, "Cannot access property started with '\\0'");
 		}
 		return ZEND_WRONG_PROPERTY_INFO;
 	}
@@ -659,16 +671,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			zval_ptr_dtor(&tmp_object);
 			goto exit;
 		} else {
-			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(NULL, "Cannot access empty property");
-					retval = &EG(uninitialized_zval);
-					goto exit;
-				} else {
-					zend_throw_error(NULL, "Cannot access property started with '\\0'");
-					retval = &EG(uninitialized_zval);
-					goto exit;
-				}
+			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
+				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				retval = &EG(uninitialized_zval);
+				goto exit;
 			}
 		}
 	}
@@ -744,14 +750,9 @@ found:
 		} else if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
 			goto write_std_property;
 		} else {
-			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(NULL, "Cannot access empty property");
-					goto exit;
-				} else {
-					zend_throw_error(NULL, "Cannot access property started with '\\0'");
-					goto exit;
-				}
+			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
+				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				goto exit;
 			}
 		}
 	} else if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
@@ -1010,14 +1011,9 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 			(*guard) &= ~IN_UNSET;
 			zval_ptr_dtor(&tmp_object);
 		} else {
-			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(NULL, "Cannot access empty property");
-					goto exit;
-				} else {
-					zend_throw_error(NULL, "Cannot access property started with '\\0'");
-					goto exit;
-				}
+			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
+				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				goto exit;
 			}
 		}
 	}
@@ -1125,6 +1121,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
 {
+	size_t mname_len;
 	zend_op_array *func;
 	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
 
@@ -1157,8 +1154,8 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 
 	//??? keep compatibility for "\0" characters
 	//??? see: Zend/tests/bug46238.phpt
-	if (UNEXPECTED(strlen(ZSTR_VAL(method_name)) != ZSTR_LEN(method_name))) {
-		func->function_name = zend_string_init(ZSTR_VAL(method_name), strlen(ZSTR_VAL(method_name)), 0);
+	if (UNEXPECTED((mname_len = strlen(ZSTR_VAL(method_name))) != ZSTR_LEN(method_name))) {
+		func->function_name = zend_string_init(ZSTR_VAL(method_name), mname_len, 0);
 	} else {
 		func->function_name = zend_string_copy(method_name);
 	}
@@ -1711,7 +1708,7 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 
 	ce = Z_OBJCE_P(obj);
 
-	if ((func = zend_hash_str_find(&ce->function_table, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1)) == NULL) {
+	if ((func = zend_hash_find(&ce->function_table, CG(known_strings)[ZEND_STR_MAGIC_INVOKE])) == NULL) {
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);

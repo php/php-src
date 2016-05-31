@@ -15,7 +15,7 @@ $stream = fopen("http://www.php.net", "r", false,  $ctxt);
 $socket = 
 	@socket_import_stream($stream);
 
-var_dump(socket_get_option($socket, STREAM_IPPROTO_TCP, TCP_NODELAY));
+var_dump(socket_get_option($socket, STREAM_IPPROTO_TCP, TCP_NODELAY) > 0);
 ?>
 --EXPECT--
-int(1)
+bool(true)
