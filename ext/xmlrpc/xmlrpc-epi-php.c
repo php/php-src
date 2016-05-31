@@ -535,7 +535,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					xReturn = XMLRPC_CreateValueBoolean(key, Z_TYPE(val) == IS_TRUE);
 					break;
 				case xmlrpc_int:
-					convert_to_long(&val);
+					ZVAL_LONG(&val, zval_get_long(&val));
 					xReturn = XMLRPC_CreateValueInt(key, Z_LVAL(val));
 					break;
 				case xmlrpc_double:
@@ -1368,10 +1368,10 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 
 			if ((type == xmlrpc_base64 && Z_TYPE_P(value) == IS_OBJECT) || type == xmlrpc_datetime) {
 				if ((val = zend_hash_str_find(Z_OBJPROP_P(value), OBJECT_VALUE_ATTR, sizeof(OBJECT_VALUE_ATTR) - 1)) != NULL) {
-					ZVAL_COPY(newvalue, val);
+					ZVAL_COPY_VALUE(newvalue, val);
 				}
 			} else {
-				ZVAL_COPY(newvalue, value);
+				ZVAL_COPY_VALUE(newvalue, value);
 			}
 		}
 	}
