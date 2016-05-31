@@ -1,5 +1,5 @@
 --TEST--
-Test mkdir/rmdir big5 to UTF-8 path 
+Test mkdir/rmdir big5 path 
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -45,10 +45,10 @@ bool(true)
 bool(true)
 bool(true)
 Active code page: 950
-getting basename of %s\æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘5\æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘4
-string(22) "æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘4"
+getting basename of %s´ú¸Õ¦h¦r¸`¸ô®|5\´ú¸Õ¦h¦r¸`¸ô®|4
+string(%d) "´ú¸Õ¦h¦r¸`¸ô®|4"
 bool(true)
-string(%d) "%s\æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘5\æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘4"
+string(%d) "%s´ú¸Õ¦h¦r¸`¸ô®|5\´ú¸Õ¦h¦r¸`¸ô®|4"
 Active code page: %d
 bool(true)
 ===DONE===

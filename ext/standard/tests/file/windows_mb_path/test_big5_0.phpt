@@ -21,7 +21,7 @@ defalut_charset=big5
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$item "測試多字節路徑"; // BIG5 string
+$item = "測試多字節路徑"; // BIG5 string
 $prefix = create_data("file_big5", $item, 950);
 $fn = $prefix . DIRECTORY_SEPARATOR . "$item";
 

@@ -48,11 +48,11 @@ resource(%d) of type (stream)
 int(25)
 bool(true)
 string(25) "writing to an mb filename"
-Active code page: 65001
-getting basename of %s\æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘25
-string(23) "æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘25"
+Active code page: 950
+getting basename of %s´ú¸Õ¦h¦r¸`¸ô®|25
+string(%d) "´ú¸Õ¦h¦r¸`¸ô®|25"
 bool(true)
-string(%d) "%s\æ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘25"
+string(%d) "%sæ¸¬è©¦å¤šå­—ç¯€è·¯å¾‘25"
 Active code page: %d
 bool(true)
 ===DONE===
