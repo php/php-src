@@ -600,6 +600,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - perform compile-time evaluation of constant binary and unary operations
 	 * - optimize series of ADD_STRING and/or ADD_CHAR
 	 * - convert CAST(IS_BOOL,x) into BOOL(x)
+         * - pre-evaluate constant function calls
 	 */
 	if (ZEND_OPTIMIZER_PASS_1 & ctx->optimization_level) {
 		zend_optimizer_pass1(op_array, ctx);
@@ -611,8 +612,6 @@ static void zend_optimize(zend_op_array      *op_array,
 	/* pass 2:
 	 * - convert non-numeric constants to numeric constants in numeric operators
 	 * - optimize constant conditional JMPs
-	 * - optimize static BRKs and CONTs
-	 * - pre-evaluate constant function calls
 	 */
 	if (ZEND_OPTIMIZER_PASS_2 & ctx->optimization_level) {
 		zend_optimizer_pass2(op_array);
