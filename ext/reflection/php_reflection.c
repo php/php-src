@@ -1633,30 +1633,6 @@ ZEND_METHOD(reflection_function, export)
 }
 /* }}} */
 
-
-static zend_function *_find_function_pointer(char *name_str, int name_len) {
-    char *lcname, *nsname;
-    zend_function *fptr;
-
-	lcname = zend_str_tolower_dup(name_str, name_len);
-
-    /* Ignore leading "\" */
-    nsname = lcname;
-    if (lcname[0] == '\\') {
-        nsname = &lcname[1];
-        name_len--;
-    }
-
-    if ((fptr = zend_hash_str_find_ptr(EG(function_table), nsname, name_len)) == NULL) {
-        efree(lcname);
-        return NULL;
-    }
-    efree(lcname);
-
-	return fptr;
-}
-
-
 /* {{{ proto public void ReflectionFunction::__construct(string name)
    Constructor. Throws an Exception in case the given function does not exist */
 ZEND_METHOD(reflection_function, __construct)
@@ -1680,12 +1656,23 @@ ZEND_METHOD(reflection_function, __construct)
 		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 			return;
 		}
-		fptr = _find_function_pointer(name_str, name_len);
-		if (fptr == NULL) {
+
+		lcname = zend_str_tolower_dup(name_str, name_len);
+
+		/* Ignore leading "\" */
+		nsname = lcname;
+		if (lcname[0] == '\\') {
+			nsname = &lcname[1];
+			name_len--;
+		}
+
+		if ((fptr = zend_hash_str_find_ptr(EG(function_table), nsname, name_len)) == NULL) {
+			efree(lcname);
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Function %s() does not exist", name_str);
-				return;
+			return;
 		}
+		efree(lcname);
 	}
 
 	ZVAL_STR_COPY(&name, fptr->common.function_name);
@@ -6805,10 +6792,6 @@ static const zend_function_entry reflection_zend_extension_functions[] = {
 	PHP_FE_END
 };
 /* }}} */
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure, 0, 0, 1)
-	ZEND_ARG_INFO(0, callable)
-ZEND_END_ARG_INFO()
 
 const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 	PHP_FE_END
