@@ -22,6 +22,7 @@
 #include "php.h"
 #include "winutil.h"
 #include <wincrypt.h>
+#include <lmcons.h>
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 {
@@ -374,6 +375,26 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
     return EINVAL;
 }
 
+PHP_WINUTIL_API char *php_win32_get_username(void)
+{
+	wchar_t unamew[UNLEN + 1];
+	size_t uname_len;
+	char *uname;
+	DWORD unsize = UNLEN;
+
+	GetUserNameW(unamew, &unsize);
+	uname = php_win32_cp_conv_w_to_any(unamew, unsize - 1, &uname_len);
+	if (!uname) {
+		return NULL;
+	}
+
+	/* Ensure the length doesn't overflow. */
+	if (uname_len > UNLEN) {
+		uname[uname_len] = '\0';
+	}
+
+	return uname;
+}
 
 /*
  * Local variables:

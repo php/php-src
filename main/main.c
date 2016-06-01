@@ -1249,15 +1249,17 @@ PHPAPI char *php_get_current_user(void)
 		return "";
 	} else {
 #ifdef PHP_WIN32
-		char name[256];
-		DWORD len = sizeof(name)-1;
+		char *name = php_win32_get_username();
+		int len;
 
-		if (!GetUserName(name, &len)) {
+		if (!name) {
 			return "";
 		}
+		len = (int)strlen(name);
 		name[len] = '\0';
 		SG(request_info).current_user_length = len;
 		SG(request_info).current_user = estrndup(name, len);
+		free(name);
 		return SG(request_info).current_user;
 #else
 		struct passwd *pwd;

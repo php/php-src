@@ -52,3 +52,5 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err);
 	_set_errno(ern); \
 	} while (0)
 
+PHP_WINUTIL_API char *php_win32_get_username(void);
+
