@@ -103,6 +103,7 @@ PHP 7.1 UPGRADE NOTES
 - unpack() accepts an additional optional $offset argument. '@' format code
   (that specifes an absolute position) is applyed to input data after
   the $offset argument.
+- pack() and unpack() now support float and double in both little and big endian.
 - strpos(), stripos(), substr_count(), grapheme_strpos(), grapheme_stripos(),
   grapheme_extract(), iconv_strpos(), mb_strimwidth(), mb_ereg_search_setpos(),
   mb_strpos() and mb_stripos() now accept negative string offsets.
