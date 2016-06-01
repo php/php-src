@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - PDO_pgsql:
   . Fixed bug #71573 (Segfault (core dumped) if paramno beyond bound).
     (Laruence)
+  . Fixed bug #72294 (Segmentation fault/invalid pointer in connection
+    with pgsql_stmt_dtor). (Anatol)
 
 - Phpdbg:
   . Fixed bug #72284 (phpdbg fatal errors with coverage). (Bob)
