@@ -3,7 +3,7 @@ Testing closure() functionality
 --FILE--
 <?php
 
-include('closureFunction.inc');
+include('cloure_from_callbable.inc');
 
 echo 'Cannot access privateInstance method statically'."\n";
 try {

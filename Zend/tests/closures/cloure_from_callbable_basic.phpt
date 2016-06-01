@@ -3,7 +3,7 @@ Testing closure() functionality
 --FILE--
 <?php
 
-include('closureFunction.inc');
+include('cloure_from_callbable.inc');
 
 echo 'Access public static function';
 $fn = Closure::fromCallable(['Foo', 'publicStaticFunction']);

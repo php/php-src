@@ -589,7 +589,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_fromcallable, 0, 0, 1)
-	ZEND_ARG_INFO(0, newthis)
+	ZEND_ARG_INFO(0, callable)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry closure_functions[] = {
