@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Fixed bug #47517 (php-cgi.exe missing UAC manifest).
     (maxdax15801 at users noreply github com)
 
+- Apache2handler:
+  . Enable per-module logging in Apache 2.4+. (Martin Vobruba)
+
 - CLI Server:
   . Fixed bug #71276 (Built-in webserver does not send Date header).
     (see at seos fr)
