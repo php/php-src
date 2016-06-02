@@ -122,6 +122,8 @@ void zend_interned_strings_dtor(void)
 	free(CG(known_strings));
 	CG(known_strings) = NULL;
 	CG(known_strings_count) = 0;
+	known_interned_strings = NULL;
+	known_interned_strings_count = 0;
 }
 
 static zend_string *zend_new_interned_string_int(zend_string *str)
