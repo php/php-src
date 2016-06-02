@@ -1049,7 +1049,12 @@ static int fcgi_read_request(fcgi_request *req)
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
-	req->has_env = 1;
+
+	if (req->has_env) {
+		fcgi_hash_clean(&req->env);
+	} else {
+		req->has_env = 1;
+	}
 
 	if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 	    hdr.version < FCGI_VERSION_1) {

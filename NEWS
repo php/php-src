@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #72218 (If host name cannot be resolved then PHP 7 crashes). 
     (Esminis at esminis dot lt)
 
+- FPM:
+  . Fixed bug #72308 (fastcgi_finish_request and logging environment
+    variables). (Laruence)
+
 - Intl:
   . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
 
