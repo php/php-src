@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -112,7 +112,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
-	int ns_len = strlen(ns);
+	int ns_len = ns ? strlen(ns) : 0;
 	int type_len = strlen(type);
 	int len = ns_len + type_len + 1;
 
@@ -296,7 +296,7 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
 						ZVAL_COPY(&ctx->old_header, header);
 						php_stream_context_set_option(ctx->context, "http", "header", &new_header);
-						zval_dtor(&new_header);
+						zval_ptr_dtor(&new_header);
 					}
 				}
 			}
@@ -1149,7 +1149,9 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					zend_hash_init(ctx.sdl->bindings, 0, NULL, delete_binding, 0);
 				}
 
-				zend_hash_str_add_ptr(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), tmpbinding);
+				if (!zend_hash_str_add_ptr(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), tmpbinding)) {
+					zend_hash_next_index_insert_ptr(ctx.sdl->bindings, tmpbinding);
+				}
 				trav= trav->next;
 			}
 

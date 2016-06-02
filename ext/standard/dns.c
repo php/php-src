@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -251,7 +251,7 @@ PHP_FUNCTION(gethostbynamel)
 		RETURN_FALSE;
 	}
 
-	hp = gethostbyname(hostname);
+	hp = php_network_gethostbyname(hostname);
 	if (hp == NULL || hp->h_addr_list == NULL) {
 		RETURN_FALSE;
 	}
@@ -272,7 +272,7 @@ static zend_string *php_gethostbyname(char *name)
 	struct in_addr in;
 	char *address;
 
-	hp = gethostbyname(name);
+	hp = php_network_gethostbyname(name);
 
 	if (!hp || !*(hp->h_addr_list)) {
 		return zend_string_init(name, strlen(name), 0);

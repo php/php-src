@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include "phpdbg_opcode.h"
 #include "zend_globals.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ private api functions */
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
@@ -212,6 +212,8 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 								phpdbg_asprintf(&new_str, "%sbreak if %s\n", str, conditional->code);
 							}
 						} break;
+
+						default: continue;
 					}
 
 					if ((*str)[0]) {
@@ -561,12 +563,14 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break) /* {
 		} else {
 			zend_execute_data *execute_data = EG(current_execute_data);
 			do {
-				zend_op_array *op_array = &execute_data->func->op_array;
-				if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == ZSTR_LEN(op_array->filename) && !memcmp(ZSTR_VAL(op_array->filename), new_break->class_name, new_break->class_len)) {
-					if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
-						return SUCCESS;
-					} else {
-						return 2;
+				if (ZEND_USER_CODE(execute_data->func->common.type)) {
+					zend_op_array *op_array = &execute_data->func->op_array;
+					if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == ZSTR_LEN(op_array->filename) && !memcmp(ZSTR_VAL(op_array->filename), new_break->class_name, new_break->class_len)) {
+						if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
+							return SUCCESS;
+						} else {
+							return 2;
+						}
 					}
 				}
 			} while ((execute_data = execute_data->prev_execute_data) != NULL);
@@ -784,6 +788,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {
 
 		PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_OPLINE);
 		new_break.opline = (zend_ulong) opline;
+		new_break.base = NULL;
 
 		zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t));
 

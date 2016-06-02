@@ -1,5 +1,7 @@
 --TEST--
 Test basic info functionality
+--INI--
+auto_globals_jit=0
 --PHPDBG--
 i classes
 i funcs
@@ -37,11 +39,11 @@ Address            Refs    Type      Variable
 %s 2       array     $_GET
 %s 2       array     $_POST
 %s 2       array     $_COOKIE
-%s 2       array     $_FILES
-%s 1       array     &$GLOBALS
 %s 2       array     $_SERVER
 %s 2       array     $_ENV
 %s 1       array     $_REQUEST
+%s 2       array     $_FILES
+%s 1       array     &$GLOBALS
 prompt> ------------------------------------------------
 Function Breakpoints:
 #0		foo

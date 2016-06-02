@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -153,7 +153,6 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 			return NULL;
 		} else {
 			if (Z_TYPE_P(value) != IS_STRING) {
-				SEPARATE_ZVAL(value);
 				convert_to_string(value);
 			}
 
@@ -218,7 +217,9 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	if (error == 1) {
 		for (i = nargs - 1; i >= 0; i--) {
 			obj = valuePop(ctxt);
-			xmlXPathFreeObject(obj);
+			if (obj) {
+				xmlXPathFreeObject(obj);
+			}
 		}
 		return;
 	}
@@ -230,6 +231,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	/* Reverse order to pop values off ctxt stack */
 	for (i = nargs - 2; i >= 0; i--) {
 		obj = valuePop(ctxt);
+		if (obj == NULL) {
+			ZVAL_NULL(&args[i]);
+			continue;
+		}
 		switch (obj->type) {
 			case XPATH_STRING:
 				ZVAL_STRING(&args[i], (char *)obj->stringval);
@@ -290,7 +295,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	}
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 	if (fci.param_count > 0) {
 		fci.params = args;
 	} else {
@@ -299,7 +303,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 
 
 	obj = valuePop(ctxt);
-	if (obj->stringval == NULL) {
+	if (obj == NULL || obj->stringval == NULL) {
 		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
 		xmlXPathFreeObject(obj);
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
@@ -315,7 +319,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	xmlXPathFreeObject(obj);
 
 	ZVAL_COPY_VALUE(&fci.function_name, &handler);
-	fci.symbol_table = NULL;
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.no_separation = 0;
@@ -350,7 +353,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				nodep = dom_object_get_node(obj);
 				valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 			} else if (Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE) {
-				valuePush(ctxt, xmlXPathNewBoolean(Z_LVAL(retval)));
+				valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
 			} else if (Z_TYPE(retval) == IS_OBJECT) {
 				php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
 				valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
@@ -760,7 +763,6 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 				php_error_docref(NULL, E_WARNING, "Invalid parameter array");
 				RETURN_FALSE;
 			}
-			SEPARATE_ZVAL(entry);
 			convert_to_string_ex(entry);
 			if (Z_REFCOUNTED_P(entry)) {
 				Z_ADDREF_P(entry);
@@ -848,7 +850,6 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 		intern = Z_XSL_P(id);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array_value), entry) {
-			SEPARATE_ZVAL(entry);
 			convert_to_string_ex(entry);
 			ZVAL_LONG(&new_string ,1);
 			zend_hash_update(intern->registered_phpfunctions, Z_STR_P(entry), &new_string);

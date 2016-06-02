@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,8 +35,6 @@
 PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object)
 {
 	object_init_ex(object, pce);
-	Z_SET_REFCOUNT_P(object, 1);
-	// !!!PZ_SET_ISREF_P(object); /* check if this can be hold always */
 }
 /* }}} */
 
@@ -44,6 +42,7 @@ PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 {
 	zend_ulong idx;
 
+try_again:
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
 		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), idx)) {
@@ -58,6 +57,9 @@ PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 		return 0;
 	case IS_TRUE:
 		return 1;
+	case IS_REFERENCE:
+		offset = Z_REFVAL_P(offset);
+		goto try_again;
 	case IS_RESOURCE:
 		return Z_RES_HANDLE_P(offset);
 	}

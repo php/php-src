@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -32,8 +32,7 @@
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
-
-static zend_class_entry *spl_ce_RuntimeException;
+#include "ext/spl/spl_exceptions.h"
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
@@ -79,20 +78,9 @@ PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
 
 PDO_API zend_class_entry *php_pdo_get_exception_base(int root) /* {{{ */
 {
-#if defined(HAVE_SPL)
 	if (!root) {
-		if (!spl_ce_RuntimeException) {
-			zend_class_entry *pce;
-
-			if ((pce = zend_hash_str_find_ptr(CG(class_table), "runtimeexception", sizeof("RuntimeException") - 1))) {
-				spl_ce_RuntimeException = pce;
-				return pce;
-			}
-		} else {
-			return spl_ce_RuntimeException;
-		}
+		return spl_ce_RuntimeException;
 	}
-#endif
 	return zend_ce_exception;
 }
 /* }}} */
@@ -128,14 +116,10 @@ const zend_function_entry pdo_functions[] = {
 /* }}} */
 
 /* {{{ pdo_functions[] */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_deps[] = {
-#ifdef HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
-#endif
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_module_entry */
@@ -350,8 +334,6 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 PHP_MINIT_FUNCTION(pdo)
 {
 	zend_class_entry ce;
-
-	spl_ce_RuntimeException = NULL;
 
 	if (FAILURE == pdo_sqlstate_init_error_table()) {
 		return FAILURE;

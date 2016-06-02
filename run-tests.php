@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,27 +59,6 @@ NO_PROC_OPEN_ERROR;
 exit;
 }
 
-// Version constants only available as of 5.2.8
-if (!defined("PHP_VERSION_ID")) {
-	list($major, $minor, $bug) = explode(".", phpversion(), 3);
-	$bug = (int)$bug; // Many distros make up their own versions
-	if ($bug < 10) {
-		$bug = "0$bug";
-	}
-
-	define("PHP_VERSION_ID", "{$major}0{$minor}$bug");
-	define("PHP_MAJOR_VERSION", $major);
-}
-
-// __DIR__ is available from 5.3.0
-if (PHP_VERSION_ID < 50300) {
-	define('__DIR__', realpath(dirname(__FILE__)));
-	// FILE_BINARY is available from 5.2.7
-	if (PHP_VERSION_ID < 50207) {
-		define('FILE_BINARY', 0);
-	}
-}
-
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
@@ -113,22 +92,6 @@ while(@ob_end_clean());
 if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
-if (PHP_MAJOR_VERSION < 6) {
-	if (ini_get('safe_mode')) {
-		echo <<< SAFE_MODE_WARNING
-
-+-----------------------------------------------------------+
-|                       ! WARNING !                         |
-| You are running the test-suite with "safe_mode" ENABLED ! |
-|                                                           |
-| Chances are high that no test will work at all,           |
-| depending on how you configured "safe_mode" !             |
-+-----------------------------------------------------------+
-
-
-SAFE_MODE_WARNING;
-	}
-}
 
 $environment = isset($_ENV) ? $_ENV : array();
 if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
@@ -240,7 +203,6 @@ $exts_to_test = array();
 $ini_overwrites = array(
 		'output_handler=',
 		'open_basedir=',
-		'safe_mode=0',
 		'disable_functions=',
 		'output_buffering=Off',
 		'error_reporting=' . (E_ALL | E_STRICT),
@@ -884,7 +846,7 @@ $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
 $test_dirs = array();
-$optionals = array('tests', 'ext', 'Zend', 'ZendEngine2', 'sapi/cli', 'sapi/cgi', 'sapi/fpm');
+$optionals = array('tests', 'ext', 'Zend', 'sapi');
 
 foreach($optionals as $dir) {
 	if (@filetype($dir) == 'dir') {
@@ -1539,6 +1501,23 @@ TEST $file
 
 	// Default ini settings
 	$ini_settings = array();
+
+	// Additional required extensions
+	if (array_key_exists('EXTENSIONS', $section_text)) {
+		$ext_dir=`$php -r 'echo ini_get("extension_dir");'`;
+		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
+		$loaded = explode(",", `$php -n -r 'echo join(",", get_loaded_extensions());'`);
+		foreach ($extensions as $req_ext) {
+			if (!in_array($req_ext, $loaded)) {
+				if ($req_ext == 'opcache') {
+					$ini_settings['zend_extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				} else {
+					$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				}
+			}
+		}
+	}
+
 	// additional ini overwrites
 	//$ini_overwrites[] = 'setting=value';
 	settings2array($ini_overwrites, $ini_settings);
@@ -1550,18 +1529,6 @@ TEST $file
 			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
 		}
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
-	}
-
-	// Additional required extensions
-	if (array_key_exists('EXTENSIONS', $section_text)) {
-		$ext_dir=`$php -r 'echo ini_get("extension_dir");'`;
-		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-		$loaded = explode(",", `$php -n -r 'echo join(",", get_loaded_extensions());'`);
-		foreach ($extensions as $req_ext) {
-			if (!in_array($req_ext, $loaded)) {
-				$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
-			}
-		}
 	}
 
 	settings2params($ini_settings);
@@ -1877,11 +1844,13 @@ TEST $file
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
 		/* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
-		if (version_compare($valgrind_version, '3.3.0', '>=')) {
+		if (version_compare($valgrind_version, '3.8.0', '>=')) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
 			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
+		} elseif (version_compare($valgrind_version, '3.3.0', '>=')) {
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
 		} else {
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-register-updates=allregs-at-mem-access --log-file-exactly=$memcheck_filename $cmd";
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
 		}
 
 	} else {
@@ -2371,7 +2340,7 @@ function settings2array($settings, &$ini_settings)
 			$name = trim($setting[0]);
 			$value = trim($setting[1]);
 
-			if ($name == 'extension') {
+			if ($name == 'extension' || $name == 'zend_extension') {
 
 				if (!isset($ini_settings[$name])) {
 					$ini_settings[$name] = array();
@@ -2827,7 +2796,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	} elseif ('WARN' == $type) {
 		junit_suite_record($suite, 'test_warn');
 		$JUNIT['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
-	} elseif('FAIL' == $type) {
+	} elseif ('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
 		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
 	} else {

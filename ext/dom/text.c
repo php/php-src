@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -164,13 +164,13 @@ PHP_FUNCTION(dom_text_split_text)
 	}
 	length = xmlUTF8Strlen(cur);
 
-	if (offset > length || offset < 0) {
+	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length || offset < 0) {
 		xmlFree(cur);
 		RETURN_FALSE;
 	}
 
-	first = xmlUTF8Strndup(cur, offset);
-	second = xmlUTF8Strsub(cur, offset, length - offset);
+	first = xmlUTF8Strndup(cur, (int)offset);
+	second = xmlUTF8Strsub(cur, (int)offset, (int)(length - offset));
 
 	xmlFree(cur);
 

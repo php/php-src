@@ -69,15 +69,16 @@ typedef void* yyscan_t;
      T_COLON = 265,
      T_DCOLON = 266,
      T_POUND = 267,
-     T_PROTO = 268,
-     T_DIGITS = 269,
-     T_LITERAL = 270,
-     T_ADDR = 271,
-     T_OPCODE = 272,
-     T_ID = 273,
-     T_INPUT = 274,
-     T_UNEXPECTED = 275,
-     T_REQ_ID = 276
+     T_SEPARATOR = 268,
+     T_PROTO = 269,
+     T_DIGITS = 270,
+     T_LITERAL = 271,
+     T_ADDR = 272,
+     T_OPCODE = 273,
+     T_ID = 274,
+     T_INPUT = 275,
+     T_UNEXPECTED = 276,
+     T_REQ_ID = 277
    };
 #endif
 /* Tokens.  */
@@ -91,15 +92,16 @@ typedef void* yyscan_t;
 #define T_COLON 265
 #define T_DCOLON 266
 #define T_POUND 267
-#define T_PROTO 268
-#define T_DIGITS 269
-#define T_LITERAL 270
-#define T_ADDR 271
-#define T_OPCODE 272
-#define T_ID 273
-#define T_INPUT 274
-#define T_UNEXPECTED 275
-#define T_REQ_ID 276
+#define T_SEPARATOR 268
+#define T_PROTO 269
+#define T_DIGITS 270
+#define T_LITERAL 271
+#define T_ADDR 272
+#define T_OPCODE 273
+#define T_ID 274
+#define T_INPUT 275
+#define T_UNEXPECTED 276
+#define T_REQ_ID 277
 
 
 

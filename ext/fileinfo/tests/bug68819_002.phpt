@@ -12,7 +12,7 @@ $string .= "\r\n";
 $string .= "''''";
 
 // Total string length > 8192
-$string .= str_repeat(chr(rand(32, 127)), 8184);
+$string .= str_repeat("a", 8184);
 
 // Ending in this string
 $string .= "say";

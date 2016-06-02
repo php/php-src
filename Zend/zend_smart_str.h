@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,6 +45,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len);
+ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char *s, size_t l);
 
 END_EXTERN_C()
 

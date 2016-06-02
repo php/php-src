@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,6 +77,8 @@
 #if defined(ZEND_WIN32)
 #include <intrin.h>
 #endif
+
+#include "zend_range_check.h"
 
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__
@@ -216,9 +218,13 @@ char *alloca();
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
 # define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+# define ZEND_COLD __attribute__((cold))
+# define ZEND_HOT __attribute__((hot))
 #else
 # define ZEND_ATTRIBUTE_UNUSED
 # define ZEND_ATTRIBUTE_UNUSED_LABEL
+# define ZEND_COLD
+# define ZEND_HOT
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
@@ -278,7 +284,7 @@ char *alloca();
 #  endif
 # elif defined(_MSC_VER)
 #  define zend_always_inline __forceinline
-#  define zend_never_inline
+#  define zend_never_inline __declspec(noinline)
 # else
 #  if __has_attribute(always_inline)
 #   define zend_always_inline inline __attribute__((always_inline))

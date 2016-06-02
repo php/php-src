@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -242,6 +242,19 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
+		/* check for invalid chars inside login/pass */
+		pp = s;
+		while (pp < p) {
+			if (!isalnum(*pp) && *pp != ':' && *pp != ';' && *pp != '=' && !(*pp >= '!' && *pp <= ',')) {
+				if (ret->scheme) {
+					efree(ret->scheme);
+				}
+				efree(ret);
+				return NULL;
+			}
+			pp++;
+		}
+
 		if ((pp = memchr(s, ':', (p-s)))) {
 			ret->user = estrndup(s, (pp-s));
 			php_replace_controlchars_ex(ret->user, (pp - s));
@@ -320,7 +333,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	nohost:
 
 	if ((p = memchr(s, '?', (ue - s)))) {
-		pp = strchr(s, '#');
+		pp = memchr(s, '#', (ue - s));
 
 		if (pp && pp < p) {
 			if (pp - s) {
@@ -493,7 +506,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
-	start = zend_string_alloc(3 * len, 0);
+	start = zend_string_safe_alloc(3, len, 0, 0);
 	to = (unsigned char*)ZSTR_VAL(start);
 
 	while (from < end) {
@@ -608,10 +621,10 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
  */
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
-	register int x, y;
+	register size_t x, y;
 	zend_string *str;
 
-	str = zend_string_alloc(3 * len, 0);
+	str = zend_string_safe_alloc(3, len, 0, 0);
 	for (x = 0, y = 0; len--; x++, y++) {
 		ZSTR_VAL(str)[y] = (unsigned char) s[x];
 #ifndef CHARSET_EBCDIC
@@ -708,22 +721,24 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format])
+/* {{{ proto array get_headers(string url[, int format[, resource context]])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
 	char *url;
 	size_t url_len;
-	php_stream_context *context;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
 	HashTable *hashT;
 	zend_long format = 0;
+	zval *zcontext = NULL;
+	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &url, &url_len, &format, &zcontext) == FAILURE) {
 		return;
 	}
-	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
+
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;
@@ -767,7 +782,7 @@ no_name_header:
 					s++;
 				}
 
-				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
+				if ((prev_val = zend_hash_str_find(Z_ARRVAL_P(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
 					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				} else { /* some headers may occur more than once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);

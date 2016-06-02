@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -43,12 +44,9 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 {
 	if (objects->top > 1) {
-		zend_object **obj_ptr = objects->object_buckets + 1;
-		zend_object **end = objects->object_buckets + objects->top;
-
-		do {
-			zend_object *obj = *obj_ptr;
-
+		uint32_t i;
+		for (i = 1; i < objects->top; i++) {
+			zend_object *obj = objects->object_buckets[i];
 			if (IS_OBJ_VALID(obj)) {
 				if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 					GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
@@ -57,8 +55,7 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 					GC_REFCOUNT(obj)--;
 				}
 			}
-			obj_ptr++;
-		} while (obj_ptr != end);
+		}
 	}
 }
 

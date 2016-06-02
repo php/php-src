@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1183,7 +1183,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
 
-			if ( sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
+			if ( sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
 				node = node->children;
 			} else {
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
@@ -2203,7 +2203,12 @@ PHP_FUNCTION(simplexml_load_file)
 		return;
 	}
 
-	docp = xmlReadFile(filename, NULL, options);
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
+	docp = xmlReadFile(filename, NULL, (int)options);
 
 	if (!docp) {
 		RETURN_FALSE;
@@ -2244,7 +2249,20 @@ PHP_FUNCTION(simplexml_load_string)
 		return;
 	}
 
-	docp = xmlReadMemory(data, data_len, NULL, NULL, options);
+	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
+		php_error_docref(NULL, E_WARNING, "Data is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
+		php_error_docref(NULL, E_WARNING, "Namespace is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
+	docp = xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
 
 	if (!docp) {
 		RETURN_FALSE;
@@ -2281,7 +2299,20 @@ SXE_METHOD(__construct)
 		return;
 	}
 
-	docp = is_url ? xmlReadFile(data, NULL, options) : xmlReadMemory(data, data_len, NULL, NULL, options);
+	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
+		php_error_docref(NULL, E_WARNING, "Data is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
+		php_error_docref(NULL, E_WARNING, "Namespace is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
+	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
 
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;

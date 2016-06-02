@@ -1,6 +1,6 @@
 /*
 zip_source_win32w.c -- create data source from Windows file (UTF-16)
-Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
+Copyright (C) 1999-2016 Dieter Baron and Thomas Klausner
 
 This file is part of libzip, a library to manipulate ZIP archives.
 The authors can be contacted at <libzip@nih.at>
@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include <errno.h>
 #include <stdio.h>
 
 #include "zipint.h"
@@ -45,11 +44,11 @@ static int _win32_rename_temp_w(_zip_source_win32_read_file_t *ctx);
 static int _win32_remove_w(const void *fname);
 
 static _zip_source_win32_file_ops_t win32_ops_w = {
-    .op_strdup       = _win32_strdup_w,
-    .op_open         = _win32_open_w,
-    .op_create_temp  = _win32_create_temp_w,
-    .op_rename_temp  = _win32_rename_temp_w,
-    .op_remove       = _win32_remove_w
+    _win32_strdup_w,
+    _win32_open_w,
+    _win32_create_temp_w,
+    _win32_rename_temp_w,
+    _win32_remove_w
 };
 
 ZIP_EXTERN zip_source_t *
@@ -100,7 +99,7 @@ _win32_create_temp_w(_zip_source_win32_read_file_t *ctx, void **temp, zip_uint32
 	    return INVALID_HANDLE_VALUE;
 	}
     }
-    if (swprintf((wchar_t *)*temp, len, L"%s.%08x", (const wchar_t *)ctx->fname, value) != len - 1) {
+    if (_snwprintf((wchar_t *)*temp, len, L"%s.%08x", (const wchar_t *)ctx->fname, value) != len - 1) {
 	return INVALID_HANDLE_VALUE;
     }
 

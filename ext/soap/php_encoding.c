@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1164,13 +1164,8 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, zval *data, int style, xmlNode
 
 static void set_zval_property(zval* object, char* name, zval* val)
 {
-	zend_class_entry *old_scope;
-
-	old_scope = EG(scope);
-	EG(scope) = Z_OBJCE_P(object);
-	add_property_zval(object, name, val);
+	zend_update_property(Z_OBJCE_P(object), object, name, strlen(name), val);
 	if (Z_REFCOUNTED_P(val)) Z_DELREF_P(val);
-	EG(scope) = old_scope;
 }
 
 static zval* get_zval_property(zval* object, char* name, zval *rv)
@@ -1181,15 +1176,15 @@ static zval* get_zval_property(zval* object, char* name, zval *rv)
 		zend_class_entry *old_scope;
 
 		ZVAL_STRING(&member, name);
-		old_scope = EG(scope);
-		EG(scope) = Z_OBJCE_P(object);
+		old_scope = EG(fake_scope);
+		EG(fake_scope) = Z_OBJCE_P(object);
 		data = Z_OBJ_HT_P(object)->read_property(object, &member, BP_VAR_IS, NULL, rv);
 		if (data == &EG(uninitialized_zval)) {
 			/* Hack for bug #32455 */
 			zend_property_info *property_info;
 
 			property_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR(member), 1);
-			EG(scope) = old_scope;
+			EG(fake_scope) = old_scope;
 			if (property_info != ZEND_WRONG_PROPERTY_INFO && property_info &&
 			    zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
 				zval_ptr_dtor(&member);
@@ -1199,7 +1194,7 @@ static zval* get_zval_property(zval* object, char* name, zval *rv)
 			return NULL;
 		}
 		zval_ptr_dtor(&member);
-		EG(scope) = old_scope;
+		EG(fake_scope) = old_scope;
 		return data;
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zval *data_ptr;
@@ -1218,10 +1213,10 @@ static void unset_zval_property(zval* object, char* name)
 		zend_class_entry *old_scope;
 
 		ZVAL_STRING(&member, name);
-		old_scope = EG(scope);
-		EG(scope) = Z_OBJCE_P(object);
+		old_scope = EG(fake_scope);
+		EG(fake_scope) = Z_OBJCE_P(object);
 		Z_OBJ_HT_P(object)->unset_property(object, &member, NULL);
-		EG(scope) = old_scope;
+		EG(fake_scope) = old_scope;
 		zval_ptr_dtor(&member);
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_hash_str_del(Z_ARRVAL_P(object), name, strlen(name));
@@ -2188,9 +2183,8 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 static inline int array_num_elements(HashTable* ht)
 {
 	if (ht->nNumUsed &&
-	    Z_TYPE(ht->arData[ht->nNumUsed-1].val) != IS_UNUSED &&
+	    Z_TYPE(ht->arData[ht->nNumUsed-1].val) != IS_UNDEF &&
 	    ht->arData[ht->nNumUsed-1].key == NULL) {
-
 	    return ht->arData[ht->nNumUsed-1].h - 1;
 	}
 	return 0;
@@ -3015,7 +3009,11 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			xmlFreeNode(dummy);
 		} ZEND_HASH_FOREACH_END();
 		smart_str_0(&list);
-		xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		if (list.s) {
+			xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		} else {
+			xmlNodeSetContentLen(ret, BAD_CAST(""), 0);
+		}
 		smart_str_free(&list);
 	} else {
 		zval tmp;
@@ -3055,7 +3053,11 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			start = next;
 		}
 		smart_str_0(&list);
-		xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		if (list.s) {
+			xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
+		} else {
+			xmlNodeSetContentLen(ret, BAD_CAST(""), 0);
+		}
 		smart_str_free(&list);
 		efree(str);
 		if (data == &tmp) {zval_dtor(&tmp);}
@@ -3502,9 +3504,10 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 	i = 0;
 	different = FALSE;
 	cur_type = prev_type = 0;
-	ht = HASH_OF(array);
+	ht = Z_ARRVAL_P(array);
 
 	ZEND_HASH_FOREACH_VAL_IND(ht, tmp) {
+		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_OBJECT &&
 		    Z_OBJCE_P(tmp) == soap_var_class_entry) {
 			zval *ztype;

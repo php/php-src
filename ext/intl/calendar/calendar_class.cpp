@@ -177,7 +177,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 		HashTable	   *debug_info_tz;
 
 		timezone_object_construct(&cal->getTimeZone(), &ztz , 0);
-		debug_info = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
+		debug_info_tz = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
 		assert(is_tmp == 1);
 
 		array_init(&ztz_debug);
@@ -503,8 +503,6 @@ void calendar_register_IntlCalendar_class(void)
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK",			UCAL_DAY_OF_WEEK);
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK_IN_MONTH",	UCAL_DAY_OF_WEEK_IN_MONTH);
 	CALENDAR_DECL_LONG_CONST("FIELD_AM_PM",					UCAL_AM_PM);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_MINUTE",				UCAL_MINUTE);

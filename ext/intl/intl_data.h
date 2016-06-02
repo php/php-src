@@ -45,7 +45,7 @@ typedef struct _intl_data {
 	obj = Z_##oclass##_P( object );												\
     intl_error_reset( INTL_DATA_ERROR_P(obj) );						\
 
-/* Check status by error code, if error - exit */
+/* Check status by error code, if error return false */
 #define INTL_CHECK_STATUS(err, msg)											\
     intl_error_set_code( NULL, (err) );							\
     if( U_FAILURE((err)) )													\
@@ -53,6 +53,16 @@ typedef struct _intl_data {
         intl_error_set_custom_msg( NULL, msg, 0 );				\
         RETURN_FALSE;														\
     }
+
+/* Check status by error code, if error return null */
+#define INTL_CHECK_STATUS_OR_NULL(err, msg)                     \
+    intl_error_set_code( NULL, (err) );             \
+    if( U_FAILURE((err)) )                          \
+    {                                   \
+        intl_error_set_custom_msg( NULL, msg, 0 );        \
+        RETURN_NULL();                           \
+    }
+
 
 /* Check status in object, if error return false */
 #define INTL_METHOD_CHECK_STATUS(obj, msg)											\

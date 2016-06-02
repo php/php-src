@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -181,7 +181,7 @@ typedef struct {
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
 	zend_bool                     in_callback;
-	uint32_t                      clone;
+	uint32_t*                     clone;
 } php_curl;
 
 #define CURLOPT_SAFE_UPLOAD -1

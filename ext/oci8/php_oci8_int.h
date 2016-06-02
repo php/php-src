@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -121,7 +121,7 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
  * Name passed to Oracle for tracing.  Note some DB views only show
  * the first nine characters of the driver name.
  */
-#define PHP_OCI8_DRIVER_NAME "PHP OCI8 " PHP_OCI8_VERSION
+#define PHP_OCI8_DRIVER_NAME     "PHP OCI8 : " PHP_OCI8_VERSION
 
 /* }}} */
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -572,7 +572,7 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("user_ini.filename",		".user.ini",	PHP_INI_SYSTEM,		OnUpdateString,		user_ini_filename,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("user_ini.cache_ttl",		"300",			PHP_INI_SYSTEM,		OnUpdateLong,		user_ini_cache_ttl,	php_core_globals,		core_globals)
-	STD_PHP_INI_BOOLEAN("exit_on_timeout",		"0",		PHP_INI_ALL,		OnUpdateBool,			exit_on_timeout,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("hard_timeout",			"2",			PHP_INI_SYSTEM,		OnUpdateLong,		hard_timeout,		zend_executor_globals,	executor_globals)
 #ifdef PHP_WIN32
 	STD_PHP_INI_BOOLEAN("windows.show_crt_warning",		"0",		PHP_INI_ALL,		OnUpdateBool,			windows_show_crt_warning,			php_core_globals,	core_globals)
 #endif
@@ -607,9 +607,9 @@ PHPAPI int php_get_module_initialized(void)
 }
 /* }}} */
 
-/* {{{ php_log_err
+/* {{{ php_log_err_with_severity
  */
-PHPAPI void php_log_err(char *log_message)
+PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int)
 {
 	int fd = -1;
 	time_t error_time;
@@ -624,7 +624,7 @@ PHPAPI void php_log_err(char *log_message)
 	if (PG(error_log) != NULL) {
 #ifdef HAVE_SYSLOG_H
 		if (!strcmp(PG(error_log), "syslog")) {
-			php_syslog(LOG_NOTICE, "%s", log_message);
+			php_syslog(syslog_type_int, "%s", log_message);
 			PG(in_error_log) = 0;
 			return;
 		}
@@ -703,7 +703,7 @@ PHPAPI size_t php_printf(const char *format, ...)
  * html error messages if correcponding ini setting (html_errors) is activated.
  * See: CODING_STANDARDS for details.
  */
-PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
+PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
 {
 	zend_string *replace_buffer = NULL, *replace_origin = NULL;
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
@@ -723,9 +723,20 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	if (PG(html_errors)) {
 		replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, NULL);
+		/* Retry with substituting invalid chars on fail. */
+		if (!replace_buffer || ZSTR_LEN(replace_buffer) < 1) {
+			replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, NULL);
+		}
+
 		efree(buffer);
-		buffer = ZSTR_VAL(replace_buffer);
-		buffer_len = (int)ZSTR_LEN(replace_buffer);
+
+		if (replace_buffer) {
+			buffer = ZSTR_VAL(replace_buffer);
+			buffer_len = (int)ZSTR_LEN(replace_buffer);
+		} else {
+			buffer = "";
+			buffer_len = 0;
+		}
 	}
 
 	/* which function caused the problem if any at all */
@@ -878,7 +889,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	if (replace_buffer) {
 		zend_string_free(replace_buffer);
 	} else {
-		efree(buffer);
+		if (buffer_len > 0) {
+			efree(buffer);
+		}
 	}
 
 	php_error(type, "%s", message);
@@ -888,7 +901,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 /* {{{ php_error_docref0 */
 /* See: CODING_STANDARDS for details. */
-PHPAPI void php_error_docref0(const char *docref, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
 {
 	va_list args;
 
@@ -900,7 +913,7 @@ PHPAPI void php_error_docref0(const char *docref, int type, const char *format, 
 
 /* {{{ php_error_docref1 */
 /* See: CODING_STANDARDS for details. */
-PHPAPI void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 {
 	va_list args;
 
@@ -912,7 +925,7 @@ PHPAPI void php_error_docref1(const char *docref, const char *param1, int type, 
 
 /* {{{ php_error_docref2 */
 /* See: CODING_STANDARDS for details. */
-PHPAPI void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
 {
 	char *params;
 	va_list args;
@@ -929,7 +942,7 @@ PHPAPI void php_error_docref2(const char *docref, const char *param1, const char
 
 #ifdef PHP_WIN32
 #define PHP_WIN32_ERROR_MSG_BUFFER_SIZE 512
-PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
+PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
 	if (error == 0) {
 		php_error_docref2(NULL, param1, param2, E_WARNING, "%s", strerror(errno));
 	} else {
@@ -957,7 +970,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 
 /* {{{ php_error_cb
  extended error handling function */
-static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	char *buffer;
 	int buffer_len, display;
@@ -982,20 +995,16 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 	/* store the error if it has changed */
 	if (display) {
-#ifdef ZEND_SIGNALS
-		HANDLE_BLOCK_INTERRUPTIONS();
-#endif
 		if (PG(last_error_message)) {
-			free(PG(last_error_message));
+			char *s = PG(last_error_message);
 			PG(last_error_message) = NULL;
+			free(s);
 		}
 		if (PG(last_error_file)) {
-			free(PG(last_error_file));
+			char *s = PG(last_error_file);
 			PG(last_error_file) = NULL;
+			free(s);
 		}
-#ifdef ZEND_SIGNALS
-		HANDLE_UNBLOCK_INTERRUPTIONS();
-#endif
 		if (!error_filename) {
 			error_filename = "Unknown";
 		}
@@ -1040,6 +1049,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	if (display && (EG(error_reporting) & type || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
 		char *error_type_str;
+		int syslog_type_int = LOG_NOTICE;
 
 		switch (type) {
 			case E_ERROR:
@@ -1047,29 +1057,36 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			case E_COMPILE_ERROR:
 			case E_USER_ERROR:
 				error_type_str = "Fatal error";
+				syslog_type_int = LOG_ERR;
 				break;
 			case E_RECOVERABLE_ERROR:
 				error_type_str = "Catchable fatal error";
+				syslog_type_int = LOG_ERR;
 				break;
 			case E_WARNING:
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
 			case E_USER_WARNING:
 				error_type_str = "Warning";
+				syslog_type_int = LOG_WARNING;
 				break;
 			case E_PARSE:
 				error_type_str = "Parse error";
+				syslog_type_int = LOG_EMERG;
 				break;
 			case E_NOTICE:
 			case E_USER_NOTICE:
 				error_type_str = "Notice";
+				syslog_type_int = LOG_NOTICE;
 				break;
 			case E_STRICT:
 				error_type_str = "Strict Standards";
+				syslog_type_int = LOG_INFO;
 				break;
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";
+				syslog_type_int = LOG_INFO;
 				break;
 			default:
 				error_type_str = "Unknown error";
@@ -1084,7 +1101,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			}
 #endif
 			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-			php_log_err(log_buffer);
+			php_log_err_with_severity(log_buffer, syslog_type_int);
 			efree(log_buffer);
 		}
 
@@ -1411,7 +1428,7 @@ static void php_free_request_globals(void)
 
 /* {{{ php_message_handler_for_zend
  */
-static void php_message_handler_for_zend(zend_long message, const void *data)
+static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void *data)
 {
 	switch (message) {
 		case ZMSG_FAILED_INCLUDE_FOPEN:
@@ -1496,8 +1513,6 @@ static void php_message_handler_for_zend(zend_long message, const void *data)
 void php_on_timeout(int seconds)
 {
 	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
-	zend_set_timeout(EG(timeout_seconds), 1);
-	if(PG(exit_on_timeout)) sapi_terminate_process();
 }
 
 #if PHP_SIGCHILD
@@ -1557,6 +1572,9 @@ int php_request_startup(void)
 #endif /* HAVE_DTRACE */
 
 #ifdef PHP_WIN32
+# if defined(ZTS)
+	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+# endif
 	PG(com_initialized) = 0;
 #endif
 
@@ -1700,6 +1718,9 @@ void php_request_shutdown_for_hook(void *dummy)
 
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
+	}
+
+	if (PG(modules_activated)) {
 		php_free_shutdown_functions();
 	}
 
@@ -1790,7 +1811,6 @@ void php_request_shutdown(void *dummy)
 	/* 5. Call all extensions RSHUTDOWN functions */
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
-		php_free_shutdown_functions();
 	}
 
 	/* 6. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
@@ -1798,7 +1818,12 @@ void php_request_shutdown(void *dummy)
 		php_output_deactivate();
 	} zend_end_try();
 
-	/* 7. Destroy super-globals */
+	/* 7. Free shutdown functions */
+	if (PG(modules_activated)) {
+		php_free_shutdown_functions();
+	}
+
+	/* 8. Destroy super-globals */
 	zend_try {
 		int i;
 
@@ -1807,37 +1832,37 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 8. free request-bound globals */
+	/* 9. free request-bound globals */
 	php_free_request_globals();
 
-	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 10. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate();
 
-	/* 10. Call all extensions post-RSHUTDOWN functions */
+	/* 11. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
-	/* 11. SAPI related shutdown (free stuff) */
+	/* 12. SAPI related shutdown (free stuff) */
 	zend_try {
 		sapi_deactivate();
 	} zend_end_try();
 
-	/* 12. free virtual CWD memory */
+	/* 13. free virtual CWD memory */
 	virtual_cwd_deactivate();
 
-	/* 13. Destroy stream hashes */
+	/* 14. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
-	/* 14. Free Willy (here be crashes) */
+	/* 15. Free Willy (here be crashes) */
 	zend_interned_strings_restore();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
 
-	/* 15. Reset max_execution_time */
+	/* 16. Reset max_execution_time */
 	zend_try {
 		zend_unset_timeout();
 	} zend_end_try();
