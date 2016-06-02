@@ -188,11 +188,11 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	}
 
 	if (pattern) {
-		 df = new SimpleDateFormat(
-				UnicodeString(Z_STRVAL_P(format), Z_STRLEN_P(format),
-						UnicodeString::kInvariant),
-				Locale::createFromName(locale_str),
-				status);
+		StringPiece sp(Z_STRVAL_P(format));
+		df = new SimpleDateFormat(
+			UnicodeString::fromUTF8(sp),
+			Locale::createFromName(locale_str),
+			status);
 
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
