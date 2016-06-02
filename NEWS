@@ -50,6 +50,10 @@ PHP                                                                        NEWS
 - Intl:
   . Added IntlTimeZone::getWindowsID() and
     IntlTimeZone::getIDForWindowsID(). (Sara)
+  . Fixed bug #69374 (IntlDateFormatter formatObject returns wrong utf8 value).
+    (lenhatanh86 at gmail com)
+  . Fixed bug #69398 (IntlDateFormatter formatObject returns wrong value when
+    time style is NONE). (lenhatanh86 at gmail com)
 
 - Hash:
   . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
