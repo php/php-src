@@ -96,6 +96,7 @@
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_raw_url_decode() */
 #include "ext/standard/php_string.h" /* for php_dirname() */
+#include "ext/date/php_date.h" /* for php_format_date() */
 #include "php_network.h"
 
 #include "php_http_parser.h"
@@ -348,6 +349,13 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 			smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
 		}
 	}
+	time_t t;
+	time(&t);
+	zend_string *dt = php_format_date("r", 1, t, 1);
+	smart_str_appendl_ex(buffer, "Date: ", 6, persistent);
+	smart_str_appends_ex(buffer, dt->val, persistent);
+	smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
+
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
 } /* }}} */
 
