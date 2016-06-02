@@ -38,6 +38,8 @@ PHP                                                                        NEWS
   . Raise a compile-time warning on octal escape sequence overflow. (Sara)
   . Added [] = as alternative construct to list() =. (Bob)
   . Implemented logging to syslog with dynamic error levels. (Jani Ollikainen)
+  . Fixed bug #47517 (php-cgi.exe missing UAC manifest).
+    (maxdax15801 at users noreply github com)
 
 - CLI Server:
   . Fixed bug #71276 (Built-in webserver does not send Date header).
