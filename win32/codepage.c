@@ -280,7 +280,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(const char *enc)
 			continue;
 		}
 
-		if (0 == zend_binary_strcasecmp(enc, enc_len, cp->name, sizeof(cp->name) - 1)) {
+		if (0 == zend_binary_strcasecmp(enc, enc_len, cp->name, strlen(cp->name))) {
 			cur_cp = cp;
 			return cp;
 		}
