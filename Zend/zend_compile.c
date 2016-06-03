@@ -5062,14 +5062,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with callable type can only be NULL");
 					}
-				} else if (arg_info->type_hint == IS_ITERABLE && default_ast) {
-					if (default_ast && !has_null_default
-						&& Z_TYPE(default_node.u.constant) != IS_ARRAY
-						&& !Z_CONSTANT(default_node.u.constant)
-					) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with iterable type can only be an array or NULL");
-					}
 				}
 			} else {
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
@@ -5081,6 +5073,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 							if (Z_TYPE(default_node.u.constant) != IS_DOUBLE && Z_TYPE(default_node.u.constant) != IS_LONG) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 									"with a float type can only be float, integer, or NULL");
+							}
+							break;
+						
+						case IS_ITERABLE:
+							if (Z_TYPE(default_node.u.constant) != IS_ARRAY) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with iterable type can only be an array or NULL");
 							}
 							break;
 							
