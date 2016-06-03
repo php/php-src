@@ -1079,7 +1079,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 				}
 			} else if (ret_info->type_hint == IS_ITERABLE) {
 				if (!zend_is_iterable(ret)) {
-					zend_verify_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
+					zend_verify_return_error(zf, "be iterable", "", zend_zval_type_name(ret), "");
 				}
 			} else if (ret_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
