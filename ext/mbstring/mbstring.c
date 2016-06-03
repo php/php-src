@@ -1594,6 +1594,8 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
 	UNREGISTER_INI_ENTRIES();
 
+	zend_multibyte_restore_functions();
+
 #if HAVE_MBREGEX
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
