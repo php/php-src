@@ -758,6 +758,11 @@ static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zv
 					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "");
 					return 0;
 				}
+			} else if (cur_arg_info->type_hint == IS_ITERABLE) {
+				if (!zend_is_iterable(arg)) {
+					zend_verify_arg_error(zf, arg_num, "be iterable", "", zend_zval_type_name(arg), "");
+					return 0;
+				}
 			} else if (cur_arg_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 				/* pass */
@@ -849,6 +854,11 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "");
 					return 0;
 				}
+			} else if (cur_arg_info->type_hint == IS_ITERABLE) {
+				if (!zend_is_iterable(arg)) {
+					zend_verify_arg_error(zf, arg_num, "be iterable", "", zend_zval_type_name(arg), "");
+					return 0;
+				}
 			} else if (cur_arg_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 				/* pass */
@@ -893,6 +903,8 @@ static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, ui
 			zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "none", "");
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "");
+		} else if (cur_arg_info->type_hint == IS_ITERABLE) {
+			zend_verify_arg_error(zf, arg_num, "be iterable", "", "none", "");
 		} else {
 			zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "");
 		}
@@ -998,6 +1010,11 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 					zend_verify_internal_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
 					return 0;
 				}
+			} else if (ret_info->type_hint == IS_ITERABLE) {
+				if (!zend_is_iterable(ret) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
+					zend_verify_internal_return_error(zf, "be iterable", "", zend_zval_type_name(ret), "");
+					return 0;
+				}
 			} else if (ret_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
 				/* pass */
@@ -1060,6 +1077,10 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 				if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL)) {
 					zend_verify_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
 				}
+			} else if (ret_info->type_hint == IS_ITERABLE) {
+				if (!zend_is_iterable(ret)) {
+					zend_verify_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
+				}
 			} else if (ret_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
 				/* pass */
@@ -1101,6 +1122,8 @@ static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **c
 			return 0;
 		} else if (ret_info->type_hint == IS_CALLABLE) {
 			zend_verify_return_error(zf, "be callable", "", "none", "");
+		} else if (ret_info->type_hint == IS_ITERABLE) {
+			zend_verify_return_error(zf, "be iterable", "", "none", "");
 		} else {
 			zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), "none", "");
 		}

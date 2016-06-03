@@ -160,6 +160,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("string")},
 	{ZEND_STRL("true")},
 	{ZEND_STRL("void")},
+	{ZEND_STRL("iterable")},
 	{NULL, 0}
 };
 
@@ -204,6 +205,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("string"), IS_STRING},
 	{ZEND_STRL("bool"), _IS_BOOL},
 	{ZEND_STRL("void"), IS_VOID},
+	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -5059,6 +5061,14 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 					if (!has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with callable type can only be NULL");
+					}
+				} else if (arg_info->type_hint == IS_ITERABLE && default_ast) {
+					if (default_ast && !has_null_default
+						&& Z_TYPE(default_node.u.constant) != IS_ARRAY
+						&& !Z_CONSTANT(default_node.u.constant)
+					) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with iterable type can only be an array or NULL");
 					}
 				}
 			} else {
