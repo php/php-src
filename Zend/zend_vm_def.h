@@ -4529,35 +4529,32 @@ ZEND_VM_C_LABEL(send_again):
 
 			if (iter->funcs->rewind) {
 				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					ZEND_VM_C_GOTO(unpack_iter_dtor);
-				}
 			}
 
 			for (; iter->funcs->valid(iter) == SUCCESS; ++arg_num) {
 				zval *arg, *top;
 
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					ZEND_VM_C_GOTO(unpack_iter_dtor);
+					break;
 				}
 
 				arg = iter->funcs->get_current_data(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					ZEND_VM_C_GOTO(unpack_iter_dtor);
+					break;
 				}
 
 				if (iter->funcs->get_current_key) {
 					zval key;
 					iter->funcs->get_current_key(iter, &key);
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						ZEND_VM_C_GOTO(unpack_iter_dtor);
+						break;
 					}
 
 					if (Z_TYPE(key) == IS_STRING) {
 						zend_throw_error(NULL,
 							"Cannot unpack Traversable with string keys");
 						zend_string_release(Z_STR(key));
-						ZEND_VM_C_GOTO(unpack_iter_dtor);
+						break;
 					}
 
 					zval_dtor(&key);
@@ -4585,12 +4582,8 @@ ZEND_VM_C_LABEL(send_again):
 				ZEND_CALL_NUM_ARGS(EX(call))++;
 
 				iter->funcs->move_forward(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					ZEND_VM_C_GOTO(unpack_iter_dtor);
-				}
 			}
 
-ZEND_VM_C_LABEL(unpack_iter_dtor):
 			zend_iterator_dtor(iter);
 		}
 	} else if (EXPECTED(Z_ISREF_P(args))) {
@@ -4612,7 +4605,6 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *args;
-	SAVE_OPLINE();
 
 	SAVE_OPLINE();
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);

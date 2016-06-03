@@ -456,7 +456,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"incq (%0)\n\t"
@@ -469,7 +469,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 		/* switch to double */
@@ -494,7 +494,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"decq (%0)\n\t"
@@ -507,7 +507,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 		/* switch to double */
@@ -542,7 +542,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "eax","cc");
+		: "eax","cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"movq	(%1), %%rax\n\t"
@@ -565,7 +565,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "rax","cc");
+		: "rax","cc", "memory");
 #else
 	/*
 	 * 'result' may alias with op1 or op2, so we need to
@@ -632,7 +632,7 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "eax","cc");
+		: "eax","cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"movq	(%1), %%rax\n\t"
@@ -659,7 +659,7 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "rax","cc");
+		: "rax","cc", "memory");
 #else
 	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
