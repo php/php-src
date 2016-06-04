@@ -526,12 +526,14 @@ PHP_FUNCTION(typeof)
 
 		case IS_OBJECT:
 			if (extended) {
-				const size_t type_len = sizeof(TYPE_OBJECT " of class ") - 1;
-				char *type = estrndup(TYPE_OBJECT " of class ", type_len);
+				const size_t prefix_len = sizeof(TYPE_OBJECT " of class ") - 1;
+				const size_t type_len = prefix_len + ZSTR_LEN(Z_OBJCE_P(var)->name);
 
-				memcpy(type + type_len, ZSTR_VAL(Z_OBJCE_P(var)->name), ZSTR_LEN(Z_OBJCE_P(var)->name));
+				char *type = emalloc(type_len);
+				memcpy(type, TYPE_OBJECT " of class ", prefix_len);
+				memcpy(type + prefix_len, ZSTR_VAL(Z_OBJCE_P(var)->name), ZSTR_LEN(Z_OBJCE_P(var)->name));
 
-				RETURN_STRINGL(type, type_len + ZSTR_LEN(Z_OBJCE_P(var)->name));
+				RETURN_STRINGL(type, type_len);
 			}
 			RETURN_TYPE_NAME(TYPE_OBJECT);
 
@@ -540,13 +542,15 @@ PHP_FUNCTION(typeof)
 				const char *rsrc_type = zend_rsrc_list_get_rsrc_type(Z_RES_P(var));
 
 				if (rsrc_type) {
-					const size_t type_len = sizeof(TYPE_RESOURCE " of type ") - 1;
-					char *type = estrndup(TYPE_RESOURCE " of type ", type_len);
-
+					const size_t prefix_len = sizeof(TYPE_RESOURCE " of type ") - 1;
 					const size_t rsrc_type_len = strlen(rsrc_type);
-					memcpy(type + type_len, rsrc_type, rsrc_type_len);
+					const size_t type_len = prefix_len + rsrc_type_len;
 
-					RETURN_STRINGL(type, type_len + rsrc_type_len);
+					char *type = emalloc(type_len);
+					memcpy(type, TYPE_RESOURCE " of type ", prefix_len);
+					memcpy(type + prefix_len, rsrc_type, rsrc_type_len);
+
+					RETURN_STRINGL(type, type_len);
 				}
 
 				RETURN_TYPE_NAME("closed " TYPE_RESOURCE);
