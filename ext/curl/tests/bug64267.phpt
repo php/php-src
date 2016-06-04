@@ -2,6 +2,7 @@
 Bug #64267 (CURLOPT_INFILE doesn't allow reset)
 --SKIPIF--
 <?php
+if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 extension_loaded("curl") or die("skip need ext/curl");
 ?>
 --FILE--
@@ -15,7 +16,9 @@ var_dump(curl_setopt_array($c, [
 	CURLOPT_RETURNTRANSFER => true,
 	CURLOPT_UPLOAD => true,
 	CURLOPT_INFILE => $f,
-	CURLOPT_INFILESIZE => filesize(__FILE__)
+	CURLOPT_INFILESIZE => filesize(__FILE__),
+	CURLOPT_CONNECTTIMEOUT => 1,
+	CURLOPT_TIMEOUT => 1,
 ]));
 fclose($f);
 var_dump(curl_setopt_array($c, [

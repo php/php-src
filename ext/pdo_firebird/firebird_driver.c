@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -474,56 +474,65 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
+			{
+				zend_bool bval = zval_get_long(val)? 1 : 0;
 
-			convert_to_boolean(val);
-
-			/* ignore if the new value equals the old one */
-			if (dbh->auto_commit ^ (Z_TYPE_P(val) == IS_TRUE? 1 : 0)) {
-				if (dbh->in_txn) {
-					if (Z_TYPE_P(val) == IS_TRUE) {
-						/* turning on auto_commit with an open transaction is illegal, because
-						   we won't know what to do with it */
-						H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
-						return 0;
-					} else {
-						/* close the transaction */
-						if (!firebird_handle_commit(dbh)) {
-							break;
+				/* ignore if the new value equals the old one */
+				if (dbh->auto_commit ^ bval) {
+					if (dbh->in_txn) {
+						if (bval) {
+							/* turning on auto_commit with an open transaction is illegal, because
+							   we won't know what to do with it */
+							H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
+							return 0;
+						} else {
+							/* close the transaction */
+							if (!firebird_handle_commit(dbh)) {
+								break;
+							}
+							dbh->in_txn = 0;
 						}
-						dbh->in_txn = 0;
 					}
+					dbh->auto_commit = bval;
 				}
-				dbh->auto_commit = Z_TYPE_P(val) == IS_TRUE? 1 : 0;
 			}
 			return 1;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
-			convert_to_boolean(val);
-			H->fetch_table_names = Z_TYPE_P(val) == IS_TRUE? 1 : 0;
+			H->fetch_table_names = zval_get_long(val)? 1 : 0;
 			return 1;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
-			convert_to_string(val);
-			if (H->date_format) {
-				efree(H->date_format);
+			{
+				zend_string *str = zval_get_string(val);
+				if (H->date_format) {
+					efree(H->date_format);
+				}
+				spprintf(&H->date_format, 0, "%s", ZSTR_VAL(str));
+				zend_string_release(str);
 			}
-			spprintf(&H->date_format, 0, "%s", Z_STRVAL_P(val));
 			return 1;
 
 		case PDO_FB_ATTR_TIME_FORMAT:
-			convert_to_string(val);
-			if (H->time_format) {
-				efree(H->time_format);
+			{
+				zend_string *str = zval_get_string(val);
+				if (H->time_format) {
+					efree(H->time_format);
+				}
+				spprintf(&H->time_format, 0, "%s", ZSTR_VAL(str));
+				zend_string_release(str);
 			}
-			spprintf(&H->time_format, 0, "%s", Z_STRVAL_P(val));
 			return 1;
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
-			convert_to_string(val);
-			if (H->timestamp_format) {
-				efree(H->timestamp_format);
+			{
+				zend_string *str = zval_get_string(val);
+				if (H->timestamp_format) {
+					efree(H->timestamp_format);
+				}
+				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
+				zend_string_release(str);
 			}
-			spprintf(&H->timestamp_format, 0, "%s", Z_STRVAL_P(val));
 			return 1;
 	}
 	return 0;

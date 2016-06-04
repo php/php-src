@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -505,6 +505,13 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 	     (IS_SLASH(filename[1]) ||
 	      ((filename[1] == '.') && IS_SLASH(filename[2])))) ||
 	    IS_ABSOLUTE_PATH(filename, filename_length) ||
+#if PHP_WIN32
+		/* This should count as an absolute local path as well, however
+		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+		   might be a big thing to extend, thus just a local handling for
+		   now. */
+		filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+#endif
 	    !path ||
 	    !*path) {
 		if (tsrm_realpath(filename, resolved_path)) {
@@ -640,7 +647,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	if ((*filename == '.')
 	/* Absolute path open */
 	 || IS_ABSOLUTE_PATH(filename, filename_length)
-	 || (!path || (path && !*path))
+	 || (!path || !*path)
 	) {
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}

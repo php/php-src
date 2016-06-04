@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,6 +58,7 @@
 #include "zend_globals.h"
 #include "zend_operators.h"
 #include "zend_multiply.h"
+#include "zend_bitset.h"
 
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
@@ -198,6 +199,10 @@ typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 # define PTR_FMT "0x%0.16lx"
 #else
 # define PTR_FMT "0x%0.8lx"
+#endif
+
+#ifdef MAP_HUGETLB
+int zend_mm_use_huge_pages = 0;
 #endif
 
 /*
@@ -462,7 +467,7 @@ static void *zend_mm_mmap(size_t size)
 	void *ptr;
 
 #ifdef MAP_HUGETLB
-	if (size == ZEND_MM_CHUNK_SIZE) {
+	if (zend_mm_use_huge_pages && size == ZEND_MM_CHUNK_SIZE) {
 		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_HUGETLB, -1, 0);
 		if (ptr != MAP_FAILED) {
 			return ptr;
@@ -506,9 +511,9 @@ static void zend_mm_munmap(void *addr, size_t size)
 /* number of trailing set (1) bits */
 static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG
+#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(~bitset);
-#elif defined(__GNUC__) || __has_builtin(__builtin_ctzll)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
 	return __builtin_ctzll(~bitset);
 #elif defined(_WIN32)
 	unsigned long index;
@@ -542,45 +547,6 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 #endif
 }
 
-/* number of trailing zero bits (0x01 -> 1; 0x40 -> 6; 0x00 -> LEN) */
-static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
-{
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG
-	return __builtin_ctzl(bitset);
-#elif defined(__GNUC__) || __has_builtin(__builtin_ctzll)
-	return __builtin_ctzll(bitset);
-#elif defined(_WIN32)
-	unsigned long index;
-
-#if defined(_WIN64)
-	if (!BitScanForward64(&index, bitset)) {
-#else
-	if (!BitScanForward(&index, bitset)) {
-#endif
-		/* undefined behavior */
-		return 32;
-	}
-
-	return (int)index;
-#else
-	int n;
-
-	if (bitset == (zend_mm_bitset)0) return ZEND_MM_BITSET_LEN;
-
-	n = 1;
-#if SIZEOF_ZEND_LONG == 8
-	if (sizeof(zend_mm_bitset) == 8) {
-		if ((bitset & 0xffffffff) == 0) {n += 32; bitset = bitset >> Z_UL(32);}
-	}
-#endif
-	if ((bitset & 0x0000ffff) == 0) {n += 16; bitset = bitset >> 16;}
-	if ((bitset & 0x000000ff) == 0) {n +=  8; bitset = bitset >>  8;}
-	if ((bitset & 0x0000000f) == 0) {n +=  4; bitset = bitset >>  4;}
-	if ((bitset & 0x00000003) == 0) {n +=  2; bitset = bitset >>  2;}
-	return n - (bitset & 1);
-#endif
-}
-
 static zend_always_inline int zend_mm_bitset_find_zero(zend_mm_bitset *bitset, int size)
 {
 	int i = 0;
@@ -602,7 +568,7 @@ static zend_always_inline int zend_mm_bitset_find_one(zend_mm_bitset *bitset, in
 	do {
 		zend_mm_bitset tmp = bitset[i];
 		if (tmp != 0) {
-			return i * ZEND_MM_BITSET_LEN + zend_mm_bitset_ntz(tmp);
+			return i * ZEND_MM_BITSET_LEN + zend_ulong_ntz(tmp);
 		}
 		i++;
 	} while (i < size);
@@ -937,7 +903,7 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, int pages_count ZEND_FILE_L
 					tmp = *(bitset++);
 				}
 				/* find first 1 bit */
-				len = (i + zend_mm_bitset_ntz(tmp)) - page_num;
+				len = (i + zend_ulong_ntz(tmp)) - page_num;
 				if (len >= pages_count) {
 					goto found;
 				}
@@ -994,7 +960,7 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, int pages_count ZEND_FILE_L
 					tmp = *(bitset++);
 				}
 				/* find first 1 bit */
-				len = i + zend_mm_bitset_ntz(tmp) - page_num;
+				len = i + zend_ulong_ntz(tmp) - page_num;
 				if (len >= pages_count) {
 					if (len == pages_count) {
 						goto found;
@@ -1161,7 +1127,7 @@ static zend_always_inline void zend_mm_free_large(zend_mm_heap *heap, zend_mm_ch
 /* higher set bit number (0->N/A, 1->1, 2->2, 4->3, 8->4, 127->7, 128->8 etc) */
 static zend_always_inline int zend_mm_small_size_to_bit(int size)
 {
-#if defined(__GNUC__) || __has_builtin(__builtin_clz)
+#if (defined(__GNUC__) || __has_builtin(__builtin_clz))  && defined(PHP_HAVE_BUILTIN_CLZ)
 	return (__builtin_clz(size) ^ 0x1f) + 1;
 #elif defined(_WIN32)
 	unsigned long index;
@@ -1353,6 +1319,10 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	/* special handling for zero-size allocation */
 	size = MAX(size, 1);
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+	if (UNEXPECTED(size < real_size)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+		return NULL;
+	}
 #endif
 	if (size <= ZEND_MM_MAX_SMALL_SIZE) {
 		ptr = zend_mm_alloc_small(heap, size, ZEND_MM_SMALL_SIZE_TO_BIN(size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1462,7 +1432,15 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 #if ZEND_DEBUG
 			size = real_size;
 #endif
+#ifdef ZEND_WIN32
+			/* On Windows we don't have ability to extend huge blocks in-place.
+			 * We allocate them with 2MB size granularity, to avoid many 
+			 * reallocations when they are extended by small pieces
+			 */
+			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+#else
 			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+#endif
 			if (new_size == old_size) {
 #if ZEND_DEBUG
 				zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1722,7 +1700,15 @@ static void zend_mm_change_huge_block_size(zend_mm_heap *heap, void *ptr, size_t
 
 static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+#ifdef ZEND_WIN32
+	/* On Windows we don't have ability to extend huge blocks in-place.
+	 * We allocate them with 2MB size granularity, to avoid many 
+	 * reallocations when they are extended by small pieces
+	 */
+	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+#else
 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+#endif
 	void *ptr;
 
 #if ZEND_MM_LIMIT
@@ -1838,7 +1824,7 @@ static zend_mm_heap *zend_mm_init(void)
 	heap->peak = 0;
 #endif
 #if ZEND_MM_LIMIT
-	heap->limit = (Z_L(-1) >> Z_L(1));
+	heap->limit = ((size_t)Z_L(-1) >> (size_t)Z_L(1));
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM
@@ -2308,7 +2294,7 @@ ZEND_API int is_zend_mm(void)
 #endif
 }
 
-#if !ZEND_DEBUG && !defined(_WIN32)
+#if !ZEND_DEBUG && (!defined(_WIN32) || defined(__clang__))
 #undef _emalloc
 
 #if ZEND_MM_CUSTOM
@@ -2626,6 +2612,12 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		alloc_globals->mm_heap->custom_heap.std._free = free;
 		alloc_globals->mm_heap->custom_heap.std._realloc = realloc;
 		return;
+	}
+#endif
+#ifdef MAP_HUGETLB
+	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
+	if (tmp && zend_atoi(tmp, 0)) {
+		zend_mm_use_huge_pages = 1;
 	}
 #endif
 	ZEND_TSRMLS_CACHE_UPDATE();

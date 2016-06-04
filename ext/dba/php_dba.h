@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,8 +128,6 @@ typedef struct dba_handler {
 	DBA_OPTIMIZE_FUNC(x); \
 	DBA_SYNC_FUNC(x); \
 	DBA_INFO_FUNC(x)
-
-#define VALLEN(p) Z_STRVAL_PP(p), Z_STRLEN_PP(p)
 
 PHP_FUNCTION(dba_open);
 PHP_FUNCTION(dba_popen);

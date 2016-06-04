@@ -178,7 +178,7 @@ Internal Function Naming Convensions
     Unexposed module function should be static and should not be defined in
     'php_modulename.h'.
 
-    static int php_session_destroy(TSRMLS_D)
+    static int php_session_destroy()
 
 2.  Main module source file must be named 'modulename.c'.
 

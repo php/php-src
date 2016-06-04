@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -188,7 +188,7 @@ PHP_MSHUTDOWN_FUNCTION(readline)
 
 PHP_RSHUTDOWN_FUNCTION(readline)
 {
-	zval_dtor(&_readline_completion);
+	zval_ptr_dtor(&_readline_completion);
 	ZVAL_UNDEF(&_readline_completion);
 #if HAVE_RL_CALLBACK_READ_CHAR
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
@@ -251,7 +251,9 @@ PHP_FUNCTION(readline_info)
 		array_init(return_value);
 		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer));
 		add_assoc_long(return_value,"point",rl_point);
+#ifndef PHP_WIN32
 		add_assoc_long(return_value,"end",rl_end);
+#endif
 #ifdef HAVE_LIBREADLINE
 		add_assoc_long(return_value,"mark",rl_mark);
 		add_assoc_long(return_value,"done",rl_done);
@@ -262,7 +264,9 @@ PHP_FUNCTION(readline_info)
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
+#ifndef PHP_WIN32
 		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version));
+#endif
 		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name));
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
@@ -276,8 +280,10 @@ PHP_FUNCTION(readline_info)
 			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (!strcasecmp(what, "point")) {
 			RETVAL_LONG(rl_point);
+#ifndef PHP_WIN32
 		} else if (!strcasecmp(what, "end")) {
 			RETVAL_LONG(rl_end);
+#endif
 #ifdef HAVE_LIBREADLINE
 		} else if (!strcasecmp(what, "mark")) {
 			RETVAL_LONG(rl_mark);
@@ -305,12 +311,14 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_erase_empty_line;
 			if (value) {
 				convert_to_long_ex(value);
-				rl_erase_empty_line = Z_LVAL_PP(value);
+				rl_erase_empty_line = Z_LVAL_P(value);
 			}
 			RETVAL_LONG(oldval);
 #endif
+#ifndef PHP_WIN32
 		} else if (!strcasecmp(what,"library_version")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_library_version));
+#endif
 		} else if (!strcasecmp(what, "readline_name")) {
 			oldstr = (char*)rl_readline_name;
 			if (value) {
@@ -505,7 +513,7 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 	for (i = 0; i < 3; i++) {
 		zval_ptr_dtor(&params[i]);
 	}
-	zval_dtor(&_readline_array);
+	zval_ptr_dtor(&_readline_array);
 
 	return matches;
 }
@@ -526,8 +534,8 @@ PHP_FUNCTION(readline_completion_function)
 	}
 	zend_string_release(name);
 
-	zval_dtor(&_readline_completion);
-	ZVAL_DUP(&_readline_completion, arg);
+	zval_ptr_dtor(&_readline_completion);
+	ZVAL_COPY(&_readline_completion, arg);
 
 	rl_attempted_completion_function = _readline_completion_cb;
 	if (rl_attempted_completion_function == NULL) {
@@ -552,7 +560,7 @@ static void php_rl_callback_handler(char *the_line)
 	call_user_function(CG(function_table), NULL, &_prepped_callback, &dummy, 1, params);
 
 	zval_ptr_dtor(&params[0]);
-	zval_dtor(&dummy);
+	zval_ptr_dtor(&dummy);
 }
 
 /* {{{ proto void readline_callback_handler_install(string prompt, mixed callback)
@@ -577,10 +585,10 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
-		zval_dtor(&_prepped_callback);
+		zval_ptr_dtor(&_prepped_callback);
 	}
 
-	ZVAL_DUP(&_prepped_callback, callback);
+	ZVAL_COPY(&_prepped_callback, callback);
 
 	rl_callback_handler_install(prompt, php_rl_callback_handler);
 
@@ -604,7 +612,7 @@ PHP_FUNCTION(readline_callback_handler_remove)
 {
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
-		zval_dtor(&_prepped_callback);
+		zval_ptr_dtor(&_prepped_callback);
 		ZVAL_UNDEF(&_prepped_callback);
 		RETURN_TRUE;
 	}

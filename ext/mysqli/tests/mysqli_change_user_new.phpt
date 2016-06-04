@@ -30,8 +30,8 @@ if (mysqli_get_server_version($link) < 50600)
 
 	if (!$res = mysqli_query($link, 'SELECT 1 AS _one'))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	var_dump($res->fetch_assoc());
+	else
+		var_dump($res->fetch_assoc());
 
 	print "done!";
 ?>
@@ -40,5 +40,4 @@ Warning: mysqli_query(): MySQL server has gone away in %s on line %d
 
 Warning: mysqli_query(): Error reading result set's header in %s on line %d
 [003] [2006] MySQL server has gone away
-
-Fatal error: Call to a member function fetch_assoc() on %s in %s on line %d
+done!

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -217,10 +217,15 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 
 	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
 		/* failed to decompress the file, will try reading the rest of the file */
-		if (php_stream_seek(stream, 8, SEEK_SET))
+		if (php_stream_seek(stream, 8, SEEK_SET)) {
 			return NULL;
+		}
 
 		bufz = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
+
+		if (!bufz) {
+			return NULL;
+		}
 
 		/*
 		 * zlib::uncompress() wants to know the output data length

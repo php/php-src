@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "3.0.0-dev"
+#define ZEND_VERSION "3.1.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -61,7 +61,7 @@
 #define USED_RET() \
 	(!EX(prev_execute_data) || \
 	 !ZEND_USER_CODE(EX(prev_execute_data)->func->common.type) || \
-	 !(EX(prev_execute_data)->opline->result_type & EXT_TYPE_UNUSED))
+	 (EX(prev_execute_data)->opline->result_type != IS_UNUSED))
 
 #ifdef ZEND_ENABLE_STATIC_TSRMLS_CACHE
 #define ZEND_TSRMG TSRMG_STATIC
@@ -77,7 +77,7 @@
 #define ZEND_TSRMLS_CACHE
 #endif
 
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 
 #ifdef HAVE_NORETURN
 # ifdef ZEND_NORETURN_ALIAS
@@ -88,11 +88,6 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 #else
 # define zend_error_noreturn zend_error
 #endif
-
-/* overloaded elements data types */
-#define OE_IS_ARRAY					(1<<0)
-#define OE_IS_OBJECT				(1<<1)
-#define OE_IS_METHOD				(1<<2)
 
 struct _zend_serialize_data;
 struct _zend_unserialize_data;

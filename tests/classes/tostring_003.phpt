@@ -30,4 +30,4 @@ catch(Exception $e)
 ?>
 ====DONE====
 --EXPECTF--
-Fatal error: Method Test::__toString() must not throw an exception in %stostring_003.php on line %d
+Fatal error: Method Test::__toString() must not throw an exception, caught Exception: Damn! in %stostring_003.php on line %d

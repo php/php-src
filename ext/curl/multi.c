@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -416,6 +416,13 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
 		case CURLMOPT_MAXCONNECTS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071e00 /* 7.30.0 */
+		case CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE:
+		case CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE:
+		case CURLMOPT_MAX_HOST_CONNECTIONS:
+		case CURLMOPT_MAX_PIPELINE_LENGTH:
+		case CURLMOPT_MAX_TOTAL_CONNECTIONS:
 #endif
 			error = curl_multi_setopt(mh->multi, option, zval_get_long(zvalue));
 			break;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,7 +109,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 			return NULL;
 		}
 
-		zend_hash_index_update_ptr(connection->descriptors, descriptor->index, &descriptor);
+		zend_hash_index_update_ptr(connection->descriptors, descriptor->index, descriptor);
 	}
 	return descriptor;
 
@@ -666,11 +666,11 @@ void php_oci_lob_free (php_oci_descriptor *descriptor)
 	}
 
 	if (descriptor->connection->descriptors) {
-		/* delete descriptor from the hash */
-		zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
 		if (zend_hash_num_elements(descriptor->connection->descriptors) == 0) {
 			descriptor->connection->descriptor_count = 0;
 		} else {
+            /* delete descriptor from the hash */
+            zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
 			if (descriptor->index + 1 == descriptor->connection->descriptor_count) {
 				/* If the descriptor being freed is the end-most one
 				 * allocated, then the descriptor_count is reduced so
@@ -716,12 +716,7 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename)
 	ub4 offset = 1;
 	sword errstatus;
 	
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
-	/* Safe mode has been removed in PHP 5.4 */
 	if (php_check_open_basedir(filename)) {
-#else
-	if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename)) {
-#endif
 		return 1;
 	}
 	

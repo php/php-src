@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -551,9 +551,10 @@ PHP_FUNCTION(unpack)
 	zend_string *formatarg, *inputarg;
 	zend_long formatlen, inputpos, inputlen;
 	int i;
+	zend_long offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &formatarg,
-		&inputarg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|l", &formatarg,
+		&inputarg, &offset) == FAILURE) {
 		return;
 	}
 
@@ -562,6 +563,14 @@ PHP_FUNCTION(unpack)
 	input = ZSTR_VAL(inputarg);
 	inputlen = ZSTR_LEN(inputarg);
 	inputpos = 0;
+
+
+	if (offset < 0 || offset > inputlen) {
+		php_error_docref(NULL, E_WARNING, "Offset " ZEND_LONG_FMT " is out of input range" , offset);
+		RETURN_FALSE;
+	}
+	input += offset;
+	inputlen -= offset;
 
 	array_init(return_value);
 
@@ -986,7 +995,7 @@ PHP_FUNCTION(unpack)
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
+				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}

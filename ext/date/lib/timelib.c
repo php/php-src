@@ -65,6 +65,23 @@ timelib_time* timelib_time_clone(timelib_time *orig)
 	return tmp;
 }
 
+int timelib_time_compare(timelib_time *t1, timelib_time *t2)
+{
+	if (t1->sse == t2->sse) {
+		if (t1->f == t2->f) {
+			return 0;
+		}
+
+		if (t1->sse < 0) {
+			return (t1->f < t2->f) ? 1 : -1;
+		} else {
+			return (t1->f < t2->f) ? -1 : 1;
+		}
+	}
+
+	return (t1->sse < t2->sse) ? -1 : 1;
+}
+
 timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 {
 	timelib_rel_time *tmp = timelib_rel_time_ctor();
@@ -293,33 +310,33 @@ void timelib_dump_rel_time(timelib_rel_time *d)
 
 timelib_long timelib_parse_tz_cor(char **ptr)
 {
-        char *begin = *ptr, *end;
-        timelib_long  tmp;
+	char *begin = *ptr, *end;
+	timelib_long  tmp;
 
-        while (isdigit(**ptr) || **ptr == ':') {
-                ++*ptr;
-        }
-        end = *ptr;
-        switch (end - begin) {
-                case 1:
-                case 2:
-                        return HOUR(strtol(begin, NULL, 10));
-                        break;
-                case 3:
-                case 4:
-                        if (begin[1] == ':') {
-                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
-                                return tmp;
-                        } else if (begin[2] == ':') {
-                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-                                return tmp;
-                        } else {
-                                tmp = strtol(begin, NULL, 10);
-                                return HOUR(tmp / 100) + tmp % 100;
-                        }
-                case 5:
-                        tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-                        return tmp;
-        }
-        return 0;
+	while (isdigit(**ptr) || **ptr == ':') {
+		++*ptr;
+	}
+	end = *ptr;
+	switch (end - begin) {
+		case 1: /* H */
+		case 2: /* HH */
+			return HOUR(strtol(begin, NULL, 10));
+			break;
+		case 3: /* H:M */
+		case 4: /* H:MM, HH:M, HHMM */
+			if (begin[1] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
+				return tmp;
+			} else if (begin[2] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+				return tmp;
+			} else {
+				tmp = strtol(begin, NULL, 10);
+				return HOUR(tmp / 100) + tmp % 100;
+			}
+		case 5: /* HH:MM */
+			tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+			return tmp;
+	}
+	return 0;
 }

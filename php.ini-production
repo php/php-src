@@ -663,11 +663,10 @@ auto_prepend_file =
 ; http://php.net/auto-append-file
 auto_append_file =
 
-; By default, PHP will output a character encoding using
-; the Content-type: header.  To disable sending of the charset, simply
-; set it to be empty.
+; By default, PHP will output a media type using the Content-Type header. To
+; disable this, simply set it to be empty.
 ;
-; PHP's built-in default is text/html
+; PHP's built-in default media type is set to text/html.
 ; http://php.net/default-mimetype
 default_mimetype = "text/html"
 
@@ -955,10 +954,7 @@ cli_server.color = On
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
 ;intl.error_level = E_WARNING
-
-[sqlite]
-; http://php.net/sqlite.assoc-case
-;sqlite.assoc_case = 0
+;intl.use_exceptions = 0
 
 [sqlite3]
 ;sqlite3.extension_dir =
@@ -1516,6 +1512,10 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ; http://php.net/session.upload-progress.min-freq
 ;session.upload_progress.min_freq = "1"
 
+; Only write session data when session data is changed. Enabled by default.
+; http://php.net/session.lazy-write
+;session.lazy_write = On
+
 [Assertion]
 ; Switch whether to compile assertions at all (to have no overhead at run-time)
 ; -1: Do not compile at all
@@ -1842,7 +1842,7 @@ ldap.max_links = -1
 
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.
-opcache.huge_code_pages=1
+;opcache.huge_code_pages=1
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

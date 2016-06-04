@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1149,8 +1149,14 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 				return 1;
 			}
 			convert_to_long(var);
+#if defined(OCI_MAJOR_VERSION) && (OCI_MAJOR_VERSION > 10) &&			\
+	(defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)) 
+			bind_data = (ub8 *)&Z_LVAL_P(var);
+			value_sz = sizeof(ub8);
+#else
 			bind_data = (ub4 *)&Z_LVAL_P(var);
 			value_sz = sizeof(ub4);
+#endif
 			mode = OCI_DEFAULT;
 			break;
 			

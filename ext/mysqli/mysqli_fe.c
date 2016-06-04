@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -243,18 +243,14 @@ ZEND_END_ARG_INFO()
 
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_fetch_object, 0, 0, 1)
-#if PHP_VERSION_ID > 50399
 	MYSQLI_ZEND_ARG_OBJ_INFO_RESULT()
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_ARRAY_INFO(0, params, 0)
-#endif
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_fetch_object, 0, 0, 0)
-#if PHP_VERSION_ID > 50399
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_ARRAY_INFO(0, params, 0)
-#endif
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_kill, 0, 0, 2)

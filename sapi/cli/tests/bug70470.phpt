@@ -20,8 +20,12 @@ if (!$fp) {
 fwrite($fp, "GET / HTTP/1.1\r\n");
 fwrite($fp, "Host: " . PHP_CLI_SERVER_HOSTNAME . "\r\n");
 fwrite($fp, "Content");
+fflush($fp);
+usleep(200000);
 fwrite($fp, "-Type: text/html; charset=UTF-8\r\n");
 fwrite($fp, "Connection: clo");
+fflush($fp);
+usleep(200000);
 fwrite($fp, "se\r\n\r\n");
 while (!feof($fp)) {
 	echo fgets($fp);

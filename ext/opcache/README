@@ -213,3 +213,6 @@ opcache.mmap_base
 	processes have to map shared memory into the same address space. This
 	directive allows to manually fix the "Unable to reattach to base address"
 	errors.
+
+opcache.lockfile_path (default "/tmp")
+	Absolute path used to store shared lockfiles (for *nix only)

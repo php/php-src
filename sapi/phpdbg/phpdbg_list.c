@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 #include "php_streams.h"
 #include "zend_exceptions.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define PHPDBG_LIST_COMMAND_D(f, h, a, m, l, s, flags) \
 	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[12], flags)
@@ -200,11 +200,12 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 
 	/* search active scope if begins with period */
 	if (func_name[0] == '.') {
-		if (EG(scope)) {
+		zend_class_entry *scope = zend_get_executed_scope();
+		if (scope) {
 			func_name++;
 			func_name_len--;
 
-			func_table = &EG(scope)->function_table;
+			func_table = &scope->function_table;
 		} else {
 			phpdbg_error("inactive", "type=\"noclasses\"", "No active class");
 			return;
@@ -232,9 +233,10 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 	efree(func_name);
 } /* }}} */
 
+/* Note: do not free the original file handler, let original compile_file() or caller do that. Caller may rely on its value to check success */
 zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
-	zend_file_handle fake = {{0}};
+	zend_file_handle fake;
 	zend_op_array *ret;
 	char *filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
 	uint line;
@@ -242,7 +244,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	char resolved_path_buf[MAXPATHLEN];
 
 	if (zend_stream_fixup(file, &bufptr, &data.len) == FAILURE) {
-		return NULL;
+		return PHPDBG_G(compile_file)(file, type);
 	}
 
 	data.buf = emalloc(data.len + ZEND_MMAP_AHEAD + 1);
@@ -253,11 +255,11 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	data.filename = filename;
 	data.line[0] = 0;
 
+	memset(&fake, 0, sizeof(fake));
 	fake.type = ZEND_HANDLE_MAPPED;
 	fake.handle.stream.mmap.buf = data.buf;
 	fake.handle.stream.mmap.len = data.len;
 	fake.free_filename = 0;
-	fake.opened_path = file->opened_path;
 	fake.filename = filename;
 	fake.opened_path = file->opened_path;
 
@@ -279,6 +281,10 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	if (ret == NULL) {
 		efree(data.buf);
 		efree(dataptr);
+
+		fake.opened_path = NULL;
+		zend_file_handle_dtor(&fake);
+
 		return NULL;
 	}
 
