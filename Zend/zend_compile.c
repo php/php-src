@@ -2270,7 +2270,13 @@ static void zend_emit_return_type_check(
 	/* `return ...;` is illegal in a void function (but `return;` isn't) */
 	if (return_info->type_hint == IS_VOID) {
 		if (expr) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+			if (expr->op_type == IS_CONST && Z_TYPE(expr->u.constant) == IS_NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A void function must not return a value "
+					"(did you mean \"return;\" instead of \"return null;\"?)");
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+			}
 		}
 		/* we don't need run-time check */
 		return;
@@ -2280,8 +2286,14 @@ static void zend_emit_return_type_check(
 		zend_op *opline;
 
 		if (!expr && !implicit) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"A function with return type must return a value");
+			if (return_info->allow_null) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A function with return type must return a value "
+					"(did you mean \"return null;\" instead of \"return;\"?)");
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A function with return type must return a value");
+			}
 		}
 
 		if (expr && expr->op_type == IS_CONST) {
