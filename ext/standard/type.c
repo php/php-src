@@ -533,7 +533,9 @@ PHP_FUNCTION(typeof)
 				memcpy(type, TYPE_OBJECT " of class ", prefix_len);
 				memcpy(type + prefix_len, ZSTR_VAL(Z_OBJCE_P(var)->name), ZSTR_LEN(Z_OBJCE_P(var)->name));
 
-				RETURN_STRINGL(type, type_len);
+				RETVAL_STRINGL(type, type_len);
+				efree(type);
+				return;
 			}
 			RETURN_TYPE_NAME(TYPE_OBJECT);
 
@@ -550,7 +552,9 @@ PHP_FUNCTION(typeof)
 					memcpy(type, TYPE_RESOURCE " of type ", prefix_len);
 					memcpy(type + prefix_len, rsrc_type, rsrc_type_len);
 
-					RETURN_STRINGL(type, type_len);
+					RETVAL_STRINGL(type, type_len);
+					efree(type);
+					return;
 				}
 
 				RETURN_TYPE_NAME("closed " TYPE_RESOURCE);
