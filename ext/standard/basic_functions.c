@@ -2565,7 +2565,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
 	ZEND_ARG_INFO(1, callable_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_typeof, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_typeof, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_INFO(0, extended)
 ZEND_END_ARG_INFO()
@@ -4006,7 +4006,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv([string varname])
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
