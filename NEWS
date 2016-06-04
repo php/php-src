@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Change statement and fcall extension handlers to accept frame. (Joe)
   . Implemented safe execution timeout handling, that prevents random crashes
     after "Maximum execution time exceeded" error. (Dmitry)
+  . Fixed bug #53432 (Assignment via string index access on an empty string
+    converts to array). (Nikita)
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
   . Fixed bug #62814 (It is possible to stiffen child class members visibility).
     (Nikita)

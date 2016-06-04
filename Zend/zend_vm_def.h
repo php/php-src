@@ -2380,27 +2380,21 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				FREE_OP_DATA();
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
-			if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-				if (OP2_TYPE == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
-					FREE_UNFETCHED_OP_DATA();
-					FREE_OP1_VAR_PTR();
-					HANDLE_EXCEPTION();
-				} else {
-					dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-					value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
-					zend_assign_to_string_offset(object_ptr, dim, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-					FREE_OP_DATA();
-				}
+			if (OP2_TYPE == IS_UNUSED) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP_DATA();
+				FREE_OP1_VAR_PTR();
+				HANDLE_EXCEPTION();
 			} else {
-				zval_ptr_dtor_nogc(object_ptr);
-ZEND_VM_C_LABEL(assign_dim_convert_to_array):
-				ZVAL_NEW_ARR(object_ptr);
-				zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
-				ZEND_VM_C_GOTO(try_assign_dim_array);
+				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+				value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, dim, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP_DATA();
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			ZEND_VM_C_GOTO(assign_dim_convert_to_array);
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			ZEND_VM_C_GOTO(try_assign_dim_array);
 		} else {
 			if (OP1_TYPE != IS_VAR || UNEXPECTED(!Z_ISERROR_P(object_ptr))) {
 				zend_error(E_WARNING, "Cannot use a scalar value as an array");
