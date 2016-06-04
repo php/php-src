@@ -51,5 +51,5 @@ string(6) "string"
 string(15) "callable string"
 string(15) "callable string"
 
-Deprecated: Non-static method Php\Test\Typeof\TestClass::instanceMethod() should not be called statically in C:\php-sdk\phpdev\vc14\x64\php-src\ext\standard\tests\type\typeof_basic_string.php on line 24
+Deprecated: Non-static method Php\Test\Typeof\TestClass::instanceMethod() should not be called statically in %s on line %d
 string(15) "callable string"
