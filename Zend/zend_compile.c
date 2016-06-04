@@ -3183,11 +3183,7 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 			}
 		} else {
 			if (zend_execute_ex == execute_ex) {
-				if (!(fbc->common.fn_flags & ZEND_ACC_GENERATOR)) {
-					return ZEND_DO_UCALL;
-				} else {
-					return ZEND_DO_FCALL_BY_NAME;
-				}
+				return ZEND_DO_UCALL;
 			}
 		}
 	} else if (zend_execute_ex == execute_ex &&
