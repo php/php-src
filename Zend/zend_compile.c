@@ -4964,6 +4964,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 
 		zend_compile_typename(return_type_ast, arg_infos);
 
+		if (arg_infos->type_hint == IS_VOID && arg_infos->allow_null) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
+		}
+
 		arg_infos++;
 		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 	} else {
