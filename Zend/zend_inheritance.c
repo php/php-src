@@ -22,6 +22,7 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_inheritance.h"
+#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "zend_inheritance.h"
 
@@ -164,6 +165,26 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 		return "public";
 	}
 	return "";
+}
+/* }}} */
+
+static zend_bool zend_iterable_type_check(zend_arg_info *arg_info) /* {{{ */
+{
+	if (arg_info->class_name) {
+		zend_class_entry *ce;
+		
+		ce = zend_lookup_class(arg_info->class_name);
+		
+		if (ce && instanceof_function(ce, zend_ce_traversable)) {
+			return 1;
+		}
+	}
+	
+	if (arg_info->type_hint == IS_ITERABLE || arg_info->type_hint == IS_ARRAY) {
+		return 1;
+	}
+	
+	return 0;
 }
 /* }}} */
 
@@ -314,6 +335,10 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		} else {
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
+		
+		if (fe_arg_info->type_hint == IS_ITERABLE && zend_iterable_type_check(proto_arg_info)) {
+			continue;
+		}
 
 		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
 			return 0;
@@ -337,6 +362,10 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		/* Removing a return type is not valid. */
 		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			return 0;
+		}
+		
+		if (proto->common.arg_info[-1].type_hint == IS_ITERABLE && zend_iterable_type_check(fe->common.arg_info - 1)) {
+			return 1;
 		}
 
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {

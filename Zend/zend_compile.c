@@ -1253,17 +1253,20 @@ static void zend_mark_function_as_generator() /* {{{ */
 	}
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		const char *msg = "Generators may only declare a return type of Generator, Iterator or Traversable, %s is not permitted";
 		zend_arg_info return_info = CG(active_op_array)->arg_info[-1];
 
-		if (!return_info.class_name) {
-			zend_error_noreturn(E_COMPILE_ERROR, msg, zend_get_type_by_const(return_info.type_hint));
-		}
+		if (return_info.type_hint != IS_ITERABLE) {
+			const char *msg = "Generators may only declare a return type of Generator, Iterator, Traversable, or iterable, %s is not permitted";
+			
+			if (!return_info.class_name) {
+				zend_error_noreturn(E_COMPILE_ERROR, msg, zend_get_type_by_const(return_info.type_hint));
+			}
 
-		if (!zend_string_equals_literal_ci(return_info.class_name, "Traversable")
-			&& !zend_string_equals_literal_ci(return_info.class_name, "Iterator")
-			&& !zend_string_equals_literal_ci(return_info.class_name, "Generator")) {
-			zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(return_info.class_name));
+			if (!zend_string_equals_literal_ci(return_info.class_name, "Traversable")
+				&& !zend_string_equals_literal_ci(return_info.class_name, "Iterator")
+				&& !zend_string_equals_literal_ci(return_info.class_name, "Generator")) {
+				zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(return_info.class_name));
+			}
 		}
 	}
 
