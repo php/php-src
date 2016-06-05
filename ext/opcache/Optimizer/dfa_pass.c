@@ -319,6 +319,30 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 	free_alloca(shiftlist, use_heap);
 }
 
+static inline zend_bool can_elide_return_type_check(
+		zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
+	zend_arg_info *info = &op_array->arg_info[-1];
+	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
+	zend_ssa_var_info *def_info = &ssa->var_info[ssa_op->op1_def];
+
+	/* A type is possible that is not in the allowed types */
+	if ((use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~(def_info->type & MAY_BE_ANY)) {
+		return 0;
+	}
+
+	if (info->type_hint == IS_CALLABLE) {
+		return 0;
+	}
+
+	if (info->class_name) {
+		if (!use_info->ce || !def_info->ce || !instanceof_function(use_info->ce, def_info->ce)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
@@ -523,7 +547,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			 && ssa->ops[op_1].op1_use >= 0
 			 && ssa->ops[op_1].op1_use_chain == -1
 			 && ssa->vars[v].use_chain >= 0
-			 && (ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_ANY|MAY_BE_UNDEF)) == (ssa->var_info[ssa->ops[op_1].op1_def].type & MAY_BE_ANY)) {
+			 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
 
 // op_1: VERIFY_RETURN_TYPE #orig_var.CV [T] -> #v.CV [T] => NOP
 
