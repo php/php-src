@@ -8,8 +8,6 @@ class Foo {
 
     function testTraversable(Traversable $traversable) {}
 
-    function testGenerator(Generator $generator) {}
-
     function testScalar(int $int) {}
 }
 
@@ -17,8 +15,6 @@ class Bar extends Foo {
     function testArray(iterable $iterable) {}
 
     function testTraversable(iterable $iterable) {}
-
-    function testGenerator(iterable $iterable) {}
 
     function testScalar(iterable $iterable) {}
 }

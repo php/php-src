@@ -22,7 +22,6 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_inheritance.h"
-#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "zend_inheritance.h"
 
@@ -170,19 +169,11 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 
 static zend_bool zend_iterable_type_check(zend_arg_info *arg_info) /* {{{ */
 {
-	if (arg_info->class_name) {
-		zend_class_entry *ce;
-		
-		ce = zend_lookup_class(arg_info->class_name);
-		
-		if (ce && instanceof_function(ce, zend_ce_traversable)) {
-			return 1;
-		}
-		
-		return 0;
+	if (arg_info->type_hint == IS_ITERABLE || arg_info->type_hint == IS_ARRAY) {
+		return 1;
 	}
 	
-	if (arg_info->type_hint == IS_ITERABLE || arg_info->type_hint == IS_ARRAY) {
+	if (arg_info->class_name && zend_string_equals_literal_ci(arg_info->class_name, "Traversable")) {
 		return 1;
 	}
 	

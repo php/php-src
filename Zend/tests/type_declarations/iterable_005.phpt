@@ -21,18 +21,6 @@ class TestTraversable extends Test {
     }
 }
 
-class TestIterator extends Test {
-    function method(): Iterator {
-        return new ArrayIterator([]);
-    }
-}
-
-class TestGenerator extends Test {
-    function method(): Generator {
-        return (function () { yield; })();
-    }
-}
-
 class TestScalar extends Test {
     function method(): int {
         return 1;
