@@ -1158,6 +1158,7 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals);
 ZEND_API ZEND_NORETURN void zend_timeout(int dummy) /* {{{ */
 {
 #if defined(PHP_WIN32)
+# ifndef ZTS
 	/* No action is needed if we're timed out because zero seconds are
 	   just ignored. Also, the hard timeout needs to be respected. If the
 	   timer is not restarted properly, it could hang in the shutdown
@@ -1168,6 +1169,7 @@ ZEND_API ZEND_NORETURN void zend_timeout(int dummy) /* {{{ */
 		/* XXX Abused, introduce an additional flag if the value needs to be kept. */
 		EG(hard_timeout) = 0;
 	}
+# endif
 #else
 	EG(timed_out) = 0;
 	zend_set_timeout_ex(0, 1);
