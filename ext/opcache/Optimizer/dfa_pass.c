@@ -142,6 +142,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 			i = b->start;
 			b->start = target;
 			while (i < end) {
+				shiftlist[i] = i - target;
 				if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
 				   /*keep NOP to support ZEND_VM_SMART_BRANCH */
 				   (i > 0 &&
@@ -165,7 +166,6 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					if (i != target) {
 						op_array->opcodes[target] = op_array->opcodes[i];
 						ssa->ops[target] = ssa->ops[i];
-						shiftlist[i] = i - target;
 					}
 					target++;
 				}
