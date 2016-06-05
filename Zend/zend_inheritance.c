@@ -178,6 +178,8 @@ static zend_bool zend_iterable_type_check(zend_arg_info *arg_info) /* {{{ */
 		if (ce && instanceof_function(ce, zend_ce_traversable)) {
 			return 1;
 		}
+		
+		return 0;
 	}
 	
 	if (arg_info->type_hint == IS_ITERABLE || arg_info->type_hint == IS_ARRAY) {
@@ -336,11 +338,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
 		
-		if (fe_arg_info->type_hint == IS_ITERABLE && zend_iterable_type_check(proto_arg_info)) {
-			continue;
-		}
-
-		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
+		if (fe_arg_info->type_hint == IS_ITERABLE) {
+			if (!zend_iterable_type_check(proto_arg_info)) {
+				return 0;
+			}
+		} else if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
 			return 0;
 		}
 
@@ -364,11 +366,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 		
-		if (proto->common.arg_info[-1].type_hint == IS_ITERABLE && zend_iterable_type_check(fe->common.arg_info - 1)) {
-			return 1;
-		}
-
-		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
+		if (proto->common.arg_info[-1].type_hint == IS_ITERABLE) {
+			if (!zend_iterable_type_check(fe->common.arg_info - 1)) {
+				return 0;
+			}
+		} else if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			return 0;
 		}
 
