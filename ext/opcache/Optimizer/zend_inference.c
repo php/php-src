@@ -3597,34 +3597,34 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 	ALLOCA_FLAG(use_heap);
 	zend_bitset visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
 	zend_bitset worklist = visited + bitset_len;
-	int i, j;
+	int i;
+	uint32_t v;
+	zend_op *opline;
 	zend_bool narrowed = 0;
 
-	zend_bitset_clear(visited, bitset_len);
 	zend_bitset_clear(worklist, bitset_len);
 
-	for (j = 0; j < op_array->last; j++) {
-		zend_op *opline = &op_array->opcodes[j];
+	for (v = op_array->last_var; v < ssa->vars_count; v++) {
+		if ((ssa->var_info[v].type & (MAY_BE_REF | MAY_BE_ANY | MAY_BE_UNDEF)) != MAY_BE_LONG) continue;
+		if (ssa->vars[v].definition < 0) continue;
+		if (ssa->vars[v].no_val) continue;
+		opline = op_array->opcodes + ssa->vars[v].definition;
 		/* Go through assignments of literal integers and check if they can be converted to
 		 * doubles instead, in the hope that we'll narrow long|double to double. */
 		if (opline->opcode == ZEND_ASSIGN && opline->result_type == IS_UNUSED &&
 				opline->op1_type == IS_CV && opline->op2_type == IS_CONST) {
-			zend_ssa_op *ssa_op = &ssa->ops[j];
 			zval *value = CRT_CONSTANT_EX(op_array, opline->op2, ssa->rt_constants);
-			if (Z_TYPE_P(value) == IS_LONG
-					&& !(ssa->var_info[ssa_op->op1_def].type & MAY_BE_REF)
-					&& !ssa->vars[ssa_op->op1_def].no_val) {
-				if (can_convert_to_double(op_array, ssa, ssa_op->op1_def, value, visited)) {
-					narrowed = 1;
-					ssa->var_info[ssa_op->op1_def].use_as_double = 1;
-					/* The "visited" vars are exactly those which may change their type due to
-					 * narrowing. Reset their types and add them to the type inference worklist */
-					ZEND_BITSET_FOREACH(visited, bitset_len, i) {
-						ssa->var_info[i].type &= ~MAY_BE_ANY;
-					} ZEND_BITSET_FOREACH_END();
-					zend_bitset_union(worklist, visited, bitset_len);
-				}
-				zend_bitset_clear(visited, bitset_len);
+
+			zend_bitset_clear(visited, bitset_len);
+			if (can_convert_to_double(op_array, ssa, v, value, visited)) {
+				narrowed = 1;
+				ssa->var_info[v].use_as_double = 1;
+				/* The "visited" vars are exactly those which may change their type due to
+				 * narrowing. Reset their types and add them to the type inference worklist */
+				ZEND_BITSET_FOREACH(visited, bitset_len, i) {
+					ssa->var_info[i].type &= ~MAY_BE_ANY;
+				} ZEND_BITSET_FOREACH_END();
+				zend_bitset_union(worklist, visited, bitset_len);
 			}
 		}
 	}
