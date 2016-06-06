@@ -5,7 +5,7 @@ openssl_error_string() tests
 if (!extension_loaded("openssl")) print "skip";
 //if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSLv1.0.1 required");
 ?>
--XFAIL--
+--XFAIL--
 ot ready baked yet, fails different ways on different envs
 --FILE--
 <?php
