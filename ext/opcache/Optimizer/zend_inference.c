@@ -3427,121 +3427,219 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	return SUCCESS;
 }
 
-#define CHECK_MAY_BE_USED_AS_DOUBLE(var2) do { \
-		if ((ssa->var_info[var2].type & MAY_BE_ANY) == (MAY_BE_LONG | MAY_BE_DOUBLE)) { \
-			if (ssa->vars[var2].var < op_array->last_var) { \
-				return 0; \
-			} else if (ssa->vars[var2].definition >= 0 && \
-			           op_array->opcodes[ssa->vars[var2].definition].opcode != ZEND_ADD && \
-			           op_array->opcodes[ssa->vars[var2].definition].opcode != ZEND_SUB && \
-			           op_array->opcodes[ssa->vars[var2].definition].opcode != ZEND_MUL && \
-			           op_array->opcodes[ssa->vars[var2].definition].opcode != ZEND_DIV) { \
-				return 0; \
-			} else if (!zend_may_be_used_as_double(op_array, ssa, var2)) { \
-				return 0; \
-			} \
-		} \
-	} while (0)
+static zend_bool is_narrowable_instr(zend_op *opline)  {
+	return opline->opcode == ZEND_ADD || opline->opcode == ZEND_SUB
+		|| opline->opcode == ZEND_MUL || opline->opcode == ZEND_DIV;
+}
 
-static int zend_may_be_used_as_double(const zend_op_array *op_array, zend_ssa *ssa, int var)
-{
-	FOR_EACH_VAR_USAGE(var, CHECK_MAY_BE_USED_AS_DOUBLE);
+static zend_bool is_effective_op1_double_cast(zend_op *opline, zval *op2) {
+	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op2) == 0)
+		|| (opline->opcode == ZEND_SUB && Z_LVAL_P(op2) == 0)
+		|| (opline->opcode == ZEND_MUL && Z_LVAL_P(op2) == 1)
+		|| (opline->opcode == ZEND_DIV && Z_LVAL_P(op2) == 1);
+}
+static zend_bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
+	/* In PHP it holds that (double)(0-$int) is bitwise identical to 0.0-(double)$int,
+	 * so allowing SUB here is fine. */
+	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op1) == 0)
+		|| (opline->opcode == ZEND_SUB && Z_LVAL_P(op1) == 0)
+		|| (opline->opcode == ZEND_MUL && Z_LVAL_P(op1) == 1);
+}
+
+/* This function recursively checks whether it's possible to convert an integer variable
+ * initialization to a double initialization. The basic idea is that if the value is used
+ * only in add/sub/mul/div ("narrowable" instructions) with a double result value, then it
+ * will be cast to double at that point anyway, so we may as well do it earlier already.
+ *
+ * The tricky case are chains of operations, where it's not necessarily a given that converting
+ * an integer to double before the chain of operations is the same as converting it after the
+ * chain. What this function does is detect two cases where it is safe:
+ *  * If the operations only involve constants, then we can simply verify that performing the
+ *    calculation on integers and doubles yields the same value.
+ *  * Even if one operand is not known, we may be able to determine that the operations with the
+ *    integer replaced by a double only acts as an effective double cast on the unknown operand.
+ *    E.g. 0+$i and 0.0+$i only differ by that cast. If then the consuming instruction of this
+ *    result will perform a double cast anyway, the conversion is safe.
+ *
+ * The checks happens recursively, while keeping track of which variables are already visisted to
+ * avoid infinite loops. An iterative, worklist driven approach would be possible, but the state
+ * management more cumbersome to implement, so we don't bother for now.
+ */
+static zend_bool can_convert_to_double(
+		const zend_op_array *op_array, zend_ssa *ssa, int var_num,
+		zval *value, zend_bitset visited) {
+	zend_ssa_var *var = &ssa->vars[var_num];
+	zend_ssa_phi *phi;
+	int use;
+	uint32_t type;
+
+	if (zend_bitset_in(visited, var_num)) {
+		return 1;
+	}
+	zend_bitset_incl(visited, var_num);
+
+	for (use = var->use_chain; use >= 0; use = zend_ssa_next_use(ssa->ops, var_num, use)) {
+		zend_op *opline = &op_array->opcodes[use];
+		zend_ssa_op *ssa_op = &ssa->ops[use];
+
+		if (is_no_val_use(opline, ssa_op, var_num)) {
+			continue;
+		}
+
+		if (!is_narrowable_instr(opline)) {
+			return 0;
+		}
+
+		/* Instruction always returns double, the conversion is certainly fine */
+		type = ssa->var_info[ssa_op->result_def].type;
+		if ((type & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+			continue;
+		}
+
+		/* UNDEF signals that the previous result is an effective double cast, this is only allowed
+		 * if this instruction would have done the cast anyway (previous check). */
+		if (Z_ISUNDEF_P(value)) {
+			return 0;
+		}
+
+		/* Check that narrowing can actually be useful */
+		if ((type & MAY_BE_ANY) & ~(MAY_BE_LONG|MAY_BE_DOUBLE)) {
+			return 0;
+		}
+
+		{
+			/* For calculation on original values */
+			zval orig_op1, orig_op2, orig_result;
+			/* For calculation with var_num cast to double */
+			zval dval_op1, dval_op2, dval_result;
+
+			ZVAL_UNDEF(&orig_op1);
+			ZVAL_UNDEF(&dval_op1);
+			if (ssa_op->op1_use == var_num) {
+				ZVAL_COPY_VALUE(&orig_op1, value);
+				ZVAL_DOUBLE(&dval_op1, (double) Z_LVAL_P(value));
+			} else if (opline->op1_type == IS_CONST) {
+				zval *zv = CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants);
+				if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_DOUBLE) {
+					ZVAL_COPY_VALUE(&orig_op1, zv);
+					ZVAL_COPY_VALUE(&dval_op1, zv);
+				}
+			}
+
+			ZVAL_UNDEF(&orig_op2);
+			ZVAL_UNDEF(&dval_op2);
+			if (ssa_op->op2_use == var_num) {
+				ZVAL_COPY_VALUE(&orig_op2, value);
+				ZVAL_DOUBLE(&dval_op2, (double) Z_LVAL_P(value));
+			} else if (opline->op2_type == IS_CONST) {
+				zval *zv = CRT_CONSTANT_EX(op_array, opline->op2, ssa->rt_constants);
+				if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_DOUBLE) {
+					ZVAL_COPY_VALUE(&orig_op2, zv);
+					ZVAL_COPY_VALUE(&dval_op2, zv);
+				}
+			}
+
+			ZEND_ASSERT(!Z_ISUNDEF(orig_op1) || !Z_ISUNDEF(orig_op2));
+			if (Z_ISUNDEF(orig_op1)) {
+				if (opline->opcode == ZEND_MUL && Z_LVAL(orig_op2) == 0) {
+					ZVAL_LONG(&orig_result, 0);
+				} else if (is_effective_op1_double_cast(opline, &orig_op2)) {
+					ZVAL_UNDEF(&orig_result);
+				} else {
+					return 0;
+				}
+			} else if (Z_ISUNDEF(orig_op2)) {
+				if (opline->opcode == ZEND_MUL && Z_LVAL(orig_op1) == 0) {
+					ZVAL_LONG(&orig_result, 0);
+				} else if (is_effective_op2_double_cast(opline, &orig_op1)) {
+					ZVAL_UNDEF(&orig_result);
+				} else {
+					return 0;
+				}
+			} else {
+				/* Avoid division by zero */
+				if (opline->opcode == ZEND_DIV && zval_get_double(&orig_op2) == 0.0) {
+					return 0;
+				}
+
+				get_binary_op(opline->opcode)(&orig_result, &orig_op1, &orig_op2);
+				get_binary_op(opline->opcode)(&dval_result, &dval_op1, &dval_op2);
+				ZEND_ASSERT(Z_TYPE(dval_result) == IS_DOUBLE);
+				if (zval_get_double(&orig_result) != Z_DVAL(dval_result)) {
+					return 0;
+				}
+			}
+
+			if (!can_convert_to_double(op_array, ssa, ssa_op->result_def, &orig_result, visited)) {
+				return 0;
+			}
+		}
+	}
+
+	for (phi = var->phi_use_chain; phi; phi = zend_ssa_next_use_phi(ssa, var_num, phi)) {
+		/* Check that narrowing can actually be useful */
+		type = ssa->var_info[phi->ssa_var].type;
+		if ((type & MAY_BE_ANY) & ~(MAY_BE_LONG|MAY_BE_DOUBLE)) {
+			return 0;
+		}
+
+		if (!can_convert_to_double(op_array, ssa, phi->ssa_var, value, visited)) {
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
 static int zend_type_narrowing(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
 {
-	zend_ssa_op *ssa_ops = ssa->ops;
-	zend_ssa_var *ssa_vars = ssa->vars;
-	zend_ssa_var_info *ssa_var_info = ssa->var_info;
-	int ssa_vars_count = ssa->vars_count;
-	int j;
-	zend_bitset worklist, types;
+	uint32_t bitset_len = zend_bitset_len(ssa->vars_count);
 	ALLOCA_FLAG(use_heap);
+	zend_bitset visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
+	zend_bitset worklist = visited + bitset_len;
+	int i, j;
+	zend_bool narrowed = 0;
 
-	types = do_alloca(sizeof(zend_ulong) * (op_array->last_var + zend_bitset_len(ssa_vars_count)), use_heap);
-	memset(types, 0, sizeof(zend_ulong) * op_array->last_var);
-	worklist = types + op_array->last_var;
-	memset(worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+	zend_bitset_clear(visited, bitset_len);
+	zend_bitset_clear(worklist, bitset_len);
 
-	/* Find variables that may be only LONG or DOUBLE */
-	for (j = op_array->last_var; j < ssa_vars_count; j++) {
-		if (ssa_vars[j].var < op_array->last_var) {
-			types[ssa_vars[j].var] |= ssa_var_info[j].type & (MAY_BE_ANY - MAY_BE_NULL);
-		}
-	}
-	for (j = 0; j < op_array->last_var; j++) {
-		if (types[j] == (MAY_BE_LONG | MAY_BE_DOUBLE)) {
-			zend_bitset_incl(worklist, j);
-		}
-	}
-	if (zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
-		free_alloca(types, use_heap);
-		return SUCCESS;
-	}
-
-	/* Exclude variables that can't be narrowed */
-	for (j = op_array->last_var; j < ssa_vars_count; j++) {
-		if (ssa_vars[j].var < op_array->last_var &&
-		    zend_bitset_in(worklist, ssa_vars[j].var)) {
-			if (ssa_vars[j].definition >= 0) {
-				if ((ssa_var_info[j].type & MAY_BE_ANY) == MAY_BE_LONG) {
-					if (ssa_vars[j].use_chain >= 0 ||
-					    op_array->opcodes[ssa_vars[j].definition].opcode != ZEND_ASSIGN ||
-					    op_array->opcodes[ssa_vars[j].definition].op2_type != IS_CONST) {
-						zend_bitset_excl(worklist, ssa_vars[j].var);
-					}
-				} else if ((ssa_var_info[j].type & MAY_BE_ANY) != MAY_BE_DOUBLE) {
-					zend_bitset_excl(worklist, ssa_vars[j].var);
+	for (j = 0; j < op_array->last; j++) {
+		zend_op *opline = &op_array->opcodes[j];
+		/* Go through assignments of literal integers and check if they can be converted to
+		 * doubles instead, in the hope that we'll narrow long|double to double. */
+		if (opline->opcode == ZEND_ASSIGN && opline->result_type == IS_UNUSED &&
+				opline->op1_type == IS_CV && opline->op2_type == IS_CONST) {
+			zend_ssa_op *ssa_op = &ssa->ops[j];
+			zval *value = CRT_CONSTANT_EX(op_array, opline->op2, ssa->rt_constants);
+			if (Z_TYPE_P(value) == IS_LONG
+					&& !(ssa->var_info[ssa_op->op1_def].type & MAY_BE_REF)
+					&& !ssa->vars[ssa_op->op1_def].no_val) {
+				if (can_convert_to_double(op_array, ssa, ssa_op->op1_def, value, visited)) {
+					narrowed = 1;
+					ssa->var_info[ssa_op->op1_def].use_as_double = 1;
+					/* The "visited" vars are exactly those which may change their type due to
+					 * narrowing. Reset their types and add them to the type inference worklist */
+					ZEND_BITSET_FOREACH(visited, bitset_len, i) {
+						ssa->var_info[i].type &= ~MAY_BE_ANY;
+					} ZEND_BITSET_FOREACH_END();
+					zend_bitset_union(worklist, visited, bitset_len);
 				}
+				zend_bitset_clear(visited, bitset_len);
 			}
 		}
-	}
-	if (zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
-		free_alloca(types, use_heap);
-		return SUCCESS;
 	}
 
-	for (j = op_array->last_var; j < ssa_vars_count; j++) {
-		if (ssa_vars[j].var < op_array->last_var &&
-		    zend_bitset_in(worklist, ssa_vars[j].var) &&
-		    (ssa_var_info[j].type & (MAY_BE_ANY-MAY_BE_NULL)) == (MAY_BE_LONG|MAY_BE_DOUBLE) &&
-		    ssa_vars[j].use_chain >= 0) {
-			if (!zend_may_be_used_as_double(op_array, ssa, j)) {
-				zend_bitset_excl(worklist, ssa_vars[j].var);
-			}
-		}
-	}
-	if (zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
-		free_alloca(types, use_heap);
+	if (!narrowed) {
+		free_alloca(visited, use_heap);
 		return SUCCESS;
-	}
-
-	for (j = op_array->last_var; j < ssa_vars_count; j++) {
-		if (ssa_vars[j].var < op_array->last_var &&
-		    zend_bitset_in(worklist, ssa_vars[j].var)) {
-			if ((ssa_var_info[j].type & MAY_BE_ANY) == MAY_BE_LONG &&
-			    ssa_vars[j].definition >= 0 &&
-			    ssa_ops[ssa_vars[j].definition].result_def < 0 &&
-			    op_array->opcodes[ssa_vars[j].definition].opcode == ZEND_ASSIGN &&
-			    op_array->opcodes[ssa_vars[j].definition].op2_type == IS_CONST &&
-			    Z_TYPE_P(CRT_CONSTANT_EX(op_array, op_array->opcodes[ssa_vars[j].definition].op2, ssa->rt_constants)) == IS_LONG) {
-				ssa_var_info[j].use_as_double = 1;
-			}
-			ssa_var_info[j].type &= ~MAY_BE_ANY;
-			zend_bitset_incl(worklist, j);
-		}
-	}
-	for (j = 0; j < op_array->last_var; j++) {
-		zend_bitset_excl(worklist, j);
 	}
 
 	if (zend_infer_types_ex(op_array, script, ssa, worklist) != SUCCESS) {
-		free_alloca(types, use_heap);
+		free_alloca(visited, use_heap);
 		return FAILURE;
 	}
 
-	free_alloca(types, use_heap);
+	free_alloca(visited, use_heap);
 	return SUCCESS;
 }
 
