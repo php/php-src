@@ -848,7 +848,7 @@ ZEND_VM_C_LABEL(assign_dim_op_convert_to_array):
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(OP1_TYPE != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 ZEND_VM_C_LABEL(assign_dim_op_ret_null):
@@ -4376,7 +4376,8 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, NUM)
 
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(varptr))) {
-		ZVAL_NEW_REF(arg, &EG(uninitialized_zval));
+		ZVAL_NEW_EMPTY_REF(arg);
+		ZVAL_NULL(Z_REFVAL_P(arg));
 		ZEND_VM_NEXT_OPCODE();
 	}
 

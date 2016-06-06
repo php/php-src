@@ -15717,7 +15717,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND
 
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(varptr))) {
-		ZVAL_NEW_REF(arg, &EG(uninitialized_zval));
+		ZVAL_NEW_EMPTY_REF(arg);
+		ZVAL_NULL(Z_REFVAL_P(arg));
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -17120,7 +17121,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_VAR != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -20684,7 +20685,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_VAR != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -22086,7 +22087,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_VAR != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -25175,7 +25176,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_VAR != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -28195,7 +28196,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_UNUSED != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -31065,7 +31066,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_UNUSED != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -31850,7 +31851,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_UNUSED != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -34388,7 +34389,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_UNUSED != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -37383,7 +37384,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_
 
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(varptr))) {
-		ZVAL_NEW_REF(arg, &EG(uninitialized_zval));
+		ZVAL_NEW_EMPTY_REF(arg);
+		ZVAL_NULL(Z_REFVAL_P(arg));
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -39173,7 +39175,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_CV != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -43930,7 +43932,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_CV != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -46325,7 +46327,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_CV != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
@@ -50487,7 +50489,7 @@ assign_dim_op_convert_to_array:
 				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 					goto assign_dim_op_convert_to_array;
 				}
-				if (UNEXPECTED(!Z_ISERROR_P(container))) {
+				if (UNEXPECTED(IS_CV != IS_VAR || !Z_ISERROR_P(container))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 assign_dim_op_ret_null:
