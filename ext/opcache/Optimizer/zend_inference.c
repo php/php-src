@@ -235,6 +235,7 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 			if (!is_no_val_use(&op_array->opcodes[use], &ssa->ops[use], i)) {
 				ssa_vars[i].no_val = 0; /* used directly */
 				zend_bitset_incl(worklist, i);
+				break;
 			}
 			use = zend_ssa_next_use(ssa_ops, i, use);
 		}
@@ -2336,7 +2337,7 @@ static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
 		case ZEND_ASSIGN_MOD: return ZEND_MOD;
 		case ZEND_ASSIGN_SL: return ZEND_SL;
 		case ZEND_ASSIGN_SR: return ZEND_SR;
-		case ZEND_ASSIGN_CONCAT: return ZEND_CONCAT; // TODO
+		case ZEND_ASSIGN_CONCAT: return ZEND_CONCAT;
 		case ZEND_ASSIGN_BW_OR: return ZEND_BW_OR;
 		case ZEND_ASSIGN_BW_AND: return ZEND_BW_AND;
 		case ZEND_ASSIGN_BW_XOR: return ZEND_BW_XOR;
@@ -2567,12 +2568,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
-// TODO: ???
-//			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_ops[i].op1_def);
-//			if (ssa_ops[i].result_def >= 0) {
-//				UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_ops[i].result_def);
-//			}
-//			break;
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
 			tmp = 0;
