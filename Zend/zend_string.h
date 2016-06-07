@@ -22,6 +22,7 @@
 #define ZEND_STRING_H
 
 #include "zend.h"
+#include "zend_types.h"
 
 BEGIN_EXTERN_C()
 
@@ -380,37 +381,48 @@ static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
 }
 #endif
 
+/* {{{ ZEND_KNOWN_STRINGS
+   Frequently used strings, usage: `CG(known_strings)[ZEND_STR_*]` */
 #define ZEND_KNOWN_STRINGS(_) \
-	_(ZEND_STR_FILE,                   "file") \
-	_(ZEND_STR_LINE,                   "line") \
-	_(ZEND_STR_FUNCTION,               "function") \
-	_(ZEND_STR_CLASS,                  "class") \
-	_(ZEND_STR_OBJECT,                 "object") \
-	_(ZEND_STR_TYPE,                   "type") \
-	_(ZEND_STR_OBJECT_OPERATOR,        "->") \
-	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
 	_(ZEND_STR_ARGS,                   "args") \
-	_(ZEND_STR_UNKNOWN,                "unknown") \
-	_(ZEND_STR_EVAL,                   "eval") \
-	_(ZEND_STR_INCLUDE,                "include") \
-	_(ZEND_STR_REQUIRE,                "require") \
-	_(ZEND_STR_INCLUDE_ONCE,           "include_once") \
-	_(ZEND_STR_REQUIRE_ONCE,           "require_once") \
-	_(ZEND_STR_SCALAR,                 "scalar") \
+	_(ZEND_STR_ARRAY,                  TYPE_ARRAY) \
+	_(ZEND_STR_BOOL,                   TYPE_BOOL) \
+	_(ZEND_STR_CALLABLE,               TYPE_CALLABLE) \
+	_(ZEND_STR_CLASS,                  "class") \
+	_(ZEND_STR_CODE,                   "code") \
 	_(ZEND_STR_ERROR_REPORTING,        "error_reporting") \
-	_(ZEND_STR_STATIC,                 "static") \
-	_(ZEND_STR_THIS,                   "this") \
-	_(ZEND_STR_VALUE,                  "value") \
+	_(ZEND_STR_EVAL,                   "eval") \
+	_(ZEND_STR_FALSE,                  TYPE_FALSE) \
+	_(ZEND_STR_FILE,                   "file") \
+	_(ZEND_STR_FLOAT,                  TYPE_FLOAT) \
+	_(ZEND_STR_FUNCTION,               "function") \
+	_(ZEND_STR_INCLUDE,                "include") \
+	_(ZEND_STR_INCLUDE_ONCE,           "include_once") \
+	_(ZEND_STR_INT,                    TYPE_INT) \
 	_(ZEND_STR_KEY,                    "key") \
+	_(ZEND_STR_LINE,                   "line") \
 	_(ZEND_STR_MAGIC_AUTOLOAD,         "__autoload") \
 	_(ZEND_STR_MAGIC_INVOKE,           "__invoke") \
-	_(ZEND_STR_PREVIOUS,               "previous") \
-	_(ZEND_STR_CODE,                   "code") \
 	_(ZEND_STR_MESSAGE,                "message") \
+	_(ZEND_STR_NULL,                   TYPE_NULL) \
+	_(ZEND_STR_OBJECT,                 TYPE_OBJECT) \
+	_(ZEND_STR_OBJECT_OPERATOR,        "->") \
+	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
+	_(ZEND_STR_PREVIOUS,               "previous") \
+	_(ZEND_STR_REQUIRE,                "require") \
+	_(ZEND_STR_REQUIRE_ONCE,           "require_once") \
+	_(ZEND_STR_RESOURCE,               TYPE_RESOURCE) \
+	_(ZEND_STR_SCALAR,                 "scalar") \
 	_(ZEND_STR_SEVERITY,               "severity") \
-	_(ZEND_STR_STRING,                 "string") \
+	_(ZEND_STR_STATIC,                 "static") \
+	_(ZEND_STR_STRING,                 TYPE_STRING) \
+	_(ZEND_STR_THIS,                   "this") \
 	_(ZEND_STR_TRACE,                  "trace") \
-
+	_(ZEND_STR_TRUE,                   TYPE_TRUE) \
+	_(ZEND_STR_TYPE,                   "type") \
+	_(ZEND_STR_UNKNOWN,                "unknown") \
+	_(ZEND_STR_VALUE,                  "value") \
+/* }}} */
 
 typedef enum _zend_known_string_id {
 #define _ZEND_STR_ID(id, str) id,
