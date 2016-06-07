@@ -1724,8 +1724,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_hel
 			ZEND_VM_CONTINUE();
 
 		} else if (op_num < try_catch->finally_end) {
-			/* Chain potential exception from wrapping finally block */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
+
+			/* cleanup incomplete RETURN statement */
+			if (fast_call->u2.lineno != (uint32_t)-1
+			 && (EX(func)->op_array.opcodes[fast_call->u2.lineno].op2_type & (IS_TMP_VAR | IS_VAR))) {
+				zval *return_value = EX_VAR(EX(func)->op_array.opcodes[fast_call->u2.lineno].op2.var);
+
+				zval_ptr_dtor(return_value);
+			}
+
+			/* Chain potential exception from wrapping finally block */
 			if (Z_OBJ_P(fast_call)) {
 				if (ex) {
 					zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
@@ -1830,15 +1839,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DISCARD_EXCEPTION_SPEC_HANDLER
 	zval *fast_call = EX_VAR(opline->op1.var);
 	SAVE_OPLINE();
 
-	/* check for incomplete RETURN statement */
+	/* cleanup incomplete RETURN statement */
 	if (fast_call->u2.lineno != (uint32_t)-1
-	 && (EX(func)->op_array.opcodes[fast_call->u2.lineno + 1].opcode == ZEND_RETURN
-	  || EX(func)->op_array.opcodes[fast_call->u2.lineno + 1].opcode == ZEND_RETURN_BY_REF)
-	 && (EX(func)->op_array.opcodes[fast_call->u2.lineno + 1].op1_type & (IS_VAR|IS_TMP_VAR))) {
-		cleanup_live_vars(execute_data, fast_call->u2.lineno, fast_call->u2.lineno + 1);
+	 && (EX(func)->op_array.opcodes[fast_call->u2.lineno].op2_type & (IS_TMP_VAR | IS_VAR))) {
+		zval *return_value = EX_VAR(EX(func)->op_array.opcodes[fast_call->u2.lineno].op2.var);
+
+		zval_ptr_dtor(return_value);
 	}
 
-	/* check for delayed exception */
+	/* cleanup delayed exception */
 	if (Z_OBJ_P(fast_call) != NULL) {
 		/* discard the previously thrown exception */
 		OBJ_RELEASE(Z_OBJ_P(fast_call));
