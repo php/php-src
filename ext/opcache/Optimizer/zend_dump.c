@@ -335,7 +335,7 @@ static void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa
 static void zend_dump_type_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_type_constraint *constraint, uint32_t dump_flags)
 {
 	fprintf(stderr, " TYPE");
-	zend_dump_type_info(constraint->type_mask, NULL, 0, dump_flags);
+	zend_dump_type_info(constraint->type_mask, constraint->ce, 1, dump_flags);
 }
 
 static void zend_dump_range_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_range_constraint *r, uint32_t dump_flags)

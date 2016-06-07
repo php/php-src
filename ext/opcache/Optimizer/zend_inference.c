@@ -3427,14 +3427,28 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 		if (ssa_vars[j].definition_phi) {
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
 			if (p->pi >= 0) {
+				zend_class_entry *ce = ssa_var_info[p->sources[0]].ce;
+				int is_instanceof = ssa_var_info[p->sources[0]].is_instanceof;
 				tmp = get_ssa_var_info(ssa, p->sources[0]);
+
 				if (!p->has_range_constraint) {
-					tmp &= p->constraint.type.type_mask;
+					zend_ssa_type_constraint *constraint = &p->constraint.type;
+					tmp &= constraint->type_mask;
+					if ((tmp & MAY_BE_OBJECT) && constraint->ce && ce != constraint->ce) {
+						if (!ce) {
+							ce = constraint->ce;
+							is_instanceof = 1;
+						} else if (is_instanceof && instanceof_function(constraint->ce, ce)) {
+							ce = constraint->ce;
+						} else {
+							/* Ignore the constraint (either ce instanceof constraint->ce or
+							 * they are unrelated, as far as we can statically determine) */
+						}
+					}
 				}
+
 				UPDATE_SSA_TYPE(tmp, j);
-				if (ssa_var_info[p->sources[0]].ce) {
-					UPDATE_SSA_OBJ_TYPE(ssa_var_info[p->sources[0]].ce, ssa_var_info[p->sources[0]].is_instanceof, j);
-				}
+				UPDATE_SSA_OBJ_TYPE(ce, is_instanceof, j);
 			} else {
 				int first = 1;
 				int is_instanceof = 0;

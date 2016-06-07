@@ -19,6 +19,7 @@
 #ifndef ZEND_SSA_H
 #define ZEND_SSA_H
 
+#include "zend_optimizer.h"
 #include "zend_cfg.h"
 
 typedef struct _zend_ssa_range {
@@ -48,7 +49,8 @@ typedef struct _zend_ssa_range_constraint {
 } zend_ssa_range_constraint;
 
 typedef struct _zend_ssa_type_constraint {
-	uint32_t               type_mask;       /* If -1 this is a range constraint */
+	uint32_t               type_mask;   /* Type mask to intersect with */
+	zend_class_entry      *ce;          /* Class entry for instanceof constraints */
 } zend_ssa_type_constraint;
 
 typedef union _zend_ssa_pi_constraint {
@@ -125,7 +127,7 @@ typedef struct _zend_ssa {
 
 BEGIN_EXTERN_C()
 
-int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
