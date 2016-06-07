@@ -2017,11 +2017,11 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 #define UPDATE_SSA_OBJ_TYPE(_ce, _is_instanceof, var)				    \
 	do {                                                                \
 		if (var >= 0) {													\
-			if (ssa_var_info[var].ce != _ce ||                          \
-			    ssa_var_info[var].is_instanceof != _is_instanceof) {    \
-				ssa_var_info[var].ce = _ce;						        \
-				ssa_var_info[var].is_instanceof = _is_instanceof;       \
-				add_usages(op_array, ssa, worklist, var);					\
+			if (ssa_var_info[var].ce != (_ce) ||                        \
+			    ssa_var_info[var].is_instanceof != (_is_instanceof)) {  \
+				ssa_var_info[var].ce = (_ce);						    \
+				ssa_var_info[var].is_instanceof = (_is_instanceof);     \
+				add_usages(op_array, ssa, worklist, var);				\
 			}															\
 			/*zend_bitset_excl(worklist, var);*/						\
 		}																\
@@ -3364,6 +3364,50 @@ unknown_opcode:
 	}
 }
 
+static uint32_t get_class_entry_rank(zend_class_entry *ce) {
+	uint32_t rank = 0;
+	while (ce->parent) {
+		rank++;
+		ce = ce->parent;
+	}
+	return rank;
+}
+
+/* Compute least common ancestor on class inheritance tree only */
+static zend_class_entry *join_class_entries(
+		zend_class_entry *ce1, zend_class_entry *ce2, int *is_instanceof) {
+	uint32_t rank1, rank2;
+	if (ce1 == ce2) {
+		return ce1;
+	}
+	if (!ce1 || !ce2) {
+		return NULL;
+	}
+
+	rank1 = get_class_entry_rank(ce1);
+	rank2 = get_class_entry_rank(ce2);
+
+	while (rank1 != rank2) {
+		if (rank1 > rank2) {
+			ce1 = ce1->parent;
+			rank1--;
+		} else {
+			ce2 = ce2->parent;
+			rank2--;
+		}
+	}
+
+	while (ce1 != ce2) {
+		ce1 = ce1->parent;
+		ce2 = ce2->parent;
+	}
+
+	if (ce1) {
+		*is_instanceof = 1;
+	}
+	return ce1;
+}
+
 int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
@@ -3399,20 +3443,21 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 				}
 				UPDATE_SSA_TYPE(tmp, j);
 				for (i = 0; i < blocks[p->block].predecessors_count; i++) {
-					if (get_ssa_var_info(ssa, p->sources[i])) {
-						if (first) {
-							ce = ssa_var_info[p->sources[i]].ce;
-							is_instanceof = ssa_var_info[p->sources[i]].is_instanceof;
-							first = 0;
-						} else if (ce != ssa_var_info[p->sources[i]].ce) {
-							ce = NULL;
-							is_instanceof = 0;
-						} else if (is_instanceof != ssa_var_info[p->sources[i]].is_instanceof) {
-							is_instanceof = 1;
+					if (p->sources[i] >= 0) {
+						zend_ssa_var_info *info = &ssa_var_info[p->sources[i]];
+						if (info->type & MAY_BE_OBJECT) {
+							if (first) {
+								ce = info->ce;
+								is_instanceof = info->is_instanceof;
+								first = 0;
+							} else {
+								is_instanceof |= info->is_instanceof;
+								ce = join_class_entries(ce, info->ce, &is_instanceof);
+							}
 						}
 					}
 				}
-				UPDATE_SSA_OBJ_TYPE(ce, is_instanceof, j);
+				UPDATE_SSA_OBJ_TYPE(ce, ce ? is_instanceof : 0, j);
 			}
 		} else if (ssa_vars[j].definition >= 0) {
 			i = ssa_vars[j].definition;
