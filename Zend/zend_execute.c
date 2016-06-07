@@ -701,7 +701,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 
 			if (arg != ret) {
 				ZVAL_COPY(ret, arg);
-				/* on success "arg" is converted to IS_STRING */
+				/* on success "ret" is converted to IS_STRING */
 				if (!zend_parse_arg_str_weak(ret, &dest)) {
 					zval_ptr_dtor(ret);
 					return 0;
@@ -709,7 +709,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 				zval_ptr_dtor(arg);
 				return 1;
 			}
-			/* on success "arg" is converted to IS_STRING */
+			/* on success "ret" is converted to IS_STRING */
 			if (!zend_parse_arg_str_weak(ret, &dest)) {
 				return 0;
 			}

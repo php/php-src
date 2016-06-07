@@ -785,11 +785,13 @@ static void zend_resolve_property_types(void) /* {{{ */
 
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->type == IS_OBJECT && prop_info->type_name) {
+					zend_string *type_name = zend_string_tolower(prop_info->type_name);
 					zend_class_entry *prop_ce =
-						(zend_class_entry*)zend_hash_find(CG(class_table), prop_info->type_name);
+						(zend_class_entry*)zend_hash_find_ptr(CG(class_table), type_name);
 
 					assert(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
 					prop_info->type_ce = prop_ce;
+					zend_string_release(type_name);
 				}
 			}ZEND_HASH_FOREACH_END();
 		}

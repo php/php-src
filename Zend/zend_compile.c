@@ -2601,7 +2601,7 @@ static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t
 }
 /* }}} */
 
-void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, int by_ref);
+void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, zend_bool by_ref);
 void zend_compile_assign(znode *result, zend_ast *ast);
 static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style);
 
@@ -2735,7 +2735,7 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 	}
 	if (opline->op1_type == IS_CONST) {
 		convert_to_string(CT_CONSTANT(opline->op1));
-		zend_alloc_polymorphic_cache_slots(opline->op1.constant, 2);
+		zend_alloc_polymorphic_cache_slot(opline->op1.constant);
 	}
 	if (class_node.op_type == IS_CONST) {
 		opline->op2_type = IS_CONST;
@@ -5608,7 +5608,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
 			if (optional_type && !Z_CONSTANT(value_zv)) {
-			    if (allow_null && Z_TYPE(value_zv) == IS_NULL) {
+				if (allow_null && Z_TYPE(value_zv) == IS_NULL) {
 					/* pass */
 				} else if (optional_type == IS_ARRAY) {
 					if (Z_TYPE(value_zv) != IS_ARRAY) {
@@ -5616,9 +5616,9 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 							"Default value for properties with array type can only be an array");
 					}
 				} else if (optional_type == IS_CALLABLE) {
-					if (Z_TYPE(value_zv) != IS_STRING && Z_TYPE(value_zv) != IS_ARRAY) {
+					if (Z_TYPE(value_zv) != IS_NULL) {
 						zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for properties with callable type can only be a string or an array");
+							"Default value for properties with callable type can only be null");
 					}
 				} else if (optional_type == IS_OBJECT) {
 					zend_error_noreturn(E_COMPILE_ERROR,
@@ -5637,11 +5637,8 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 		}
 
 		name = zend_new_interned_string_safe(name);
-		if (optional_type) {
-			zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, optional_type, optional_type_name, allow_null);
-		} else {
-			zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment);
-		}
+
+		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, optional_type, optional_type_name, allow_null);
 	}
 }
 /* }}} */
@@ -7980,7 +7977,7 @@ void zend_compile_var(znode *result, zend_ast *ast, uint32_t type, int by_ref) /
 }
 /* }}} */
 
-void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, int by_ref) /* {{{ */
+void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, zend_bool by_ref) /* {{{ */
 {
 	zend_op *opline;
 	switch (ast->kind) {

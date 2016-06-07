@@ -1152,7 +1152,7 @@ simple_list:
 				if (type_ast->attr & ZEND_TYPE_NULLABLE) {
 					smart_str_appendc(str, '?');
 				}
-				zend_ast_export_name(
+				zend_ast_export_ns_name(
 					str, type_ast, 0, indent);
 				smart_str_appendc(str, ' ');
 			}
