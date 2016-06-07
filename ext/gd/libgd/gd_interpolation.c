@@ -1059,6 +1059,10 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 	gdImagePtr tmp_im;
 	gdImagePtr dst;
 
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
+	}
+
 	/* Convert to truecolor if it isn't; this code requires it. */
 	if (!src->trueColor) {
 		gdImagePaletteToTrueColor(src);
@@ -1086,6 +1090,10 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const gdImagePtr dst, const unsigned int new_width, const unsigned int new_height)
 {
 	gdImagePtr tmp_im;
+
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
+	}
 
 	tmp_im = gdImageCreateTrueColor(new_width, src_height);
 	if (tmp_im == NULL) {
@@ -1119,6 +1127,10 @@ gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width,
 	unsigned long  dst_offset_x;
 	unsigned long  dst_offset_y = 0;
 	unsigned int i;
+
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
+	}
 
 	dst_img = gdImageCreateTrueColor(new_width, new_height);
 
@@ -1221,6 +1233,10 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
 	gdImagePtr new_img;
 	const int transparent = im->transparent;
 
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
+	}
+
 	new_img = gdImageCreateTrueColor(new_width, new_height);
 	if (new_img == NULL) {
 		return NULL;
@@ -1312,6 +1328,10 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 	int dwSrcTotalOffset;
 	long i;
 	gdImagePtr new_img;
+
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
+	}
 
 	new_img = gdImageCreateTrueColor(new_width, new_height);
 	if (!new_img){
@@ -1411,6 +1431,10 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 	unsigned int dst_offset_x;
 	unsigned int dst_offset_y = 0;
 	long i;
+
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
+	}
 
 	/* impact perf a bit, but not that much. Implementation for palette
 	   images can be done at a later point.
@@ -1634,7 +1658,11 @@ gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, cons
 	gdImagePtr im_scaled = NULL;
 
 	if (src == NULL || src->interpolation_id < 0 || src->interpolation_id > GD_METHOD_COUNT) {
-		return 0;
+		return NULL;
+	}
+
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
 	}
 
 	switch (src->interpolation_id) {
@@ -1679,6 +1707,10 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 	unsigned int dst_offset_y = 0;
 	unsigned int i;
 	gdImagePtr dst;
+
+	if (new_width == 0 || new_height == 0) {
+		return NULL;
+	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (!dst) {

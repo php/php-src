@@ -4667,6 +4667,10 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
+	if (tmp_h <= 0 || tmp_w <= 0) {
+		RETURN_FALSE;
+	}
+
 	new_width = tmp_w;
 	new_height = tmp_h;
 
