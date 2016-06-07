@@ -694,12 +694,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		}
 	}
 	if ((type != BP_VAR_IS)) {
-		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot))
-		 && UNEXPECTED(!prop_info->allow_null)) {
-			zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
+		if (UNEXPECTED(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot))) {
+			if (UNEXPECTED(!prop_info->allow_null || Z_TYPE_P(retval) == IS_UNDEF)) {
+				zend_throw_exception_ex(zend_ce_type_error, prop_info->type,
 				"Typed property %s::$%s must not be accessed before initialization",
-				ZSTR_VAL(prop_info->ce->name),
-				Z_STRVAL_P(member));
+					ZSTR_VAL(prop_info->ce->name),
+					Z_STRVAL_P(member));
+			}
 		} else {
 			zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), Z_STRVAL_P(member));
 		}
