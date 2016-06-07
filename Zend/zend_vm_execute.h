@@ -3441,6 +3441,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 			if (IS_CONST != IS_TMP_VAR) {
 				Z_ADDREF_P(array_ptr);
 			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
+			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			pos = 0;
 			p = fe_ht->arData;
@@ -3583,6 +3590,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			} else {
 				array_ptr = EX_VAR(opline->result.var);
 				ZVAL_COPY_VALUE(array_ptr, array_ref);
+			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			p = fe_ht->arData;
@@ -12503,6 +12517,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 			if (IS_TMP_VAR != IS_TMP_VAR) {
 				Z_ADDREF_P(array_ptr);
 			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
+			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			pos = 0;
 			p = fe_ht->arData;
@@ -12646,6 +12667,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			} else {
 				array_ptr = EX_VAR(opline->result.var);
 				ZVAL_COPY_VALUE(array_ptr, array_ref);
+			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			p = fe_ht->arData;
@@ -16071,6 +16099,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 			if (IS_VAR != IS_TMP_VAR) {
 				Z_ADDREF_P(array_ptr);
 			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
+			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			pos = 0;
 			p = fe_ht->arData;
@@ -16216,6 +16251,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			} else {
 				array_ptr = EX_VAR(opline->result.var);
 				ZVAL_COPY_VALUE(array_ptr, array_ref);
+			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			p = fe_ht->arData;
@@ -37831,6 +37873,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 			if (IS_CV != IS_TMP_VAR) {
 				Z_ADDREF_P(array_ptr);
 			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
+			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			pos = 0;
 			p = fe_ht->arData;
@@ -37973,6 +38022,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			} else {
 				array_ptr = EX_VAR(opline->result.var);
 				ZVAL_COPY_VALUE(array_ptr, array_ref);
+			}
+			if (Z_OBJ_P(array_ptr)->properties
+			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+				}
+				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
 			fe_ht = Z_OBJPROP_P(array_ptr);
 			p = fe_ht->arData;

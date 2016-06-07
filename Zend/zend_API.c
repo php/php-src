@@ -495,6 +495,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
 	int check_null = 0;
+	int separate = 0;
 	zval *real_arg = arg;
 
 	/* scan through modifiers */
@@ -503,6 +504,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		if (*spec_walk == '/') {
 			SEPARATE_ZVAL_NOREF(arg);
 			real_arg = arg;
+			separate = 1;
 		} else if (*spec_walk == '!') {
 			check_null = 1;
 		} else {
@@ -622,7 +624,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				HashTable **p = va_arg(*va, HashTable **);
 
-				if (!zend_parse_arg_array_ht(arg, p, check_null, c == 'H')) {
+				if (!zend_parse_arg_array_ht(arg, p, check_null, c == 'H', separate)) {
 					return "array";
 				}
 			}
