@@ -1828,17 +1828,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DISCARD_EXCEPTION_SPEC_HANDLER
 {
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->op1.var);
+	SAVE_OPLINE();
+
+	/* check for incomplete RETURN statement */
+	if (fast_call->u2.lineno != (uint32_t)-1
+	 && (EX(func)->op_array.opcodes[fast_call->u2.lineno + 1].opcode == ZEND_RETURN
+	  || EX(func)->op_array.opcodes[fast_call->u2.lineno + 1].opcode == ZEND_RETURN_BY_REF)
+	 && (EX(func)->op_array.opcodes[fast_call->u2.lineno + 1].op1_type & (IS_VAR|IS_TMP_VAR))) {
+		cleanup_live_vars(execute_data, fast_call->u2.lineno, fast_call->u2.lineno + 1);
+	}
 
 	/* check for delayed exception */
 	if (Z_OBJ_P(fast_call) != NULL) {
-		SAVE_OPLINE();
 		/* discard the previously thrown exception */
 		OBJ_RELEASE(Z_OBJ_P(fast_call));
 		Z_OBJ_P(fast_call) = NULL;
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

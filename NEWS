@@ -20,6 +20,7 @@ PHP                                                                        NEWS
   . Fixed bug #62814 (It is possible to stiffen child class members visibility).
     (Nikita)
   . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
+  . Fixed bug #70228 (Memleak if return in finally block). (Dmitry)
   . Fixed bug #71266 (Missing separation of properties HT in foreach etc).
     (Dmitry)
   . Fixed bug #71604 (Aborted Generators continue after nested finally).
