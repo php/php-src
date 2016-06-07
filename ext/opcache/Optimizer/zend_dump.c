@@ -504,19 +504,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		} else if (opline->extended_value == ZEND_RETURNS_FUNCTION) {
 			fprintf(stderr, " (function)");
 		}
-	} else if (ZEND_VM_EXT_SEND == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
-			fprintf(stderr, " (ref)");
-		}
-		if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
-			fprintf(stderr, " (compile-time)");
-		}
-		if (opline->extended_value & ZEND_ARG_SEND_FUNCTION) {
-			fprintf(stderr, " (function)");
-		}
-		if (opline->extended_value & ZEND_ARG_SEND_SILENT) {
-			fprintf(stderr, " (silent)");
-		}
 	} else {
 		if (ZEND_VM_EXT_VAR_FETCH & flags) {
 			switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {

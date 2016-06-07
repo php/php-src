@@ -607,9 +607,9 @@ PHPAPI int php_get_module_initialized(void)
 }
 /* }}} */
 
-/* {{{ php_log_err
+/* {{{ php_log_err_with_severity
  */
-PHPAPI ZEND_COLD void php_log_err(char *log_message)
+PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int)
 {
 	int fd = -1;
 	time_t error_time;
@@ -624,7 +624,7 @@ PHPAPI ZEND_COLD void php_log_err(char *log_message)
 	if (PG(error_log) != NULL) {
 #ifdef HAVE_SYSLOG_H
 		if (!strcmp(PG(error_log), "syslog")) {
-			php_syslog(LOG_NOTICE, "%s", log_message);
+			php_syslog(syslog_type_int, "%s", log_message);
 			PG(in_error_log) = 0;
 			return;
 		}
@@ -1049,6 +1049,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 	if (display && (EG(error_reporting) & type || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
 		char *error_type_str;
+		int syslog_type_int = LOG_NOTICE;
 
 		switch (type) {
 			case E_ERROR:
@@ -1056,29 +1057,36 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 			case E_COMPILE_ERROR:
 			case E_USER_ERROR:
 				error_type_str = "Fatal error";
+				syslog_type_int = LOG_ERR;
 				break;
 			case E_RECOVERABLE_ERROR:
 				error_type_str = "Catchable fatal error";
+				syslog_type_int = LOG_ERR;
 				break;
 			case E_WARNING:
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
 			case E_USER_WARNING:
 				error_type_str = "Warning";
+				syslog_type_int = LOG_WARNING;
 				break;
 			case E_PARSE:
 				error_type_str = "Parse error";
+				syslog_type_int = LOG_EMERG;
 				break;
 			case E_NOTICE:
 			case E_USER_NOTICE:
 				error_type_str = "Notice";
+				syslog_type_int = LOG_NOTICE;
 				break;
 			case E_STRICT:
 				error_type_str = "Strict Standards";
+				syslog_type_int = LOG_INFO;
 				break;
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";
+				syslog_type_int = LOG_INFO;
 				break;
 			default:
 				error_type_str = "Unknown error";
@@ -1093,7 +1101,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 			}
 #endif
 			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-			php_log_err(log_buffer);
+			php_log_err_with_severity(log_buffer, syslog_type_int);
 			efree(log_buffer);
 		}
 

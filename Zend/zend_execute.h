@@ -259,11 +259,10 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 	ZEND_ASSERT_VM_STACK_GLOBAL;
 
 	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
-		ZEND_ASSERT(call == (zend_execute_data*)ZEND_VM_STACK_ELEMENTS(EG(vm_stack)));
-
 		zend_vm_stack p = EG(vm_stack);
 		zend_vm_stack prev = p->prev;
 
+		ZEND_ASSERT(call == (zend_execute_data*)ZEND_VM_STACK_ELEMENTS(EG(vm_stack)));
 		EG(vm_stack_top) = prev->top;
 		EG(vm_stack_end) = prev->end;
 		EG(vm_stack) = prev;

@@ -145,19 +145,20 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				}
 				break;
-			case ZEND_SEND_VAR_NO_REF:
-				if (!(opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) && call_stack[call - 1].func) {
-					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
-						opline->extended_value |= ZEND_ARG_COMPILE_TIME_BOUND | ZEND_ARG_SEND_BY_REF;
+			case ZEND_SEND_VAR_NO_REF_EX:
+				if (call_stack[call - 1].func) {
+					if (ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
+						opline->opcode = ZEND_SEND_VAR_NO_REF;
+					} else if (ARG_MAY_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
+						opline->opcode = ZEND_SEND_VAL;
 					} else {
 						opline->opcode = ZEND_SEND_VAR;
-						opline->extended_value = 0;
 					}
 				}
 				break;
 #if 0
 			case ZEND_SEND_REF:
-				if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND && call_stack[call - 1].func) {
+				if (call_stack[call - 1].func) {
 					/* We won't handle run-time pass by reference */
 					call_stack[call - 1].opline = NULL;
 				}

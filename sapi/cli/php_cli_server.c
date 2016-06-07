@@ -96,6 +96,7 @@
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_raw_url_decode() */
 #include "ext/standard/php_string.h" /* for php_dirname() */
+#include "ext/date/php_date.h" /* for php_format_date() */
 #include "php_network.h"
 
 #include "php_http_parser.h"
@@ -339,15 +340,24 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 
 static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, int persistent) /* {{{ */
 {
-	{
-		char *val;
-		if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
-			smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
-			smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
-			smart_str_appends_ex(buffer, val, persistent);
-			smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
-		}
+	char *val;
+	struct timeval tv = {0};
+
+	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
+		smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
+		smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
+		smart_str_appends_ex(buffer, val, persistent);
+		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
 	}
+
+	if (!gettimeofday(&tv, NULL)) {
+		zend_string *dt = php_format_date("r", 1, tv.tv_sec, 1);
+		smart_str_appendl_ex(buffer, "Date: ", 6, persistent);
+		smart_str_appends_ex(buffer, dt->val, persistent);
+		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
+		zend_string_release(dt);
+	}
+
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
 } /* }}} */
 

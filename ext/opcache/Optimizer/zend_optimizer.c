@@ -254,6 +254,13 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 					return 0;
 				}
 
+				if (zend_optimizer_classify_function(Z_STR_P(val), opline->extended_value)) {
+					/* Dynamic call to various special functions must stay dynamic,
+					 * otherwise would drop a warning */
+					zval_dtor(val);
+					return 0;
+				}
+
 				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 				drop_leading_backslash(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
@@ -419,17 +426,10 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					opline->opcode = ZEND_SEND_VAL_EX;
 					break;
 				case ZEND_SEND_VAR_NO_REF:
-					if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
-						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
-							zval_dtor(val);
-							return 0;
-						}
-						opline->extended_value = 0;
-						opline->opcode = ZEND_SEND_VAL_EX;
-					} else {
-						opline->extended_value = 0;
-						opline->opcode = ZEND_SEND_VAL;
-					}
+					zval_dtor(val);
+					return 0;
+				case ZEND_SEND_VAR_NO_REF_EX:
+					opline->opcode = ZEND_SEND_VAL;
 					break;
 				case ZEND_SEND_USER:
 					opline->opcode = ZEND_SEND_VAL_EX;
@@ -591,6 +591,30 @@ zend_function *zend_optimizer_get_called_func(
 #undef GET_OP
 }
 
+uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) {
+	if (zend_string_equals_literal(name, "extract")) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "compact")) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "parse_str") && num_args <= 1) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "mb_parse_str") && num_args <= 1) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "get_defined_vars")) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "assert")) {
+		return ZEND_FUNC_INDIRECT_VAR_ACCESS;
+	} else if (zend_string_equals_literal(name, "func_num_args")) {
+		return ZEND_FUNC_VARARG;
+	} else if (zend_string_equals_literal(name, "func_get_arg")) {
+		return ZEND_FUNC_VARARG;
+	} else if (zend_string_equals_literal(name, "func_get_args")) {
+		return ZEND_FUNC_VARARG;
+	} else {
+		return 0;
+	}
+}
+
 static void zend_optimize(zend_op_array      *op_array,
                           zend_optimizer_ctx *ctx)
 {
@@ -607,6 +631,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - perform compile-time evaluation of constant binary and unary operations
 	 * - optimize series of ADD_STRING and/or ADD_CHAR
 	 * - convert CAST(IS_BOOL,x) into BOOL(x)
+         * - pre-evaluate constant function calls
 	 */
 	if (ZEND_OPTIMIZER_PASS_1 & ctx->optimization_level) {
 		zend_optimizer_pass1(op_array, ctx);
@@ -618,8 +643,6 @@ static void zend_optimize(zend_op_array      *op_array,
 	/* pass 2:
 	 * - convert non-numeric constants to numeric constants in numeric operators
 	 * - optimize constant conditional JMPs
-	 * - optimize static BRKs and CONTs
-	 * - pre-evaluate constant function calls
 	 */
 	if (ZEND_OPTIMIZER_PASS_2 & ctx->optimization_level) {
 		zend_optimizer_pass2(op_array);

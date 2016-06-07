@@ -93,6 +93,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSIGN_ADD:
 					case ZEND_ASSIGN_SUB:
@@ -124,7 +125,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_OBJ_UNSET:
 					case ZEND_VERIFY_RETURN_TYPE:
 op1_def:
-						// FIXME: include into "use" too ...?
+						/* `def` always come along with dtor or separation,
+						 * thus the origin var info might be also `use`d in the feature(CG) */
 						DFG_SET(use, set_size, j, var_num);
 						DFG_SET(def, set_size, j, var_num);
 						break;
