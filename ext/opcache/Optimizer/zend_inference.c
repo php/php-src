@@ -486,8 +486,9 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		tmp->min = ZEND_LONG_MAX;
 		tmp->max = ZEND_LONG_MIN;
 		tmp->overflow = 0;
-		if (p->pi >= 0 && p->constraint.type_mask == (uint32_t) -1) {
-			if (p->constraint.negative) {
+		if (p->pi >= 0 && p->has_range_constraint) {
+			zend_ssa_range_constraint *constraint = &p->constraint.range;
+			if (constraint->negative) {
 				if (ssa->var_info[p->sources[0]].has_range) {
 					tmp->underflow = ssa->var_info[p->sources[0]].range.underflow;
 					tmp->min = ssa->var_info[p->sources[0]].range.min;
@@ -500,8 +501,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->overflow = 1;
 				}
 #ifdef NEG_RANGE
-				if (p->constraint.min_ssa_var < 0 &&
-				    p->constraint.min_ssa_var < 0 &&
+				if (constraint->min_ssa_var < 0 &&
+				    constraint->min_ssa_var < 0 &&
 				    ssa->var_info[p->ssa_var].has_range) {
 #ifdef LOG_NEG_RANGE
 					fprintf(stderr, "%s() #%d [%ld..%ld] -> [%ld..%ld]?\n",
@@ -512,19 +513,19 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						tmp->min,
 						tmp->max);
 #endif
-					if (p->constraint.negative == NEG_USE_LT &&
-					    tmp->max >= p->constraint.range.min) {
+					if (constraint->negative == NEG_USE_LT &&
+					    tmp->max >= constraint->range.min) {
 						tmp->overflow = 0;
-						tmp->max = p->constraint.range.min - 1;
+						tmp->max = constraint->range.min - 1;
 #ifdef LOG_NEG_RANGE
 						fprintf(stderr, "  => [%ld..%ld]\n",
 							tmp->min,
 							tmp->max);
 #endif
-					} else if (p->constraint.negative == NEG_USE_GT &&
-					           tmp->min <= p->constraint.range.max) {
+					} else if (constraint->negative == NEG_USE_GT &&
+					           tmp->min <= constraint->range.max) {
 						tmp->underflow = 0;
-						tmp->min = p->constraint.range.max + 1;
+						tmp->min = constraint->range.max + 1;
 #ifdef LOG_NEG_RANGE
 						fprintf(stderr, "  => [%ld..%ld]\n",
 							tmp->min,
@@ -539,44 +540,44 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				tmp->min = ssa->var_info[p->sources[0]].range.min;
 				tmp->max = ssa->var_info[p->sources[0]].range.max;
 				tmp->overflow = ssa->var_info[p->sources[0]].range.overflow;
-				if (p->constraint.min_ssa_var < 0) {
-					tmp->underflow = p->constraint.range.underflow && tmp->underflow;
-					tmp->min = MAX(p->constraint.range.min, tmp->min);
+				if (constraint->min_ssa_var < 0) {
+					tmp->underflow = constraint->range.underflow && tmp->underflow;
+					tmp->min = MAX(constraint->range.min, tmp->min);
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[p->constraint.min_ssa_var].has_range) {
-					tmp->underflow = ssa->var_info[p->constraint.min_ssa_var].range.underflow && tmp->underflow;
-					tmp->min = MAX(ssa->var_info[p->constraint.min_ssa_var].range.min + p->constraint.range.min, tmp->min);
+				} else if (narrowing && ssa->var_info[constraint->min_ssa_var].has_range) {
+					tmp->underflow = ssa->var_info[constraint->min_ssa_var].range.underflow && tmp->underflow;
+					tmp->min = MAX(ssa->var_info[constraint->min_ssa_var].range.min + constraint->range.min, tmp->min);
 #endif
 				}
-				if (p->constraint.max_ssa_var < 0) {
-					tmp->max = MIN(p->constraint.range.max, tmp->max);
-					tmp->overflow = p->constraint.range.overflow && tmp->overflow;
+				if (constraint->max_ssa_var < 0) {
+					tmp->max = MIN(constraint->range.max, tmp->max);
+					tmp->overflow = constraint->range.overflow && tmp->overflow;
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[p->constraint.max_ssa_var].has_range) {
-					tmp->max = MIN(ssa->var_info[p->constraint.max_ssa_var].range.max + p->constraint.range.max, tmp->max);
-					tmp->overflow = ssa->var_info[p->constraint.max_ssa_var].range.overflow && tmp->overflow;
+				} else if (narrowing && ssa->var_info[constraint->max_ssa_var].has_range) {
+					tmp->max = MIN(ssa->var_info[constraint->max_ssa_var].range.max + constraint->range.max, tmp->max);
+					tmp->overflow = ssa->var_info[constraint->max_ssa_var].range.overflow && tmp->overflow;
 #endif
 				}
 			} else if (narrowing) {
-				if (p->constraint.min_ssa_var < 0) {
-					tmp->underflow = p->constraint.range.underflow;
-					tmp->min = p->constraint.range.min;
+				if (constraint->min_ssa_var < 0) {
+					tmp->underflow = constraint->range.underflow;
+					tmp->min = constraint->range.min;
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[p->constraint.min_ssa_var].has_range) {
-					tmp->underflow = ssa->var_info[p->constraint.min_ssa_var].range.underflow;
-					tmp->min = ssa->var_info[p->constraint.min_ssa_var].range.min + p->constraint.range.min;
+				} else if (narrowing && ssa->var_info[constraint->min_ssa_var].has_range) {
+					tmp->underflow = ssa->var_info[constraint->min_ssa_var].range.underflow;
+					tmp->min = ssa->var_info[constraint->min_ssa_var].range.min + constraint->range.min;
 #endif
 				} else {
 					tmp->underflow = 1;
 					tmp->min = ZEND_LONG_MIN;
 				}
-				if (p->constraint.max_ssa_var < 0) {
-					tmp->max = p->constraint.range.max;
-					tmp->overflow = p->constraint.range.overflow;
+				if (constraint->max_ssa_var < 0) {
+					tmp->max = constraint->range.max;
+					tmp->overflow = constraint->range.overflow;
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[p->constraint.max_ssa_var].has_range) {
-					tmp->max = ssa->var_info[p->constraint.max_ssa_var].range.max + p->constraint.range.max;
-					tmp->overflow = ssa->var_info[p->constraint.max_ssa_var].range.overflow;
+				} else if (narrowing && ssa->var_info[constraint->max_ssa_var].has_range) {
+					tmp->max = ssa->var_info[constraint->max_ssa_var].range.max + constraint->range.max;
+					tmp->overflow = ssa->var_info[constraint->max_ssa_var].range.overflow;
 #endif
 				} else {
 					tmp->max = ZEND_LONG_MAX;
@@ -1825,55 +1826,57 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 				    ssa->var_info[j].has_range &&
 				    ssa->vars[j].definition_phi &&
 				    ssa->vars[j].definition_phi->pi >= 0 &&
-				    ssa->vars[j].definition_phi->constraint.type_mask == (uint32_t) -1 &&
-				    ssa->vars[j].definition_phi->constraint.negative &&
-				    ssa->vars[j].definition_phi->constraint.min_ssa_var < 0 &&
-				    ssa->vars[j].definition_phi->constraint.min_ssa_var < 0) {
+					ssa->vars[j].definition_phi->has_range_constraint &&
+				    ssa->vars[j].definition_phi->constraint.range.negative &&
+				    ssa->vars[j].definition_phi->constraint.range.min_ssa_var < 0 &&
+				    ssa->vars[j].definition_phi->constraint.range.min_ssa_var < 0) {
+					zend_ssa_range_constraint *constraint =
+						&ssa->vars[j].definition_phi->constraint.range;
 					if (tmp.min == ssa->var_info[j].range.min &&
 					    tmp.max == ssa->var_info[j].range.max) {
-						if (ssa->vars[j].definition_phi->constraint.negative == NEG_INIT) {
+						if (constraint->negative == NEG_INIT) {
 #ifdef LOG_NEG_RANGE
 							fprintf(stderr, "#%d INVARIANT\n", j);
 #endif
-							ssa->vars[j].definition_phi->constraint.negative = NEG_INVARIANT;
+							constraint->negative = NEG_INVARIANT;
 						}
 					} else if (tmp.min == ssa->var_info[j].range.min &&
 					           tmp.max == ssa->var_info[j].range.max + 1 &&
-					           tmp.max < ssa->vars[j].definition_phi->constraint.range.min) {
-						if (ssa->vars[j].definition_phi->constraint.negative == NEG_INIT ||
-						    ssa->vars[j].definition_phi->constraint.negative == NEG_INVARIANT) {
+					           tmp.max < constraint->range.min) {
+						if (constraint->negative == NEG_INIT ||
+						    constraint->negative == NEG_INVARIANT) {
 #ifdef LOG_NEG_RANGE
 							fprintf(stderr, "#%d LT\n", j);
 #endif
-							ssa->vars[j].definition_phi->constraint.negative = NEG_USE_LT;
+							constraint->negative = NEG_USE_LT;
 //???NEG
-						} else if (ssa->vars[j].definition_phi->constraint.negative == NEG_USE_GT) {
+						} else if (constraint->negative == NEG_USE_GT) {
 #ifdef LOG_NEG_RANGE
 							fprintf(stderr, "#%d UNKNOWN\n", j);
 #endif
-							ssa->vars[j].definition_phi->constraint.negative = NEG_UNKNOWN;
+							constraint->negative = NEG_UNKNOWN;
 						}
 					} else if (tmp.max == ssa->var_info[j].range.max &&
 				               tmp.min == ssa->var_info[j].range.min - 1 &&
-					           tmp.min > ssa->vars[j].definition_phi->constraint.range.max) {
-						if (ssa->vars[j].definition_phi->constraint.negative == NEG_INIT ||
-						    ssa->vars[j].definition_phi->constraint.negative == NEG_INVARIANT) {
+					           tmp.min > constraint->range.max) {
+						if (constraint->negative == NEG_INIT ||
+						    constraint->negative == NEG_INVARIANT) {
 #ifdef LOG_NEG_RANGE
 							fprintf(stderr, "#%d GT\n", j);
 #endif
-							ssa->vars[j].definition_phi->constraint.negative = NEG_USE_GT;
+							constraint->negative = NEG_USE_GT;
 //???NEG
-						} else if (ssa->vars[j].definition_phi->constraint.negative == NEG_USE_LT) {
+						} else if (constraint->negative == NEG_USE_LT) {
 #ifdef LOG_NEG_RANGE
 							fprintf(stderr, "#%d UNKNOWN\n", j);
 #endif
-							ssa->vars[j].definition_phi->constraint.negative = NEG_UNKNOWN;
+							constraint->negative = NEG_UNKNOWN;
 						}
 					} else {
 #ifdef LOG_NEG_RANGE
 						fprintf(stderr, "#%d UNKNOWN\n", j);
 #endif
-						ssa->vars[j].definition_phi->constraint.negative = NEG_UNKNOWN;
+						constraint->negative = NEG_UNKNOWN;
 					}
 				}
 #endif
@@ -3425,8 +3428,8 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
 			if (p->pi >= 0) {
 				tmp = get_ssa_var_info(ssa, p->sources[0]);
-				if (p->constraint.type_mask != (uint32_t) -1) {
-					tmp &= p->constraint.type_mask;
+				if (!p->has_range_constraint) {
+					tmp &= p->constraint.type.type_mask;
 				}
 				UPDATE_SSA_TYPE(tmp, j);
 				if (ssa_var_info[p->sources[0]].ce) {

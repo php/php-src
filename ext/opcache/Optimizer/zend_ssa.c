@@ -110,16 +110,17 @@ static void pi_range(
 		zend_ssa_phi *phi, int min_var, int max_var, zend_long min, zend_long max,
 		char underflow, char overflow, char negative) /* {{{ */
 {
-	phi->constraint.min_var = min_var;
-	phi->constraint.max_var = max_var;
-	phi->constraint.min_ssa_var = -1;
-	phi->constraint.max_ssa_var = -1;
-	phi->constraint.range.min = min;
-	phi->constraint.range.max = max;
-	phi->constraint.range.underflow = underflow;
-	phi->constraint.range.overflow = overflow;
-	phi->constraint.negative = negative ? NEG_INIT : NEG_NONE;
-	phi->constraint.type_mask = (uint32_t) -1;
+	zend_ssa_range_constraint *constraint = &phi->constraint.range;
+	constraint->min_var = min_var;
+	constraint->max_var = max_var;
+	constraint->min_ssa_var = -1;
+	constraint->max_ssa_var = -1;
+	constraint->range.min = min;
+	constraint->range.max = max;
+	constraint->range.underflow = underflow;
+	constraint->range.overflow = overflow;
+	constraint->negative = negative ? NEG_INIT : NEG_NONE;
+	phi->has_range_constraint = 1;
 }
 /* }}} */
 
@@ -137,10 +138,11 @@ static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
 }
 
 static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
-	phi->constraint.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
-	phi->constraint.type_mask |= type_mask;
+	phi->has_range_constraint = 0;
+	phi->constraint.type.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
+	phi->constraint.type.type_mask |= type_mask;
 	if (type_mask & MAY_BE_NULL) {
-		phi->constraint.type_mask |= MAY_BE_UNDEF;
+		phi->constraint.type.type_mask |= MAY_BE_UNDEF;
 	}
 }
 static inline void pi_not_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
@@ -741,11 +743,13 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 			for (p = ssa_blocks[succ].phis; p; p = p->next) {
 				if (p->pi == n) {
 					/* e-SSA Pi */
-					if (p->constraint.min_var >= 0) {
-						p->constraint.min_ssa_var = var[p->constraint.min_var];
-					}
-					if (p->constraint.max_var >= 0) {
-						p->constraint.max_ssa_var = var[p->constraint.max_var];
+					if (p->has_range_constraint) {
+						if (p->constraint.range.min_var >= 0) {
+							p->constraint.range.min_ssa_var = var[p->constraint.range.min_var];
+						}
+						if (p->constraint.range.max_var >= 0) {
+							p->constraint.range.max_ssa_var = var[p->constraint.range.max_var];
+						}
 					}
 					for (j = 0; j < blocks[succ].predecessors_count; j++) {
 						p->sources[j] = var[p->var];
@@ -1021,13 +1025,16 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 						ssa_vars[phi->sources[0]].phi_use_chain = phi;
 					}
 				}
-				/* min and max variables can't be used together */
-				if (phi->constraint.min_ssa_var >= 0) {
-					phi->sym_use_chain = ssa_vars[phi->constraint.min_ssa_var].sym_use_chain;
-					ssa_vars[phi->constraint.min_ssa_var].sym_use_chain = phi;
-				} else if (phi->constraint.max_ssa_var >= 0) {
-					phi->sym_use_chain = ssa_vars[phi->constraint.max_ssa_var].sym_use_chain;
-					ssa_vars[phi->constraint.max_ssa_var].sym_use_chain = phi;
+				if (phi->has_range_constraint) {
+					/* min and max variables can't be used together */
+					zend_ssa_range_constraint *constraint = &phi->constraint.range;
+					if (constraint->min_ssa_var >= 0) {
+						phi->sym_use_chain = ssa_vars[constraint->min_ssa_var].sym_use_chain;
+						ssa_vars[constraint->min_ssa_var].sym_use_chain = phi;
+					} else if (constraint->max_ssa_var >= 0) {
+						phi->sym_use_chain = ssa_vars[constraint->max_ssa_var].sym_use_chain;
+						ssa_vars[constraint->max_ssa_var].sym_use_chain = phi;
+					}
 				}
 			} else {
 				int j;
