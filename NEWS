@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #72308 (fastcgi_finish_request and logging environment
     variables). (Laruence)
 
+- GD:
+  . Fixed bug #72337 (invalid dimensions can lead to crash) (Pierre)
+
 - Intl:
   . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
 
