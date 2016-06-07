@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.8
+09 Jun 2016 PHP 7.0.8RC1
 
 - Core:
   . Fixed bug #72221 (segfault, past-the-end access). (Lauri Kenttä)
