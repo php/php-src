@@ -1,5 +1,112 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0alpha2
+?? ??? 2016, PHP 7.1.0
+
+- Core:
+  . Added nullable types. (Levi, Dmitry)
+  . Added DFA optimization framework based on e-SSA form. (Dmitry, Nikita)
+  . Added specialized opcode handlers (e.g. ZEND_ADD_LONG_NO_OVERFLOW).
+    (Dmitry)
+  . Change statement and fcall extension handlers to accept frame. (Joe)
+  . Implemented safe execution timeout handling, that prevents random crashes
+    after "Maximum execution time exceeded" error. (Dmitry)
+  . Fixed bug #53432 (Assignment via string index access on an empty string
+    converts to array). (Nikita)
+  . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
+  . Fixed bug #62814 (It is possible to stiffen child class members visibility).
+    (Nikita)
+  . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
+  . Fixed bug #71604 (Aborted Generators continue after nested finally).
+    (Nikita)
+  . Fixed bug #71572 (String offset assignment from an empty string inserts
+    null byte). (Francois)
+  . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
+    identifiers). (Andrea)
+  . Fixed bug #72188 (Nested try/finally blocks losing return value). (Dmitry)
+  . Fixed bug #72213 (Finally leaks on nested exceptions). (Dmitry, Nikita)
+  . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
+    Reeze Xia, Dmitry)
+  . Added void return type. (Andrea)
+  . Added support for negative string offsets in string offset syntax and
+    various string functions. (Francois)
+  . Added a form of the list() construct where keys can be specified. (Andrea)
+  . Number operators taking numeric strings now emit E_NOTICEs or E_WARNINGs
+    when given malformed numeric strings. (Andrea)
+  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
+    decoct(), dechex(), integer operators and other conversions now always
+    respect scientific notation in numeric strings. (Andrea)
+  . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
+    Pierrick)
+  . Raise a compile-time warning on octal escape sequence overflow. (Sara)
+  . Added [] = as alternative construct to list() =. (Bob)
+  . Implemented logging to syslog with dynamic error levels. (Jani Ollikainen)
+  . Fixed bug #47517 (php-cgi.exe missing UAC manifest).
+    (maxdax15801 at users noreply github com)
+
+- Apache2handler:
+  . Enable per-module logging in Apache 2.4+. (Martin Vobruba)
+
+- CLI Server:
+  . Fixed bug #71276 (Built-in webserver does not send Date header).
+    (see at seos fr)
+
+- FTP:
+  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
+    (abrender at elitehosts dot com)
+
+- Intl:
+  . Added IntlTimeZone::getWindowsID() and
+    IntlTimeZone::getIDForWindowsID(). (Sara)
+  . Fixed bug #69374 (IntlDateFormatter formatObject returns wrong utf8 value).
+    (lenhatanh86 at gmail com)
+  . Fixed bug #69398 (IntlDateFormatter formatObject returns wrong value when
+    time style is NONE). (lenhatanh86 at gmail com)
+
+- Hash:
+  . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
+  . Added SHA512/256 and SHA512/224 algorithms. (Sara)
+
+- JSON:
+  . Exported JSON parser API including json_parser_method that can be used
+    for implementing custom logic when parsing JSON. (Jakub Zelenka)
+  . Escaped U+2028 and U+2029 when JSON_UNESCAPED_UNICODE is supplied as
+    json_encode options and added JSON_UNESCAPED_LINE_TERMINATORS to restore
+    the previous behaviour. (Eddie Kohler)
+
+- PDO_Firebird:
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X86_64). (Mariuz)
+
+- Pgsql:
+  . Implemented FR #31021 (pg_last_notice() is needed to get all notice
+    messages). (Yasuo)
+  . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
+
+- Reflection:
+  . Fix #72209 (ReflectionProperty::getValue() doesn't fail if object doesn't match type). (Joe)
+
+- Session:
+  . Improved fix for bug #68063 (Empty session IDs do still start sessions).
+    (Yasuo)
+  . Fixed bug #71038 (session_start() returns TRUE on failure).
+    Session save handlers must return 'string' always for successful read.
+    i.e. Non-existing session read must return empty string. PHP 7.0 is made
+    not to tolerate buggy return value. (Yasuo)
+  . Fixed bug #71394 (session_regenerate_id() must close opened session on
+    errors). (Yasuo)
+
+- SQLite3:
+  . Implemented FR #71159 (Upgraded bundled SQLite lib to 3.9.2). (Laruence)
+
+- Standard:
+  . Fixed bug #71100 (long2ip() doesn't accept integers in strict mode).
+    (Laruence)
+  . Implemented FR #55716 (Add an option to pass a custom stream context to
+    get_headers()). (Ferenc)
+  . Additional validation for parse_url() for login/pass components).
+    (Ilia) (Julien)
+  . Implemented FR #69359 (Provide a way to fetch the current environment
+    variables). (Ferenc)
+  . unpack() function accepts an additional optional argument $offset. (Dmitry)
+  . Implemented #51879 stream context socket option tcp_nodelay (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
