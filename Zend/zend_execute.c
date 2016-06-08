@@ -1710,15 +1710,7 @@ fetch_from_array:
 			goto try_array;
 		}
 	}
-	if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-		if (type != BP_VAR_UNSET && UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-			zval_ptr_dtor_nogc(container);
-convert_to_array:
-			ZVAL_NEW_ARR(container);
-			zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-			goto fetch_from_array;
-		}
-
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		if (dim == NULL) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
 		} else {
@@ -1778,7 +1770,9 @@ convert_to_array:
 		}
 		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (type != BP_VAR_UNSET) {
-				goto convert_to_array;
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto fetch_from_array;
 			} else {
 				/* for read-mode only */
 				ZVAL_NULL(result);

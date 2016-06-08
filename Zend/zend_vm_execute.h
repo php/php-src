@@ -17150,7 +17150,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -17160,15 +17163,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_VAR != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CONST == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -20640,7 +20635,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -20650,15 +20648,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_VAR != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_UNUSED == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -22008,7 +21998,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -22018,15 +22011,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_VAR != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CV == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -25023,7 +25008,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -25033,15 +25021,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_VAR != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -27969,7 +27949,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -27979,15 +27962,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_UNUSED != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CONST == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -30799,7 +30774,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -30809,15 +30787,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_UNUSED != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_UNUSED == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -31584,7 +31554,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -31594,15 +31567,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_UNUSED != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CV == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -34082,7 +34047,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -34092,15 +34060,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_UNUSED != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -38842,7 +38802,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -38852,15 +38815,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_CV != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CONST == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -43521,7 +43476,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -43531,15 +43489,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_CV != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_UNUSED == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -45882,7 +45832,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -45892,15 +45845,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_CV != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CV == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
@@ -49970,7 +49915,10 @@ assign_dim_op_new_array:
 				}
 			} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
-				goto assign_dim_op_convert_to_array;
+assign_dim_op_convert_to_array:
+				ZVAL_NEW_ARR(container);
+				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				goto assign_dim_op_new_array;
 			}
 		}
 
@@ -49980,15 +49928,7 @@ assign_dim_op_new_array:
 			value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
 			zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 		} else if (IS_CV != IS_UNUSED) {
-			if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (UNEXPECTED(Z_STRLEN_P(container) == 0)) {
-					zval_ptr_dtor_nogc(container);
-assign_dim_op_convert_to_array:
-					ZVAL_NEW_ARR(container);
-					zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
-					goto assign_dim_op_new_array;
-				}
-
+			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 					zend_throw_error(NULL, "[] operator not supported for strings");
 				} else {
