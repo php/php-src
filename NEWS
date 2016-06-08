@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #72308 (fastcgi_finish_request and logging environment
     variables). (Laruence)
 
+- GD:
+  . Fixed bug #72337 (invalid dimensions can lead to crash) (Pierre)
+
 - Intl:
   . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
 
@@ -1005,7 +1008,8 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #53156 (imagerectangle problem with point ordering). (cmb)
-  . Fixed bug #66387 (Stack overflow with imagefilltoborder). (cmb)
+  . Fixed bug #66387 (Stack overflow with imagefilltoborder). (CVE-2015-8874)
+    (cmb)
   . Fixed bug #70102 (imagecreatefromwebm() shifts colors). (cmb)
   . Fixed bug #66590 (imagewebp() doesn't pad to even length). (cmb)
   . Fixed bug #66882 (imagerotate by -90 degrees truncates image by 1px). (cmb)
