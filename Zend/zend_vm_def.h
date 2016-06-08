@@ -7641,6 +7641,7 @@ ZEND_VM_HANDLER(168, ZEND_BIND_GLOBAL, CV, CONST)
 	zval *value;
 	zval *variable_ptr;
 	uint32_t idx;
+	zend_reference *ref;
 
 	ZEND_VM_REPEATABLE_OPCODE
 
@@ -7683,29 +7684,24 @@ ZEND_VM_C_LABEL(check_indirect):
 		}
 	}
 
-	do {
-		zend_reference *ref;
+	if (UNEXPECTED(!Z_ISREF_P(value))) {
+		ref = (zend_reference*)emalloc(sizeof(zend_reference));
+		GC_REFCOUNT(ref) = 2;
+		GC_TYPE_INFO(ref) = IS_REFERENCE;
+		ZVAL_COPY_VALUE(&ref->val, value);
+		Z_REF_P(value) = ref;
+		Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
+	} else {
+		ref = Z_REF_P(value);
+		GC_REFCOUNT(ref)++;
+	}
 
-		if (UNEXPECTED(!Z_ISREF_P(value))) {
-			ref = (zend_reference*)emalloc(sizeof(zend_reference));
-			GC_REFCOUNT(ref) = 2;
-			GC_TYPE_INFO(ref) = IS_REFERENCE;
-			ZVAL_COPY_VALUE(&ref->val, value);
-			Z_REF_P(value) = ref;
-			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
-		} else {
-			ref = Z_REF_P(value);
-			GC_REFCOUNT(ref)++;
-		}
+	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
-		variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-		
-		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-			uint32_t refcnt = Z_DELREF_P(variable_ptr);
+	if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+		uint32_t refcnt = Z_DELREF_P(variable_ptr);
 
-			if (UNEXPECTED(variable_ptr == value)) {
-				break;
-			}
+		if (EXPECTED(variable_ptr != value)) {
 			if (refcnt == 0) {
 				SAVE_OPLINE();
 				zval_dtor_func(Z_COUNTED_P(variable_ptr));
@@ -7717,8 +7713,8 @@ ZEND_VM_C_LABEL(check_indirect):
 				GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
 			}
 		}
-		ZVAL_REF(variable_ptr, ref);
-	} while (0);
+	}
+	ZVAL_REF(variable_ptr, ref);
 
 	ZEND_VM_REPEAT_OPCODE(ZEND_BIND_GLOBAL);
 	ZEND_VM_NEXT_OPCODE();
