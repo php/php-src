@@ -2283,7 +2283,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		ZEND_VM_C_GOTO(exit_assign_obj);
 	}
 
-	if (OP_DATA_TYPE == IS_TMP_VAR || OP_DATA_TYPE == IS_VAR) {
+	if (OP_DATA_TYPE == IS_CV || OP_DATA_TYPE == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 

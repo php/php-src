@@ -18513,7 +18513,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -18674,7 +18674,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -18835,7 +18835,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -18996,7 +18996,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -23361,7 +23361,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -23522,7 +23522,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -23683,7 +23683,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -23844,7 +23844,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -26376,7 +26376,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -26537,7 +26537,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -26698,7 +26698,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -26859,7 +26859,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29023,7 +29023,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29184,7 +29184,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29345,7 +29345,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29506,7 +29506,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -32628,7 +32628,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -32789,7 +32789,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -32950,7 +32950,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -33111,7 +33111,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -35126,7 +35126,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -35287,7 +35287,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -35448,7 +35448,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -35609,7 +35609,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -40439,7 +40439,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -40600,7 +40600,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -40761,7 +40761,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -40922,7 +40922,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -47330,7 +47330,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -47491,7 +47491,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -47652,7 +47652,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -47813,7 +47813,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -51419,7 +51419,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
+	if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -51580,7 +51580,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
+	if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -51741,7 +51741,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
+	if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -51902,7 +51902,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
+	if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
