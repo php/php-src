@@ -18472,7 +18472,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -18519,12 +18518,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -18533,11 +18527,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -18643,7 +18633,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -18690,12 +18679,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -18704,11 +18688,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -18814,7 +18794,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -18861,12 +18840,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -18875,11 +18849,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -18985,7 +18955,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -19032,12 +19001,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -19046,11 +19010,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -19107,21 +19067,12 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -19207,21 +19158,13 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -19307,21 +19250,13 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -19407,21 +19342,12 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -21122,21 +21048,12 @@ try_assign_dim_array:
 			dim = NULL;
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -21222,21 +21139,13 @@ try_assign_dim_array:
 			dim = NULL;
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -21322,21 +21231,13 @@ try_assign_dim_array:
 			dim = NULL;
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -21422,21 +21323,12 @@ try_assign_dim_array:
 			dim = NULL;
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -23438,7 +23330,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -23485,12 +23376,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -23499,11 +23385,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -23609,7 +23491,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -23656,12 +23537,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -23670,11 +23546,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -23780,7 +23652,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -23827,12 +23698,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -23841,11 +23707,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -23951,7 +23813,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -23998,12 +23859,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -24012,11 +23868,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -24073,21 +23925,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -24173,21 +24016,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -24273,21 +24108,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -24373,21 +24200,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -26532,7 +26350,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -26579,12 +26396,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -26593,11 +26405,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26703,7 +26511,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -26750,12 +26557,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -26764,11 +26566,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26874,7 +26672,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -26921,12 +26718,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -26935,11 +26727,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -27045,7 +26833,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -27092,12 +26879,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -27106,11 +26888,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -27167,21 +26945,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -27267,21 +27036,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -27367,21 +27128,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -27467,21 +27220,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -29258,7 +29002,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -29305,12 +29048,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29319,11 +29057,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -29429,7 +29163,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -29476,12 +29209,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29490,11 +29218,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -29600,7 +29324,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -29647,12 +29370,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29661,11 +29379,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -29771,7 +29485,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -29818,12 +29531,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -29832,11 +29540,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -32913,7 +32617,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -32960,12 +32663,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -32974,11 +32672,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -33084,7 +32778,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -33131,12 +32824,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -33145,11 +32833,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -33255,7 +32939,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -33302,12 +32985,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -33316,11 +32994,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -33426,7 +33100,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -33473,12 +33146,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -33487,11 +33155,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -35456,7 +35120,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -35503,12 +35166,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -35517,11 +35175,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -35627,7 +35281,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -35674,12 +35327,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -35688,11 +35336,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -35798,7 +35442,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -35845,12 +35488,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -35859,11 +35497,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -35969,7 +35603,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -36016,12 +35649,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -36030,11 +35658,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -40814,7 +40438,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -40861,12 +40484,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -40875,11 +40493,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -40985,7 +40599,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -41032,12 +40645,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -41046,11 +40654,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -41156,7 +40760,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -41203,12 +40806,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -41217,11 +40815,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -41327,7 +40921,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -41374,12 +40967,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -41388,11 +40976,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -41449,21 +41033,12 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -41549,21 +41124,13 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -41649,21 +41216,13 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -41749,21 +41308,12 @@ try_assign_dim_array:
 			dim = EX_CONSTANT(opline->op2);
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -44645,21 +44195,12 @@ try_assign_dim_array:
 			dim = NULL;
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -44745,21 +44286,13 @@ try_assign_dim_array:
 			dim = NULL;
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -44845,21 +44378,13 @@ try_assign_dim_array:
 			dim = NULL;
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -44945,21 +44470,12 @@ try_assign_dim_array:
 			dim = NULL;
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -47827,7 +47343,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -47874,12 +47389,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -47888,11 +47398,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -47998,7 +47504,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -48045,12 +47550,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -48059,11 +47559,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -48169,7 +47665,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -48216,12 +47711,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -48230,11 +47720,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 
 
@@ -48340,7 +47826,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -48387,12 +47872,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -48401,11 +47881,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 
 
@@ -48462,21 +47938,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -48562,21 +48029,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -48662,21 +48121,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -48762,21 +48213,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -51995,7 +51437,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -52042,12 +51483,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CONST == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CONST != IS_TMP_VAR) {
+	if (IS_CONST == IS_TMP_VAR || IS_CONST == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -52056,11 +51492,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CONST == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -52166,7 +51598,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -52213,12 +51644,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_TMP_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+	if (IS_TMP_VAR == IS_TMP_VAR || IS_TMP_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -52227,11 +51653,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_TMP_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -52337,7 +51759,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -52384,12 +51805,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_VAR == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_VAR != IS_TMP_VAR) {
+	if (IS_VAR == IS_TMP_VAR || IS_VAR == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -52398,11 +51814,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_VAR == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		zval_ptr_dtor_nogc(free_op_data);
-	}
+	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -52508,7 +51920,6 @@ fast_assign_obj:
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -52555,12 +51966,7 @@ fast_assign_obj:
 		goto exit_assign_obj;
 	}
 
-	/* separate our value if necessary */
-	if (IS_CV == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (IS_CV != IS_TMP_VAR) {
+	if (IS_CV == IS_TMP_VAR || IS_CV == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -52569,11 +51975,7 @@ fast_assign_obj:
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (IS_CV == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
 
-	}
 exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -52630,21 +52032,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = EX_CONSTANT((opline+1)->op1);
 
-			if (IS_CONST == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CONST == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -52730,21 +52123,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = _get_zval_ptr_tmp((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_TMP_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_TMP_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -52830,21 +52215,13 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
 
-			if (IS_VAR == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_VAR == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				zval_ptr_dtor_nogc(free_op_data);
-			}
+			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
@@ -52930,21 +52307,12 @@ try_assign_dim_array:
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
-			if (IS_CV == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (IS_CV == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-
-			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");

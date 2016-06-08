@@ -2242,7 +2242,6 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
-				/* separate our value if necessary */
 				if (OP_DATA_TYPE == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 						Z_ADDREF_P(value);
@@ -2289,12 +2288,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		ZEND_VM_C_GOTO(exit_assign_obj);
 	}
 
-	/* separate our value if necessary */
-	if (OP_DATA_TYPE == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
-			Z_ADDREF_P(value);
-		}
-	} else if (OP_DATA_TYPE != IS_TMP_VAR) {
+	if (OP_DATA_TYPE == IS_TMP_VAR || OP_DATA_TYPE == IS_VAR) {
 		ZVAL_DEREF(value);
 	}
 
@@ -2303,11 +2297,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	if (OP_DATA_TYPE == IS_CONST) {
-		zval_ptr_dtor_nogc(value);
-	} else {
-		FREE_OP_DATA();
-	}
+	FREE_OP_DATA();
 ZEND_VM_C_LABEL(exit_assign_obj):
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
@@ -2364,21 +2354,13 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
-			if (OP_DATA_TYPE == IS_CONST && UNEXPECTED(Z_REFCOUNTED_P(value))) {
-				Z_ADDREF_P(value);
-			}
-
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
 			if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 
-			if (OP_DATA_TYPE == IS_CONST) {
-				zval_ptr_dtor_nogc(value);
-			} else {
-				FREE_OP_DATA();
-			}
+			FREE_OP_DATA();
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (OP2_TYPE == IS_UNUSED) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
