@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #74159 (Writing a large buffer to a non-blocking encrypted stream
     fails with "bad write retry"). (trowski)
 
+- PDO MySQL:
+  . Fixed bug #71003 (Expose MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT to PDO
+    interface). (Thomas Orozco)
+
 16 Mar 2017 PHP 7.0.17
 
 - Core:
