@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 5.6.23
+09 Jun 2016, PHP 5.6.23RC1
 
 - GD:
   . Fixed bug #72337 (invalid dimensions can lead to crash) (Pierre)
