@@ -1089,6 +1089,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 
 		if (class_type->parent) {
 			if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
+				class_type->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				return FAILURE;
 			}
 		}
@@ -1146,7 +1147,23 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 						}
 						ZVAL_DEREF(val);
 						if (Z_CONSTANT_P(val)) {
-							if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
+							if (prop_info->type) {
+								zval tmp, tmp2, *v;
+
+								ZVAL_COPY(&tmp, val);
+								if (UNEXPECTED(zval_update_constant_ex(&tmp, ce) != SUCCESS)) {
+									return FAILURE;
+								}
+								v = zend_verify_property_type(prop_info, &tmp, &tmp2, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
+								if (UNEXPECTED(!v)) {
+									zend_verify_property_type_error(prop_info, prop_info->name, &tmp);
+									class_type->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+									zval_ptr_dtor(&tmp);
+									return FAILURE;
+								}
+								zval_ptr_dtor(val);
+								ZVAL_COPY_VALUE(val, v);
+							} else if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
 								return FAILURE;
 							}
 						}
@@ -1195,7 +1212,19 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 			    property_info &&
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 				zval *slot = OBJ_PROP(object, property_info->offset);
-				ZVAL_COPY_VALUE(slot, prop);
+
+				if (UNEXPECTED(property_info->type)) {
+					zval tmp, *val;
+
+					val = zend_verify_property_type(property_info, prop, &tmp, 0);
+					if (UNEXPECTED(!val)) {
+						zend_verify_property_type_error(property_info, key, prop);
+						continue;
+					}
+					ZVAL_COPY_VALUE(slot, val);
+				} else {
+					ZVAL_COPY_VALUE(slot, prop);
+				}
 				ZVAL_INDIRECT(prop, slot);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -3600,9 +3629,21 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_uchar optional_type, zend_string *optional_type_name, zend_bool allow_null) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
+
+	if (optional_type) {
+		if (access_type & ZEND_ACC_STATIC) {
+			zend_error(ce->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR,
+				"Typed property %s::$%s must not be static",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(name));
+			return FAILURE;
+		}
+
+		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+	}
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		property_info = pemalloc(sizeof(zend_property_info), 1);
@@ -3670,9 +3711,21 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
 	property_info->ce = ce;
+	property_info->type = optional_type;
+	property_info->allow_null = allow_null;
+	property_info->type_name = optional_type_name ?
+		zend_new_interned_string(optional_type_name) : NULL;
+	property_info->type_ce = NULL;
+
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
 
 	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
+{
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, 0, NULL, 0);
 }
 /* }}} */
 

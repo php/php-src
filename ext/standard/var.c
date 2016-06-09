@@ -48,7 +48,7 @@ static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key,
 }
 /* }}} */
 
-static void php_object_property_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
+static void php_object_property_dump(zend_property_info *prop_info, zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	const char *prop_name, *class_name;
 
@@ -71,7 +71,22 @@ static void php_object_property_dump(zval *zv, zend_ulong index, zend_string *ke
 		}
 		ZEND_PUTS("]=>\n");
 	}
-	php_var_dump(zv, level + 2);
+
+	if (Z_TYPE_P(zv) == IS_UNDEF) {
+		if (prop_info->type) {
+			php_printf("%*cuninitialized(%s%s)\n",
+				level + 1, ' ',
+				prop_info->allow_null ? "?" : "",
+				(prop_info->type == IS_OBJECT) ?
+					ZSTR_VAL(prop_info->type_name) :
+					zend_get_type_by_const(prop_info->type));
+		} else {
+			php_printf("%*cuninitialized\n",
+				level + 1, ' ');
+		}
+	} else {
+		php_var_dump(zv, level + 2);
+	}
 }
 /* }}} */
 
@@ -155,8 +170,20 @@ again:
 				zend_string *key;
 				zval *val;
 
-				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
-					php_object_property_dump(val, num, key, level);
+				ZEND_HASH_FOREACH_KEY_VAL(myht, num, key, val) {
+					zend_property_info *prop_info = NULL;
+
+					if (Z_TYPE_P(val) == IS_INDIRECT) {
+						val = Z_INDIRECT_P(val);
+					}
+
+					if (key) {
+						prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+					}
+
+					if (!Z_ISUNDEF_P(val) || prop_info) {
+						php_object_property_dump(prop_info, val, num, key, level);
+					}
 				} ZEND_HASH_FOREACH_END();
 				if (is_temp) {
 					zend_hash_destroy(myht);
@@ -220,7 +247,7 @@ static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key
 }
 /* }}} */
 
-static void zval_object_property_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
+static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	const char *prop_name, *class_name;
 
@@ -241,7 +268,21 @@ static void zval_object_property_dump(zval *zv, zend_ulong index, zend_string *k
 		}
 		ZEND_PUTS("]=>\n");
 	}
-	php_debug_zval_dump(zv, level + 2);
+	if (prop_info && Z_TYPE_P(zv) == IS_UNDEF) {
+		if (prop_info->type) {
+			php_printf("%*cuninitialized(%s%s)\n",
+				level + 1, ' ',
+				prop_info->allow_null ? "?" : "",
+				(prop_info->type == IS_OBJECT) ?
+					ZSTR_VAL(prop_info->type_name) :
+					zend_get_type_by_const(prop_info->type));
+		} else {
+			php_printf("%*cuninitialized\n",
+				level + 1, ' ');
+		}
+	} else {
+		php_debug_zval_dump(zv, level + 2);
+	}
 }
 /* }}} */
 
@@ -320,8 +361,20 @@ again:
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
 		zend_string_release(class_name);
 		if (myht) {
-			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
-				zval_object_property_dump(val, index, key, level);
+			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
+				zend_property_info *prop_info = NULL;
+
+				if (Z_TYPE_P(val) == IS_INDIRECT) {
+					val = Z_INDIRECT_P(val);
+				}
+
+				if (key) {
+					prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(struc), key, NULL);
+				}
+
+				if (!Z_ISUNDEF_P(val) || prop_info) {
+					zval_object_property_dump(prop_info, val, index, key, level);
+				}
 			} ZEND_HASH_FOREACH_END();
 			myht->u.v.nApplyCount--;
 			if (is_temp) {

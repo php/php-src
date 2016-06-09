@@ -132,7 +132,7 @@ typedef union _zend_parser_stack_elem {
 void zend_compile_top_stmt(zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
-void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
+void zend_compile_var(znode *node, zend_ast *ast, uint32_t type, int by_ref);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
@@ -298,6 +298,10 @@ typedef struct _zend_property_info {
 	zend_string *name;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
+	zend_uchar type;
+	zend_bool allow_null;
+	zend_string *type_name;
+	zend_class_entry *type_ce;
 } zend_property_info;
 
 #define OBJ_PROP(obj, offset) \
@@ -890,6 +894,7 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_ISEMPTY			    0x01000000
 #define ZEND_ISSET_ISEMPTY_MASK	    (ZEND_ISSET | ZEND_ISEMPTY)
 #define ZEND_QUICK_SET			    0x00800000
+#define ZEND_FETCH_REF			    0x00400000
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 

@@ -288,6 +288,9 @@ static void zend_persist_property_info_calc(zval *zv)
 		zend_shared_alloc_register_xlat_entry(prop, prop);
 		ADD_ARENA_SIZE(sizeof(zend_property_info));
 		ADD_INTERNED_STRING(prop->name, 0);
+		if (prop->type_name) {
+			ADD_INTERNED_STRING(prop->type_name, 0);
+		}
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 			ADD_STRING(prop->doc_comment);
 		}

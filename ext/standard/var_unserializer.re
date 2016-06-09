@@ -162,6 +162,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
+
+	if ((*var_hashx)->refs) {
+		zend_array_destroy((*var_hashx)->refs);
+	}
 }
 
 /* }}} */
@@ -305,11 +309,12 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes
 
-static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
+static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_class_entry *ce)
 {
 	while (elements-- > 0) {
-		zval key, *data, d, *old_data;
+		zval key, *data, d, *old_data, tmp;
 		zend_ulong idx;
+		zend_property_info *info = NULL;
 
 		ZVAL_UNDEF(&key);
 
@@ -321,7 +326,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 		data = NULL;
 		ZVAL_UNDEF(&d);
 
-		if (!objprops) {
+		if (!ce) {
 			if (Z_TYPE(key) == IS_LONG) {
 				idx = Z_LVAL(key);
 numeric_key:
@@ -353,9 +358,40 @@ string_key:
 				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
 						old_data = Z_INDIRECT_P(old_data);
+						if (Z_STRVAL(key)[0] == 0) {
+							zend_string *member, *class;
+							const char *class_name, *prop_name;
+							size_t prop_name_len;
+							zend_unmangle_property_name_ex(Z_STR(key), &class_name, &prop_name, &prop_name_len);
+							member = zend_string_init(prop_name, prop_name_len, 0);
+							class = zend_string_init(class_name, strlen(class_name), 0);
+							zend_str_tolower(ZSTR_VAL(class), ZSTR_LEN(class));
+							EG(fake_scope) = class_name[0] == '*' ? ce : zend_hash_find_ptr(EG(class_table), class);
+							info = zend_get_property_info(EG(fake_scope), member, 1);
+							EG(fake_scope) = NULL;
+							zend_string_release(member);
+							zend_string_release(class);
+						} else {
+							info = zend_get_property_info(ce, Z_STR(key), 1);
+						}
+						var_push_dtor(var_hash, old_data);
+						old_data = zend_hash_update_ind(ht, Z_STR(key), &d);
+
+						if (EXPECTED(!info->type)) {
+							info = NULL;
+							data = old_data;
+						} else {
+							/* little hack to disallow references */
+							if (!(*var_hash)->refs) {
+								(*var_hash)->refs = emalloc(sizeof(HashTable));
+								zend_hash_init((*var_hash)->refs, 8, NULL, ZVAL_PTR_DTOR, 0);
+							}
+							data = zend_hash_next_index_insert((*var_hash)->refs, &d);
+						}
+					} else {
+						var_push_dtor(var_hash, old_data);
+						data = zend_hash_update_ind(ht, Z_STR(key), &d);
 					}
-					var_push_dtor(var_hash, old_data);
-					data = zend_hash_update_ind(ht, Z_STR(key), &d);
 				} else {
 					data = zend_hash_add_new(ht, Z_STR(key), &d);
 				}
@@ -372,6 +408,15 @@ string_key:
 		if (!php_var_unserialize_ex(data, p, max, var_hash, classes)) {
 			zval_dtor(&key);
 			return 0;
+		}
+
+		if (UNEXPECTED(info)) {
+			data = zend_verify_property_type(info, data, &tmp, 1);
+			if (UNEXPECTED(!data)) {
+				zval_dtor(&key);
+				return 0;
+			}
+			ZVAL_COPY(old_data, data);
 		}
 
 		if (UNEXPECTED(Z_ISUNDEF_P(data))) {
@@ -466,7 +511,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 
 	ht = Z_OBJPROP_P(rval);
 	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJCE_P(rval))) {
 		return 0;
 	}
 

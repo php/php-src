@@ -212,7 +212,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							opline->op2_type,
 							opline->op2,
 							opline->op1.constant,
-							LITERAL_STATIC_PROPERTY, 2, 1,
+							LITERAL_STATIC_PROPERTY, 3, 1,
 							op_array);
 					}
 					break;
@@ -248,7 +248,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							opline->op1_type,
 							opline->op1,
 							opline->op2.constant,
-							LITERAL_PROPERTY, 2, 1,
+							LITERAL_PROPERTY, 3, 1,
 							op_array);
 					}
 					break;
@@ -271,7 +271,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 								opline->op1_type,
 								opline->op1,
 								opline->op2.constant,
-								LITERAL_PROPERTY, 2, 1,
+								LITERAL_PROPERTY, 3, 1,
 								op_array);
 						} else {
 							LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1, 0, 1);

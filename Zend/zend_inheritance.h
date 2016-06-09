@@ -35,6 +35,8 @@ void zend_do_early_binding(void);
 
 void zend_check_deprecated_constructor(const zend_class_entry *ce);
 
+zend_string* zend_resolve_property_type(zend_string *name, zend_class_entry *scope);
+
 END_EXTERN_C()
 
 #endif

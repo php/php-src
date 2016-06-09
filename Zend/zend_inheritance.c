@@ -41,6 +41,11 @@ static zend_property_info *zend_duplicate_property_info(zend_property_info *prop
 	if (new_property_info->doc_comment) {
 		zend_string_addref(new_property_info->doc_comment);
 	}
+	if (new_property_info->type_name) {
+		zend_string_addref(new_property_info->type_name);
+		new_property_info->type_ce = NULL;
+	}
+
 	return new_property_info;
 }
 /* }}} */
@@ -50,6 +55,11 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
 	zend_string_addref(new_property_info->name);
+	if (new_property_info->type_name) {
+		zend_string_addref(new_property_info->type_name);
+		new_property_info->type_ce = NULL;
+	}
+
 	return new_property_info;
 }
 /* }}} */
@@ -640,6 +650,29 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 }
 /* }}} */
 
+zend_string* zend_resolve_property_type(zend_string *name, zend_class_entry *scope) /* {{{ */
+{
+	zend_string *type = name;
+
+	if (!type) {
+		return NULL;
+	}
+
+	if (zend_string_equals_literal_ci(type, "parent")) {
+		if (scope && scope->parent) {
+			return scope->parent->name;
+		}
+	}
+
+	if (zend_string_equals_literal_ci(type, "self")) {
+		if (scope) {
+			return scope->name;
+		}
+	}
+
+	return type;
+} /* }}} */
+
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
 	zval *child = zend_hash_find(&ce->properties_info, key);
@@ -672,6 +705,38 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 				child_info->offset = parent_info->offset;
 			}
+		}
+
+		if (UNEXPECTED(parent_info->type && !(parent_info->flags & ZEND_ACC_PRIVATE))) {
+			if (parent_info->type == IS_OBJECT) {
+				if (child_info->type != IS_OBJECT ||
+				    child_info->allow_null != parent_info->allow_null ||
+					!zend_string_equals_ci(zend_resolve_property_type(parent_info->type_name, parent_info->ce),
+										   zend_resolve_property_type(child_info->type_name, child_info->ce))) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must be %s%s (as in class %s)",
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(key),
+						parent_info->allow_null ? "?" : "",
+						ZSTR_VAL(zend_resolve_property_type(parent_info->type_name, parent_info->ce)),
+						ZSTR_VAL(ce->parent->name));
+				}
+			} else if (parent_info->type != child_info->type ||
+			           parent_info->allow_null != child_info->allow_null) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must be %s%s (as in class %s)",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key),
+					parent_info->allow_null ? "?" : "",
+					zend_get_type_by_const(parent_info->type),
+					ZSTR_VAL(ce->parent->name));
+			}
+		} else if (UNEXPECTED(child_info->type && !parent_info->type)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+					"Type of %s::$%s must not be defined (as in class %s)",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key),
+					ZSTR_VAL(ce->parent->name));
 		}
 	} else {
 		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
@@ -1590,9 +1655,11 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			if (Z_REFCOUNTED_P(prop_value)) Z_ADDREF_P(prop_value);
 
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
-			zend_declare_property_ex(ce, prop_name,
-									 prop_value, flags,
-								     doc_comment);
+			if (property_info->type) {
+				zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type, property_info->type_name, property_info->allow_null);
+			} else {
+				zend_declare_property_ex(ce, prop_name, prop_value, flags, doc_comment);
+			}
 			zend_string_release(prop_name);
 		} ZEND_HASH_FOREACH_END();
 	}
