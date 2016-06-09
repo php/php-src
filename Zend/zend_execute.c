@@ -1950,11 +1950,6 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 {
     if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
-			if (container_op_type == IS_VAR && UNEXPECTED(Z_ISERROR_P(container))) {
-				ZVAL_ERROR(result);
-				return;
-			}
-
 			if (Z_ISREF_P(container)) {
 				container = Z_REFVAL_P(container);
 				if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -1969,7 +1964,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				zval_ptr_dtor_nogc(container);
 				object_init(container);
 			} else {
-				zend_error(E_WARNING, "Attempt to modify property of non-object");
+				if (container_op_type != IS_VAR || EXPECTED(!Z_ISERROR_P(container))) {
+					zend_error(E_WARNING, "Attempt to modify property of non-object");
+				}
 				ZVAL_ERROR(result);
 				return;
 			}
@@ -2005,6 +2002,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		zval *ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, cache_slot);
 		if (NULL == ptr) {
 			if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
+use_read_property:
 				ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result);
 				if (ptr != result) {
 					ZVAL_INDIRECT(result, ptr);
@@ -2019,12 +2017,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			ZVAL_INDIRECT(result, ptr);
 		}
 	} else if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
-		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result);
-		if (ptr != result) {
-			ZVAL_INDIRECT(result, ptr);
-		} else if (UNEXPECTED(Z_ISREF_P(ptr) && Z_REFCOUNT_P(ptr) == 1)) {
-			ZVAL_UNREF(ptr);
-		}
+		goto use_read_property; 
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
 		ZVAL_ERROR(result);
