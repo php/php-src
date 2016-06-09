@@ -276,6 +276,7 @@ def_tmp:
 	fd = php_do_open_temporary_file(dir, pfx, opened_path_p);
 	if (fd == -1) {
 		/* Use default temporary directory. */
+		php_error_docref(NULL, E_NOTICE, "file created in the system's temporary directory");
 		goto def_tmp;
 	}
 	return fd;
