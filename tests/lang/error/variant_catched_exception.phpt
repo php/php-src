@@ -15,5 +15,5 @@ catch (Exception $e) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 NULL
