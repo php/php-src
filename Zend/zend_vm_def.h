@@ -839,11 +839,10 @@ ZEND_VM_C_LABEL(assign_dim_op_convert_to_array):
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
+			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+				ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
 			} else {
-				if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-					ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
-				}
-				if (UNEXPECTED(OP1_TYPE != IS_VAR || !Z_ISERROR_P(container))) {
+				if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				}
 ZEND_VM_C_LABEL(assign_dim_op_ret_null):
@@ -2159,13 +2158,6 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		do {
-			if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(object))) {
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_NULL(EX_VAR(opline->result.var));
-				}
-				FREE_OP_DATA();
-				ZEND_VM_C_GOTO(exit_assign_obj);
-			}
 			if (Z_ISREF_P(object)) {
 				object = Z_REFVAL_P(object);
 				if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -2192,7 +2184,9 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 				}
 				Z_DELREF_P(object);
 			} else {
-				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
+					zend_error(E_WARNING, "Attempt to assign property of non-object");
+				}
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
@@ -2373,7 +2367,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
 			ZEND_VM_C_GOTO(try_assign_dim_array);
 		} else {
-			if (OP1_TYPE != IS_VAR || UNEXPECTED(!Z_ISERROR_P(object_ptr))) {
+			if (OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
 				zend_error(E_WARNING, "Cannot use a scalar value as an array");
 			}
 			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
