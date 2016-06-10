@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0alpha2
 
+- Core:
+  . Fixed bug #72373 (TypeError after Generator function w/declared return type
+    finishes). (Nikita)
 
 
 09 Jun 2016, PHP 7.1.0alpha1

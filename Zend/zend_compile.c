@@ -2329,7 +2329,8 @@ void zend_emit_final_return(int return_one) /* {{{ */
 	zend_op *ret;
 	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
-	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE
+			&& !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR)) {
 		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1, 1);
 	}
 
