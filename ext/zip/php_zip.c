@@ -1602,6 +1602,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		size_t real_len = strlen(remove_path);
 		if ((real_len > 1) && ((remove_path[real_len - 1] == '/') || (remove_path[real_len - 1] == '\\'))) {
 			remove_path[real_len - 1] = '\0';
+			remove_path_len -= 1;
 		}
 	}
 
@@ -1627,8 +1628,8 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					file_stripped = ZSTR_VAL(basename);
 					file_stripped_len = ZSTR_LEN(basename);
 				} else if (remove_path && strstr(Z_STRVAL_P(zval_file), remove_path) != NULL) {
-					file_stripped = Z_STRVAL_P(zval_file) + remove_path_len + 1;
-					file_stripped_len = Z_STRLEN_P(zval_file) - remove_path_len - 1;
+					file_stripped = Z_STRVAL_P(zval_file) + remove_path_len;
+					file_stripped_len = Z_STRLEN_P(zval_file) - remove_path_len;
 				} else {
 					file_stripped = Z_STRVAL_P(zval_file);
 					file_stripped_len = Z_STRLEN_P(zval_file);

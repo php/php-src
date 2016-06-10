@@ -68,4 +68,7 @@ PHP                                                                        NEWS
   . Changed functions to accept/return XMKWriter objects instead of resources.
     (cmb)
 
+- Zip:
+  . Fixed bug #72374 (remove_path strips first char of filename). (tyage)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
