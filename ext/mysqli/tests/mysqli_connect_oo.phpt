@@ -147,7 +147,7 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli::mysqli(): (%s/%d): Access denied for user '%sunknown%s'@'%s' (using password: %s) in %s on line %d
+Warning: mysqli::__construct(): (%s/%d): Access denied for user '%sunknown%s'@'%s' (using password: %s) in %s on line %d
 ... and now Exceptions
 Access denied for user '%s'@'%s' (using password: %s)
 done!

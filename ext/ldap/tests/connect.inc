@@ -22,6 +22,20 @@ function ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version) 
 }
 
 function insert_dummy_data($link, $base) {
+	// Create root if not there
+	$testBase = ldap_read($link, $base, '(objectClass=*)', array('objectClass'));
+	if (ldap_count_entries($link, $testBase) < 1) {
+		ldap_add(
+			$link, "$base", array(
+				"objectClass"   => array(
+					"top",
+					"organization",
+					"dcObject"
+				),
+				"o" => "php ldap tests"
+			)
+		);
+	}
 	ldap_add($link, "o=test,$base", array(
 	        "objectClass"   => array(
             "top",

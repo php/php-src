@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -202,11 +202,10 @@ struct mb_overload_def {
 	char *save_func;
 };
 
-#ifdef ZTS
-#define MBSTRG(v) ZEND_TSRMG(mbstring_globals_id, zend_mbstring_globals *, v)
-ZEND_TSRMLS_CACHE_EXTERN();
-#else
-#define MBSTRG(v) (mbstring_globals.v)
+#define MBSTRG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mbstring, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_MBSTRING)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #else	/* HAVE_MBSTRING */

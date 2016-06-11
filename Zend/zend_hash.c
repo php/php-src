@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -30,14 +31,16 @@
 # define HT_ASSERT(c)
 #endif
 
+#define HT_POISONED_PTR ((HashTable *) (intptr_t) -1)
+
 #if ZEND_DEBUG
 /*
-#define HASH_MASK_CONSISTENCY	0x60
+#define HASH_MASK_CONSISTENCY	0xc0
 */
 #define HT_OK					0x00
-#define HT_IS_DESTROYING		0x20
-#define HT_DESTROYED			0x40
-#define HT_CLEANING				0x60
+#define HT_IS_DESTROYING		0x40
+#define HT_DESTROYED			0x80
+#define HT_CLEANING				0xc0
 
 static void _zend_is_inconsistent(const HashTable *ht, const char *file, int line)
 {
@@ -89,7 +92,7 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 
 static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht);
 
-static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
+static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 {
 #if defined(ZEND_WIN32)
 	unsigned long index;
@@ -97,7 +100,11 @@ static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
 
 	/* Use big enough power of 2 */
 	/* size should be between HT_MIN_SIZE and HT_MAX_SIZE */
-	nSize = (nSize <= HT_MIN_SIZE ? HT_MIN_SIZE : (nSize >= HT_MAX_SIZE ? HT_MAX_SIZE : nSize));
+	if (nSize < HT_MIN_SIZE) {
+		nSize = HT_MIN_SIZE;
+	} else if (UNEXPECTED(nSize >= HT_MAX_SIZE)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
+	}
 
 #if defined(ZEND_WIN32)
 	if (BitScanReverse(&index, nSize - 1)) {
@@ -107,7 +114,7 @@ static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
 		   rather than using an undefined bis scan result. */
 		return nSize;
 	}
-#elif defined(__GNUC__) || __has_builtin(__builtin_clz)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_clz))  && defined(PHP_HAVE_BUILTIN_CLZ)
 	return 0x2 << (__builtin_clz(nSize - 1) ^ 0x1f);
 #else
 	nSize -= 1;
@@ -120,7 +127,7 @@ static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
 #endif
 }
 
-static void zend_always_inline zend_hash_real_init_ex(HashTable *ht, int packed)
+static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, int packed)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	ZEND_ASSERT(!((ht)->u.flags & HASH_FLAG_INITIALIZED));
@@ -132,11 +139,24 @@ static void zend_always_inline zend_hash_real_init_ex(HashTable *ht, int packed)
 		(ht)->nTableMask = -(ht)->nTableSize;
 		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
 		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
-		HT_HASH_RESET(ht);
+		if (EXPECTED(ht->nTableMask == (uint32_t)-8)) {
+			Bucket *arData = ht->arData;
+
+			HT_HASH_EX(arData, -8) = -1;
+			HT_HASH_EX(arData, -7) = -1;
+			HT_HASH_EX(arData, -6) = -1;
+			HT_HASH_EX(arData, -5) = -1;
+			HT_HASH_EX(arData, -4) = -1;
+			HT_HASH_EX(arData, -3) = -1;
+			HT_HASH_EX(arData, -2) = -1;
+			HT_HASH_EX(arData, -1) = -1;
+		} else {
+			HT_HASH_RESET(ht);
+		}
 	}
 }
 
-static void zend_always_inline zend_hash_check_init(HashTable *ht, int packed)
+static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	if (UNEXPECTED(!((ht)->u.flags & HASH_FLAG_INITIALIZED))) {
@@ -187,14 +207,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed)
 
 ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 {
-	void *old_data = HT_GET_DATA_ADDR(ht);
+	void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 	Bucket *old_buckets = ht->arData;
 
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->u.flags &= ~HASH_FLAG_PACKED;
+	new_data = pemalloc(HT_SIZE_EX(ht->nTableSize, -ht->nTableSize), (ht)->u.flags & HASH_FLAG_PERSISTENT);
 	ht->nTableMask = -ht->nTableSize;
-	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+	HT_SET_DATA_ADDR(ht, new_data);
 	memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 	pefree(old_data, (ht)->u.flags & HASH_FLAG_PERSISTENT);
 	zend_hash_rehash(ht);
@@ -203,14 +224,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 
 ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 {
-	void *old_data = HT_GET_DATA_ADDR(ht);
+	void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 	Bucket *old_buckets = ht->arData;
 
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	HANDLE_BLOCK_INTERRUPTIONS();
+	new_data = pemalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK), (ht)->u.flags & HASH_FLAG_PERSISTENT);
 	ht->u.flags |= HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 	ht->nTableMask = HT_MIN_MASK;
-	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+	HT_SET_DATA_ADDR(ht, new_data);
 	HT_HASH_RESET_PACKED(ht);
 	memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 	pefree(old_data, (ht)->u.flags & HASH_FLAG_PERSISTENT);
@@ -246,13 +268,14 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend
 		} else {
 			ZEND_ASSERT(!(ht->u.flags & HASH_FLAG_PACKED));
 			if (nSize > ht->nTableSize) {
-				void *old_data = HT_GET_DATA_ADDR(ht);
+				void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 				Bucket *old_buckets = ht->arData;
-
+				nSize = zend_hash_check_size(nSize);
 				HANDLE_BLOCK_INTERRUPTIONS();
-				ht->nTableSize = zend_hash_check_size(nSize);
+				new_data = pemalloc(HT_SIZE_EX(nSize, -nSize), ht->u.flags & HASH_FLAG_PERSISTENT);
+				ht->nTableSize = nSize;
 				ht->nTableMask = -ht->nTableSize;
-				HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), ht->u.flags & HASH_FLAG_PERSISTENT));
+				HT_SET_DATA_ADDR(ht, new_data);
 				memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 				pefree(old_data, ht->u.flags & HASH_FLAG_PERSISTENT);
 				zend_hash_rehash(ht);
@@ -261,6 +284,40 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend
 		}
 	}
 }
+
+static uint32_t zend_array_recalc_elements(HashTable *ht)
+{
+       zval *val;
+       uint32_t num = ht->nNumOfElements;
+
+	   ZEND_HASH_FOREACH_VAL(ht, val) {
+		   if (Z_TYPE_P(val) == IS_UNDEF) continue;
+		   if (Z_TYPE_P(val) == IS_INDIRECT) {
+			   if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
+				   num--;
+			   }
+		   }
+       } ZEND_HASH_FOREACH_END();
+       return num;
+}
+/* }}} */
+
+ZEND_API uint32_t zend_array_count(HashTable *ht)
+{
+	uint32_t num;
+	if (UNEXPECTED(ht->u.v.flags & HASH_FLAG_HAS_EMPTY_IND)) {
+		num = zend_array_recalc_elements(ht);
+		if (UNEXPECTED(ht->nNumOfElements == num)) {
+			ht->u.v.flags &= ~HASH_FLAG_HAS_EMPTY_IND;
+		}
+	} else if (UNEXPECTED(ht == &EG(symbol_table))) {
+		num = zend_array_recalc_elements(ht);
+	} else {
+		num = zend_hash_num_elements(ht);
+	}
+	return num;
+}
+/* }}} */
 
 ZEND_API void ZEND_FASTCALL zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProtection)
 {
@@ -316,9 +373,34 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos(uint32_t idx, HashTab
 	if (iter->pos == HT_INVALID_IDX) {
 		return HT_INVALID_IDX;
 	} else if (UNEXPECTED(iter->ht != ht)) {
-		if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 			iter->ht->u.v.nIteratorsCount--;
 		}
+		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
+			ht->u.v.nIteratorsCount++;
+		}
+		iter->ht = ht;
+		iter->pos = ht->nInternalPointer;
+	}
+	return iter->pos;
+}
+
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval *array)
+{
+	HashTable *ht = Z_ARRVAL_P(array);
+	HashTableIterator *iter = EG(ht_iterators) + idx;
+
+	ZEND_ASSERT(idx != (uint32_t)-1);
+	if (iter->pos == HT_INVALID_IDX) {
+		return HT_INVALID_IDX;
+	} else if (UNEXPECTED(iter->ht != ht)) {
+		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+			iter->ht->u.v.nIteratorsCount--;
+		}
+		SEPARATE_ARRAY(array);
+		ht = Z_ARRVAL_P(array);
 		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
 			ht->u.v.nIteratorsCount++;
 		}
@@ -334,7 +416,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 
 	ZEND_ASSERT(idx != (uint32_t)-1);
 
-	if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+	if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+			&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 		iter->ht->u.v.nIteratorsCount--;
 	}
 	iter->ht = NULL;
@@ -351,20 +434,13 @@ static zend_never_inline void ZEND_FASTCALL _zend_hash_iterators_remove(HashTabl
 {
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
-	uint32_t idx;
 
 	while (iter != end) {
 		if (iter->ht == ht) {
-			iter->ht = NULL;
+			iter->ht = HT_POISONED_PTR;
 		}
 		iter++;
 	}
-
-	idx = EG(ht_iterators_used);
-	while (idx > 0 && EG(ht_iterators)[idx - 1].ht == NULL) {
-		idx--;
-	}
-	EG(ht_iterators_used) = idx;
 }
 
 static zend_always_inline void zend_hash_iterators_remove(HashTable *ht)
@@ -495,12 +571,25 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			zval *data;
 
 			if (flag & HASH_ADD) {
-				return NULL;
-			}
-			ZEND_ASSERT(&p->val != pData);
-			data = &p->val;
-			if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
-				data = Z_INDIRECT_P(data);
+				if (!(flag & HASH_UPDATE_INDIRECT)) {
+					return NULL;
+				}
+				ZEND_ASSERT(&p->val != pData);
+				data = &p->val;
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+					if (Z_TYPE_P(data) != IS_UNDEF) {
+						return NULL;
+					}
+				} else {
+					return NULL;
+				}
+			} else {
+				ZEND_ASSERT(&p->val != pData);
+				data = &p->val;
+				if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+				}
 			}
 			HANDLE_BLOCK_INTERRUPTIONS();
 			if (ht->pDestructor) {
@@ -791,13 +880,15 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 		zend_hash_rehash(ht);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 	} else if (ht->nTableSize < HT_MAX_SIZE) {	/* Let's double the table size */
-		void *old_data = HT_GET_DATA_ADDR(ht);
+		void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
+		uint32_t nSize = ht->nTableSize + ht->nTableSize;
 		Bucket *old_buckets = ht->arData;
 
 		HANDLE_BLOCK_INTERRUPTIONS();
-		ht->nTableSize += ht->nTableSize;
+		new_data = pemalloc(HT_SIZE_EX(nSize, -nSize), ht->u.flags & HASH_FLAG_PERSISTENT);
+		ht->nTableSize = nSize;
 		ht->nTableMask = -ht->nTableSize;
-		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), ht->u.flags & HASH_FLAG_PERSISTENT));
+		HT_SET_DATA_ADDR(ht, new_data);
 		memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 		pefree(old_data, ht->u.flags & HASH_FLAG_PERSISTENT);
 		zend_hash_rehash(ht);
@@ -1026,9 +1117,14 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 					return FAILURE;
 				} else {
 					if (ht->pDestructor) {
-						ht->pDestructor(data);
+						zval tmp;
+						ZVAL_COPY_VALUE(&tmp, data);
+						ZVAL_UNDEF(data);
+						ht->pDestructor(&tmp);
+					} else {
+						ZVAL_UNDEF(data);
 					}
-					ZVAL_UNDEF(data);
+					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);
@@ -1072,6 +1168,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str,
 						ht->pDestructor(data);
 					}
 					ZVAL_UNDEF(data);
+					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);
@@ -1428,15 +1525,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_fu
 	int result;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	HASH_PROTECT_RECURSION(ht);
-	p = ht->arData;
-	for (idx = 0; idx < ht->nNumUsed; idx++, p++) {
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		result = apply_func(&p->val);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
+			HT_ASSERT(GC_REFCOUNT(ht) == 1);
 			_zend_hash_del_el(ht, HT_IDX_TO_HASH(idx), p);
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
@@ -1454,15 +1551,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply_with_argument(HashTable *ht, apply_f
 	int result;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	HASH_PROTECT_RECURSION(ht);
-	p = ht->arData;
-	for (idx = 0; idx < ht->nNumUsed; idx++, p++) {
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		result = apply_func(&p->val, argument);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
+			HT_ASSERT(GC_REFCOUNT(ht) == 1);
 			_zend_hash_del_el(ht, HT_IDX_TO_HASH(idx), p);
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
@@ -1482,12 +1579,11 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply_with_arguments(HashTable *ht, apply_
 	int result;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	HASH_PROTECT_RECURSION(ht);
 
-	p = ht->arData;
-	for (idx = 0; idx < ht->nNumUsed; idx++, p++) {
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		va_start(args, num_args);
 		hash_key.h = p->h;
@@ -1496,6 +1592,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply_with_arguments(HashTable *ht, apply_
 		result = apply_func(&p->val, num_args, args, &hash_key);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
+			HT_ASSERT(GC_REFCOUNT(ht) == 1);
 			_zend_hash_del_el(ht, HT_IDX_TO_HASH(idx), p);
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
@@ -1516,19 +1613,18 @@ ZEND_API void ZEND_FASTCALL zend_hash_reverse_apply(HashTable *ht, apply_func_t 
 	int result;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	HASH_PROTECT_RECURSION(ht);
 	idx = ht->nNumUsed;
-	p = ht->arData + idx;
 	while (idx > 0) {
 		idx--;
-		p--;
+		p = ht->arData + idx;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 
 		result = apply_func(&p->val);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
+			HT_ASSERT(GC_REFCOUNT(ht) == 1);
 			_zend_hash_del_el(ht, HT_IDX_TO_HASH(idx), p);
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
@@ -1698,7 +1794,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	target->pDestructor = source->pDestructor;
 
 	if (source->nNumUsed == 0) {
-		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;
@@ -1723,7 +1819,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			target->nInternalPointer = idx;
 		}
 	} else if (source->u.flags & HASH_FLAG_PACKED) {
-		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -1746,7 +1842,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			target->nInternalPointer = idx;
 		}
 	} else {
-		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer = HT_INVALID_IDX;
@@ -1781,24 +1877,47 @@ ZEND_API void ZEND_FASTCALL _zend_hash_merge(HashTable *target, HashTable *sourc
     uint32_t idx;
 	Bucket *p;
 	zval *t;
-	uint32_t mode = (overwrite?HASH_UPDATE:HASH_ADD);
 
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
 	HT_ASSERT(GC_REFCOUNT(target) == 1);
 
-	for (idx = 0; idx < source->nNumUsed; idx++) {
-		p = source->arData + idx;
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-		if (p->key) {
-			t = _zend_hash_add_or_update(target, p->key, &p->val, mode ZEND_FILE_LINE_RELAY_CC);
-			if (t && pCopyConstructor) {
-				pCopyConstructor(t);
+	if (overwrite) {
+		for (idx = 0; idx < source->nNumUsed; idx++) {
+			p = source->arData + idx;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
+			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
+			    continue;
 			}
-		} else {
-			if ((mode==HASH_UPDATE || !zend_hash_index_exists(target, p->h))) {
-			 	t = zend_hash_index_update(target, p->h, &p->val);
-			 	if (t && pCopyConstructor) {
+			if (p->key) {
+				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			} else {
+				t = zend_hash_index_update(target, p->h, &p->val);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			}
+		}
+	} else {
+		for (idx = 0; idx < source->nNumUsed; idx++) {
+			p = source->arData + idx;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_INDIRECT) &&
+			    UNEXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
+			    continue;
+			}
+			if (p->key) {
+				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_ADD | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
+				if (t && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			} else {
+				t = zend_hash_index_add(target, p->h, &p->val);
+				if (t && pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			}
@@ -1919,6 +2038,15 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulon
 	return p ? &p->val : NULL;
 }
 
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h)
+{
+	Bucket *p;
+
+	IS_CONSISTENT(ht);
+
+	p = zend_hash_index_find_bucket(ht, h);
+	return p ? &p->val : NULL;
+}
 
 ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zend_ulong h)
 {
@@ -1945,7 +2073,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, H
     uint32_t idx;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
@@ -1965,7 +2093,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Has
 	uint32_t idx;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	idx = ht->nNumUsed;
 	while (idx > 0) {
@@ -1984,7 +2112,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition
 	uint32_t idx = *pos;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	if (idx != HT_INVALID_IDX) {
 		while (1) {
@@ -2008,7 +2136,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPositi
 	uint32_t idx = *pos;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	if (idx != HT_INVALID_IDX) {
 		while (idx > 0) {
@@ -2190,12 +2318,13 @@ ZEND_API int ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, co
 		}
 	} else {
 		if (renumber) {
-			void *old_data = HT_GET_DATA_ADDR(ht);
+			void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 			Bucket *old_buckets = ht->arData;
 
+			new_data = pemalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK), (ht->u.flags & HASH_FLAG_PERSISTENT));
 			ht->u.flags |= HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 			ht->nTableMask = HT_MIN_MASK;
-			HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), ht->u.flags & HASH_FLAG_PERSISTENT & HASH_FLAG_PERSISTENT));
+			HT_SET_DATA_ADDR(ht, new_data);
 			memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 			pefree(old_data, ht->u.flags & HASH_FLAG_PERSISTENT & HASH_FLAG_PERSISTENT);
 			HT_HASH_RESET_PACKED(ht);

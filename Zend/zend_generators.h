@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,8 +62,8 @@ struct _zend_generator {
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
-	/* The separate stack used by generator */
-	zend_vm_stack stack;
+	/* Frozen call stack for "yield" used in context of other calls */
+	zend_execute_data *frozen_call_stack;
 
 	/* Current value */
 	zval value;
@@ -82,7 +82,7 @@ struct _zend_generator {
 	 * by-value foreach. */
 	zval values;
 
-	/* Node of waiting generators when multiple "yield *" expressions
+	/* Node of waiting generators when multiple "yield from" expressions
 	 * are nested. */
 	zend_generator_node node;
 
@@ -91,6 +91,9 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
+
+	zval *gc_buffer;
+	uint32_t gc_buffer_size;
 };
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
@@ -99,13 +102,33 @@ static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 static const zend_uchar ZEND_GENERATOR_DO_INIT           = 0x8;
 
 void zend_register_generator_ce(void);
-ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution);
 ZEND_API void zend_generator_resume(zend_generator *generator);
 
-void zend_generator_yield_from(zend_generator *this, zend_generator *from);
-ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator);
+void zend_generator_yield_from(zend_generator *generator, zend_generator *from);
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr);
+
+ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf);
+static zend_always_inline zend_generator *zend_generator_get_current(zend_generator *generator)
+{
+	zend_generator *leaf;
+	zend_generator *root;
+
+	if (EXPECTED(generator->node.parent == NULL)) {
+		/* we're not in yield from mode */
+		return generator;
+	}
+
+	leaf = generator->node.children ? generator->node.ptr.leaf : generator;
+	root = leaf->node.ptr.root;
+
+	if (EXPECTED(root->execute_data && root->node.parent == NULL)) {
+		/* generator still running */
+		return root;
+	}
+
+	return zend_generator_update_current(generator, leaf);
+}
 
 END_EXTERN_C()
 

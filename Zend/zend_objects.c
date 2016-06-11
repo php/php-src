@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -45,7 +46,6 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 	}
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
-		Z_PTR_P(p) = NULL;
 		ZVAL_UNDEF(p);
 	}
 }
@@ -70,11 +70,17 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 		} while (p != end);
 	}
 	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_HAS_GUARDS)) {
-		HashTable *guards = Z_PTR_P(p);
+		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
+			zend_string_release(Z_STR_P(p));
+		} else {
+			HashTable *guards;
 
-		ZEND_ASSERT(guards != NULL);
-		zend_hash_destroy(guards);
-		FREE_HASHTABLE(guards);
+			ZEND_ASSERT(Z_TYPE_P(p) == IS_ARRAY);
+			guards = Z_ARRVAL_P(p);
+			ZEND_ASSERT(guards != NULL);
+			zend_hash_destroy(guards);
+			FREE_HASHTABLE(guards);
+		}
 	}
 }
 
@@ -85,44 +91,50 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	if (destructor) {
 		zend_object *old_exception;
 		zval obj;
+		zend_class_entry *orig_fake_scope = NULL;
 
+		EG(fake_scope) = NULL;
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				/* Ensure that if we're calling a private function, we're allowed to do so.
 				 */
-				if (object->ce != EG(scope)) {
-					zend_class_entry *ce = object->ce;
+				if (EG(current_execute_data)) {
+					zend_class_entry *scope = zend_get_executed_scope();
 
-					if (EG(current_execute_data)) {
-						zend_throw_error(zend_ce_error,
+					if (object->ce != scope) {
+						zend_throw_error(NULL,
 							"Call to private %s::__destruct() from context '%s'",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
-					} else {
-						zend_error(E_WARNING,
-							"Call to private %s::__destruct() from context '%s' during shutdown ignored",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+							ZSTR_VAL(object->ce->name),
+							scope ? ZSTR_VAL(scope->name) : "");
+						EG(fake_scope) = orig_fake_scope;
+						return;
 					}
+				} else {
+					zend_error(E_WARNING,
+						"Call to private %s::__destruct() from context '' during shutdown ignored",
+						ZSTR_VAL(object->ce->name));
+					EG(fake_scope) = orig_fake_scope;
 					return;
 				}
 			} else {
 				/* Ensure that if we're calling a protected function, we're allowed to do so.
 				 */
-				if (!zend_check_protected(zend_get_function_root_class(destructor), EG(scope))) {
-					zend_class_entry *ce = object->ce;
+				if (EG(current_execute_data)) {
+					zend_class_entry *scope = zend_get_executed_scope();
 
-					if (EG(current_execute_data)) {
-						zend_throw_error(zend_ce_error,
+					if (!zend_check_protected(zend_get_function_root_class(destructor), scope)) {
+						zend_throw_error(NULL,
 							"Call to protected %s::__destruct() from context '%s'",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
-					} else {
-						zend_error(E_WARNING,
-							"Call to protected %s::__destruct() from context '%s' during shutdown ignored",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+							ZSTR_VAL(object->ce->name),
+							scope ? ZSTR_VAL(scope->name) : "");
+						EG(fake_scope) = orig_fake_scope;
+						return;
 					}
+				} else {
+					zend_error(E_WARNING,
+						"Call to protected %s::__destruct() from context '' during shutdown ignored",
+						ZSTR_VAL(object->ce->name));
+					EG(fake_scope) = orig_fake_scope;
 					return;
 				}
 			}
@@ -153,6 +165,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			}
 		}
 		zval_ptr_dtor(&obj);
+		EG(fake_scope) = orig_fake_scope;
 	}
 }
 
@@ -204,6 +217,9 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 			zend_hash_extend(new_object->properties, new_object->properties->nNumUsed + zend_hash_num_elements(old_object->properties), 0);
 		}
 
+		new_object->properties->u.v.flags |=
+			old_object->properties->u.v.flags & HASH_FLAG_HAS_EMPTY_IND;
+
 		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {
 				ZVAL_INDIRECT(&new_prop, new_object->properties_table + (Z_INDIRECT_P(prop) - old_object->properties_table));
@@ -223,7 +239,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		zval new_obj;
 
 		ZVAL_OBJ(&new_obj, new_object);
-		zval_copy_ctor(&new_obj);
+		Z_ADDREF(new_obj);
 		zend_call_method_with_0_params(&new_obj, old_object->ce, &old_object->ce->clone, ZEND_CLONE_FUNC_NAME, NULL);
 		zval_ptr_dtor(&new_obj);
 	}

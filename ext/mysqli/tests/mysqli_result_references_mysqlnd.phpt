@@ -113,7 +113,7 @@ array(2) refcount(%d){
     [%u|b%"id_copy"]=>
     %unicode|string%(1) "2" refcount(%d)
     [%u|b%"id_copy_mod"]=>
-    long(2)
+    int(2)
   }
 }
 done!

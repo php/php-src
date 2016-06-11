@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -251,6 +251,8 @@ const zend_function_entry mcrypt_functions[] = { /* {{{ */
 static PHP_MINFO_FUNCTION(mcrypt);
 static PHP_MINIT_FUNCTION(mcrypt);
 static PHP_MSHUTDOWN_FUNCTION(mcrypt);
+static PHP_GINIT_FUNCTION(mcrypt);
+static PHP_GSHUTDOWN_FUNCTION(mcrypt);
 
 ZEND_DECLARE_MODULE_GLOBALS(mcrypt)
 
@@ -263,13 +265,16 @@ zend_module_entry mcrypt_module_entry = {
 	PHP_MINFO(mcrypt),
 	PHP_MCRYPT_VERSION,
 	PHP_MODULE_GLOBALS(mcrypt),
-	NULL,
-	NULL,
+	PHP_GINIT(mcrypt),
+	PHP_GSHUTDOWN(mcrypt),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_MCRYPT
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(mcrypt)
 #endif
 
@@ -346,6 +351,28 @@ static void php_mcrypt_module_dtor(zend_resource *rsrc) /* {{{ */
 }
 /* }}} */
 
+static PHP_GINIT_FUNCTION(mcrypt)
+{/*{{{*/
+#if defined(COMPILE_DL_MCRYPT) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+	mcrypt_globals->fd[RANDOM] = -1;
+	mcrypt_globals->fd[URANDOM] = -1;
+}/*}}}*/
+
+static PHP_GSHUTDOWN_FUNCTION(mcrypt)
+{/*{{{*/
+	if (mcrypt_globals->fd[RANDOM] > 0) {
+		close(mcrypt_globals->fd[RANDOM]);
+		mcrypt_globals->fd[RANDOM] = -1;
+	}
+
+	if (mcrypt_globals->fd[URANDOM] > 0) {
+		close(mcrypt_globals->fd[URANDOM]);
+		mcrypt_globals->fd[URANDOM] = -1;
+	}
+}/*}}}*/
+
 static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 {
 	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
@@ -403,9 +430,6 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	php_stream_filter_register_factory("mcrypt.*", &php_mcrypt_filter_factory);
 	php_stream_filter_register_factory("mdecrypt.*", &php_mcrypt_filter_factory);
 
-	MCG(fd[RANDOM]) = -1;
-	MCG(fd[URANDOM]) = -1;
-
 	return SUCCESS;
 }
 /* }}} */
@@ -414,14 +438,6 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 {
 	php_stream_filter_unregister_factory("mcrypt.*");
 	php_stream_filter_unregister_factory("mdecrypt.*");
-
-	if (MCG(fd[RANDOM]) > 0) {
-		close(MCG(fd[RANDOM]));
-	}
-
-	if (MCG(fd[URANDOM]) > 0) {
-		close(MCG(fd[URANDOM]));
-	}
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -548,7 +564,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memset(iv_s, 0, iv_size + 1);
 
 	if (key_len > max_key_size) {
-		php_error_docref(NULL, E_WARNING, "Key size too large; supplied length: %d, max: %d", key_len, max_key_size);
+		php_error_docref(NULL, E_WARNING, "Key size too large; supplied length: %zd, max: %d", key_len, max_key_size);
 		key_size = max_key_size;
 	} else {
 		key_size = (int)key_len;
@@ -556,7 +572,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memcpy(key_s, key, key_len);
 
 	if (iv_len != iv_size) {
-		php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %d, needed: %d", iv_len, iv_size);
+		php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %zd, needed: %d", iv_len, iv_size);
 		if (iv_len > iv_size) {
 			iv_len = iv_size;
 		}
@@ -1202,6 +1218,10 @@ static int php_mcrypt_ensure_valid_iv(MCRYPT td, const char *iv, int iv_size) /*
 {
 	if (mcrypt_enc_mode_has_iv(td) == 1) {
 		int expected_iv_size = mcrypt_enc_get_iv_size(td);
+		if (expected_iv_size == 0) {
+			/* Algorithm does not use IV, even though mode supports it */
+			return SUCCESS;
+		}
 
 		if (!iv) {
 			php_error_docref(NULL, E_WARNING,
@@ -1361,7 +1381,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 
 		while (read_bytes < size) {
 			n = read(*fd, iv + read_bytes, size - read_bytes);
-			if (n < 0) {
+			if (n <= 0) {
 				break;
 			}
 			read_bytes += n;

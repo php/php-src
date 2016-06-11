@@ -1446,8 +1446,8 @@ void *from_zval_run_conversions(const zval			*container,
 								zend_llist			**allocations /* out */,
 								struct err_s			*err /* in/out */)
 {
-	ser_context ctx = {{0}};
-	char *structure = NULL;
+	ser_context ctx;
+	char *structure;
 
 	*allocations = NULL;
 
@@ -1455,6 +1455,7 @@ void *from_zval_run_conversions(const zval			*container,
 		return NULL;
 	}
 
+	memset(&ctx, 0, sizeof(ctx));
 	zend_hash_init(&ctx.params, 8, NULL, NULL, 0);
 	zend_llist_init(&ctx.keys, sizeof(const char *), NULL, 0);
 	zend_llist_init(&ctx.allocations, sizeof(void *), &free_from_zval_allocation, 0);
@@ -1488,13 +1489,14 @@ zval *to_zval_run_conversions(const char *structure,
 							  const struct key_value *key_value_pairs,
 							  struct err_s *err, zval *zv)
 {
-	res_context				ctx = {{0}, {0}};
+	res_context				ctx;
 	const struct key_value	*kv;
 
 	if (err->has_error) {
 		return NULL;
 	}
 
+	memset(&ctx, 0, sizeof(ctx));
 	zend_llist_init(&ctx.keys, sizeof(const char *), NULL, 0);
 	zend_llist_add_element(&ctx.keys, &top_name);
 

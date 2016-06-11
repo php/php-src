@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@
 #	include "win32/time.h"
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* copied from php-src/main/snprintf.c and slightly modified */
 /*
@@ -1281,6 +1281,7 @@ PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) {
 		len = phpdbg_mixed_write(fd, buffer, buflen);
 	}
 
+	efree(buffer);
 	return len;
 }
 

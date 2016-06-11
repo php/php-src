@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -331,7 +331,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Multiple or malformed newlines found in additional_header");
+		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
 		MAIL_RET(0);
 	}
 

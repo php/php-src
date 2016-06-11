@@ -44,5 +44,5 @@ object(SplObjectStorage)#2 (1) {
     }
   }
 }
-Error at offset 79 of 78 bytes
+Error at offset 78 of 78 bytes
 DONE

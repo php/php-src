@@ -10,7 +10,7 @@ if (PHP_MCRYPT != "no") {
 			CHECK_LIB('Advapi32.lib', 'mcrypt')
 			) {
 
-		EXTENSION('mcrypt', 'mcrypt.c mcrypt_filter.c', false);
+		EXTENSION('mcrypt', 'mcrypt.c mcrypt_filter.c', false, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('HAVE_LIBMCRYPT', 1);
 		AC_DEFINE('HAVE_LIBMCRYPT24', 1);
 	} else {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -233,6 +233,13 @@ typedef struct odbc_result_value {
 	SQLLEN coltype;
 } odbc_result_value;
 
+typedef struct odbc_param_info {
+	SQLSMALLINT sqltype;
+	SQLSMALLINT scale;
+	SQLSMALLINT nullable;
+	SQLULEN precision;
+} odbc_param_info;
+
 typedef struct odbc_result {
 	ODBC_SQL_STMT_T stmt;
 	odbc_result_value *values;
@@ -244,6 +251,7 @@ typedef struct odbc_result {
 	zend_long longreadlen;
 	int binmode;
 	int fetched;
+	odbc_param_info * param_info;
 	odbc_connection *conn_ptr;
 } odbc_result;
 
@@ -296,14 +304,11 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 #endif
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
 
-#ifdef ZTS
-# define ODBCG(v) ZEND_TSRMG(odbc_globals_id, zend_odbc_globals *, v)
-# ifdef COMPILE_DL_ODBC
-ZEND_TSRMLS_CACHE_EXTERN();
-# endif
-#else
-# define ODBCG(v) (odbc_globals.v)
-extern ZEND_API zend_odbc_globals odbc_globals;
+PHP_ODBC_API ZEND_EXTERN_MODULE_GLOBALS(odbc)
+#define ODBCG(v) ZEND_MODULE_GLOBALS_ACCESSOR(odbc, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_ODBC)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #endif /* HAVE_UODBC */

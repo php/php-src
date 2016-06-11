@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -215,7 +215,7 @@ zend_module_entry gmp_module_entry = {
 
 #ifdef COMPILE_DL_GMP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(gmp)
 #endif
@@ -585,44 +585,42 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 {
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
-	zval zv;
+	zval *zv;
 	int retval = FAILURE;
 	php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
 
-	ZVAL_UNDEF(&zv);
 	PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
 	gmp_create(object, &gmpnum);
 
 	p = buf;
 	max = buf + buf_len;
 
-	if (!php_var_unserialize(&zv, &p, max, &unserialize_data)
-		|| Z_TYPE(zv) != IS_STRING
-		|| convert_to_gmp(gmpnum, &zv, 10) == FAILURE
+	zv = var_tmp_var(&unserialize_data);
+	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
+		|| Z_TYPE_P(zv) != IS_STRING
+		|| convert_to_gmp(gmpnum, zv, 10) == FAILURE
 	) {
 		zend_throw_exception(NULL, "Could not unserialize number", 0);
 		goto exit;
 	}
-	zval_dtor(&zv);
-	ZVAL_UNDEF(&zv);
 
-	if (!php_var_unserialize(&zv, &p, max, &unserialize_data)
-		|| Z_TYPE(zv) != IS_ARRAY
+	zv = var_tmp_var(&unserialize_data);
+	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
+		|| Z_TYPE_P(zv) != IS_ARRAY
 	) {
 		zend_throw_exception(NULL, "Could not unserialize properties", 0);
 		goto exit;
 	}
 
-	if (zend_hash_num_elements(Z_ARRVAL(zv)) != 0) {
+	if (zend_hash_num_elements(Z_ARRVAL_P(zv)) != 0) {
 		zend_hash_copy(
-			zend_std_get_properties(object), Z_ARRVAL(zv),
+			zend_std_get_properties(object), Z_ARRVAL_P(zv),
 			(copy_ctor_func_t) zval_add_ref
 		);
 	}
 
 	retval = SUCCESS;
 exit:
-	zval_dtor(&zv);
 	PHP_VAR_UNSERIALIZE_DESTROY(unserialize_data);
 	return retval;
 }
@@ -1146,11 +1144,10 @@ ZEND_FUNCTION(gmp_export)
 	} else {
 		size_t bits_per_word = size * 8;
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
-		size_t out_len = count * size;
 
-		zend_string *out_string = zend_string_alloc(out_len, 0);
+		zend_string *out_string = zend_string_safe_alloc(count, size, 0, 0);
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
-		ZSTR_VAL(out_string)[out_len] = '\0';
+		ZSTR_VAL(out_string)[ZSTR_LEN(out_string)] = '\0';
 
 		RETURN_NEW_STR(out_string);
 	}

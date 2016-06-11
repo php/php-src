@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,11 +39,7 @@ ZEND_DECLARE_MODULE_GLOBALS(assert)
 
 static zend_class_entry *assertion_error_ce;
 
-#ifdef ZTS
-#define ASSERTG(v) ZEND_TSRMG(assert_globals_id, zend_assert_globals *, v)
-#else
-#define ASSERTG(v) (assert_globals.v)
-#endif
+#define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
@@ -169,6 +165,10 @@ PHP_FUNCTION(assert)
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
 
+		if (zend_forbid_dynamic_call("assert() with string argument") == FAILURE) {
+			RETURN_FALSE;
+		}
+
 		myeval = Z_STRVAL_P(assertion);
 
 		if (ASSERTG(quiet_eval)) {
@@ -246,7 +246,7 @@ PHP_FUNCTION(assert)
 		if (!description) {
 			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
 		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), assertion_error_ce)) {
+			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
 			Z_ADDREF_P(description);
 			zend_throw_exception_object(description);
 		} else {
@@ -275,6 +275,8 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
+	
+	RETURN_FALSE;
 }
 /* }}} */
 

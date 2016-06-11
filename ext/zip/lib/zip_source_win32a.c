@@ -1,6 +1,6 @@
 /*
 zip_source_win32a.c -- create data source from Windows file (ANSI)
-Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
+Copyright (C) 1999-2016 Dieter Baron and Thomas Klausner
 
 This file is part of libzip, a library to manipulate ZIP archives.
 The authors can be contacted at <libzip@nih.at>
@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include <errno.h>
 #include <stdio.h>
 
 #include "zipint.h"
@@ -45,11 +44,11 @@ static int _win32_rename_temp_a(_zip_source_win32_read_file_t *ctx);
 static int _win32_remove_a(const void *fname);
 
 static _zip_source_win32_file_ops_t win32_ops_a = {
-    .op_strdup         = _win32_strdup_a,
-    .op_open           = _win32_open_a,
-    .op_create_temp    = _win32_create_temp_a,
-    .op_rename_temp    = _win32_rename_temp_a,
-    .op_remove         = _win32_remove_a
+    _win32_strdup_a,
+    _win32_open_a,
+    _win32_create_temp_a,
+    _win32_rename_temp_a,
+    _win32_remove_a
 };
 
 ZIP_EXTERN zip_source_t *

@@ -11,7 +11,7 @@ if (!(isset($matches[0]) && $matches[1] >= 12)) {
 }
 ?>
 --ENV--
-NLS_LANG=
+NLS_LANG=.AL32UTF8
 --FILE--
 <?php
 
@@ -259,19 +259,20 @@ string(3) "abc"
 Test 1.4 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: AFC
   Executing:
 string(3) "abc"
-string(30) "abc                           "
+string(10) "abc       "
 Test 1.5 In Length: strlen.   In Type: AFC.      Out Length: strlen(input).    Out Type: AFC
   Executing:
 string(3) "abc"
-string(9) "abc      "
+string(3) "abc"
 Test 1.6 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)-1.  Out Type: AFC
   Executing:
+    Oci_execute error ORA-6502
 string(3) "abc"
-string(6) "abc   "
+string(3) "abc"
 Test 1.7 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)+1.  Out Type: AFC
   Executing:
 string(3) "abc"
-string(12) "abc         "
+string(4) "abc "
 
 
 Tests with ''

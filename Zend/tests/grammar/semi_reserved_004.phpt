@@ -70,6 +70,17 @@ class Obj
     static $die = 'die';
     static $self = 'self';
     static $parent = 'parent';
+    static $isset = 'isset';
+    static $unset = 'unset';
+    static $__CLASS__ = '__CLASS__';
+    static $__TRAIT__ = '__TRAIT__';
+    static $__FUNCTION__ = '__FUNCTION__';
+    static $__METHOD__ = '__METHOD__';
+    static $__LINE__ = '__LINE__';
+    static $__FILE__ = '__FILE__';
+    static $__DIR__ = '__DIR__';
+    static $__NAMESPACE__ = '__NAMESPACE__';
+    static $__halt_compiler = '__halt_compiler';
 }
 
 echo Obj::$empty, PHP_EOL;
@@ -137,6 +148,17 @@ echo Obj::$catch, PHP_EOL;
 echo Obj::$die, PHP_EOL;
 echo Obj::$self, PHP_EOL;
 echo Obj::$parent, PHP_EOL;
+echo Obj::$isset, PHP_EOL;
+echo Obj::$unset, PHP_EOL;
+echo Obj::$__CLASS__, PHP_EOL;
+echo Obj::$__TRAIT__, PHP_EOL;
+echo Obj::$__FUNCTION__, PHP_EOL;
+echo Obj::$__METHOD__, PHP_EOL;
+echo Obj::$__LINE__, PHP_EOL;
+echo Obj::$__FILE__, PHP_EOL;
+echo Obj::$__DIR__, PHP_EOL;
+echo Obj::$__NAMESPACE__, PHP_EOL;
+echo Obj::$__halt_compiler, PHP_EOL;
 
 echo "\nDone\n";
 
@@ -206,5 +228,16 @@ catch
 die
 self
 parent
+isset
+unset
+__CLASS__
+__TRAIT__
+__FUNCTION__
+__METHOD__
+__LINE__
+__FILE__
+__DIR__
+__NAMESPACE__
+__halt_compiler
 
 Done

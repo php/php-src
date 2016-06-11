@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -161,7 +161,7 @@ PHPAPI char *php_strerror(int errnum);
 # define php_mb_reset() memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)))
 #else
 # define php_mblen(ptr, len) mblen(ptr, len)
-# define php_mb_reset() mblen(NULL, 0)
+# define php_mb_reset() php_ignore_value(mblen(NULL, 0))
 #endif
 
 void register_string_constants(INIT_FUNC_ARGS);

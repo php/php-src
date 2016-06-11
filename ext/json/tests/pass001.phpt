@@ -4,7 +4,7 @@ JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
 precision=14
 --SKIPIF--
 <?php
-  if (!extension_loaded('json')) die('skip: json extension not available');
+if (!extension_loaded('json')) die('skip');
 ?>
 --FILE--
 <?php

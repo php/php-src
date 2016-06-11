@@ -23,7 +23,7 @@ $o->func();
 ?>
 ===DONE===
 --EXPECTF--
-Test::{closure}()
+{closure}()
 
 Fatal error: Uncaught Error: Call to private method Test::func() from context '' in %sclosure_033.php:%d
 Stack trace:

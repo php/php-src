@@ -498,7 +498,7 @@ if (!$use_pear_template) {
 
 	/* grab the bootstrap script */
 	echo "Downloading go-pear\n";
-	copy("http://pear.php.net/go-pear", "$dist_dir/PEAR/go-pear.php");
+	copy("https://pear.php.net/go-pear.phar", "$dist_dir/PEAR/go-pear.php");
 
 	/* import the package list -- sets $packages variable */
 	include "pear/go-pear-list.php";

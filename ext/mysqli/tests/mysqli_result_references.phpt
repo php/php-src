@@ -85,48 +85,48 @@ array(7) refcount(2){
   [0]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(1)
+    int(1)
     [%u|b%"label"]=>
     %unicode|string%(1) "a" refcount(%d)
   }
   [1]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(2)
+    int(2)
     [%u|b%"label"]=>
     %unicode|string%(1) "b" refcount(%d)
   }
   [2]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(1)
+    int(1)
     [%u|b%"label"]=>
     %unicode|string%(1) "a" refcount(%d)
   }
   [3]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(2)
+    int(2)
     [%u|b%"label"]=>
     %unicode|string%(1) "b" refcount(%d)
   }
   [4]=>
   array(3) refcount(1){
     [%u|b%"id"]=>
-    &long(3)
+    &int(3)
     [%u|b%"label"]=>
     %unicode|string%(1) "a" refcount(%d)
     [%u|b%"id2"]=>
-    &long(3)
+    &int(3)
   }
   [5]=>
   array(3) refcount(1){
     [%u|b%"id"]=>
-    &long(4)
+    &int(4)
     [%u|b%"label"]=>
     %unicode|string%(1) "b" refcount(%d)
     [%u|b%"id2"]=>
-    &long(4)
+    &int(4)
   }
   [6]=>
   &object(mysqli_result)#%d (5) refcount(%d){

@@ -12,4 +12,4 @@ class Obj
 function echo(){} // not valid
 
 --EXPECTF--
-Parse error: syntax error, unexpected 'echo' (T_ECHO), expecting identifier (T_STRING) or '(' in %s on line 9
+Parse error: syntax error, unexpected 'echo' (T_ECHO), expecting %s in %s on line 9

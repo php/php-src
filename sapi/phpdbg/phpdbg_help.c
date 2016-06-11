@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@
 #include "phpdbg_eol.h"
 #include "zend.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ Commands Table */
 #define PHPDBG_COMMAND_HELP_D(name, tip, alias, action) \
@@ -383,7 +383,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-I**                          Ignore default .phpdbginit" CR
 "  **-O**      **-O**my.oplog          Sets oplog output file" CR
 "  **-r**                          Run execution context" CR
-"  **-rr**                         Run execution context and quit after execution" CR
+"  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
+"  **-e**                          Generate extended information for debugger/profiler" CR
 "  **-E**                          Enable step through eval, careful!" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
@@ -808,9 +809,11 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"run",
-"Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
-"or completion of the script. Add parameters you want to use as $argv"
+"Enter the vm, starting execution. Execution will then continue until the next breakpoint "
+"or completion of the script. Add parameters you want to use as $argv" CR CR
+
 "**Examples**" CR CR
+
 "    $P run" CR
 "    $P r" CR
 "    Will cause execution of the context, if it is set" CR CR

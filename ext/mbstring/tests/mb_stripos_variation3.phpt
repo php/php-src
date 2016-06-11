@@ -8,10 +8,9 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of first occurrence of a string within another, case insensitive 
+/* Prototype  : int mb_stripos(string $haystack, string $needle [, int $offset [, string $encoding]])
+ * Description: Find position of first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
  */
 
 /*
@@ -52,45 +51,47 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
+	   -5,
        -2345,
 
        // float data
-/*5*/  10.5,
-       -10.5,
+/*6*/  10.5,
+       -5.5,
+	   -100.5,
        12.3456789000e10,
        12.3456789000E-10,
        .5,
 
        // null data
-/*10*/ NULL,
+/*12*/ NULL,
        null,
 
        // boolean data
-/*12*/ true,
+/*14*/ true,
        false,
        TRUE,
        FALSE,
        
        // empty data
-/*16*/ "",
+/*18*/ "",
        '',
 
        // string data
-/*18*/ "string",
+/*20*/ "string",
        'string',
        $heredoc,
        
        // object data
-/*21*/ new classA(),
+/*23*/ new classA(),
 
        // undefined data
-/*22*/ @$undefined_var,
+/*24*/ @$undefined_var,
 
        // unset data
-/*23*/ @$unset_var,
+/*25*/ @$unset_var,
 
        // resource variable
-/*24*/ $fp
+/*26*/ $fp
 );
 
 // loop through each element of $inputs to check the behavior of mb_stripos()
@@ -120,28 +121,28 @@ Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Iteration 4 --
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+int(8)
 
 -- Iteration 5 --
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Iteration 6 --
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Iteration 7 --
+int(8)
+
+-- Iteration 8 --
 
 Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
--- Iteration 8 --
-int(8)
-
 -- Iteration 9 --
-int(8)
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
+bool(false)
 
 -- Iteration 10 --
 int(8)
@@ -162,14 +163,10 @@ int(8)
 int(8)
 
 -- Iteration 16 --
-
-Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
-NULL
+int(8)
 
 -- Iteration 17 --
-
-Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
-NULL
+int(8)
 
 -- Iteration 18 --
 
@@ -188,16 +185,26 @@ NULL
 
 -- Iteration 21 --
 
-Warning: mb_stripos() expects parameter 3 to be integer, object given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
+NULL
 
 -- Iteration 23 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, object given in %s on line %d
+NULL
 
 -- Iteration 24 --
+int(8)
+
+-- Iteration 25 --
+int(8)
+
+-- Iteration 26 --
 
 Warning: mb_stripos() expects parameter 3 to be integer, resource given in %s on line %d
 NULL

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,8 +94,9 @@
 #include "ext/standard/file.h" /* for php_set_sock_blocking() :-( */
 #include "zend_smart_str.h"
 #include "ext/standard/html.h"
-#include "ext/standard/url.h" /* for php_url_decode() */
+#include "ext/standard/url.h" /* for php_raw_url_decode() */
 #include "ext/standard/php_string.h" /* for php_dirname() */
+#include "ext/date/php_date.h" /* for php_format_date() */
 #include "php_network.h"
 
 #include "php_http_parser.h"
@@ -339,15 +340,24 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 
 static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, int persistent) /* {{{ */
 {
-	{
-		char *val;
-		if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
-			smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
-			smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
-			smart_str_appends_ex(buffer, val, persistent);
-			smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
-		}
+	char *val;
+	struct timeval tv = {0};
+
+	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
+		smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
+		smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
+		smart_str_appends_ex(buffer, val, persistent);
+		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
 	}
+
+	if (!gettimeofday(&tv, NULL)) {
+		zend_string *dt = php_format_date("r", 1, tv.tv_sec, 1);
+		smart_str_appendl_ex(buffer, "Date: ", 6, persistent);
+		smart_str_appends_ex(buffer, dt->val, persistent);
+		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
+		zend_string_release(dt);
+	}
+
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
 } /* }}} */
 
@@ -604,6 +614,9 @@ static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list
 			}
 		}
 		spprintf(&real_key, 0, "%s_%s", "HTTP", key);
+		if (strcmp(key, "CONTENT_TYPE") == 0 || strcmp(key, "CONTENT_LENGTH") == 0) {
+			sapi_cli_server_register_variable(track_vars_array, key, *entry);
+		}
 		sapi_cli_server_register_variable(track_vars_array, real_key, *entry);
 		efree(key);
 		efree(real_key);
@@ -1464,7 +1477,19 @@ static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath
 		return;
 	}
 
-	decoded_vpath_end = decoded_vpath + php_url_decode(decoded_vpath, (int)vpath_len);
+	decoded_vpath_end = decoded_vpath + php_raw_url_decode(decoded_vpath, (int)vpath_len);
+
+#ifdef PHP_WIN32
+	{
+		char *p = decoded_vpath;
+		
+		do {
+			if (*p == '\\') {
+				*p = '/';
+			}
+		} while (*p++);
+	}
+#endif
 
 	p = decoded_vpath;
 
@@ -1940,6 +1965,19 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		return php_cli_server_send_error_page(server, client, 400);
 	}
 
+#ifdef PHP_WIN32
+	/* The win32 namespace will cut off trailing dots and spaces. Since the
+	   VCWD functionality isn't used here, a sophisticated functionality
+	   would have to be reimplemented to know ahead there are no files
+	   with invalid names there. The simplest is just to forbid invalid
+	   filenames, which is done here. */
+	if (client->request.path_translated &&
+		('.' == client->request.path_translated[client->request.path_translated_len-1] ||
+		 ' ' == client->request.path_translated[client->request.path_translated_len-1])) {
+		return php_cli_server_send_error_page(server, client, 500 TSRMLS_CC);
+	}
+#endif
+
 	fd = client->request.path_translated ? open(client->request.path_translated, O_RDONLY): -1;
 	if (fd < 0) {
 		return php_cli_server_send_error_page(server, client, 404);
@@ -2035,6 +2073,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 
 	zend_try {
 		zval retval;
+
+		ZVAL_UNDEF(&retval);
 		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				decline = Z_TYPE(retval) == IS_FALSE;

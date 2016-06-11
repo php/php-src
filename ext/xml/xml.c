@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,7 @@ ZEND_DECLARE_MODULE_GLOBALS(xml)
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_XML
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(xml)
 #endif /* COMPILE_DL_XML */
@@ -111,7 +111,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_object, 0, 0, 2)
 	ZEND_ARG_INFO(0, parser)
-	ZEND_ARG_INFO(1, obj)
+	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_element_handler, 0, 0, 3)
@@ -483,9 +483,7 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 		zend_fcall_info fci;
 
 		fci.size = sizeof(fci);
-		fci.function_table = EG(function_table);
 		ZVAL_COPY_VALUE(&fci.function_name, handler);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ(parser->object);
 		fci.retval = retval;
 		fci.param_count = argc;
@@ -581,7 +579,7 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 	}
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
-	str = zend_string_alloc(len * 4, 0);
+	str = zend_string_safe_alloc(len, 4, 0, 0);
 	ZSTR_LEN(str) = 0;
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
@@ -1169,7 +1167,7 @@ PHP_FUNCTION(xml_set_object)
 	xml_parser *parser;
 	zval *pind, *mythis;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro/", &pind, &mythis) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro", &pind, &mythis) == FAILURE) {
 		return;
 	}
 
@@ -1183,9 +1181,7 @@ PHP_FUNCTION(xml_set_object)
 	}
 
 	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
-/* #ifdef ZEND_ENGINE_2
-	zval_add_ref(&parser->object); 
-#endif */
+	/* zval_add_ref(&parser->object); */
 
 	ZVAL_COPY(&parser->object, mythis);
 
@@ -1383,7 +1379,7 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_parse(resource parser, string data [, int isFinal]) 
+/* {{{ proto int xml_parse(resource parser, string data [, bool isFinal])
    Start parsing an XML document */
 PHP_FUNCTION(xml_parse)
 {
@@ -1392,9 +1388,9 @@ PHP_FUNCTION(xml_parse)
 	char *data;
 	size_t data_len;
 	int ret;
-	zend_long isFinal = 0;
+	zend_bool isFinal = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pind, &data, &data_len, &isFinal) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|b", &pind, &data, &data_len, &isFinal) == FAILURE) {
 		return;
 	}
 
@@ -1573,9 +1569,10 @@ PHP_FUNCTION(xml_parser_free)
 		RETURN_FALSE;
 	}
 
-	res = Z_RES(parser->index);
-	ZVAL_UNDEF(&parser->index);
-	zend_list_close(res);
+	if (zend_list_delete(Z_RES(parser->index)) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */

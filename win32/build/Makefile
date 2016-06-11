@@ -1,7 +1,7 @@
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
-#  | Copyright (c) 1997-2008 The PHP Group                                |
+#  | Copyright (c) 1997-2016 The PHP Group                                |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
@@ -36,11 +36,13 @@ build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
 !if $(RE2C) == ""
 generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c \
+	sapi\phpdbg\phpdbg_parser.c \
 	$(PHPDEF) $(MCFILE)
 !else
 generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
+	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_lexer.c \
 	$(PHPDEF) $(MCFILE)
 !endif
 
@@ -53,12 +55,18 @@ Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
 
+sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
+	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
+	
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+	
+sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
+	$(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
 !endif
 
 !if $(PGOMGR) != ""
@@ -203,9 +211,12 @@ install-sdk: build-devel
 
 really-install:
 	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
+	@if not exist $(PHP_PREFIX)\ext mkdir $(PHP_PREFIX)\ext
 	@echo Installing files under $(PHP_PREFIX)
 	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
-	@copy $(BUILD_DIR)\*.dll $(PHP_PREFIX) /y >nul
+	@copy $(BUILD_DIR)\php_*.dll $(PHP_PREFIX)\ext /y >nul
+	dir /b $(BUILD_DIR)\php_*.dll > $(BUILD_DIR)\extension_dlls.txt
+	@xcopy $(BUILD_DIR)\*.dll /exclude:$(BUILD_DIR)\extension_dlls.txt $(PHP_PREFIX) /y >nul
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:
 	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)

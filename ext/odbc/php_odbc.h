@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,6 +100,14 @@ PHP_FUNCTION(odbc_gettypeinfo);
 PHP_FUNCTION(odbc_primarykeys);
 PHP_FUNCTION(odbc_specialcolumns);
 PHP_FUNCTION(odbc_statistics);
+
+#ifdef PHP_WIN32
+# define PHP_ODBC_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_ODBC_API __attribute__ ((visibility("default")))
+#else
+# define PHP_ODBC_API
+#endif
 
 #else
 

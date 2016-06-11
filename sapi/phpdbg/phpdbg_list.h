@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,7 @@ void phpdbg_list_file(zend_string *, uint, int, uint);
 extern const phpdbg_command_t phpdbg_list_commands[];
 
 void phpdbg_init_list(void);
+void phpdbg_list_update(void);
 
 typedef struct {
 	char *filename;
@@ -47,6 +48,8 @@ typedef struct {
 #if HAVE_MMAP
 	void *map;
 #endif
+	zend_op_array op_array;
+	zend_bool destroy_op_array;
 	uint lines;
 	uint line[1];
 } phpdbg_file_source;

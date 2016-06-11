@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1728,6 +1728,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 	) {
 		ZVAL_RES(&zcert, zend_register_resource(peer_cert, php_openssl_get_x509_list_id()));
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate", &zcert);
+		zval_ptr_dtor(&zcert);
 		cert_captured = 1;
 	}
 
@@ -1755,7 +1756,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 		}
 
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate_chain", &arr);
-		zval_dtor(&arr);
+		zval_ptr_dtor(&arr);
 	}
 
 	return cert_captured;
@@ -1874,7 +1875,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 						zval meta_arr;
 						ZVAL_ARR(&meta_arr, capture_session_meta(sslsock->ssl_handle));
 						php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "session_meta", &meta_arr);
-						zval_dtor(&meta_arr);
+						zval_ptr_dtor(&meta_arr);
 					}
 				}
 			}
@@ -1946,7 +1947,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 			timeout = &sslsock->s.timeout;
 		}
 
-		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC) == SUCCESS) {
+		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0) == SUCCESS) {
 			sslsock->s.is_blocked = 0;
 		}
 
@@ -2198,39 +2199,39 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		php_stream_xport_param *xparam STREAMS_DC)
 {
 	int clisock;
-
+	zend_bool nodelay = 0;
+	zval *tmpzval = NULL;
+	
 	xparam->outputs.client = NULL;
 
+	if ((tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
+		zend_is_true(tmpzval)) {
+		nodelay = 1;
+	}
+
 	clisock = php_network_accept_incoming(sock->s.socket,
-			xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
-			xparam->want_addr ? &xparam->outputs.addr : NULL,
-			xparam->want_addr ? &xparam->outputs.addrlen : NULL,
-			xparam->inputs.timeout,
-			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
-			&xparam->outputs.error_code
-			);
+		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+		xparam->want_addr ? &xparam->outputs.addr : NULL,
+		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
+		xparam->inputs.timeout,
+		xparam->want_errortext ? &xparam->outputs.error_text : NULL,
+		&xparam->outputs.error_code,
+		nodelay);
 
 	if (clisock >= 0) {
-		php_openssl_netstream_data_t *clisockdata;
+		php_openssl_netstream_data_t *clisockdata = (php_openssl_netstream_data_t*) emalloc(sizeof(*clisockdata));
 
-		clisockdata = emalloc(sizeof(*clisockdata));
+		/* copy underlying tcp fields */
+		memset(clisockdata, 0, sizeof(*clisockdata));
+		memcpy(clisockdata, sock, sizeof(clisockdata->s));
 
-		if (clisockdata == NULL) {
-			closesocket(clisock);
-			/* technically a fatal error */
-		} else {
-			/* copy underlying tcp fields */
-			memset(clisockdata, 0, sizeof(*clisockdata));
-			memcpy(clisockdata, sock, sizeof(clisockdata->s));
+		clisockdata->s.socket = clisock;
 
-			clisockdata->s.socket = clisock;
-
-			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
-			if (xparam->outputs.client) {
-				xparam->outputs.client->ctx = stream->ctx;
-				if (stream->ctx) {
-					GC_REFCOUNT(stream->ctx)++;
-				}
+		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
+		if (xparam->outputs.client) {
+			xparam->outputs.client->ctx = stream->ctx;
+			if (stream->ctx) {
+				GC_REFCOUNT(stream->ctx)++;
 			}
 		}
 

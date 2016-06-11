@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,13 +95,10 @@ ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	gmp_randstate_t rand_state;
 ZEND_END_MODULE_GLOBALS(gmp)
 
-#ifdef ZTS
-#define GMPG(v) ZEND_TSRMG(gmp_globals_id, zend_gmp_globals *, v)
-#ifdef COMPILE_DL_GMP
-ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define GMPG(v) (gmp_globals.v)
+#define GMPG(v) ZEND_MODULE_GLOBALS_ACCESSOR(gmp, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_GMP)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #else

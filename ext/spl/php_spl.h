@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,13 +68,8 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	int          autoload_running;
 ZEND_END_MODULE_GLOBALS(spl)
 
-#ifdef ZTS
-# define SPL_G(v) ZEND_TSRMG(spl_globals_id, zend_spl_globals *, v)
-extern int spl_globals_id;
-#else
-# define SPL_G(v) (spl_globals.v)
-extern zend_spl_globals spl_globals;
-#endif
+ZEND_EXTERN_MODULE_GLOBALS(spl)
+#define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
 
 PHP_FUNCTION(spl_classes);
 PHP_FUNCTION(class_parents);

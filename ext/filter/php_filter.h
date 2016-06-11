@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -65,13 +65,11 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zend_long default_filter_flags;
 ZEND_END_MODULE_GLOBALS(filter)
 
-#ifdef ZTS
-#define IF_G(v) ZEND_TSRMG(filter_globals_id, zend_filter_globals *, v)
-ZEND_TSRMLS_CACHE_EXTERN();
-#else
-#define IF_G(v) (filter_globals.v)
+#if defined(COMPILE_DL_FILTER) && defined(ZTS)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+#define IF_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(filter, v)
 
 #define PHP_INPUT_FILTER_PARAM_DECL zval *value, zend_long flags, zval *option_array, char *charset
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL);

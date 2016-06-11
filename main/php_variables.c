@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -524,7 +524,7 @@ zend_bool php_std_auto_global_callback(char *name, uint name_len)
 
 /* {{{ php_build_argv
  */
-static void php_build_argv(char *s, zval *track_vars_array)
+PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 {
 	zval arr, argc, tmp;
 	int count = 0;
@@ -592,6 +592,8 @@ static void php_build_argv(char *s, zval *track_vars_array)
  */
 static inline void php_register_server_variables(void)
 {
+	zval request_time_float, request_time_long;
+
 	zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_SERVER]);
 	array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
 
@@ -610,15 +612,12 @@ static inline void php_register_server_variables(void)
 	if (SG(request_info).auth_digest) {
 		php_register_variable("PHP_AUTH_DIGEST", SG(request_info).auth_digest, &PG(http_globals)[TRACK_VARS_SERVER]);
 	}
-	/* store request init time */
-	{
-		zval request_time_float, request_time_long;
-		ZVAL_DOUBLE(&request_time_float, sapi_get_request_time());
-		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER]);
-		ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
-		php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER]);
-	}
 
+	/* store request init time */
+	ZVAL_DOUBLE(&request_time_float, sapi_get_request_time());
+	php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER]);
+	ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
+	php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER]);
 }
 /* }}} */
 
@@ -650,7 +649,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 				zend_hash_index_update(dest, num_key, src_entry);
 			}
 		} else {
-			SEPARATE_ZVAL(dest_entry);
+			SEPARATE_ARRAY(dest_entry);
 			php_autoglobal_merge(Z_ARRVAL_P(dest_entry), Z_ARRVAL_P(src_entry));
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -740,8 +739,8 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 			if (SG(request_info).argc) {
 				zval *argc, *argv;
 
-				if ((argc = zend_hash_str_find(&EG(symbol_table), "argc", sizeof("argc")-1)) != NULL &&
-					(argv = zend_hash_str_find(&EG(symbol_table), "argv", sizeof("argv")-1)) != NULL) {
+				if ((argc = zend_hash_str_find_ind(&EG(symbol_table), "argc", sizeof("argc")-1)) != NULL &&
+					(argv = zend_hash_str_find_ind(&EG(symbol_table), "argv", sizeof("argv")-1)) != NULL) {
 					Z_ADDREF_P(argv);
 					zend_hash_str_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1, argv);
 					zend_hash_str_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc")-1, argc);

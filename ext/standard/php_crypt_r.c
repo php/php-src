@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -127,7 +127,7 @@ to64(char *s, int32_t v, int n)
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	HCRYPTPROV hCryptProv;
 	HCRYPTHASH ctx, ctx1;
-	unsigned int i, pwl, sl;
+	DWORD i, pwl, sl;
 	const BYTE magic_md5[4] = "$1$";
 	const DWORD magic_md5_len = 3;
 	DWORD        dwHashLen;
@@ -144,7 +144,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 		return NULL;
 	}
 
-	pwl = (unsigned int) strlen(pw);
+	pwl = (DWORD) strlen(pw);
 
 	/* Refine the salt first */
 	sp = salt;
@@ -160,7 +160,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	}
 
 	/* get the length of the true salt */
-	sl = ep - sp;
+	sl = (DWORD)(ep - sp);
 
 	/* Create an empty hash object. */
 	if(!CryptCreateHash(hCryptProv, CALG_MD5, 0, 0, &ctx)) {
@@ -318,12 +318,12 @@ _destroyProv:
  */
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 {
-	static char passwd[MD5_HASH_MAX_LEN], *p;
+	ZEND_TLS char passwd[MD5_HASH_MAX_LEN], *p;
 	const char *sp, *ep;
 	unsigned char final[16];
 	unsigned int i, sl, pwl;
 	PHP_MD5_CTX	ctx, ctx1;
-	php_uint32 l;
+	uint32_t l;
 	int pl;
 
 	pwl = strlen(pw);
@@ -418,7 +418,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 	*p = '\0';
 
 	/* Don't leave anything around in vm they could use. */
-	memset(final, 0, sizeof(final));
+	ZEND_SECURE_ZERO(final, sizeof(final));
 	return (passwd);
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 
 #include <errno.h>
 #include "zend.h"
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 # include <Winuser.h>
 #endif
 #include "zend_alloc.h"
@@ -116,7 +116,7 @@ do {																			\
 #define SET_DOUBLE_QUOTES_SCANNED_LENGTH(len) SCNG(scanned_string_len) = (len)
 #define GET_DOUBLE_QUOTES_SCANNED_LENGTH()    SCNG(scanned_string_len)
 
-#define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x7F)
+#define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x80)
 
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
@@ -178,6 +178,7 @@ void startup_scanner(void)
 {
 	CG(parse_error) = 0;
 	CG(doc_comment) = NULL;
+	CG(extra_fn_flags) = 0;
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 }
@@ -568,6 +569,48 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 }
 END_EXTERN_C()
 
+static zend_op_array *zend_compile(int type)
+{
+	zend_op_array *op_array = NULL;
+	zend_bool original_in_compilation = CG(in_compilation);
+
+	CG(in_compilation) = 1;
+	CG(ast) = NULL;
+	CG(ast_arena) = zend_arena_create(1024 * 32);
+
+	if (!zendparse()) {
+		zend_file_context original_file_context;
+		zend_oparray_context original_oparray_context;
+		zend_op_array *original_active_op_array = CG(active_op_array);
+
+		op_array = emalloc(sizeof(zend_op_array));
+		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
+		CG(active_op_array) = op_array;
+
+		if (zend_ast_process) {
+			zend_ast_process(CG(ast));
+		}
+
+		zend_file_context_begin(&original_file_context);
+		zend_oparray_context_begin(&original_oparray_context);
+		zend_compile_top_stmt(CG(ast));
+		zend_emit_final_return(type == ZEND_USER_FUNCTION);
+		op_array->line_start = 1;
+		op_array->line_end = CG(zend_lineno);
+		pass_two(op_array);
+		zend_oparray_context_end(&original_oparray_context);
+		zend_file_context_end(&original_file_context);
+
+		CG(active_op_array) = original_active_op_array;
+	}
+
+	zend_ast_destroy(CG(ast));
+	zend_arena_destroy(CG(ast_arena));
+
+	CG(in_compilation) = original_in_compilation;
+
+	return op_array;
+}
 
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 {
@@ -583,41 +626,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		}
 	} else {
-		zend_bool original_in_compilation = CG(in_compilation);
-		CG(in_compilation) = 1;
-
-		CG(ast) = NULL;
-		CG(ast_arena) = zend_arena_create(1024 * 32);
-		if (!zendparse()) {
-			zval retval_zv;
-			zend_file_context original_file_context;
-			zend_oparray_context original_oparray_context;
-			zend_op_array *original_active_op_array = CG(active_op_array);
-			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
-			CG(active_op_array) = op_array;
-			ZVAL_LONG(&retval_zv, 1);
-
-			if (zend_ast_process) {
-				zend_ast_process(CG(ast));
-			}
-
-			zend_file_context_begin(&original_file_context);
-			zend_oparray_context_begin(&original_oparray_context);
-			zend_compile_top_stmt(CG(ast));
-			zend_emit_final_return(&retval_zv);
-			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
-			pass_two(op_array);
-			zend_oparray_context_end(&original_oparray_context);
-			zend_file_context_end(&original_file_context);
-
-			CG(active_op_array) = original_active_op_array;
-		}
-
-		zend_ast_destroy(CG(ast));
-		zend_arena_destroy(CG(ast_arena));
-		CG(in_compilation) = original_in_compilation;
+		op_array = zend_compile(ZEND_USER_FUNCTION);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
@@ -732,13 +741,11 @@ ZEND_API size_t zend_get_scanned_file_offset(void)
 	return offset;
 }
 
-
 zend_op_array *compile_string(zval *source_string, char *filename)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
 	zval tmp;
-	zend_bool original_in_compilation = CG(in_compilation);
 
 	if (Z_STRLEN_P(source_string)==0) {
 		return NULL;
@@ -748,45 +755,15 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 	convert_to_string(&tmp);
 	source_string = &tmp;
 
-	CG(in_compilation) = 1;
 	zend_save_lexical_state(&original_lex_state);
 	if (zend_prepare_string_for_scanning(source_string, filename) == SUCCESS) {
-		CG(ast) = NULL;
-		CG(ast_arena) = zend_arena_create(1024 * 32);
 		BEGIN(ST_IN_SCRIPTING);
-
-		if (!zendparse()) {
-			zend_file_context original_file_context;
-			zend_oparray_context original_oparray_context;
-			zend_op_array *original_active_op_array = CG(active_op_array);
-			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
-			CG(active_op_array) = op_array;
-
-			if (zend_ast_process) {
-				zend_ast_process(CG(ast));
-			}
-
-			zend_file_context_begin(&original_file_context);
-			zend_oparray_context_begin(&original_oparray_context);
-			zend_compile_top_stmt(CG(ast));
-			zend_emit_final_return(NULL);
-			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
-			pass_two(op_array);
-			zend_oparray_context_end(&original_oparray_context);
-			zend_file_context_end(&original_file_context);
-
-			CG(active_op_array) = original_active_op_array;
-		}
-
-		zend_ast_destroy(CG(ast));
-		zend_arena_destroy(CG(ast_arena));
+		op_array = zend_compile(ZEND_EVAL_CODE);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
 	zval_dtor(&tmp);
-	CG(in_compilation) = original_in_compilation;
+
 	return op_array;
 }
 
@@ -927,7 +904,7 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'e':
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 					*t++ = VK_ESCAPE;
 #else
 					*t++ = '\e';
@@ -1009,8 +986,9 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 						if (!valid) {
 							zend_throw_exception(zend_ce_parse_error,
-								"Invalid UTF-8 codepoint escape sequence", E_PARSE);
+								"Invalid UTF-8 codepoint escape sequence", 0);
 							zval_ptr_dtor(zendlval);
+							ZVAL_UNDEF(zendlval);
 							return FAILURE;
 						}
 
@@ -1020,8 +998,9 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						/* per RFC 3629, UTF-8 can only represent 21 bits */
 						if (codepoint > 0x10FFFF || errno) {
 							zend_throw_exception(zend_ce_parse_error,
-								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", E_PARSE);
+								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
 							zval_ptr_dtor(zendlval);
+							ZVAL_UNDEF(zendlval);
 							return FAILURE;
 						}
 
@@ -1065,6 +1044,12 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 								Z_STRLEN_P(zendlval)--;
 							}
 						}
+						if (octal_buf[2] &&
+						    (octal_buf[0] > '3')) {
+							/* 3 octit values must not overflow 0xFF (\377) */
+							zend_error(E_COMPILE_WARNING, "Octal escape sequence overflow \\%s is greater than \\377", octal_buf);
+						}
+
 						*t++ = (char) ZEND_STRTOL(octal_buf, NULL, 8);
 					} else {
 						*t++ = '\\';
@@ -1119,7 +1104,7 @@ DNUM	([0-9]*"."[0-9]+)|([0-9]+"."[0-9]*)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM	"0x"[0-9a-fA-F]+
 BNUM	"0b"[01]+
-LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
+LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
@@ -1150,6 +1135,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"yield"{WHITESPACE}"from" {
+	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_YIELD_FROM);
 }
 
@@ -1658,8 +1644,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		 * Because the lexing itself doesn't do that for us
 		 */
 		if (end != yytext + yyleng) {
-			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", E_PARSE);
-			RETURN_TOKEN(T_ERROR);
+			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+			ZVAL_UNDEF(zendlval);
+			RETURN_TOKEN(T_LNUMBER);
 		}
 	} else {
 		errno = 0;
@@ -1675,16 +1662,18 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			/* Also not an assert for the same reason */
 			if (end != yytext + yyleng) {
 				zend_throw_exception(zend_ce_parse_error,
-					"Invalid numeric literal", E_PARSE);
-				RETURN_TOKEN(T_ERROR);
+					"Invalid numeric literal", 0);
+				ZVAL_UNDEF(zendlval);
+				RETURN_TOKEN(T_DNUMBER);
 			}
 			ZEND_ASSERT(!errno);
 			RETURN_TOKEN(T_DNUMBER);
 		}
 		/* Also not an assert for the same reason */
 		if (end != yytext + yyleng) {
-			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", E_PARSE);
-			RETURN_TOKEN(T_ERROR);
+			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+			ZVAL_UNDEF(zendlval);
+			RETURN_TOKEN(T_DNUMBER);
 		}
 	}
 	ZEND_ASSERT(!errno);
@@ -1853,7 +1842,7 @@ inline_char_handler:
 /* Make sure a label character follows "->", otherwise there is no property
  * and "->" will be taken literally
  */
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x80-\xff] {
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
@@ -2042,9 +2031,7 @@ inline_char_handler:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				if (zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"') == FAILURE) {
-					RETURN_TOKEN(T_ERROR);
-				}
+				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"');
 				RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
@@ -2211,9 +2198,7 @@ inline_char_handler:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng, '"') == FAILURE) {
-		RETURN_TOKEN(T_ERROR);
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng, '"');
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
@@ -2255,9 +2240,7 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng, '`') == FAILURE) {
-		RETURN_TOKEN(T_ERROR);
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng, '`');
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
@@ -2331,9 +2314,7 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0) == FAILURE) {
-		RETURN_TOKEN(T_ERROR);
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0);
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 

@@ -1,387 +1,122 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-09 Jul 2015, PHP 7.0.0 Beta 1
+?? ??? 2016, PHP 7.1.0alpha2
 
 - Core:
-  . Fixed bug #69521 (Segfault in gc_collect_cycles()).
-    (arjen at react dot com, Laruence)
-  . Improved zend_string API (Francois Laupretre)
-  . Fixed bug #69955 (Segfault when trying to combine [] and assign-op on
-    ArrayAccess object). (Laruence)
-  . Fixed bug #69957 (Different ways of handling div/mod/intdiv). (Bob)
+  . Fixed bug #72373 (TypeError after Generator function w/declared return type
+    finishes). (Nikita)
 
-- CLI server:
-  . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
-  . Fixed bug #64878 (304 responses return Content-Type header). (cmb)
 
-- COM:
-  . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
-
-- JSON
-  . Fixed bug #62010 (json_decode produces invalid byte-sequences).
-    (Jakub Zelenka)
-
-- OCI8:
-  . Corrected oci8 hash destructors to prevent segfaults, and a few other fixes.
-    (Cameron Porter)
-
-- ODBC:
-  . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined
-    columns). (cmb)
-
-- OpenSSL:
-  . Fixed bug #69882 (OpenSSL error "key values mismatch" after
-    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
-
-- PCRE:
-  . Fixed bug #53823 (preg_replace: * qualifier on unicode replace garbles the
-    string). (cmb)
-
-- Session:
-  . Fixed bug #69952 (Data integrity issues accessing superglobals by
-    reference). (Bob)
-
-- Standard:
-  . Fixed bug #69983 (get_browser fails with user agent of null).
-    (Kalle, cmb, Laruence)
-  . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
-  . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
-
-25 Jun 2015, PHP 7.0.0 Alpha 2
+09 Jun 2016, PHP 7.1.0alpha1
 
 - Core:
-  . Fixed bug #69872 (uninitialised value in strtr with array). (Laruence)
-  . Fixed bug #69868 (Invalid read of size 1 in zend_compile_short_circuiting).
-    (Laruence)
-  . Fixed bug #69849 (Broken output of apache_request_headers). (Kalle)
-  . Fixed bug #69840 (iconv_substr() doesn't work with UTF-16BE). (Kalle)
-  . Fixed bug #69823 (PHP 7.0.0alpha1 segmentation fault when exactly 33
-    extensions are loaded). (Laruence)
-  . Fixed bug #69805 (null ptr deref and seg fault in zend_resolve_class_name).
-    (Laruence)
-  . Fixed bug #69802 (Reflection on Closure::__invoke borks type hint class
-    name). (Dmitry)
-  . Fixed bug #69761 (Serialization of anonymous classes should be prevented).
-    (Laruence)
-  . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation
-    fault). (Christoph M. Becker)
-  . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
-    7/8/8.1/10 as "Business"). (Christian Wenz)
-  . Fixed bug #69835 (phpinfo() does not report many Windows SKUs).
-    (Christian Wenz)
-  . Fixed bug #69889 (Null coalesce operator doesn't work for string offsets).
+  . Added nullable types. (Levi, Dmitry)
+  . Added DFA optimization framework based on e-SSA form. (Dmitry, Nikita)
+  . Added specialized opcode handlers (e.g. ZEND_ADD_LONG_NO_OVERFLOW).
+    (Dmitry)
+  . Change statement and fcall extension handlers to accept frame. (Joe)
+  . Implemented safe execution timeout handling, that prevents random crashes
+    after "Maximum execution time exceeded" error. (Dmitry)
+  . Fixed bug #53432 (Assignment via string index access on an empty string
+    converts to array). (Nikita)
+  . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
+  . Fixed bug #62814 (It is possible to stiffen child class members visibility).
     (Nikita)
-  . Fixed bug #69891 (Unexpected array comparison result). (Nikita)
-  . Fixed bug #69892 (Different arrays compare indentical due to integer key
-    truncation). (Nikita)
-  . Fixed bug #69893 (Strict comparison between integer and empty string keys
-    crashes). (Nikita)
-
-- DOM:
-  . Fixed bug #69846 (Segmenation fault (access violation) when iterating over
-    DOMNodeList). (Anatol Belski)
-
-- GD:
-  . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
-
-- mysqlnd:
-  . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
-    bound variables). (Laruence)
-
-- Curl:
-  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
-    yahoo dot com)
-
-- Opcache:
-  . Removed opcache.load_comments configuration directive. Now doc comments
-    loading costs nothing and always enabled. (Dmitry)
-  . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
-  
-- PCRE:
-  . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
-
-- PDO_pgsql:
-  . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
-    Statements when closeCuror() is u). (Philip Hofstetter)
-
-- SPL
-  . Fixed bug #69845 (ArrayObject with ARRAY_AS_PROPS broken). (Dmitry)
-
-- SQLite3
-  . Fixed bug #69897 (segfault when manually constructing SQLite3Result). 
-    (Kalle)
-
-- Standard
-  . Fixed bug #62922 (Truncating entire string should result in string).
+  . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
+  . Fixed bug #70228 (Memleak if return in finally block). (Dmitry)
+  . Fixed bug #71266 (Missing separation of properties HT in foreach etc).
+    (Dmitry)
+  . Fixed bug #71604 (Aborted Generators continue after nested finally).
     (Nikita)
+  . Fixed bug #71572 (String offset assignment from an empty string inserts
+    null byte). (Francois)
+  . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
+    identifiers). (Andrea)
+  . Fixed bug #72188 (Nested try/finally blocks losing return value). (Dmitry)
+  . Fixed bug #72213 (Finally leaks on nested exceptions). (Dmitry, Nikita)
+  . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
+    Reeze Xia, Dmitry)
+  . Added void return type. (Andrea)
+  . Added support for negative string offsets in string offset syntax and
+    various string functions. (Francois)
+  . Added a form of the list() construct where keys can be specified. (Andrea)
+  . Number operators taking numeric strings now emit E_NOTICEs or E_WARNINGs
+    when given malformed numeric strings. (Andrea)
+  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
+    decoct(), dechex(), integer operators and other conversions now always
+    respect scientific notation in numeric strings. (Andrea)
+  . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
+    Pierrick)
+  . Raise a compile-time warning on octal escape sequence overflow. (Sara)
+  . Added [] = as alternative construct to list() =. (Bob)
+  . Implemented logging to syslog with dynamic error levels. (Jani Ollikainen)
+  . Fixed bug #47517 (php-cgi.exe missing UAC manifest).
+    (maxdax15801 at users noreply github com)
 
-11 Jun 2015, PHP 7.0.0 Alpha 1
+- Apache2handler:
+  . Enable per-module logging in Apache 2.4+. (Martin Vobruba)
 
-- Core:
-  . Fixed bug #69767 (Default parameter value with wrong type segfaults).
-    (cmb, Laruence)
-  . Fixed bug #69756 (Fatal error: Nesting level too deep - recursive dependency
-    ? with ===). (Dmitry, Laruence)
-  . Fixed bug #69758 (Item added to array not being removed by array_pop/shift
-    ). (Laruence)
-  . Fixed bug #68475 (Add support for $callable() sytnax with 'Class::method').
-    (Julien, Aaron Piotrowski)
-  . Fixed bug #69485 (Double free on zend_list_dtor). (Laruence)
-  . Fixed bug #69427 (Segfault on magic method __call of private method in 
-    superclass). (Laruence)
-  . Improved __call() and __callStatic() magic method handling. Now they are
-    called in a stackless way using ZEND_CALL_TRAMPOLINE opcode, without
-    additional stack frame. (Laruence, Dmitry)
-  . Optimized strings concatenation. (Dmitry, Laruence)
-  . Fixed weird operators behavior. Division by zero now emits warning and 
-    returns +/-INF, modulo by zero and intdid() throws an exception, shifts
-    by negative offset throw exceptions. Compile-time evaluation of division
-    by zero is disabled. (Dmitry, Andrea, Nikita)
-  . Fixed bug #69371 (Hash table collision leads to inaccessible array keys).
-    (Laruence)
-  . Fixed bug #68933 (Invalid read of size 8 in zend_std_read_property).
-    (Laruence, arjen at react dot com)
-  . Fixed bug #68252 (segfault in Zend/zend_hash.c in function
-    _zend_hash_del_el). (Laruence)
-  . Fixed bug #65598 (Closure executed via static autoload incorrectly marked as
-    static). (Nikita)
-  . Fixed bug #66811 (Cannot access static::class in lambda, writen outside of a
-    class). (Nikita)
-  . Fixed bug #69568 (call a private function in closure failed). (Nikita)
-  . Added PHP_INT_MIN constant. (Andrea)
-  . Added Closure::call() method. (Andrea)
-  . Fixed bug #67959 (Segfault when calling phpversion('spl')). (Florian)
-  . Implemented the RFC `Catchable "Call to a member function bar() on a
-    non-object"`. (Timm)
-  . Added options parameter for unserialize allowing to specify acceptable
-    classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
-  . Fixed bug #63734 (Garbage collector can free zvals that are still
-    referenced). (Dmitry)
-  . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
-    modifier. (Guilherme Blanco)
-  . is_long() & is_integer() is now an alias of is_int(). (Kalle)
-  . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
-  . Added ?? operator. (Andrea)
-  . Added <=> operator. (Andrea)
-  . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
-  . Fixed oversight where define() did not support arrays yet const syntax did.
-    (Andrea, Dmitry)
-  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint
-    and conversion error messages. (Andrea)
-  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output
-    buffering handler). (Kalle)
-  . Removed scoped calls of non-static methods from an incompatible $this
-    context. (Nikita)
-  . Removed support for #-style comments in ini files. (Nikita)
-  . Removed support for assigning the result of new by reference. (Nikita)
-  . Invalid octal literals in source code now produce compile errors, fixes
-    PHPSadness #31. (Andrea)
-  . Removed dl() function on fpm-fcgi. (Nikita)
-  . Removed support for hexadecimal numeric strings. (Nikita)
-  . Removed obsolete extensions and SAPIs. See the full list in UPGRADING. (Anatol)
-  . Added NULL byte protection to exec, system and passthru. (Yasuo)
-  . Added error_clear_last() function. (Reeze Xia)
-  . Fixed bug #68797 (Number 2.2250738585072012e-308 converted incorrectly).
-    (Anatol)
-  . Improved zend_qsort(using hybrid sorting algo) for better performance, 
-    and also renamed zend_qsort to zend_sort. (Laruence)
-  . Added stable sorting algo zend_insert_sort. (Laruence)
-  . Implemented the RFC `Scalar Type Decalarations v0.5`. (Anthony)
-  . Implemented the RFC `Group Use Declarations`. (Marcio)
-  . Implemented the RFC `Continue Output Buffering`. (Mike)
-  . Implemented the RFC `Constructor behaviour of internal classes`. (Dan, Dmitry)
-  . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
-  . Implemented the RFC `Generator Delegation`. (Bob)
-  . Implemented the RFC `Anonymous Class Support`. (Joe, Nikita, Dmitry)
-  . Implemented the RFC `Context Sensitive Lexer`. (Marcio Almada)
-  . Fixed bug #69511 (Off-by-one buffer overflow in php_sys_readlink).
-    (Jan Starke, Anatol)
-
-- CLI server:
-  . Refactor MIME type handling to use a hash table instead of linear search.
-    (Adam)
-  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
-  . Added support for SEARCH WebDav method. (Mats Lindh)
-
-- Curl:
-  . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
-  . Removed support for unsafe file uploads. (Nikita)
-
-- Date:
-  . Fixed day_of_week function as it could sometimes return negative values
-    internally. (Derick)
-  . Removed $is_dst parameter from mktime() and gmmktime(). (Nikita)
-  . Removed date.timezone warning
-    (https://wiki.php.net/rfc/date.timezone_warning_removal). (Bob)
-  . Added "v" DateTime format modifier to get the 3-digit version of fraction 
-    of seconds. (Mariano Iglesias)
-  . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
-    RFC3339 Extended format which includes fraction of seconds (Mariano 
-    Iglesias)
-
-- DBA:
-  . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
-  . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
-
-- DOM:
-  . Made DOMNode::textContent writeable. (Tjerk)
-
-- GD:
-  . Made fontFetch's path parser thread-safe. (Sara)
-  . Removed T1Lib support. (Kalle)
-
-- Fileinfo:
-  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
-
-- Filter:
-  . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
-
-- FPM:
-  . Fixed bug #68945 (Unknown admin values segfault pools). (Laruence)
-  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
-  . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
+- CLI Server:
+  . Fixed bug #71276 (Built-in webserver does not send Date header).
+    (see at seos fr)
 
 - FTP:
-  . Fixed bug #69082 (FTPS support on Windows). (Anatol) 
+  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
+    (abrender at elitehosts dot com)
 
 - Intl:
-  . Removed deprecated aliases datefmt_set_timezone_id() and
-    IntlDateFormatter::setTimeZoneID(). (Nikita)
+  . Added IntlTimeZone::getWindowsID() and
+    IntlTimeZone::getIDForWindowsID(). (Sara)
+  . Fixed bug #69374 (IntlDateFormatter formatObject returns wrong utf8 value).
+    (lenhatanh86 at gmail com)
+  . Fixed bug #69398 (IntlDateFormatter formatObject returns wrong value when
+    time style is NONE). (lenhatanh86 at gmail com)
 
-- JSON
-  . Replace non-free JSON parser with a parser from Jsond extension, fixes #63520
-    (JSON extension includes a problematic license statement). (Jakub Zelenka)
-  . Fixed bug #68938 (json_decode() decodes empty string without error).
-    (jeremy at bat-country dot us)
-  . Fixed bug #68546 (json_decode() Fatal error: Cannot access property
-    started with '\0'). (Jakub Zelenka)
+- Hash:
+  . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
+  . Added SHA512/256 and SHA512/224 algorithms. (Sara)
 
-- LDAP
-  . Fixed bug #47222 (Implement LDAP_OPT_DIAGNOSTIC_MESSAGE). (Andreas Heigl)
+- JSON:
+  . Exported JSON parser API including json_parser_method that can be used
+    for implementing custom logic when parsing JSON. (Jakub Zelenka)
+  . Escaped U+2028 and U+2029 when JSON_UNESCAPED_UNICODE is supplied as
+    json_encode options and added JSON_UNESCAPED_LINE_TERMINATORS to restore
+    the previous behaviour. (Eddie Kohler)
 
-- LiteSpeed:
-  . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
+- PDO_Firebird:
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X86_64). (Mariuz)
 
-- libxml:
-  . Fixed handling of big lines in error messages with libxml >= 2.9.0.
-    (Christoph M. Becker)
+- Pgsql:
+  . Implemented FR #31021 (pg_last_notice() is needed to get all notice
+    messages). (Yasuo)
+  . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
 
-- Mcrypt:
-  . Fixed possible read after end of buffer and use after free. (Dmitry)
-  . Removed mcrypt_generic_end() alias. (Nikita)
-  . Removed mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb(), mcrypt_ofb(). (Nikita)
-
-- Opcache:
-  . Fixed bug #69688 (segfault with eval and opcache fast shutdown).
-    (Laruence)
-  . Added experimental (disabled by default) file based opcode cache.
-    (Dmitry, Laruence, Anatol)
-  . Fixed bug with try blocks being removed when extended_info opcode
-    generation is turned on. (Laruence)
-  . Fixed bug #68644 (strlen incorrect : mbstring + func_overload=2 +UTF-8
-    + Opcache). (Laruence)
-
-- OpenSSL:
-  . Added "alpn_protocols" SSL context option allowing encrypted client/server
-    streams to negotiate alternative protocols using the ALPN TLS extension when
-    built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
-    accessible through stream_get_meta_data() output.
-  . Removed "CN_match" and "SNI_server_name" SSL context options. Use automatic
-    detection or the "peer_name" option instead. (Nikita)
-
-- pcntl:
-  . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
-    when setting SIG_DFL). (Julien)
-  . Added wifcontinued and wcontinued. (xilon-jul)
-  . Added rusage support to pcntl_wait() and pcntl_waitpid(). (Anton Stepanenko,
-    Tony)
-
-- PCRE:
-  . Removed support for the /e (PREG_REPLACE_EVAL) modifier. (Nikita)
-
-- PDO:
-  . Fixed bug #59450 (./configure fails with "Cannot find php_pdo_driver.h").
-    (maxime dot besson at smile dot fr)
-
-- PDO_mysql:
-  . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
-    statements option). (peter dot wolanin at acquia dot com)
-
-- PDO_pgsql:
-  . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
-    ATTR_EMULATE_PREPARES). (Nikita)
-
-- Reflection
-  . Fixed inheritance chain of Reflector interface. (Tjerk)
-  . Added ReflectionGenerator class. (Bob)
-  . Added reflection support for return types and type declarations. (Sara,
-    Matteo)
+- Reflection:
+  . Fix #72209 (ReflectionProperty::getValue() doesn't fail if object doesn't match type). (Joe)
 
 - Session:
-  . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
-  . Fixed bug #68941 (mod_files.sh is a bash-script). (bugzilla at ii.nl, Yasuo)
+  . Improved fix for bug #68063 (Empty session IDs do still start sessions).
+    (Yasuo)
+  . Fixed bug #71038 (session_start() returns TRUE on failure).
+    Session save handlers must return 'string' always for successful read.
+    i.e. Non-existing session read must return empty string. PHP 7.0 is made
+    not to tolerate buggy return value. (Yasuo)
+  . Fixed bug #71394 (session_regenerate_id() must close opened session on
+    errors). (Yasuo)
 
-- SOAP:
-  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes). (Laruence)
-
-- SPL:
-  . Changed ArrayIterator implementation using zend_hash_iterator_... API.
-    Allowed modification of iterated ArrayObject using the same behavior
-    as proposed in `Fix "foreach" behavior`. Removed "Array was modified
-    outside object and internal position is no longer valid" hack. (Dmitry)
-  . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
-    nor curruption state). (Julien)
-  . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
-    breaks the RecursiveIterator). (Paul Garvin)
-
-- Sqlite3:
-  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong
-    required_num_args). (Julien)
+- SQLite3:
+  . Implemented FR #71159 (Upgraded bundled SQLite lib to 3.9.2). (Laruence)
 
 - Standard:
-  . Fixed bug #69723 (Passing parameters by reference and array_column).
+  . Fixed bug #71100 (long2ip() doesn't accept integers in strict mode).
     (Laruence)
-  . Fixed bug #69523 (Cookie name cannot be empty). (Christoph M. Becker)
-  . Fixed bug #69325 (php_copy_file_ex does not pass the argument).
-    (imbolk at gmail dot com)
-  . Fixed bug #69299 (Regression in array_filter's $flag argument in PHP 7).
-    (Laruence)
-  . Removed call_user_method() and call_user_method_array() functions. (Kalle)
-  . Fixed user session handlers (See rfc:session.user.return-value). (Sara)
-  . Added intdiv() function. (Andrea)
-  . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
-  . Remove string category support in setlocale(). (Nikita)
-  . Remove set_magic_quotes_runtime() and its alias magic_quotes_runtime().
-    (Nikita)
-  . Fixed bug #65272 (flock() out parameter not set correctly in windows).
-    (Daniel Lowrey)
-  . Added preg_replace_callback_array function. (Wei Dai)
-  . Deprecated salt option to password_hash. (Anthony)
-  . Fixed bug #69686 (password_verify reports back error on PHP7 will null
-    string). (Anthony)
-  . Added Windows support for getrusage(). (Kalle)
-  . Removed hardcoded limit on number of pipes in proc_open(). (Tony)
-
-- Streams:
-  . Fixed bug #68532 (convert.base64-encode omits padding bytes).
-    (blaesius at krumedia dot de)
-  . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
-    (Nikita)
-
-- XSL:
-  . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
-  . Removed xsl.security_prefs ini option. (Nikita)
-
-- Zlib:
-  . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
-    functions allowing incremental/streaming compression/decompression.
-    (Daniel Lowrey & Bob Weinand)
-
-- Zip:
-  . Added ZipArchive::setCompressionName and ZipArchive::setCompressionIndex
-    methods (Remi, Cedric Delmas)
-  . Update bundled libzip to 1.0.1 (Remi, Anatol)
-  . Fixed bug #67161. (ZipArchive::getStream() returns NULL for certain file)
-    (Christoph M. Becker)
+  . Implemented FR #55716 (Add an option to pass a custom stream context to
+    get_headers()). (Ferenc)
+  . Additional validation for parse_url() for login/pass components).
+    (Ilia) (Julien)
+  . Implemented FR #69359 (Provide a way to fetch the current environment
+    variables). (Ferenc)
+  . unpack() function accepts an additional optional argument $offset. (Dmitry)
+  . Implemented #51879 stream context socket option tcp_nodelay (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

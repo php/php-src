@@ -11,7 +11,7 @@ if (!(isset($matches[0]) && $matches[1] < 12)) {
 }
 ?>
 --ENV--
-NLS_LANG=
+NLS_LANG=.AL32UTF8
 --FILE--
 <?php
 
@@ -246,9 +246,8 @@ echo "Done\n";
 --EXPECTF--
 Test 1.1 In Length: default.  In Type: default.  Out Length: default.          Out Type: default
   Executing:
-    Oci_execute error ORA-6502
 string(3) "abc"
-NULL
+string(3) "abc"
 Test 1.2 In Length: default.  In Type: default.  Out Length: 10.               Out Type: default
   Executing:
 string(3) "abc"

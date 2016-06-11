@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -243,6 +243,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
 			ZVAL_STRING(&ssl_proxy_peer_name, resource->host);
 			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
+			zval_ptr_dtor(&ssl_proxy_peer_name);
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
@@ -579,13 +580,13 @@ finish:
 		}
 	}
 
-	/* Send a Connection: close header when using HTTP 1.1 or later to avoid
-	 * hanging when the server interprets the RFC literally and establishes a
-	 * keep-alive connection, unless the user specifically requests something
-	 * else by specifying a Connection header in the context options. */
-	if (protocol_version &&
-	    ((have_header & HTTP_HEADER_CONNECTION) == 0) &&
-	    (strncmp(protocol_version, "1.0", MIN(protocol_version_len, 3)) > 0)) {
+	/* Send a Connection: close header to avoid hanging when the server
+	 * interprets the RFC literally and establishes a keep-alive connection,
+	 * unless the user specifically requests something else by specifying a
+	 * Connection header in the context options. Send that header even for
+	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
+	 * keep-alive response, which is the preferred response type. */
+	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
 		php_stream_write_string(stream, "Connection: close\r\n");
 	}
 
@@ -613,10 +614,7 @@ finish:
 			} else {
 				php_error_docref(NULL, E_WARNING, "Cannot construct User-agent header");
 			}
-
-			if (ua) {
-				efree(ua);
-			}
+			efree(ua);
 		}
 	}
 

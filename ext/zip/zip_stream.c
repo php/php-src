@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +16,11 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #ifdef HAVE_CONFIG_H
 #   include "config.h"
 #endif
 #include "php.h"
 #if HAVE_ZIP
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
@@ -61,7 +59,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 			zip_error_t *err;
 			err = zip_file_get_error(self->zf);
 			stream->eof = 1;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
+			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
 			zip_error_fini(err);
 #endif
 			return 0;
@@ -357,5 +355,4 @@ php_stream_wrapper php_stream_zip_wrapper = {
 	NULL,
 	0 /* is_url */
 };
-#endif /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
 #endif /* HAVE_ZIP */

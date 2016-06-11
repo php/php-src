@@ -1,8 +1,8 @@
 --TEST--
-Error message handling (with ZendOptimizer)
+Error message handling (without ZendOpcache)
 --SKIPIF--
 <?php
-extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is not loaded");
+!extension_loaded("Zend Opcache") or die("skip Zend Opcache is loaded");
 ?>
 --FILE--
 <?php
@@ -16,18 +16,15 @@ var_dump(ini_get('display_errors'));
 var_dump(ini_get('error_reporting'));
 var_dump(ini_get('log_errors'));
 var_dump(ini_get('track_errors'));
-ini_set('display_errors', 0);
+ini_set('display_errors', "0");
 var_dump(ini_get('display_errors'));
-var_dump($php_errormsg);
 $error = 1 / 0;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--
-%s: %sivision by zero in %s on line %d
 string(1) "1"
-string(4) "8191"
+string(5) "32767"
 string(1) "0"
 string(1) "1"
 string(1) "0"
-string(%d) "%sivision by zer%s"
 string(%d) "%sivision by zer%s"

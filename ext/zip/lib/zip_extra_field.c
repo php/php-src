@@ -31,12 +31,10 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
-#include "zipint.h"
-
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "zipint.h"
 
 
 zip_extra_field_t *
@@ -207,20 +205,20 @@ _zip_ef_new(zip_uint16_t id, zip_uint16_t size, const zip_uint8_t *data, zip_fla
 }
 
 
-zip_extra_field_t *
-_zip_ef_parse(const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags, zip_error_t *error)
+bool
+_zip_ef_parse(const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags, zip_extra_field_t **ef_head_p, zip_error_t *error)
 {
     zip_buffer_t *buffer;
     zip_extra_field_t *ef, *ef2, *ef_head;
 
     if ((buffer = _zip_buffer_new((zip_uint8_t *)data, len)) == NULL) {
         zip_error_set(error, ZIP_ER_MEMORY, 0);
-        return NULL;
+        return false;
     }
     
     ef_head = ef = NULL;
     
-    while (_zip_buffer_ok(buffer) && !_zip_buffer_eof(buffer)) {
+    while (_zip_buffer_ok(buffer) && _zip_buffer_left(buffer) >= 4) {
         zip_uint16_t fid, flen;
         zip_uint8_t *ef_data;
         
@@ -229,14 +227,17 @@ _zip_ef_parse(const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags, zip_
         ef_data = _zip_buffer_get(buffer, flen);
 
         if (ef_data == NULL) {
-            break;
+	    zip_error_set(error, ZIP_ER_INCONS, 0);
+            _zip_buffer_free(buffer);
+	    _zip_ef_free(ef_head);
+	    return false;
         }
         
 	if ((ef2=_zip_ef_new(fid, flen, ef_data, flags)) == NULL) {
 	    zip_error_set(error, ZIP_ER_MEMORY, 0);
             _zip_buffer_free(buffer);
 	    _zip_ef_free(ef_head);
-	    return NULL;
+	    return false;
 	}
 
 	if (ef_head) {
@@ -248,15 +249,29 @@ _zip_ef_parse(const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags, zip_
     }
 
     if (!_zip_buffer_eof(buffer)) {
-        zip_error_set(error, ZIP_ER_INCONS, 0);
-        _zip_buffer_free(buffer);
-        _zip_ef_free(ef_head);
-        return NULL;
+	/* Android APK files align stored file data with padding in extra fields; ignore. */
+	/* see https://android.googlesource.com/platform/build/+/master/tools/zipalign/ZipAlign.cpp */
+	size_t glen = _zip_buffer_left(buffer);
+	zip_uint8_t *garbage;
+	garbage = _zip_buffer_get(buffer, glen);
+	if (glen >= 4 || garbage == NULL || memcmp(garbage, "\0\0\0", glen) != 0) {
+	    zip_error_set(error, ZIP_ER_INCONS, 0);
+	    _zip_buffer_free(buffer);
+	    _zip_ef_free(ef_head);
+	    return false;
+	}
     }
 
     _zip_buffer_free(buffer);
+
+    if (ef_head_p) {
+	*ef_head_p = ef_head;
+    }
+    else {
+        _zip_ef_free(ef_head);
+    }
     
-    return ef_head;
+    return true;
 }
 
 
@@ -400,14 +415,16 @@ _zip_read_local_ef(zip_t *za, zip_uint64_t idx)
 	if (ef_raw == NULL)
 	    return -1;
 
-	if ((ef=_zip_ef_parse(ef_raw, ef_len, ZIP_EF_LOCAL, &za->error)) == NULL) {
+	if (!_zip_ef_parse(ef_raw, ef_len, ZIP_EF_LOCAL, &ef, &za->error)) {
 	    free(ef_raw);
 	    return -1;
 	}
 	free(ef_raw);
-	
-        ef = _zip_ef_remove_internal(ef);
-	e->orig->extra_fields = _zip_ef_merge(e->orig->extra_fields, ef);
+
+	if (ef) {
+	    ef = _zip_ef_remove_internal(ef);
+	    e->orig->extra_fields = _zip_ef_merge(e->orig->extra_fields, ef);
+	}
     }
 
     e->orig->local_extra_fields_read = 1;

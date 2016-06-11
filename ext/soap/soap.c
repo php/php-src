@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -467,7 +467,7 @@ zend_module_entry soap_module_entry = {
 
 #ifdef COMPILE_DL_SOAP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(soap)
 #endif
@@ -953,9 +953,7 @@ PHP_METHOD(SoapFault, __toString)
 	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1, &rv4);
 
 	fci.size = sizeof(fci);
-	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
 	ZVAL_STRINGL(&fci.function_name, "gettraceasstring", sizeof("gettraceasstring")-1);
-	fci.symbol_table = NULL;
 	fci.object = Z_OBJ(EX(This));
 	fci.retval = &trace;
 	fci.param_count = 0;
@@ -1505,7 +1503,7 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", "Internal Error", NULL, NULL);
 		}
 		soap_server_fault_ex(function, &exception_object, NULL);
-	} 
+	}
 }
 /* }}} */
 
@@ -1536,6 +1534,11 @@ PHP_METHOD(SoapServer, handle)
 	SOAP_GLOBAL(soap_version) = service->version;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &arg, &arg_len) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 0 && ZEND_SIZE_T_INT_OVFL(arg_len)) {
+		soap_server_fault("Server", "Input string is too long", NULL, NULL, NULL);
 		return;
 	}
 
@@ -2130,7 +2133,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	_old_http_response_code = SG(sapi_headers).http_response_code;
 	_old_http_status_line = SG(sapi_headers).http_status_line;
 
-	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets) {
+	if (!PG(modules_activated) || !SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets) {
 		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		return;
 	}
@@ -2919,8 +2922,10 @@ PHP_METHOD(SoapClient, __call)
 				free_soap_headers = 1;
 			}
 			ZEND_HASH_FOREACH_VAL(default_headers, tmp) {
-				Z_ADDREF_P(tmp);
-				zend_hash_next_index_insert(soap_headers, tmp);
+				if(Z_TYPE_P(tmp) == IS_OBJECT) {
+					Z_ADDREF_P(tmp);
+					zend_hash_next_index_insert(soap_headers, tmp);
+				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
 			soap_headers = Z_ARRVAL_P(tmp);
@@ -2934,6 +2939,7 @@ PHP_METHOD(SoapClient, __call)
 		real_args = safe_emalloc(sizeof(zval), arg_count, 0);
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), param) {
 			/*zval_add_ref(param);*/
+			ZVAL_DEREF(param);
 			ZVAL_COPY_VALUE(&real_args[i], param);
 			i++;
 		} ZEND_HASH_FOREACH_END();
@@ -3090,14 +3096,15 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
    SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-  char *buf, *location, *action;
-  size_t   buf_size, location_size, action_size;
-  zend_long  version;
-  zend_long  one_way = 0;
-  zval *this_ptr = getThis();
+	zend_string *buf;
+	char      *location, *action;
+	size_t     location_size, action_size;
+	zend_long  version;
+	zend_long  one_way = 0;
+	zval      *this_ptr = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sssl|l",
-	    &buf, &buf_size,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|l",
+	    &buf,
 	    &location, &location_size,
 	    &action, &action_size,
 	    &version, &one_way) == FAILURE) {
@@ -3107,10 +3114,10 @@ PHP_METHOD(SoapClient, __doRequest)
 		one_way = 0;
 	}
 	if (one_way) {
-		if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version, NULL)) {
+		if (make_http_soap_request(this_ptr, buf, location, action, version, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, version,
 	    return_value)) {
 		return;
 	}
@@ -4327,9 +4334,14 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		zval* header;
 
 		ZEND_HASH_FOREACH_VAL(soap_headers, header) {
-			HashTable *ht = Z_OBJPROP_P(header);
+			HashTable *ht;
 			zval *name, *ns, *tmp;
 
+			if (Z_TYPE_P(header) != IS_OBJECT) {
+				continue;
+			}
+
+			ht = Z_OBJPROP_P(header);
 			if ((name = zend_hash_str_find(ht, "name", sizeof("name")-1)) != NULL &&
 			    Z_TYPE_P(name) == IS_STRING &&
 			    (ns = zend_hash_str_find(ht, "namespace", sizeof("namespace")-1)) != NULL &&
@@ -4789,7 +4801,9 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 						enc = enc->details.sdl_type->encode;
 					}
 					if (enc) {
-						smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						if (spaces.s) {
+							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						}
 						smart_str_appendc(buf, ' ');
 						smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
 						smart_str_appendl(buf, " _;\n", 4);
@@ -4802,7 +4816,9 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 					sdlAttributePtr attr;
 
 					ZEND_HASH_FOREACH_PTR(type->attributes, attr) {
-						smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						if (spaces.s) {
+							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						}
 						smart_str_appendc(buf, ' ');
 						if (attr->encode && attr->encode->details.type_str) {
 							smart_str_appends(buf, attr->encode->details.type_str);

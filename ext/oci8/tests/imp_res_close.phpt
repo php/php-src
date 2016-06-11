@@ -63,7 +63,6 @@ oci8_test_sql_execute($c, $stmtarray);
 --EXPECTF--
 Test 1
   1
-  2
 
-Warning: oci_fetch_array(): %d is not a valid oci8 statement resource in %simp_res_close.php on line %d
+Warning: oci_fetch_array(): supplied resource is not a valid oci8 statement resource in %simp_res_close.php on line %d
 ===DONE===

@@ -11,8 +11,8 @@ $context = stream_context_create();
 var_dump(stream_context_set_option($context));
 ?>
 --EXPECTF--
-Warning: stream_context_set_option(): called with wrong number or type of parameters; please RTM in %s on line %d
+Warning: stream_context_set_option() expects exactly 4 parameters, 0 given in %s on line %d
 bool(false)
 
-Warning: stream_context_set_option(): called with wrong number or type of parameters; please RTM in %s on line %d
+Warning: stream_context_set_option() expects exactly 4 parameters, 1 given in %s on line %d
 bool(false)

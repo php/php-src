@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -298,6 +298,10 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 	ZVAL_UNDEF(&retval);
 	if ((ret = php_wddx_deserialize_ex(val, vallen, &retval)) == SUCCESS) {
+		if (Z_TYPE(retval) != IS_ARRAY) {
+			zval_dtor(&retval);
+			return FAILURE;
+		}
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
 			if (key == NULL) {
 				key = zend_long_to_str(idx);
@@ -390,9 +394,8 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 	php_wddx_add_chunk_static(packet, WDDX_STRING_S);
 
 	if (Z_STRLEN_P(var) > 0) {
-		zend_string *buf;
-
-		buf = php_escape_html_entities(Z_STRVAL_P(var), Z_STRLEN_P(var), 0, ENT_QUOTES, NULL);
+		zend_string *buf = php_escape_html_entities(
+			(unsigned char *) Z_STRVAL_P(var), Z_STRLEN_P(var), 0, ENT_QUOTES, NULL);
 
 		php_wddx_add_chunk_ex(packet, ZSTR_VAL(buf), ZSTR_LEN(buf));
 
@@ -464,7 +467,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 
 			PHP_CLEANUP_CLASS_ATTRIBUTES();
 
-			objhash = HASH_OF(obj);
+			objhash = Z_OBJPROP_P(obj);
 
 			ZEND_HASH_FOREACH_VAL(sleephash, varname) {
 				if (Z_TYPE_P(varname) != IS_STRING) {
@@ -494,7 +497,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 
 		PHP_CLEANUP_CLASS_ATTRIBUTES();
 
-		objhash = HASH_OF(obj);
+		objhash = Z_OBJPROP_P(obj);
 		ZEND_HASH_FOREACH_KEY_VAL(objhash, idx, key, ent) {
 			if (ent == obj) {
 				continue;
@@ -534,7 +537,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	char tmp_buf[WDDX_BUF_LEN];
 	zend_ulong ind = 0;
 
-	target_hash = HASH_OF(arr);
+	target_hash = Z_ARRVAL_P(arr);
 	ZEND_HASH_FOREACH_KEY(target_hash, idx, key) {
 		if (key) {
 			is_struct = 1;
@@ -589,9 +592,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name)
 
 	if (name) {
 		char *tmp_buf;
-		zend_string *name_esc;
-
-		name_esc = php_escape_html_entities(ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES, NULL);
+		zend_string *name_esc = php_escape_html_entities((unsigned char *) ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES, NULL);
 		tmp_buf = emalloc(ZSTR_LEN(name_esc) + sizeof(WDDX_VAR_S));
 		snprintf(tmp_buf, ZSTR_LEN(name_esc) + sizeof(WDDX_VAR_S), WDDX_VAR_S, ZSTR_VAL(name_esc));
 		php_wddx_add_chunk(packet, tmp_buf);
@@ -736,7 +737,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 				char tmp_buf[2];
 
 				snprintf(tmp_buf, sizeof(tmp_buf), "%c", (char)strtol((char *)atts[i], NULL, 16));
-				php_wddx_process_data(user_data, tmp_buf, strlen(tmp_buf));
+				php_wddx_process_data(user_data, (XML_Char *) tmp_buf, strlen(tmp_buf));
 				break;
 			}
 		}
@@ -783,7 +784,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 
 		if (atts) for (i = 0; atts[i]; i++) {
 			if (!strcmp((char *)atts[i], EL_NAME) && atts[++i] && atts[i][0]) {
-				stack->varname = estrdup(atts[i]);
+				stack->varname = estrdup((char *)atts[i]);
 				break;
 			}
 		}
@@ -798,9 +799,9 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 			if (!strcmp((char *)atts[i], "fieldNames") && atts[++i] && atts[i][0]) {
 				zval tmp;
 				char *key;
-				char *p1, *p2, *endp;
+				const char *p1, *p2, *endp;
 
-				endp = (char *)atts[i] + strlen(atts[i]);
+				endp = (char *)atts[i] + strlen((char *)atts[i]);
 				p1 = (char *)atts[i];
 				while ((p2 = php_memnstr(p1, ",", sizeof(",")-1, endp)) != NULL) {
 					key = estrndup(p1, p2 - p1);
@@ -835,7 +836,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 
 				if (wddx_stack_top(stack, (void**)&recordset) == SUCCESS &&
 					recordset->type == ST_RECORDSET &&
-					(field = zend_hash_str_find(Z_ARRVAL(recordset->data), (char*)atts[i], strlen(atts[i]))) != NULL) {
+					(field = zend_hash_str_find(Z_ARRVAL(recordset->data), (char*)atts[i], strlen((char *)atts[i]))) != NULL) {
 					ZVAL_COPY_VALUE(&ent.data, field);
 				}
 
@@ -876,10 +877,19 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		!strcmp((char *)name, EL_DATETIME)) {
 		wddx_stack_top(stack, (void**)&ent1);
 
-		if (!strcmp((char *)name, EL_BINARY)) {
-			zend_string *new_str;
+		if (Z_TYPE(ent1->data) == IS_UNDEF) {
+			if (stack->top > 1) {
+				stack->top--;
+			} else {
+				stack->done = 1;
+			}
+			efree(ent1);
+			return;
+		}
 
-			new_str = php_base64_decode(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+		if (!strcmp((char *)name, EL_BINARY)) {
+			zend_string *new_str = php_base64_decode(
+				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
 			zval_ptr_dtor(&ent1->data);
 			ZVAL_STR(&ent1->data, new_str);
 		}
@@ -912,7 +922,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
-						Z_TYPE(ent1->data) == IS_STRING && Z_STRLEN(ent1->data)) {
+						Z_TYPE(ent1->data) == IS_STRING && Z_STRLEN(ent1->data) &&
+						ent2->type == ST_STRUCT && Z_TYPE(ent2->data) == IS_ARRAY) {
 						zend_bool incomplete_class = 0;
 
 						zend_str_tolower(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
@@ -943,12 +954,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						/* Clean up class name var entry */
 						zval_ptr_dtor(&ent1->data);
 					} else if (Z_TYPE(ent2->data) == IS_OBJECT) {
-						zend_class_entry *old_scope = EG(scope);
-
-						EG(scope) = Z_OBJCE(ent2->data);
-						add_property_zval(&ent2->data, ent1->varname, &ent1->data);
+						zend_update_property(Z_OBJCE(ent2->data), &ent2->data, ent1->varname, strlen(ent1->varname), &ent1->data);
 						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
-						EG(scope) = old_scope;
 					} else {
 						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
 					}
@@ -963,6 +970,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		}
 	} else if (!strcmp((char *)name, EL_VAR) && stack->varname) {
 		efree(stack->varname);
+		stack->varname = NULL;
 	} else if (!strcmp((char *)name, EL_FIELD)) {
 		st_entry *ent;
 		wddx_stack_top(stack, (void **)&ent);
@@ -1004,11 +1012,11 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				} else if (!strcmp((char *)s, "false")) {
 					Z_LVAL(ent->data) = 0;
 				} else {
-					stack->top--;
 					zval_ptr_dtor(&ent->data);
-					if (ent->varname)
+					if (ent->varname) {
 						efree(ent->varname);
-					efree(ent);
+					}
+					ZVAL_UNDEF(&ent->data);
 				}
 				break;
 
@@ -1045,14 +1053,14 @@ int php_wddx_deserialize_ex(const char *value, size_t vallen, zval *return_value
 	int retval;
 
 	wddx_stack_init(&stack);
-	parser = XML_ParserCreate("UTF-8");
+	parser = XML_ParserCreate((XML_Char *) "UTF-8");
 
 	XML_SetUserData(parser, &stack);
 	XML_SetElementHandler(parser, php_wddx_push_element, php_wddx_pop_element);
 	XML_SetCharacterDataHandler(parser, php_wddx_process_data);
 
 	/* XXX value should be parsed in the loop to exhaust size_t */
-	XML_Parse(parser, value, (int)vallen, 1);
+	XML_Parse(parser, (const XML_Char *) value, (int)vallen, 1);
 
 	XML_ParserFree(parser);
 
@@ -1204,7 +1212,7 @@ PHP_FUNCTION(wddx_packet_end)
 }
 /* }}} */
 
-/* {{{ proto int wddx_add_vars(resource packet_id,  mixed var_names [, mixed ...])
+/* {{{ proto bool wddx_add_vars(resource packet_id,  mixed var_names [, mixed ...])
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {

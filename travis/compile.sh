@@ -10,7 +10,9 @@ else
 	DEBUG="";
 fi
 ./buildconf --force
-./configure --quiet \
+./configure \
+--prefix=$HOME"/php-install" \
+--quiet \
 $DEBUG \
 $TS \
 --enable-phpdbg \
@@ -21,7 +23,7 @@ $TS \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
 --enable-intl \
---with-pear \
+--without-pear \
 --with-gd \
 --with-jpeg-dir=/usr \
 --with-png-dir=/usr \
@@ -54,12 +56,9 @@ $TS \
 --with-pspell=/usr \
 --with-enchant=/usr \
 --enable-wddx \
---with-imap \
---with-imap-ssl \
 --with-freetype-dir=/usr \
---with-t1lib=/usr \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg 
 make -j2 --quiet
-sudo make install
+make install

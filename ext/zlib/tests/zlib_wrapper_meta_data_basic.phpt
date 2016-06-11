@@ -25,6 +25,12 @@ gzclose($h);
 --EXPECTF--
 no wrapper
 array(7) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["stream_type"]=>
   string(4) "ZLIB"
   ["mode"]=>
@@ -33,16 +39,16 @@ array(7) {
   int(0)
   ["seekable"]=>
   bool(true)
+}
+
+with wrapper
+array(9) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
   bool(true)
   ["eof"]=>
   bool(false)
-}
-
-with wrapper
-array(9) {
   ["wrapper_type"]=>
   string(4) "ZLIB"
   ["stream_type"]=>
@@ -55,11 +61,5 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%d) "compress.zlib://%s/004.txt.gz"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
 }
 ===DONE===

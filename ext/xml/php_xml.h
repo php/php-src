@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -144,13 +144,10 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *, size_t, const XML_Char *)
 
 #define phpext_xml_ptr xml_module_ptr
 
-#ifdef ZTS
-#define XML(v) ZEND_TSRMG(xml_globals_id, zend_xml_globals *, v)
-#ifdef COMPILE_DL_XML
-ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define XML(v) (xml_globals.v)
+#define XML(v) ZEND_MODULE_GLOBALS_ACCESSOR(xml, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_XML)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #endif /* PHP_XML_H */

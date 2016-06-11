@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,7 +61,7 @@ typedef int32_t zend_off_t;
 # define ZEND_ULONG_FMT "%" PRIu64
 # define ZEND_LONG_FMT_SPEC PRId64
 # define ZEND_ULONG_FMT_SPEC PRIu64
-# ifdef PHP_WIN32
+# ifdef ZEND_WIN32
 #  define ZEND_LTOA(i, s, len) _i64toa_s((i), (s), (len), 10)
 #  define ZEND_ATOL(i, s) i = _atoi64((s))
 #  define ZEND_STRTOL(s0, s1, base) _strtoi64((s0), (s1), (base))
@@ -89,7 +89,7 @@ typedef int32_t zend_off_t;
 # define ZEND_ULONG_FMT "%" PRIu32
 # define ZEND_LONG_FMT_SPEC PRId32
 # define ZEND_ULONG_FMT_SPEC PRIu32
-# ifdef PHP_WIN32
+# ifdef ZEND_WIN32
 #  define ZEND_LTOA(i, s, len) _ltoa_s((i), (s), (len), 10)
 #  define ZEND_ATOL(i, s) i = atol((s))
 # else

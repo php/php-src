@@ -89,6 +89,7 @@ static const char *method_strings[] =
   , "LOCK"
   , "MKCOL"
   , "MOVE"
+  , "MKCALENDAR"
   , "PROPFIND"
   , "PROPPATCH"
   , "SEARCH"
@@ -326,7 +327,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
                             const char *data,
                             size_t len)
 {
-  char c, ch;
+  char ch;
+  signed char c;
   const char *p = data, *pe;
   size_t to_read;
 
@@ -584,7 +586,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'G': parser->method = PHP_HTTP_GET; break;
           case 'H': parser->method = PHP_HTTP_HEAD; break;
           case 'L': parser->method = PHP_HTTP_LOCK; break;
-          case 'M': parser->method = PHP_HTTP_MKCOL; /* or MOVE, MKACTIVITY, MERGE, M-SEARCH */ break;
+          case 'M': parser->method = PHP_HTTP_MKCOL; /* or MOVE, MKCALENDAR, MKACTIVITY, MERGE, M-SEARCH */ break;
           case 'N': parser->method = PHP_HTTP_NOTIFY; break;
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
@@ -622,6 +624,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
         } else if (parser->method == PHP_HTTP_MKCOL) {
           if (index == 1 && ch == 'O') {
             parser->method = PHP_HTTP_MOVE;
+          } else if (index == 3 && ch == 'A') {
+            parser->method = PHP_HTTP_MKCALENDAR;
           } else if (index == 1 && ch == 'E') {
             parser->method = PHP_HTTP_MERGE;
           } else if (index == 1 && ch == '-') {

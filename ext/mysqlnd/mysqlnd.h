@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #ifndef MYSQLND_H
 #define MYSQLND_H
@@ -61,6 +60,7 @@
 #include "mysqlnd_enum_n_def.h"
 #include "mysqlnd_structs.h"
 
+#define MYSQLND_STR_W_LEN(str)  str, (sizeof(str) - 1)
 
 /* Library related */
 PHPAPI void mysqlnd_library_init(void);
@@ -83,18 +83,23 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 
 /* Connect */
-PHPAPI MYSQLND * mysqlnd_init(unsigned int client_flags, zend_bool persistent);
-PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
-						  const char * host, const char * user,
-						  const char * passwd, unsigned int passwd_len,
-						  const char * db, unsigned int db_len,
-						  unsigned int port,
-						  const char * socket_or_pipe,
-						  unsigned int mysql_flags,
-						  unsigned int client_api_flags
-						 );
+#define mysqlnd_init(flags, persistent)		mysqlnd_connection_init((flags), (persistent), NULL /*use default factory*/)
+#define mysqlnd_connect(conn, host, user, pass, pass_len, db, db_len, port, socket, mysql_flags, client_api_flags) \
+			mysqlnd_connection_connect((conn), (host), (user), (pass), (pass_len), (db), (db_len), (port), (socket), (mysql_flags), (client_api_flags))
 
-#define mysqlnd_change_user(conn, user, passwd, db, silent)		((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)))
+PHPAPI MYSQLND * mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory);
+PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
+											const char * const host,
+											const char * const user,
+											const char * const passwd, unsigned int passwd_len,
+											const char * const db, unsigned int db_len,
+											unsigned int port,
+											const char * const socket_or_pipe,
+											unsigned int mysql_flags,
+											unsigned int client_api_flags
+										);
+
+#define mysqlnd_change_user(conn, user, passwd, db, silent)					((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)))
 #define mysqlnd_change_user_ex(conn, user, passwd, db, silent, passwd_len)	((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), (passwd_len))
 
 PHPAPI void mysqlnd_debug(const char *mode);
@@ -105,7 +110,7 @@ PHPAPI void mysqlnd_debug(const char *mode);
 #define mysqlnd_fetch_all(result, flags, return_value)	(result)->m.fetch_all((result), (flags), (return_value) ZEND_FILE_LINE_CC)
 #define mysqlnd_result_fetch_field_data(res,offset,ret)	(res)->m.fetch_field_data((res), (offset), (ret))
 #define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) ZEND_FILE_LINE_CC)
-#define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats((values) ZEND_FILE_LINE_CC)
+#define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats(mysqlnd_global_stats, (values) ZEND_FILE_LINE_CC)
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced))
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len))
@@ -180,7 +185,7 @@ PHPAPI void mysqlnd_free_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind);
 PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 
 
-PHPAPI const char * mysqlnd_field_type_name(enum mysqlnd_field_types field_type);
+PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type);
 
 /* LOAD DATA LOCAL */
 void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
@@ -193,7 +198,6 @@ void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 #define mysqlnd_savepoint(conn, name)		((conn)->data)->m->tx_savepoint((conn)->data, (name))
 #define mysqlnd_release_savepoint(conn, name) ((conn)->data)->m->tx_savepoint_release((conn)->data, (name))
 #define mysqlnd_list_dbs(conn, wild)		((conn)->data)->m->list_method((conn)->data, wild? "SHOW DATABASES LIKE %s":"SHOW DATABASES", (wild), NULL)
-#define mysqlnd_list_fields(conn, tab,wild)	((conn)->data)->m->list_fields((conn)->data, (tab), (wild))
 #define mysqlnd_list_processes(conn)		((conn)->data)->m->list_method((conn)->data, "SHOW PROCESSLIST", NULL, NULL)
 #define mysqlnd_list_tables(conn, wild)		((conn)->data)->m->list_method((conn)->data, wild? "SHOW TABLES LIKE %s":"SHOW TABLES", (wild), NULL)
 #define mysqlnd_dump_debug_info(conn)		((conn)->data)->m->server_dump_debug_information((conn)->data)
@@ -218,14 +222,14 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 
 
 /* PS */
-#define mysqlnd_stmt_init(conn)				((conn)->data)->m->stmt_init(((conn)->data))
-#define mysqlnd_stmt_store_result(stmt)		(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->store_result((stmt))? PASS:FAIL))
-#define mysqlnd_stmt_get_result(stmt)		(stmt)->m->get_result((stmt))
-#define mysqlnd_stmt_more_results(stmt)		(stmt)->m->more_results((stmt))
-#define mysqlnd_stmt_next_result(stmt)		(stmt)->m->next_result((stmt))
-#define mysqlnd_stmt_data_seek(stmt, row)	(stmt)->m->seek_data((stmt), (row))
-#define mysqlnd_stmt_prepare(stmt, q, qlen)	(stmt)->m->prepare((stmt), (q), (qlen))
-#define mysqlnd_stmt_execute(stmt) 			(stmt)->m->execute((stmt))
+#define mysqlnd_stmt_init(conn)						((conn)->data)->m->stmt_init(((conn)->data))
+#define mysqlnd_stmt_store_result(stmt)				(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->store_result((stmt))? PASS:FAIL))
+#define mysqlnd_stmt_get_result(stmt)				(stmt)->m->get_result((stmt))
+#define mysqlnd_stmt_more_results(stmt)				(stmt)->m->more_results((stmt))
+#define mysqlnd_stmt_next_result(stmt)				(stmt)->m->next_result((stmt))
+#define mysqlnd_stmt_data_seek(stmt, row)			(stmt)->m->seek_data((stmt), (row))
+#define mysqlnd_stmt_prepare(stmt, q, qlen)			(stmt)->m->prepare((stmt), (q), (qlen))
+#define mysqlnd_stmt_execute(stmt) 					(stmt)->m->execute((stmt))
 #define mysqlnd_stmt_send_long_data(stmt,p,d,l) 	(stmt)->m->send_long_data((stmt), (p), (d), (l))
 #define mysqlnd_stmt_alloc_param_bind(stmt)			(stmt)->m->alloc_parameter_bind((stmt))
 #define mysqlnd_stmt_free_param_bind(stmt,bind)		(stmt)->m->free_parameter_bind((stmt), (bind))
@@ -239,10 +243,10 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 #define mysqlnd_stmt_param_metadata(stmt)			(stmt)->m->get_parameter_metadata((stmt))
 #define mysqlnd_stmt_result_metadata(stmt)			(stmt)->m->get_result_metadata((stmt))
 
-#define	mysqlnd_stmt_free_result(stmt)		(stmt)->m->free_result((stmt))
-#define	mysqlnd_stmt_close(stmt, implicit)	(stmt)->m->dtor((stmt), (implicit))
-#define	mysqlnd_stmt_reset(stmt)			(stmt)->m->reset((stmt))
-#define	mysqlnd_stmt_flush(stmt)			(stmt)->m->flush((stmt))
+#define	mysqlnd_stmt_free_result(stmt)				(stmt)->m->free_result((stmt))
+#define	mysqlnd_stmt_close(stmt, implicit)			(stmt)->m->dtor((stmt), (implicit))
+#define	mysqlnd_stmt_reset(stmt)					(stmt)->m->reset((stmt))
+#define	mysqlnd_stmt_flush(stmt)					(stmt)->m->flush((stmt))
 
 
 #define mysqlnd_stmt_attr_get(stmt, attr, value)	(stmt)->m->get_attribute((stmt), (attr), (value))
@@ -252,11 +256,54 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 
 
 /* Performance statistics */
-PHPAPI void			_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC);
+PHPAPI extern MYSQLND_STATS * mysqlnd_global_stats;
+PHPAPI extern const MYSQLND_STRING mysqlnd_stats_values_names[];
+PHPAPI void			_mysqlnd_get_client_stats(MYSQLND_STATS * stats, zval *return_value ZEND_FILE_LINE_DC);
+
+
+#ifndef MYSQLND_CORE_STATISTICS_DISABLED
+
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) \
+	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic))
+
+#define MYSQLND_DEC_GLOBAL_STATISTIC(statistic) \
+	MYSQLND_DEC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic))
+
+#define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2) \
+	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2))
+
+#define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic) \
+	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic)); \
+	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), (conn_stats), (statistic));
+
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value) \
+	MYSQLND_INC_STATISTIC_W_VALUE(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic), (value)); \
+	MYSQLND_INC_STATISTIC_W_VALUE(MYSQLND_G(collect_statistics), (conn_stats), (statistic), (value));
+
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn_stats, statistic1, value1, statistic2, value2) \
+	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2)); \
+	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2));
+
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3) \
+	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2), (statistic3), (value3)); \
+	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2), (statistic3), (value3));
+
+#else
+
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic)
+#define MYSQLND_DEC_GLOBAL_STATISTIC(statistic)
+#define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2)
+#define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn_stats, statistic1, value1, statistic2, value2)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3)
+
+#endif /* MYSQLND_CORE_STATISTICS_DISABLED */
+
 
 /* double check the class name to avoid naming conflicts when using these: */
-#define MYSQLND_METHOD(class, method) php_##class##_##method##_pub
-#define MYSQLND_METHOD_PRIVATE(class, method) php_##class##_##method##_priv
+#define MYSQLND_METHOD(class, method) 			mysqlnd_##class##_##method##_pub
+#define MYSQLND_METHOD_PRIVATE(class, method)	mysqlnd_##class##_##method##_priv
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	char *			debug;	/* The actual string */
@@ -281,14 +328,10 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)
+#define MYSQLND_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(mysqlnd, v)
 
-#ifdef ZTS
-#define MYSQLND_G(v) ZEND_TSRMG(mysqlnd_globals_id, zend_mysqlnd_globals *, v)
-#ifdef COMPILE_DL_MYSQLND
-ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define MYSQLND_G(v) (mysqlnd_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_MYSQLND)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 

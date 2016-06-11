@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -692,7 +692,7 @@ int fcgi_listen(const char *path, int backlog)
 				if(strlen(host) > MAXFQDNLEN) {
 					hep = NULL;
 				} else {
-					hep = gethostbyname(host);
+					hep = php_network_gethostbyname(host);
 				}
 				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
@@ -1049,7 +1049,12 @@ static int fcgi_read_request(fcgi_request *req)
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
-	req->has_env = 1;
+
+	if (req->has_env) {
+		fcgi_hash_clean(&req->env);
+	} else {
+		req->has_env = 1;
+	}
 
 	if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 	    hdr.version < FCGI_VERSION_1) {
@@ -1277,21 +1282,21 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 			DisconnectNamedPipe(pipe);
 		} else {
 			if (!force) {
-				fcgi_header buf;
+				char buf[8];
 
 				shutdown(req->fd, 1);
-				/* read the last FCGI_STDIN header (it may be omitted) */
-				recv(req->fd, (char *)(&buf), sizeof(buf), 0);
+				/* read any remaining data, it may be omitted */
+				while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
 			}
 			closesocket(req->fd);
 		}
 #else
 		if (!force) {
-			fcgi_header buf;
+			char buf[8];
 
 			shutdown(req->fd, 1);
-			/* read the last FCGI_STDIN header (it may be omitted) */
-			recv(req->fd, (char *)(&buf), sizeof(buf), 0);
+			/* read any remaining data, it may be omitted */
+			while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
 		}
 		close(req->fd);
 #endif

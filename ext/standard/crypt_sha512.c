@@ -643,8 +643,8 @@ php_sha512_crypt(const char *key, const char *salt) {
 	 password.  We can compute an upper bound for the size of the
 	 result in advance and so we can prepare the buffer we pass to
 	 `sha512_crypt_r'.  */
-	static char *buffer;
-	static int buflen;
+	ZEND_TLS char *buffer;
+	ZEND_TLS int buflen = 0;
 	int needed = (int)(sizeof(sha512_salt_prefix) - 1
 		+ sizeof(sha512_rounds_prefix) + 9 + 1
 		+ strlen(salt) + 1 + 86 + 1);

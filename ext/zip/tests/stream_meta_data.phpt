@@ -35,6 +35,12 @@ fclose($fp);
 ?>
 --EXPECTF--
 array(8) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["stream_type"]=>
   string(3) "zip"
   ["mode"]=>
@@ -45,14 +51,14 @@ array(8) {
   bool(false)
   ["uri"]=>
   string(3) "foo"
+}
+array(9) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
   bool(true)
   ["eof"]=>
   bool(false)
-}
-array(9) {
   ["wrapper_type"]=>
   string(11) "zip wrapper"
   ["stream_type"]=>
@@ -65,10 +71,4 @@ array(9) {
   bool(false)
   ["uri"]=>
   string(%d) "zip://%stest_with_comment.zip#foo"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
 }

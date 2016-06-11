@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -336,7 +336,11 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		int bytes_written = write(data->fd, buf, (unsigned int)count);
+		int bytes_written;
+		if (ZEND_SIZE_T_UINT_OVFL(count)) {
+			count = UINT_MAX;
+		}
+		bytes_written = _write(data->fd, buf, (unsigned int)count);
 #else
 		int bytes_written = write(data->fd, buf, count);
 #endif
@@ -1480,7 +1484,7 @@ not_relative_path:
 	}
 #endif
 
-	if (!path || (path && !*path)) {
+	if (!path || !*path) {
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 

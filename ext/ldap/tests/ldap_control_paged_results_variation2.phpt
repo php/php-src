@@ -32,7 +32,7 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 bool(true)
-resource(6) of type (ldap result)
+resource(%d) of type (ldap result)
 array(3) {
   ["count"]=>
   int(2)

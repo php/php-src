@@ -30,6 +30,6 @@ var_dump( gmmktime() );
 *** Testing gmmktime() : basic functionality ***
 int(1218182888)
 
-Strict Standards: gmmktime(): You should be using the time() function instead in %s on line %d
+Deprecated: gmmktime(): You should be using the time() function instead in %s on line %d
 int(%d)
 ===DONE===

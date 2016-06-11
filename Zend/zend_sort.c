@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 	register char  *seg2;
 	register char  *seg2p;
 	register int    loop;
-	uint            offset;
+	size_t          offset;
 
 	begin_stack[0] = (char *) base;
 	end_stack[0]   = (char *) base + ((nmemb - 1) * siz);

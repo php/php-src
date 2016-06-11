@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -242,6 +242,13 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 		GC_REFCOUNT(ref)++;
 		gc_collect_cycles();
 		GC_REFCOUNT(ref)--;
+		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
+			zval_dtor_func(ref);
+			return;
+		}
+		if (UNEXPECTED(GC_INFO(ref))) {
+			return;
+		}
 		newRoot = GC_G(unused);
 		if (!newRoot) {
 #if ZEND_GC_DEBUG

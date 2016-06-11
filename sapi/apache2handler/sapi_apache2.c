@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,7 +66,7 @@
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 static size_t
@@ -123,15 +123,15 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_e
 				}
 				ctx->content_type = estrdup(val);
 			} else if (!strcasecmp(sapi_header->header, "content-length")) {
-#ifdef PHP_WIN32
-# ifdef APR_HAS_LARGE_FILES
-				ap_set_content_length(ctx->r, (apr_off_t) _strtoui64(val, (char **)NULL, 10));
-# else
-				ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
-# endif
-#else
-				ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
-#endif
+				apr_off_t clen = 0;
+
+				if (APR_SUCCESS != apr_strtoff(&clen, val, (char **) NULL, 10)) {
+					/* We'll fall back to strtol, since that's what we used to
+					 * do anyway. */
+					clen = (apr_off_t) strtol(val, (char **) NULL, 10);
+				}
+
+				ap_set_content_length(ctx->r, clen);
 			} else if (op == SAPI_HEADER_REPLACE) {
 				apr_table_set(ctx->r->headers_out, sapi_header->header, val);
 			} else {
@@ -455,6 +455,11 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	(void)ts_resource(0);
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
+
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
+#endif
+
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);

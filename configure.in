@@ -118,7 +118,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 ])
 
 PHP_MAJOR_VERSION=7
-PHP_MINOR_VERSION=0
+PHP_MINOR_VERSION=1
 PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
@@ -131,9 +131,9 @@ PHP_SUBST(PHP_RELEASE_VERSION)
 PHP_SUBST(PHP_EXTRA_VERSION)
 
 dnl Define where extension directories are located in the configure context
-AC_DEFUN([PHP_EXT_BUILDDIR],[ext/$1])dnl
-AC_DEFUN([PHP_EXT_DIR],[ext/$1])dnl
-AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir/ext/$1])dnl
+AC_DEFUN([PHP_EXT_BUILDDIR],[$config_m4_dir])dnl
+AC_DEFUN([PHP_EXT_DIR],[$config_m4_dir])dnl
+AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir/$config_m4_dir])dnl
 AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl
 
 dnl Setting up the PHP version based on the information above.
@@ -577,6 +577,12 @@ PHP_CHECK_STDINT_TYPES
 
 dnl Check __builtin_expect
 PHP_CHECK_BUILTIN_EXPECT
+dnl Check __builtin_clz
+PHP_CHECK_BUILTIN_CLZ
+dnl Check __builtin_ctzl
+PHP_CHECK_BUILTIN_CTZL
+dnl Check __builtin_ctzll
+PHP_CHECK_BUILTIN_CTZLL
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -1420,9 +1426,7 @@ AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
 ])
 AC_PROG_LIBTOOL
 
-if test "$enable_debug" != "yes"; then
-  PHP_SET_LIBTOOL_VARIABLE([--silent])
-fi
+PHP_SET_LIBTOOL_VARIABLE([--silent])
 
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])

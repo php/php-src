@@ -269,9 +269,15 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 static void Transliterator_write_property( zval *object, zval *member, zval *value,
 	void **cache_slot )
 {
+	zend_class_entry *scope;
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
-	if( ( EG( scope ) != Transliterator_ce_ptr ) &&
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+	if( ( scope != Transliterator_ce_ptr ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{

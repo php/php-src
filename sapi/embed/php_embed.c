@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ const char HARDCODED_INI[] =
 	"max_input_time=-1\n\0";
 
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 static char* php_embed_read_cookies(void)
@@ -175,6 +175,10 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
   tsrm_startup(1, 1, 0, NULL);
   (void)ts_resource(0);
   ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
 #endif
 
   sapi_startup(&php_embed_module);

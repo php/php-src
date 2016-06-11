@@ -8,6 +8,7 @@ if (@preg_match_all('/\p{N}/', '0123456789', $dummy) === false) {
 ?>
 --INI--
 pcre.backtrack_limit=2
+pcre.jit=0
 --FILE--
 <?php
 

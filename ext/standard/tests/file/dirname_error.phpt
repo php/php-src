@@ -20,7 +20,7 @@ var_dump( dirname() );
 echo "\n-- Testing dirname() function with more than expected no. of arguments --\n";
 $path = 'string_val';
 $extra_arg = 10;
-var_dump( dirname($path, $extra_arg) );
+var_dump( dirname($path, 1, $extra_arg) );
 
 ?>
 ===DONE===
@@ -29,12 +29,12 @@ var_dump( dirname($path, $extra_arg) );
 
 -- Testing dirname() function with Zero arguments --
 
-Warning: dirname() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: dirname() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing dirname() function with more than expected no. of arguments --
 
-Warning: dirname() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: dirname() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 ===DONE===
 

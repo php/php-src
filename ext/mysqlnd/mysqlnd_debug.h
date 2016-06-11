@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,10 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef MYSQLND_DEBUG_H
 #define MYSQLND_DEBUG_H
@@ -70,6 +67,17 @@ void mysqlnd_debug_trace_plugin_register(void);
 
 PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 
+#define MYSQLND_DEBUG_DUMP_TIME				1
+#define MYSQLND_DEBUG_DUMP_TRACE			2
+#define MYSQLND_DEBUG_DUMP_PID				4
+#define MYSQLND_DEBUG_DUMP_LINE				8
+#define MYSQLND_DEBUG_DUMP_FILE				16
+#define MYSQLND_DEBUG_DUMP_LEVEL			32
+#define MYSQLND_DEBUG_APPEND				64
+#define MYSQLND_DEBUG_FLUSH					128
+#define MYSQLND_DEBUG_TRACE_MEMORY_CALLS	256
+#define MYSQLND_DEBUG_PROFILE_CALLS			512
+
 
 #if defined(__GNUC__) || defined(PHP_WIN32)
 #ifdef PHP_WIN32
@@ -115,6 +123,7 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 					struct timeval __dbg_prof_tp = {0}; \
 					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
 					zend_bool dbg_skip_trace = TRUE; \
+					((void)__dbg_prof_start); \
 					if ((dbg_obj1)) { \
 						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
