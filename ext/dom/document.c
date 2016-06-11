@@ -1856,7 +1856,7 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	vptr = xmlSchemaNewValidCtxt(sptr);
 	if (!vptr) {
 		xmlSchemaFree(sptr);
-		php_error(E_ERROR, "Invalid Schema Validation Context");
+		zend_throw_error(NULL, "Invalid Schema Validation Context");
 		RETURN_FALSE;
 	}
 
@@ -1956,7 +1956,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	vptr = xmlRelaxNGNewValidCtxt(sptr);
 	if (!vptr) {
 		xmlRelaxNGFree(sptr);
-		php_error(E_ERROR, "Invalid RelaxNG Validation Context");
+		zend_throw_error(NULL, "Invalid RelaxNG Validation Context");
 		RETURN_FALSE;
 	}
 
@@ -2248,7 +2248,7 @@ PHP_METHOD(domdocument, registerNodeClass)
 		RETURN_TRUE;
 	}
 	
-	zend_throw_error(zend_ce_error, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
+	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	RETURN_FALSE;
 }
 /* }}} */

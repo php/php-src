@@ -107,7 +107,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 	intern = Z_REFLECTION_P(getThis());                                                      				\
 	if (intern->ptr == NULL) {                                                            \
 		RETURN_ON_EXCEPTION                                                                                 \
-		zend_throw_error(zend_ce_error, "Internal error: Failed to retrieve the reflection object");        \
+		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object");        \
 		return;                                                                                             \
 	}                                                                                                       \
 
@@ -1499,7 +1499,7 @@ static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTIO
 		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) {
 			return NULL;
 		}
-		zend_throw_error(zend_ce_error, "Internal error: Failed to retrieve the reflection object");
+		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object");
 		return NULL;
 	}
 
@@ -5190,7 +5190,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 			if (instanceof_function(Z_OBJCE_P(class_name), reflection_class_ptr)) {
 				argument = Z_REFLECTION_P(class_name);
 				if (argument->ptr == NULL) {
-					zend_throw_error(zend_ce_error, "Internal error: Failed to retrieve the argument's reflection object");
+					zend_throw_error(NULL, "Internal error: Failed to retrieve the argument's reflection object");
 					return;
 				}
 				class_ce = argument->ptr;
@@ -5234,7 +5234,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 			if (instanceof_function(Z_OBJCE_P(interface), reflection_class_ptr)) {
 				argument = Z_REFLECTION_P(interface);
 				if (argument->ptr == NULL) {
-					zend_throw_error(zend_ce_error, "Internal error: Failed to retrieve the argument's reflection object");
+					zend_throw_error(NULL, "Internal error: Failed to retrieve the argument's reflection object");
 					return;
 				}
 				interface_ce = argument->ptr;
@@ -5635,7 +5635,7 @@ ZEND_METHOD(reflection_property, getValue)
 			return;
 		}
 		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
-			zend_throw_error(zend_ce_error, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
+			zend_throw_error(NULL, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
 			/* Bails out */
 		}
 		member_p = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
@@ -5702,7 +5702,7 @@ ZEND_METHOD(reflection_property, setValue)
 		}
 
 		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
-			zend_throw_error(zend_ce_error, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
+			zend_throw_error(NULL, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
 			return;
 		}
 		variable_ptr = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];

@@ -38,7 +38,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "zend_exceptions.h"
 
 #include <stddef.h>
 
@@ -1864,7 +1863,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				oper = LDAP_MOD_REPLACE;
 				break;
 			default:
-				zend_throw_error(zend_ce_error, "Unknown and uncaught modification type.");
+				zend_throw_error(NULL, "Unknown and uncaught modification type.");
 				RETVAL_FALSE;
 				efree(ldap_mods[i]);
 				num_mods = i;

@@ -22,4 +22,10 @@ try {
 var_dump( $foo );
 
 --EXPECTF--
-Fatal error: Invalid serialization data for DateTime object in %sbug62852_var2.php on line %d
+Fatal error: Uncaught Error: Invalid serialization data for DateTime object in %sbug62852_var2.php:%d
+Stack trace:
+#0 %sbug62852_var2.php(%d): DateTime->__wakeup()
+#1 [internal function]: Foo->__wakeup()
+#2 %sbug62852_var2.php(%d): unserialize('O:3:"Foo":3:{s:...')
+#3 {main}
+  thrown in %sbug62852_var2.php on line %d

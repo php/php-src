@@ -4446,7 +4446,7 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 	char address[SENDBUFLEN];
 
 	if (_php_imap_address_size(addresslist) >= SENDBUFLEN) {
-		zend_throw_error(zend_ce_error, "Address buffer overflow");
+		zend_throw_error(NULL, "Address buffer overflow");
 		return NULL;
 	}
 	address[0] = 0;

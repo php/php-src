@@ -28,7 +28,6 @@
 #if HAVE_TIDY
 
 #include "php_ini.h"
-#include "zend_exceptions.h"
 #include "ext/standard/info.h"
 
 #include "tidy.h"
@@ -1850,7 +1849,7 @@ static TIDY_NODE_METHOD(getParent)
          __constructor for tidyNode. */
 static TIDY_NODE_METHOD(__construct)
 {
-	zend_throw_error(zend_ce_error, "You should not create a tidyNode manually");
+	zend_throw_error(NULL, "You should not create a tidyNode manually");
 }
 /* }}} */
 

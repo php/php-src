@@ -40,7 +40,6 @@
 #include "rfc1867.h"
 #include "php_variables.h"
 #include "php_session.h"
-#include "zend_exceptions.h"
 #include "ext/standard/md5.h"
 #include "ext/standard/sha1.h"
 #include "ext/standard/php_var.h"
@@ -349,7 +348,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 		case PS_HASH_FUNC_OTHER:
 			if (!PS(hash_ops)) {
 				efree(buf);
-				zend_throw_error(zend_ce_error, "Invalid session hash function");
+				zend_throw_error(NULL, "Invalid session hash function");
 				return NULL;
 			}
 
@@ -361,7 +360,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 #endif /* HAVE_HASH_EXT */
 		default:
 			efree(buf);
-			zend_throw_error(zend_ce_error, "Invalid session hash function");
+			zend_throw_error(NULL, "Invalid session hash function");
 			return NULL;
 	}
 	efree(buf);
@@ -530,7 +529,7 @@ static void php_session_initialize(void) /* {{{ */
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
 			php_session_abort();
-			zend_throw_error(zend_ce_error, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			return;
 		}
 		if (PS(use_cookies)) {

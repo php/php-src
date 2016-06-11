@@ -1411,7 +1411,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 		success = SUCCESS;
 	} else {
-		zend_throw_error(zend_ce_error, "Unable to call %s::%s()", intern->inner.ce->name, method);
+		zend_throw_error(NULL, "Unable to call %s::%s()", intern->inner.ce->name, method);
 		success = FAILURE;
 	}
 
@@ -1712,7 +1712,7 @@ static inline void spl_dual_it_next(spl_dual_it_object *intern, int do_free)
 	if (do_free) {
 		spl_dual_it_free(intern);
 	} else if (!intern->inner.iterator) {
-		zend_throw_error(zend_ce_error, "The inner constructor wasn't initialized with an iterator instance");
+		zend_throw_error(NULL, "The inner constructor wasn't initialized with an iterator instance");
 		return;
 	}
 	intern->inner.iterator->funcs->move_forward(intern->inner.iterator);

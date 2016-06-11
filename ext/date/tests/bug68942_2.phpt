@@ -6,4 +6,9 @@ $data = unserialize('a:2:{i:0;O:8:"DateTime":3:{s:4:"date";s:26:"2000-01-01 00:0
 var_dump($data);
 ?>
 --EXPECTF--
-Fatal error: Invalid serialization data for DateTime object in %s%ebug68942_2.php on line %d
+Fatal error: Uncaught Error: Invalid serialization data for DateTime object in %sbug68942_2.php:%d
+Stack trace:
+#0 [internal function]: DateTime->__wakeup()
+#1 %sbug68942_2.php(%d): unserialize('a:2:{i:0;O:8:"D...')
+#2 {main}
+  thrown in %sbug68942_2.php on line %d

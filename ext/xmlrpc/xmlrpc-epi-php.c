@@ -66,7 +66,6 @@
 #endif
 
 #include "php.h"
-#include "zend_exceptions.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
@@ -558,7 +557,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ht = HASH_OF(&val);
 						if (ht && ht->u.v.nApplyCount > 1) {
-							zend_throw_error(zend_ce_error, "XML-RPC doesn't support circular references");
+							zend_throw_error(NULL, "XML-RPC doesn't support circular references");
 							return NULL;
 						}
 

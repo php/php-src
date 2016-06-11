@@ -285,7 +285,7 @@ PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj)
 /* {{{ dom_read_na */
 static int dom_read_na(dom_object *obj, zval *retval)
 {
-	zend_throw_error(zend_ce_error, "Cannot read property");
+	zend_throw_error(NULL, "Cannot read property");
 	return FAILURE;
 }
 /* }}} */
@@ -293,7 +293,7 @@ static int dom_read_na(dom_object *obj, zval *retval)
 /* {{{ dom_write_na */
 static int dom_write_na(dom_object *obj, zval *newval)
 {
-	zend_throw_error(zend_ce_error, "Cannot write property");
+	zend_throw_error(NULL, "Cannot write property");
 	return FAILURE;
 }
 /* }}} */
