@@ -74,7 +74,7 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_DSC)
 
 void zend_known_interned_strings_init(zend_string ***strings, uint32_t *count)
 {
-	*strings = known_interned_strings;
+	*strings = (zend_string **)known_interned_strings;
 	*count   = known_interned_strings_count;
 }
 
