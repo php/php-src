@@ -967,6 +967,22 @@ static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC) 
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+#define PHP_OPENSSL_RAND_ADD_TIME() ((void) 0)
+#else
+#define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
+
+static inline void php_openssl_rand_add_timeval()  /* {{{ */
+{
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	RAND_add(&tv, sizeof(tv), 0.0);
+}
+/* }}} */
+
+#endif
+
 static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded TSRMLS_DC) /* {{{ */
 {
 	char buffer[MAXPATHLEN];
@@ -1010,6 +1026,7 @@ static int php_openssl_write_rand_file(const char * file, int egdsocket, int see
 	if (file == NULL) {
 		file = RAND_file_name(buffer, sizeof(buffer));
 	}
+	PHP_OPENSSL_RAND_ADD_TIME();
 	if (file == NULL || !RAND_write_file(file)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to write random state");
 		return FAILURE;
@@ -3399,12 +3416,14 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	if ((req->priv_key = EVP_PKEY_new()) != NULL) {
 		switch(req->priv_key_type) {
 			case OPENSSL_KEYTYPE_RSA:
+				PHP_OPENSSL_RAND_ADD_TIME();
 				if (EVP_PKEY_assign_RSA(req->priv_key, RSA_generate_key(req->priv_key_bits, 0x10001, NULL, NULL))) {
 					return_val = req->priv_key;
 				}
 				break;
 #if !defined(NO_DSA) && defined(HAVE_DSA_DEFAULT_METHOD)
 			case OPENSSL_KEYTYPE_DSA:
+				PHP_OPENSSL_RAND_ADD_TIME();
 				{
 					DSA *dsapar = DSA_generate_parameters(req->priv_key_bits, NULL, 0, NULL, NULL, NULL, NULL);
 					if (dsapar) {
@@ -3422,6 +3441,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 #endif
 #if !defined(NO_DH)
 			case OPENSSL_KEYTYPE_DH:
+				PHP_OPENSSL_RAND_ADD_TIME();
 				{
 					DH *dhpar = DH_generate_parameters(req->priv_key_bits, 2, NULL, NULL);
 					int codes = 0;
@@ -3540,6 +3560,7 @@ zend_bool php_openssl_pkey_init_dsa(DSA *dsa)
 	if (dsa->priv_key || dsa->pub_key) {
 		return 1;
 	}
+	PHP_OPENSSL_RAND_ADD_TIME();
 	if (!DSA_generate_key(dsa)) {
 		return 0;
 	}
@@ -3562,6 +3583,7 @@ zend_bool php_openssl_pkey_init_dh(DH *dh)
 	if (dh->pub_key) {
 		return 1;
 	}
+	PHP_OPENSSL_RAND_ADD_TIME();
 	if (!DH_generate_key(dh)) {
 		return 0;
 	}
@@ -5461,6 +5483,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_FALSE;
 	}
 #else
+	PHP_OPENSSL_RAND_ADD_TIME();
 	if (RAND_bytes(buffer, buffer_length) <= 0) {
 		efree(buffer);
 		if (zstrong_result_returned) {
