@@ -21,7 +21,7 @@
 #include "ext/standard/php_var.h"
 #include "ext/standard/basic_functions.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 	zval *zvp;
@@ -281,11 +281,6 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 				pefree(elm, zend_extensions.persistent);
 				zend_extensions.count--;
 			} else {
-/*				zend_hash_get_current_key_zval_ex(Z_ARRVAL_PP(zvpp), &key, &hpos);
-				if (Z_TYPE(key) == IS_LONG) {
-					zend_hash_index_del(Z_ARRVAL_PP(zvpp), Z_LVAL(key));
-				}
-*/
 				zend_hash_del(Z_ARRVAL_P(zvp), strkey);
 			}
 		}

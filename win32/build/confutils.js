@@ -2156,7 +2156,7 @@ function ADD_FLAG(name, flags, target)
 		        match can be done. This will also
 			help to normalize flags and to not
 			to insert duplicates. */
-		if (curr_flags.indexOf(" " + flags) >= 0) {
+		if (curr_flags.indexOf(" " + flags) >= 0 || curr_flags.indexOf(flags + " ") >= 0) {
 			return;
 		}
 		

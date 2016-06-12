@@ -610,7 +610,6 @@ failure:
 
 static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
 {
-	zend_class_entry *ce1;
 	Bucket *p, *end;
 	zval *t;
 
@@ -626,7 +625,17 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 				/* Mangled key - ignore and wait for runtime */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
-				goto failure;
+				zend_class_entry *ce1 = Z_PTR(p->val);
+				if (!(ce1->ce_flags & ZEND_ACC_ANON_CLASS)) {
+					CG(in_compilation) = 1;
+					zend_set_compiled_filename(ce1->info.user.filename);
+					CG(zend_lineno) = ce1->info.user.line_start;
+					zend_error(E_ERROR,
+							"Cannot declare %s %s, because the name is already in use",
+							zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
+					return;
+				}
+				continue;
 			}
 		} else {
 			t = _zend_hash_append_ptr(target, p->key, Z_PTR(p->val));
@@ -637,13 +646,6 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
 	return;
-
-failure:
-	ce1 = Z_PTR(p->val);
-	CG(in_compilation) = 1;
-	zend_set_compiled_filename(ce1->info.user.filename);
-	CG(zend_lineno) = ce1->info.user.line_start;
-	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
 }
 
 #ifdef __SSE2__

@@ -597,7 +597,9 @@ try_again:
 					if (obj_ht) {
 						zval arr;
 
-						if (!Z_OBJCE_P(op)->default_properties_count && obj_ht == Z_OBJ_P(op)->properties) {
+						if (!Z_OBJCE_P(op)->default_properties_count &&
+							obj_ht == Z_OBJ_P(op)->properties &&
+							!ZEND_HASH_GET_APPLY_COUNT(Z_OBJ_P(op)->properties)) {
 							/* fast copy */
 							if (EXPECTED(Z_OBJ_P(op)->handlers == &std_object_handlers)) {
 								ZVAL_ARR(&arr, obj_ht);
@@ -2924,6 +2926,9 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 		}
 		if (i == needle_len) {
 			return p;
+		}
+		if (UNEXPECTED(p == end)) {
+			return NULL;
 		}
 		p += td[(unsigned char)(p[needle_len])];
 	}

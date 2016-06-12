@@ -12,33 +12,17 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef MYSQLND_PRIV_H
 #define MYSQLND_PRIV_H
 
-#ifndef Z_ADDREF_P
-/* PHP 5.2, old GC */
-#define Z_ADDREF_P(pz)				(++(pz)->refcount)
-#define Z_DELREF_P(pz)				(--(pz)->refcount)
-#define Z_REFCOUNT_P(pz)			((pz)->refcount)
-#define Z_SET_REFCOUNT_P(pz, rc)	((pz)->refcount = rc)
-#define Z_REFCOUNT_PP(ppz)			Z_REFCOUNT_P(*(ppz))
-#define Z_DELREF_PP(ppz)			Z_DELREF_P(*(ppz))
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
-#endif
-
-#ifndef pestrndup
-#define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 #endif
 
 #define MYSQLND_STR_W_LEN(str)  str, (sizeof(str) - 1)

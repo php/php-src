@@ -681,6 +681,9 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			MAKE_NOP(src);
 		}
 
+#if 0
+	   /* This pattern is unnecessary for PHP7, 
+		* since compiler won't generate ZEND_FREE for ZEND_BOOL anymore */
        /* T = BOOL(X), FREE(T) => NOP */
 		if (opline->opcode == ZEND_FREE &&
 			ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
@@ -689,13 +692,15 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			if (src->opcode == ZEND_BOOL) {
 				if (ZEND_OP1_TYPE(src) == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(src));
+				} else if (ZEND_OP1_TYPE(src) == IS_TMP_VAR) {
+					src->opcode = ZEND_FREE;
+				} else {
+					MAKE_NOP(src);
 				}
-				MAKE_NOP(src);
 				MAKE_NOP(opline);
 			}
 		}
 
-#if 0
 		/* pre-evaluate functions:
 		   constant(x)
 		   defined(x)
@@ -1466,9 +1471,9 @@ next_target:
 				    		same_var == VAR_NUM_EX(target->op1) &&
 							target_block->follow_to &&
 							!target_block->protected) {
-					/* JMPZ(X, L), L: X = JMPNZ_EX(X, L2) -> JMPZ(X, L+1) */
+					/* JMPZ(X, L), L: T = JMPNZ_EX(X, L2) -> T = JMPZ_EX(X, L+1) */
 					last_op->opcode += 3;
-					last_op->result = target->result;
+					COPY_NODE(last_op->result, target->result);
 					del_source(block, block->op2_to);
 					block->op2_to = target_block->follow_to;
 					ADD_SOURCE(block, block->op2_to);
@@ -1891,8 +1896,11 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_b
 					case ZEND_BOOL_NOT:
 						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 							literal_dtor(&ZEND_OP1_LITERAL(opline));
+						} else if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
+							opline->opcode = ZEND_FREE;
+						} else {
+							MAKE_NOP(opline);
 						}
-						MAKE_NOP(opline);
 						break;
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:

@@ -296,6 +296,7 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, con
 void zend_verify_abstract_class(zend_class_entry *ce);
 
 ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim);
+ZEND_API void zend_fetch_dimension_by_zval_is(zval *result, zval *container, zval *dim, int dim_type);
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 

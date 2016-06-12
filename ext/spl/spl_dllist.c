@@ -156,7 +156,7 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
 
 	while (current) {
 		next = current->next;
-		if(current && dtor) {
+		if (dtor) {
 			dtor(current);
 		}
 		SPL_LLIST_DELREF(current);
@@ -830,7 +830,6 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		index = spl_offset_convert_to_long(zindex);
 
 		if (index < 0 || index >= intern->llist->count) {
-			zval_ptr_dtor(value);
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
 			return;
 		}

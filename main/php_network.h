@@ -74,6 +74,10 @@ END_EXTERN_C()
 #include <sys/socket.h>
 #endif
 
+#ifdef HAVE_GETHOSTBYNAME_R
+#include <netdb.h>
+#endif
+
 /* These are here, rather than with the win32 counterparts above,
  * since <sys/socket.h> defines them. */
 #ifndef SHUT_RD
@@ -309,6 +313,10 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
 		zend_long addrlen, struct sockaddr *sa, socklen_t *sl);
+
+PHPAPI struct hostent*	php_network_gethostbyname(char *name);
+
+PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
 END_EXTERN_C()
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC)

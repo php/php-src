@@ -245,16 +245,15 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	freeaddrinfo(res);
 #else
 	if (!inet_aton(host, &in)) {
-		/* XXX NOT THREAD SAFE (is safe under win32) */
 		if(strlen(host) > MAXFQDNLEN) {
 			host_info = NULL;
 			errno = E2BIG;
 		} else {
-			host_info = gethostbyname(host);
+			host_info = php_network_gethostbyname(host);
 		}
 		if (host_info == NULL) {
 			if (error_string) {
-				error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
+				*error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
 				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 			} else {
 				php_error_docref(NULL, E_WARNING, "php_network_getaddresses: gethostbyname failed");
@@ -1257,9 +1256,95 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 	}
 	return n;
 }
-
 #endif
 
+#if defined(HAVE_GETHOSTBYNAME_R)
+#ifdef HAVE_FUNC_GETHOSTBYNAME_R_6
+struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+{
+	struct hostent *hp;
+	int herr,res;
+
+	if (*hstbuflen == 0) {
+		*hstbuflen = 1024; 
+		*tmphstbuf = (char *)malloc (*hstbuflen);
+	}
+
+	while (( res = 
+		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
+		&& (errno == ERANGE)) {
+		/* Enlarge the buffer. */
+		*hstbuflen *= 2;
+		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+	}
+
+	if (res != SUCCESS) {
+		return NULL;
+	}
+		
+	return hp;
+}
+#endif
+#ifdef HAVE_FUNC_GETHOSTBYNAME_R_5
+struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+{
+	struct hostent *hp;
+	int herr;
+
+	if (*hstbuflen == 0) {
+		*hstbuflen = 1024;
+		*tmphstbuf = (char *)malloc (*hstbuflen);
+	}
+
+	while ((NULL == ( hp = 
+		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
+		&& (errno == ERANGE)) {
+		/* Enlarge the buffer. */
+		*hstbuflen *= 2;
+		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+	}
+	return hp;
+}
+#endif
+#ifdef HAVE_FUNC_GETHOSTBYNAME_R_3
+struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+{
+	if (*hstbuflen == 0) {
+		*hstbuflen = sizeof(struct hostent_data);
+		*tmphstbuf = (char *)malloc (*hstbuflen);
+	} else {
+		if (*hstbuflen < sizeof(struct hostent_data)) {
+			*hstbuflen = sizeof(struct hostent_data);
+			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+		}
+	}
+	memset((void *)(*tmphstbuf),0,*hstbuflen);
+
+	if (SUCCESS != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
+		return NULL;
+	}
+
+	return hostbuf;
+}
+#endif
+#endif
+
+PHPAPI struct hostent*	php_network_gethostbyname(char *name) {
+#if !defined(HAVE_GETHOSTBYNAME_R)
+	return gethostbyname(name);
+#else
+	if (FG(tmp_host_buf)) {
+		free(FG(tmp_host_buf));
+	}
+
+	FG(tmp_host_buf) = NULL;
+	FG(tmp_host_buf_len) = 0;
+
+	memset(&FG(tmp_host_info), 0, sizeof(struct hostent));
+
+	return gethostname_re(name, &FG(tmp_host_info), &FG(tmp_host_buf), &FG(tmp_host_buf_len));
+#endif
+}
 
 /*
  * Local variables:

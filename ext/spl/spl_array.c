@@ -82,18 +82,18 @@ static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
 
 #define Z_SPLARRAY_P(zv)  spl_array_from_obj(Z_OBJ_P((zv)))
 
-static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /* {{{ */
+static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern) { /* {{{ */
 	//??? TODO: Delay duplication for arrays; only duplicate for write operations
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		if (!intern->std.properties) {
 			rebuild_object_properties(&intern->std);
 		}
-		return intern->std.properties;
+		return &intern->std.properties;
 	} else if (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
-		return spl_array_get_hash_table(other);
+		return spl_array_get_hash_table_ptr(other);
 	} else if (Z_TYPE(intern->array) == IS_ARRAY) {
-		return Z_ARRVAL(intern->array);
+		return &Z_ARRVAL(intern->array);
 	} else {
 		zend_object *obj = Z_OBJ(intern->array);
 		if (!obj->properties) {
@@ -104,9 +104,22 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /*
 			}
 			obj->properties = zend_array_dup(obj->properties);
 		}
-		return obj->properties;
+		return &obj->properties;
 	}
-} /* }}} */
+}
+/* }}} */
+
+static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /* {{{ */
+	return *spl_array_get_hash_table_ptr(intern);
+}
+/* }}} */
+
+static inline void spl_array_replace_hash_table(spl_array_object* intern, HashTable *ht) { /* {{{ */
+	HashTable **ht_ptr = spl_array_get_hash_table_ptr(intern);
+	zend_array_destroy(*ht_ptr);
+	*ht_ptr = ht;
+}
+/* }}} */
 
 static inline zend_bool spl_array_is_object(spl_array_object *intern) /* {{{ */
 {
@@ -275,12 +288,11 @@ static zend_object *spl_array_object_clone(zval *zobject)
 }
 /* }}} */
 
-static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval *offset, int type) /* {{{ */
+static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *intern, zval *offset, int type) /* {{{ */
 {
 	zval *retval;
 	zend_long index;
 	zend_string *offset_key;
-	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *ht = spl_array_get_hash_table(intern);
 
 	if (!offset || Z_ISUNDEF_P(offset)) {
@@ -382,12 +394,21 @@ num_index:
 	}
 } /* }}} */
 
+static int spl_array_has_dimension(zval *object, zval *offset, int check_empty);
+
 static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type, zval *rv) /* {{{ */
 {
+	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zval *ret;
 
-	if (check_inherited) {
-		spl_array_object *intern = Z_SPLARRAY_P(object);
+	if (check_inherited &&
+			(intern->fptr_offset_get || (type == BP_VAR_IS && intern->fptr_offset_has))) {
+		if (type == BP_VAR_IS) {
+			if (!spl_array_has_dimension(object, offset, 0)) {
+				return &EG(uninitialized_zval);
+			}
+		}
+
 		if (intern->fptr_offset_get) {
 			zval tmp;
 			if (!offset) {
@@ -405,7 +426,8 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 			return &EG(uninitialized_zval);
 		}
 	}
-	ret = spl_array_get_dimension_ptr(check_inherited, object, offset, type);
+
+	ret = spl_array_get_dimension_ptr(check_inherited, intern, offset, type);
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
@@ -879,7 +901,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
-		return spl_array_get_dimension_ptr(1, object, member, type);
+		return spl_array_get_dimension_ptr(1, intern, member, type);
 	}
 	return std_object_handlers.get_property_ptr_ptr(object, member, type, cache_slot);
 } /* }}} */
@@ -1423,16 +1445,12 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	spl_array_object *intern = Z_SPLARRAY_P(getThis());
 	HashTable *aht = spl_array_get_hash_table(intern);
 	zval function_name, params[2], *arg = NULL;
-	uint32_t old_refcount;
 
 	ZVAL_STRINGL(&function_name, fname, fname_len);
 
-	/* A tricky way to pass "aht" by reference, reset refcount */
-	//??? It may be not safe, if user comparison handler accesses "aht"
-	old_refcount = GC_REFCOUNT(aht);
-	GC_REFCOUNT(aht) = 1;
 	ZVAL_NEW_EMPTY_REF(&params[0]);
 	ZVAL_ARR(Z_REFVAL(params[0]), aht);
+	GC_REFCOUNT(aht)++;
 
 	if (!use_arg) {
 		intern->nApplyCount++;
@@ -1461,10 +1479,16 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	}
 
 exit:
-	/* A tricky way to pass "aht" by reference, copy back and cleanup */
-	GC_REFCOUNT(aht) = old_refcount;
-	efree(Z_REF(params[0]));
-	zend_string_free(Z_STR(function_name));
+	{
+		HashTable *new_ht = Z_ARRVAL_P(Z_REFVAL(params[0]));
+		if (aht != new_ht) {
+			spl_array_replace_hash_table(intern, new_ht);
+		} else {
+			GC_REFCOUNT(aht)--;
+		}
+		efree(Z_REF(params[0]));
+		zend_string_free(Z_STR(function_name));
+	}
 } /* }}} */
 
 #define SPL_ARRAY_METHOD(cname, fname, use_arg) \

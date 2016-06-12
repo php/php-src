@@ -177,7 +177,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 		HashTable	   *debug_info_tz;
 
 		timezone_object_construct(&cal->getTimeZone(), &ztz , 0);
-		debug_info = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
+		debug_info_tz = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
 		assert(is_tmp == 1);
 
 		array_init(&ztz_debug);

@@ -1281,7 +1281,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 	}
 
 	if (zr_rsrc->zf) {
-		buffer = zend_string_alloc(len, 0);
+		buffer = zend_string_safe_alloc(1, len, 0, 0);
 		n = zip_fread(zr_rsrc->zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 		if (n > 0) {
 			ZSTR_VAL(buffer)[n] = '\0';
@@ -2728,7 +2728,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	buffer = zend_string_alloc(len, 0);
+	buffer = zend_string_safe_alloc(1, len, 0, 0);
 	n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 	if (n < 1) {
 		zend_string_free(buffer);
@@ -3038,6 +3038,24 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NODIR", ZIP_FL_NODIR);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_COMPRESSED", ZIP_FL_COMPRESSED);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_UNCHANGED", ZIP_FL_UNCHANGED);
+
+#ifdef ZIP_FL_ENC_GUESS
+	/* Default filename encoding policy. */
+	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENC_GUESS", ZIP_FL_ENC_GUESS);
+#endif
+#ifdef ZIP_FL_ENC_RAW
+	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENC_RAW", ZIP_FL_ENC_RAW);
+#endif
+#ifdef ZIP_FL_ENC_STRICT
+	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENC_STRICT", ZIP_FL_ENC_STRICT);
+#endif
+#ifdef ZIP_FL_ENC_UTF_8
+	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENC_UTF_8", ZIP_FL_ENC_UTF_8);
+#endif
+#ifdef ZIP_FL_ENC_CP437
+	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENC_CP437", ZIP_FL_ENC_CP437);
+#endif
+
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_DEFAULT", ZIP_CM_DEFAULT);
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_STORE", ZIP_CM_STORE);
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_SHRINK", ZIP_CM_SHRINK);

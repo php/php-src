@@ -24,7 +24,7 @@
 #include "phpdbg_opcode.h"
 #include "phpdbg_prompt.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define PHPDBG_PRINT_COMMAND_D(f, h, a, m, l, s, flags) \
 	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[8], flags)

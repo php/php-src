@@ -1547,7 +1547,11 @@ TEST $file
 		$loaded = explode(",", `$php -n -r 'echo join(",", get_loaded_extensions());'`);
 		foreach ($extensions as $req_ext) {
 			if (!in_array($req_ext, $loaded)) {
-				$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				if ($req_ext == 'opcache') {
+					$ini_settings['zend_extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				} else {
+					$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+				}
 			}
 		}
 	}
@@ -2374,7 +2378,7 @@ function settings2array($settings, &$ini_settings)
 			$name = trim($setting[0]);
 			$value = trim($setting[1]);
 
-			if ($name == 'extension') {
+			if ($name == 'extension' || $name == 'zend_extension') {
 
 				if (!isset($ini_settings[$name])) {
 					$ini_settings[$name] = array();

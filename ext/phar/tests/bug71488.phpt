@@ -7,6 +7,7 @@ Phar: bug #71488: Stack overflow when decompressing tar archives
 $p = new PharData(__DIR__."/bug71488.tar");
 $newp = $p->decompress("test");
 ?>
+
 DONE
 --CLEAN--
 <?php

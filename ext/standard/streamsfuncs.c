@@ -613,6 +613,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
 		php_socket_t this_fd;
 
+		ZVAL_DEREF(elem);
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
 			continue;
@@ -652,6 +653,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
 		php_socket_t this_fd;
 
+		ZVAL_DEREF(elem);
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
 			continue;
@@ -698,6 +700,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	zend_hash_init(Z_ARRVAL(new_array), zend_hash_num_elements(Z_ARRVAL_P(stream_array)), NULL, ZVAL_PTR_DTOR, 0);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
+		ZVAL_DEREF(elem);
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
 			continue;
@@ -883,13 +886,12 @@ static int parse_context_options(php_stream_context *context, zval *options)
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), wkey, wval) {
 		ZVAL_DEREF(wval);
-		if (Z_TYPE_P(wval) == IS_ARRAY) {
-		    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
+		if (wkey && Z_TYPE_P(wval) == IS_ARRAY) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
 				if (okey) {
 					php_stream_context_set_option(context, ZSTR_VAL(wkey), ZSTR_VAL(okey), oval);
 				}
 			} ZEND_HASH_FOREACH_END();
-
 		} else {
 			php_error_docref(NULL, E_WARNING, "options should have the form [\"wrappername\"][\"optionname\"] = $value");
 		}

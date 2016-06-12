@@ -1,8 +1,8 @@
 --TEST--
 Bug #69111 Crash in SessionHandler::read()
---SKIPIF--
 --XFAIL--
 It is still a leak
+--SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php

@@ -1241,7 +1241,6 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all)
 				return 0;
 			}
 			/* fall through */
-
 		default:
 			if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_SERIALIZE can only be used together with PDO::FETCH_CLASS");
@@ -1542,16 +1541,16 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 {
 	struct pdo_bound_param_data param = {{{0}}};
 	zend_long param_type = PDO_PARAM_STR;
-	zval *parameter;
+	zval *parameter, *driver_params = NULL;
 
 	param.paramno = -1;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 			"lz|llz!", &param.paramno, &parameter, &param_type, &param.max_value_len,
-			&param.driver_params)) {
+			&driver_params)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|llz!", &param.name,
 				&parameter, &param_type, &param.max_value_len,
-				&param.driver_params)) {
+				&driver_params)) {
 			return 0;
 		}
 	}
@@ -1563,6 +1562,10 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	} else if (!param.name) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
 		return 0;
+	}
+
+	if (driver_params) {
+		ZVAL_COPY(&param.driver_params, driver_params);
 	}
 
 	ZVAL_COPY(&param.parameter, parameter);
@@ -2215,6 +2218,7 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 	lc_method_name = zend_string_alloc(ZSTR_LEN(method_name), 0);
 	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
 
+
 	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, lc_method_name)) == NULL) {
 		pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 		/* instance not created by PDO object */
@@ -2239,6 +2243,9 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 
 out:
 	zend_string_release(lc_method_name);
+	if (!fbc) {
+		fbc = std_object_handlers.get_method(object_pp, method_name, key);
+	}
 	return fbc;
 }
 
@@ -2619,6 +2626,7 @@ static union _zend_function *row_method_get(
 	}
 
 	zend_string_release(lc_method_name);
+
 	return fbc;
 }
 

@@ -597,12 +597,13 @@ static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {
 	register zend_ulong h;
 	char *bucket_key_start = tsrm_win32_get_path_sid_key(path);
 	char *bucket_key = (char *)bucket_key_start;
-	const char *e = bucket_key + strlen(bucket_key);
+	const char *e;
 
 	if (!bucket_key) {
 		return 0;
 	}
 
+	e = bucket_key + strlen(bucket_key);
 	for (h = Z_UL(2166136261); bucket_key < e;) {
 		h *= Z_UL(16777619);
 		h ^= *bucket_key++;
@@ -914,6 +915,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 			if (pbuffer == NULL) {
+				CloseHandle(hLink);
 				return -1;
 			}
 			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {

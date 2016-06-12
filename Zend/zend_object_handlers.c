@@ -552,6 +552,31 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		goto exit;
 	}
 
+	/* magic isset */
+	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
+		zval tmp_object, tmp_result;
+		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+
+		if (!((*guard) & IN_ISSET)) {
+			ZVAL_COPY(&tmp_object, object);
+			ZVAL_UNDEF(&tmp_result);
+
+			*guard |= IN_ISSET;
+			zend_std_call_issetter(&tmp_object, member, &tmp_result);
+			*guard &= ~IN_ISSET;
+	
+			if (!zend_is_true(&tmp_result)) {
+				retval = &EG(uninitialized_zval);
+				zval_ptr_dtor(&tmp_object);
+				zval_ptr_dtor(&tmp_result);
+				goto exit;
+			}
+
+			zval_ptr_dtor(&tmp_object);
+			zval_ptr_dtor(&tmp_result);
+		}
+	}
+
 	/* magic get */
 	if (zobj->ce->__get) {
 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
@@ -710,13 +735,26 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 	zval tmp;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
-		if(offset == NULL) {
+		if (offset == NULL) {
 			/* [] construct */
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
+
+		if (type == BP_VAR_IS) {
+			zend_call_method_with_1_params(object, ce, NULL, "offsetexists", rv, offset);
+			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
+				return NULL;
+			}
+			if (!i_zend_is_true(rv)) {
+				zval_ptr_dtor(rv);
+				return &EG(uninitialized_zval);
+			}
+			zval_ptr_dtor(rv);
+		}
+
 		zend_call_method_with_1_params(object, ce, NULL, "offsetget", rv, offset);
 
 		zval_ptr_dtor(offset);
@@ -1030,6 +1068,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
 {
+	size_t mname_len;
 	zend_op_array *func;
 	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
 
@@ -1062,8 +1101,8 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 
 	//??? keep compatibility for "\0" characters
 	//??? see: Zend/tests/bug46238.phpt
-	if (UNEXPECTED(strlen(ZSTR_VAL(method_name)) != ZSTR_LEN(method_name))) {
-		func->function_name = zend_string_init(ZSTR_VAL(method_name), strlen(ZSTR_VAL(method_name)), 0);
+	if (UNEXPECTED((mname_len = strlen(ZSTR_VAL(method_name))) != ZSTR_LEN(method_name))) {
+		func->function_name = zend_string_init(ZSTR_VAL(method_name), mname_len, 0);
 	} else {
 		func->function_name = zend_string_copy(method_name);
 	}

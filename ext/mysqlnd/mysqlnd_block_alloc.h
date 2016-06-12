@@ -12,13 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef MYSQLND_BLOCK_ALLOC_H
 #define MYSQLND_BLOCK_ALLOC_H

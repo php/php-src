@@ -1767,6 +1767,12 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		return;
 	}
 
+	if (!im->trueColor) {
+		if ((color > (im->colorsTotal - 1)) || (border > (im->colorsTotal - 1)) || (color < 0)) {
+			return;
+		}
+	}
+
 	restoreAlphaBlending = im->alphaBlendingFlag;
 	im->alphaBlendingFlag = 0;
 

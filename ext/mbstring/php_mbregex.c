@@ -935,12 +935,20 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 			if (eval) {
 				zval v;
+				zend_string *eval_str;
 				/* null terminate buffer */
 				smart_str_0(&eval_buf);
+
+				if (eval_buf.s) {
+					eval_str = eval_buf.s;
+				} else {
+					eval_str = ZSTR_EMPTY_ALLOC();
+				}
+
 				/* do eval */
-				if (zend_eval_stringl(ZSTR_VAL(eval_buf.s), ZSTR_LEN(eval_buf.s), &v, description) == FAILURE) {
+				if (zend_eval_stringl(ZSTR_VAL(eval_str), ZSTR_LEN(eval_str), &v, description) == FAILURE) {
 					efree(description);
-					php_error_docref(NULL,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_buf.s));
+					php_error_docref(NULL,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_str));
 					/* zend_error() does not return in this case */
 				}
 
@@ -948,7 +956,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				convert_to_string(&v);
 				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
 				/* Clean up */
-				ZSTR_LEN(eval_buf.s) = 0;
+				smart_str_free(&eval_buf);
 				zval_dtor(&v);
 			} else if (is_callable) {
 				zval args[1];
@@ -971,9 +979,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						!Z_ISUNDEF(retval)) {
 					convert_to_string_ex(&retval);
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
-					if (eval_buf.s) {
-						ZSTR_LEN(eval_buf.s) = 0;
-					}
+					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
 				} else {
 					efree(description);

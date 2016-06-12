@@ -12,13 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id: mysqlnd_wireprotocol.h 291983 2009-12-11 11:58:57Z andrey $ */
 
 #ifndef MYSQLND_NET_H
 #define MYSQLND_NET_H

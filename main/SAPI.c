@@ -856,15 +856,24 @@ SAPI_API int sapi_send_headers(void)
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
-		sapi_header_struct default_header;
-	    uint len;
+	    uint len = 0;
+		char *default_mimetype = get_default_content_type(0, &len);
 
-		SG(sapi_headers).mimetype = get_default_content_type(0, &len);
-		default_header.header_len = sizeof("Content-type: ") - 1 + len;
-		default_header.header = emalloc(default_header.header_len + 1);
-		memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
-		memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
-		sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
+		if (default_mimetype && len) {
+			sapi_header_struct default_header;
+
+			SG(sapi_headers).mimetype = default_mimetype;
+
+			default_header.header_len = sizeof("Content-type: ") - 1 + len;
+			default_header.header = emalloc(default_header.header_len + 1);
+
+			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
+			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+			
+			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
+		} else {
+			efree(default_mimetype);
+		}
 		SG(sapi_headers).send_default_content_type = 0;
 	}
 

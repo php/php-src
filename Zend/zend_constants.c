@@ -299,7 +299,6 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	zend_constant *c;
 	const char *colon;
 	zend_class_entry *ce = NULL;
-	zend_string *class_name;
 	const char *name = ZSTR_VAL(cname);
 	size_t name_len = ZSTR_LEN(cname);
 
@@ -315,13 +314,9 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		int class_name_len = colon - name - 1;
 		size_t const_name_len = name_len - class_name_len - 2;
 		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
-		char *lcname;
+		zend_string *class_name = zend_string_init(name, class_name_len, 0);
 		zval *ret_constant = NULL;
-		ALLOCA_FLAG(use_heap)
 
-		class_name = zend_string_init(name, class_name_len, 0);
-		lcname = do_alloca(class_name_len + 1, use_heap);
-		zend_str_tolower_copy(lcname, name, class_name_len);
 		if (!scope) {
 			if (EG(current_execute_data)) {
 				scope = EG(scope);
@@ -330,48 +325,43 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			}
 		}
 
-		if (class_name_len == sizeof("self")-1 &&
-		    !memcmp(lcname, "self", sizeof("self")-1)) {
+		if (zend_string_equals_literal_ci(class_name, "self")) {
 			if (UNEXPECTED(!scope)) {
 				zend_throw_error(NULL, "Cannot access self:: when no class scope is active");
-				return NULL;
+				goto failure;
 			}
 			ce = scope;
-		} else if (class_name_len == sizeof("parent")-1 &&
-		           !memcmp(lcname, "parent", sizeof("parent")-1)) {
+		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
 			if (UNEXPECTED(!scope)) {
 				zend_throw_error(NULL, "Cannot access parent:: when no class scope is active");
-				return NULL;
+				goto failure;
 			} else if (UNEXPECTED(!scope->parent)) {
 				zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
-				return NULL;
+				goto failure;
 			} else {
 				ce = scope->parent;
 			}
-		} else if (class_name_len == sizeof("static")-1 &&
-		           !memcmp(lcname, "static", sizeof("static")-1)) {
+		} else if (zend_string_equals_literal_ci(class_name, "static")) {
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
 				zend_throw_error(NULL, "Cannot access static:: when no class scope is active");
-				return NULL;
+				goto failure;
 			}
 		} else {
 			ce = zend_fetch_class(class_name, flags);
 		}
-		free_alloca(lcname, use_heap);
 		if (ce) {
 			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
 			if (ret_constant == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_throw_error(NULL, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-					zend_string_release(class_name);
-					zend_string_free(constant_name);
-					return NULL;
 				}
 			} else if (Z_ISREF_P(ret_constant)) {
 				ret_constant = Z_REFVAL_P(ret_constant);
 			}
 		}
+
+failure:
 		zend_string_release(class_name);
 		zend_string_free(constant_name);
 		if (ret_constant && Z_CONSTANT_P(ret_constant)) {

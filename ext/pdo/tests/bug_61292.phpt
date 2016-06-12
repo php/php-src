@@ -1,5 +1,5 @@
 --TEST--
-Bug #61292 (Segfault while calling a method on an overloaded PDO object)
+PDO Common: Bug #61292 (Segfault while calling a method on an overloaded PDO object)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo')) die('skip');

@@ -165,7 +165,7 @@ zend_module_entry iconv_module_entry = {
 
 #ifdef COMPILE_DL_ICONV
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(iconv)
 #endif

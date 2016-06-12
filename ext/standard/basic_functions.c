@@ -5007,7 +5007,6 @@ PHPAPI void php_call_shutdown_functions(void) /* {{{ */
 			zend_hash_apply(BG(user_shutdown_function_names), user_shutdown_function_call);
 		}
 		zend_end_try();
-		php_free_shutdown_functions();
 	}
 }
 /* }}} */
@@ -5526,7 +5525,7 @@ PHP_FUNCTION(ignore_user_abort)
 
 	old_setting = PG(ignore_user_abort);
 
-	if (arg) {
+	if (ZEND_NUM_ARGS()) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(key);

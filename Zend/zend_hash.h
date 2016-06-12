@@ -385,6 +385,18 @@ static zend_always_inline int zend_symtable_exists(HashTable *ht, zend_string *k
 }
 
 
+static zend_always_inline int zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+{
+	zend_ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_exists(ht, idx);
+	} else {
+		return zend_hash_exists_ind(ht, key);
+	}
+}
+
+
 static zend_always_inline zval *zend_symtable_str_update(HashTable *ht, const char *str, size_t len, zval *pData)
 {
 	zend_ulong idx;

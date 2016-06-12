@@ -295,8 +295,8 @@ void shutdown_executor(void) /* {{{ */
 		}
 
 		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_DESTRUCTOR, 1);
-		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_DESTRUCTOR, 1);
+		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
+		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 	} zend_end_try();
 
 	zend_try {
@@ -397,7 +397,7 @@ void shutdown_executor(void) /* {{{ */
 
 	zend_shutdown_fpu();
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 	if (EG(ht_iterators_used) && !CG(unclean_shutdown)) {
 		zend_error(E_WARNING, "Leaked %" PRIu32 " hashtable iterators", EG(ht_iterators_used));
 	}
@@ -786,6 +786,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			if (EG(current_execute_data) == &dummy_execute_data) {
+				EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+			}
 			return FAILURE;
 		}
 		if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
@@ -850,6 +853,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		GC_REFCOUNT((zend_object*)func->op_array.prototype)++;
 		ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
 	}
+
+	/* PHP-7 doesn't support symbol_table substitution for functions */
+	ZEND_ASSERT(fci->symbol_table == NULL);
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;

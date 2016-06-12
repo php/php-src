@@ -5383,8 +5383,12 @@ ZEND_METHOD(reflection_property, getValue)
 		}
 
 		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
-		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1, &rv);
-		ZVAL_DUP(return_value, member_p);
+		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 0, &rv);
+		if (member_p != &rv) {
+			ZVAL_COPY(return_value, member_p);
+		} else {
+			ZVAL_COPY_VALUE(return_value, member_p);
+		}
 	}
 }
 /* }}} */
