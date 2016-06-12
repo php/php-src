@@ -1,16 +1,37 @@
 --TEST--
 openssl_error_string() tests
 --SKIPIF--
-<?php
-if (!extension_loaded("openssl")) print "skip";
-//if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSLv1.0.1 required");
-?>
---XFAIL--
-ot ready baked yet, fails different ways on different envs
+<?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-// helper function to dump openssl errors
-function dump_openssl_errors() {
+// helper function to check openssl errors
+function expect_openssl_errors($name, $expected_error_codes) {
+	$expected_errors = array_fill_keys($expected_error_codes, false);
+	while (($error_string = openssl_error_string()) !== false) {
+		if (strlen($error_string) > 14) {
+			$error_code = substr($error_string, 6, 8);
+			if (isset($expected_errors[$error_code])) {
+				$expected_errors[$error_code] = true;
+			}
+		}
+	}
+
+	$fail = false;
+	foreach ($expected_errors as $error_code => $error_code_found) {
+		if (!$error_code_found) {
+			$fail = true;
+			echo "$name: no error code $error_code\n";
+		}
+	}
+
+	if (!$fail) {
+		echo "$name: ok\n";
+	}
+}
+
+// helper for debugging errors
+function dump_openssl_errors($name) {
+	echo "\n$name\n";
 	while (($error_string = openssl_error_string()) !== false) {
 		var_dump($error_string);
 	}
@@ -56,61 +77,59 @@ while (($enc_error_new = openssl_error_string()) !== false) {
 	++$error_queue_size;
 }
 var_dump($error_queue_size);
+echo "\n";
 
 // PKEY
 echo "PKEY errors\n";
 // file for pkey (file:///) fails when opennig (BIO_new_file)
-openssl_pkey_export_to_file("file://" . $invalid_file_for_read, $output_file);
-dump_openssl_errors();
+@openssl_pkey_export_to_file("file://" . $invalid_file_for_read, $output_file);
+expect_openssl_errors('openssl_pkey_export_to_file opening', ['02001002', '2006D080']);
 // file or private pkey is not correct PEM - failing PEM_read_bio_PrivateKey
-openssl_pkey_export_to_file($csr_file, $output_file);
-dump_openssl_errors();
+@openssl_pkey_export_to_file($csr_file, $output_file);
+expect_openssl_errors('openssl_pkey_export_to_file pem', ['0906D06C']);
 // file to export cannot be written
-openssl_pkey_export_to_file($private_key_file, $invalid_file_for_write);
-dump_openssl_errors();
+@openssl_pkey_export_to_file($private_key_file, $invalid_file_for_write);
+expect_openssl_errors('openssl_pkey_export_to_file write', ['2006D002', '09072007']);
 // succesful export
-openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd');
-dump_openssl_errors();
+@openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd');
+expect_openssl_errors('openssl_pkey_export', ['06065064', '0906A065']);
 // invalid x509 for getting public key
-openssl_pkey_get_public($private_key_file);
-dump_openssl_errors();
+@openssl_pkey_get_public($private_key_file);
+expect_openssl_errors('openssl_pkey_get_public', ['0906D06C']);
 // private encrypt with unknown padding
-openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
-dump_openssl_errors();
+@openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
+expect_openssl_errors('openssl_private_encrypt', ['04066076']);
 // private decrypt with failed padding check
-openssl_private_decrypt("data", $crypted, $private_key_file);
-dump_openssl_errors();
+@openssl_private_decrypt("data", $crypted, $private_key_file);
+expect_openssl_errors('openssl_private_decrypt', ['04065072']);
 // public encrypt and decrypt with failed padding check and padding
-openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
-openssl_public_decrypt("data", $crypted, $public_key_file);
-dump_openssl_errors();
+@openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
+@openssl_public_decrypt("data", $crypted, $public_key_file);
+expect_openssl_errors('openssl_private_(en|de)crypt padding', ['0906D06C', '04068076', '0407006A', '04067072']);
 
 // X509
 echo "X509 errors\n";
 // file for x509 (file:///) fails when opennig (BIO_new_file)
-openssl_x509_export_to_file("file://" . $invalid_file_for_read, $output_file);
-dump_openssl_errors();
+@openssl_x509_export_to_file("file://" . $invalid_file_for_read, $output_file);
+expect_openssl_errors('openssl_x509_export_to_file open', ['02001002']);
 // file or str cert is not correct PEM - failing PEM_read_bio_X509 or PEM_ASN1_read_bio
-openssl_x509_export_to_file($csr_file, $output_file);
-dump_openssl_errors();
+@openssl_x509_export_to_file($csr_file, $output_file);
+expect_openssl_errors('openssl_x509_export_to_file pem', ['0906D06C']);
 // file to export cannot be written
-openssl_x509_export_to_file($crt_file, $invalid_file_for_write);
-dump_openssl_errors();
+@openssl_x509_export_to_file($crt_file, $invalid_file_for_write);
+expect_openssl_errors('openssl_x509_export_to_file write', ['2006D002']);
 // checking purpose fails because there is no such purpose 1000
-openssl_x509_checkpurpose($crt_file, 1000);
-dump_openssl_errors();
-// make sure that X509_STORE_add_lookup will not emmit any error (just PHP warning)
-openssl_x509_checkpurpose($crt_file, X509_PURPOSE_SSL_CLIENT, array( __DIR__ . "/cert.csr"));
-dump_openssl_errors();
+@openssl_x509_checkpurpose($crt_file, 1000);
+expect_openssl_errors('openssl_x509_checkpurpose purpose', ['0B086079']);
 
 // CSR
 echo "CSR errors\n";
 // file for csr (file:///) fails when opennig (BIO_new_file)
-openssl_csr_get_subject("file://" . $invalid_file_for_read);
-dump_openssl_errors();
+@openssl_csr_get_subject("file://" . $invalid_file_for_read);
+expect_openssl_errors('openssl_csr_get_subject open', ['02001002', '2006D080', '20068079', '0906D06C']);
 // file or str csr is not correct PEM - failing PEM_read_bio_X509_REQ
 openssl_csr_get_subject($crt_file);
-dump_openssl_errors();
+@expect_openssl_errors('openssl_csr_get_subjec pem', ['0906D06C']);
 
 // other possible cuases that are difficult to catch:
 // - ASN1_STRING_to_UTF8 fails in add_assoc_name_entry
@@ -124,59 +143,25 @@ if (is_file($output_file)) {
 	unlink($output_file);
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(89) "error:0607A082:digital envelope routines:EVP_CIPHER_CTX_set_key_length:invalid key length"
 bool(false)
 int(15)
+
 PKEY errors
-
-Warning: openssl_pkey_export_to_file(): cannot get key from parameter 1 in %s on line %d
-string(61) "error:02001002:system library:fopen:No such file or directory"
-string(53) "error:2006D080:BIO routines:BIO_new_file:no such file"
-
-Warning: openssl_pkey_export_to_file(): cannot get key from parameter 1 in %s on line %d
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
-string(68) "error:0E06D06C:configuration file routines:NCONF_get_string:no value"
-string(68) "error:0E06D06C:configuration file routines:NCONF_get_string:no value"
-string(68) "error:0E06D06C:configuration file routines:NCONF_get_string:no value"
-string(68) "error:0E06D06C:configuration file routines:NCONF_get_string:no value"
-string(68) "error:0E06D06C:configuration file routines:NCONF_get_string:no value"
-string(68) "error:0E06D06C:configuration file routines:NCONF_get_string:no value"
-string(50) "error:02001015:system library:fopen:Is a directory"
-string(51) "error:2006D002:BIO routines:BIO_new_file:system lib"
-string(49) "error:09072007:PEM routines:PEM_write_bio:BUF lib"
-
-Warning: openssl_pkey_export(): cannot get key from parameter 1 in %s on line %d
-string(72) "error:06065064:digital envelope routines:EVP_DecryptFinal_ex:bad decrypt"
-string(53) "error:0906A065:PEM routines:PEM_do_header:bad decrypt"
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
-string(72) "error:04066076:rsa routines:RSA_EAY_PRIVATE_ENCRYPT:unknown padding type"
-string(78) "error:0407109F:rsa routines:RSA_padding_check_PKCS1_type_2:pkcs decoding error"
-string(72) "error:04065072:rsa routines:RSA_EAY_PRIVATE_DECRYPT:padding check failed"
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
-string(71) "error:04068076:rsa routines:RSA_EAY_PUBLIC_ENCRYPT:unknown padding type"
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
-string(79) "error:0407006A:rsa routines:RSA_padding_check_PKCS1_type_1:block type is not 01"
-string(71) "error:04067072:rsa routines:RSA_EAY_PUBLIC_DECRYPT:padding check failed"
+openssl_pkey_export_to_file opening: ok
+openssl_pkey_export_to_file pem: ok
+openssl_pkey_export_to_file write: ok
+openssl_pkey_export: ok
+openssl_pkey_get_public: ok
+openssl_private_encrypt: ok
+openssl_private_decrypt: ok
+openssl_private_(en|de)crypt padding: ok
 X509 errors
-
-Warning: openssl_x509_export_to_file(): cannot get cert from parameter 1 in %s on line %d
-string(61) "error:02001002:system library:fopen:No such file or directory"
-string(53) "error:2006D080:BIO routines:BIO_new_file:no such file"
-
-Warning: openssl_x509_export_to_file(): cannot get cert from parameter 1 in %s on line %d
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
-
-Warning: openssl_x509_export_to_file(): error opening file %s in %s on line %d
-string(50) "error:02001015:system library:fopen:Is a directory"
-string(51) "error:2006D002:BIO routines:BIO_new_file:system lib"
-string(90) "error:0B086079:x509 certificate routines:X509_STORE_CTX_purpose_inherit:unknown purpose id"
-
-Warning: openssl_x509_checkpurpose(): error loading file %s in %s on line %d
+openssl_x509_export_to_file open: ok
+openssl_x509_export_to_file pem: ok
+openssl_x509_export_to_file write: ok
+openssl_x509_checkpurpose purpose: ok
 CSR errors
-string(61) "error:02001002:system library:fopen:No such file or directory"
-string(53) "error:2006D080:BIO routines:BIO_new_file:no such file"
-string(55) "error:20068079:BIO routines:BIO_gets:unsupported method"
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
-string(54) "error:0906D06C:PEM routines:PEM_read_bio:no start line"
+openssl_csr_get_subject open: ok
+openssl_csr_get_subjec pem: ok
