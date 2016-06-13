@@ -1183,7 +1183,7 @@ property_name:
 ;
 
 array_pair_list:
-	non_empty_array_pair_list { /* allow single trailing comma */ zend_ast_list *list = zend_ast_get_list($$ = $1); if (list->child[list->children - 1] == NULL) { list->children--; } }
+		non_empty_array_pair_list { /* allow single trailing comma */ zend_ast_list_rtrim($$ = $1); }
 ;
 
 possible_array_pair:
