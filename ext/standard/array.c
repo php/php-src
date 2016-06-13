@@ -1613,7 +1613,6 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		ZVAL_DEREF(value);
 		if (Z_TYPE_P(value) == IS_LONG) {
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_long(value, entry)) {
