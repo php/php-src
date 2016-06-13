@@ -1006,6 +1006,22 @@ static void php_openssl_dispose_config(struct php_x509_request * req) /* {{{ */
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+#define PHP_OPENSSL_RAND_ADD_TIME() ((void) 0)
+#else
+#define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
+
+static inline void php_openssl_rand_add_timeval()  /* {{{ */
+{
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	RAND_add(&tv, sizeof(tv), 0.0);
+}
+/* }}} */
+
+#endif
+
 static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded) /* {{{ */
 {
 	char buffer[MAXPATHLEN];
@@ -1048,6 +1064,7 @@ static int php_openssl_write_rand_file(const char * file, int egdsocket, int see
 	if (file == NULL) {
 		file = RAND_file_name(buffer, sizeof(buffer));
 	}
+	PHP_OPENSSL_RAND_ADD_TIME();
 	if (file == NULL || !RAND_write_file(file)) {
 		php_error_docref(NULL, E_WARNING, "unable to write random state");
 		return FAILURE;
@@ -1318,6 +1335,9 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	EVP_cleanup();
 
 #if OPENSSL_VERSION_NUMBER >= 0x00090805f
+	/* prevent accessing locking callback from unloaded extension */
+	CRYPTO_set_locking_callback(NULL);
+	/* free allocated error strings */
 	ERR_free_strings();
 #endif
 
@@ -3411,6 +3431,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 					RSA* rsaparam;
 #if OPENSSL_VERSION_NUMBER < 0x10002000L
 					/* OpenSSL 1.0.2 deprecates RSA_generate_key */
+					PHP_OPENSSL_RAND_ADD_TIME();
 					rsaparam = (RSA*)RSA_generate_key(req->priv_key_bits, RSA_F4, NULL, NULL);
 #else
 					{
@@ -3421,6 +3442,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 							return NULL;
 						}
 						rsaparam = RSA_new();
+						PHP_OPENSSL_RAND_ADD_TIME();
 						RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL);
 						BN_free(bne);
 					}
@@ -3432,6 +3454,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 				break;
 #if !defined(NO_DSA)
 			case OPENSSL_KEYTYPE_DSA:
+				PHP_OPENSSL_RAND_ADD_TIME();
 				{
 					DSA *dsaparam = NULL;
 #if OPENSSL_VERSION_NUMBER < 0x10002000L
@@ -3454,6 +3477,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 #endif
 #if !defined(NO_DH)
 			case OPENSSL_KEYTYPE_DH:
+				PHP_OPENSSL_RAND_ADD_TIME();
 				{
 					int codes = 0;
 					DH *dhparam = NULL;
@@ -3567,6 +3591,46 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 	    }                                                               \
 	} while (0);
 
+/* {{{ php_openssl_pkey_init_dsa */
+zend_bool php_openssl_pkey_init_dsa(DSA *dsa)
+{
+	if (!dsa->p || !dsa->q || !dsa->g) {
+		return 0;
+	}
+	if (dsa->priv_key || dsa->pub_key) {
+		return 1;
+	}
+	PHP_OPENSSL_RAND_ADD_TIME();
+	if (!DSA_generate_key(dsa)) {
+		return 0;
+	}
+	/* if BN_mod_exp return -1, then DSA_generate_key succeed for failed key
+	 * so we need to double check that public key is created */
+	if (!dsa->pub_key || BN_is_zero(dsa->pub_key)) {
+		return 0;
+	}
+	/* all good */
+	return 1;
+}
+/* }}} */
+
+/* {{{ php_openssl_pkey_init_dh */
+zend_bool php_openssl_pkey_init_dh(DH *dh)
+{
+	if (!dh->p || !dh->g) {
+		return 0;
+	}
+	if (dh->pub_key) {
+		return 1;
+	}
+	PHP_OPENSSL_RAND_ADD_TIME();
+	if (!DH_generate_key(dh)) {
+		return 0;
+	}
+	/* all good */
+	return 1;
+}
+/* }}} */
 
 /* {{{ proto resource openssl_pkey_new([array configargs])
    Generates a new private key */
@@ -3619,10 +3683,7 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, g);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, pub_key);
-					if (dsa->p && dsa->q && dsa->g) {
-						if (!dsa->priv_key && !dsa->pub_key) {
-							DSA_generate_key(dsa);
-						}
+					if (php_openssl_pkey_init_dsa(dsa)) {
 						if (EVP_PKEY_assign_DSA(pkey, dsa)) {
 							RETURN_RES(zend_register_resource(pkey, le_key));
 						}
@@ -3642,11 +3703,11 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, g);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, pub_key);
-					if (dh->p && dh->g &&
-							(dh->pub_key || DH_generate_key(dh)) &&
-							EVP_PKEY_assign_DH(pkey, dh)) {
-						ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
-						return;
+					if (php_openssl_pkey_init_dh(dh)) {
+						if (EVP_PKEY_assign_DH(pkey, dh)) {
+							ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
+							return;
+						}
 					}
 					DH_free(dh);
 				}
@@ -5508,7 +5569,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 #else
 
 	PHP_OPENSSL_CHECK_LONG_TO_INT(buffer_length, length);
-
+	PHP_OPENSSL_RAND_ADD_TIME();
 	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
 		zend_string_release(buffer);
 		if (zstrong_result_returned) {

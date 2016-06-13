@@ -27,6 +27,22 @@ try {
 }
 var_dump($str);
 
+$str = '';
+try {
+    var_dump($str[0] += 1);
+} catch (Error $e) {
+    echo "Error: {$e->getMessage()}\n";
+}
+var_dump($str);
+
+$str = '';
+try {
+    var_dump($str[0][0] = 'a');
+} catch (Error $e) {
+    echo "Error: {$e->getMessage()}\n";
+}
+var_dump($str);
+
 ?>
 --EXPECTF--
 string(1) "a"
@@ -42,4 +58,8 @@ Warning: Illegal string offset 'foo' in %s on line %d
 string(1) "a"
 string(1) "a"
 Error: [] operator not supported for strings
+string(0) ""
+Error: Cannot use assign-op operators with string offsets
+string(0) ""
+Error: Cannot use string offset as an array
 string(0) ""

@@ -91,9 +91,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	if (destructor) {
 		zend_object *old_exception;
 		zval obj;
-		zend_class_entry *orig_fake_scope = NULL;
+		zend_class_entry *orig_fake_scope;
 
-		EG(fake_scope) = NULL;
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				/* Ensure that if we're calling a private function, we're allowed to do so.
@@ -106,14 +105,12 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 							"Call to private %s::__destruct() from context '%s'",
 							ZSTR_VAL(object->ce->name),
 							scope ? ZSTR_VAL(scope->name) : "");
-						EG(fake_scope) = orig_fake_scope;
 						return;
 					}
 				} else {
 					zend_error(E_WARNING,
 						"Call to private %s::__destruct() from context '' during shutdown ignored",
 						ZSTR_VAL(object->ce->name));
-					EG(fake_scope) = orig_fake_scope;
 					return;
 				}
 			} else {
@@ -127,21 +124,19 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 							"Call to protected %s::__destruct() from context '%s'",
 							ZSTR_VAL(object->ce->name),
 							scope ? ZSTR_VAL(scope->name) : "");
-						EG(fake_scope) = orig_fake_scope;
 						return;
 					}
 				} else {
 					zend_error(E_WARNING,
 						"Call to protected %s::__destruct() from context '' during shutdown ignored",
 						ZSTR_VAL(object->ce->name));
-					EG(fake_scope) = orig_fake_scope;
 					return;
 				}
 			}
 		}
 
+		GC_REFCOUNT(object)++;
 		ZVAL_OBJ(&obj, object);
-		Z_ADDREF(obj);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
 		 * For example, if an exception was thrown in a function and when the function's
@@ -156,6 +151,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				EG(exception) = NULL;
 			}
 		}
+		orig_fake_scope = EG(fake_scope);
+		EG(fake_scope) = NULL;
 		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
 		if (old_exception) {
 			if (EG(exception)) {

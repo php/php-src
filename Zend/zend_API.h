@@ -862,7 +862,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 /* old "h" */
 #define Z_PARAM_ARRAY_HT_EX(dest, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 0))) { \
+		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 0, separate))) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -874,7 +874,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 /* old "H" */
 #define Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 1))) { \
+		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 1, separate))) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1177,11 +1177,19 @@ static zend_always_inline int zend_parse_arg_array(zval *arg, zval **dest, int c
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **dest, int check_null, int or_object)
+static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **dest, int check_null, int or_object, int separate)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
 		*dest = Z_ARRVAL_P(arg);
 	} else if (or_object && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		if (separate
+		 && Z_OBJ_P(arg)->properties
+		 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(arg)->properties) > 1)) {
+			if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(arg)->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(Z_OBJ_P(arg)->properties)--;
+			}
+			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
+		}
 		*dest = Z_OBJ_HT_P(arg)->get_properties(arg);
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;
