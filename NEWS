@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 
 ?? ?? 2016, PHP 5.5.37
 
+-GD:
+  . Fixed bug #66387 (Stack overflow with imagefilltoborder) (CVE-2015-8874).
+    (cmb)
 
 26 May 2016, PHP 5.5.36
 
