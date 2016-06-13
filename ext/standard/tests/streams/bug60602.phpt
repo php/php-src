@@ -49,8 +49,6 @@ if (is_resource($p)) {
 ==DONE==
 --EXPECTF--
 Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 int(%d)
 int(0)
 bool(true)

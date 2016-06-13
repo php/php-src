@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.9
 
 
+- Standard:
+  . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
+    (Laruence)
 
 23 Jun 2016 PHP 7.0.8
 
