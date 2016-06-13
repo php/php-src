@@ -29,20 +29,16 @@ ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
 
+
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+ZEND_API zval* zend_call_method_params(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval ***params TSRMLS_DC)
 {
 	int result;
 	zend_fcall_info fci;
 	zval z_fname;
 	zval *retval;
 	HashTable *function_table;
-
-	zval **params[2];
-
-	params[0] = &arg1;
-	params[1] = &arg2;
 
 	fci.size = sizeof(fci);
 	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
@@ -112,6 +108,25 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		return NULL;
 	}
 	return *retval_ptr_ptr;
+}
+/* }}} */
+
+
+/* {{{ zend_call_method
+ Only returns the returned zval if retval_ptr != NULL */
+ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+{
+
+	zval **params[2];
+
+	params[0] = &arg1;
+	params[1] = &arg2;
+
+	return zend_call_method_params(
+		object_pp, obj_ce, fn_proxy, function_name, function_name_len,
+		retval_ptr_ptr, param_count, params TSRMLS_CC
+	);
+
 }
 /* }}} */
 
