@@ -2762,7 +2762,10 @@ static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_styl
 static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_node, zend_bool old_style) /* {{{ */
 {
 	uint32_t i;
-	zend_bool has_elems = 0;
+
+	if (list->children == 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
+	}
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
@@ -2777,7 +2780,6 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 		}
 
 		var_ast = elem_ast->child[0];
-		has_elems = 1;
 
 		dim_node.op_type = IS_CONST;
 		ZVAL_LONG(&dim_node.u.constant, i);
@@ -2794,10 +2796,6 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 
 		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
 		zend_emit_assign_znode(var_ast, &fetch_result);
-	}
-
-	if (!has_elems) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
 	}
 }
 /* }}} */
