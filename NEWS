@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed bug #72373 (TypeError after Generator function w/declared return type
     finishes). (Nikita)
 
+- Sqlite3:
+  . Implemented FR #72385 (Update SQLite bundle lib(3.13.0)). (Laruence)
 
 09 Jun 2016, PHP 7.1.0alpha1
 
