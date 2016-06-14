@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.9
 
+- Mbstring:
+  . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
 
 - Standard:
   . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
