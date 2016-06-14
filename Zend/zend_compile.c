@@ -2796,9 +2796,10 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 		zend_emit_assign_znode(var_ast, &fetch_result);
 	}
 
-	if (!has_elems) {
+	if (has_elems == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
 	}
+
 }
 /* }}} */
 
