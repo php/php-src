@@ -1613,7 +1613,6 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		ZVAL_DEREF(value);
 		if (Z_TYPE_P(value) == IS_LONG) {
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_long(value, entry)) {
@@ -3099,15 +3098,20 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 	zend_string *string_key;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
-		if (string_key) {
-			if (Z_REFCOUNTED_P(src_entry)) {
+		if (Z_REFCOUNTED_P(src_entry)) {
+			if (UNEXPECTED(Z_ISREF_P(src_entry))
+			 && UNEXPECTED(Z_REFCOUNT_P(src_entry) == 1)) {
+				ZVAL_UNREF(src_entry);
+				if (Z_REFCOUNTED_P(src_entry)) {
+					Z_ADDREF_P(src_entry);
+				}
+			} else {
 				Z_ADDREF_P(src_entry);
 			}
+		}
+		if (string_key) {
 			zend_hash_update(dest, string_key, src_entry);
 		} else {
-			if (Z_REFCOUNTED_P(src_entry)) {
-				Z_ADDREF_P(src_entry);
-			}
 			zend_hash_next_index_insert_new(dest, src_entry);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -3234,18 +3238,19 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		src  = Z_ARRVAL_P(arg);
 		dest = Z_ARRVAL_P(return_value);
 		ZEND_HASH_FOREACH_KEY_VAL(src, idx, string_key, src_entry) {
-			if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
-				src_entry = Z_REFVAL_P(src_entry);
+			if (Z_REFCOUNTED_P(src_entry)) {
+				if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
+					src_entry = Z_REFVAL_P(src_entry);
+					if (Z_REFCOUNTED_P(src_entry)) {
+						Z_ADDREF_P(src_entry);
+					}
+				} else {
+					Z_ADDREF_P(src_entry);
+				}
 			}
 			if (string_key) {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_add_new(dest, string_key, src_entry);
 			} else {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_index_add_new(dest, idx, src_entry);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -3274,18 +3279,19 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		src  = Z_ARRVAL_P(arg);
 		dest = Z_ARRVAL_P(return_value);
 		ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
-			if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
-				src_entry = Z_REFVAL_P(src_entry);
+			if (Z_REFCOUNTED_P(src_entry)) {
+				if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
+					src_entry = Z_REFVAL_P(src_entry);
+					if (Z_REFCOUNTED_P(src_entry)) {
+						Z_ADDREF_P(src_entry);
+					}
+				} else {
+					Z_ADDREF_P(src_entry);
+				}
 			}
 			if (string_key) {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_add_new(dest, string_key, src_entry);
 			} else {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_next_index_insert_new(dest, src_entry);
 			}
 		} ZEND_HASH_FOREACH_END();

@@ -2264,12 +2264,19 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 }
 /* }}} */
 
-static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
+static void zend_emit_return_type_check(
+		znode *expr, zend_arg_info *return_info, zend_bool implicit) /* {{{ */
 {
 	/* `return ...;` is illegal in a void function (but `return;` isn't) */
 	if (return_info->type_hint == IS_VOID) {
 		if (expr) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+			if (expr->op_type == IS_CONST && Z_TYPE(expr->u.constant) == IS_NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A void function must not return a value "
+					"(did you mean \"return;\" instead of \"return null;\"?)");
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+			}
 		}
 		/* we don't need run-time check */
 		return;
@@ -2277,6 +2284,17 @@ static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info)
 
 	if (return_info->type_hint != IS_UNDEF) {
 		zend_op *opline;
+
+		if (!expr && !implicit) {
+			if (return_info->allow_null) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A function with return type must return a value "
+					"(did you mean \"return null;\" instead of \"return;\"?)");
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A function with return type must return a value");
+			}
+		}
 
 		if (expr && expr->op_type == IS_CONST) {
 			if ((return_info->type_hint == Z_TYPE(expr->u.constant))
@@ -2311,8 +2329,9 @@ void zend_emit_final_return(int return_one) /* {{{ */
 	zend_op *ret;
 	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
-	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1);
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE
+			&& !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR)) {
+		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1, 1);
 	}
 
 	zn.op_type = IS_CONST;
@@ -2777,9 +2796,10 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 		zend_emit_assign_znode(var_ast, &fetch_result);
 	}
 
-	if (!has_elems) {
+	if (has_elems == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
 	}
+
 }
 /* }}} */
 
@@ -3183,11 +3203,7 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 			}
 		} else {
 			if (zend_execute_ex == execute_ex) {
-				if (!(fbc->common.fn_flags & ZEND_ACC_GENERATOR)) {
-					return ZEND_DO_UCALL;
-				} else {
-					return ZEND_DO_FCALL_BY_NAME;
-				}
+				return ZEND_DO_UCALL;
 			}
 		}
 	} else if (zend_execute_ex == execute_ex &&
@@ -3986,7 +4002,7 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
+static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value) /* {{{ */
 {
 	zend_loop_var *base;
 	zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
@@ -4003,7 +4019,11 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 			opline->result_type = IS_TMP_VAR;
 			opline->result.var = loop_var->var_num;
 			SET_UNUSED(opline->op1);
-			SET_UNUSED(opline->op2);
+			if (return_value) {
+				SET_NODE(opline->op2, return_value);
+			} else {
+				SET_UNUSED(opline->op2);
+			}
 			opline->op1.num = loop_var->u.try_catch_offset;
 		} else if (loop_var->opcode == ZEND_DISCARD_EXCEPTION) {
 			zend_op *opline = get_next_op(CG(active_op_array));
@@ -4037,9 +4057,9 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 }
 /* }}} */
 
-static int zend_handle_loops_and_finally(void) /* {{{ */
+static int zend_handle_loops_and_finally(znode *return_value) /* {{{ */
 {
-	return zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
+	return zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1, return_value);
 }
 /* }}} */
 
@@ -4062,10 +4082,11 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 
 	/* Generator return types are handled separately */
 	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
+		zend_emit_return_type_check(
+			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
 	}
 
-	zend_handle_loops_and_finally();
+	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
 
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
@@ -4135,7 +4156,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "'%s' not in the 'loop' or 'switch' context",
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
-		if (!zend_handle_loops_and_finally_ex(depth)) {
+		if (!zend_handle_loops_and_finally_ex(depth, NULL)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
 				depth, depth == 1 ? "" : "s");
@@ -4218,7 +4239,7 @@ void zend_compile_goto(zend_ast *ast) /* {{{ */
 	zend_compile_expr(&label_node, label_ast);
 
 	/* Label resolution and unwinding adjustments happen in pass two. */
-	zend_handle_loops_and_finally();
+	zend_handle_loops_and_finally(NULL);
 	opline = zend_emit_op(NULL, ZEND_GOTO, NULL, &label_node);
 	opline->op1.num = get_next_op_number(CG(active_op_array)) - opnum_start - 1;
 	opline->extended_value = CG(context).current_brk_cont;
@@ -4948,6 +4969,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		}
 
 		zend_compile_typename(return_type_ast, arg_infos);
+
+		if (arg_infos->type_hint == IS_VOID && arg_infos->allow_null) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
+		}
 
 		arg_infos++;
 		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;

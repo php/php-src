@@ -61,6 +61,8 @@
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+	zend_bool server_obj_usable = IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
+		&& !(GC_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
 
 	if (S->result) {
 		/* free the resource */
@@ -69,11 +71,11 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	}
 
 	if (S->stmt_name) {
-		pdo_pgsql_db_handle *H = S->H;
-		char *q = NULL;
-		PGresult *res;
+		if (S->is_prepared && server_obj_usable) {
+			pdo_pgsql_db_handle *H = S->H;
+			char *q = NULL;
+			PGresult *res;
 
-		if (S->is_prepared) {
 			spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
 			res = PQexec(H->server, q);
 			efree(q);
@@ -106,14 +108,16 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	}
 
 	if (S->cursor_name) {
-		pdo_pgsql_db_handle *H = S->H;
-		char *q = NULL;
-		PGresult *res;
+		if (server_obj_usable) {
+			pdo_pgsql_db_handle *H = S->H;
+			char *q = NULL;
+			PGresult *res;
 
-		spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-		res = PQexec(H->server, q);
-		efree(q);
-		if (res) PQclear(res);
+			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
+			res = PQexec(H->server, q);
+			efree(q);
+			if (res) PQclear(res);
+		}
 		efree(S->cursor_name);
 		S->cursor_name = NULL;
 	}

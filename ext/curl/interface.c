@@ -3354,9 +3354,7 @@ PHP_FUNCTION(curl_close)
 		return;
 	}
 
-	if (Z_REFCOUNT_P(zid) <= 2) {
-		zend_list_close(Z_RES_P(zid));
-	}
+	zend_list_close(Z_RES_P(zid));
 }
 /* }}} */
 

@@ -10,7 +10,7 @@ Pull Requests
 =============
 PHP accepts pull requests via github. Discussions are done on github, but
 depending on the topic can also be relayed to the official PHP developer
-mailinglist internals@lists.php.net.
+mailing list internals@lists.php.net.
 
 New features require an RFC and must be accepted by the developers.
 See https://wiki.php.net/rfc and https://wiki.php.net/rfc/voting for more

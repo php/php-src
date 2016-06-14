@@ -40,6 +40,10 @@ PHP 7.1 UPGRADE NOTES
      . mb_parse_str() with one argument
      . assert() with a string argument
     (RFC: https://wiki.php.net/rfc/forbid_dynamic_scope_introspection)
+  . If the error_log is set to syslog, the PHP error levels are mapped to the
+    syslog error levels. This brings finer differentiation in the error logs
+    in contrary to the previous approach where all the errors are loggged with
+    the notice level only.
 
 - JSON:
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and

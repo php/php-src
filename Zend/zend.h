@@ -39,6 +39,7 @@
 #include "zend_variables.h"
 #include "zend_iterators.h"
 #include "zend_stream.h"
+#include "zend_smart_str_public.h"
 
 #ifdef ZEND_SIGNALS
 # include "zend_signal.h"
@@ -243,10 +244,9 @@ ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint lineno);
 ZEND_API char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);
-ZEND_API size_t zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
+ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
-ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent);
 ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 ZEND_API void zend_activate(void);
