@@ -18,7 +18,7 @@ foo("1numeric");
 ?>
 --EXPECT--
 int(1)
-int(1)
+string(1) "1"
 string(3) "1.1"
 string(1) "1"
 int(1)

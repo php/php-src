@@ -17,6 +17,8 @@ foo("1.1");
 foo("1numeric");
 foo("1.1numeric");
 foo("invalid");
+foo(INF);
+foo(NAN);
 
 ?>
 --EXPECTF--
@@ -30,4 +32,5 @@ int(1)
 int(1)
 int(1)
 bool(true)
-
+int(0)
+int(0)

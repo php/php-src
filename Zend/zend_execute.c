@@ -826,7 +826,6 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
  * Else fail in weak mode (i.e. only true or false possible, but not boolean in general or non-numeric string for int|float)
  */
 	if (EXPECTED(((1 << arg_type) & SCALAR_TYPEMASK) && (allowed_types & SCALAR_TYPEMASK))) {
-
 		/* If there's no other scalar type than true or false */
 		if (UNEXPECTED((allowed_types & (SCALAR_TYPEMASK & ~(MAY_BE_FALSE|MAY_BE_TRUE))) == 0)) {
 			zend_bool truth = zend_is_true(arg);
@@ -870,12 +869,17 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
 				return 1;
 
 			case IS_DOUBLE:
-				if ((allowed_types & (MAY_BE_LONG|MAY_BE_STRING)) == (MAY_BE_LONG|MAY_BE_STRING) && Z_DVAL_P(arg) == (double)(zend_long)Z_DVAL_P(arg)) {
-					ZVAL_LONG(arg, (zend_long) Z_DVAL_P(arg));
-				} else if (allowed_types & MAY_BE_STRING) {
+				if (allowed_types & MAY_BE_STRING) {
 					ZVAL_NEW_STR(arg, zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(arg)));
 				} else if (allowed_types & MAY_BE_LONG) {
-					ZVAL_LONG(arg, zend_dval_to_lval_cap(Z_DVAL_P(arg)));
+					/* do not emit notices when we can still cast to true */
+					if (UNEXPECTED(allowed_types & (MAY_BE_TRUE|MAY_BE_BOOL))) {
+						ZVAL_LONG(arg, zend_dval_to_lval_cap(Z_DVAL_P(arg)));
+					} else if (EXPECTED(ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) && EXPECTED(!zend_isnan(Z_DVAL_P(arg)))) {
+						ZVAL_LONG(arg, zend_dval_to_lval(Z_DVAL_P(arg)));
+					} else {
+						return 0;
+					}
 				} else {
 					ZEND_ASSERT(allowed_types & MAY_BE_BOOL);
 					ZVAL_BOOL(arg, !!Z_DVAL_P(arg));
@@ -888,7 +892,7 @@ static zend_bool zend_verify_multi_type(zend_multi_type *m, zend_bool allow_null
 					zend_long lval;
 					double dval;
 					/* do not emit notices when we can still cast to true */
-					if (0 == (type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, (allowed_types & (MAY_BE_TRUE|MAY_BE_BOOL)) ? 1 : -1))) {
+					if (UNEXPECTED(0 == (type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, (allowed_types & (MAY_BE_TRUE|MAY_BE_BOOL)) ? 1 : -1)))) {
 						if (!(allowed_types & MAY_BE_BOOL) && !(allowed_types & (Z_STRLEN_P(arg) == 0 ? MAY_BE_FALSE : MAY_BE_TRUE))) {
 							return 0;
 						}
