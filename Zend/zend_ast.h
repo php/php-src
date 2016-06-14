@@ -268,7 +268,7 @@ static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast
 }
 static zend_always_inline void zend_ast_list_rtrim(zend_ast *ast) {
 	zend_ast_list *list = zend_ast_get_list(ast);
-	while (list->children && list->child[list->children - 1] == NULL) {
+	if (list->children && list->child[list->children - 1] == NULL) {
 		list->children--;
 	}
 }
