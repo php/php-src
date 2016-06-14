@@ -2059,6 +2059,7 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_immutable.clone_obj = date_object_clone_date;
 	date_object_handlers_immutable.compare_objects = date_object_compare_date;
 	date_object_handlers_immutable.get_properties = date_object_get_properties;
+	date_object_handlers_immutable.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_immutable TSRMLS_CC, 1, date_ce_interface);
 
 	INIT_CLASS_ENTRY(ce_timezone, "DateTimeZone", date_funcs_timezone);
@@ -2225,7 +2226,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 
 	props = zend_std_get_properties(object TSRMLS_CC);
 
-	if (!dateobj->time || GC_G(gc_active)) {
+	if (!dateobj->time) {
 		return props;
 	}
 
@@ -4941,7 +4942,7 @@ static HashTable *date_object_get_properties_period(zval *object TSRMLS_DC)
 
 	props = zend_std_get_properties(object TSRMLS_CC);
 
-	if (!period_obj->start || GC_G(gc_active)) {
+	if (!period_obj->start) {
 		return props;
 	}
 
