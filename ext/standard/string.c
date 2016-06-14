@@ -3624,6 +3624,9 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 	}
 
 	Z_STRLEN_P(result) = len + (char_count * (to_len - 1));
+	if (Z_STRLEN_P(result) < 0) {
+		zend_error(E_ERROR, "String size overflow");
+	}
 	Z_STRVAL_P(result) = target = safe_emalloc(char_count, to_len, len + 1);
 	Z_TYPE_P(result) = IS_STRING;
 
