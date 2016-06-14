@@ -7084,6 +7084,7 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *value_ast, *key_ast;
 		zend_bool by_ref;
+		znode value_node, key_node, *key_node_ptr = NULL;
 
 		if (elem_ast == NULL) {
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
@@ -7092,8 +7093,6 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		value_ast = elem_ast->child[0];
 		key_ast = elem_ast->child[1];
 		by_ref = elem_ast->attr;
-
-		znode value_node, key_node, *key_node_ptr = NULL;
 
 		if (key_ast) {
 			zend_compile_expr(&key_node, key_ast);
