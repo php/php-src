@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fix bug #72138 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
+- EXIF:
+  . Fixed bug #50845 (exif_read_data() returns corrupted exif headers).
+    (Bartosz Dziewoński)
+
 - OpenSSL:
   . Fixed bug #71915 (openssl_random_pseudo_bytes is not fork-safe).
     (Jakub Zelenka)
