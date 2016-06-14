@@ -459,8 +459,12 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 			retval = NULL;
 			goto out;
 		}
+		if (rc == MBREX(search_re)) {
+			/* reuse the new rc? see bug #72399 */
+			MBREX(search_re) = NULL;
+		}
 		zend_hash_str_update_ptr(&MBREX(ht_rc), (char *)pattern, patlen, retval);
-	} else if (rc) {
+	} else {
 		retval = rc;
 	}
 out:
