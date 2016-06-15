@@ -8109,7 +8109,6 @@ ZEND_VM_HANDLER(184, ZEND_FETCH_THIS, UNUSED, UNUSED)
 ZEND_VM_HANDLER(186, ZEND_ISSET_ISEMPTY_THIS, UNUSED, UNUSED)
 {
 	USE_OPLINE
-	zval *result = EX_VAR(opline->result.var);
 
 	ZVAL_BOOL(EX_VAR(opline->result.var),
 		(opline->extended_value & ZEND_ISSET) ?
