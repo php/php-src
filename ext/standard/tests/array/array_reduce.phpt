@@ -35,6 +35,16 @@ function reduce_null($w, $v) { return $w . $v; }
 $initial = null;
 var_dump(array_reduce($array, 'reduce_null', $initial), $initial);
 
+echo "\n*** Testing array_reduce() to integer with integer array keys ***\n";
+function reduce_integer_keys($w, $v, $k) { return $w * ($k + 1); }
+$initial = 1;
+var_dump(array_reduce($array, 'reduce_integer_keys', $initial), $initial);
+
+echo "\n*** Testing array_reduce() to string with string array keys ***\n";
+$stringKeyedArray = ['foo' => 1, 'bar' => 2, 'bas' => 3];
+$initial = 'quux';
+var_dump(array_reduce($stringKeyedArray, function ($w, $v, $k) { return $w . $k; }, $initial), $initial);
+
 echo "\nDone";
 ?> 
 --EXPECTF--
@@ -75,5 +85,13 @@ array(4) {
 *** Testing array_reduce() to null ***
 string(19) "foofoobarquxquxquux"
 NULL
+
+*** Testing array_reduce() to integer with integer array keys ***
+int(720)
+int(1)
+
+*** Testing array_reduce() to string with string array keys ***
+string(13) "quuxfoobarbas"
+string(4) "quux"
 
 Done
