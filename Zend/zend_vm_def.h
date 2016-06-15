@@ -4720,8 +4720,8 @@ ZEND_VM_HANDLER(63, ZEND_RECV, NUM, ANY)
 
 	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
 		SAVE_OPLINE();
-		zend_verify_missing_arg(execute_data, arg_num, CACHE_ADDR(opline->op2.num));
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		zend_missing_arg_error(execute_data);
+		HANDLE_EXCEPTION();
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 

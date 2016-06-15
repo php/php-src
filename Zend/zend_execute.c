@@ -861,60 +861,28 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 	return 1;
 }
 
-static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_num, void **cache_slot)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data)
 {
-	zend_arg_info *cur_arg_info;
-	char *need_msg;
-	zend_class_entry *ce;
+	zend_execute_data *ptr = EX(prev_execute_data);
 
-	if (EXPECTED(arg_num <= zf->common.num_args)) {
-		cur_arg_info = &zf->common.arg_info[arg_num-1];
-	} else if (UNEXPECTED(zf->common.fn_flags & ZEND_ACC_VARIADIC)) {
-		cur_arg_info = &zf->common.arg_info[zf->common.num_args];
+	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
+			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+			EX(func)->common.scope ? "::" : "",
+			ZSTR_VAL(EX(func)->common.function_name),
+			EX_NUM_ARGS(),
+			ZSTR_VAL(ptr->func->op_array.filename),
+			ptr->opline->lineno,
+			EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
+			EX(func)->common.required_num_args);
 	} else {
-		return 1;
-	}
-
-	if (cur_arg_info->type_hint) {
-		if (cur_arg_info->class_name) {
-			if (EXPECTED(*cache_slot)) {
-				ce = (zend_class_entry*)*cache_slot;
-			} else {
-				ce = zend_verify_arg_class_kind(cur_arg_info);
-				if (UNEXPECTED(!ce)) {
-					zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info->class_name), "none", "");
-					return 0;
-				}
-				*cache_slot = (void*)ce;
-			}
-			need_msg =
-				(ce->ce_flags & ZEND_ACC_INTERFACE) ?
-				"implement interface " : "be an instance of ";
-			zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce->name), "none", "");
-		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
-			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "");
-		} else {
-			zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "");
-		}
-		return 0;
-	}
-	return 1;
-}
-
-static ZEND_COLD void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
-{
-	if (EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) ||
-	    UNEXPECTED(zend_verify_missing_arg_type(EX(func), arg_num, cache_slot))) {
-		const char *class_name = EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "";
-		const char *space = EX(func)->common.scope ? "::" : "";
-		const char *func_name = EX(func)->common.function_name ? ZSTR_VAL(EX(func)->common.function_name) : "main";
-		zend_execute_data *ptr = EX(prev_execute_data);
-
-		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-			zend_error(E_WARNING, "Missing argument %u for %s%s%s(), called in %s on line %d and defined", arg_num, class_name, space, func_name, ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
-		} else {
-			zend_error(E_WARNING, "Missing argument %u for %s%s%s()", arg_num, class_name, space, func_name);
-		}
+		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed and %s %d expected",
+			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+			EX(func)->common.scope ? "::" : "",
+			ZSTR_VAL(EX(func)->common.function_name),
+			EX_NUM_ARGS(),
+			EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
+			EX(func)->common.required_num_args);
 	}
 }
 
@@ -3071,11 +3039,6 @@ ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint
 ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
-}
-
-ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
-{
-	zend_verify_missing_arg(execute_data, arg_num, cache_slot);
 }
 
 /*

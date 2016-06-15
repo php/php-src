@@ -2894,12 +2894,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			if (func_info && (int)opline->op1.num-1 < func_info->num_args) {
 				tmp = (tmp & (MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF)) |
 					(tmp & func_info->arg_info[opline->op1.num-1].info.type);
-			} else {
-				if (opline->opcode == ZEND_RECV && (!arg_info || arg_info->type_hint == IS_UNDEF)) {
-					/* If the argument has no default value and no typehint, it is possible
-					 * to pass less arguments than the function expects */
-					tmp |= MAY_BE_UNDEF|MAY_BE_RC1;
-				}
 			}
 #if 0
 			/* We won't recieve unused arguments */
