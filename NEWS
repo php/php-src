@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.9
 
 - Mbstring:
+  . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
+    oob read access). (Laruence)
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
 
 - Standard:
