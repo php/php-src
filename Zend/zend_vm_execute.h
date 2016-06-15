@@ -16994,6 +16994,80 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZE
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SIMPLE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+	zend_free_op free_op1;
+
+	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_VAR == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_VAR == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SIMPLE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+	zend_free_op free_op1;
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(0)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_var_by_ref;
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_var_by_ref:
+		ZEND_VM_TAIL_CALL(ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_VAR == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_VAR == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SIMPLE_SPEC_VAR_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+	zend_free_op free_op1;
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(1)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_var_by_ref;
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_var_by_ref:
+		ZEND_VM_TAIL_CALL(ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_VAR == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_VAR == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -37915,6 +37989,80 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEN
 	ZEND_VM_SMART_BRANCH(result, 1);
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SIMPLE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+
+
+	varptr = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_CV == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_CV == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(0)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_var_by_ref;
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_var_by_ref:
+		ZEND_VM_TAIL_CALL(ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	varptr = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_CV == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_CV == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(1)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_var_by_ref;
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_var_by_ref:
+		ZEND_VM_TAIL_CALL(ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	varptr = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (IS_CV == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (IS_CV == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -63737,6 +63885,21 @@ void zend_init_opcodes_handlers(void)
 		ZEND_FETCH_DIM_R_INDEX_SPEC_CV_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_R_INDEX_SPEC_CV_CV_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_SEND_VAR_SIMPLE_SPEC_VAR_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_SEND_VAR_SIMPLE_SPEC_CV_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_SEND_VAR_EX_SIMPLE_SPEC_VAR_HANDLER,
+		ZEND_SEND_VAR_EX_SIMPLE_SPEC_VAR_QUICK_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_HANDLER,
+		ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_QUICK_HANDLER,
 		ZEND_NULL_HANDLER
 	};
 	static const uint32_t specs[] = {
@@ -63789,9 +63952,9 @@ void zend_init_opcodes_handlers(void)
 		1423 | SPEC_RULE_OP1,
 		1428 | SPEC_RULE_OP1,
 		1433 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		4481,
+		4496,
 		1458 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
-		4481,
+		4496,
 		1468 | SPEC_RULE_OP1,
 		1473 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1498 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -63840,7 +64003,7 @@ void zend_init_opcodes_handlers(void)
 		2207 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2232 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2257 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		4481,
+		4496,
 		2282,
 		2283,
 		2284,
@@ -63924,7 +64087,7 @@ void zend_init_opcodes_handlers(void)
 		3456 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3481 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3506 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		4481
+		4496
 	};
 	zend_opcode_handlers = labels;
 		zend_handlers_count = sizeof(labels) / sizeof(void*);
@@ -64205,9 +64368,19 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				spec = 4441 | SPEC_RULE_OP1;
 			}
 			break;
+		case ZEND_SEND_VAR_EX:
+			if ((op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
+				spec = 4486 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG;
+			}
+			break;
 		case ZEND_FETCH_DIM_R:
 			if ((!(op2_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
 				spec = 4456 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+			}
+			break;
+		case ZEND_SEND_VAR:
+			if ((op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
+				spec = 4481 | SPEC_RULE_OP1;
 			}
 			break;
 		default:

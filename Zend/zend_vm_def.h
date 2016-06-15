@@ -8523,4 +8523,50 @@ ZEND_VM_C_LABEL(fetch_dim_r_index_undef):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_TYPE_SPEC_HANDLER(ZEND_SEND_VAR, (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0, ZEND_SEND_VAR_SIMPLE, CV|VAR, NUM)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+	zend_free_op free_op1;
+
+	varptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (OP1_TYPE == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (OP1_TYPE == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_TYPE_SPEC_HANDLER(ZEND_SEND_VAR_EX, (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0, ZEND_SEND_VAR_EX_SIMPLE, CV|VAR, NUM, SPEC(QUICK_ARG))
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+	zend_free_op free_op1;
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			ZEND_VM_C_GOTO(send_var_by_ref);
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+ZEND_VM_C_LABEL(send_var_by_ref):
+		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_REF);
+	}
+
+	varptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (OP1_TYPE == IS_CV) {
+		ZVAL_COPY(arg, varptr);
+	} else /* if (OP1_TYPE == IS_VAR) */ {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
