@@ -1538,7 +1538,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 		php_header();
 
 		fcgi_flush(request, 1);
-		fcgi_close(request, 0, 1);
+		fcgi_close(request, 0, 0);
 		RETURN_TRUE;
 	}
 

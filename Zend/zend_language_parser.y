@@ -250,7 +250,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
-%type <ast> array_pair non_empty_array_pair_list array_pair_list
+%type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
 
@@ -1183,21 +1183,20 @@ property_name:
 ;
 
 array_pair_list:
-		/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_ARRAY); }
-	|	non_empty_array_pair_list { /* allow single trailing comma */ zend_ast_list *list = zend_ast_get_list($$ = $1); if (list->child[list->children - 1] == NULL) { list->children--; } }
+		non_empty_array_pair_list
+			{ /* allow single trailing comma */ $$ = zend_ast_list_rtrim($1); }
+;
+
+possible_array_pair:
+		/* empty */ { $$ = NULL; }
+	|	array_pair  { $$ = $1; }
 ;
 
 non_empty_array_pair_list:
-		non_empty_array_pair_list ',' array_pair
+		non_empty_array_pair_list ',' possible_array_pair
 			{ $$ = zend_ast_list_add($1, $3); }
-	|	array_pair
+	|	possible_array_pair
 			{ $$ = zend_ast_create_list(1, ZEND_AST_ARRAY, $1); }
-	|	non_empty_array_pair_list ',' /* empty, for LHS array lists */
-			{ $$ = zend_ast_list_add($1, NULL); }
-	|	','
-			{ $$ = zend_ast_create_list(1, ZEND_AST_ARRAY, NULL); }
-	|	',' array_pair
-			{ $$ = zend_ast_create_list(2, ZEND_AST_ARRAY, NULL, $2); }
 ;
 
 array_pair:

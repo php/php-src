@@ -62,7 +62,7 @@ Stack trace:
 #0 %sbug65784.php(52): foo3()
 #1 {main}
 
-Next Error: Class 'NotExists' not found in %s/bug65784.php:46
+Next Error: Class 'NotExists' not found in %sbug65784.php:46
 Stack trace:
 #0 %sbug65784.php(52): foo3()
 #1 {main}
