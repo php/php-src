@@ -364,8 +364,6 @@ struct _zend_op_array {
 
 	uint32_t *refcount;
 
-	uint32_t this_var;
-
 	uint32_t last;
 	zend_op *opcodes;
 

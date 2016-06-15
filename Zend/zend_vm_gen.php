@@ -949,7 +949,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 	if ($spec &&
 	    isset($extra_spec["DIM_OBJ"]) &&
 		(($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1) ||
-		 ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] == 0))) {
+		 ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] != 2))) {
 	    // Skip useless handlers
 		return;
 	}
@@ -1184,7 +1184,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						return;
 					} else if (isset($extra_spec["DIM_OBJ"]) &&
 						(($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1) ||
-						 ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] == 0))) {
+						 ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] != 2))) {
 					    // Skip useless handlers
 						gen_null_label($f, $kind, $prolog);
 						$label++;

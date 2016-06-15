@@ -1141,7 +1141,6 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
-	func->this_var = -1;
 	func->opcodes = &EG(call_trampoline_op);
 
 	func->prototype = fbc;

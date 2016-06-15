@@ -2133,7 +2133,7 @@ static zend_never_inline ZEND_COLD ZEND_NORETURN void ZEND_FASTCALL zend_interru
  *                             +----------------------------------------+
  */
 
-static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, int check_this) /* {{{ */
+static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
@@ -2191,11 +2191,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
-		GC_REFCOUNT(Z_OBJ(EX(This)))++;
-	}
-
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 	EX_LOAD_LITERALS(op_array);
 
@@ -2219,13 +2214,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-		GC_REFCOUNT(Z_OBJ(EX(This)))++;
-		if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
-			GC_REFCOUNT(Z_OBJ(EX(This)))--;
-		}
-	}
-
 	zend_attach_symbol_table(execute_data);
 
 	if (!op_array->run_time_cache) {
@@ -2248,13 +2236,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(return_value) = return_value;
 
 	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
-		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-			GC_REFCOUNT(Z_OBJ(EX(This)))++;
-			if (!zend_hash_add(EX(symbol_table), CG(known_strings)[ZEND_STR_THIS], &EX(This))) {
-				GC_REFCOUNT(Z_OBJ(EX(This)))--;
-			}
-		}
-
 		zend_attach_symbol_table(execute_data);
 	} else {
 		uint32_t first_extra_arg, num_args;
@@ -2306,11 +2287,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 				ZVAL_UNDEF(var);
 				var++;
 			} while (var != end);
-		}
-
-		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
-			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		}
 	}
 
