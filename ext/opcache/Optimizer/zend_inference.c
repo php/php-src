@@ -3238,6 +3238,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
+		case ZEND_FETCH_THIS:
+			UPDATE_SSA_OBJ_TYPE(op_array->scope, 1, ssa_ops[i].result_def);
+			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_OBJECT, ssa_ops[i].result_def);
+			break;
 		case ZEND_FETCH_OBJ_R:
 		case ZEND_FETCH_OBJ_IS:
 		case ZEND_FETCH_OBJ_RW:
