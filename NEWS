@@ -7,8 +7,17 @@ PHP                                                                        NEWS
   . Fixed bug #72373 (TypeError after Generator function w/declared return type
     finishes). (Nikita)
 
+- Mbstring:
+  . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
+    oob read access). (Laruence)
+  . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
+
 - Sqlite3:
   . Implemented FR #72385 (Update SQLite bundle lib(3.13.0)). (Laruence)
+
+- Standard:
+  . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
+    (Laruence)
 
 09 Jun 2016, PHP 7.1.0alpha1
 
