@@ -3112,6 +3112,9 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					tmp = MAY_BE_RCN;
 				}
 			}
+			if (opline->opcode == ZEND_FE_FETCH_R && (t2 & MAY_BE_REF)) {
+				tmp |= MAY_BE_REF;
+			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
 			if (ssa_ops[i].result_def >= 0) {
 				tmp = MAY_BE_RC1;
@@ -3734,6 +3737,9 @@ void zend_init_func_return_info(const zend_op_array   *op_array,
 		zend_ssa_range tmp_range = {0, 0, 0, 0};
 
 		ret->type = zend_fetch_arg_info(script, ret_info, &ret->ce);
+		if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			ret->type |= MAY_BE_REF;
+		}
 		ret->is_instanceof = (ret->ce) ? 1 : 0;
 		ret->range = tmp_range;
 		ret->has_range = 0;

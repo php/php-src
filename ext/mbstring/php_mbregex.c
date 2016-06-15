@@ -811,7 +811,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	OnigUChar *pos;
 	OnigUChar *string_lim;
 	char *description = NULL;
-	char pat_buf[4];
+	char pat_buf[6];
 
 	const mbfl_encoding *enc;
 
@@ -864,6 +864,8 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		pat_buf[1] = '\0';
 		pat_buf[2] = '\0';
 		pat_buf[3] = '\0';
+		pat_buf[4] = '\0';
+		pat_buf[5] = '\0';
 
 		arg_pattern = pat_buf;
 		arg_pattern_len = 1;
