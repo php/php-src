@@ -249,7 +249,6 @@ END_EXTERN_C()
 #define ZEND_BIND_LEXICAL                    182
 #define ZEND_BIND_STATIC                     183
 #define ZEND_FETCH_THIS                      184
-#define ZEND_FETCH_THIS_IS                   185
 #define ZEND_ISSET_ISEMPTY_THIS              186
 
 #define ZEND_VM_LAST_OPCODE                  186

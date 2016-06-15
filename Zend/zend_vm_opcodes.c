@@ -207,7 +207,7 @@ static const char *zend_vm_opcodes_names[187] = {
 	"ZEND_BIND_LEXICAL",
 	"ZEND_BIND_STATIC",
 	"ZEND_FETCH_THIS",
-	"ZEND_FETCH_THIS_IS",
+	NULL,
 	"ZEND_ISSET_ISEMPTY_THIS",
 };
 
@@ -287,7 +287,7 @@ static uint32_t zend_vm_opcodes_flags[187] = {
 	0x00106703,
 	0x08000007,
 	0x00030107,
-	0x00000751,
+	0x00000701,
 	0x00000751,
 	0x00002003,
 	0x03000001,
@@ -327,7 +327,7 @@ static uint32_t zend_vm_opcodes_flags[187] = {
 	0x01000757,
 	0x01008773,
 	0x00030107,
-	0x00020757,
+	0x00020707,
 	0x00001003,
 	0x00001001,
 	0x01000703,
@@ -397,7 +397,7 @@ static uint32_t zend_vm_opcodes_flags[187] = {
 	0x00100101,
 	0x00100301,
 	0x00000101,
-	0x00000101,
+	0x00000000,
 	0x00000101,
 };
 

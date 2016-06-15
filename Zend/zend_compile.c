@@ -1932,9 +1932,6 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 	zend_uchar factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
 	
 	if (opline->opcode == ZEND_FETCH_THIS) {
-		if ((type & BP_VAR_MASK) == BP_VAR_IS) {
-			opline->opcode = ZEND_FETCH_THIS_IS;
-		}
 		return;
 	}
 
