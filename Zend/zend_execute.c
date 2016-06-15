@@ -861,6 +861,31 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 	return 1;
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data)
+{
+	zend_execute_data *ptr = EX(prev_execute_data);
+
+	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
+			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+			EX(func)->common.scope ? "::" : "",
+			ZSTR_VAL(EX(func)->common.function_name),
+			EX_NUM_ARGS(),
+			ZSTR_VAL(ptr->func->op_array.filename),
+			ptr->opline->lineno,
+			EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
+			EX(func)->common.required_num_args);
+	} else {
+		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed and %s %d expected",
+			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+			EX(func)->common.scope ? "::" : "",
+			ZSTR_VAL(EX(func)->common.function_name),
+			EX_NUM_ARGS(),
+			EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
+			EX(func)->common.required_num_args);
+	}
+}
+
 static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = ZSTR_VAL(zf->common.function_name);
