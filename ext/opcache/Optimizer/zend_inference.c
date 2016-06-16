@@ -2596,8 +2596,15 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					tmp |= MAY_BE_LONG;
 				}
 			} else {
+				if (t1 & MAY_BE_ERROR) {
+					tmp |= MAY_BE_NULL;
+				}
 				if (t1 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
-					tmp |= MAY_BE_LONG;
+					if (opline->opcode == ZEND_PRE_INC) {
+						tmp |= MAY_BE_LONG;
+					} else {
+						tmp |= MAY_BE_NULL;
+					}
 				}
 				if (t1 & MAY_BE_LONG) {
 					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
@@ -2647,8 +2654,15 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					tmp |= MAY_BE_LONG;
 				}
 			} else {
+				if (t1 & MAY_BE_ERROR) {
+					tmp |= MAY_BE_NULL;
+				}
 				if (t1 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
-					tmp |= MAY_BE_LONG;
+					if (opline->opcode == ZEND_POST_INC) {
+						tmp |= MAY_BE_LONG;
+					} else {
+						tmp |= MAY_BE_NULL;
+					}
 				}
 				if (t1 & MAY_BE_LONG) {
 					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
@@ -2923,6 +2937,8 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		}
 		case ZEND_DECLARE_CLASS:
 		case ZEND_DECLARE_INHERITED_CLASS:
+		case ZEND_DECLARE_ANON_CLASS:
+		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
 			if ((ce = zend_hash_find_ptr(&script->class_table, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_ops[i].result_def);
