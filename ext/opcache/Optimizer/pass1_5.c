@@ -46,10 +46,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		(op_array == &ctx->script->main_op_array) : 0;
 
 	while (opline < end) {
-		if (op_array->last_try_catch
-		 && opline == op_array->opcodes + op_array->try_catch_array[0].try_op) {
-			collect_constants = 0;
-		}
 		switch (opline->opcode) {
 		case ZEND_ADD:
 		case ZEND_SUB:
@@ -413,6 +409,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				    send2_opline &&
 				    Z_TYPE(ZEND_OP1_LITERAL(send2_opline)) <= IS_STRING) {
 
+					if (collect_constants
+					 && op_array->last_try_catch
+					 && opline == op_array->opcodes + op_array->try_catch_array[0].try_op) {
+						collect_constants = 0;
+					}
 					if (collect_constants) {
 						zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(send1_opline), &ZEND_OP1_LITERAL(send2_opline));
 					}
@@ -625,6 +626,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 		case ZEND_DECLARE_CONST:
+			if (collect_constants
+			 && op_array->last_try_catch
+			 && opline == op_array->opcodes + op_array->try_catch_array[0].try_op) {
+				collect_constants = 0;
+			}
 			if (collect_constants &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
 			    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_STRING) {
