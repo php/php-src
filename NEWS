@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.9
 
+- GD:
+  . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
+
 - Mbstring:
   . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
     oob read access). (Laruence)
