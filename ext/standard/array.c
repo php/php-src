@@ -1764,6 +1764,7 @@ PHP_FUNCTION(extract)
 	zend_ulong num_key;
 	int var_exists, count = 0;
 	int extract_refs = 0;
+	int exception_thrown = 0;
 	zend_array *symbol_table;
 	zval var_array;
 
@@ -1846,12 +1847,6 @@ PHP_FUNCTION(extract)
 				if (var_exists && ZSTR_LEN(var_name) == sizeof("GLOBALS")-1 && !strcmp(ZSTR_VAL(var_name), "GLOBALS")) {
 					break;
 				}
-				if (var_exists && ZSTR_LEN(var_name) == sizeof("this")-1  && !strcmp(ZSTR_VAL(var_name), "this")) {
-					zend_class_entry *scope = zend_get_executed_scope();
-					if (scope && ZSTR_LEN(scope->name) != 0) {
-						break;
-					}
-				}
 				ZVAL_STR_COPY(&final_name, var_name);
 				break;
 
@@ -1892,6 +1887,15 @@ PHP_FUNCTION(extract)
 
 		if (Z_TYPE(final_name) == IS_STRING && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			zval *orig_var;
+
+			if (Z_STRLEN(final_name) == sizeof("this")-1  && !strcmp(Z_STRVAL(final_name), "this")) {
+				if (!exception_thrown) {
+					exception_thrown = 1;
+					zend_throw_error(NULL, "Cannot re-assign $this");
+				}
+				zval_dtor(&final_name);
+				continue;
+			}
 			if (extract_refs) {
 
 				ZVAL_MAKE_REF(entry);
