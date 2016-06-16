@@ -1,9 +1,9 @@
 --TEST--
-Bug #71127 (Define in auto_prepend_file is overwrite)
+Bug #71127_2 (Define in auto_prepend_file is overwrite)
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.optimization_level=0x7FFFBFFF
+opcache.optimization_level=0x7FFFFFFF
 --SKIPIF--
 <?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
 --FILE--

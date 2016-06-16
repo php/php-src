@@ -5,7 +5,11 @@ Defining and using constants
 
 define('foo', 	2);
 define('1', 	2);
-define(1, 		2);
+try {
+	define(1, 		2);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 define('',		1);
 define('1foo',	3);
 
@@ -16,8 +20,8 @@ var_dump(constant(''));
 var_dump(constant('1foo'));
 
 ?>
---EXPECTF--
-Notice: Constant 1 already defined in %s on line %d
+--EXPECT--
+Exception: Constant 1 already defined
 int(2)
 int(2)
 int(2)

@@ -6,8 +6,11 @@ Trying to redeclare constant inside namespace
 namespace foo;
 
 const foo = 1;
-const foo = 2;
-
+try {
+	define("foo\\foo", 2);
+} catch (\Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Notice: Constant foo\foo already defined in %s on line %d
+--EXPECT--
+Exception: Constant foo\foo already defined

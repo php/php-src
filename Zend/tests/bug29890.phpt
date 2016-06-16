@@ -15,9 +15,11 @@ set_error_handler("customErrorHandler");
 define("TEST",2);
 
 //should return a notice that the constant is already defined
-
-define("TEST",3);
-
+try {
+	define("TEST",3);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 ?>
 --EXPECT--
-error :Constant TEST already defined
+Exception: Constant TEST already defined

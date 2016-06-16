@@ -46,6 +46,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		(op_array == &ctx->script->main_op_array) : 0;
 
 	while (opline < end) {
+		if (op_array->last_try_catch
+		 && opline == op_array->opcodes + op_array->try_catch_array[0].try_op) {
+			collect_constants = 0;
+		}
 		switch (opline->opcode) {
 		case ZEND_ADD:
 		case ZEND_SUB:

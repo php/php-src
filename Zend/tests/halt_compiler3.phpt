@@ -2,9 +2,13 @@
 __HALT_COMPILER(); bad define() of __COMPILER_HALT_OFFSET__ 1
 --FILE--
 <?php
-define ('__COMPILER_HALT_OFFSET__', 1);
+try {
+	define ('__COMPILER_HALT_OFFSET__', 1);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 ?>
 ==DONE==
---EXPECTF--
-Notice: Constant __COMPILER_HALT_OFFSET__ already defined in %s on line %d
+--EXPECT--
+Exception: Constant __COMPILER_HALT_OFFSET__ already defined
 ==DONE==
