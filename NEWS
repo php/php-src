@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #50845 (exif_read_data() returns corrupted exif headers).
     (Bartosz Dziewoński)
 
+- GD:
+  . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
+
 - OpenSSL:
   . Fixed bug #71915 (openssl_random_pseudo_bytes is not fork-safe).
     (Jakub Zelenka)
@@ -49,7 +52,7 @@ PHP                                                                        NEWS
 
 28 Apr 2016, PHP 5.6.21
 
-- Core: 
+- Core:
   . Fixed bug #69537 (__debugInfo with empty string for key gives error).
     (krakjoe)
   . Fixed bug #71841 (EG(error_zval) is not handled well). (Laruence)
