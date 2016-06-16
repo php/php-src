@@ -128,8 +128,8 @@ echo "CSR errors\n";
 @openssl_csr_get_subject("file://" . $invalid_file_for_read);
 expect_openssl_errors('openssl_csr_get_subject open', ['02001002', '2006D080', '20068079', '0906D06C']);
 // file or str csr is not correct PEM - failing PEM_read_bio_X509_REQ
-openssl_csr_get_subject($crt_file);
-@expect_openssl_errors('openssl_csr_get_subjec pem', ['0906D06C']);
+@openssl_csr_get_subject($crt_file);
+expect_openssl_errors('openssl_csr_get_subjec pem', ['0906D06C']);
 
 // other possible cuases that are difficult to catch:
 // - ASN1_STRING_to_UTF8 fails in add_assoc_name_entry
