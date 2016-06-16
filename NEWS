@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #72373 (TypeError after Generator function w/declared return type
     finishes). (Nikita)
 
+- GD:
+  . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
+
 - Mbstring:
   . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
     oob read access). (Laruence)
