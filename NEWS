@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0alpha2
 
 - Core:
+  . Implemented RFC: Replace "Missing argument" warning with "Too few
+    arguments" exception. (Dmitry)
+  . Implemented RFC: Fix inconsistent behavior of $this variable. (Dmitry)
   . Fixed bug #72395 (list() regression). (Laruence)
   . Fixed bug #72373 (TypeError after Generator function w/declared return type
     finishes). (Nikita)
