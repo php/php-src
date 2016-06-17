@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0alpha2
 
 - Core:
-  . Implemented RFC: R/eplace "Missing argument" warning with "Too few
+  . Implemented RFC: Replace "Missing argument" warning with "Too few
     arguments" exception. (Dmitry)
   . Implemented RFC: Fix inconsistent behavior of $this variable. (Dmitry)
   . Fixed bug #72441 (Segmentation fault: RFC list_keys). (Laruence)
