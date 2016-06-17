@@ -8,7 +8,7 @@ ini_set('ibase.default_user',$user);
 ini_set('ibase.default_password',$password);
 
 /* we need just the generated name, not the file itself */
-unlink($test_base = tempnam('/tmp',"php_ibase_test"));
+unlink($test_base = tempnam(sys_get_temp_dir(),"php_ibase_test"));
 
 function init_db()
 {
