@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
+  . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
 
 - OpenSSL:
   . Fixed bug #71915 (openssl_random_pseudo_bytes is not fork-safe).
