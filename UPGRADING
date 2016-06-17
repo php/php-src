@@ -112,6 +112,7 @@ PHP 7.1 UPGRADE NOTES
   mb_strpos() and mb_stripos() now accept negative string offsets.
 - substr_count() and mb_strimwidth() additionally also accept negative length.
 - file_get_contents() accepts a negative seek offset if the stream is seekable.
+- tempnam() throws a notice when failing back to the system temp dir.
 
 ========================================
 6. New Functions
