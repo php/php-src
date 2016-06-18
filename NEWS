@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Implemented RFC: Replace "Missing argument" warning with "Too few
     arguments" exception. (Dmitry)
   . Implemented RFC: Fix inconsistent behavior of $this variable. (Dmitry)
+  . Fixed bug #72441 (Segmentation fault: RFC list_keys). (Laruence)
   . Fixed bug #72395 (list() regression). (Laruence)
   . Fixed bug #72373 (TypeError after Generator function w/declared return type
     finishes). (Nikita)
@@ -14,6 +15,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
+  . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
 
 - Mbstring:
   . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -

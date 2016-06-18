@@ -343,6 +343,24 @@ static inline zend_bool can_elide_return_type_check(
 	return 1;
 }
 
+static zend_bool opline_supports_assign_contraction(zend_ssa *ssa, zend_op *opline, int src_var) {
+	if (opline->opcode == ZEND_NEW) {
+		/* see Zend/tests/generators/aborted_yield_during_new.phpt */
+		return 0;
+	}
+
+	if (opline->opcode == ZEND_DO_ICALL || opline->opcode == ZEND_DO_UCALL
+			|| opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+		/* Function calls may dtor the return value after it has already been written -- allow
+		 * direct assignment only for types where a double-dtor does not matter. */
+		uint32_t type = ssa->var_info[src_var].type;
+		uint32_t simple = MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE;
+		return !((type & MAY_BE_ANY) & ~simple);
+	}
+
+	return 1;
+}
+
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
@@ -457,8 +475,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && ssa->ops[op_1].op2_use_chain < 0
 					 && !ssa->vars[src_var].phi_use_chain
 					 && !ssa->vars[src_var].sym_use_chain
-					 /* see Zend/tests/generators/aborted_yield_during_new.phpt */
-					 && op_array->opcodes[ssa->vars[src_var].definition].opcode != ZEND_NEW
+					 && opline_supports_assign_contraction(
+						 ssa, &op_array->opcodes[ssa->vars[src_var].definition], src_var)
 					) {
 
 						int op_2 = ssa->vars[src_var].definition;
