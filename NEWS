@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
     (Laruence)
 
+- Streams:
+  . Fixed bug #72439 (Stream socket with remote address leads to a segmentation
+    fault). (Laruence)
+
 23 Jun 2016 PHP 7.0.8
 
 - Core:
