@@ -42,7 +42,6 @@ enum _zend_ast_kind {
 
 	/* list nodes */
 	ZEND_AST_ARG_LIST = 1 << ZEND_AST_IS_LIST_SHIFT,
-	ZEND_AST_LIST,
 	ZEND_AST_ARRAY,
 	ZEND_AST_ENCAPS_LIST,
 	ZEND_AST_EXPR_LIST,
@@ -124,7 +123,6 @@ enum _zend_ast_kind {
 	ZEND_AST_SWITCH,
 	ZEND_AST_SWITCH_CASE,
 	ZEND_AST_DECLARE,
-	ZEND_AST_CONST_ELEM,
 	ZEND_AST_USE_TRAIT,
 	ZEND_AST_TRAIT_PRECEDENCE,
 	ZEND_AST_METHOD_REFERENCE,
@@ -142,6 +140,7 @@ enum _zend_ast_kind {
 	ZEND_AST_CATCH,
 	ZEND_AST_PARAM,
 	ZEND_AST_PROP_ELEM,
+	ZEND_AST_CONST_ELEM,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -267,5 +266,11 @@ static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, z
 static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast *op0) {
 	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
 }
-
+static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
+	zend_ast_list *list = zend_ast_get_list(ast);
+	if (list->children && list->child[list->children - 1] == NULL) {
+		list->children--;
+	}
+	return ast;
+}
 #endif

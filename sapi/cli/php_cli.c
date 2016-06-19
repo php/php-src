@@ -689,6 +689,14 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #else
 					"NTS "
 #endif
+#ifdef COMPILER
+					COMPILER
+					" "
+#endif
+#ifdef ARCHITECTURE
+					ARCHITECTURE
+					" "
+#endif
 #if ZEND_DEBUG
 					"DEBUG "
 #endif

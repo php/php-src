@@ -14,17 +14,15 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
-  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
-#ifndef MYSQLND_NET_H
-#define MYSQLND_NET_H
+#ifndef MYSQLND_COMMANDS_H
+#define MYSQLND_COMMANDS_H
 
-PHPAPI MYSQLND_NET * mysqlnd_net_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
-PHPAPI void mysqlnd_net_free(MYSQLND_NET * const net, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+extern func_mysqlnd__command_factory mysqlnd_command_factory;
 
-#endif /* MYSQLND_NET_H */
+#endif /* MYSQLND_COMMANDS_H */
 
 /*
  * Local variables:

@@ -28,6 +28,7 @@
 #else
 # undef closesocket
 # define closesocket close
+# include <netinet/tcp.h>
 #endif
 
 #ifndef HAVE_SHUTDOWN
@@ -115,6 +116,7 @@ typedef int php_socket_t;
 #define STREAM_SOCKOP_SO_BROADCAST        (1 << 2)
 #define STREAM_SOCKOP_IPV6_V6ONLY         (1 << 3)
 #define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
+#define STREAM_SOCKOP_TCP_NODELAY         (1 << 5)
 
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
@@ -265,7 +267,8 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_string,
-		int *error_code
+		int *error_code,
+		int tcp_nodelay
 		);
 
 PHPAPI int php_network_get_sock_name(php_socket_t sock,

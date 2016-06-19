@@ -23,6 +23,7 @@
 #include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"
+#include "php_variables.h"
 #include "php_ini.h"
 #include "php_standard.h"
 #include "php_math.h"
@@ -632,7 +633,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_long2ip, 0)
 	ZEND_ARG_INFO(0, proper_address)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_getenv, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 0)
 	ZEND_ARG_INFO(0, varname)
 ZEND_END_ARG_INFO()
 
@@ -871,12 +872,10 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 /* {{{ crypt.c */
-#if HAVE_CRYPT
 ZEND_BEGIN_ARG_INFO_EX(arginfo_crypt, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, salt)
 ZEND_END_ARG_INFO()
-#endif
 /* }}} */
 /* {{{ cyr_convert.c */
 ZEND_BEGIN_ARG_INFO(arginfo_convert_cyr_string, 0)
@@ -2598,6 +2597,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_headers, 0, 0, 1)
 	ZEND_ARG_INFO(0, url)
 	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ user_filters.c */
@@ -3168,10 +3168,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	/* functions from browscap.c */
 	PHP_FE(get_browser,														arginfo_get_browser)
 
-#if HAVE_CRYPT
 	/* functions from crypt.c */
 	PHP_FE(crypt,															arginfo_crypt)
-#endif
 
 	/* functions from dir.c */
 	PHP_FE(opendir,															arginfo_opendir)
@@ -3491,8 +3489,8 @@ PHPAPI double php_get_nan(void) /* {{{ */
 	return HUGE_VAL + -HUGE_VAL;
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val = 0.0;
-	((php_uint32*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
-	((php_uint32*)&val)[0] = 0;
+	((uint32_t*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
+	((uint32_t*)&val)[0] = 0;
 	return val;
 #elif HAVE_ATOF_ACCEPTS_NAN
 	return atof("NAN");
@@ -3508,8 +3506,8 @@ PHPAPI double php_get_inf(void) /* {{{ */
 	return HUGE_VAL;
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val = 0.0;
-	((php_uint32*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
-	((php_uint32*)&val)[0] = 0;
+	((uint32_t*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
+	((uint32_t*)&val)[0] = 0;
 	return val;
 #elif HAVE_ATOF_ACCEPTS_INF
 	return atof("INF");
@@ -3641,10 +3639,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
-#if HAVE_CRYPT
 	BASIC_MINIT_SUBMODULE(crypt)
-#endif
-
 	BASIC_MINIT_SUBMODULE(lcg)
 
 	BASIC_MINIT_SUBMODULE(dir)
@@ -3713,10 +3708,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
-#if HAVE_CRYPT
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
-#endif
-
 	BASIC_MSHUTDOWN_SUBMODULE(random)
 
 	zend_hash_destroy(&basic_submodules);
@@ -3842,20 +3834,21 @@ PHP_FUNCTION(constant)
 {
 	zend_string *const_name;
 	zval *c;
+	zend_class_entry *scope;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &const_name) == FAILURE) {
 		return;
 	}
 
-	c = zend_get_constant_ex(const_name, NULL, ZEND_FETCH_CLASS_SILENT);
+	scope = zend_get_executed_scope();
+	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
 	if (c) {
-		ZVAL_COPY_VALUE(return_value, c);
+		ZVAL_DUP(return_value, c);
 		if (Z_CONSTANT_P(return_value)) {
-			if (UNEXPECTED(zval_update_constant_ex(return_value, 1, NULL) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
 				return;
 			}
 		}
-		zval_copy_ctor(return_value);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
 		RETURN_NULL();
@@ -3977,22 +3970,17 @@ PHP_FUNCTION(ip2long)
    Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
 PHP_FUNCTION(long2ip)
 {
-	/* "It's a long but it's not, PHP ints are signed */
-	char *ip;
-	size_t ip_len;
-	uint32_t n;
+	zend_ulong ip;
 	struct in_addr myaddr;
 #ifdef HAVE_INET_PTON
 	char str[40];
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &ip, &ip_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &ip) == FAILURE) {
 		return;
 	}
 
-	n = strtoul(ip, NULL, 0);
-
-	myaddr.s_addr = htonl(n);
+	myaddr.s_addr = htonl(ip);
 #ifdef HAVE_INET_PTON
 	if (inet_ntop(AF_INET, &myaddr, str, sizeof(str))) {
 		RETURN_STRING(str);
@@ -4009,15 +3997,22 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv(string varname)
-   Get the value of an environment variable */
+/* {{{ proto string getenv([string varname])
+   Get the value of an environment variable or every available environment variable 
+   if no varname is present  */
 PHP_FUNCTION(getenv)
 {
-	char *ptr, *str;
+	char *ptr, *str = NULL;
 	size_t str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (!str) {
+		array_init(return_value);
+		php_import_environment_variables(return_value);
+		return;
 	}
 
 	/* SAPI method returns an emalloc()'d string */
@@ -4709,7 +4704,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
 			break;
 
 		default:
-			php_log_err(message);
+			php_log_err_with_severity(message, LOG_NOTICE);
 			break;
 	}
 	return SUCCESS;
@@ -5482,15 +5477,9 @@ PHP_FUNCTION(print_r)
 	}
 
 	if (do_return) {
-		php_output_start_default();
-	}
-
-	zend_print_zval_r(var, 0);
-
-	if (do_return) {
-		php_output_get_contents(return_value);
-		php_output_discard();
+		RETURN_STR(zend_print_zval_r_to_str(var, 0));
 	} else {
+		zend_print_zval_r(var, 0);
 		RETURN_TRUE;
 	}
 }

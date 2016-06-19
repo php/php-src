@@ -122,6 +122,16 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 	return (zend_long)d;
 }
 #endif
+
+static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
+{
+	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		return 0;
+	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
+		return (d > 0 ? ZEND_LONG_MAX : ZEND_LONG_MIN);
+	}
+	return (zend_long)d;
+}
 /* }}} */
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
@@ -185,7 +195,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
-	register const unsigned char *e;
+	const unsigned char *e;
 	if (n <= 0) {
 		return NULL;
 	}
@@ -446,7 +456,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"incq (%0)\n\t"
@@ -459,7 +469,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 		/* switch to double */
@@ -484,7 +494,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"decq (%0)\n\t"
@@ -497,7 +507,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 		/* switch to double */
@@ -532,7 +542,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "eax","cc");
+		: "eax","cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"movq	(%1), %%rax\n\t"
@@ -555,7 +565,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "rax","cc");
+		: "rax","cc", "memory");
 #else
 	/*
 	 * 'result' may alias with op1 or op2, so we need to
@@ -622,7 +632,7 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "eax","cc");
+		: "eax","cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"movq	(%1), %%rax\n\t"
@@ -649,7 +659,7 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "rax","cc");
+		: "rax","cc", "memory");
 #else
 	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
@@ -810,6 +820,18 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 }
 
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
+
+static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
+{
+	if (Z_REFCOUNT_P(op) == 1) {
+		ZVAL_UNREF(op);
+	} else {
+		Z_DELREF_P(op);
+		ZVAL_COPY(op, Z_REFVAL_P(op));
+	}
+}
+/* }}} */
+
 
 END_EXTERN_C()
 

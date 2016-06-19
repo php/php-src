@@ -29,6 +29,9 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
+#define ZEND_OP1_IS_CONST_STRING(opline) \
+	(ZEND_OP1_TYPE(opline) == IS_CONST && \
+	Z_TYPE(op_array->literals[(opline)->op1.constant]) == IS_STRING)
 #define ZEND_OP2_IS_CONST_STRING(opline) \
 	(ZEND_OP2_TYPE(opline) == IS_CONST && \
 	Z_TYPE(op_array->literals[(opline)->op2.constant]) == IS_STRING)
@@ -38,7 +41,7 @@ typedef struct _optimizer_call_info {
 	zend_op       *opline;
 } optimizer_call_info;
 
-void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
@@ -56,19 +59,13 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
-				if (ZEND_OP2_IS_CONST_STRING(opline)) {
-					zend_function *func;
-					zval *function_name = &op_array->literals[opline->op2.constant + 1];
-					if ((func = zend_hash_find_ptr(&ctx->script->function_table,
-							Z_STR_P(function_name))) != NULL) {
-						call_stack[call].func = func;
-					}
-				}
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_METHOD_CALL:
+				call_stack[call].func = zend_optimizer_get_called_func(
+					ctx->script, op_array, opline, 0);
 				/* break missing intentionally */
 			case ZEND_NEW:
 			case ZEND_INIT_DYNAMIC_CALL:
-			case ZEND_INIT_METHOD_CALL:
-			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_FCALL:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call].opline = opline;
@@ -88,7 +85,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						Z_CACHE_SLOT(op_array->literals[fcall->op2.constant + 1]) = Z_CACHE_SLOT(op_array->literals[fcall->op2.constant]);
 						literal_dtor(&ZEND_OP2_LITERAL(fcall));
 						fcall->op2.constant = fcall->op2.constant + 1;
-						opline->opcode = zend_get_call_op(ZEND_INIT_FCALL, call_stack[call].func);
+						opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
 					} else if (fcall->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
@@ -96,7 +93,10 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						literal_dtor(&op_array->literals[fcall->op2.constant]);
 						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
 						fcall->op2.constant = fcall->op2.constant + 1;
-						opline->opcode = zend_get_call_op(ZEND_INIT_FCALL, call_stack[call].func);
+						opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
+					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
+							|| fcall->opcode == ZEND_INIT_METHOD_CALL) {
+						/* We don't have specialized opcodes for this, do nothing */
 					} else {
 						ZEND_ASSERT(0);
 					}
@@ -105,15 +105,24 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				call_stack[call].opline = NULL;
 				break;
 			case ZEND_FETCH_FUNC_ARG:
+			case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_DIM_FUNC_ARG:
 				if (call_stack[call - 1].func) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
 						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
-						opline->opcode -= 9;
+						if (opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG) {
+							opline->opcode -= 9;
+						} else {
+							opline->opcode = ZEND_FETCH_STATIC_PROP_W;
+						}
 					} else {
 						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
-						opline->opcode -= 12;
+						if (opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG) {
+							opline->opcode -= 12;
+						} else {
+							opline->opcode = ZEND_FETCH_STATIC_PROP_R;
+						}
 					}
 				}
 				break;
@@ -136,19 +145,20 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				}
 				break;
-			case ZEND_SEND_VAR_NO_REF:
-				if (!(opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) && call_stack[call - 1].func) {
-					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
-						opline->extended_value |= ZEND_ARG_COMPILE_TIME_BOUND | ZEND_ARG_SEND_BY_REF;
+			case ZEND_SEND_VAR_NO_REF_EX:
+				if (call_stack[call - 1].func) {
+					if (ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
+						opline->opcode = ZEND_SEND_VAR_NO_REF;
+					} else if (ARG_MAY_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
+						opline->opcode = ZEND_SEND_VAL;
 					} else {
 						opline->opcode = ZEND_SEND_VAR;
-						opline->extended_value = 0;
 					}
 				}
 				break;
 #if 0
 			case ZEND_SEND_REF:
-				if (opline->extended_value != ZEND_ARG_COMPILE_TIME_BOUND && call_stack[call - 1].func) {
+				if (call_stack[call - 1].func) {
 					/* We won't handle run-time pass by reference */
 					call_stack[call - 1].opline = NULL;
 				}

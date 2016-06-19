@@ -14,12 +14,10 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
-  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
 #include "php.h"
-#include "php_ini.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"

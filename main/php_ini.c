@@ -638,7 +638,7 @@ int php_init_config(void)
 			}
 			if (!debpath[0]) {
 				/* empty string means default builtin value
-				   to allow "/foo/phd.d:" or ":/foo/php.d" */
+				   to allow "/foo/php.d:" or ":/foo/php.d" */
 				debpath = PHP_CONFIG_FILE_SCAN_DIR;
 			}
 			lenpath = (int)strlen(debpath);

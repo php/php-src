@@ -120,9 +120,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 
 			ZVAL_STRINGL(&fci.function_name, lc_name, name->len);
 			fci.size = sizeof(zend_fcall_info);
-			fci.function_table = &PHPDBG_G(registered);
 			//???fci.symbol_table = zend_rebuild_symbol_table();
-			fci.symbol_table = NULL;
 			fci.object = NULL;
 			fci.retval = &fretval;
 			fci.no_separation = 1;
@@ -654,7 +652,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 
 	phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
 	zend_string_release(file);
-	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", ZSTR_VAL(msg));
+	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", "%s", ZSTR_VAL(msg));
 	zend_string_release(msg);
 
 	if (EG(prev_exception)) {
@@ -689,7 +687,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		/* clean up from last execution */
-		if (ex && ex->symbol_table) {
+		if (ex && (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_hash_clean(ex->symbol_table);
 		} else {
 			zend_rebuild_symbol_table();
@@ -799,7 +797,6 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zval retval;
 
 	zend_execute_data *original_execute_data = EG(current_execute_data);
-	zend_class_entry *original_scope = EG(scope);
 	zend_vm_stack original_stack = EG(vm_stack);
 	zend_object *ex = NULL;
 
@@ -847,7 +844,6 @@ PHPDBG_COMMAND(ev) /* {{{ */
 			OBJ_RELEASE(ex);
 		}
 		EG(current_execute_data) = original_execute_data;
-		EG(scope) = original_scope;
 		EG(vm_stack_top) = original_stack->top;
 		EG(vm_stack_end) = original_stack->end;
 		EG(vm_stack) = original_stack;
@@ -1634,7 +1630,7 @@ next:
 		     execute_data->call->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
-		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		
+		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);
 		zend_execute_ex = phpdbg_execute_ex;
 
 		if (PHPDBG_G(vmret) != 0) {

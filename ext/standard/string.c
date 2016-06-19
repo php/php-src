@@ -1439,7 +1439,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!isupper(*c)) {
+		if (islower(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -1508,7 +1508,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!islower(*c)) {
+		if (isupper(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -1968,6 +1968,9 @@ PHP_FUNCTION(strpos)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -2018,6 +2021,9 @@ PHP_FUNCTION(stripos)
 		return;
 	}
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -2426,10 +2432,6 @@ PHP_FUNCTION(substr)
 		}
 	}
 
-	if (f > (zend_long)ZSTR_LEN(str)) {
-		RETURN_FALSE;
-	}
-
 	if ((f + l) > (zend_long)ZSTR_LEN(str)) {
 		l = ZSTR_LEN(str) - f;
 	}
@@ -2745,7 +2747,8 @@ PHP_FUNCTION(quotemeta)
 /* }}} */
 
 /* {{{ proto int ord(string character)
-   Returns ASCII value of character */
+   Returns ASCII value of character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
 PHP_FUNCTION(ord)
 {
 	char   *str;
@@ -2766,7 +2769,8 @@ PHP_FUNCTION(ord)
 /* }}} */
 
 /* {{{ proto string chr(int ascii)
-   Converts ASCII code to a character */
+   Converts ASCII code to a character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant integer argument */
 PHP_FUNCTION(chr)
 {
 	zend_long c;
@@ -4601,10 +4605,18 @@ PHP_FUNCTION(parse_str)
 
 	if (arrayArg == NULL) {
 		zval tmp;
-		zend_array *symbol_table = zend_rebuild_symbol_table();
+		zend_array *symbol_table;
+		if (zend_forbid_dynamic_call("parse_str() with a single argument") == FAILURE) {
+			efree(res);
+			return;
+		}
 
+		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
+		if (UNEXPECTED(zend_hash_del(symbol_table, CG(known_strings)[ZEND_STR_THIS]) == SUCCESS)) {
+			zend_throw_error(NULL, "Cannot re-assign $this");
+		}
 	} else 	{
 		zval ret;
 
@@ -5291,12 +5303,10 @@ PHP_FUNCTION(substr_count)
 	endp = p + haystack_len;
 
 	if (offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset should be greater than or equal to 0");
-		RETURN_FALSE;
+		offset += (zend_long)haystack_len;
 	}
-
-	if ((size_t)offset > haystack_len) {
-		php_error_docref(NULL, E_WARNING, "Offset value " ZEND_LONG_FMT " exceeds string length", offset);
+	if ((offset < 0) || ((size_t)offset > haystack_len)) {
+		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 	p += offset;
@@ -5304,11 +5314,10 @@ PHP_FUNCTION(substr_count)
 	if (ac == 4) {
 
 		if (length <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length should be greater than 0");
-			RETURN_FALSE;
+			length += (haystack_len - offset);
 		}
-		if (length > (haystack_len - offset)) {
-			php_error_docref(NULL, E_WARNING, "Length value " ZEND_LONG_FMT " exceeds string length", length);
+		if ((length <= 0) || (length > (haystack_len - offset))) {
+			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
 		endp = p + length;

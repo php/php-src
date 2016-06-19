@@ -436,10 +436,8 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 		zval retval;
 
 		fci.size = sizeof(zend_fcall_info);
-		fci.function_table = &dbstmt_ce->function_table;
 		ZVAL_UNDEF(&fci.function_name);
 		fci.object = Z_OBJ_P(object);
-		fci.symbol_table = NULL;
 		fci.retval = &retval;
 		fci.param_count = 0;
 		fci.params = NULL;
@@ -449,7 +447,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
-		fcc.calling_scope = EG(scope);
+		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 
@@ -1432,9 +1430,7 @@ void pdo_dbh_init(void)
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_KEY_PAIR", (zend_long)PDO_FETCH_KEY_PAIR);
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_CLASSTYPE", (zend_long)PDO_FETCH_CLASSTYPE);
 
-#if PHP_VERSION_ID >= 50100
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_SERIALIZE",(zend_long)PDO_FETCH_SERIALIZE);
-#endif
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_PROPS_LATE", (zend_long)PDO_FETCH_PROPS_LATE);
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_NAMED", (zend_long)PDO_FETCH_NAMED);
 

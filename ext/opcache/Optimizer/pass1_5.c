@@ -42,7 +42,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	int i = 0;
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
-	zend_bool collect_constants = (ZEND_OPTIMIZER_PASS_15 & OPTIMIZATION_LEVEL)?
+	zend_bool collect_constants = (ZEND_OPTIMIZER_PASS_15 & ctx->optimization_level)?
 		(op_array == &ctx->script->main_op_array) : 0;
 
 	while (opline < end) {
@@ -83,6 +83,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				} else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
 					zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 					/* shift by negative number */
+					break;
+				} else if (zend_binary_op_produces_numeric_string_error(opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline))) {
+					/* produces numeric string E_NOTICE/E_WARNING */
 					break;
 				}
 				er = EG(error_reporting);
@@ -240,8 +243,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 #endif
 
 		case ZEND_FETCH_CONSTANT:
-			if (ZEND_OP1_TYPE(opline) == IS_UNUSED &&
-				ZEND_OP2_TYPE(opline) == IS_CONST &&
+			if (ZEND_OP2_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
 				Z_STRLEN(ZEND_OP2_LITERAL(opline)) == sizeof("__COMPILER_HALT_OFFSET__") - 1 &&
 				memcmp(Z_STRVAL(ZEND_OP2_LITERAL(opline)), "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1) == 0) {
@@ -265,8 +267,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			}
 
-			if (ZEND_OP1_TYPE(opline) == IS_UNUSED &&
-				ZEND_OP2_TYPE(opline) == IS_CONST &&
+			if (ZEND_OP2_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 				/* substitute persistent constants */
 				uint32_t tv = ZEND_RESULT(opline).var;
@@ -285,10 +286,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					MAKE_NOP(opline);
 				}
 			}
+			break;
 
-			/* class constant */
-			if (ZEND_OP1_TYPE(opline) != IS_UNUSED &&
-			    ZEND_OP2_TYPE(opline) == IS_CONST &&
+		case ZEND_FETCH_CLASS_CONSTANT:
+			if (ZEND_OP2_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 
 				zend_class_entry *ce = NULL;
@@ -306,15 +307,20 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 								(ce->type == ZEND_INTERNAL_CLASS &&
 								 ce->info.internal.module->type != MODULE_PERSISTENT) ||
 								(ce->type == ZEND_USER_CLASS &&
-								 ZEND_CE_FILENAME(ce) != op_array->filename)) {
+								 ce->info.user.filename != op_array->filename)) {
 							break;
 						}
 					}
 				} else if (op_array->scope &&
+					ZEND_OP1_TYPE(opline) == IS_UNUSED &&
+					(opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+					/* for self::B */
+					ce = op_array->scope;
+				} else if (op_array->scope &&
 					ZEND_OP1_TYPE(opline) == IS_VAR &&
 					(opline - 1)->opcode == ZEND_FETCH_CLASS &&
 					(ZEND_OP1_TYPE(opline - 1) == IS_UNUSED &&
-					((opline - 1)->extended_value & ~ZEND_FETCH_CLASS_NO_AUTOLOAD) == ZEND_FETCH_CLASS_SELF) &&
+					((opline - 1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
 					ZEND_RESULT((opline - 1)).var == ZEND_OP1(opline).var) {
 					/* for self::B */
 					ce = op_array->scope;
@@ -322,11 +328,13 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 				if (ce) {
 					uint32_t tv = ZEND_RESULT(opline).var;
+					zend_class_constant *cc;
 					zval *c, t;
 
-					if ((c = zend_hash_find(&ce->constants_table,
-							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL) {
-						ZVAL_DEREF(c);
+					if ((cc = zend_hash_find_ptr(&ce->constants_table,
+							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL &&
+						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
+						c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 							break;
 						}
@@ -340,12 +348,12 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zval_copy_ctor(&t);
 						}
 
-						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-							literal_dtor(&ZEND_OP1_LITERAL(opline));
-						} else {
-							MAKE_NOP((opline - 1));
-						}
 						if (zend_optimizer_replace_by_const(op_array, opline, IS_TMP_VAR, tv, &t)) {
+							if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+								literal_dtor(&ZEND_OP1_LITERAL(opline));
+							} else if (ZEND_OP1_TYPE(opline) == IS_VAR) {
+								MAKE_NOP((opline - 1));
+							}
 							literal_dtor(&ZEND_OP2_LITERAL(opline));
 							MAKE_NOP(opline);
 						}
@@ -638,73 +646,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_FE_RESET_RW:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-		case ZEND_NEW:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
 			collect_constants = 0;
-			break;
-		case ZEND_FETCH_R:
-		case ZEND_FETCH_W:
-		case ZEND_FETCH_RW:
-		case ZEND_FETCH_FUNC_ARG:
-		case ZEND_FETCH_IS:
-		case ZEND_FETCH_UNSET:
-			if (opline != op_array->opcodes &&
-			    (opline-1)->opcode == ZEND_BEGIN_SILENCE &&
-			    (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL &&
-				opline->op1_type == IS_CONST &&
-			    opline->op2_type == IS_UNUSED &&
-			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
-			    (Z_STRLEN(ZEND_OP1_LITERAL(opline)) != sizeof("this")-1 ||
-			     memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), "this", sizeof("this") - 1) != 0)) {
-
-			    int var = opline->result.var;
-			    int level = 0;
-				zend_op *op = opline + 1;
-				zend_op *use = NULL;
-
-				while (op < end) {
-					if (op->opcode == ZEND_BEGIN_SILENCE) {
-						level++;
-					} else if (op->opcode == ZEND_END_SILENCE) {
-						if (level == 0) {
-							break;
-						} else {
-							level--;
-						}
-					}
-					if (op->op1_type == IS_VAR && op->op1.var == var) {
-						if (use) {
-							/* used more than once */
-							use = NULL;
-							break;
-						}
-						use = op;
-					} else if (op->op2_type == IS_VAR && op->op2.var == var) {
-						if (use) {
-							/* used more than once */
-							use = NULL;
-							break;
-						}
-						use = op;
-					}
-					op++;
-				}
-				if (use) {
-					if (use->op1_type == IS_VAR && use->op1.var == var) {
-						use->op1_type = IS_CV;
-						use->op1.var = zend_optimizer_lookup_cv(op_array,
-							Z_STR(ZEND_OP1_LITERAL(opline)));
-						MAKE_NOP(opline);
-					} else if (use->op2_type == IS_VAR && use->op2.var == var) {
-						use->op2_type = IS_CV;
-						use->op2.var = zend_optimizer_lookup_cv(op_array,
-							Z_STR(ZEND_OP1_LITERAL(opline)));
-						MAKE_NOP(opline);
-					}
-				}
-			}
 			break;
 		}
 		opline++;

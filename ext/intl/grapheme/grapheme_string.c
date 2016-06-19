@@ -135,20 +135,21 @@ PHP_FUNCTION(grapheme_strpos)
 		RETURN_FALSE;
 	}
 
+	if (offset >= 0) {
+		/* quick check to see if the string might be there
+		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
+		*/
+		found = php_memnstr(haystack + noffset, needle, needle_len, haystack + haystack_len);
 
-	/* quick check to see if the string might be there
-	 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
-	*/
-	found = php_memnstr(haystack + noffset, needle, needle_len, haystack + haystack_len);
+		/* if it isn't there the we are done */
+		if (!found) {
+			RETURN_FALSE;
+		}
 
-	/* if it isn't there the we are done */
-	if (!found) {
-		RETURN_FALSE;
-	}
-
-	/* if it is there, and if the haystack is ascii, we are all done */
-	if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
-		RETURN_LONG(found - haystack);
+		/* if it is there, and if the haystack is ascii, we are all done */
+		if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
+			RETURN_LONG(found - haystack);
+		}
 	}
 
 	/* do utf16 part of the strpos */
@@ -195,7 +196,6 @@ PHP_FUNCTION(grapheme_stripos)
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_stripos: Empty delimiter", 1 );
 		RETURN_FALSE;
 	}
-
 
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
@@ -802,6 +802,10 @@ PHP_FUNCTION(grapheme_extract)
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_extract: unable to parse input param", 0 );
 		RETURN_FALSE;
+	}
+
+	if (lstart < 0) {
+		lstart += str_len;
 	}
 
 	if ( NULL != next ) {

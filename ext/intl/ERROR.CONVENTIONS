@@ -80,7 +80,7 @@ ICU operates, where functions return immediately if an error is set.
 
 Error resetting can be done with:
 void intl_error_reset(NULL);				/* reset global error */
-void intl_errors_reset(intl_error* err );	/* reset global and object error */
+void intl_errors_reset(intl_error* err);	/* reset global and object error */
 
 In practice, intl_errors_reset() is not used because most classes have also
 plain functions mapped to the same internal functions as their instance methods.

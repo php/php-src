@@ -4416,13 +4416,6 @@ ZEND_API double zend_hex_strtod(const char *str, const char **endptr)
 	int any = 0;
 	double value = 0;
 
-	if (s[0] == '\0' || s[1] == '\0') {
-		if (endptr != NULL) {
-			*endptr = str;
-		}
-		return 0.0;
-	}
-
 	if (*s == '0' && (s[1] == 'x' || s[1] == 'X')) {
 		s += 2;
 	}
@@ -4490,13 +4483,6 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
 	char 		c;
 	double 		value = 0;
 	int 		any = 0;
-
-	if (str[0] == '\0' || str[1] == '\0') {
-		if (endptr != NULL) {
-			*endptr = str;
-		}
-		return 0.0;
-	}
 
 	if ('0' == *s && ('b' == s[1] || 'B' == s[1])) {
 		s += 2;

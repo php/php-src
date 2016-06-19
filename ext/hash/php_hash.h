@@ -31,10 +31,6 @@
 #define PHP_HASH_HMAC		0x0001
 
 #define L64 INT64_C
-#define php_hash_int32  int32_t
-#define php_hash_uint32 uint32_t
-#define php_hash_int64  int64_t
-#define php_hash_uint64 uint64_t
 
 typedef void (*php_hash_init_func_t)(void *context);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
@@ -68,6 +64,12 @@ extern const php_hash_ops php_hash_sha224_ops;
 extern const php_hash_ops php_hash_sha256_ops;
 extern const php_hash_ops php_hash_sha384_ops;
 extern const php_hash_ops php_hash_sha512_ops;
+extern const php_hash_ops php_hash_sha512_256_ops;
+extern const php_hash_ops php_hash_sha512_224_ops;
+extern const php_hash_ops php_hash_sha3_224_ops;
+extern const php_hash_ops php_hash_sha3_256_ops;
+extern const php_hash_ops php_hash_sha3_384_ops;
+extern const php_hash_ops php_hash_sha3_512_ops;
 extern const php_hash_ops php_hash_ripemd128_ops;
 extern const php_hash_ops php_hash_ripemd160_ops;
 extern const php_hash_ops php_hash_ripemd256_ops;

@@ -46,9 +46,7 @@
 #include "php_string.h"
 #include "php_rand.h"
 #include "zend_smart_str.h"
-#ifdef HAVE_SPL
 #include "ext/spl/spl_array.h"
-#endif
 
 /* {{{ defines */
 #define EXTR_OVERWRITE			0
@@ -821,9 +819,7 @@ PHP_FUNCTION(count)
 			RETURN_LONG(cnt);
 			break;
 		case IS_OBJECT: {
-#ifdef HAVE_SPL
 			zval retval;
-#endif
 			/* first, we check if the handler is defined */
 			if (Z_OBJ_HT_P(array)->count_elements) {
 				RETVAL_LONG(1);
@@ -831,7 +827,6 @@ PHP_FUNCTION(count)
 					return;
 				}
 			}
-#ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
 			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable)) {
 				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
@@ -841,7 +836,6 @@ PHP_FUNCTION(count)
 				}
 				return;
 			}
-#endif
 		}
 		default:
 			RETURN_LONG(1);
@@ -1619,7 +1613,6 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		ZVAL_DEREF(value);
 		if (Z_TYPE_P(value) == IS_LONG) {
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_long(value, entry)) {
@@ -1771,6 +1764,7 @@ PHP_FUNCTION(extract)
 	zend_ulong num_key;
 	int var_exists, count = 0;
 	int extract_refs = 0;
+	int exception_thrown = 0;
 	zend_array *symbol_table;
 	zval var_array;
 
@@ -1811,6 +1805,10 @@ PHP_FUNCTION(extract)
 		}
 	}
 
+	if (zend_forbid_dynamic_call("extract()") == FAILURE) {
+		return;
+	}
+
 	symbol_table = zend_rebuild_symbol_table();
 #if 0
 	if (!symbol_table) {
@@ -1847,9 +1845,6 @@ PHP_FUNCTION(extract)
 			case EXTR_OVERWRITE:
 				/* GLOBALS protection */
 				if (var_exists && ZSTR_LEN(var_name) == sizeof("GLOBALS")-1 && !strcmp(ZSTR_VAL(var_name), "GLOBALS")) {
-					break;
-				}
-				if (var_exists && ZSTR_LEN(var_name) == sizeof("this")-1  && !strcmp(ZSTR_VAL(var_name), "this") && EG(scope) && ZSTR_LEN(EG(scope)->name) != 0) {
 					break;
 				}
 				ZVAL_STR_COPY(&final_name, var_name);
@@ -1892,6 +1887,15 @@ PHP_FUNCTION(extract)
 
 		if (Z_TYPE(final_name) == IS_STRING && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			zval *orig_var;
+
+			if (Z_STRLEN(final_name) == sizeof("this")-1  && !strcmp(Z_STRVAL(final_name), "this")) {
+				if (!exception_thrown) {
+					exception_thrown = 1;
+					zend_throw_error(NULL, "Cannot re-assign $this");
+				}
+				zval_dtor(&final_name);
+				continue;
+			}
 			if (extract_refs) {
 
 				ZVAL_MAKE_REF(entry);
@@ -1972,8 +1976,11 @@ PHP_FUNCTION(compact)
 		return;
 	}
 
-	symbol_table = zend_rebuild_symbol_table();
+	if (zend_forbid_dynamic_call("compact()") == FAILURE) {
+		return;
+	}
 
+	symbol_table = zend_rebuild_symbol_table();
 	if (UNEXPECTED(symbol_table == NULL)) {
 		return;
 	}
@@ -3235,18 +3242,19 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		src  = Z_ARRVAL_P(arg);
 		dest = Z_ARRVAL_P(return_value);
 		ZEND_HASH_FOREACH_KEY_VAL(src, idx, string_key, src_entry) {
-			if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
-				src_entry = Z_REFVAL_P(src_entry);
+			if (Z_REFCOUNTED_P(src_entry)) {
+				if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
+					src_entry = Z_REFVAL_P(src_entry);
+					if (Z_REFCOUNTED_P(src_entry)) {
+						Z_ADDREF_P(src_entry);
+					}
+				} else {
+					Z_ADDREF_P(src_entry);
+				}
 			}
 			if (string_key) {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_add_new(dest, string_key, src_entry);
 			} else {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_index_add_new(dest, idx, src_entry);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -3275,18 +3283,19 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		src  = Z_ARRVAL_P(arg);
 		dest = Z_ARRVAL_P(return_value);
 		ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
-			if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
-				src_entry = Z_REFVAL_P(src_entry);
+			if (Z_REFCOUNTED_P(src_entry)) {
+				if (UNEXPECTED(Z_ISREF_P(src_entry) && Z_REFCOUNT_P(src_entry) == 1)) {
+					src_entry = Z_REFVAL_P(src_entry);
+					if (Z_REFCOUNTED_P(src_entry)) {
+						Z_ADDREF_P(src_entry);
+					}
+				} else {
+					Z_ADDREF_P(src_entry);
+				}
 			}
 			if (string_key) {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_add_new(dest, string_key, src_entry);
 			} else {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
 				zend_hash_next_index_insert_new(dest, src_entry);
 			}
 		} ZEND_HASH_FOREACH_END();

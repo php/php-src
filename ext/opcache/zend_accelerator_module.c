@@ -294,6 +294,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.fast_shutdown"         , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.fast_shutdown,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.optimization_level"    , DEFAULT_OPTIMIZATION_LEVEL , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.optimization_level,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.opt_debug_level"       , "0"      , PHP_INI_SYSTEM, OnUpdateLong,             accel_directives.opt_debug_level,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.enable_file_override"	, "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.file_override_enabled,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.enable_cli"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.enable_cli,                zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.error_log"                , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.error_log,                 zend_accel_globals, accel_globals)
@@ -555,7 +556,7 @@ static int accelerator_get_scripts(zval *return_value)
 			script = (zend_persistent_script *)cache_entry->data;
 
 			array_init(&persistent_script_report);
-			add_assoc_str(&persistent_script_report, "full_path", zend_string_dup(script->full_path, 0));
+			add_assoc_str(&persistent_script_report, "full_path", zend_string_dup(script->script.filename, 0));
 			add_assoc_long(&persistent_script_report, "hits", (zend_long)script->dynamic_members.hits);
 			add_assoc_long(&persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
 			ta = localtime(&script->dynamic_members.last_used);

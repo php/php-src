@@ -100,10 +100,10 @@ if (typeof(CWD) == "undefined") {
 
 /* defaults; we pick up the precise versions from configure.in */
 var PHP_VERSION = 7;
-var PHP_MINOR_VERSION = 0;
+var PHP_MINOR_VERSION = 1;
 var PHP_RELEASE_VERSION = 0;
 var PHP_EXTRA_VERSION = "";
-var PHP_VERSION_STRING = "7.0.0";
+var PHP_VERSION_STRING = "7.1.0";
 
 /* Get version numbers and DEFINE as a string */
 function get_version_numbers()
@@ -2692,6 +2692,15 @@ function toolset_setup_common_cflags()
 		} else {
 			if (VCVERS >= 1900) {
 				ADD_FLAG('CFLAGS', "/guard:cf");
+			}
+			if (VCVERS >= 1800) {
+				if (PHP_PGI != "yes" && PHP_PGO != "yes") {
+					ADD_FLAG('CFLAGS', "/Zc:inline");
+				}
+				/* We enable /opt:icf only with the debug pack, so /Gw only makes sense there, too. */
+				if (PHP_DEBUG_PACK == "yes") {
+					ADD_FLAG('CFLAGS', "/Gw");
+				}
 			}
 		}
 

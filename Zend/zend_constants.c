@@ -33,7 +33,7 @@ void free_zend_constant(zval *zv)
 	zend_constant *c = Z_PTR_P(zv);
 
 	if (!(c->flags & CONST_PERSISTENT)) {
-		zval_dtor(&c->value);
+		zval_ptr_dtor(&c->value);
 	} else {
 		zval_internal_dtor(&c->value);
 	}
@@ -251,6 +251,18 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 	}
 }
 
+ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
+{
+	if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PUBLIC) {
+		return 1;
+	} else if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PRIVATE) {
+		return (c->ce == scope);
+	} else {
+		ZEND_ASSERT(Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PROTECTED);
+		return zend_check_protected(c->ce, scope);
+	}
+}
+/* }}} */
 
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 {
@@ -294,7 +306,7 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 	return c ? &c->value : NULL;
 }
 
-ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, zend_ulong flags)
+ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)
 {
 	zend_constant *c;
 	const char *colon;
@@ -316,14 +328,6 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
 		zend_string *class_name = zend_string_init(name, class_name_len, 0);
 		zval *ret_constant = NULL;
-
-		if (!scope) {
-			if (EG(current_execute_data)) {
-				scope = EG(scope);
-			} else {
-				scope = CG(active_class_entry);
-			}
-		}
 
 		if (zend_string_equals_literal_ci(class_name, "self")) {
 			if (UNEXPECTED(!scope)) {
@@ -351,24 +355,39 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ce = zend_fetch_class(class_name, flags);
 		}
 		if (ce) {
-			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
-			if (ret_constant == NULL) {
+			zend_class_constant *c = zend_hash_find_ptr(&ce->constants_table, constant_name);
+			if (c == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_throw_error(NULL, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					goto failure;
 				}
-			} else if (Z_ISREF_P(ret_constant)) {
-				ret_constant = Z_REFVAL_P(ret_constant);
+				ret_constant = NULL;
+			} else {
+				if (!zend_verify_const_access(c, scope)) {
+					zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					goto failure;
+				}
+				ret_constant = &c->value;
 			}
 		}
 
+		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
+			if (Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
+				if (IS_CONSTANT_VISITED(ret_constant)) {
+					zend_throw_error(NULL, "Cannot declare self-referencing constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					goto failure;
+				}
+				MARK_CONSTANT_VISITED(ret_constant);
+			}
+			if (UNEXPECTED(zval_update_constant_ex(ret_constant, ce) != SUCCESS)) {
+				RESET_CONSTANT_VISITED(ret_constant);
+				goto failure;
+			}
+			RESET_CONSTANT_VISITED(ret_constant);
+		}
 failure:
 		zend_string_release(class_name);
 		zend_string_free(constant_name);
-		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
-			if (UNEXPECTED(zval_update_constant_ex(ret_constant, 1, ce) != SUCCESS)) {
-				return NULL;
-			}
-		}
 		return ret_constant;
 	}
 
@@ -417,7 +436,7 @@ failure:
 	}
 }
 
-zend_constant *zend_quick_get_constant(const zval *key, zend_ulong flags)
+zend_constant *zend_quick_get_constant(const zval *key, uint32_t flags)
 {
 	zend_constant *c;
 

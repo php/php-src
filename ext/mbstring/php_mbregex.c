@@ -459,8 +459,12 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 			retval = NULL;
 			goto out;
 		}
+		if (rc == MBREX(search_re)) {
+			/* reuse the new rc? see bug #72399 */
+			MBREX(search_re) = NULL;
+		}
 		zend_hash_str_update_ptr(&MBREX(ht_rc), (char *)pattern, patlen, retval);
-	} else if (rc) {
+	} else {
 		retval = rc;
 	}
 out:
@@ -807,7 +811,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	OnigUChar *pos;
 	OnigUChar *string_lim;
 	char *description = NULL;
-	char pat_buf[4];
+	char pat_buf[6];
 
 	const mbfl_encoding *enc;
 
@@ -860,6 +864,8 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		pat_buf[1] = '\0';
 		pat_buf[2] = '\0';
 		pat_buf[3] = '\0';
+		pat_buf[4] = '\0';
+		pat_buf[5] = '\0';
 
 		arg_pattern = pat_buf;
 		arg_pattern_len = 1;
@@ -1406,6 +1412,11 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
+	/* Accept negative position if length of search string can be determined */
+	if ((position < 0) && (!Z_ISUNDEF(MBREX(search_str))) && (Z_TYPE(MBREX(search_str)) == IS_STRING)) {
+		position += Z_STRLEN(MBREX(search_str));
+	}
+		
 	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position >= Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;

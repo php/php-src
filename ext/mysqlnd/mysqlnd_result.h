@@ -14,17 +14,16 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
-  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
 #ifndef MYSQLND_RESULT_H
 #define MYSQLND_RESULT_H
 
-PHPAPI MYSQLND_RES * mysqlnd_result_init(unsigned int field_count, zend_bool persistent);
-PHPAPI MYSQLND_RES_UNBUFFERED * mysqlnd_result_unbuffered_init(unsigned int field_count, zend_bool ps, zend_bool persistent);
-PHPAPI MYSQLND_RES_BUFFERED_ZVAL * mysqlnd_result_buffered_zval_init(unsigned int field_count, zend_bool ps, zend_bool persistent);
-PHPAPI MYSQLND_RES_BUFFERED_C * mysqlnd_result_buffered_c_init(unsigned int field_count, zend_bool ps, zend_bool persistent);
+PHPAPI MYSQLND_RES * mysqlnd_result_init(const unsigned int field_count, const zend_bool persistent);
+PHPAPI MYSQLND_RES_UNBUFFERED * mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent);
+PHPAPI MYSQLND_RES_BUFFERED_ZVAL * mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent);
+PHPAPI MYSQLND_RES_BUFFERED_C * mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent);
 
 enum_func_status mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * stmt);
 

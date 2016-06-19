@@ -2199,39 +2199,39 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		php_stream_xport_param *xparam STREAMS_DC)
 {
 	int clisock;
-
+	zend_bool nodelay = 0;
+	zval *tmpzval = NULL;
+	
 	xparam->outputs.client = NULL;
 
+	if ((tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
+		zend_is_true(tmpzval)) {
+		nodelay = 1;
+	}
+
 	clisock = php_network_accept_incoming(sock->s.socket,
-			xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
-			xparam->want_addr ? &xparam->outputs.addr : NULL,
-			xparam->want_addr ? &xparam->outputs.addrlen : NULL,
-			xparam->inputs.timeout,
-			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
-			&xparam->outputs.error_code
-			);
+		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+		xparam->want_addr ? &xparam->outputs.addr : NULL,
+		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
+		xparam->inputs.timeout,
+		xparam->want_errortext ? &xparam->outputs.error_text : NULL,
+		&xparam->outputs.error_code,
+		nodelay);
 
 	if (clisock >= 0) {
-		php_openssl_netstream_data_t *clisockdata;
+		php_openssl_netstream_data_t *clisockdata = (php_openssl_netstream_data_t*) emalloc(sizeof(*clisockdata));
 
-		clisockdata = emalloc(sizeof(*clisockdata));
+		/* copy underlying tcp fields */
+		memset(clisockdata, 0, sizeof(*clisockdata));
+		memcpy(clisockdata, sock, sizeof(clisockdata->s));
 
-		if (clisockdata == NULL) {
-			closesocket(clisock);
-			/* technically a fatal error */
-		} else {
-			/* copy underlying tcp fields */
-			memset(clisockdata, 0, sizeof(*clisockdata));
-			memcpy(clisockdata, sock, sizeof(clisockdata->s));
+		clisockdata->s.socket = clisock;
 
-			clisockdata->s.socket = clisock;
-
-			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
-			if (xparam->outputs.client) {
-				xparam->outputs.client->ctx = stream->ctx;
-				if (stream->ctx) {
-					GC_REFCOUNT(stream->ctx)++;
-				}
+		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
+		if (xparam->outputs.client) {
+			xparam->outputs.client->ctx = stream->ctx;
+			if (stream->ctx) {
+				GC_REFCOUNT(stream->ctx)++;
 			}
 		}
 

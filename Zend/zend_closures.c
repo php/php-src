@@ -52,17 +52,11 @@ static zend_object_handlers closure_handlers;
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
 	zend_function *func = EX(func);
-	zval *arguments;
+	zval *arguments = ZEND_CALL_ARG(execute_data, 1);
 
-	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
-		efree(arguments);
-		zend_throw_error(NULL, "Cannot get arguments for calling closure");
-		RETVAL_FALSE;
-	} else if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
+	if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
 		RETVAL_FALSE;
 	}
-	efree(arguments);
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release(func->internal_function.function_name);
@@ -77,16 +71,17 @@ static zend_bool zend_valid_closure_binding(
 		zend_closure *closure, zval *newthis, zend_class_entry *scope) /* {{{ */
 {
 	zend_function *func = &closure->func;
+	zend_bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_WARNING, "Cannot bind an instance to a static closure");
 			return 0;
 		}
 
-		if (func->type == ZEND_INTERNAL_FUNCTION && func->common.scope &&
+		if (is_fake_closure && func->common.scope &&
 				!instanceof_function(Z_OBJCE_P(newthis), func->common.scope)) {
 			/* Binding incompatible $this to an internal method is not supported. */
-			zend_error(E_WARNING, "Cannot bind internal method %s::%s() to object of class %s",
+			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s",
 					ZSTR_VAL(func->common.scope->name),
 					ZSTR_VAL(func->common.function_name),
 					ZSTR_VAL(Z_OBJCE_P(newthis)->name));
@@ -105,7 +100,7 @@ static zend_bool zend_valid_closure_binding(
 		return 0;
 	}
 
-	if ((func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) && scope != func->common.scope) {
+	if (is_fake_closure && scope != func->common.scope) {
 		zend_error(E_WARNING, "Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()");
 		return 0;
 	}
@@ -276,7 +271,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
-	invoke->internal_function.function_name = zend_string_init(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1, 0);
+	invoke->internal_function.function_name = CG(known_strings)[ZEND_STR_MAGIC_INVOKE];
 	return invoke;
 }
 /* }}} */
@@ -387,23 +382,16 @@ static zend_object *zend_closure_clone(zval *zobject) /* {{{ */
 
 int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
-	zend_closure *closure;
-
-	if (Z_TYPE_P(obj) != IS_OBJECT) {
-		return FAILURE;
-	}
-
-	closure = (zend_closure *)Z_OBJ_P(obj);
+	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
 	*fptr_ptr = &closure->func;
 	*ce_ptr = closure->called_scope;
 
-	if (obj_ptr) {
-		if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
-			*obj_ptr = Z_OBJ(closure->this_ptr);
-		} else {
-			*obj_ptr = NULL;
-		}
+	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
+		*obj_ptr = Z_OBJ(closure->this_ptr);
+	} else {
+		*obj_ptr = NULL;
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -423,12 +411,12 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 		HashTable *static_variables = closure->func.op_array.static_variables;
 		ZVAL_ARR(&val, zend_array_dup(static_variables));
-		zend_hash_str_update(debug_info, "static", sizeof("static")-1, &val);
+		zend_hash_update(debug_info, CG(known_strings)[ZEND_STR_STATIC], &val);
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 		Z_ADDREF(closure->this_ptr);
-		zend_hash_str_update(debug_info, "this", sizeof("this")-1, &closure->this_ptr);
+		zend_hash_update(debug_info, CG(known_strings)[ZEND_STR_THIS], &closure->this_ptr);
 	}
 
 	if (arg_info &&
@@ -522,7 +510,6 @@ void zend_register_closure_ce(void) /* {{{ */
 
 	memcpy(&closure_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	closure_handlers.free_obj = zend_closure_free_storage;
-	closure_handlers.clone_obj = NULL;
 	closure_handlers.get_constructor = zend_closure_get_constructor;
 	closure_handlers.get_method = zend_closure_get_method;
 	closure_handlers.write_property = zend_closure_write_property;
@@ -566,11 +553,8 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		closure->func.common.prototype = (zend_function*)closure;
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		if (closure->func.op_array.static_variables) {
-			HashTable *static_variables = closure->func.op_array.static_variables;
-
-			ALLOC_HASHTABLE(closure->func.op_array.static_variables);
-			zend_hash_init(closure->func.op_array.static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_apply_with_arguments(static_variables, zval_copy_static_var, 1, closure->func.op_array.static_variables);
+			closure->func.op_array.static_variables =
+				zend_array_dup(closure->func.op_array.static_variables);
 		}
 		if (UNEXPECTED(!closure->func.op_array.run_time_cache)) {
 			closure->func.op_array.run_time_cache = func->op_array.run_time_cache = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
@@ -622,6 +606,14 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
+}
+/* }}} */
+
+void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /* {{{ */
+{
+	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
+	HashTable *static_variables = closure->func.op_array.static_variables;
+	zend_hash_update(static_variables, var_name, var);
 }
 /* }}} */
 

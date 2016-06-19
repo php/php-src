@@ -15,8 +15,6 @@
   | Author: Georg Richter <georg@php.net>                                |
   |         Andrey Hristov <andrey@php.net>                              |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -289,7 +287,11 @@ static zval *result_type_read(mysqli_object *obj, zval *retval)
 static zval *result_lengths_read(mysqli_object *obj, zval *retval)
 {
 	MYSQL_RES *p;
-	zend_ulong *ret;
+#if defined(MYSQLI_USE_MYSQLND)
+	const size_t *ret;
+#else
+	const zend_ulong *ret;
+#endif
 	uint field_count;
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);

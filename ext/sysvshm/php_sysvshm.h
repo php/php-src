@@ -33,7 +33,7 @@ extern zend_module_entry sysvshm_module_entry;
 
 #ifdef PHP_WIN32
 # include <TSRM/tsrm_win32.h>
-typedef int key_t;
+# include "win32/ipc.h"
 # ifndef THREAD_LS
 #  define THREAD_LS
 # endif

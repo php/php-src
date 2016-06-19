@@ -2097,8 +2097,13 @@ PHP_FUNCTION(mb_parse_str)
 		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
 	} else {
 		zval tmp;
-		zend_array *symbol_table = zend_rebuild_symbol_table();
+		zend_array *symbol_table;
+		if (zend_forbid_dynamic_call("mb_parse_str() with a single argument") == FAILURE) {
+			efree(encstr);
+			return;
+		}
 
+		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr);
 	}
@@ -2262,7 +2267,7 @@ PHP_FUNCTION(mb_strlen)
 PHP_FUNCTION(mb_strpos)
 {
 	int n, reverse = 0;
-	zend_long offset = 0;
+	zend_long offset = 0, slen;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	size_t enc_name_len, haystack_len, needle_len;
@@ -2297,7 +2302,11 @@ PHP_FUNCTION(mb_strpos)
 		}
 	}
 
-	if (offset < 0 || offset > mbfl_strlen(&haystack)) {
+	slen = mbfl_strlen(&haystack);
+	if (offset < 0) {
+		offset += slen;
+	}
+	if (offset < 0 || offset > slen) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -3053,7 +3062,7 @@ PHP_FUNCTION(mb_strwidth)
 PHP_FUNCTION(mb_strimwidth)
 {
 	char *str, *trimmarker = NULL, *encoding = NULL;
-	zend_long from, width;
+	zend_long from, width, swidth;
 	size_t str_len, trimmarker_len, encoding_len;
 	mbfl_string string, result, marker, *ret;
 
@@ -3081,13 +3090,25 @@ PHP_FUNCTION(mb_strimwidth)
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 
+	if ((from < 0) || (width < 0)) {
+		swidth = mbfl_strwidth(&string);
+	}
+
+	if (from < 0) {
+		from += swidth;
+	}
+		
 	if (from < 0 || (size_t)from > str_len) {
 		php_error_docref(NULL, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;
 	}
 
 	if (width < 0) {
-		php_error_docref(NULL, E_WARNING, "Width is negative value");
+		width = swidth + width - from;
+	}
+
+	if (width < 0) {
+		php_error_docref(NULL, E_WARNING, "Width is out of range");
 		RETURN_FALSE;
 	}
 
@@ -3426,6 +3447,10 @@ PHP_FUNCTION(mb_list_encodings)
 	const mbfl_encoding **encodings;
 	const mbfl_encoding *encoding;
 	int i;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	array_init(return_value);
 	i = 0;
@@ -4865,6 +4890,9 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
  					break;
  				}
  			} else {
+				if (offset < 0) {
+					offset += (long)haystack_char_len;
+				}
  				if (offset < 0 || offset > haystack_char_len) {
  					php_error_docref(NULL, E_WARNING, "Offset not contained in string");
  					break;

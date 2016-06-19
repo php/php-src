@@ -1084,6 +1084,11 @@ PHP_FUNCTION(unserialize)
 	   in case nesting calls to unserialize */
 	var_push_dtor(&var_hash, return_value);
 
+	/* Ensure return value is a value */
+	if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
+	}
+
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	if (class_hash) {
 		zend_hash_destroy(class_hash);
