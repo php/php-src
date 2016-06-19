@@ -185,6 +185,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /*  36 */   ,   {   ERROR_SHARING_BUFFER_EXCEEDED   ,   ENFILE          }
         /*  37 */   ,   {   ERROR_HANDLE_EOF                ,   EINVAL          }
         /*  38 */   ,   {   ERROR_HANDLE_DISK_FULL          ,   ENOSPC          }
+#if 0
         /*  39 */   ,   {   0                               ,   0               }
         /*  40 */   ,   {   0                               ,   0               }
         /*  41 */   ,   {   0                               ,   0               }
@@ -196,10 +197,14 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /*  47 */   ,   {   0                               ,   0               }
         /*  48 */   ,   {   0                               ,   0               }
         /*  49 */   ,   {   0                               ,   0               }
+#endif
         /*  50 */   ,   {   ERROR_NOT_SUPPORTED             ,   ENOSYS          }
+#if 0
         /*  51 */   ,   {   0                               ,   0               }
         /*  52 */   ,   {   0                               ,   0               }
+#endif
         /*  53 */   ,   {   ERROR_BAD_NETPATH               ,   ENOENT          }
+#if 0
         /*  54 */   ,   {   0                               ,   0               }
         /*  55 */   ,   {   0                               ,   0               }
         /*  56 */   ,   {   0                               ,   0               }
@@ -211,9 +216,13 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /*  62 */   ,   {   0                               ,   0               }
         /*  63 */   ,   {   0                               ,   0               }
         /*  64 */   ,   {   0                               ,   0               }
+#endif
         /*  65 */   ,   {   ERROR_NETWORK_ACCESS_DENIED     ,   EACCES          }
+#if 0
         /*  66 */   ,   {   0                               ,   0               }
+#endif
         /*  67 */   ,   {   ERROR_BAD_NET_NAME              ,   ENOENT          }
+#if 0
         /*  68 */   ,   {   0                               ,   0               }
         /*  69 */   ,   {   0                               ,   0               }
         /*  70 */   ,   {   0                               ,   0               }
@@ -226,16 +235,24 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /*  77 */   ,   {   0                               ,   0               }
         /*  78 */   ,   {   0                               ,   0               }
         /*  79 */   ,   {   0                               ,   0               }
+#endif
         /*  80 */   ,   {   ERROR_FILE_EXISTS               ,   EEXIST          }
+#if 0
         /*  81 */   ,   {   0                               ,   0               }
+#endif
         /*  82 */   ,   {   ERROR_CANNOT_MAKE               ,   EACCES          }
         /*  83 */   ,   {   ERROR_FAIL_I24                  ,   EACCES          }
+#if 0
         /*  84 */   ,   {   0                               ,   0               }
         /*  85 */   ,   {   0                               ,   0               }
         /*  86 */   ,   {   0                               ,   0               }
+#endif
         /*  87 */   ,   {   ERROR_INVALID_PARAMETER         ,   EINVAL          }
+#if 0
         /*  88 */   ,   {   0                               ,   0               }
+#endif
         /*  89 */   ,   {   ERROR_NO_PROC_SLOTS             ,   EAGAIN          }
+#if 0
         /*  90 */   ,   {   0                               ,   0               }
         /*  91 */   ,   {   0                               ,   0               }
         /*  92 */   ,   {   0                               ,   0               }
@@ -254,13 +271,19 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 105 */   ,   {   0                               ,   0               }
         /* 106 */   ,   {   0                               ,   0               }
         /* 107 */   ,   {   0                               ,   0               }
+#endif
         /* 108 */   ,   {   ERROR_DRIVE_LOCKED              ,   EACCES          }
         /* 109 */   ,   {   ERROR_BROKEN_PIPE               ,   EPIPE           }
+#if 0
         /* 110 */   ,   {   0                               ,   0               }
+#endif
         /* 111 */   ,   {   ERROR_BUFFER_OVERFLOW           ,   ENAMETOOLONG    }
         /* 112 */   ,   {   ERROR_DISK_FULL                 ,   ENOSPC          }
+#if 0
         /* 113 */   ,   {   0                               ,   0               }
+#endif
         /* 114 */   ,   {   ERROR_INVALID_TARGET_HANDLE     ,   EBADF           }
+#if 0
         /* 115 */   ,   {   0                               ,   0               }
         /* 116 */   ,   {   0                               ,   0               }
         /* 117 */   ,   {   0                               ,   0               }
@@ -268,17 +291,21 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 119 */   ,   {   0                               ,   0               }
         /* 120 */   ,   {   0                               ,   0               }
         /* 121 */   ,   {   0                               ,   0               }
+#endif
         /* 122 */   ,   {   ERROR_INSUFFICIENT_BUFFER       ,   ERANGE          }
         /* 123 */   ,   {   ERROR_INVALID_NAME              ,   ENOENT          }
         /* 124 */   ,   {   ERROR_INVALID_HANDLE            ,   EINVAL          }
+#if 0
         /* 125 */   ,   {   0                               ,   0               }
         /* 126 */   ,   {   0                               ,   0               }
         /* 127 */   ,   {   0                               ,   0               }
+#endif
         /* 128 */   ,   {   ERROR_WAIT_NO_CHILDREN          ,   ECHILD          }
         /* 129 */   ,   {   ERROR_CHILD_NOT_COMPLETE        ,   ECHILD          }
         /* 130 */   ,   {   ERROR_DIRECT_ACCESS_HANDLE      ,   EBADF           }
         /* 131 */   ,   {   ERROR_NEGATIVE_SEEK             ,   EINVAL          }
         /* 132 */   ,   {   ERROR_SEEK_ON_DEVICE            ,   EACCES          }
+#if 0
         /* 133 */   ,   {   0                               ,   0               }
         /* 134 */   ,   {   0                               ,   0               }
         /* 135 */   ,   {   0                               ,   0               }
@@ -291,7 +318,9 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 142 */   ,   {   0                               ,   0               }
         /* 143 */   ,   {   0                               ,   0               }
         /* 144 */   ,   {   0                               ,   0               }
+#endif
         /* 145 */   ,   {   ERROR_DIR_NOT_EMPTY             ,   ENOTEMPTY       }
+#if 0
         /* 146 */   ,   {   0                               ,   0               }
         /* 147 */   ,   {   0                               ,   0               }
         /* 148 */   ,   {   0                               ,   0               }
@@ -304,16 +333,24 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 155 */   ,   {   0                               ,   0               }
         /* 156 */   ,   {   0                               ,   0               }
         /* 157 */   ,   {   0                               ,   0               }
+#endif
         /* 158 */   ,   {   ERROR_NOT_LOCKED                ,   EACCES          }
+#if 0
         /* 159 */   ,   {   0                               ,   0               }
         /* 160 */   ,   {   0                               ,   0               }
+#endif
         /* 161 */   ,   {   ERROR_BAD_PATHNAME              ,   ENOENT          }
+#if 0
         /* 162 */   ,   {   0                               ,   0               }
         /* 163 */   ,   {   0                               ,   0               }
+#endif
         /* 164 */   ,   {   ERROR_MAX_THRDS_REACHED         ,   EAGAIN          }
+#if 0
         /* 165 */   ,   {   0                               ,   0               }
         /* 166 */   ,   {   0                               ,   0               }
+#endif
         /* 167 */   ,   {   ERROR_LOCK_FAILED               ,   EACCES          }
+#if 0
         /* 168 */   ,   {   0                               ,   0               }
         /* 169 */   ,   {   0                               ,   0               }
         /* 170 */   ,   {   0                               ,   0               }
@@ -329,7 +366,9 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 180 */   ,   {   0                               ,   0               }
         /* 181 */   ,   {   0                               ,   0               }
         /* 182 */   ,   {   0                               ,   0               }
+#endif
         /* 183 */   ,   {   ERROR_ALREADY_EXISTS            ,   EEXIST          }
+#if 0
         /* 184 */   ,   {   0                               ,   0               }
         /* 185 */   ,   {   0                               ,   0               }
         /* 186 */   ,   {   0                               ,   0               }
@@ -346,6 +385,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 197 */   ,   {   0                               ,   0               }
         /* 198 */   ,   {   0                               ,   0               }
         /* 199 */   ,   {   0                               ,   0               }
+#endif
 
         /* 206 */   ,   {   ERROR_FILENAME_EXCED_RANGE      ,   ENAMETOOLONG    }
 
