@@ -89,7 +89,7 @@ expect_openssl_errors('openssl_pkey_export_to_file opening', ['02001002', '2006D
 expect_openssl_errors('openssl_pkey_export_to_file pem', ['0906D06C']);
 // file to export cannot be written
 @openssl_pkey_export_to_file($private_key_file, $invalid_file_for_write);
-expect_openssl_errors('openssl_pkey_export_to_file write', ['2006D002', '09072007']);
+expect_openssl_errors('openssl_pkey_export_to_file write', ['2006D002']);
 // succesful export
 @openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd');
 expect_openssl_errors('openssl_pkey_export', ['06065064', '0906A065']);
@@ -126,7 +126,7 @@ expect_openssl_errors('openssl_x509_checkpurpose purpose', ['0B086079']);
 echo "CSR errors\n";
 // file for csr (file:///) fails when opennig (BIO_new_file)
 @openssl_csr_get_subject("file://" . $invalid_file_for_read);
-expect_openssl_errors('openssl_csr_get_subject open', ['02001002', '2006D080', '20068079', '0906D06C']);
+expect_openssl_errors('openssl_csr_get_subject open', ['02001002', '2006D080']);
 // file or str csr is not correct PEM - failing PEM_read_bio_X509_REQ
 @openssl_csr_get_subject($crt_file);
 expect_openssl_errors('openssl_csr_get_subjec pem', ['0906D06C']);
