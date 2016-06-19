@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2014 University of Cambridge
+           Copyright (c) 1997-2016 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 functions. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 
 /* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for
@@ -171,7 +173,8 @@ static const int eint[] = {
   REG_BADPAT,  /* group name must start with a non-digit */
   /* 85 */
   REG_BADPAT,  /* parentheses too deeply nested (stack check) */
-  REG_BADPAT   /* missing digits in \x{} or \o{} */
+  REG_BADPAT,  /* missing digits in \x{} or \o{} */
+  REG_BADPAT   /* pattern too complicated */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -362,6 +365,7 @@ start location rather than being passed as a PCRE "starting offset". */
 
 if ((eflags & REG_STARTEND) != 0)
   {
+  if (pmatch == NULL) return REG_INVARG;
   so = pmatch[0].rm_so;
   eo = pmatch[0].rm_eo;
   }
