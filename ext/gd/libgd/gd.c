@@ -2717,6 +2717,19 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 			maxy = p[i].y;
 		}
 	}
+	/* necessary special case: horizontal line */
+	if (n > 1 && miny == maxy) {
+		x1 = x2 = p[0].x;
+		for (i = 1; (i < n); i++) {
+			if (p[i].x < x1) {
+				x1 = p[i].x;
+			} else if (p[i].x > x2) {
+				x2 = p[i].x;
+			}
+		}
+		gdImageLine(im, x1, miny, x2, miny, c);
+		return;
+	}
 	pmaxy = maxy;
 	/* 2.0.16: Optimization by Ilia Chipitsine -- don't waste time offscreen */
 	if (miny < 0) {
