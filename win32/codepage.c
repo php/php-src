@@ -253,10 +253,8 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 	size_t i;
 
 	for (i = 0; i < sizeof(php_win32_cp_map)/sizeof(struct php_win32_cp); i++) {
-		const struct php_win32_cp *cp = &php_win32_cp_map[i];
-
-		if (cp->id == id) {
-			return cp;
+		if (php_win32_cp_map[i].id == id) {
+			return &php_win32_cp_map[i];
 		}
 	}
 
