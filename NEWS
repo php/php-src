@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #72336 (openssl_pkey_new does not fail for invalid DSA params).
     (Jakub Zelenka)
 
+- Streams:
+  . Fixed bug #72439 (Stream socket with remote address leads to a segmentation
+    fault). (Laruence)
+
 23 Jun 2016, PHP 5.6.23
 
 - GD:
