@@ -14,12 +14,8 @@ $white = imagecolorallocate($image, 255,255,255);
 
 $result = imagestring($image, 1, 5, 5, 'String Text', $white);
 
-ob_start();
-imagegd($image);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagestring_basic.png', $image);
 ?>
 --EXPECT--
-7f146e3cdcaf89c6b9d68ccbb44cf94e
+The images are equal.

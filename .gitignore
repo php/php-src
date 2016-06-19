@@ -135,6 +135,7 @@ tests/*/*.sh
 */tests/*/*.sh
 */*/tests/*.diff
 */*/tests/*.out
+*/*/tests/*.out.png
 */*/tests/*.php
 */*/tests/*.exp
 */*/tests/*.log
