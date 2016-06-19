@@ -163,11 +163,11 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_release_lock(void)
 #include <fcntl.h>
 
 /* Some old systems does not have MAP_ANON. */
-static sljit_si dev_zero = -1;
+static sljit_s32 dev_zero = -1;
 
 #if (defined SLJIT_SINGLE_THREADED && SLJIT_SINGLE_THREADED)
 
-static SLJIT_INLINE sljit_si open_dev_zero(void)
+static SLJIT_INLINE sljit_s32 open_dev_zero(void)
 {
 	dev_zero = open("/dev/zero", O_RDWR);
 	return dev_zero < 0;
@@ -179,10 +179,13 @@ static SLJIT_INLINE sljit_si open_dev_zero(void)
 
 static pthread_mutex_t dev_zero_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static SLJIT_INLINE sljit_si open_dev_zero(void)
+static SLJIT_INLINE sljit_s32 open_dev_zero(void)
 {
 	pthread_mutex_lock(&dev_zero_mutex);
-	dev_zero = open("/dev/zero", O_RDWR);
+	/* The dev_zero might be initialized by another thread during the waiting. */
+	if (dev_zero < 0) {
+		dev_zero = open("/dev/zero", O_RDWR);
+	}
 	pthread_mutex_unlock(&dev_zero_mutex);
 	return dev_zero < 0;
 }

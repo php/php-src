@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting functions. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "pcre_internal.h"
 
@@ -1369,7 +1371,7 @@ do
             for (c = 0; c < 16; c++) start_bits[c] |= map[c];
             for (c = 128; c < 256; c++)
               {
-              if ((map[c/8] && (1 << (c&7))) != 0)
+              if ((map[c/8] & (1 << (c&7))) != 0)
                 {
                 int d = (c >> 6) | 0xc0;            /* Set bit for this starter */
                 start_bits[d/8] |= (1 << (d&7));    /* and then skip on to the */

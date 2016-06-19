@@ -41,7 +41,7 @@
 #define PUSH_RLDICR(reg, shift) \
 	push_inst(compiler, RLDI(reg, reg, 63 - shift, shift, 1))
 
-static sljit_si load_immediate(struct sljit_compiler *compiler, sljit_si reg, sljit_sw imm)
+static sljit_s32 load_immediate(struct sljit_compiler *compiler, sljit_s32 reg, sljit_sw imm)
 {
 	sljit_uw tmp;
 	sljit_uw shift;
@@ -145,8 +145,8 @@ static sljit_si load_immediate(struct sljit_compiler *compiler, sljit_si reg, sl
 		src1 = TMP_REG1; \
 	}
 
-static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, sljit_si op, sljit_si flags,
-	sljit_si dst, sljit_si src1, sljit_si src2)
+static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 flags,
+	sljit_s32 dst, sljit_s32 src1, sljit_s32 src2)
 {
 	switch (op) {
 	case SLJIT_MOV:
@@ -156,11 +156,11 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 			return push_inst(compiler, OR | S(src2) | A(dst) | B(src2));
 		return SLJIT_SUCCESS;
 
-	case SLJIT_MOV_UI:
-	case SLJIT_MOV_SI:
+	case SLJIT_MOV_U32:
+	case SLJIT_MOV_S32:
 		SLJIT_ASSERT(src1 == TMP_REG1);
 		if ((flags & (REG_DEST | REG2_SOURCE)) == (REG_DEST | REG2_SOURCE)) {
-			if (op == SLJIT_MOV_SI)
+			if (op == SLJIT_MOV_S32)
 				return push_inst(compiler, EXTSW | S(src2) | A(dst));
 			return push_inst(compiler, INS_CLEAR_LEFT(dst, src2, 0));
 		}
@@ -169,26 +169,26 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 		}
 		return SLJIT_SUCCESS;
 
-	case SLJIT_MOV_UB:
-	case SLJIT_MOV_SB:
+	case SLJIT_MOV_U8:
+	case SLJIT_MOV_S8:
 		SLJIT_ASSERT(src1 == TMP_REG1);
 		if ((flags & (REG_DEST | REG2_SOURCE)) == (REG_DEST | REG2_SOURCE)) {
-			if (op == SLJIT_MOV_SB)
+			if (op == SLJIT_MOV_S8)
 				return push_inst(compiler, EXTSB | S(src2) | A(dst));
 			return push_inst(compiler, INS_CLEAR_LEFT(dst, src2, 24));
 		}
-		else if ((flags & REG_DEST) && op == SLJIT_MOV_SB)
+		else if ((flags & REG_DEST) && op == SLJIT_MOV_S8)
 			return push_inst(compiler, EXTSB | S(src2) | A(dst));
 		else {
 			SLJIT_ASSERT(dst == src2);
 		}
 		return SLJIT_SUCCESS;
 
-	case SLJIT_MOV_UH:
-	case SLJIT_MOV_SH:
+	case SLJIT_MOV_U16:
+	case SLJIT_MOV_S16:
 		SLJIT_ASSERT(src1 == TMP_REG1);
 		if ((flags & (REG_DEST | REG2_SOURCE)) == (REG_DEST | REG2_SOURCE)) {
-			if (op == SLJIT_MOV_SH)
+			if (op == SLJIT_MOV_S16)
 				return push_inst(compiler, EXTSH | S(src2) | A(dst));
 			return push_inst(compiler, INS_CLEAR_LEFT(dst, src2, 16));
 		}
@@ -389,7 +389,7 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 	return SLJIT_SUCCESS;
 }
 
-static SLJIT_INLINE sljit_si emit_const(struct sljit_compiler *compiler, sljit_si reg, sljit_sw init_value)
+static SLJIT_INLINE sljit_s32 emit_const(struct sljit_compiler *compiler, sljit_s32 reg, sljit_sw init_value)
 {
 	FAIL_IF(push_inst(compiler, ADDIS | D(reg) | A(0) | IMM(init_value >> 48)));
 	FAIL_IF(push_inst(compiler, ORI | S(reg) | A(reg) | IMM(init_value >> 32)));
