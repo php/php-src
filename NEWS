@@ -22,6 +22,10 @@ PHP                                                                        NEWS
     oob read access). (Laruence)
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
 
+- OpenSSL:
+  . Implemented error storing to the global queue and cleaning up the OpenSSL
+    error queue (resolves bugs #68276 and #69882). (Jakub Zelenka)
+
 - Sqlite3:
   . Implemented FR #72385 (Update SQLite bundle lib(3.13.0)). (Laruence)
 
