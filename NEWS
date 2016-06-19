@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Implemented error storing to the global queue and cleaning up the OpenSSL
     error queue (resolves bugs #68276 and #69882). (Jakub Zelenka)
 
+- PCRE:
+  . Upgraded to PCRE 8.39. (Anatol)
+
 - Sqlite3:
   . Implemented FR #72385 (Update SQLite bundle lib(3.13.0)). (Laruence)
 
