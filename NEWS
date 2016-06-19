@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
 
 - OpenSSL:
+  . Implemented FR #67304 (Added AEAD support [CCM and GCM modes] to
+    openssl_encrypt and openssl_decrypt). (Jakub Zelenka)
   . Implemented error storing to the global queue and cleaning up the OpenSSL
     error queue (resolves bugs #68276 and #69882). (Jakub Zelenka)
 
