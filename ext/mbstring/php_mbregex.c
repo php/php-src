@@ -32,7 +32,7 @@
 #include "ext/standard/info.h"
 #include "php_mbregex.h"
 #include "mbstring.h"
- 
+
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
 #include <oniguruma.h>
 #undef UChar
@@ -55,7 +55,7 @@ struct _zend_mb_regex_globals {
 #define MBREX(g) (MBSTRG(mb_regex_globals)->g)
 
 /* {{{ static void php_mb_regex_free_cache() */
-static void php_mb_regex_free_cache(php_mb_regex_t **pre) 
+static void php_mb_regex_free_cache(php_mb_regex_t **pre)
 {
 	onig_free(*pre);
 }
@@ -78,7 +78,7 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals TSRMLS_DC)
 /* }}} */
 
 /* {{{ _php_mb_regex_globals_dtor */
-static void _php_mb_regex_globals_dtor(zend_mb_regex_globals *pglobals TSRMLS_DC) 
+static void _php_mb_regex_globals_dtor(zend_mb_regex_globals *pglobals TSRMLS_DC)
 {
 	zend_hash_destroy(&pglobals->ht_rc);
 }
@@ -466,7 +466,7 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 		retval = *rc;
 	}
 out:
-	return retval; 
+	return retval;
 }
 /* }}} */
 
@@ -483,7 +483,7 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 			--len_left;
 			*(p++) = 'i';
 		}
-		++len_req;	
+		++len_req;
 	}
 
 	if ((option & ONIG_OPTION_EXTEND) != 0) {
@@ -491,7 +491,7 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 			--len_left;
 			*(p++) = 'x';
 		}
-		++len_req;	
+		++len_req;
 	}
 
 	if ((option & (ONIG_OPTION_MULTILINE | ONIG_OPTION_SINGLELINE)) ==
@@ -500,14 +500,14 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 			--len_left;
 			*(p++) = 'p';
 		}
-		++len_req;	
+		++len_req;
 	} else {
 		if ((option & ONIG_OPTION_MULTILINE) != 0) {
 			if (len_left > 0) {
 				--len_left;
 				*(p++) = 'm';
 			}
-			++len_req;	
+			++len_req;
 		}
 
 		if ((option & ONIG_OPTION_SINGLELINE) != 0) {
@@ -515,22 +515,22 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 				--len_left;
 				*(p++) = 's';
 			}
-			++len_req;	
+			++len_req;
 		}
-	}	
+	}
 	if ((option & ONIG_OPTION_FIND_LONGEST) != 0) {
 		if (len_left > 0) {
 			--len_left;
 			*(p++) = 'l';
 		}
-		++len_req;	
+		++len_req;
 	}
 	if ((option & ONIG_OPTION_FIND_NOT_EMPTY) != 0) {
 		if (len_left > 0) {
 			--len_left;
 			*(p++) = 'n';
 		}
-		++len_req;	
+		++len_req;
 	}
 
 	c = 0;
@@ -566,7 +566,7 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 		--len_left;
 		*(p++) = '\0';
 	}
-	++len_req;	
+	++len_req;
 	if (len < len_req) {
 		return len_req;
 	}
@@ -577,11 +577,11 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 
 /* {{{ _php_mb_regex_init_options */
 static void
-_php_mb_regex_init_options(const char *parg, int narg, OnigOptionType *option, OnigSyntaxType **syntax, int *eval) 
+_php_mb_regex_init_options(const char *parg, int narg, OnigOptionType *option, OnigSyntaxType **syntax, int *eval)
 {
 	int n;
 	char c;
-	int optm = 0; 
+	int optm = 0;
 
 	*syntax = ONIG_SYNTAX_RUBY;
 
@@ -636,13 +636,13 @@ _php_mb_regex_init_options(const char *parg, int narg, OnigOptionType *option, O
 					*syntax = ONIG_SYNTAX_POSIX_EXTENDED;
 					break;
 				case 'e':
-					if (eval != NULL) *eval = 1; 
+					if (eval != NULL) *eval = 1;
 					break;
 				default:
 					break;
 			}
 		}
-		if (option != NULL) *option|=optm; 
+		if (option != NULL) *option|=optm;
 	}
 }
 /* }}} */
@@ -860,11 +860,11 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	} else {
 		/* FIXME: this code is not multibyte aware! */
 		convert_to_long_ex(arg_pattern_zval);
-		pat_buf[0] = (char)Z_LVAL_PP(arg_pattern_zval);	
+		pat_buf[0] = (char)Z_LVAL_PP(arg_pattern_zval);
 		pat_buf[1] = '\0';
 
 		arg_pattern = pat_buf;
-		arg_pattern_len = 1;	
+		arg_pattern_len = 1;
 	}
 	/* create regex pattern buffer */
 	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), syntax TSRMLS_CC);
@@ -934,7 +934,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					}
 				}
 			}
-				
+
 			if (eval) {
 				zval v;
 				/* null terminate buffer */
@@ -953,32 +953,31 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				eval_buf.len = 0;
 				zval_dtor(&v);
 			} else if (is_callable) {
-				zval *retval_ptr;
+				zval *retval_ptr = NULL;
 				zval **args[1];
 				zval *subpats;
 				int i;
-				
+
 				MAKE_STD_ZVAL(subpats);
 				array_init(subpats);
-				
+
 				for (i = 0; i < regs->num_regs; i++) {
 					add_next_index_stringl(subpats, string + regs->beg[i], regs->end[i] - regs->beg[i], 1);
-				}				
-				
+				}
+
 				args[0] = &subpats;
 				/* null terminate buffer */
 				smart_str_0(&eval_buf);
-				
+
 				arg_replace_fci.param_count = 1;
 				arg_replace_fci.params = args;
 				arg_replace_fci.retval_ptr_ptr = &retval_ptr;
-				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache TSRMLS_CC) == SUCCESS && arg_replace_fci.retval_ptr_ptr) {
+				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache TSRMLS_CC) == SUCCESS && arg_replace_fci.retval_ptr_ptr && retval_ptr) {
 					convert_to_string_ex(&retval_ptr);
 					smart_str_appendl(&out_buf, Z_STRVAL_P(retval_ptr), Z_STRLEN_P(retval_ptr));
 					eval_buf.len = 0;
 					zval_ptr_dtor(&retval_ptr);
 				} else {
-					efree(description);
 					if (!EG(exception)) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call custom replacement function");
 					}
@@ -991,7 +990,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				pos = (OnigUChar *)string + n;
 			} else {
 				if (pos < string_lim) {
-					smart_str_appendl(&out_buf, pos, 1); 
+					smart_str_appendl(&out_buf, pos, 1);
 				}
 				pos++;
 			}
@@ -1013,7 +1012,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	smart_str_free(&eval_buf);
 
 	if (err <= -2) {
-		smart_str_free(&out_buf);	
+		smart_str_free(&out_buf);
 		RETVAL_FALSE;
 	} else {
 		smart_str_appendc(&out_buf, '\0');
@@ -1063,7 +1062,7 @@ PHP_FUNCTION(mb_split)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
 		RETURN_FALSE;
-	} 
+	}
 
 	if (count > 0) {
 		count--;
@@ -1317,7 +1316,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	if (zend_parse_parameters(argc TSRMLS_CC, "z|ss", &arg_str, &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
 		return;
 	}
-	
+
 	if (argc > 1 && arg_pattern_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty pattern");
 		RETURN_FALSE;
@@ -1416,7 +1415,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 /* }}} */
 
 /* {{{ php_mb_regex_set_options */
-static void _php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *syntax, OnigOptionType *prev_options, OnigSyntaxType **prev_syntax TSRMLS_DC) 
+static void _php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *syntax, OnigOptionType *prev_options, OnigSyntaxType **prev_syntax TSRMLS_DC)
 {
 	if (prev_options != NULL) {
 		*prev_options = MBREX(regex_default_options);
