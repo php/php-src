@@ -461,7 +461,7 @@ zend_module_entry ibase_module_entry = {
 
 #ifdef COMPILE_DL_INTERBASE
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(ibase)
 #endif
@@ -848,7 +848,7 @@ static char const dpb_args[] = {
 	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name, 0
 };
 
-int _php_ibase_attach_db(char **args, int *len, zend_long *largs, isc_db_handle *db) /* {{{ */
+int _php_ibase_attach_db(char **args, size_t *len, zend_long *largs, isc_db_handle *db) /* {{{ */
 {
 	short i, dpb_len, buf_len = 257-2;  /* version byte at the front, and a null at the end */
 	char dpb_buffer[257] = { isc_dpb_version1, 0 }, *dpb;
@@ -884,7 +884,8 @@ int _php_ibase_attach_db(char **args, int *len, zend_long *largs, isc_db_handle 
 static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* {{{ */
 {
 	char *c, hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
-	int i, len[] = { 0, 0, 0, 0, 0 };
+	int i;
+	size_t len[] = { 0, 0, 0, 0, 0 };
 	zend_long largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
 	zend_resource new_index_ptr, *le;

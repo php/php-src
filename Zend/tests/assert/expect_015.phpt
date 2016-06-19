@@ -154,7 +154,7 @@ Warning: assert(): assert(0 && ($a = function () {
     $x = $a ? $b : $c;
     $x = $a ?: $c;
     $x = $a ?? $b;
-    list($a, $b, $c) = [1, 2 => 'x', 'z' => 'c'];
+    [$a, $b, $c] = [1, 2 => 'x', 'z' => 'c'];
     @foo();
     $y = clone $x;
     yield 1 => 2;

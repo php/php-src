@@ -62,6 +62,11 @@ enum {
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
+#ifdef PCRE_STUDY_JIT_COMPILE
+#define PCRE_JIT_STACK_MIN_SIZE (32 * 1024)
+#define PCRE_JIT_STACK_MAX_SIZE (64 * 1024)
+ZEND_TLS pcre_jit_stack *jit_stack = NULL;
+#endif
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 {
@@ -129,6 +134,16 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
+
+#ifdef PCRE_STUDY_JIT_COMPILE
+	/* Stack may only be destroyed when no cached patterns
+	 	possibly associated with it do exist. */
+	if (jit_stack) {
+		pcre_jit_stack_free(jit_stack);
+		jit_stack = NULL;
+	}
+#endif
+
 }
 /* }}} */
 
@@ -196,6 +211,19 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 	return SUCCESS;
 }
 /* }}} */
+
+#ifdef PCRE_STUDY_JIT_COMPILE
+/* {{{ PHP_RINIT_FUNCTION(pcre) */
+static PHP_RINIT_FUNCTION(pcre)
+{
+	if (PCRE_G(jit)) {
+		jit_stack = pcre_jit_stack_alloc(PCRE_JIT_STACK_MIN_SIZE,PCRE_JIT_STACK_MAX_SIZE);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+#endif
 
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(zval *data, void *arg)
@@ -461,6 +489,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			extra->flags |= PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 			extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
 			extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
+#ifdef PCRE_STUDY_JIT_COMPILE
+			if (PCRE_G(jit) && jit_stack) {
+				pcre_assign_jit_stack(extra, NULL, jit_stack);
+			}
+#endif
 		}
 		if (error != NULL) {
 			php_error_docref(NULL, E_WARNING, "Error while studying pattern");
@@ -997,7 +1030,7 @@ static int preg_get_backref(char **str, int *backref)
 	}
 
 	if (in_brace) {
-		if (*walk == 0 || *walk != '}')
+		if (*walk != '}')
 			return 0;
 		else
 			walk++;
@@ -1086,8 +1119,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	char 			**subpat_names;		/* Array for named subpatterns */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int				 size_offsets;		/* Size of the offsets array */
-	int				 new_len;			/* Length of needed storage */
-	int				 alloc_len;			/* Actual allocated length */
+	size_t			 new_len;			/* Length of needed storage */
+	size_t			 alloc_len;			/* Actual allocated length */
 	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	int				 start_offset;		/* Where the new search starts */
@@ -1731,8 +1764,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	zend_long limit_val, zend_long flags)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
-	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
-	pcre_extra		*extra_bump = NULL;	/* Almost dummy */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
@@ -1840,29 +1871,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
-				if (pce->compile_options & PCRE_UTF8) {
-					if (re_bump == NULL) {
-						int dummy;
-						zend_string *regex = zend_string_init("/./us", sizeof("/./us")-1, 0);
-						re_bump = pcre_get_compiled_regex(regex, &extra_bump, &dummy);
-						zend_string_release(regex);
-						if (re_bump == NULL) {
-							RETURN_FALSE;
-						}
-					}
-					count = pcre_exec(re_bump, extra_bump, subject,
-							  subject_len, start_offset,
-							  exoptions, offsets, size_offsets);
-					if (count < 1) {
-						php_error_docref(NULL, E_WARNING, "Unknown error");
-						RETURN_FALSE;
-					}
-				} else {
-					offsets[0] = start_offset;
-					offsets[1] = start_offset + 1;
-				}
-			} else
+				offsets[0] = start_offset;
+				offsets[1] = start_offset + calculate_unit_length(pce, subject + start_offset);
+			} else {
 				break;
+			}
 		} else {
 			pcre_handle_exec_error(count);
 			break;
@@ -2219,7 +2232,11 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
-	NULL,
+#ifdef PCRE_STUDY_JIT_COMPILE
+	PHP_RINIT(pcre),
+#else
+	NULL
+#endif
 	NULL,
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,

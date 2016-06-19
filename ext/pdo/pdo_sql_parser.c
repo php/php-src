@@ -54,7 +54,6 @@ static int scan(Scanner *s)
 #line 55 "ext/pdo/pdo_sql_parser.c"
 {
 	YYCTYPE yych;
-	unsigned int yyaccept = 0;
 
 	if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
 	yych = *YYCURSOR;
@@ -62,31 +61,32 @@ static int scan(Scanner *s)
 	case 0x00:	goto yy2;
 	case '"':	goto yy3;
 	case '\'':	goto yy5;
-	case '-':	goto yy11;
-	case '/':	goto yy9;
+	case '(':
+	case ')':
+	case '*':
+	case '+':
+	case ',':
+	case '.':	goto yy9;
+	case '-':	goto yy10;
+	case '/':	goto yy11;
 	case ':':	goto yy6;
 	case '?':	goto yy7;
 	default:	goto yy12;
 	}
 yy2:
 	YYCURSOR = YYMARKER;
-	switch (yyaccept) {
-	case 0: 	goto yy4;
-	case 1: 	goto yy10;
-	}
+	goto yy4;
 yy3:
-	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
-	if (yych >= 0x01) goto yy43;
+	if (yych >= 0x01) goto yy37;
 yy4:
 #line 63 "ext/pdo/pdo_sql_parser.re"
 	{ SKIP_ONE(PDO_PARSER_TEXT); }
-#line 85 "ext/pdo/pdo_sql_parser.c"
+#line 86 "ext/pdo/pdo_sql_parser.c"
 yy5:
-	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych <= 0x00) goto yy4;
-	goto yy38;
+	goto yy32;
 yy6:
 	yych = *++YYCURSOR;
 	switch (yych) {
@@ -152,14 +152,14 @@ yy6:
 	case 'w':
 	case 'x':
 	case 'y':
-	case 'z':	goto yy32;
-	case ':':	goto yy35;
+	case 'z':	goto yy26;
+	case ':':	goto yy29;
 	default:	goto yy4;
 	}
 yy7:
 	++YYCURSOR;
 	switch ((yych = *YYCURSOR)) {
-	case '?':	goto yy29;
+	case '?':	goto yy23;
 	default:	goto yy8;
 	}
 yy8:
@@ -167,133 +167,89 @@ yy8:
 	{ RET(PDO_PARSER_BIND_POS); }
 #line 169 "ext/pdo/pdo_sql_parser.c"
 yy9:
-	++YYCURSOR;
-	switch ((yych = *YYCURSOR)) {
-	case '*':	goto yy19;
-	default:	goto yy13;
-	}
+	yych = *++YYCURSOR;
+	goto yy4;
 yy10:
-#line 65 "ext/pdo/pdo_sql_parser.re"
-	{ RET(PDO_PARSER_TEXT); }
-#line 179 "ext/pdo/pdo_sql_parser.c"
-yy11:
 	yych = *++YYCURSOR;
 	switch (yych) {
-	case '-':	goto yy14;
-	default:	goto yy13;
+	case '-':	goto yy21;
+	default:	goto yy4;
+	}
+yy11:
+	yych = *(YYMARKER = ++YYCURSOR);
+	switch (yych) {
+	case '*':	goto yy15;
+	default:	goto yy4;
 	}
 yy12:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy13:
 	switch (yych) {
 	case 0x00:
 	case '"':
 	case '\'':
+	case '(':
+	case ')':
+	case '*':
+	case '+':
+	case ',':
+	case '-':
+	case '.':
+	case '/':
 	case ':':
-	case '?':	goto yy10;
+	case '?':	goto yy14;
 	default:	goto yy12;
 	}
 yy14:
+#line 65 "ext/pdo/pdo_sql_parser.re"
+	{ RET(PDO_PARSER_TEXT); }
+#line 208 "ext/pdo/pdo_sql_parser.c"
+yy15:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy17;
-	case '\n':
-	case '\r':	goto yy12;
-	default:	goto yy14;
+	case '*':	goto yy17;
+	default:	goto yy15;
 	}
-yy16:
-#line 64 "ext/pdo/pdo_sql_parser.re"
-	{ RET(PDO_PARSER_TEXT); }
-#line 216 "ext/pdo/pdo_sql_parser.c"
 yy17:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case '\n':
-	case '\r':	goto yy16;
-	default:	goto yy17;
+	case '*':	goto yy17;
+	case '/':	goto yy19;
+	default:	goto yy15;
 	}
 yy19:
-	yyaccept = 1;
-	YYMARKER = ++YYCURSOR;
-	if (YYLIMIT <= YYCURSOR) YYFILL(1);
-	yych = *YYCURSOR;
-	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy21;
-	case '*':	goto yy23;
-	default:	goto yy19;
-	}
+	++YYCURSOR;
+yy20:
+#line 64 "ext/pdo/pdo_sql_parser.re"
+	{ RET(PDO_PARSER_TEXT); }
+#line 231 "ext/pdo/pdo_sql_parser.c"
 yy21:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case '*':	goto yy26;
+	case '\n':
+	case '\r':	goto yy20;
 	default:	goto yy21;
 	}
 yy23:
-	yyaccept = 1;
-	YYMARKER = ++YYCURSOR;
-	if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
+	++YYCURSOR;
+	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy21;
-	case '*':	goto yy23;
-	case '/':	goto yy25;
-	default:	goto yy19;
+	case '?':	goto yy23;
+	default:	goto yy25;
 	}
 yy25:
-	yych = *++YYCURSOR;
-	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy16;
-	default:	goto yy12;
-	}
-yy26:
-	++YYCURSOR;
-	if (YYLIMIT <= YYCURSOR) YYFILL(1);
-	yych = *YYCURSOR;
-	switch (yych) {
-	case '*':	goto yy26;
-	case '/':	goto yy28;
-	default:	goto yy21;
-	}
-yy28:
-	yych = *++YYCURSOR;
-	goto yy16;
-yy29:
-	++YYCURSOR;
-	if (YYLIMIT <= YYCURSOR) YYFILL(1);
-	yych = *YYCURSOR;
-	switch (yych) {
-	case '?':	goto yy29;
-	default:	goto yy31;
-	}
-yy31:
 #line 60 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 296 "ext/pdo/pdo_sql_parser.c"
-yy32:
+#line 252 "ext/pdo/pdo_sql_parser.c"
+yy26:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
@@ -360,65 +316,65 @@ yy32:
 	case 'w':
 	case 'x':
 	case 'y':
-	case 'z':	goto yy32;
-	default:	goto yy34;
+	case 'z':	goto yy26;
+	default:	goto yy28;
 	}
-yy34:
+yy28:
 #line 61 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_BIND); }
-#line 370 "ext/pdo/pdo_sql_parser.c"
-yy35:
+#line 326 "ext/pdo/pdo_sql_parser.c"
+yy29:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case ':':	goto yy35;
-	default:	goto yy31;
+	case ':':	goto yy29;
+	default:	goto yy25;
 	}
-yy37:
+yy31:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy38:
+yy32:
 	switch (yych) {
 	case 0x00:	goto yy2;
-	case '\'':	goto yy40;
-	case '\\':	goto yy39;
-	default:	goto yy37;
+	case '\'':	goto yy34;
+	case '\\':	goto yy33;
+	default:	goto yy31;
 	}
-yy39:
+yy33:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	if (yych <= 0x00) goto yy2;
-	goto yy37;
-yy40:
+	goto yy31;
+yy34:
 	++YYCURSOR;
 #line 59 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 400 "ext/pdo/pdo_sql_parser.c"
-yy42:
+#line 356 "ext/pdo/pdo_sql_parser.c"
+yy36:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy43:
+yy37:
 	switch (yych) {
 	case 0x00:	goto yy2;
-	case '"':	goto yy45;
-	case '\\':	goto yy44;
-	default:	goto yy42;
+	case '"':	goto yy39;
+	case '\\':	goto yy38;
+	default:	goto yy36;
 	}
-yy44:
+yy38:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	if (yych <= 0x00) goto yy2;
-	goto yy42;
-yy45:
+	goto yy36;
+yy39:
 	++YYCURSOR;
 #line 58 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 422 "ext/pdo/pdo_sql_parser.c"
+#line 378 "ext/pdo/pdo_sql_parser.c"
 }
 #line 66 "ext/pdo/pdo_sql_parser.re"
 

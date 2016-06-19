@@ -700,16 +700,6 @@ try_again:
 						PHP_MD5Update(&md5ctx, (unsigned char*)phpurl->query, strlen(phpurl->query));
 					}
 
-					/* TODO: Support for qop="auth-int" */
-/*
-					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
-					    Z_TYPE_PP(tmp) == IS_STRING &&
-					    Z_STRLEN_PP(tmp) == sizeof("auth-int")-1 &&
-					    stricmp(Z_STRVAL_PP(tmp), "auth-int") == 0) {
-						PHP_MD5Update(&md5ctx, ":", 1);
-						PHP_MD5Update(&md5ctx, HEntity, HASHHEXLEN);
-					}
-*/
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(HA2, hash);
 
@@ -833,8 +823,10 @@ try_again:
 						    Z_TYPE_P(value) == IS_STRING) {
 						  zval *tmp;
 						  if (((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 1)) == NULL ||
+							   Z_TYPE_P(tmp) != IS_STRING ||
 						       strncmp(phpurl->path?phpurl->path:"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0) &&
 						      ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
+							   Z_TYPE_P(tmp) != IS_STRING ||
 						       in_domain(phpurl->host,Z_STRVAL_P(tmp))) &&
 						      (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
 								smart_str_append(&soap_headers, key);

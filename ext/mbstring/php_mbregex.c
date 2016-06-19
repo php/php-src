@@ -459,8 +459,12 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 			retval = NULL;
 			goto out;
 		}
+		if (rc == MBREX(search_re)) {
+			/* reuse the new rc? see bug #72399 */
+			MBREX(search_re) = NULL;
+		}
 		zend_hash_str_update_ptr(&MBREX(ht_rc), (char *)pattern, patlen, retval);
-	} else if (rc) {
+	} else {
 		retval = rc;
 	}
 out:
@@ -807,7 +811,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	OnigUChar *pos;
 	OnigUChar *string_lim;
 	char *description = NULL;
-	char pat_buf[4];
+	char pat_buf[6];
 
 	const mbfl_encoding *enc;
 
@@ -860,6 +864,8 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		pat_buf[1] = '\0';
 		pat_buf[2] = '\0';
 		pat_buf[3] = '\0';
+		pat_buf[4] = '\0';
+		pat_buf[5] = '\0';
 
 		arg_pattern = pat_buf;
 		arg_pattern_len = 1;
@@ -935,12 +941,20 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 			if (eval) {
 				zval v;
+				zend_string *eval_str;
 				/* null terminate buffer */
 				smart_str_0(&eval_buf);
+
+				if (eval_buf.s) {
+					eval_str = eval_buf.s;
+				} else {
+					eval_str = ZSTR_EMPTY_ALLOC();
+				}
+
 				/* do eval */
-				if (zend_eval_stringl(ZSTR_VAL(eval_buf.s), ZSTR_LEN(eval_buf.s), &v, description) == FAILURE) {
+				if (zend_eval_stringl(ZSTR_VAL(eval_str), ZSTR_LEN(eval_str), &v, description) == FAILURE) {
 					efree(description);
-					php_error_docref(NULL,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_buf.s));
+					php_error_docref(NULL,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_str));
 					/* zend_error() does not return in this case */
 				}
 
@@ -948,7 +962,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				convert_to_string(&v);
 				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
 				/* Clean up */
-				ZSTR_LEN(eval_buf.s) = 0;
+				smart_str_free(&eval_buf);
 				zval_dtor(&v);
 			} else if (is_callable) {
 				zval args[1];
@@ -971,9 +985,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						!Z_ISUNDEF(retval)) {
 					convert_to_string_ex(&retval);
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
-					if (eval_buf.s) {
-						ZSTR_LEN(eval_buf.s) = 0;
-					}
+					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
 				} else {
 					efree(description);
@@ -1400,6 +1412,11 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
+	/* Accept negative position if length of search string can be determined */
+	if ((position < 0) && (!Z_ISUNDEF(MBREX(search_str))) && (Z_TYPE(MBREX(search_str)) == IS_STRING)) {
+		position += Z_STRLEN(MBREX(search_str));
+	}
+		
 	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position >= Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;

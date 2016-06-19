@@ -34,7 +34,11 @@ var_dump( array_filter($input, 'dump2', true) );
 
 echo "*** Testing array_filter() : usage variations - 'callback' expecting second argument ***\n";
 
-var_dump( array_filter($small, 'dump', false) );
+try {
+	var_dump( array_filter($small, 'dump', false) );
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 echo "*** Testing array_filter() with various use types ***\n";
 
@@ -70,13 +74,7 @@ array(3) {
   NULL
 }
 *** Testing array_filter() : usage variations - 'callback' expecting second argument ***
-
-Warning: Missing argument 2 for dump() in %s on line %d
-
-Notice: Undefined variable: key in %s on line %d
- = 123
-array(0) {
-}
+Exception: Too few arguments to function dump(), 1 passed and exactly 2 expected
 *** Testing array_filter() with various use types ***
 array(2) {
   [1]=>
@@ -91,13 +89,13 @@ array(2) {
   int(2)
 }
 
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 44
+Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
 
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 44
+Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
 
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 44
+Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
 
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 44
+Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line 48
 array(0) {
 }
 Done

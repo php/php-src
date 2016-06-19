@@ -568,12 +568,6 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
 
-#define php_stream_get_from_zval(stream, zstream, mode, options, opened, context) \
-		if (Z_TYPE_P((zstream)) == IS_RESOURCE) { \
-			php_stream_from_zval((stream), (zstream)); \
-		} else (stream) = Z_TYPE_P((zstream)) == IS_STRING ?  \
-			php_stream_open_wrapper_ex(Z_STRVAL_P((zstream)), (mode), (options), (opened), (context)) : NULL
-
 /* pushes an error message onto the stack for a wrapper instance */
 PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 

@@ -683,9 +683,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	fake_argc = argc + is_agg;
 
 	fc->fci.size = sizeof(fc->fci);
-	fc->fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
-	fc->fci.symbol_table = NULL;
 	fc->fci.object = NULL;
 	fc->fci.retval = &retval;
 	fc->fci.param_count = fake_argc;
@@ -842,9 +840,7 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	int ret;
 
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
-	collation->fci.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
-	collation->fci.fci.symbol_table = NULL;
 	collation->fci.fci.object = NULL;
 	collation->fci.fci.retval = &retval;
 	collation->fci.fci.param_count = 2;
@@ -1394,6 +1390,26 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 }
 /* }}} */
 
+/* {{{ Best try to map between PHP and SQLite. Default is still text. */
+#define PHP_SQLITE3_SET_TYPE(z, p) \
+	switch (Z_TYPE_P(z)) { \
+		default: \
+			(p).type = SQLITE_TEXT; \
+			break; \
+		case IS_LONG: \
+		case IS_TRUE: \
+		case IS_FALSE: \
+			(p).type = SQLITE_INTEGER; \
+			break; \
+		case IS_DOUBLE: \
+			(p).type = SQLITE_FLOAT; \
+			break; \
+		case IS_NULL: \
+			(p).type = SQLITE_NULL; \
+			break; \
+	}
+/* }}} */
+
 /* {{{ proto bool SQLite3Stmt::bindParam(int parameter_number, mixed parameter [, int type])
    Bind Parameter to a stmt variable. */
 PHP_METHOD(sqlite3stmt, bindParam)
@@ -1417,6 +1433,10 @@ PHP_METHOD(sqlite3stmt, bindParam)
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 	ZVAL_COPY(&param.parameter, parameter);
+
+	if (ZEND_NUM_ARGS() < 3) {
+		PHP_SQLITE3_SET_TYPE(parameter, param);
+	}
 
 	if (!register_bound_parameter_to_sqlite(&param, stmt_obj)) {
 		if (!Z_ISUNDEF(param.parameter)) {
@@ -1453,6 +1473,10 @@ PHP_METHOD(sqlite3stmt, bindValue)
 
 	ZVAL_COPY(&param.parameter, parameter);
 
+	if (ZEND_NUM_ARGS() < 3) {
+		PHP_SQLITE3_SET_TYPE(parameter, param);
+	}
+
 	if (!register_bound_parameter_to_sqlite(&param, stmt_obj)) {
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
@@ -1463,6 +1487,8 @@ PHP_METHOD(sqlite3stmt, bindValue)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#undef PHP_SQLITE3_SET_TYPE
 
 /* {{{ proto SQLite3Result SQLite3Stmt::execute()
    Executes a prepared statement and returns a result set object. */
@@ -2295,7 +2321,7 @@ zend_module_entry sqlite3_module_entry = {
 
 #ifdef COMPILE_DL_SQLITE3
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(sqlite3)
 #endif

@@ -666,6 +666,36 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 }
 /* }}} */
 
+static HashTable *php_var_serialize_collect_names(HashTable *src, uint32_t count, zend_bool incomplete) /* {{{ */ {
+	zval *val;
+	HashTable *ht;
+	zend_string *key, *name;
+
+	ALLOC_HASHTABLE(ht);
+	zend_hash_init(ht, count, NULL, NULL, 0);
+	ZEND_HASH_FOREACH_STR_KEY_VAL(src, key, val) {
+		if (incomplete && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
+			continue;
+		}
+		if (Z_TYPE_P(val) != IS_STRING) {
+			php_error_docref(NULL, E_NOTICE,
+					"__sleep should return an array only containing the names of instance-variables to serialize.");
+		}
+		name = zval_get_string(val);
+		if (zend_hash_exists(ht, name)) {
+			php_error_docref(NULL, E_NOTICE,
+					"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(name));
+			zend_string_release(name);
+			continue;
+		}
+		zend_hash_add_empty_element(ht, name);
+		zend_string_release(name);
+	} ZEND_HASH_FOREACH_END();
+
+	return ht;
+}
+/* }}} */
+
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
 {
 	uint32_t count;
@@ -686,37 +716,29 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		}
 	} else {
 		count = 0;
+		ht = NULL;
 	}
 
-	smart_str_append_unsigned(buf, count);
-	smart_str_appendl(buf, ":{", 2);
-
 	if (count > 0) {
-		zend_string *key;
-		zval *d, *val;
+		zval *d;
 		zval nval, *nvalp;
 		zend_string *name;
-		HashTable *propers;
+		HashTable *names, *propers;
+
+		names = php_var_serialize_collect_names(ht, count, incomplete_class);
+
+		smart_str_append_unsigned(buf, zend_hash_num_elements(names));
+		smart_str_appendl(buf, ":{", 2);
 
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
+		propers = Z_OBJPROP_P(struc);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
-			if (incomplete_class && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
-				continue;
-			}
-
-			if (Z_TYPE_P(val) != IS_STRING) {
-				php_error_docref(NULL, E_NOTICE,
-						"__sleep should return an array only containing the names of instance-variables to serialize.");
-			}
-			name = zval_get_string(val);
-			propers = Z_OBJPROP_P(struc);
+		ZEND_HASH_FOREACH_STR_KEY(names, name) {
 			if ((d = zend_hash_find(propers, name)) != NULL) {
 				if (Z_TYPE_P(d) == IS_INDIRECT) {
 					d = Z_INDIRECT_P(d);
 					if (Z_TYPE_P(d) == IS_UNDEF) {
-						zend_string_release(name);
 						continue;
 					}
 				}
@@ -769,10 +791,14 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 					php_var_serialize_intern(buf, nvalp, var_hash);
 				}
 			}
-			zend_string_release(name);
 		} ZEND_HASH_FOREACH_END();
+		smart_str_appendc(buf, '}');
+
+		zend_hash_destroy(names);
+		FREE_HASHTABLE(names);
+	} else {
+		smart_str_appendl(buf, "0:{}", 4);
 	}
-	smart_str_appendc(buf, '}');
 }
 /* }}} */
 
@@ -864,7 +890,7 @@ again:
 					return;
 				}
 
-				if (ce && ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
+				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
 					BG(serialize_lock)++;
 					res = call_user_function_ex(CG(function_table), struc, &fname, &retval, 0, 0, 1, NULL);
@@ -929,6 +955,10 @@ again:
 						php_var_serialize_long(buf, index);
 					} else {
 						php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
+					}
+
+					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+						data = Z_REFVAL_P(data);
 					}
 
 					/* we should still add element even if it's not OK,
@@ -1039,7 +1069,7 @@ PHP_FUNCTION(unserialize)
 
 	if (!php_var_unserialize_ex(return_value, &p, p + buf_len, &var_hash, class_hash)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		if(class_hash) {
+		if (class_hash) {
 			zend_hash_destroy(class_hash);
 			FREE_HASHTABLE(class_hash);
 		}
@@ -1050,8 +1080,17 @@ PHP_FUNCTION(unserialize)
 		}
 		RETURN_FALSE;
 	}
+	/* We should keep an reference to return_value to prevent it from being dtor
+	   in case nesting calls to unserialize */
+	var_push_dtor(&var_hash, return_value);
+
+	/* Ensure return value is a value */
+	if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
+	}
+
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	if(class_hash) {
+	if (class_hash) {
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}

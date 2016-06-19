@@ -176,7 +176,7 @@ zend_module_entry json_module_entry = {
 
 #ifdef COMPILE_DL_JSON
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(json)
 #endif
@@ -254,7 +254,7 @@ static PHP_FUNCTION(json_decode)
 		return;
 	}
 
-	JSON_G(error_code) = 0;
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;

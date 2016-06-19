@@ -39,6 +39,7 @@
 #include "zend_variables.h"
 #include "zend_iterators.h"
 #include "zend_stream.h"
+#include "zend_smart_str_public.h"
 
 #ifdef ZEND_SIGNALS
 # include "zend_signal.h"
@@ -77,7 +78,7 @@
 #define ZEND_TSRMLS_CACHE
 #endif
 
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 
 #ifdef HAVE_NORETURN
 # ifdef ZEND_NORETURN_ALIAS
@@ -88,11 +89,6 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 #else
 # define zend_error_noreturn zend_error
 #endif
-
-/* overloaded elements data types */
-#define OE_IS_ARRAY					(1<<0)
-#define OE_IS_OBJECT				(1<<1)
-#define OE_IS_METHOD				(1<<2)
 
 struct _zend_serialize_data;
 struct _zend_unserialize_data;
@@ -248,10 +244,9 @@ ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint lineno);
 ZEND_API char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);
-ZEND_API size_t zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
+ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
-ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent);
 ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 ZEND_API void zend_activate(void);

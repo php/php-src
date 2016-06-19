@@ -38,7 +38,6 @@
 # include "sys/mman.h"
 #endif
 
-#define TMP_DIR "/tmp"
 #define SEM_FILENAME_PREFIX ".ZendSem."
 #define S_H(s) g_shared_alloc_handler->s
 
@@ -55,7 +54,7 @@ zend_smm_shared_globals *smm_shared_globals;
 static MUTEX_T zts_lock;
 #endif
 int lock_file;
-static char lockfile_name[sizeof(TMP_DIR) + sizeof(SEM_FILENAME_PREFIX) + 8];
+static char lockfile_name[MAXPATHLEN];
 #endif
 
 static const zend_shared_memory_handler_entry handler_table[] = {
@@ -75,7 +74,7 @@ static const zend_shared_memory_handler_entry handler_table[] = {
 };
 
 #ifndef ZEND_WIN32
-void zend_shared_alloc_create_lock(void)
+void zend_shared_alloc_create_lock(char *lockfile_path)
 {
 	int val;
 
@@ -83,7 +82,7 @@ void zend_shared_alloc_create_lock(void)
     zts_lock = tsrm_mutex_alloc();
 #endif
 
-	sprintf(lockfile_name, "%s/%sXXXXXX", TMP_DIR, SEM_FILENAME_PREFIX);
+	snprintf(lockfile_name, sizeof(lockfile_name), "%s/%sXXXXXX", lockfile_path, SEM_FILENAME_PREFIX);
 	lock_file = mkstemp(lockfile_name);
 	fchmod(lock_file, 0666);
 
@@ -163,7 +162,11 @@ int zend_shared_alloc_startup(size_t requested_size)
 	smm_shared_globals = &tmp_shared_globals;
 	ZSMMG(shared_free) = requested_size; /* goes to tmp_shared_globals.shared_free */
 
+#ifndef ZEND_WIN32
+	zend_shared_alloc_create_lock(ZCG(accel_directives).lockfile_path);
+#else
 	zend_shared_alloc_create_lock();
+#endif
 
 	if (ZCG(accel_directives).memory_model && ZCG(accel_directives).memory_model[0]) {
 		char *model = ZCG(accel_directives).memory_model;
@@ -495,6 +498,10 @@ void zend_accel_shared_protect(int mode)
 {
 #ifdef HAVE_MPROTECT
 	int i;
+
+	if (!smm_shared_globals) {
+		return;
+	}
 
 	if (mode) {
 		mode = PROT_READ;

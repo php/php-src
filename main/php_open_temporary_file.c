@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_open_temporary_file.h"
 
 #include <errno.h>
 #include <sys/types.h>
@@ -249,7 +250,7 @@ PHPAPI const char* php_get_temporary_directory(void)
  * This function should do its best to return a file pointer to a newly created
  * unique file, on every platform.
  */
-PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, zend_bool open_basedir_check)
+PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, uint32_t flags)
 {
 	int fd;
 	const char *temp_dir;
@@ -265,7 +266,7 @@ PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_strin
 def_tmp:
 		temp_dir = php_get_temporary_directory();
 
-		if (temp_dir && *temp_dir != '\0' && (!open_basedir_check || !php_check_open_basedir(temp_dir))) {
+		if (temp_dir && *temp_dir != '\0' && (!(flags & PHP_TMP_FILE_OPEN_BASEDIR_CHECK) || !php_check_open_basedir(temp_dir))) {
 			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p);
 		} else {
 			return -1;
@@ -276,6 +277,9 @@ def_tmp:
 	fd = php_do_open_temporary_file(dir, pfx, opened_path_p);
 	if (fd == -1) {
 		/* Use default temporary directory. */
+		if (!(flags & PHP_TMP_FILE_SILENT)) {
+			php_error_docref(NULL, E_NOTICE, "file created in the system's temporary directory");
+		}
 		goto def_tmp;
 	}
 	return fd;

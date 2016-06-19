@@ -64,8 +64,8 @@ ZEND_GET_MODULE(pdo_odbc)
 #endif
 
 #ifdef SQL_ATTR_CONNECTION_POOLING
-SQLUINTEGER pdo_odbc_pool_on = SQL_CP_OFF;
-SQLUINTEGER pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
+zend_ulong pdo_odbc_pool_on = SQL_CP_OFF;
+zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
 
 #if defined(DB2CLI_VER) && !defined(PHP_WIN32)

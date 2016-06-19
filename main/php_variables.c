@@ -109,6 +109,25 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 		return;
 	}
 
+	if (var_len == sizeof("this")-1 && EG(current_execute_data)) {
+		zend_execute_data *ex = EG(current_execute_data);
+
+		while (ex) {
+			if (ex->func && ZEND_USER_CODE(ex->func->common.type)) {
+				if (ex->symbol_table == symtable1) {
+					if (memcmp(var, "this", sizeof("this")-1) == 0) {
+						zend_throw_error(NULL, "Cannot re-assign $this");
+						zval_dtor(val);
+						free_alloca(var_orig, use_heap);
+						return;
+					}
+				}
+				break;
+			}
+			ex = ex->prev_execute_data;
+		}
+	}
+
 	/* GLOBALS hijack attempt, reject parameter */
 	if (symtable1 == &EG(symbol_table) &&
 		var_len == sizeof("GLOBALS")-1 &&

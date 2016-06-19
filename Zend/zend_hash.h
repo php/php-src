@@ -154,6 +154,26 @@ ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p);
 ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *key);
 ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char *key, size_t len);
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h);
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h);
+
+#define ZEND_HASH_INDEX_FIND(_ht, _h, _ret, _not_found) do { \
+		if (EXPECTED((_ht)->u.flags & HASH_FLAG_PACKED)) { \
+			if (EXPECTED((_h) < (_ht)->nNumUsed)) { \
+				_ret = &_ht->arData[_h].val; \
+				if (UNEXPECTED(Z_TYPE_P(_ret) == IS_UNDEF)) { \
+					goto _not_found; \
+				} \
+			} else { \
+				goto _not_found; \
+			} \
+		} else { \
+			_ret = _zend_hash_index_find(_ht, _h); \
+			if (UNEXPECTED(_ret == NULL)) { \
+				goto _not_found; \
+			} \
+		} \
+	} while (0)
+
 
 /* Misc */
 ZEND_API zend_bool ZEND_FASTCALL zend_hash_exists(const HashTable *ht, zend_string *key);
@@ -381,6 +401,18 @@ static zend_always_inline int zend_symtable_exists(HashTable *ht, zend_string *k
 		return zend_hash_index_exists(ht, idx);
 	} else {
 		return zend_hash_exists(ht, key);
+	}
+}
+
+
+static zend_always_inline int zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+{
+	zend_ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_exists(ht, idx);
+	} else {
+		return zend_hash_exists_ind(ht, key);
 	}
 }
 

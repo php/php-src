@@ -35,64 +35,11 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
 				CHECK_ZVAL_STRING_REL(str);
-				zend_string_release(str);
-				break;
-			}
-		case IS_ARRAY: {
-				zend_array *arr = (zend_array*)p;
-				ZEND_ASSERT(GC_REFCOUNT(arr) <= 1);
-				zend_array_destroy(arr);
-				break;
-			}
-		case IS_CONSTANT_AST: {
-				zend_ast_ref *ast = (zend_ast_ref*)p;
-
-				zend_ast_destroy_and_free(ast->ast);
-				efree_size(ast, sizeof(zend_ast_ref));
-				break;
-			}
-		case IS_OBJECT: {
-				zend_object *obj = (zend_object*)p;
-
-				OBJ_RELEASE(obj);
-				break;
-			}
-		case IS_RESOURCE: {
-				zend_resource *res = (zend_resource*)p;
-
-				if (--GC_REFCOUNT(res) == 0) {
-					/* destroy resource */
-					zend_list_free(res);
-				}
-				break;
-			}
-		case IS_REFERENCE: {
-				zend_reference *ref = (zend_reference*)p;
-				if (--GC_REFCOUNT(ref) == 0) {
-
-					i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC);
-					efree_size(ref, sizeof(zend_reference));
-				}
-				break;
-			}
-		default:
-			break;
-	}
-}
-
-ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
-{
-	switch (GC_TYPE(p)) {
-		case IS_STRING:
-		case IS_CONSTANT: {
-				zend_string *str = (zend_string*)p;
-				CHECK_ZVAL_STRING_REL(str);
 				zend_string_free(str);
 				break;
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
-
 				zend_array_destroy(arr);
 				break;
 			}
@@ -225,12 +172,8 @@ ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
-		zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
-
-		GC_REFCOUNT(ast) = 1;
-		GC_TYPE_INFO(ast) = IS_CONSTANT_AST;
-		ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
-		Z_AST_P(zvalue) = ast;
+		zend_ast *copy = zend_ast_copy(Z_ASTVAL_P(zvalue));
+		ZVAL_NEW_AST(zvalue, copy);
 	}
 }
 

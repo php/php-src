@@ -18,9 +18,32 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 1. Backward Incompatible Changes
 ========================================
+
 - Core:
   . 'void' can no longer be used as the name of a class, interface, or trait.
     This applies to declarations, class_alias() and use statements.
+  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
+    decoct(), dechex(), integer operators and other conversions now always
+    respect scientific notation in numeric strings.
+    (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
+  . The ASCII 0x7F Delete control character is no longer permitted in unquoted
+    identifiers in source code.
+  . The following functions may no longer be called dynamically using $func(),
+    call_user_func(), array_map() or similar:
+     . extract()
+     . compact()
+     . get_defined_vars()
+     . func_get_args()
+     . func_get_arg()
+     . func_num_args()
+     . parse_str() with one argument
+     . mb_parse_str() with one argument
+     . assert() with a string argument
+    (RFC: https://wiki.php.net/rfc/forbid_dynamic_scope_introspection)
+  . If the error_log is set to syslog, the PHP error levels are mapped to the
+    syslog error levels. This brings finer differentiation in the error logs
+    in contrary to the previous approach where all the errors are loggged with
+    the notice level only.
 
 - JSON:
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
@@ -32,6 +55,24 @@ PHP 7.1 UPGRADE NOTES
 - Core
   . Added void return type, which requires that a function not return a value.
     (RFC: https://wiki.php.net/rfc/void_return_type)
+  . String offset access now supports negative references, which will be
+    counted from the end of the string.
+    (RFC: https://wiki.php.net/rfc/negative-string-offsets)
+  . Added a form of the list() construct where keys can be specified.
+    (RFC: https://wiki.php.net/rfc/list_keys)
+  . Added [] = as alternative construct to list() =.
+    (RFC: https://wiki.php.net/rfc/short_list_syntax)
+  . Number operators taking numeric strings now emit "A non well formed numeric
+    value encountered" E_NOTICEs for leading-numeric strings, and "A
+    non-numeric value encountered" E_WARNINGs for non-numeric strings.
+    This always applies to the +, -, *, /, **, %, << and >> operators, and
+    their assignment counterparts +=, -=, *=, /=, **=, %=, <<= and >>=.
+    For the bitwise operators |, & and ^, and their assignment counterparts
+    |=, &= and ^=, this only applies where only one operand is a string.
+    Note that this never applies to the bitwise NOT operator, ~, which does not
+    handle numeric strings, nor to the increment and decrement operators
+    ++ and --, which have a unique approach to handling numeric strings.
+    (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
 
 ========================================
 3. Changes in SAPI modules
@@ -63,6 +104,15 @@ PHP 7.1 UPGRADE NOTES
   pg_fetch_row().
 - pg_select() accepts 4th optional result type parameter like pg_fetch_row().
 - parse_url() is more restrictive now and supports RFC3986.
+- unpack() accepts an additional optional $offset argument. '@' format code
+  (that specifes an absolute position) is applyed to input data after
+  the $offset argument.
+- strpos(), stripos(), substr_count(), grapheme_strpos(), grapheme_stripos(),
+  grapheme_extract(), iconv_strpos(), mb_strimwidth(), mb_ereg_search_setpos(),
+  mb_strpos() and mb_stripos() now accept negative string offsets.
+- substr_count() and mb_strimwidth() additionally also accept negative length.
+- file_get_contents() accepts a negative seek offset if the stream is seekable.
+- tempnam() throws a notice when failing back to the system temp dir.
 
 ========================================
 6. New Functions
@@ -80,7 +130,7 @@ PHP 7.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 - SQLite3:
-  . Upgraded bundled SQLite lib to 3.9.2
+  . Upgraded bundled SQLite lib to 3.13.0
 
 ========================================
 10. New Global Constants

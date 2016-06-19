@@ -87,7 +87,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		memset(tmp, 1, 32);
 	}
 */
-	str = zend_string_alloc(3 * Z_STRLEN_P(value), 0);
+	str = zend_string_safe_alloc(Z_STRLEN_P(value), 3, 0, 0);
 	p = (unsigned char *) ZSTR_VAL(str);
 	s = (unsigned char *) Z_STRVAL_P(value);
 	e = s + Z_STRLEN_P(value);

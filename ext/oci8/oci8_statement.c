@@ -1149,7 +1149,8 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 				return 1;
 			}
 			convert_to_long(var);
-#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION > 10
+#if defined(OCI_MAJOR_VERSION) && (OCI_MAJOR_VERSION > 10) &&			\
+	(defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)) 
 			bind_data = (ub8 *)&Z_LVAL_P(var);
 			value_sz = sizeof(ub8);
 #else

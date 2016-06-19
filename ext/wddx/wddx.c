@@ -877,6 +877,16 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		!strcmp((char *)name, EL_DATETIME)) {
 		wddx_stack_top(stack, (void**)&ent1);
 
+		if (Z_TYPE(ent1->data) == IS_UNDEF) {
+			if (stack->top > 1) {
+				stack->top--;
+			} else {
+				stack->done = 1;
+			}
+			efree(ent1);
+			return;
+		}
+
 		if (!strcmp((char *)name, EL_BINARY)) {
 			zend_string *new_str = php_base64_decode(
 				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
@@ -944,12 +954,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						/* Clean up class name var entry */
 						zval_ptr_dtor(&ent1->data);
 					} else if (Z_TYPE(ent2->data) == IS_OBJECT) {
-						zend_class_entry *old_scope = EG(scope);
-
-						EG(scope) = Z_OBJCE(ent2->data);
-						add_property_zval(&ent2->data, ent1->varname, &ent1->data);
+						zend_update_property(Z_OBJCE(ent2->data), &ent2->data, ent1->varname, strlen(ent1->varname), &ent1->data);
 						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
-						EG(scope) = old_scope;
 					} else {
 						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
 					}
@@ -964,6 +970,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		}
 	} else if (!strcmp((char *)name, EL_VAR) && stack->varname) {
 		efree(stack->varname);
+		stack->varname = NULL;
 	} else if (!strcmp((char *)name, EL_FIELD)) {
 		st_entry *ent;
 		wddx_stack_top(stack, (void **)&ent);
@@ -1005,11 +1012,11 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				} else if (!strcmp((char *)s, "false")) {
 					Z_LVAL(ent->data) = 0;
 				} else {
-					stack->top--;
 					zval_ptr_dtor(&ent->data);
-					if (ent->varname)
+					if (ent->varname) {
 						efree(ent->varname);
-					efree(ent);
+					}
+					ZVAL_UNDEF(&ent->data);
 				}
 				break;
 

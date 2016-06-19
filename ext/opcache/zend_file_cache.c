@@ -373,7 +373,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 	}
 
 	if (!IS_SERIALIZED(op_array->opcodes)) {
-#if ZEND_USE_ABS_CONST_ADDR || ZEND_USE_ABS_JMP_ADDR
 		zend_op *opline, *end;
 
 		SERIALIZE_PTR(op_array->opcodes);
@@ -381,15 +380,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
 		while (opline < end) {
-# if ZEND_USE_ABS_CONST_ADDR
+#if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
 			}
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
 			}
-# endif
-# if ZEND_USE_ABS_JMP_ADDR
+#endif
+#if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
@@ -404,7 +403,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
@@ -417,12 +415,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					/* relative extended_value don't have to be changed */
 					break;
 			}
-# endif
+#endif
+			zend_serialize_opcode_handler(opline);
 			opline++;
 		}
-#else
-		SERIALIZE_PTR(op_array->opcodes);
-#endif
 
 		if (op_array->arg_info) {
 			zend_arg_info *p, *end;
@@ -981,7 +977,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
@@ -995,7 +990,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					break;
 			}
 # endif
-			ZEND_VM_SET_OPCODE_HANDLER(opline);
+			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}
 

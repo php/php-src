@@ -103,7 +103,7 @@ PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 #ifndef O_BINARY
@@ -304,7 +304,7 @@ static size_t sapi_cli_ub_write(const char *str, size_t str_length) /* {{{ */
 	if (cli_shell_callbacks.cli_shell_ub_write) {
 		size_t ub_wrote;
 		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length);
-		if (ub_wrote > -1) {
+		if (ub_wrote != (size_t) -1) {
 			return ub_wrote;
 		}
 	}
@@ -689,6 +689,14 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #else
 					"NTS "
 #endif
+#ifdef COMPILER
+					COMPILER
+					" "
+#endif
+#ifdef ARCHITECTURE
+					ARCHITECTURE
+					" "
+#endif
 #if ZEND_DEBUG
 					"DEBUG "
 #endif
@@ -1018,16 +1026,15 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				if (exec_begin && zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1) == FAILURE) {
 					exit_status=254;
 				}
-				ZVAL_LONG(&argi, index);
-				zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
 					while (len > 0 && len-- && (input[len]=='\n' || input[len]=='\r')) {
 						input[len] = '\0';
 					}
-					ZVAL_STRINGL(&argn, input, len);
+					ZVAL_STRINGL(&argn, input, len + 1);
 					zend_hash_str_update(&EG(symbol_table), "argn", sizeof("argn")-1, &argn);
-					Z_LVAL(argi) = ++index;
+					ZVAL_LONG(&argi, ++index);
+					zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
 					if (exec_run) {
 						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1) == FAILURE) {
 							exit_status=254;

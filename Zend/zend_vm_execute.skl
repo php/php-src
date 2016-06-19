@@ -9,6 +9,7 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *ex)
 	{%INTERNAL_LABELS%}
 
 	LOAD_OPLINE();
+	ZEND_VM_INTERRUPT_CHECK();
 
 	while (1) {
 		{%ZEND_VM_CONTINUE_LABEL%}
@@ -28,7 +29,7 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 		return;
 	}
 
-	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_CODE,
+	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_CODE | ZEND_CALL_HAS_SYMBOL_TABLE,
 		(zend_function*)op_array, 0, zend_get_called_scope(EG(current_execute_data)), zend_get_this_object(EG(current_execute_data)));
 	if (EG(current_execute_data)) {
 		execute_data->symbol_table = zend_rebuild_symbol_table();
@@ -47,3 +48,38 @@ void {%INITIALIZER_NAME%}(void)
 {
 	{%EXTERNAL_LABELS%}
 }
+
+static HashTable *zend_handlers_table = NULL;
+
+static void init_opcode_serialiser(void)
+{
+	int i;
+	zval tmp;
+
+	zend_handlers_table = malloc(sizeof(HashTable));
+	zend_hash_init_ex(zend_handlers_table, zend_handlers_count, NULL, NULL, 1, 0);
+	zend_hash_real_init(zend_handlers_table, 0);
+	Z_TYPE_INFO(tmp) = IS_LONG;
+	for (i = 0; i < zend_handlers_count; i++) {
+		Z_LVAL(tmp) = i;
+		zend_hash_index_add(zend_handlers_table, (zend_long)(zend_uintptr_t)zend_opcode_handlers[i], &tmp);
+	}
+}
+
+ZEND_API void zend_serialize_opcode_handler(zend_op *op)
+{
+	zval *zv;
+
+	if (!zend_handlers_table) {
+		init_opcode_serialiser();
+	}
+	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(zend_uintptr_t)op->handler);
+	ZEND_ASSERT(zv != NULL);
+	op->handler = (const void *)(zend_uintptr_t)Z_LVAL_P(zv);
+}
+
+ZEND_API void zend_deserialize_opcode_handler(zend_op *op)
+{
+	op->handler = zend_opcode_handlers[(zend_uintptr_t)op->handler];
+}
+

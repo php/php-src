@@ -21,7 +21,6 @@
 #include <stdlib.h>
 
 #include "php.h"
-#if HAVE_CRYPT
 
 #include "fcntl.h"
 #include "php_password.h"
@@ -384,7 +383,6 @@ PHP_FUNCTION(password_hash)
 }
 /* }}} */
 
-#endif /* HAVE_CRYPT */
 /*
  * Local variables:
  * tab-width: 4

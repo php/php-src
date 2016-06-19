@@ -243,11 +243,6 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zval
 
 	intern->std.handlers = &spl_handler_SplObjectStorage;
 
-	if (orig) {
-		spl_SplObjectStorage *other = Z_SPLOBJSTORAGE_P(orig);
-		spl_object_storage_addall(intern, orig, other);
-	}
-
 	while (parent) {
 		if (parent == spl_ce_SplObjectStorage) {
 			if (class_type != spl_ce_SplObjectStorage) {
@@ -260,6 +255,11 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zval
 		}
 
 		parent = parent->parent;
+	}
+
+	if (orig) {
+		spl_SplObjectStorage *other = Z_SPLOBJSTORAGE_P(orig);
+		spl_object_storage_addall(intern, orig, other);
 	}
 
 	return &intern->std;
@@ -858,10 +858,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 
 	/* copy members */
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
-	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref);
+	object_properties_load(&intern->std, Z_ARRVAL_P(pmembers));
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return;

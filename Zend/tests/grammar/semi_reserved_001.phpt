@@ -80,7 +80,6 @@ class Obj
     function __FILE__(){ echo __METHOD__, PHP_EOL; }
     function __DIR__(){ echo __METHOD__, PHP_EOL; }
     function __NAMESPACE__(){ echo __METHOD__, PHP_EOL; }
-    function __halt_compiler(){ echo __METHOD__, PHP_EOL; }
 }
 
 $obj = new Obj;
@@ -160,7 +159,6 @@ $obj->__LINE__();
 $obj->__FILE__();
 $obj->__DIR__();
 $obj->__NAMESPACE__();
-$obj->__halt_compiler();
 
 echo "\nDone\n";
 
@@ -240,6 +238,5 @@ Obj::__LINE__
 Obj::__FILE__
 Obj::__DIR__
 Obj::__NAMESPACE__
-Obj::__halt_compiler
 
 Done

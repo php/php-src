@@ -146,7 +146,7 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	int flags;
 ZEND_END_MODULE_GLOBALS(output)
 
-PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output);
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output)
 
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS

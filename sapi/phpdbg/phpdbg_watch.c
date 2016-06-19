@@ -80,7 +80,7 @@
 # include <sys/mman.h>
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 const phpdbg_command_t phpdbg_watch_commands[] = {
 	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     &phpdbg_prompt_commands[24], "s", 0),
@@ -680,7 +680,9 @@ static int phpdbg_watchpoint_parse_step(char *name, size_t namelen, char *key, s
 }
 
 static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*callback)(phpdbg_watchpoint_t *)) {
-	if (EG(scope) && len >= 5 && !memcmp("$this", input, 5)) {
+	zend_class_entry *scope = zend_get_executed_scope();
+
+	if (scope && len >= 5 && !memcmp("$this", input, 5)) {
 		zend_hash_str_add(EG(current_execute_data)->symbol_table, ZEND_STRL("this"), &EG(current_execute_data)->This);
 	}
 

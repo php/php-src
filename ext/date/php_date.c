@@ -2013,6 +2013,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_immutable.clone_obj = date_object_clone_date;
 	date_object_handlers_immutable.compare_objects = date_object_compare_date;
 	date_object_handlers_immutable.get_properties = date_object_get_properties;
+	date_object_handlers_immutable.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_immutable, 1, date_ce_interface);
 
 	INIT_CLASS_ENTRY(ce_timezone, "DateTimeZone", date_funcs_timezone);
@@ -2170,7 +2171,7 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 
 	props = zend_std_get_properties(object);
 
-	if (!dateobj->time || GC_G(gc_active)) {
+	if (!dateobj->time) {
 		return props;
 	}
 
@@ -4270,6 +4271,10 @@ static zend_string *date_interval_format(char *format, size_t format_len, timeli
 
 	smart_str_0(&string);
 
+	if (string.s == NULL) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
 	return string.s;
 }
 /* }}} */
@@ -4446,6 +4451,10 @@ PHP_METHOD(DatePeriod, getEndDate)
         }
 
         dpobj = Z_PHPPERIOD_P(getThis());
+
+        if (!dpobj->end) {
+                return;
+        }
 
         php_date_instantiate(dpobj->start_ce, return_value);
         dateobj = Z_PHPDATE_P(return_value);
@@ -4843,7 +4852,7 @@ static HashTable *date_object_get_properties_period(zval *object) /* {{{ */
 
 	props = zend_std_get_properties(object);
 
-	if (!period_obj->start || GC_G(gc_active)) {
+	if (!period_obj->start) {
 		return props;
 	}
 

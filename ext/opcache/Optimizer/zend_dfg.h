@@ -26,7 +26,6 @@ typedef struct _zend_dfg {
 	int         vars;
 	uint32_t    size;
 	zend_bitset tmp;
-	zend_bitset gen;
 	zend_bitset def;
 	zend_bitset use;
 	zend_bitset in;

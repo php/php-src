@@ -215,7 +215,7 @@ zend_module_entry gmp_module_entry = {
 
 #ifdef COMPILE_DL_GMP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(gmp)
 #endif
@@ -1144,11 +1144,10 @@ ZEND_FUNCTION(gmp_export)
 	} else {
 		size_t bits_per_word = size * 8;
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
-		size_t out_len = count * size;
 
-		zend_string *out_string = zend_string_alloc(out_len, 0);
+		zend_string *out_string = zend_string_safe_alloc(count, size, 0, 0);
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
-		ZSTR_VAL(out_string)[out_len] = '\0';
+		ZSTR_VAL(out_string)[ZSTR_LEN(out_string)] = '\0';
 
 		RETURN_NEW_STR(out_string);
 	}

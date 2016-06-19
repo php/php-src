@@ -5,10 +5,10 @@ openssl_pkcs7_encrypt() tests
 --FILE--
 <?php
 $infile = dirname(__FILE__) . "/cert.crt";
-$outfile = tempnam("/tmp", "ssl");
+$outfile = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfile === false)
 	die("failed to get a temporary filename!");
-$outfile2 = tempnam("/tmp", "ssl");
+$outfile2 = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfile2 === false)
 	die("failed to get a temporary filename!");
 

@@ -101,6 +101,7 @@ struct _zend_compiler_globals {
 	zend_bool increment_lineno;
 
 	zend_string *doc_comment;
+	uint32_t extra_fn_flags;
 
 	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 
@@ -113,6 +114,8 @@ struct _zend_compiler_globals {
 
 	zend_string *empty_string;
 	zend_string *one_char_string[256];
+	zend_string **known_strings;
+	uint32_t    known_strings_count;
 
 	HashTable interned_strings;
 
@@ -161,7 +164,7 @@ struct _zend_executor_globals {
 	zend_vm_stack  vm_stack;
 
 	struct _zend_execute_data *current_execute_data;
-	zend_class_entry *scope;
+	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
 	zend_long precision;
 
@@ -174,8 +177,10 @@ struct _zend_executor_globals {
 	/* for extended information support */
 	zend_bool no_extensions;
 
-#ifdef ZEND_WIN32
 	zend_bool timed_out;
+	zend_long hard_timeout;
+
+#ifdef ZEND_WIN32
 	OSVERSIONINFOEX windows_version_info;
 #endif
 

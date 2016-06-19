@@ -241,7 +241,7 @@ IC_METHOD(charName) {
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) ||
 	    (convert_cp(&cp, zcp) == FAILURE)) {
-		return;
+		RETURN_NULL();
 	}
 
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, NULL, 0, &error);
@@ -250,7 +250,7 @@ IC_METHOD(charName) {
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1, &error);
 	if (U_FAILURE(error)) {
 		zend_string_free(buffer);
-		INTL_CHECK_STATUS(error, "Failure getting character name");
+		INTL_CHECK_STATUS_OR_NULL(error, "Failure getting character name");
 	}
 	RETURN_NEW_STR(buffer);
 }
@@ -269,11 +269,11 @@ IC_METHOD(charFromName) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
-		return;
+		RETURN_NULL();
 	}
 
 	ret = u_charFromName((UCharNameChoice)nameChoice, name, &error);
-	INTL_CHECK_STATUS(error, NULL);
+	INTL_CHECK_STATUS_OR_NULL(error, NULL);
 	RETURN_LONG(ret);
 }
 /* }}} */
@@ -737,6 +737,7 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 	IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
 	IC_CONSTL("FOLD_CASE_DEFAULT", U_FOLD_CASE_DEFAULT)
 	IC_CONSTL("FOLD_CASE_EXCLUDE_SPECIAL_I", U_FOLD_CASE_EXCLUDE_SPECIAL_I)
+	zend_declare_class_constant_double(ce, "NO_NUMERIC_VALUE", sizeof("NO_NUMERIC_VALUE")-1, U_NO_NUMERIC_VALUE);
 
 	/* All enums used by the uchar APIs.  There are a LOT of them,
 	 * so they're separated out into include files,

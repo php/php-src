@@ -19,6 +19,7 @@
 #ifndef ZEND_SSA_H
 #define ZEND_SSA_H
 
+#include "zend_optimizer.h"
 #include "zend_cfg.h"
 
 typedef struct _zend_ssa_range {
@@ -38,14 +39,23 @@ typedef enum _zend_ssa_negative_lat {
 } zend_ssa_negative_lat;
 
 /* Special kind of SSA Phi function used in eSSA */
-typedef struct _zend_ssa_pi_constraint {
+typedef struct _zend_ssa_range_constraint {
 	zend_ssa_range         range;       /* simple range constraint */
 	int                    min_var;
 	int                    max_var;
 	int                    min_ssa_var; /* ((min_var>0) ? MIN(ssa_var) : 0) + range.min */
-	int                    max_ssa_var; /* ((man_var>0) ? MAX(ssa_var) : 0) + range.man */
+	int                    max_ssa_var; /* ((max_var>0) ? MAX(ssa_var) : 0) + range.max */
 	zend_ssa_negative_lat  negative;
-	uint32_t               type_mask;   /* If -1 this is a range constraint */
+} zend_ssa_range_constraint;
+
+typedef struct _zend_ssa_type_constraint {
+	uint32_t               type_mask;   /* Type mask to intersect with */
+	zend_class_entry      *ce;          /* Class entry for instanceof constraints */
+} zend_ssa_type_constraint;
+
+typedef union _zend_ssa_pi_constraint {
+	zend_ssa_range_constraint range;
+	zend_ssa_type_constraint type;
 } zend_ssa_pi_constraint;
 
 /* SSA Phi - ssa_var = Phi(source0, source1, ...sourceN) */
@@ -57,7 +67,8 @@ struct _zend_ssa_phi {
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
 	int                    block;         /* current BB index */
-	int                    visited;       /* flag to avoid recursive processing */
+	int                    visited : 1;   /* flag to avoid recursive processing */
+	int                    has_range_constraint : 1;
 	zend_ssa_phi         **use_chains;
 	zend_ssa_phi          *sym_use_chain;
 	int                   *sources;       /* Array of SSA IDs that produce this var.
@@ -116,7 +127,7 @@ typedef struct _zend_ssa {
 
 BEGIN_EXTERN_C()
 
-int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
