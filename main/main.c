@@ -386,10 +386,27 @@ static PHP_INI_DISP(display_errors_mode)
 
 /* {{{ PHP_INI_MH
  */
+static PHP_INI_MH(OnUpdateDefaultCharset)
+{
+	if (new_value) {
+		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+#ifdef PHP_WIN32
+		php_win32_cp_do_update(ZSTR_VAL(new_value));
+#endif
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+#ifdef PHP_WIN32
+		php_win32_cp_do_update(ZSTR_VAL(new_value));
+#endif
 	}
 	return SUCCESS;
 }
@@ -523,7 +540,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct, sapi_globals)
+	STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateDefaultCharset,			default_charset,		sapi_globals_struct, sapi_globals)
 	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct, sapi_globals)
 	STD_PHP_INI_ENTRY("internal_encoding",		NULL,			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("input_encoding",			NULL,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
@@ -1240,15 +1257,17 @@ PHPAPI char *php_get_current_user(void)
 		return "";
 	} else {
 #ifdef PHP_WIN32
-		char name[256];
-		DWORD len = sizeof(name)-1;
+		char *name = php_win32_get_username();
+		int len;
 
-		if (!GetUserName(name, &len)) {
+		if (!name) {
 			return "";
 		}
+		len = (int)strlen(name);
 		name[len] = '\0';
 		SG(request_info).current_user_length = len;
 		SG(request_info).current_user = estrndup(name, len);
+		free(name);
 		return SG(request_info).current_user;
 #else
 		struct passwd *pwd;

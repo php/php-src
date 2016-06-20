@@ -39,6 +39,7 @@
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
+#include <shellapi.h>
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -102,8 +103,11 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-#if defined(PHP_WIN32) && defined(ZTS)
+#if defined(PHP_WIN32)
+#if defined(ZTS)
 ZEND_TSRMLS_CACHE_DEFINE()
+#endif
+static DWORD orig_cp = 0;
 #endif
 
 #ifndef O_BINARY
@@ -646,6 +650,17 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 }
 /* }}} */
 
+/*{{{ php_cli_win32_ctrl_handler */
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
+{
+	(void)php_win32_cp_cli_do_restore(orig_cp);
+
+	return FALSE;
+}
+#endif
+/*}}}*/
+
 static int do_cli(int argc, char **argv) /* {{{ */
 {
 	int c;
@@ -1171,9 +1186,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main(int argc, char *argv[])
 #endif
 {
-#ifdef PHP_CLI_WIN32_NO_CONSOLE
+#if defined(PHP_WIN32)
+# ifdef PHP_CLI_WIN32_NO_CONSOLE
 	int argc = __argc;
 	char **argv = __argv;
+# else
+	int num_args;
+	wchar_t **argv_wide;
+	char **argv_save = argv;
+	BOOL using_wide_argv = 0;
+# endif
 #endif
 
 	int c;
@@ -1338,6 +1360,19 @@ exit_loop:
 	}
 	module_started = 1;
 
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+	php_win32_cp_cli_setup();
+	orig_cp = (php_win32_cp_get_orig())->id;
+	/* Ignore the delivered argv and argc, read from W API. This place
+		might be too late though, but this is the earliest place ATW
+		we can access the internal charset information from PHP. */
+	argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
+	PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
+	using_wide_argv = 1;
+
+	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
+#endif
+
 	/* -e option */
 	if (use_extended_info) {
 		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
@@ -1371,6 +1406,15 @@ out:
 	tsrm_shutdown();
 #endif
 
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+	(void)php_win32_cp_cli_restore();
+
+	if (using_wide_argv) {
+		PHP_WIN32_FREE_ARRAY(argv, argc);
+		LocalFree(argv_wide);
+	}
+	argv = argv_save;
+#endif
 	/*
 	 * Do not move this de-initialization. It needs to happen right before
 	 * exiting.
