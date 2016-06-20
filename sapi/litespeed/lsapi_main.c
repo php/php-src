@@ -444,8 +444,6 @@ static sapi_module_struct lsapi_sapi_module =
     sapi_lsapi_log_message,         /* Log message */
 
     NULL,                           /* php.ini path override */
-    NULL,                           /* block interruptions */
-    NULL,                           /* unblock interruptions */
     NULL,                           /* default post reader */
     NULL,                           /* treat data */
     NULL,                           /* executable location */
