@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
+  . Fixed bug #64641 (imagefilledpolygon doesn't draw horizontal line). (cmb)
 
 - OpenSSL:
   . Fixed bug #71915 (openssl_random_pseudo_bytes is not fork-safe).
@@ -57,7 +58,7 @@ PHP                                                                        NEWS
   . Fixed bug #72241 (get_icu_value_internal out-of-bounds read). (Stas)
 
 - Postgres:
-  . Fixed bug #72151 (mysqli_fetch_object changed behaviour). (Anatol) 
+  . Fixed bug #72151 (mysqli_fetch_object changed behaviour). (Anatol)
 
 28 Apr 2016, PHP 5.6.21
 
