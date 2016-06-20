@@ -48,7 +48,19 @@
 #ifdef ZTS
 ZEND_API int zend_signal_globals_id;
 #else
-zend_signal_globals_t zend_signal_globals;
+ZEND_API zend_signal_globals_t zend_signal_globals;
+#endif /* not ZTS */
+
+#define SIGNAL_BEGIN_CRITICAL() \
+	sigset_t oldmask; \
+	zend_sigprocmask(SIG_BLOCK, &global_sigmask, &oldmask);
+#define SIGNAL_END_CRITICAL() \
+	zend_sigprocmask(SIG_SETMASK, &oldmask, NULL);
+
+#ifdef ZTS
+# define zend_sigprocmask(signo, set, oldset) tsrm_sigmask((signo), (set), (oldset))
+#else
+# define zend_sigprocmask(signo, set, oldset) sigprocmask((signo), (set), (oldset))
 #endif
 
 static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context);
@@ -338,7 +350,7 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 }
 /* }}} */
 
-void zend_signal_init() /* {{{ */
+void zend_signal_init(void) /* {{{ */
 {
 	int signo;
 	struct sigaction sa = {{0}};
@@ -360,7 +372,7 @@ void zend_signal_init() /* {{{ */
 
 /* {{{ zend_signal_startup
  * alloc zend signal globals */
-void zend_signal_startup()
+void zend_signal_startup(void)
 {
 
 #ifdef ZTS

@@ -1597,9 +1597,7 @@ int php_request_startup(void)
 		zend_activate();
 		sapi_activate();
 
-#ifdef ZEND_SIGNALS
 		zend_signal_activate();
-#endif
 
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);

@@ -40,10 +40,7 @@
 #include "zend_iterators.h"
 #include "zend_stream.h"
 #include "zend_smart_str_public.h"
-
-#ifdef ZEND_SIGNALS
-# include "zend_signal.h"
-#endif
+#include "zend_signal.h"
 
 #ifndef ZEND_SIGNALS
 /* block/unblock interruptions callbacks might be used by SAPI, and were used
@@ -52,7 +49,7 @@
 # define HANDLE_BLOCK_INTERRUPTIONS()
 # define HANDLE_UNBLOCK_INTERRUPTIONS()
 #else
-# define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()
+# define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPTIONS()
 # define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
 #endif
 

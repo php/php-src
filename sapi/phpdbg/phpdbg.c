@@ -1241,11 +1241,7 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 			}
 			is_handled = phpdbg_watchpoint_segfault_handler(info, context);
 			if (is_handled == FAILURE) {
-#ifdef ZEND_SIGNALS
 				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
-#else
-				sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
-#endif
 			}
 			break;
 	}
@@ -1342,9 +1338,7 @@ int main(int argc, char **argv) /* {{{ */
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-#ifdef ZEND_SIGNALS
 	zend_signal_startup();
-#endif
 
 phpdbg_main:
 	ini_entries = NULL;
