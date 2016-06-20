@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 5.6.24
 
+- Core:
+  . Fix bug #71936 (Segmentation fault destroying HTTP_RAW_POST_DATA).
+    (mike dot laspina at gmail dot com, Remi)
+
 - bz2:
   . Fix bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at 
     stealien dot com).

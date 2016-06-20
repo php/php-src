@@ -70,6 +70,9 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 					(unsigned long) length, INT_MAX);
 				length = INT_MAX;
 			}
+			if (!data) {
+				data = STR_EMPTY_ALLOC();
+			}
 			SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, length);
 
 			sapi_module.sapi_error(E_DEPRECATED,
