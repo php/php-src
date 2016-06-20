@@ -161,7 +161,7 @@ void http_context_headers(php_stream_context* context,
 static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, php_stream_context *context, int *use_proxy)
 {
 	php_stream *stream;
-	zval *proxy_host, *proxy_port, *tmp;
+	zval *proxy_host, *proxy_port, *tmp, ssl_proxy_peer_name;
 	char *host;
 	char *name;
 	char *protocol;
@@ -240,6 +240,13 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	/* SSL & proxy */
 	if (stream && *use_proxy && use_ssl) {
 		smart_str soap_headers = {0};
+
+		/* Set peer_name or name verification will try to use the proxy server name */
+		if (context && (tmp = php_stream_context_get_option(context, "ssl", "peer_name")) != NULL) {
+			ZVAL_STRING(&ssl_proxy_peer_name, phpurl->host);
+			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
+			zval_ptr_dtor(&ssl_proxy_peer_name);
+		}
 
 		smart_str_append_const(&soap_headers, "CONNECT ");
 		smart_str_appends(&soap_headers, phpurl->host);
