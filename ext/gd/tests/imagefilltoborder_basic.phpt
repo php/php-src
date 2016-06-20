@@ -21,13 +21,9 @@ imageellipse( $image, 50, 50, 50, 50, imagecolorallocate( $image, 0, 0, 0 ) );
 // Fill border
 imagefilltoborder( $image, 50, 50, imagecolorallocate( $image, 0, 0, 0 ), imagecolorallocate( $image, 255, 0, 0 ) );
 
-ob_start(); 
-imagepng( $image, null, 9 ); 
-$img = ob_get_contents(); 
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagefilltoborder_basic.png', $image);
 
 ?> 
 --EXPECT-- 
-847ec236f1c4d14c465306c8408550fc
+The images are equal.
