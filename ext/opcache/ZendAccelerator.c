@@ -2773,7 +2773,6 @@ static int accel_startup(zend_extension *extension)
 		zend_shared_alloc_unlock();
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	} else if (!ZCG(accel_directives).file_cache) {
 		accel_startup_ok = 0;

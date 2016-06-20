@@ -117,6 +117,9 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+- Core:
+  . Added sapi_windows_cp_set(), sapi_windows_cp_get(), sapi_windows_cp_is_utf8(),
+    sapi_windows_cp_conv() for codepage handling.
 
 ========================================
 7. New Classes and Interfaces
@@ -153,6 +156,48 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Support for long and UTF-8 path;
+
+    If an application is UTF-8 conform, no further action is required. For
+    applications depending on paths in non UTF-8 encodings for I/O, an explicit
+    INI directive has to be set. The encoding INI settings check relies on the
+    order in the core:
+      - internal_encoding
+      - default_charset
+      - zend.multibyte
+
+    Several functions for codepage handling were itroduced:
+      - sapi_windows_cp_set() to set the default codepage
+      - sapi_windows_cp_get() to retrieve the current codepage
+      - sapi_windows_cp_is_utf8()
+      - sapi_windows_cp_conv() to convert between codepages, using iconv()
+        compatible signature
+    These functions are thread safe.
+
+    The console output codepage is adjusted depending on the encoding used in
+    PHP. Depending on the concrete system OEM codepage, the visible output
+    might or might be not correct. For example, in the default cmd.exe and on
+    a system with the OEM codepage 437, outputs in codepages 1251, 1252, 1253
+    and some others can be shown correctly when using UTF-8. On the same system,
+    chars in codepage like 20932 probably won't be shown correctly. This refers
+    to the particular system rules for codepage, font compatibility and the
+    particular console program used. PHP automatically sets the console codepage
+    according to the encoding rules from php.ini. Using alternative consoles
+    instead of cmd.exe directly might bring better experience in some cases.
+
+    As a result of UTF-8 support in the streams, PHP scripts are not limited
+    to ASCII or ANSI filenames anymore. This is supported out of the box on
+    CLI. For for other SAPI, the documentation for the corresponding server
+    is useful.
+
+    Long paths support is transparent. Paths longer than 260 bytes get
+    automatically prefixed with \\?\. The max path length is limited to
+    2048 bytes. Be aware, that the path segment limit (basename length) still
+    persists.
+
+    The recommended way to file paths, I/O and other related topics is by
+    utilizing UTF-8.
+
   . Support for ftok()
 
 - FCGI
