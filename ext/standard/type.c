@@ -21,6 +21,22 @@
 #include "php.h"
 #include "php_incomplete_class.h"
 
+/* {{{ register_type_constants
+ */
+void register_type_constants(INIT_FUNC_ARGS)
+{
+	REGISTER_STRING_CONSTANT("TYPE_ARRAY",    TYPE_ARRAY,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_BOOL",     TYPE_BOOL,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_CALLABLE", TYPE_CALLABLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_FLOAT",    TYPE_FLOAT,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_INT",      TYPE_INT,      CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_NULL",     TYPE_NULL,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_OBJECT",   TYPE_OBJECT,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_RESOURCE", TYPE_RESOURCE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("TYPE_STRING",   TYPE_STRING,   CONST_CS | CONST_PERSISTENT);
+}
+/* }}} */
+
 /* {{{ proto string gettype(mixed var)
    Returns the type of the variable */
 PHP_FUNCTION(gettype)
@@ -431,6 +447,135 @@ PHP_FUNCTION(is_callable)
 	}
 
 	RETURN_BOOL(retval);
+}
+/* }}} */
+
+#define RETURN_TYPE_NAME(t) { RETURN_STRINGL(t, sizeof(t) - 1) }
+
+/* {{{ proto string typeof(mixed var[, bool extended])
+ * Get the type of a variable with (optional) extended information. */
+PHP_FUNCTION(typeof)
+{
+	zval *var;
+	zend_bool extended = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &var, &extended) == FAILURE) {
+		return;
+	}
+
+	switch (Z_TYPE_P(var)) {
+		case IS_ARRAY:
+			if (extended && zend_is_callable(var, IS_CALLABLE_CHECK_SILENT, NULL)) {
+				RETURN_TYPE_NAME(TYPE_CALLABLE " " TYPE_ARRAY);
+			}
+			RETURN_TYPE_NAME(TYPE_ARRAY);
+
+		case IS_FALSE:
+		case IS_TRUE:
+			if (extended) {
+				if (Z_TYPE_P(var) == IS_FALSE) {
+					RETURN_TYPE_NAME(TYPE_BOOL " " TYPE_FALSE);
+				}
+
+				if (Z_TYPE_P(var) == IS_TRUE) {
+					RETURN_TYPE_NAME(TYPE_BOOL " " TYPE_TRUE);
+				}
+			}
+			RETURN_TYPE_NAME(TYPE_BOOL);
+
+		/* case IS_FLOAT: */
+		case IS_DOUBLE:
+			if (extended) {
+				if (zend_isinf(Z_DVAL_P(var))) {
+					RETURN_TYPE_NAME("infinite " TYPE_FLOAT);
+				}
+
+				if (zend_isnan(Z_DVAL_P(var))) {
+					RETURN_TYPE_NAME("invalid " TYPE_FLOAT);
+				}
+
+				if (Z_DVAL_P(var) > 0.0) {
+					RETURN_TYPE_NAME("positive " TYPE_FLOAT);
+				}
+
+				if (Z_DVAL_P(var) < -0.0) {
+					RETURN_TYPE_NAME("negative " TYPE_FLOAT);
+				}
+
+				RETURN_TYPE_NAME("zero " TYPE_FLOAT);
+			}
+			RETURN_TYPE_NAME(TYPE_FLOAT);
+
+		/* case IS_INT: */
+		case IS_LONG:
+			if (extended) {
+				if (Z_LVAL_P(var) > 0) {
+					RETURN_TYPE_NAME("positive " TYPE_INT);
+				}
+
+				if (Z_LVAL_P(var) < -0) {
+					RETURN_TYPE_NAME("negative " TYPE_INT);
+				}
+
+				RETURN_TYPE_NAME("zero " TYPE_INT);
+			}
+			RETURN_TYPE_NAME(TYPE_INT);
+
+		case IS_NULL:
+			RETURN_TYPE_NAME(TYPE_NULL);
+
+		case IS_OBJECT:
+			if (extended) {
+				const size_t prefix_len = sizeof(TYPE_OBJECT " of class ") - 1;
+				const size_t type_len = prefix_len + ZSTR_LEN(Z_OBJCE_P(var)->name);
+
+				char *type = emalloc(type_len);
+				memcpy(type, TYPE_OBJECT " of class ", prefix_len);
+				memcpy(type + prefix_len, ZSTR_VAL(Z_OBJCE_P(var)->name), ZSTR_LEN(Z_OBJCE_P(var)->name));
+
+				RETVAL_STRINGL(type, type_len);
+				efree(type);
+				return;
+			}
+			RETURN_TYPE_NAME(TYPE_OBJECT);
+
+		case IS_RESOURCE:
+			if (extended) {
+				const char *rsrc_type = zend_rsrc_list_get_rsrc_type(Z_RES_P(var));
+
+				if (rsrc_type) {
+					const size_t prefix_len = sizeof(TYPE_RESOURCE " of type ") - 1;
+					const size_t rsrc_type_len = strlen(rsrc_type);
+					const size_t type_len = prefix_len + rsrc_type_len;
+
+					char *type = emalloc(type_len);
+					memcpy(type, TYPE_RESOURCE " of type ", prefix_len);
+					memcpy(type + prefix_len, rsrc_type, rsrc_type_len);
+
+					RETVAL_STRINGL(type, type_len);
+					efree(type);
+					return;
+				}
+
+				RETURN_TYPE_NAME("closed " TYPE_RESOURCE);
+			}
+			RETURN_TYPE_NAME(TYPE_RESOURCE);
+
+		case IS_STRING:
+			if (extended) {
+				if (is_numeric_string(Z_STRVAL_P(var), Z_STRLEN_P(var), NULL, NULL, 0)) {
+					RETURN_TYPE_NAME("numeric " TYPE_STRING);
+				}
+
+				if (zend_is_callable(var, IS_CALLABLE_CHECK_SILENT, NULL)) {
+					RETURN_TYPE_NAME("callable " TYPE_STRING);
+				}
+			}
+			RETURN_TYPE_NAME(TYPE_STRING);
+	}
+
+	/* (should be) unreachable in userland */
+	RETURN_TYPE_NAME("unknown");
 }
 /* }}} */
 

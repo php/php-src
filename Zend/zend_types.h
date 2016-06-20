@@ -299,6 +299,19 @@ struct _zend_ast_ref {
 	zend_ast         *ast;
 };
 
+/* primitive data type names */
+#define TYPE_ARRAY    "array"
+#define TYPE_BOOL     "bool"
+#define TYPE_CALLABLE "callable"
+#define TYPE_FALSE    "false"
+#define TYPE_FLOAT    "float"
+#define TYPE_INT      "int"
+#define TYPE_NULL     "null"
+#define TYPE_OBJECT   "object"
+#define TYPE_RESOURCE "resource"
+#define TYPE_STRING   "string"
+#define TYPE_TRUE     "true"
+
 /* regular data types */
 #define IS_UNDEF					0
 #define IS_NULL						1
