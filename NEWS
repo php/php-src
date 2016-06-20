@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     finishes). (Nikita)
   . Fixed bug #69489 (tempnam() should raise notice if falling back to temp dir).
     (Laruence, Anatol)
+  . Fixed UTF-8 and long path support on Windows. (Anatol)
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
