@@ -42,16 +42,8 @@
 #include "zend_smart_str_public.h"
 #include "zend_signal.h"
 
-#ifndef ZEND_SIGNALS
-/* block/unblock interruptions callbacks might be used by SAPI, and were used
- * by mod_php for Apache 1, but now they are not usefull anymore.
- */
-# define HANDLE_BLOCK_INTERRUPTIONS()
-# define HANDLE_UNBLOCK_INTERRUPTIONS()
-#else
-# define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPTIONS()
-# define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
-#endif
+#define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPTIONS()
+#define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
 
 #define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value
