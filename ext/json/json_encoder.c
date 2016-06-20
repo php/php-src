@@ -169,7 +169,7 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 				php_json_encode(buf, data, options);
 			} else if (r == PHP_JSON_OUTPUT_OBJECT) {
 				if (key) {
-					if (ZSTR_VAL(key)[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
+					if (ZSTR_VAL(key)[0] == '\0' && ZSTR_LEN(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
 						if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
 							ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);

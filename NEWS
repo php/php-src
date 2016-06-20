@@ -12,11 +12,15 @@ PHP                                                                        NEWS
     finishes). (Nikita)
   . Fixed bug #69489 (tempnam() should raise notice if falling back to temp dir).
     (Laruence, Anatol)
+  . Fixed UTF-8 and long path support on Windows. (Anatol)
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
   . Fixed bug #64641 (imagefilledpolygon doesn't draw horizontal line). (cmb)
+
+- JSON
+  . Implemented FR #46600 ("_empty_" key in objects). (Jakub Zelenka)
 
 - Mbstring:
   . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
