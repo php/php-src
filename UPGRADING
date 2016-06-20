@@ -46,6 +46,8 @@ PHP 7.1 UPGRADE NOTES
     the notice level only.
 
 - JSON:
+  . An empty key is decoded as an empty property name instead of using _empty_
+    property name when decoding object to stdClass.
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
     U+2029 are escaped.
 
