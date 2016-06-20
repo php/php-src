@@ -248,6 +248,9 @@ struct _sapi_module_struct {
 
 	char *php_ini_path_override;
 
+	void (*block_interruptions)(void);
+	void (*unblock_interruptions)(void);
+
 	void (*default_post_reader)(void);
 	void (*treat_data)(int arg, char *str, zval *destArray);
 	char *executable_location;
