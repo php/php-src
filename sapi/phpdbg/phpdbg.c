@@ -1657,14 +1657,6 @@ phpdbg_main:
 		} zend_end_try();
 #endif
 
-#if defined(ZEND_SIGNALS) && !defined(_WIN32)
-		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
-		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
-#elif !defined(_WIN32)
-		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
-		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
-#endif
-
 		PHPDBG_G(sapi_name_ptr) = sapi_name;
 
 		if (exec) { /* set execution context */
@@ -1700,6 +1692,14 @@ phpdbg_main:
 			PUTS("Could not startup");
 			return 1;
 		}
+
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
+		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
+		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
+#elif !defined(_WIN32)
+		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+#endif
 
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
