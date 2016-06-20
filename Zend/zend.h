@@ -49,8 +49,8 @@
 /* block/unblock interruptions callbacks might be used by SAPI, and were used
  * by mod_php for Apache 1, but now they are not usefull anymore.
  */
-# define HANDLE_BLOCK_INTERRUPTIONS()		/*if (zend_block_interruptions) { zend_block_interruptions(); }*/
-# define HANDLE_UNBLOCK_INTERRUPTIONS()		/*if (zend_unblock_interruptions) { zend_unblock_interruptions(); }*/
+# define HANDLE_BLOCK_INTERRUPTIONS()
+# define HANDLE_UNBLOCK_INTERRUPTIONS()
 #else
 # define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()
 # define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
@@ -194,8 +194,6 @@ typedef struct _zend_utility_functions {
 	size_t (*write_function)(const char *str, size_t str_length);
 	FILE *(*fopen_function)(const char *filename, zend_string **opened_path);
 	void (*message_handler)(zend_long message, const void *data);
-	void (*block_interruptions)(void);
-	void (*unblock_interruptions)(void);
 	zval *(*get_configuration_directive)(zend_string *name);
 	void (*ticks_function)(int ticks);
 	void (*on_timeout)(int seconds);
@@ -270,8 +268,6 @@ BEGIN_EXTERN_C()
 extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
-extern ZEND_API void (*zend_block_interruptions)(void);
-extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
