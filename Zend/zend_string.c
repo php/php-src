@@ -161,7 +161,6 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 			void *old_data = HT_GET_DATA_ADDR(&CG(interned_strings));
 			Bucket *old_buckets = CG(interned_strings).arData;
 
-			HANDLE_BLOCK_INTERRUPTIONS();
 			CG(interned_strings).nTableSize += CG(interned_strings).nTableSize;
 			CG(interned_strings).nTableMask = -CG(interned_strings).nTableSize;
 			new_data = malloc(HT_SIZE(&CG(interned_strings)));
@@ -175,11 +174,8 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 				CG(interned_strings).nTableSize = CG(interned_strings).nTableSize >> 1;
 				CG(interned_strings).nTableMask = -CG(interned_strings).nTableSize;
 			}
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 		}
 	}
-
-	HANDLE_BLOCK_INTERRUPTIONS();
 
 	idx = CG(interned_strings).nNumUsed++;
 	CG(interned_strings).nNumOfElements++;
@@ -191,8 +187,6 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	nIndex = h | CG(interned_strings).nTableMask;
 	Z_NEXT(p->val) = HT_HASH(&CG(interned_strings), nIndex);
 	HT_HASH(&CG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);
-
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	return str;
 #else
