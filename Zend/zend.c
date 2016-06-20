@@ -759,6 +759,11 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 	zend_ini_startup();
 
+#ifdef ZEND_WIN32
+	/* Uses INI settings, so needs to be run after it. */
+	php_win32_cp_setup();
+#endif
+
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 #endif

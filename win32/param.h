@@ -9,7 +9,8 @@
  *                                                                           *
  *****************************************************************************/
 #ifndef MAXPATHLEN
-#define MAXPATHLEN     _MAX_PATH
+#include "win32/ioutil.h"
+#define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 #endif
 #define MAXHOSTNAMELEN 64
 #define howmany(x,y)   (((x)+((y)-1))/(y))
