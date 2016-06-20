@@ -2548,6 +2548,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 
 #if defined(HAVE_SIGNAL_H) && defined(SIGINT)
 	signal(SIGINT, php_cli_server_sigint_handler);
+	zend_signal_init();
 #endif
 	php_cli_server_do_event_loop(&server);
 	php_cli_server_dtor(&server);
