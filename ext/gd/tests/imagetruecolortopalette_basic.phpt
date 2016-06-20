@@ -28,4 +28,4 @@ echo md5(base64_encode($img));
 ?>
 --EXPECT--
 bool(true)
-0843f63ab2f9fddedd69b0b421686bc5
+1d41787ff70aa0c7eea5ee9304afa36b
