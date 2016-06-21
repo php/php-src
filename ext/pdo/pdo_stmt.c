@@ -2159,10 +2159,36 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out TSRMLS_CC, "Key: Name: [%d] %.*s\n", len, len, str);
 			}
 
-			php_stream_printf(out TSRMLS_CC, "paramno=%ld\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+			php_stream_printf(out TSRMLS_CC, "paramno=%ld\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\nis_input_output=%d\n",
 				param->paramno, param->namelen, param->namelen, param->name ? param->name : "",
 				param->is_param,
-				param->param_type);
+				PDO_PARAM_TYPE(param->param_type),
+				(param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT);
+
+			/*
+			 * Check the type of the parameter and print out the value.
+			 *
+			 * Most are self explanatory with the following exceptions:
+			 * PDO::PARAM_INT evaluates to a long
+			 * PDO::PARAM_LOB evaluates to a string
+			 */
+			switch (Z_TYPE_P(param->parameter)) {
+				case IS_BOOL:
+					php_stream_printf(out TSRMLS_CC, "param_value=%s\n", Z_BVAL_P(param->parameter)?"true":"false");
+					break;
+				case IS_NULL:
+					php_stream_printf(out TSRMLS_CC, "param_value=null\n");
+					break;
+				case IS_LONG:
+					php_stream_printf(out TSRMLS_CC, "param_value=%ld\n", Z_LVAL_P(param->parameter));
+					break;
+				case IS_STRING:
+					php_stream_printf(out TSRMLS_CC, "param_value=%s\n", Z_STRVAL_P(param->parameter));
+					break;
+				default:
+					php_stream_printf(out TSRMLS_CC, "param_value=unknown\n");
+					break;
+			}
 
 			zend_hash_move_forward_ex(stmt->bound_params, &pos);
 		}
