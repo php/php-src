@@ -1095,6 +1095,10 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 
 			case ST_BOOLEAN:
 				if(!ent->data) {
+					if (ent->varname) {
+						efree(ent->varname);
+						ent->varname = NULL;
+					}
 					break;
 				}
 				if (!strcmp(s, "true")) {
