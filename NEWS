@@ -3,19 +3,34 @@ PHP                                                                        NEWS
 09 Jun 2016 PHP 7.0.8RC1
 
 - Core:
-  . Fixed bug #72221 (segfault, past-the-end access). (Lauri Kenttä)
   . Fixed bug #72218 (If host name cannot be resolved then PHP 7 crashes). 
     (Esminis at esminis dot lt)
+  . Fixed bug #72221 (segfault, past-the-end access). (Lauri Kenttä)
+  . Fixed bug #72268 (Integer Overflow in nl2br()). (Stas)
+  . Fixed bug #72275 (Integer Overflow in json_encode()/json_decode()/
+    json_utf8_to_utf16()). (Stas)
+  . Fixed bug #72400 (Integer Overflow in addcslashes/addslashes). (Stas)
+  . Fixed bug #72403 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
 - FPM:
   . Fixed bug #72308 (fastcgi_finish_request and logging environment
     variables). (Laruence)
 
 - GD:
+  . Fixed bug #72298 (pass2_no_dither out-of-bounds access). (Stas)
   . Fixed bug #72337 (invalid dimensions can lead to crash) (Pierre)
+  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in 
+    heap overflow). (Pierre)
+  . Fixed bug #72407 (NULL Pointer Dereference at _gdScaleVert). (Stas)
 
 - Intl:
   . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
+
+- mbstring:
+  . Fixed bug #72402 (_php_mb_regex_ereg_replace_exec - double free). (Stas)
+
+- mcrypt:
+   . Fixed bug #72455 (Heap Overflow due to integer overflows). (Stas)
 
 - PCRE:
   . Fixed bug #72143 (preg_replace uses int instead of size_t). (Joe)
@@ -33,14 +48,19 @@ PHP                                                                        NEWS
   . Fixed bug #72195 (pg_pconnect/pg_connect cause use-after-free). (Laruence)
   . Fixed bug #72197 (pg_lo_create arbitrary read). (Anatol)
 
+- SPL:
+  . Fixed bug #72262 (int/size_t confusion in SplFileObject::fread). (Stas)
+  . Fixed bug #72433 (Use After Free Vulnerability in PHP's GC algorithm and
+    unserialize). (Dmitry)
+
 - Standard:
-  . Fixed bug #72300 (ignore_user_abort(false) has no effect). (Laruence)
-  . Fixed bug #72229 (Wrong reference when serialize/unserialize an object).
-    (Laruence)
-  . Fixed bug #72193 (dns_get_record returns array containing elements of
-    type 'unknown'). (Laruence)
   . Fixed bug #72017 (range() with float step produces unexpected result).
     (Thomas Punt)
+  . Fixed bug #72193 (dns_get_record returns array containing elements of
+    type 'unknown'). (Laruence)
+  . Fixed bug #72229 (Wrong reference when serialize/unserialize an object).
+    (Laruence)
+  . Fixed bug #72300 (ignore_user_abort(false) has no effect). (Laruence)
 
 - XML:
   . Fixed bug #72206 (xml_parser_create/xml_parser_free leaks mem). (Joe)
@@ -49,9 +69,14 @@ PHP                                                                        NEWS
   . Fixed bug #72155 (use-after-free caused by get_zval_xmlrpc_type).
     (Joe, Laruence)
 
+- WDDX:
+  . Fixed bug #72340 (Double Free Courruption in wddx_deserialize). (Stas)
+
 - Zip:
   . Fixed ug #72258 (ZipArchive converts filenames to unrecoverable form).
     (Anatol)
+  . Fixed bug #72434 (ZipArchive class Use After Free Vulnerability in PHP's GC
+    algorithm and unserialize). (Dmitry)
 
 26 May 2016 PHP 7.0.7
 
