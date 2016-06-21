@@ -172,10 +172,11 @@ ZEND_API void zend_signal_handler_unblock(void)
 static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
-	struct sigaction sa = {{0}};
+	struct sigaction sa;
 	sigset_t sigset;
 	zend_signal_entry_t p_sig = SIGG(handlers)[signo-1];
 
+	memset(&sa, 0, sizeof(sa));
 	if (p_sig.handler == SIG_DFL) { /* raise default handler */
 		if (sigaction(signo, NULL, &sa) == 0) {
 			sa.sa_handler = SIG_DFL;
@@ -209,9 +210,10 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
  *  Register a signal handler that will be deferred in critical sections */
 ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact)
 {
-	struct sigaction sa = {{0}};
+	struct sigaction sa;
 	sigset_t sigset;
 
+	memset(&sa, 0, sizeof(sa));
 	if (oldact != NULL) {
 		oldact->sa_flags   = SIGG(handlers)[signo-1].flags;
 		oldact->sa_handler = (void *) SIGG(handlers)[signo-1].handler;
@@ -247,8 +249,9 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
  *  Register a signal handler that will be deferred in critical sections */
 ZEND_API int zend_signal(int signo, void (*handler)(int))
 {
-	struct sigaction sa = {{0}};
+	struct sigaction sa;
 
+	memset(&sa, 0, sizeof(sa));
 	sa.sa_flags   = 0;
 	sa.sa_handler = handler;
 	sa.sa_mask    = global_sigmask;
@@ -263,8 +266,9 @@ ZEND_API int zend_signal(int signo, void (*handler)(int))
  */
 static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
 {
-	struct sigaction sa = {{0}};
+	struct sigaction sa;
 
+	memset(&sa, 0, sizeof(sa));
 	if (sigaction(signo, NULL, &sa) == 0) {
 		if ((sa.sa_flags & SA_SIGINFO) && sa.sa_sigaction == handler) {
 			return FAILURE;
@@ -294,7 +298,7 @@ static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void
  *  Install our signal handlers, per request */
 void zend_signal_activate(void)
 {
-	int x;
+	size_t x;
 
 	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
@@ -312,8 +316,10 @@ void zend_signal_deactivate(void)
 {
 
 	if (SIGG(check)) {
-		int x;
-		struct sigaction sa = {{0}};
+		size_t x;
+		struct sigaction sa;
+
+		memset(&sa, 0, sizeof(sa));
 		if (SIGG(depth) != 0) {
 			zend_error(E_CORE_WARNING, "zend_signal: shutdown with non-zero blocking depth (%d)", SIGG(depth));
 		}
@@ -353,8 +359,9 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 void zend_signal_init(void) /* {{{ */
 {
 	int signo;
-	struct sigaction sa = {{0}};
+	struct sigaction sa;
 
+	memset(&sa, 0, sizeof(sa));
 	/* Save previously registered signal handlers into orig_handlers */
 	memset(&global_orig_handlers, 0, sizeof(global_orig_handlers));
 	for (signo = 1; signo < NSIG; ++signo) {

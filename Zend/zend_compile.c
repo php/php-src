@@ -665,7 +665,7 @@ static void zend_end_live_range(zend_op_array *op_array, uint32_t offset, uint32
 {
 	zend_live_range *range = op_array->live_range + offset;
 
-	if (range->start == end && offset == op_array->last_live_range - 1) {
+	if (range->start == end && offset == (uint32_t)op_array->last_live_range - 1) {
 		op_array->last_live_range--;
 	} else {
 		range->end = end;
