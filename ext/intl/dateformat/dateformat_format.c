@@ -18,10 +18,11 @@
 #include "config.h"
 #endif
 
+#include "../php_intl.h"
+
 #include <unicode/ustring.h>
 #include <unicode/ucal.h>
 
-#include "../php_intl.h"
 #include "../intl_convert.h"
 #include "../common/common_date.h"
 #include "dateformat.h"

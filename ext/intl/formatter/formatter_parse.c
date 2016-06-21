@@ -18,10 +18,11 @@
 #include "config.h"
 #endif
 
+#include "php_intl.h"
+
 #include <unicode/ustring.h>
 #include <locale.h>
 
-#include "php_intl.h"
 #include "formatter_class.h"
 #include "formatter_format.h"
 #include "formatter_parse.h"
