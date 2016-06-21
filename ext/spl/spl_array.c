@@ -837,7 +837,7 @@ static HashTable *spl_array_get_gc(zval *object, zval ***gc_data, int *gc_data_c
 
 	*gc_data = &intern->array;
 	*gc_data_count = 1;
-	return zend_std_get_properties(object);
+	return zend_std_get_properties(object TSRMLS_CC);
 }
 /* }}} */
 
