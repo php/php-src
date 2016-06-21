@@ -1271,7 +1271,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 				return;
 			}
 #endif /* GLOB_NOMATCH */
-			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%d) from %s at line %d.", inc, i, filename, ini_lineno);
+			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%zd) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;
 			efree(filename);
 			return;

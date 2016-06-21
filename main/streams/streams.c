@@ -1753,7 +1753,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
 	php_stream_wrapper *wrapper = NULL;
 	const char *p, *protocol = NULL;
-	int n = 0;
+	size_t n = 0;
 
 	if (path_for_open) {
 		*path_for_open = (char*)path;

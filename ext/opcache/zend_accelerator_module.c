@@ -80,13 +80,13 @@ static zend_function_entry accel_functions[] = {
 	/* Private functions */
 	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
-	{ NULL, NULL, NULL, 0, 0 }
+	ZEND_FE_END
 };
 
 static int validate_api_restriction(void)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
-		int len = strlen(ZCG(accel_directives).restrict_api);
+		size_t len = strlen(ZCG(accel_directives).restrict_api);
 
 		if (!SG(request_info).path_translated ||
 		    strlen(SG(request_info).path_translated) < len ||

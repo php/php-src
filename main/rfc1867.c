@@ -620,7 +620,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes
 	char *bound;
 
 	/* fill buffer if needed */
-	if (bytes > self->bytes_in_buffer) {
+	if (bytes > (size_t)self->bytes_in_buffer) {
 		fill_buffer(self);
 	}
 
@@ -1058,7 +1058,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					wlen = write(fd, buff, blen);
 #endif
 
-					if (wlen == -1) {
+					if (wlen == (size_t)-1) {
 						/* write failed */
 #if DEBUG_FILE_UPLOAD
 						sapi_module.sapi_error(E_NOTICE, "write() failed - %s", strerror(errno));

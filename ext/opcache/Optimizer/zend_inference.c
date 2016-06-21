@@ -85,7 +85,7 @@
 			if (ssa->ops[line-1].result_def >= 0) { \
 				MACRO(ssa->ops[line-1].result_def); \
 			} \
-		} else if (line+1 < op_array->last && \
+		} else if ((uint32_t)line+1 < op_array->last && \
 		           op_array->opcodes[line+1].opcode == ZEND_OP_DATA) { \
 			if (ssa->ops[line+1].op1_def >= 0) { \
 				MACRO(ssa->ops[line+1].op1_def); \
@@ -3437,8 +3437,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	zend_ssa_var *ssa_vars = ssa->vars;
 	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
-	uint i;
-	int j;
+	int i, j;
 	uint32_t tmp;
 
 	while (!zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
@@ -3674,8 +3673,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 	ALLOCA_FLAG(use_heap);
 	zend_bitset visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
 	zend_bitset worklist = visited + bitset_len;
-	int i;
-	uint32_t v;
+	int i, v;
 	zend_op *opline;
 	zend_bool narrowed = 0;
 

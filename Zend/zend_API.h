@@ -567,7 +567,7 @@ END_EXTERN_C()
 #endif
 
 #define CHECK_ZVAL_NULL_PATH(p) (Z_STRLEN_P(p) != strlen(Z_STRVAL_P(p)))
-#define CHECK_NULL_PATH(p, l) (strlen(p) != l)
+#define CHECK_NULL_PATH(p, l) (strlen(p) != (size_t)(l))
 
 #define ZVAL_STRINGL(z, s, l) do {				\
 		ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\

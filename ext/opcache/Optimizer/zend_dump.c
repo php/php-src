@@ -887,10 +887,12 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	fprintf(stderr, "    ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
 
 	if (func_info && func_info->num_args > 0) {
-		for (i = 0; i < MIN(op_array->num_args, func_info->num_args ); i++) {
-			fprintf(stderr, "    ; arg %d ", i);
-			zend_dump_type_info(func_info->arg_info[i].info.type, func_info->arg_info[i].info.ce, func_info->arg_info[i].info.is_instanceof, dump_flags);
-			zend_dump_range(&func_info->arg_info[i].info.range);
+		uint32_t j;
+
+		for (j = 0; j < MIN(op_array->num_args, func_info->num_args ); j++) {
+			fprintf(stderr, "    ; arg %d ", j);
+			zend_dump_type_info(func_info->arg_info[j].info.type, func_info->arg_info[j].info.ce, func_info->arg_info[j].info.is_instanceof, dump_flags);
+			zend_dump_range(&func_info->arg_info[j].info.range);
 			fprintf(stderr, "\n");
 		}
 	}

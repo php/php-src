@@ -283,7 +283,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_RECV_INIT:
 					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 0, 0, 1);
-					if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != -1) {
+					if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != (uint32_t)-1) {
 						Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = cache_size;
 						cache_size += sizeof(void *);
 					}
@@ -297,7 +297,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:
 				case ZEND_VERIFY_RETURN_TYPE:
-					if (opline->op2.num != -1) {
+					if (opline->op2.num != (uint32_t)-1) {
 						opline->op2.num = cache_size;
 						cache_size += sizeof(void *);
 					}

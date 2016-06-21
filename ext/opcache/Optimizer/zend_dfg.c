@@ -26,7 +26,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
-	uint32_t k, var_num;
+	int k;
+	uint32_t var_num;
 	int j;
 
 	set_size = dfg->size;

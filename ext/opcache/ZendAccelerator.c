@@ -1427,7 +1427,7 @@ static void zend_accel_init_auto_globals(void)
 	}
 }
 
-static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, char *key, unsigned int key_length, zend_op_array **op_array_p)
+static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, char *key, zend_op_array **op_array_p)
 {
 	zend_persistent_script *new_persistent_script;
 	zend_op_array *orig_active_op_array;
@@ -1440,12 +1440,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
     /* Try to open file */
     if (file_handle->type == ZEND_HANDLE_FILENAME) {
-        if (accelerator_orig_zend_stream_open_function(file_handle->filename, file_handle) == SUCCESS) {
-        	/* key may be changed by zend_stream_open_function() */
-        	if (key == ZCG(key)) {
-        		key_length = ZCG(key_len);
-        	}
-        } else {
+        if (accelerator_orig_zend_stream_open_function(file_handle->filename, file_handle) != SUCCESS) {
 			*op_array_p = NULL;
 			if (type == ZEND_REQUIRE) {
 				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
@@ -1484,7 +1479,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 		/* check if file is too new (may be it's not written completely yet) */
 		if (ZCG(accel_directives).file_update_protection &&
-		    (ZCG(request_time) - ZCG(accel_directives).file_update_protection < timestamp)) {
+		    ((accel_time_t)(ZCG(request_time) - ZCG(accel_directives).file_update_protection) < timestamp)) {
 			*op_array_p = accelerator_orig_compile_file(file_handle, type);
 			return NULL;
 		}
@@ -1637,7 +1632,7 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 		return zend_accel_load_script(persistent_script, 1);
 	}
 
-	persistent_script = opcache_compile_file(file_handle, type, NULL, 0, &op_array);
+	persistent_script = opcache_compile_file(file_handle, type, NULL, &op_array);
 
 	if (persistent_script) {
 		from_memory = 0;
@@ -1834,7 +1829,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
          * If it isn't compile_and_cache_file() changes the flag to 0
          */
        	from_shared_memory = 0;
-		persistent_script = opcache_compile_file(file_handle, type, key, key ? key_length : 0, &op_array);
+		persistent_script = opcache_compile_file(file_handle, type, key, &op_array);
 		if (persistent_script) {
 			persistent_script = cache_script_in_shared_memory(persistent_script, key, key ? key_length : 0, &from_shared_memory);
 		}
@@ -2060,7 +2055,7 @@ static void accel_activate(void)
 	ZCG(include_path_check) = 1;
 
 	/* check if ZCG(function_table) wasn't somehow polluted on the way */
-	if (ZCG(internal_functions_count) != zend_hash_num_elements(&ZCG(function_table))) {
+	if (ZCG(internal_functions_count) != (zend_long)zend_hash_num_elements(&ZCG(function_table))) {
 		zend_accel_error(ACCEL_LOG_WARNING, "Internal functions count changed - was %d, now %d", ZCG(internal_functions_count), zend_hash_num_elements(&ZCG(function_table)));
 	}
 

@@ -112,7 +112,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 						b->start++;
 						b->len--;
 					}
-					if (b->len == 0 && b->successors[0] == block_map[live_range->end]) {
+					if (b->len == 0 && (uint32_t)b->successors[0] == block_map[live_range->end]) {
 						/* mark as removed (empty live range) */
 						live_range->var = (uint32_t)-1;
 						continue;

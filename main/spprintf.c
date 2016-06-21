@@ -182,7 +182,7 @@
  */
 #define FIX_PRECISION(adjust, precision, s, s_len) do {	\
     if (adjust)					                    	\
-		while (s_len < precision) {                 	\
+		while (s_len < (size_t)precision) {				\
 			*--s = '0';                             	\
 			s_len++;                                	\
 		}												\
@@ -417,7 +417,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					}
 					s_len = Z_STRLEN_P(zvp);
 					s = Z_STRVAL_P(zvp);
-					if (adjust_precision && precision < s_len) {
+					if (adjust_precision && (size_t)precision < s_len) {
 						s_len = precision;
 					}
 					break;
@@ -803,7 +803,7 @@ fmt_error:
 				*--s = prefix_char;
 				s_len++;
 			}
-			if (adjust_width && adjust == RIGHT && min_width > s_len) {
+			if (adjust_width && adjust == RIGHT && (size_t)min_width > s_len) {
 				if (pad_char == '0' && prefix_char != NUL) {
 					INS_CHAR(xbuf, *s, is_char);
 					s++;
@@ -817,7 +817,7 @@ fmt_error:
 			 */
 			INS_STRING(xbuf, s, s_len, is_char);
 
-			if (adjust_width && adjust == LEFT && min_width > s_len) {
+			if (adjust_width && adjust == LEFT && (size_t)min_width > s_len) {
 				PAD_CHAR(xbuf, pad_char, min_width - s_len, is_char);
 			}
 
