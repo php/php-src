@@ -834,6 +834,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 
 		if (atts) for (i = 0; atts[i]; i++) {
 			if (!strcmp(atts[i], EL_NAME) && atts[++i] && atts[i][0]) {
+				if (stack->varname) efree(stack->varname);
 				stack->varname = estrdup(atts[i]);
 				break;
 			}
