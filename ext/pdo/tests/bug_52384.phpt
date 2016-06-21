@@ -15,65 +15,68 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$calories = 150;
-$colour = 'red';
-$tf = true;
-$n = null;
-$lob = str_repeat('a',1000);
-$dob = '1978-10-17';
+$a = 150;
+$b = 'red';
+$c = true;
+$d = null;
+$e = str_repeat('a',1000);
+$f = '1978-10-17';
 
-$sth = $db->prepare('SELECT 1 WHERE 1');
-$sth->bindParam(':calories', $calories, PDO::PARAM_INT);
-$sth->bindValue(':colour', $colour, PDO::PARAM_STR);
-$sth->bindValue(':tf', $tf, PDO::PARAM_BOOL);
-$sth->bindValue(':n', $n, PDO::PARAM_NULL);
-$sth->bindValue(':lob', $lob, PDO::PARAM_LOB);
-$sth->bindValue(':dob', $dob, PDO::PARAM_STR|PDO::PARAM_INPUT_OUTPUT);
+$db->exec("CREATE TABLE test (a INT, b VARCHAR(10), c INT, d INT, e TEXT, f VARCHAR(10))");
+$sth = $db->prepare(
+    'SELECT * FROM test WHERE a=:a AND b=:b AND c=:c AND d=:d AND e=:e AND f=:f'
+);
+$sth->bindParam(':a', $a, PDO::PARAM_INT);
+$sth->bindValue(':b', $b, PDO::PARAM_STR);
+$sth->bindValue(':c', $c, PDO::PARAM_BOOL);
+$sth->bindValue(':d', $d, PDO::PARAM_NULL);
+$sth->bindValue(':e', $e, PDO::PARAM_LOB);
+$sth->bindValue(':f', $f, PDO::PARAM_STR|PDO::PARAM_INPUT_OUTPUT);
 
 $sth->debugDumpParams();
 unset($dbh);
 ?>
---EXPECT--
-SQL: [16] SELECT 1 WHERE 1
+--EXPECTF--
+SQL: [74] SELECT * FROM test WHERE a=:a AND b=:b AND c=:c AND d=:d AND e=:e AND f=:f
 Params:  6
-Key: Name: [9] :calories
-paramno=-1
-name=[9] ":calories"
+Key: Name: [2] :a
+paramno=%s
+name=[2] ":a"
 is_param=1
 param_type=1
 is_input_output=0
 param_value=150
-Key: Name: [7] :colour
-paramno=-1
-name=[7] ":colour"
+Key: Name: [2] :b
+paramno=%s
+name=[2] ":b"
 is_param=1
 param_type=2
 is_input_output=0
 param_value=red
-Key: Name: [3] :tf
-paramno=-1
-name=[3] ":tf"
+Key: Name: [2] :c
+paramno=%s
+name=[2] ":c"
 is_param=1
 param_type=5
 is_input_output=0
 param_value=true
-Key: Name: [2] :n
-paramno=-1
-name=[2] ":n"
+Key: Name: [2] :d
+paramno=%s
+name=[2] ":d"
 is_param=1
 param_type=0
 is_input_output=0
 param_value=null
-Key: Name: [4] :lob
-paramno=-1
-name=[4] ":lob"
+Key: Name: [2] :e
+paramno=%s
+name=[2] ":e"
 is_param=1
 param_type=3
 is_input_output=0
 param_value=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-Key: Name: [4] :dob
-paramno=-1
-name=[4] ":dob"
+Key: Name: [2] :f
+paramno=%s
+name=[2] ":f"
 is_param=1
 param_type=2
 is_input_output=1
