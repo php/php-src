@@ -1007,13 +1007,6 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				break;
 
 			case ST_BOOLEAN:
-				if (IS_UNDEF == Z_TYPE(ent->data)) {
-					if (ent->varname) {
-						efree(ent->varname);
-						ent->varname = NULL;
-					}
-					break;
-				}
 				if (!strcmp((char *)s, "true")) {
 					Z_LVAL(ent->data) = 1;
 				} else if (!strcmp((char *)s, "false")) {
