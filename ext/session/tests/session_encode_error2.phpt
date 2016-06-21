@@ -121,7 +121,7 @@ bool(true)
 -- Iteration 4 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key -2345 in %s on line %d
+Notice: session_encode(): Skipping numeric key 18446744073709549271 in %s on line %d
 bool(false)
 bool(true)
 
@@ -135,7 +135,7 @@ bool(true)
 -- Iteration 6 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key -10 in %s on line %d
+Notice: session_encode(): Skipping numeric key 18446744073709551606 in %s on line %d
 bool(false)
 bool(true)
 
