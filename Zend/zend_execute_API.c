@@ -1175,7 +1175,7 @@ ZEND_API ZEND_NORETURN void zend_timeout(int dummy) /* {{{ */
 	zend_set_timeout_ex(0, 1);
 #endif
 
-	zend_error_noreturn(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
 }
 /* }}} */
 
@@ -1205,7 +1205,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 			error_filename = "Unknown";
 		}
 
-		zend_spprintf(&log_buffer, 0, "\nFatal error: Maximum execution time of %pd+%pd seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
+		zend_spprintf(&log_buffer, 0, "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
 		write(2, log_buffer, strlen(log_buffer));
 		_exit(1);
     }

@@ -617,7 +617,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	}
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
-			zend_error(E_WARNING, "Expected array for frame %pu", index);
+			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
 			continue;
 		}
 

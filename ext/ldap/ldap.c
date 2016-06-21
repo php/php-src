@@ -357,7 +357,7 @@ PHP_FUNCTION(ldap_connect)
 #endif
 
 	if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
-		php_error_docref(NULL, E_WARNING, "Too many open links (%pd)", LDAPG(num_links));
+		php_error_docref(NULL, E_WARNING, "Too many open links (" ZEND_LONG_FMT ")", LDAPG(num_links));
 		RETURN_FALSE;
 	}
 
@@ -370,12 +370,12 @@ PHP_FUNCTION(ldap_connect)
 			int	urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
-				php_error_docref(NULL, E_WARNING, "invalid port number: %ld", port);
+				php_error_docref(NULL, E_WARNING, "invalid port number: " ZEND_LONG_FMT, port);
 				RETURN_FALSE;
 			}
 
 			url = emalloc(urllen);
-			snprintf( url, urllen, "ldap://%s:%ld", host ? host : "", port );
+			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host ? host : "", port );
 		}
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP

@@ -1343,12 +1343,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
 				php_error_docref(NULL, E_WARNING,
-								 "Cannot create new link. Too many open links (%pd)", PGG(num_links));
+								 "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
 				goto err;
 			}
 			if (PGG(max_persistent) != -1 && PGG(num_persistent) >= PGG(max_persistent)) {
 				php_error_docref(NULL, E_WARNING,
-								 "Cannot create new link. Too many open persistent links (%pd)", PGG(num_persistent));
+								 "Cannot create new link. Too many open persistent links (" ZEND_LONG_FMT ")", PGG(num_persistent));
 				goto err;
 			}
 
@@ -1441,7 +1441,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
-			php_error_docref(NULL, E_WARNING, "Cannot create new link. Too many open links (%pd)", PGG(num_links));
+			php_error_docref(NULL, E_WARNING, "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
 			goto err;
 		}
 
@@ -2681,7 +2681,7 @@ PHP_FUNCTION(pg_fetch_result)
 		}
 	} else {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2772,7 +2772,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 
 	if (use_row) {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2858,7 +2858,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			fcc.object = Z_OBJ_P(return_value);
 
 			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
+				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 			} else {
 				zval_ptr_dtor(&retval);
 			}
@@ -2866,7 +2866,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				efree(fci.params);
 			}
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
+			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
 		}
 	}
 }
@@ -2964,7 +2964,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 
 	num_fields = PQnfields(pgsql_result);
 	if (colno >= (zend_long)num_fields || colno < 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid column number '%pd'", colno);
+		php_error_docref(NULL, E_WARNING, "Invalid column number '" ZEND_LONG_FMT "'", colno);
 		RETURN_FALSE;
 	}
 
@@ -3048,7 +3048,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		}
 	} else {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -3582,11 +3582,11 @@ PHP_FUNCTION(pg_lo_write)
 
 	if (argc > 2) {
 		if (z_len > (zend_long)str_len) {
-			php_error_docref(NULL, E_WARNING, "Cannot write more than buffer size %d. Tried to write %pd", str_len, z_len);
+			php_error_docref(NULL, E_WARNING, "Cannot write more than buffer size %d. Tried to write " ZEND_LONG_FMT, str_len, z_len);
 			RETURN_FALSE;
 		}
 		if (z_len < 0) {
-			php_error_docref(NULL, E_WARNING, "Buffer size must be larger than 0, but %pd was specified", z_len);
+			php_error_docref(NULL, E_WARNING, "Buffer size must be larger than 0, but " ZEND_LONG_FMT " was specified", z_len);
 			RETURN_FALSE;
 		}
 		len = z_len;

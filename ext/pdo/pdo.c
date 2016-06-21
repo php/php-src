@@ -159,7 +159,7 @@ static PHP_GINIT_FUNCTION(pdo)
 PDO_API int php_pdo_register_driver(pdo_driver_t *driver) /* {{{ */
 {
 	if (driver->api_version != PDO_DRIVER_API) {
-		zend_error(E_ERROR, "PDO: driver %s requires PDO API version %pd; this is PDO version %d",
+		zend_error(E_ERROR, "PDO: driver %s requires PDO API version " ZEND_ULONG_FMT "; this is PDO version %d",
 			driver->driver_name, driver->api_version, PDO_DRIVER_API);
 		return FAILURE;
 	}

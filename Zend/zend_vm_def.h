@@ -7548,7 +7548,7 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 			ZVAL_OBJ(&generator->values, &iter->std);
 		}
 	} else {
-		zend_throw_error(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		zend_throw_error(NULL, "Can use \"yield from\" only with arrays and Traversables");
 		HANDLE_EXCEPTION();
 	}
 

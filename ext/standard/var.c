@@ -171,7 +171,7 @@ again:
 			break;
 		case IS_RESOURCE: {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
-			php_printf("%sresource(%pd) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
+			php_printf("%sresource(%d) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
 			break;
 		}
 		case IS_REFERENCE:

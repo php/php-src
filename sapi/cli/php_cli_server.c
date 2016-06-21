@@ -1857,7 +1857,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		if (!chunk) {
 			goto fail;
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string, ZSTR_VAL(escaped_request_uri));
+		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string);
 		chunk->data.heap.len = strlen(chunk->data.heap.p);
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}

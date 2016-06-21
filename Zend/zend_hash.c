@@ -103,7 +103,7 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 	if (nSize < HT_MIN_SIZE) {
 		nSize = HT_MIN_SIZE;
 	} else if (UNEXPECTED(nSize >= HT_MAX_SIZE)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
 	}
 
 #if defined(ZEND_WIN32)
@@ -189,7 +189,7 @@ static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	if (ht->nTableSize >= HT_MAX_SIZE) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket), sizeof(Bucket));
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket), sizeof(Bucket));
 	}
 	ht->nTableSize += ht->nTableSize;
 	HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_SIZE(ht), HT_USED_SIZE(ht), ht->u.flags & HASH_FLAG_PERSISTENT));
@@ -869,7 +869,7 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 		pefree(old_data, ht->u.flags & HASH_FLAG_PERSISTENT);
 		zend_hash_rehash(ht);
 	} else {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket) + sizeof(uint32_t), sizeof(Bucket));
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket) + sizeof(uint32_t), sizeof(Bucket));
 	}
 }
 

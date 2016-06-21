@@ -544,7 +544,7 @@ PHP_FUNCTION(proc_open)
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor %pd - %s", nindex, strerror(errno));
+				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif

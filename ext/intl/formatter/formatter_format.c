@@ -119,7 +119,7 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
 			RETURN_FALSE;
 			break;
 	}

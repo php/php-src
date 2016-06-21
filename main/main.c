@@ -1124,7 +1124,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 
 		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
-				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%pd</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
+				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
 			} else {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
@@ -1468,7 +1468,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 				if (message==ZMSG_MEMORY_LEAK_DETECTED) {
 					zend_leak_info *t = (zend_leak_info *) data;
 
-					snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%.8lX (%zu bytes), script=%s\n", t->filename, t->lineno, (zend_uintptr_t)t->addr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
+					snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", t->filename, t->lineno, (size_t)t->addr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
 					if (t->orig_filename) {
 						char relay_buf[512];
 

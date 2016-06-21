@@ -683,7 +683,7 @@ static inline int accel_is_inactive(void)
 	if (ZCG(accel_directives).force_restart_timeout
 		&& ZCSG(force_restart_time)
 		&& time(NULL) >= ZCSG(force_restart_time)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %d (after %d seconds), locked by %d", time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
+		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %ld (after " ZEND_LONG_FMT " seconds), locked by %d", time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
 		kill_all_lockers(&mem_usage_check);
 
 		return FAILURE; /* next request should be able to restart it */
@@ -1227,11 +1227,11 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 	if ((char*)new_persistent_script->mem + new_persistent_script->size != (char*)ZCG(mem)) {
 		zend_accel_error(
 			((char*)new_persistent_script->mem + new_persistent_script->size < (char*)ZCG(mem)) ? ACCEL_LOG_ERROR : ACCEL_LOG_WARNING,
-			"Internal error: wrong size calculation: %s start=0x%08x, end=0x%08x, real=0x%08x\n",
+			"Internal error: wrong size calculation: %s start=" ZEND_ADDR_FMT ", end=" ZEND_ADDR_FMT ", real=" ZEND_ADDR_FMT "\n",
 			ZSTR_VAL(new_persistent_script->script.filename),
-			new_persistent_script->mem,
-			(char *)new_persistent_script->mem + new_persistent_script->size,
-			ZCG(mem));
+			(size_t)new_persistent_script->mem,
+			(size_t)((char *)new_persistent_script->mem + new_persistent_script->size),
+			(size_t)ZCG(mem));
 	}
 
 	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
@@ -1321,11 +1321,11 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	if ((char*)new_persistent_script->mem + new_persistent_script->size != (char*)ZCG(mem)) {
 		zend_accel_error(
 			((char*)new_persistent_script->mem + new_persistent_script->size < (char*)ZCG(mem)) ? ACCEL_LOG_ERROR : ACCEL_LOG_WARNING,
-			"Internal error: wrong size calculation: %s start=0x%08x, end=0x%08x, real=0x%08x\n",
+			"Internal error: wrong size calculation: %s start=" ZEND_ADDR_FMT ", end=" ZEND_ADDR_FMT ", real=" ZEND_ADDR_FMT "\n",
 			ZSTR_VAL(new_persistent_script->script.filename),
-			new_persistent_script->mem,
-			(char *)new_persistent_script->mem + new_persistent_script->size,
-			ZCG(mem));
+			(size_t)new_persistent_script->mem,
+			(size_t)((char *)new_persistent_script->mem + new_persistent_script->size),
+			(size_t)ZCG(mem));
 	}
 
 	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
@@ -1333,7 +1333,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(new_persistent_script->script.filename), ZSTR_LEN(new_persistent_script->script.filename), 0, new_persistent_script);
 	if (bucket) {
-		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", new_persistent_script->script.filename);
+		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", ZSTR_VAL(new_persistent_script->script.filename));
 		if (key &&
 		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
 		    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
@@ -1790,8 +1790,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		unsigned int checksum = zend_accel_script_checksum(persistent_script);
 		if (checksum != persistent_script->dynamic_members.checksum ) {
 			/* The checksum is wrong */
-			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%0.8X, found=0x%0.8X",
-							 persistent_script->script.filename, persistent_script->dynamic_members.checksum, checksum);
+			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%08x, found=0x%08x",
+							 ZSTR_VAL(persistent_script->script.filename), persistent_script->dynamic_members.checksum, checksum);
 			zend_shared_alloc_lock();
 			if (!persistent_script->corrupted) {
 				persistent_script->corrupted = 1;

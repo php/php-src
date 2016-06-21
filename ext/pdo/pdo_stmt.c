@@ -2123,10 +2123,10 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out, "Key: Name: [%zd] %.*s\n",
 					ZSTR_LEN(key), (int) ZSTR_LEN(key), ZSTR_VAL(key));
 			} else {
-				php_stream_printf(out, "Key: Position #%pd:\n", num);
+				php_stream_printf(out, "Key: Position #" ZEND_ULONG_FMT ":\n", num);
 			}
 
-			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+			php_stream_printf(out, "paramno=" ZEND_LONG_FMT "\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
 					param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
 					param->name ? ZSTR_VAL(param->name) : "",
 					param->is_param,

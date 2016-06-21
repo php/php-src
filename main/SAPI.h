@@ -232,7 +232,7 @@ struct _sapi_module_struct {
 	zend_stat_t *(*get_stat)(void);
 	char *(*getenv)(char *name, size_t name_len);
 
-	void (*sapi_error)(int type, const char *error_msg, ...);
+	void (*sapi_error)(int type, const char *error_msg, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 	int (*header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers);
 	int (*send_headers)(sapi_headers_struct *sapi_headers);

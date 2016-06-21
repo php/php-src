@@ -141,7 +141,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (supp) {
-		message = strpprintf(0, "SQLSTATE[%s]: %s: %ld %s", *pdo_err, msg, native_code, supp);
+		message = strpprintf(0, "SQLSTATE[%s]: %s: " ZEND_LONG_FMT " %s", *pdo_err, msg, native_code, supp);
 	} else {
 		message = strpprintf(0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
