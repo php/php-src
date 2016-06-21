@@ -138,7 +138,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	if (gd2_compressed(*fmt)) {
 		nc = (*ncx) * (*ncy);
 		GD2_DBG(php_gd_error("Reading %d chunk index entries", nc));
-		if (overflow2(sidx, nc)) {
+		if (overflow2(sizeof(t_chunk_info), nc)) {
 			goto fail1;
 		}
 		sidx = sizeof(t_chunk_info) * nc;
