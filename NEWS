@@ -2,7 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
 
-?? ?? 2016, PHP 5.5.37
+?? ?? 2016, PHP 5.5.38
+
+
+
+23 Jun 2016, PHP 5.5.37
 
 - Core:
   . Fixed bug #72268 (Integer Overflow in nl2br()). (Stas)
