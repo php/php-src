@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in 
     heap overflow). (Pierre)
   . Fixed bug #72407 (NULL Pointer Dereference at _gdScaleVert). (Stas)
+  . Fixed bug #72446 (Integer Overflow in gdImagePaletteToTrueColor() resulting
+    in heap overflow). (Pierre)
 
 - mbstring:
    . Fixed bug #72402 (_php_mb_regex_ereg_replace_exec - double free). (Stas)
