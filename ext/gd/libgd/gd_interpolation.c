@@ -1047,6 +1047,9 @@ static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_w
 	}
 
 	contrib = _gdContributionsCalc(dst_height, src_height, (double)(dst_height) / (double)(src_height), pSrc->interpolation);
+	if (contrib == NULL) {
+		return;
+	}
 	/* scale each column */
 	for (u = 0; u < dst_width - 1; u++) {
 		_gdScaleCol(pSrc, src_width, pDst, dst_width, dst_height, u, contrib);

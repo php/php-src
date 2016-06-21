@@ -4166,14 +4166,14 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			if (!php_stream_mkdir(fullpath, entry->flags & PHAR_ENT_PERM_MASK,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
 				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
 				efree(fullpath);
-				free(new_state.cwd);
+				efree(new_state.cwd);
 				return FAILURE;
 			}
 		} else {
 			if (!php_stream_mkdir(fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
 				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
 				efree(fullpath);
-				free(new_state.cwd);
+				efree(new_state.cwd);
 				return FAILURE;
 			}
 		}

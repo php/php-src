@@ -131,6 +131,10 @@ gdImagePtr gdImageCreate (int sx, int sy)
 		return NULL;
 	}
 
+	if (overflow2(sizeof(unsigned char *), sx)) {
+		return NULL;
+	}
+
 	im = (gdImage *) gdCalloc(1, sizeof(gdImage));
 
 	/* Row-major ever since gd 1.3 */
@@ -1765,6 +1769,12 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	if (border < 0) {
 		/* Refuse to fill to a non-solid border */
 		return;
+	}
+
+	if (!im->trueColor) {
+		if ((color > (im->colorsTotal - 1)) || (border > (im->colorsTotal - 1)) || (color < 0)) {
+			return;
+		}
 	}
 
 	restoreAlphaBlending = im->alphaBlendingFlag;
