@@ -466,7 +466,8 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_get_current_data,
 	spl_recursive_it_get_current_key,
 	spl_recursive_it_move_forward,
-	spl_recursive_it_rewind
+	spl_recursive_it_rewind,
+	NULL
 };
 
 static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, recursive_it_it_type rit_type)

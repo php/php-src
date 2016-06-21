@@ -226,7 +226,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	}
 
 	iv = emalloc(iv_len + 1);
-	if (iv_len <= Z_STRLEN_P(tmpzval)) {
+	if ((size_t)iv_len <= Z_STRLEN_P(tmpzval)) {
 		memcpy(iv, Z_STRVAL_P(tmpzval), iv_len);
 	} else {
 		memcpy(iv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));

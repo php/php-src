@@ -139,8 +139,8 @@ int json_yydebug = 1;
 
 /* In a future release of Bison, this section will be replaced
    by #include "json_parser.tab.h".  */
-#ifndef YY_PHP_JSON_YY_HOME_JAKUB_PROG_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
-# define YY_PHP_JSON_YY_HOME_JAKUB_PROG_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+#ifndef YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+# define YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -201,7 +201,7 @@ typedef union YYSTYPE YYSTYPE;
 
 int php_json_yyparse (php_json_parser *parser);
 
-#endif /* !YY_PHP_JSON_YY_HOME_JAKUB_PROG_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
+#endif /* !YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 

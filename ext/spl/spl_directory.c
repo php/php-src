@@ -676,7 +676,8 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 {
 	spl_filesystem_object *intern;
 	char *path;
-	size_t parsed, len;
+	int parsed;
+	size_t len;
 	zend_long flags;
 	zend_error_handling error_handling;
 
@@ -1608,7 +1609,8 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 	spl_filesystem_dir_it_current_data,
 	spl_filesystem_dir_it_current_key,
 	spl_filesystem_dir_it_move_forward,
-	spl_filesystem_dir_it_rewind
+	spl_filesystem_dir_it_rewind,
+	NULL
 };
 /* }}} */
 
@@ -1806,7 +1808,8 @@ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_current_data,
 	spl_filesystem_tree_it_current_key,
 	spl_filesystem_tree_it_move_forward,
-	spl_filesystem_tree_it_rewind
+	spl_filesystem_tree_it_rewind,
+	NULL
 };
 /* }}} */
 

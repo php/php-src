@@ -413,7 +413,7 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name) /* {{{ *
 
 		if (san->type == GEN_DNS) {
 			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
-			if (ASN1_STRING_length(san->d.dNSName) != strlen((const char*)cert_name)) {
+			if ((size_t)ASN1_STRING_length(san->d.dNSName) != strlen((const char*)cert_name)) {
 				OPENSSL_free(cert_name);
 				/* prevent null-byte poisoning*/
 				continue;
@@ -465,7 +465,7 @@ static zend_bool matches_common_name(X509 *peer, const char *subject_name) /* {{
 
 	if (cert_name_len == -1) {
 		php_error_docref(NULL, E_WARNING, "Unable to locate peer certificate CN");
-	} else if (cert_name_len != strlen(buf)) {
+	} else if ((size_t)cert_name_len != strlen(buf)) {
 		php_error_docref(NULL, E_WARNING, "Peer certificate CN=`%.*s' is malformed", cert_name_len, buf);
 	} else if (matches_wildcard_name(subject_name, buf)) {
 		is_match = 1;
@@ -579,7 +579,7 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 	GET_VER_OPT_STRING("passphrase", passphrase);
 
 	if (passphrase) {
-		if (Z_STRLEN_P(val) < num - 1) {
+		if (Z_STRLEN_P(val) < (size_t)num - 1) {
 			memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val)+1);
 			return (int)Z_STRLEN_P(val);
 		}

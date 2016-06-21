@@ -1246,7 +1246,7 @@ const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 	PHP_ME(PDO, __wakeup,               arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, __sleep,                arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, getAvailableDrivers,    arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -1309,7 +1309,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 
 			func.arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
 			func.num_args = funcs->num_args;
-			if (info->required_num_args == -1) {
+			if (info->required_num_args == (uint32_t)-1) {
 				func.required_num_args = funcs->num_args;
 			} else {
 				func.required_num_args = info->required_num_args;

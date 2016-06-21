@@ -1291,7 +1291,8 @@ zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_get_current_data,
 	spl_dllist_it_get_current_key,
 	spl_dllist_it_move_forward,
-	spl_dllist_it_rewind
+	spl_dllist_it_rewind,
+	NULL
 }; /* }}} */
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

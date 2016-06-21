@@ -300,7 +300,7 @@ zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, const uint64_t length);
 size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 
-PHPAPI const extern char * const mysqlnd_empty_string;
+PHPAPI extern const char * const mysqlnd_empty_string;
 
 enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,

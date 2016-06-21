@@ -1160,7 +1160,8 @@ zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_get_current_data,
 	spl_array_it_get_current_key,
 	spl_array_it_move_forward,
-	spl_array_it_rewind
+	spl_array_it_rewind,
+	NULL
 };
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
@@ -1376,7 +1377,7 @@ SPL_METHOD(Array, seek)
 	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", opos);
 } /* }}} */
 
-int static spl_array_object_count_elements_helper(spl_array_object *intern, zend_long *count) /* {{{ */
+static int spl_array_object_count_elements_helper(spl_array_object *intern, zend_long *count) /* {{{ */
 {
 	HashTable *aht = spl_array_get_hash_table(intern);
 	HashPosition pos, *pos_ptr;

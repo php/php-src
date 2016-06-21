@@ -3473,7 +3473,7 @@ void phar_request_initialize(void) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
-	int i;
+	uint32_t i;
 
 	PHAR_G(request_ends) = 1;
 

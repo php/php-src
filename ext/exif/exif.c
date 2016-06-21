@@ -2703,7 +2703,8 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
  * Process nested IFDs directories in Maker Note. */
 static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, char *offset_base, size_t IFDlength, size_t displacement)
 {
-	int de, i=0, section_index = SECTION_MAKERNOTE;
+	size_t i;
+	int de, section_index = SECTION_MAKERNOTE;
 	int NumDirEntries, old_motorola_intel, offset_diff;
 	const maker_note_type *maker_note;
 	char *dir_start;
@@ -3317,11 +3318,11 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 		}
 
 		/* Read the length of the section. */
-		if ((lh = php_stream_getc(ImageInfo->infile)) == EOF) {
+		if ((lh = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {
 			EXIF_ERRLOG_CORRUPT(ImageInfo)
 			return FALSE;
 		}
-		if ((ll = php_stream_getc(ImageInfo->infile)) == EOF) {
+		if ((ll = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {
 			EXIF_ERRLOG_CORRUPT(ImageInfo)
 			return FALSE;
 		}

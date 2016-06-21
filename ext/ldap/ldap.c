@@ -1601,7 +1601,7 @@ PHP_FUNCTION(ldap_delete)
  */
 static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *cstr)
 {
-	int i;
+	uint i;
 
 	if (strlen(cstr) != str_len)
 		return 0;
@@ -1620,7 +1620,7 @@ static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *c
  */
 static int _ldap_strlen_max(const char *str, uint max_len)
 {
-	int i;
+	uint i;
 
 	for (i = 0; i < max_len; ++i) {
 		if (str[i] == '\0') {
@@ -1696,7 +1696,7 @@ PHP_FUNCTION(ldap_modify_batch)
 		zend_ulong tmpUlong;
 
 		/* make sure the DN contains no NUL bytes */
-		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
+		if ((size_t)_ldap_strlen_max(dn, dn_len) != dn_len) {
 			php_error_docref(NULL, E_WARNING, "DN must not contain NUL bytes");
 			RETURN_FALSE;
 		}
@@ -1755,7 +1755,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 
-					if (Z_STRLEN_P(modinfo) != _ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
+					if (Z_STRLEN_P(modinfo) != (size_t)_ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
 						php_error_docref(NULL, E_WARNING, "A '" LDAP_MODIFY_BATCH_ATTRIB "' value must not contain NUL bytes");
 						RETURN_FALSE;
 					}
@@ -2715,7 +2715,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen)
 {
 	char hex[] = "0123456789abcdef";
-	int i, p = 0;
+	size_t i, p = 0;
 	size_t len = 0;
 	zend_string *ret;
 

@@ -51,7 +51,7 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_SplObserver[] = {
 	SPL_ABSTRACT_ME(SplObserver, update,   arginfo_SplObserver_update)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 ZEND_BEGIN_ARG_INFO(arginfo_SplSubject_attach, 0)
@@ -69,7 +69,7 @@ static const zend_function_entry spl_funcs_SplSubject[] = {
 	SPL_ABSTRACT_ME(SplSubject,  attach,   arginfo_SplSubject_attach)
 	SPL_ABSTRACT_ME(SplSubject,  detach,   arginfo_SplSubject_attach)
 	SPL_ABSTRACT_ME(SplSubject,  notify,   arginfo_SplSubject_void)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 PHPAPI zend_class_entry     *spl_ce_SplObserver;
@@ -924,7 +924,7 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_attach, 0)
 	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_offsetGet, 0)
 	SPL_ME(SplObjectStorage, offsetGet,    arginfo_offsetGet,     0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 typedef enum {
@@ -1233,7 +1233,7 @@ static const zend_function_entry spl_funcs_MultipleIterator[] = {
 	SPL_ME(MultipleIterator,  key,                    arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  current,                arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  next,                   arginfo_splobject_void,                     0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ PHP_MINIT_FUNCTION(spl_observer) */

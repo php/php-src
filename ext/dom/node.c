@@ -856,7 +856,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	str = zval_get_string(newval);
 	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
 	xmlNodeSetContent(nodep, (xmlChar *) "");
-	xmlNodeAddContent(nodep, ZSTR_VAL(str));
+	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
 	zend_string_release(str);
 
 	return SUCCESS;

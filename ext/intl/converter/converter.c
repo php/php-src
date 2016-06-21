@@ -997,7 +997,7 @@ static zend_function_entry php_converter_methods[] = {
 	PHP_ME(UConverter, getAvailable,           php_converter_getavailable_arginfo,      ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(UConverter, getAliases,             php_converter_getaliases_arginfo,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(UConverter, getStandards,           php_converter_getstandards_arginfo,      ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 
 /* {{{ Converter create/clone/destroy */

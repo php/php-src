@@ -775,7 +775,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_length(timestr) != strlen((const char*)ASN1_STRING_data(timestr))) {
+	if ((size_t)ASN1_STRING_length(timestr) != strlen((const char*)ASN1_STRING_data(timestr))) {
 		php_error_docref(NULL, E_WARNING, "illegal length in timestamp");
 		return (time_t)-1;
 	}
@@ -2901,13 +2901,13 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 		/* Finally apply defaults from config file */
 		for(i = 0; i < sk_CONF_VALUE_num(dn_sk); i++) {
-			int len;
+			size_t len;
 			char buffer[200 + 1]; /*200 + \0 !*/
 
 			v = sk_CONF_VALUE_value(dn_sk, i);
 			type = v->name;
 
-			len = (int)strlen(type);
+			len = strlen(type);
 			if (len < sizeof("_default")) {
 				continue;
 			}
@@ -5463,7 +5463,7 @@ PHP_FUNCTION(openssl_open)
 					"Cipher algorithm requires an IV to be supplied as a sixth parameter");
 			RETURN_FALSE;
 		}
-		if (cipher_iv_len != iv_len) {
+		if ((size_t)cipher_iv_len != iv_len) {
 			php_error_docref(NULL, E_WARNING, "IV length is invalid");
 			RETURN_FALSE;
 		}

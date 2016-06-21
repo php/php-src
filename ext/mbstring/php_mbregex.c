@@ -748,7 +748,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		for (i = 0; i < regs->num_regs; i++) {
 			beg = regs->beg[i];
 			end = regs->end[i];
-			if (beg >= 0 && beg < end && end <= string_len) {
+			if (beg >= 0 && beg < end && (size_t)end <= string_len) {
 				add_index_stringl(array, i, (char *)&str[beg], end - beg);
 			} else {
 				add_index_bool(array, i, 0);
@@ -807,7 +807,8 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	smart_str out_buf = {0};
 	smart_str eval_buf = {0};
 	smart_str *pbuf;
-	int i, err, eval, n;
+	size_t i;
+	int err, eval, n;
 	OnigUChar *pos;
 	OnigUChar *string_lim;
 	char *description = NULL;
@@ -926,7 +927,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						n = p[1] - '0';
 					}
 					if (n >= 0 && n < regs->num_regs) {
-						if (regs->beg[n] >= 0 && regs->beg[n] < regs->end[n] && regs->end[n] <= string_len) {
+						if (regs->beg[n] >= 0 && regs->beg[n] < regs->end[n] && (size_t)regs->end[n] <= string_len) {
 							smart_str_appendl(pbuf, string + regs->beg[n], regs->end[n] - regs->beg[n]);
 						}
 						p += 2;
@@ -1100,7 +1101,7 @@ PHP_FUNCTION(mb_split)
 		beg = regs->beg[0], end = regs->end[0];
 		/* add it to the array */
 		if ((pos - (OnigUChar *)string) < end) {
-			if (beg < string_len && beg >= (chunk_pos - (OnigUChar *)string)) {
+			if ((size_t)beg < string_len && beg >= (chunk_pos - (OnigUChar *)string)) {
 				add_next_index_stringl(return_value, (char *)chunk_pos, ((OnigUChar *)(string + beg) - chunk_pos));
 				--count;
 			} else {

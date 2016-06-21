@@ -517,7 +517,7 @@ void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	php_url *url;
-	int old_len = (int)Z_STRLEN_P(value);
+	size_t old_len = Z_STRLEN_P(value);
 
 	php_filter_url(value, flags, option_array, charset);
 

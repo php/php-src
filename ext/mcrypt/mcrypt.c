@@ -563,7 +563,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	iv_s = emalloc(iv_size + 1);
 	memset(iv_s, 0, iv_size + 1);
 
-	if (key_len > max_key_size) {
+	if (key_len > (size_t)max_key_size) {
 		php_error_docref(NULL, E_WARNING, "Key size too large; supplied length: %zd, max: %d", key_len, max_key_size);
 		key_size = max_key_size;
 	} else {
@@ -571,9 +571,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 	}
 	memcpy(key_s, key, key_len);
 
-	if (iv_len != iv_size) {
+	if (iv_len != (size_t)iv_size) {
 		php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %zd, needed: %d", iv_len, iv_size);
-		if (iv_len > iv_size) {
+		if (iv_len > (size_t)iv_size) {
 			iv_len = iv_size;
 		}
 	}
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 			}
 		}
 
-		while (read_bytes < size) {
+		while ((zend_long)read_bytes < size) {
 			n = read(*fd, iv + read_bytes, size - read_bytes);
 			if (n <= 0) {
 				break;

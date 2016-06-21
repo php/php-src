@@ -2032,7 +2032,9 @@ static zend_object_handlers sxe_object_handlers = { /* {{{ */
 	sxe_count_elements,
 	sxe_get_debug_info,
 	NULL,
-	sxe_get_gc
+	sxe_get_gc,
+	NULL,
+	NULL
 };
 /* }}} */
 
@@ -2334,6 +2336,7 @@ zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_current_key,
 	php_sxe_iterator_move_forward,
 	php_sxe_iterator_rewind,
+	NULL
 };
 /* }}} */
 

@@ -687,8 +687,8 @@ static sapi_post_entry mbstr_post_entries[] = {
 static int
 php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_encoding ***return_list, size_t *return_size, int persistent)
 {
-	int size, bauto, ret = SUCCESS;
-	size_t n;
+	int bauto, ret = SUCCESS;
+	size_t n, size;
 	char *p, *p1, *p2, *endp, *tmpstr;
 	const mbfl_encoding **entry, **list;
 

@@ -1071,7 +1071,8 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 static zend_string *date_format(char *format, size_t format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
-	int                  i, length = 0;
+	size_t               i;
+	int                  length = 0;
 	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
@@ -4217,7 +4218,8 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 static zend_string *date_interval_format(char *format, size_t format_len, timelib_rel_time *t)
 {
 	smart_str            string = {0};
-	int                  i, length, have_format_spec = 0;
+	size_t               i;
+	int                  length, have_format_spec = 0;
 	char                 buffer[33];
 
 	if (!format_len) {

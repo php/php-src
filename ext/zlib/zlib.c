@@ -761,7 +761,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
 				zend_string *str = Z_STR_P(option_buffer);
-				int i;
+				size_t i;
 				zend_bool last_null = 1;
 
 				for (i = 0; i < ZSTR_LEN(str); i++) {
@@ -794,7 +794,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 					zend_string **end, **ptr = strings - 1;
 
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						int i;
+						size_t i;
 
 						*++ptr = zval_get_string(cur);
 						if (!*ptr || ZSTR_LEN(*ptr) == 0) {

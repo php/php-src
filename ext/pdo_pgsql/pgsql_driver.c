@@ -813,7 +813,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 			if (ret == -1) {
 				break; /* done */
 			} else if (ret > 0) {
-				if (php_stream_write(stream, csv, ret) != ret) {
+				if (php_stream_write(stream, csv, ret) != (size_t)ret) {
 					pdo_pgsql_error_msg(dbh, PGRES_FATAL_ERROR, "Unable to write to file");
 					PQfreemem(csv);
 					php_stream_close(stream);

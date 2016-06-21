@@ -110,7 +110,7 @@ static const zend_function_entry php_dir_class_functions[] = {
 	PHP_FALIAS(close,	closedir,		arginfo_dir)
 	PHP_FALIAS(rewind,	rewinddir,		arginfo_dir)
 	PHP_NAMED_FE(read,  php_if_readdir, arginfo_dir)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 

@@ -203,7 +203,7 @@ zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_file,		arginfo_finfo_file)
 	PHP_FE(finfo_buffer,	arginfo_finfo_buffer)
 	PHP_FE(mime_content_type, arginfo_mime_content_type)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

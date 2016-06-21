@@ -190,7 +190,8 @@ pdo_driver_t *pdo_find_driver(const char *name, int namelen) /* {{{ */
 
 PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_source_len, struct pdo_data_src_parser *parsed, int nparams) /* {{{ */
 {
-	int i, j;
+	zend_ulong i;
+	int j;
 	int valstart = -1;
 	int semi = -1;
 	int optstart = 0;

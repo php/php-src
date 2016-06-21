@@ -345,7 +345,7 @@ grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t
 		e = haystack + haystack_len - needle_len;
 	} else {
 		p = haystack;
-		if (needle_len > -offset) {
+		if (needle_len > (size_t)-offset) {
 			e = haystack + haystack_len - needle_len;
 		} else {
 			e = haystack + haystack_len + offset;

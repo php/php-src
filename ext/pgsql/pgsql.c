@@ -3333,7 +3333,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rl", &pgsql_link, &oid_long) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3353,7 +3353,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "l", &oid_long) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID is specified");
 			RETURN_FALSE;
 		}
@@ -3407,7 +3407,7 @@ PHP_FUNCTION(pg_lo_open)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rls", &pgsql_link, &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3427,7 +3427,7 @@ PHP_FUNCTION(pg_lo_open)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "ls", &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3599,7 +3599,7 @@ PHP_FUNCTION(pg_lo_write)
 		RETURN_FALSE;
 	}
 
-	if ((nbytes = lo_write((PGconn *)pgsql->conn, pgsql->lofd, str, len)) == -1) {
+	if ((nbytes = lo_write((PGconn *)pgsql->conn, pgsql->lofd, str, len)) == (size_t)-1) {
 		RETURN_FALSE;
 	}
 
@@ -3738,7 +3738,7 @@ PHP_FUNCTION(pg_lo_export)
 	/* allow string to handle large OID value correctly */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rlp", &pgsql_link, &oid_long, &file_out, &name_len) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3757,7 +3757,7 @@ PHP_FUNCTION(pg_lo_export)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 									  "lp",  &oid_long, &file_out, &name_len) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3789,7 +3789,7 @@ PHP_FUNCTION(pg_lo_export)
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 									  "lpr", &oid_long, &file_out, &name_len, &pgsql_link) == SUCCESS) {
 		php_error_docref(NULL, E_NOTICE, "Old API is used");
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}

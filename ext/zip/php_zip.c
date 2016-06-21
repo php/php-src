@@ -499,7 +499,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	char *result;
 #endif
 	glob_t globbuf;
-	int n;
+	uint n;
 	int ret;
 
 	if (pattern_len >= MAXPATHLEN) {
@@ -3003,7 +3003,7 @@ static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(getExternalAttributesIndex,	arginfo_ziparchive_getextattrindex, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setCompressionName,		arginfo_ziparchive_setcompname, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setCompressionIndex,		arginfo_ziparchive_setcompindex, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
