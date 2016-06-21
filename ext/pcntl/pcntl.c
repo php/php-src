@@ -840,7 +840,7 @@ PHP_FUNCTION(pcntl_exec)
    Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
 {
-	zval *handle, **dest_handle = NULL;
+	zval *handle, **prev_handle, **dest_handle = NULL;
 	char *func_name;
 	long signo;
 	zend_bool restart_syscalls = 1;
@@ -890,6 +890,10 @@ PHP_FUNCTION(pcntl_signal)
 	}
 	efree(func_name);
 
+	if (zend_hash_index_find(&PCNTL_G(php_signal_table), signo, (void **) &prev_handle) == SUCCESS) {
+		RETVAL_ZVAL(*prev_handle, 1, 0);
+	}
+
 	/* Add the function name to our signal table */
 	zend_hash_index_update(&PCNTL_G(php_signal_table), signo, (void **) &handle, sizeof(zval *), (void **) &dest_handle);
 	if (dest_handle) zval_add_ref(dest_handle);
@@ -899,7 +903,10 @@ PHP_FUNCTION(pcntl_signal)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+
+	if (ZVAL_IS_NULL(return_value)) {
+		RETURN_TRUE;
+	}
 }
 /* }}} */
 
