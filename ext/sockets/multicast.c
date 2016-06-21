@@ -93,7 +93,7 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out)
 		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL, E_WARNING,
 				"the interface index cannot be negative or larger than %u;"
-				" given %pd", UINT_MAX, Z_LVAL_P(val));
+				" given " ZEND_LONG_FMT, UINT_MAX, Z_LVAL_P(val));
 			ret = FAILURE;
 		} else {
 			*out = Z_LVAL_P(val);

@@ -2119,7 +2119,7 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
 		zend_ulong __calc_size = (start - end) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", end, start); \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
 			RETURN_FALSE; \
 		} \
 		size = (uint32_t)(__calc_size + 1); \

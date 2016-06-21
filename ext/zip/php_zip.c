@@ -1694,7 +1694,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 				if (add_path) {
 					if ((add_path_len + file_stripped_len) > MAXPATHLEN) {
-						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %pd given)",
+						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, (add_path_len + file_stripped_len));
 						zval_ptr_dtor(return_value);
 						RETURN_FALSE;

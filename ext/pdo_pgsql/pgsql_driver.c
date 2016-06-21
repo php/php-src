@@ -1218,13 +1218,13 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user && tmp_pass) {
-		spprintf(&conn_str, 0, "%s user='%s' password='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_user), ZSTR_VAL(tmp_pass), connect_timeout);
+		spprintf(&conn_str, 0, "%s user='%s' password='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_user), ZSTR_VAL(tmp_pass), connect_timeout);
 	} else if (tmp_user) {
-		spprintf(&conn_str, 0, "%s user='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_user), connect_timeout);
+		spprintf(&conn_str, 0, "%s user='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_user), connect_timeout);
 	} else if (tmp_pass) {
-		spprintf(&conn_str, 0, "%s password='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_pass), connect_timeout);
+		spprintf(&conn_str, 0, "%s password='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_pass), connect_timeout);
 	} else {
-		spprintf(&conn_str, 0, "%s connect_timeout=%pd", (char *) dbh->data_source, connect_timeout);
+		spprintf(&conn_str, 0, "%s connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, connect_timeout);
 	}
 
 	H->server = PQconnectdb(conn_str);

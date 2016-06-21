@@ -970,7 +970,7 @@ PHP_METHOD(SoapFault, __toString)
 	convert_to_long(line);
 	convert_to_string(&trace);
 
-	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:%pd\nStack trace:\n%s",
+	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:" ZEND_LONG_FMT "\nStack trace:\n%s",
 	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
 	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 
@@ -1273,7 +1273,7 @@ PHP_METHOD(SoapServer, setPersistence)
 				value == SOAP_PERSISTENCE_REQUEST) {
 				service->soap_class.persistence = value;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Tried to set persistence with bogus value (%pd)", value);
+				php_error_docref(NULL, E_WARNING, "Tried to set persistence with bogus value (" ZEND_LONG_FMT ")", value);
 				return;
 			}
 		} else {

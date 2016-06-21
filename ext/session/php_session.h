@@ -300,7 +300,7 @@ PHPAPI void php_session_reset_id(void);
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
 			php_error_docref(NULL, E_NOTICE,				\
-					"Skipping numeric key %pd", num_key);			\
+					"Skipping numeric key " ZEND_ULONG_FMT, num_key);			\
 			continue;												\
 		}															\
 		if ((struc = php_get_session_var(key))) {			\

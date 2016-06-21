@@ -97,7 +97,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
 			RETVAL_FALSE;
 			break;
 	}

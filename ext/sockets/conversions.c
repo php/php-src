@@ -656,7 +656,7 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 	}
 	if (ZSTR_LEN(path_str) >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
-				"length is %ld", sizeof(saddr->sun_path) - 1);
+				"length is %zd", sizeof(saddr->sun_path) - 1);
 		return;
 	}
 
@@ -965,7 +965,7 @@ static void to_zval_read_cmsg_data(const char *cmsghdr_c, zval *zv, res_context 
 	}
 	if (CMSG_LEN(entry->size) > cmsg->cmsg_len) {
 		do_to_zval_err(ctx, "the cmsghdr structure is unexpectedly small; "
-				"expected a length of at least %pd, but got %pd",
+				"expected a length of at least " ZEND_LONG_FMT ", but got " ZEND_LONG_FMT,
 				(zend_long)CMSG_LEN(entry->size), (zend_long)cmsg->cmsg_len);
 		return;
 	}
@@ -1062,8 +1062,8 @@ static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c,
 	}
 
 	if (lval < 0 || lval > MAX_USER_BUFF_SIZE) {
-		do_from_zval_err(ctx, "the buffer size must be between 1 and %pd; "
-				"given %pd", (zend_long)MAX_USER_BUFF_SIZE, lval);
+		do_from_zval_err(ctx, "the buffer size must be between 1 and " ZEND_LONG_FMT "; "
+				"given " ZEND_LONG_FMT, (zend_long)MAX_USER_BUFF_SIZE, lval);
 		return;
 	}
 
@@ -1238,7 +1238,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 	if (Z_TYPE_P(zv) == IS_LONG) {
 		if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
 			do_from_zval_err(ctx, "the interface index cannot be negative or "
-					"larger than %u; given %pd", UINT_MAX, Z_LVAL_P(zv));
+					"larger than %u; given " ZEND_LONG_FMT, UINT_MAX, Z_LVAL_P(zv));
 		} else {
 			ret = (unsigned)Z_LVAL_P(zv);
 		}
@@ -1400,7 +1400,7 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 
 	if (*cmsg_len < data_offset) {
 		do_to_zval_err(ctx, "length of cmsg is smaller than its data member "
-				"offset (%pd vs %pd)", (zend_long)*cmsg_len, (zend_long)data_offset);
+				"offset (" ZEND_LONG_FMT " vs " ZEND_LONG_FMT ")", (zend_long)*cmsg_len, (zend_long)data_offset);
 		return;
 	}
 	num_elems = (*cmsg_len - data_offset) / sizeof(int);

@@ -104,7 +104,7 @@ const char *fcgi_get_last_client_ip();
 void fcgi_set_in_shutdown(int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
-typedef void (*fcgi_logger)(int type, const char *fmt, ...);
+typedef void (*fcgi_logger)(int type, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 void fcgi_set_logger(fcgi_logger lg);
 #endif
 
