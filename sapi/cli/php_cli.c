@@ -271,11 +271,7 @@ PHP_CLI_API size_t sapi_cli_single_write(const char *str, size_t str_length) /* 
 #endif
 
 	if (cli_shell_callbacks.cli_shell_write) {
-		size_t shell_wrote;
-		shell_wrote = cli_shell_callbacks.cli_shell_write(str, str_length);
-		if (shell_wrote > -1) {
-			return shell_wrote;
-		}
+		cli_shell_callbacks.cli_shell_write(str, str_length);
 	}
 
 #ifdef PHP_WRITE_STDOUT
@@ -491,7 +487,7 @@ static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
 	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
 	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ php_cli_usage

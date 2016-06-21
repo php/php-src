@@ -969,7 +969,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ php_cgi_usage
@@ -1716,7 +1716,7 @@ const zend_function_entry cgi_functions[] = {
 	PHP_FE(apache_request_headers, arginfo_no_args)
 	PHP_FE(apache_response_headers, arginfo_no_args)
 	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static zend_module_entry cgi_module_entry = {

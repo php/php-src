@@ -734,7 +734,7 @@ int fcgi_listen(const char *path, int backlog)
 #else
 		int path_len = strlen(path);
 
-		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
+		if (path_len >= (int)sizeof(sa.sa_unix.sun_path)) {
 			fcgi_log(FCGI_ERROR, "Listening socket's path name is too long.\n");
 			return -1;
 		}
@@ -1587,7 +1587,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		}
 		memcpy(req->out_pos, str, len);
 		req->out_pos += len;
-	} else if (len - limit < sizeof(req->out_buf) - sizeof(fcgi_header)) {
+	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
 		if (!req->out_hdr) {
 			open_packet(req, type);
 		}

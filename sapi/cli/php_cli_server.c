@@ -482,7 +482,7 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE(apache_request_headers, arginfo_no_args)
 	PHP_FE(apache_response_headers, arginfo_no_args)
 	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
@@ -1005,7 +1005,11 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			if (nbytes_sent < 0) {
 				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
+#ifdef PHP_WIN32
 			} else if (nbytes_sent == chunk->data.heap.len) {
+#else
+			} else if (nbytes_sent == (ssize_t)chunk->data.heap.len) {
+#endif
 				php_cli_server_chunk_dtor(chunk);
 				pefree(chunk, 1);
 				sender->buffer.first = next;
@@ -1028,7 +1032,11 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			if (nbytes_sent < 0) {
 				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
+#ifdef PHP_WIN32
 			} else if (nbytes_sent == chunk->data.immortal.len) {
+#else
+			} else if (nbytes_sent == (ssize_t)chunk->data.immortal.len) {
+#endif
 				php_cli_server_chunk_dtor(chunk);
 				pefree(chunk, 1);
 				sender->buffer.first = next;
@@ -1705,7 +1713,7 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	}
 	client->parser.data = client;
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
-	if (nbytes_consumed != nbytes_read) {
+	if (nbytes_consumed != (size_t)nbytes_read) {
 		if (buf[0] & 0x80 /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
 			*errstr = estrdup("Unsupported SSL request");
 		} else {

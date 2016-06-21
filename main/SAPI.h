@@ -272,7 +272,6 @@ struct _sapi_module_struct {
 	unsigned int (*input_filter_init)(void);
 };
 
-
 struct _sapi_post_entry {
 	char *content_type;
 	uint content_type_len;
@@ -305,7 +304,23 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter);
 END_EXTERN_C()
 
-#define STANDARD_SAPI_MODULE_PROPERTIES
+#define STANDARD_SAPI_MODULE_PROPERTIES \
+	NULL, /* php_ini_path_override   */ \
+	NULL, /* default_post_reader     */ \
+	NULL, /* treat_data              */ \
+	NULL, /* executable_location     */ \
+	0,    /* php_ini_ignore          */ \
+	0,    /* php_ini_ignore_cwd      */ \
+	NULL, /* get_fd                  */ \
+	NULL, /* force_http_10           */ \
+	NULL, /* get_target_uid          */ \
+	NULL, /* get_target_gid          */ \
+	NULL, /* input_filter            */ \
+	NULL, /* ini_defaults            */ \
+	0,    /* phpinfo_as_text;        */ \
+	NULL, /* ini_entries;            */ \
+	NULL, /* additional_functions    */ \
+	NULL  /* input_filter_init       */
 
 #endif /* SAPI_H */
 
