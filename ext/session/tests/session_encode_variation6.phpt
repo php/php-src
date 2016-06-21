@@ -45,7 +45,7 @@ bool(false)
 bool(true)
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 18446744072474983726 in %s on line %d
+Notice: session_encode(): Skipping numeric key -1234567890 in %s on line %d
 bool(false)
 bool(true)
 Done
