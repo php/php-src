@@ -4,9 +4,38 @@ PHP                                                                        NEWS
 
 ?? ?? 2016, PHP 5.5.37
 
--GD:
+- Core:
+  . Fixed bug #72268 (Integer Overflow in nl2br()). (Stas)
+  . Fixed bug #72275 (Integer Overflow in json_encode()/json_decode()/
+    json_utf8_to_utf16()). (Stas)
+  . Fixed bug #72400 (Integer Overflow in addcslashes/addslashes). (Stas)
+  . Fixed bug #72403 (Integer Overflow in Length of String-typed ZVAL). (Stas)
+
+- GD:
   . Fixed bug #66387 (Stack overflow with imagefilltoborder) (CVE-2015-8874).
     (cmb)
+  . Fixed bug #72298 (pass2_no_dither out-of-bounds access). (Stas)
+  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in 
+    heap overflow). (Pierre)
+  . Fixed bug #72407 (NULL Pointer Dereference at _gdScaleVert). (Stas)
+
+- mbstring:
+   . Fixed bug #72402 (_php_mb_regex_ereg_replace_exec - double free). (Stas)
+
+- mcrypt:
+   . Fixed bug #72455 (Heap Overflow due to integer overflows). (Stas)
+
+- SPL:
+  . Fixed bug #72340 (int/size_t confusion in SplFileObject::fread). (Stas)
+  . Fixed bug #72433 (Use After Free Vulnerability in PHP's GC algorithm and
+    unserialize). (Dmitry)
+
+- WDDX:
+  . Fixed bug #72298 (Double Free Courruption in wddx_deserialize). (Stas)
+
+- zip:
+  . Fixed bug #72434 (ZipArchive class Use After Free Vulnerability in PHP's GC
+    algorithm and unserialize). (Dmitry)
 
 26 May 2016, PHP 5.5.36
 
