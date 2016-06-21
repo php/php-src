@@ -2,7 +2,7 @@
 PDO Common: Bug #52384 (debugDumpParams does not emit the bind parameter value)
 --SKIPIF--
 <?php # vim:ft=php
-# PDOTEST_DSN=sqlite::memory: REDIR_TEST_DIR=ext/pdo/tests/ TEST_PHP_EXECUTABLE=sapi/cli/php sapi/cli/php run-tests.php ext/pdo/tests/pdo_038.phpt 
+# PDOTEST_DSN=sqlite::memory: REDIR_TEST_DIR=ext/pdo/tests/ TEST_PHP_EXECUTABLE=sapi/cli/php sapi/cli/php run-tests.php ext/pdo/tests/bug_52384.phpt 
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
