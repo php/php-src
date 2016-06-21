@@ -1015,6 +1015,14 @@ static int php_zip_has_property(zval *object, zval *member, int type, const zend
 }
 /* }}} */
 
+static HashTable *php_zip_get_gc(zval *object, zval ***gc_data, int *gc_data_count TSRMLS_DC) /* {{{ */
+{
+	*gc_data = NULL;
+	*gc_data_count = 0;
+	return zend_std_get_properties(object TSRMLS_CC);
+}
+/* }}} */
+
 static HashTable *php_zip_get_properties(zval *object TSRMLS_DC)/* {{{ */
 {
 	ze_zip_object *obj;
@@ -2777,6 +2785,7 @@ static PHP_MINIT_FUNCTION(zip)
 	zip_object_handlers.clone_obj		= NULL;
 	zip_object_handlers.get_property_ptr_ptr = php_zip_get_property_ptr_ptr;
 
+	zip_object_handlers.get_gc          = php_zip_get_gc;
 	zip_object_handlers.get_properties = php_zip_get_properties;
 	zip_object_handlers.read_property	= php_zip_read_property;
 	zip_object_handlers.has_property	= php_zip_has_property;
