@@ -137,6 +137,9 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
+	if (UNEXPECTED(oldlen * 2 * sizeof(char) > INT_MAX)) {
+		zend_error(E_ERROR, "String size overflow");
+	}
 	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
 
 	for (i = j = 0; i < oldlen; i++) {
@@ -2613,6 +2616,7 @@ PHP_FUNCTION(quotemeta)
 	char *p, *q;
 	char c;
 	int  old_len;
+	size_t new_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &old, &old_len) == FAILURE) {
 		return;
@@ -2647,8 +2651,13 @@ PHP_FUNCTION(quotemeta)
 		}
 	}
 	*q = 0;
+	new_len = q - str;
+	if (UNEXPECTED(new_len > INT_MAX)) {
+		efree(str);
+		zend_error(E_ERROR, "String size overflow");
+	}
 
-	RETURN_STRINGL(erealloc(str, q - str + 1), q - str, 0);
+	RETURN_STRINGL(erealloc(str, new_len + 1), new_len, 0);
 }
 /* }}} */
 
@@ -3500,7 +3509,7 @@ PHPAPI char *php_addcslashes(const char *str, int length, int *new_length, int s
 	char *source, *target;
 	char *end;
 	char c;
-	int  newlen;
+	size_t  newlen;
 
 	if (!wlength) {
 		wlength = strlen(what);
@@ -3531,11 +3540,15 @@ PHPAPI char *php_addcslashes(const char *str, int length, int *new_length, int s
 	}
 	*target = 0;
 	newlen = target - new_str;
+	if (UNEXPECTED(newlen > INT_MAX)) {
+		efree(new_str);
+		zend_error(E_ERROR, "String size overflow");
+	}
 	if (target - new_str < length * 4) {
 		new_str = erealloc(new_str, newlen + 1);
 	}
 	if (new_length) {
-		*new_length = newlen;
+		*new_length = (int)newlen;
 	}
 	if (should_free) {
 		STR_FREE((char*)str);
@@ -3587,6 +3600,9 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 
 	*target = 0;
 	*new_length = target - new_str;
+	if (UNEXPECTED(*new_length < 0)) {
+		zend_error(E_ERROR, "String size overflow");
+	}
 	if (should_free) {
 		STR_FREE(str);
 	}
@@ -4290,6 +4306,9 @@ PHP_FUNCTION(nl2br)
 		size_t repl_len = is_xhtml ? (sizeof("<br />") - 1) : (sizeof("<br>") - 1);
 
 		new_length = str_len + repl_cnt * repl_len;
+		if (UNEXPECTED(new_length > INT_MAX)) {
+			zend_error(E_ERROR, "String size overflow");
+		}
 		tmp = target = safe_emalloc(repl_cnt, repl_len, str_len + 1);
 	}
 
