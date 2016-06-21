@@ -189,7 +189,7 @@ PHP 7.1 UPGRADE NOTES
 
     As a result of UTF-8 support in the streams, PHP scripts are not limited
     to ASCII or ANSI filenames anymore. This is supported out of the box on
-    CLI. For for other SAPI, the documentation for the corresponding server
+    CLI. For other SAPI, the documentation for the corresponding server
     is useful.
 
     Long paths support is transparent. Paths longer than 260 bytes get
@@ -197,8 +197,8 @@ PHP 7.1 UPGRADE NOTES
     2048 bytes. Be aware, that the path segment limit (basename length) still
     persists.
 
-    The recommended way to file paths, I/O and other related topics is by
-    utilizing UTF-8.
+    The recommended way to handle file paths, I/O and other related topics is
+    by utilizing UTF-8.
 
   . Support for ftok()
 
