@@ -131,6 +131,10 @@ gdImagePtr gdImageCreate (int sx, int sy)
 		return NULL;
 	}
 
+	if (overflow2(sizeof(unsigned char *), sx)) {
+		return NULL;
+	}
+
 	im = (gdImage *) gdCalloc(1, sizeof(gdImage));
 
 	/* Row-major ever since gd 1.3 */
