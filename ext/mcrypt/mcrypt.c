@@ -637,6 +637,10 @@ PHP_FUNCTION(mcrypt_generic)
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
 		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
+		if (data_size <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Integer overflow in data size");
+			RETURN_FALSE;
+		}
 		data_str = zend_string_alloc(data_size, 0);
 		memset(ZSTR_VAL(data_str), 0, data_size);
 		memcpy(ZSTR_VAL(data_str), data, data_len);
@@ -683,7 +687,11 @@ PHP_FUNCTION(mdecrypt_generic)
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
 		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
-		data_s = emalloc(data_size + 1);
+		if (data_size <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Integer overflow in data size");
+			RETURN_FALSE;
+		}
+		data_s = emalloc((size_t)data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
 	} else { /* It's not a block algorithm */

@@ -1015,6 +1015,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 					zval_ptr_dtor(&ent->data);
 					if (ent->varname) {
 						efree(ent->varname);
+						ent->varname = NULL;
 					}
 					ZVAL_UNDEF(&ent->data);
 				}

@@ -988,7 +988,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
 				} else {
-					efree(description);
 					if (!EG(exception)) {
 						php_error_docref(NULL, E_WARNING, "Unable to call custom replacement function");
 					}
