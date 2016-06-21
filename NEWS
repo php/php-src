@@ -28,12 +28,12 @@ PHP                                                                        NEWS
    . Fixed bug #72455 (Heap Overflow due to integer overflows). (Stas)
 
 - SPL:
-  . Fixed bug #72340 (int/size_t confusion in SplFileObject::fread). (Stas)
+  . Fixed bug #72114 (int/size_t confusion in SplFileObject::fread). (Stas)
   . Fixed bug #72433 (Use After Free Vulnerability in PHP's GC algorithm and
     unserialize). (Dmitry)
 
 - WDDX:
-  . Fixed bug #72298 (Double Free Courruption in wddx_deserialize). (Stas)
+  . Fixed bug #72340 (Double Free Courruption in wddx_deserialize). (Stas)
 
 - zip:
   . Fixed bug #72434 (ZipArchive class Use After Free Vulnerability in PHP's GC
