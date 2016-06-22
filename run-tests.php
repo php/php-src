@@ -1900,12 +1900,11 @@ COMMAND $cmd
 	$output = preg_replace("/\r\n/", "\n", trim($out));
 
 	/* when using CGI, strip the headers from the output */
-	$headers = "";
+	$headers = array();
 
 	if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
 		$output = trim($match[2]);
 		$rh = preg_split("/[\n\r]+/", $match[1]);
-		$headers = array();
 
 		foreach ($rh as $line) {
 			if (strpos($line, ':') !== false) {
