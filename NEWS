@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0alpha2
+23 Jun 2016, PHP 7.1.0alpha2
 
 - Core:
   . Implemented RFC: Replace "Missing argument" warning with "Too few
