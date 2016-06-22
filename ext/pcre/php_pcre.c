@@ -1331,7 +1331,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 					break;
 				}
 				new_len = result_len + subject_len - start_offset;
-				if (new_len > alloc_len) {
+				if (new_len >= alloc_len) {
 					alloc_len = new_len; /* now we know exactly how long it is */
 					if (NULL != result) {
 						result = zend_string_realloc(result, alloc_len, 0);
