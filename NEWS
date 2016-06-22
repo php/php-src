@@ -13,11 +13,20 @@ PHP                                                                        NEWS
   . Fixed bug #69489 (tempnam() should raise notice if falling back to temp dir).
     (Laruence, Anatol)
   . Fixed UTF-8 and long path support on Windows. (Anatol)
+  . Fixed bug #72268 (Integer Overflow in nl2br()). (Stas)
+  . Fixed bug #72275 (Integer Overflow in json_encode()/json_decode()/
+    json_utf8_to_utf16()). (Stas)
+  . Fixed bug #72400 (Integer Overflow in addcslashes/addslashes). (Stas)
+  . Fixed bug #72403 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
   . Fixed bug #64641 (imagefilledpolygon doesn't draw horizontal line). (cmb)
+  . Fixed bug #72298 (pass2_no_dither out-of-bounds access). (Stas)
+  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in 
+    heap overflow). (Pierre)
+  . Fixed bug #72407 (NULL Pointer Dereference at _gdScaleVert). (Stas)
 
 - JSON
   . Implemented FR #46600 ("_empty_" key in objects). (Jakub Zelenka)
@@ -26,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
     oob read access). (Laruence)
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
+  . Fixed bug #72402 (_php_mb_regex_ereg_replace_exec - double free). (Stas)
+
+- mcrypt:
+  . Fixed bug #72455 (Heap Overflow due to integer overflows). (Stas)
 
 - OpenSSL:
   . Implemented FR #67304 (Added AEAD support [CCM and GCM modes] to
@@ -35,6 +48,11 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Upgraded to PCRE 8.39. (Anatol)
+
+- SPL:
+  . Fixed bug #72262 (int/size_t confusion in SplFileObject::fread). (Stas)
+  . Fixed bug #72433 (Use After Free Vulnerability in PHP's GC algorithm and
+    unserialize). (Dmitry)
 
 - Sqlite3:
   . Implemented FR #72385 (Update SQLite bundle lib(3.13.0)). (Laruence)
@@ -46,6 +64,13 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #72439 (Stream socket with remote address leads to a segmentation
     fault). (Laruence)
+
+- WDDX:
+  . Fixed bug #72340 (Double Free Courruption in wddx_deserialize). (Stas)
+
+- zip:
+  . Fixed bug #72434 (ZipArchive class Use After Free Vulnerability in PHP's GC
+    algorithm and unserialize). (Dmitry)
 
 09 Jun 2016, PHP 7.1.0alpha1
 
