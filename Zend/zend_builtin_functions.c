@@ -2388,8 +2388,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 			if (object) {
 				if (func->common.scope) {
 					class_name = func->common.scope->name;
-				} else {
+				} else if (object->handlers->get_class_name == std_object_handlers.get_class_name) {
 					class_name = object->ce->name;
+				} else {
+					class_name = object->handlers->get_class_name(object);
 				}
 
 				call_type = "->";
@@ -2449,6 +2451,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 		if (class_name) {
 			ZEND_PUTS(ZSTR_VAL(class_name));
 			ZEND_PUTS(call_type);
+			if (object
+			  && !func->common.scope
+			  && object->handlers->get_class_name != std_object_handlers.get_class_name) {
+				zend_string_release(class_name);
+			}
 		}
 		zend_printf("%s(", function_name);
 		if (Z_TYPE(arg_array) != IS_UNDEF) {
@@ -2608,9 +2615,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			if (object) {
 				if (func->common.scope) {
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(func->common.scope->name));
-				} else {
+				} else if (object->handlers->get_class_name == std_object_handlers.get_class_name) {
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(object->ce->name));
-
+				} else {
+					zend_string *class_name = object->handlers->get_class_name(object);
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, class_name);
+					zend_string_release(class_name);
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
 					zval zv;
