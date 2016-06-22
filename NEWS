@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0beta1
 
-
+- PCRE:
+  . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
 
 23 Jun 2016, PHP 7.1.0alpha2
 
