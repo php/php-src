@@ -12,6 +12,9 @@ PHP                                                                        NEWS
     oob read access). (Laruence)
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
 
+- PCRE:
+  . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
+
 - Standard:
   . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
     (Laruence)
