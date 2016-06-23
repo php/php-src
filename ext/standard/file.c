@@ -576,7 +576,7 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	size_t filename_len;
 	zval *data;
-	zend_long numbytes = 0;
+	size_t numbytes = 0;
 	zend_long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -695,7 +695,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 	php_stream_close(stream);
 
-	if (numbytes < 0) {
+	if (numbytes == (size_t)-1) {
 		RETURN_FALSE;
 	}
 

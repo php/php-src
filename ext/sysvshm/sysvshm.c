@@ -169,7 +169,7 @@ PHP_FUNCTION(shm_attach)
 
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
-		if (shm_size < sizeof(sysvshm_chunk_head)) {
+		if (shm_size < (zend_long)sizeof(sysvshm_chunk_head)) {
 			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
 			efree(shm_list_ptr);
 			RETURN_FALSE;

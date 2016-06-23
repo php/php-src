@@ -225,7 +225,7 @@ static unsigned from_array_iterate(const zval *arr,
 	/* Note i starts at 1, not 0! */
 	i = 1;
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), elem) {
-		if (snprintf(buf, sizeof(buf), "element #%u", i) >= sizeof(buf)) {
+		if ((size_t)snprintf(buf, sizeof(buf), "element #%u", i) >= sizeof(buf)) {
 			memcpy(buf, "element", sizeof("element"));
 		}
 		zend_llist_add_element(&ctx->keys, &bufp);
@@ -937,7 +937,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 			break;
 		}
 
-		if (snprintf(buf, sizeof(buf), "element #%u", (unsigned)i++) >= sizeof(buf)) {
+		if ((size_t)snprintf(buf, sizeof(buf), "element #%u", (unsigned)i++) >= sizeof(buf)) {
 			memcpy(buf, "element", sizeof("element"));
 		}
 		zend_llist_add_element(&ctx->keys, &bufp);
@@ -1019,7 +1019,7 @@ static void to_zval_read_control_array(const char *msghdr_c, zval *zv, res_conte
 		ZVAL_NULL(&tmp);
 		elem = zend_hash_next_index_insert(Z_ARRVAL_P(zv), &tmp);
 
-		if (snprintf(buf, sizeof(buf), "element #%u", (unsigned)i++) >= sizeof(buf)) {
+		if ((size_t)snprintf(buf, sizeof(buf), "element #%u", (unsigned)i++) >= sizeof(buf)) {
 			memcpy(buf, "element", sizeof("element"));
 		}
 		zend_llist_add_element(&ctx->keys, &bufp);
@@ -1061,7 +1061,7 @@ static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c,
 		return;
 	}
 
-	if (lval < 0 || lval > MAX_USER_BUFF_SIZE) {
+	if (lval < 0 || (zend_ulong)lval > MAX_USER_BUFF_SIZE) {
 		do_from_zval_err(ctx, "the buffer size must be between 1 and " ZEND_LONG_FMT "; "
 				"given " ZEND_LONG_FMT, (zend_long)MAX_USER_BUFF_SIZE, lval);
 		return;
@@ -1236,7 +1236,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 	unsigned ret = 0;
 
 	if (Z_TYPE_P(zv) == IS_LONG) {
-		if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
+		if (Z_LVAL_P(zv) < 0 || (zend_ulong)Z_LVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
 			do_from_zval_err(ctx, "the interface index cannot be negative or "
 					"larger than %u; given " ZEND_LONG_FMT, UINT_MAX, Z_LVAL_P(zv));
 		} else {

@@ -2069,15 +2069,9 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 }
 /* }}} */
 
-static zend_never_inline ZEND_COLD ZEND_NORETURN void ZEND_FASTCALL zend_interrupt(void) /* {{{ */
-{
-	zend_timeout(0);
-}
-/* }}} */
-
 #define ZEND_VM_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(EG(timed_out))) { \
-			zend_interrupt(); \
+		if (UNEXPECTED(EG(vm_interrupt))) { \
+			ZEND_VM_INTERRUPT(); \
 		} \
 	} while (0)
 

@@ -52,6 +52,7 @@ ZEND_API zend_write_func_t zend_write;
 ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
+ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
@@ -681,6 +682,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_vstrpprintf = utility_functions->vstrpprintf_function;
 	zend_getenv = utility_functions->getenv_function;
 	zend_resolve_path = utility_functions->resolve_path_function;
+
+	zend_interrupt_function = NULL;
 
 #if HAVE_DTRACE
 /* build with dtrace support */
