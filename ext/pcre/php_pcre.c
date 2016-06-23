@@ -216,7 +216,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
-	if (PCRE_G(jit)) {
+	if (PCRE_G(jit) && jit_stack == NULL) {
 		jit_stack = pcre_jit_stack_alloc(PCRE_JIT_STACK_MIN_SIZE,PCRE_JIT_STACK_MAX_SIZE);
 	}
 
