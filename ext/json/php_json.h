@@ -81,7 +81,6 @@ typedef enum {
 #define PHP_JSON_PARSER_DEFAULT_DEPTH 512
 
 ZEND_BEGIN_MODULE_GLOBALS(json)
-	zend_long precision;
 	int encoder_depth;
 	int encode_max_depth;
 	php_json_error_code error_code;
