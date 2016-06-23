@@ -304,8 +304,8 @@ PHP_FUNCTION(socket_cmsg_space)
 		return;
 	}
 
-	if (entry->var_el_size > 0 && n > (ZEND_LONG_MAX - (zend_long)entry->size -
-			(zend_long)CMSG_SPACE(0) - 15L) / entry->var_el_size) {
+	if (entry->var_el_size > 0 && n > (zend_long)((ZEND_LONG_MAX - entry->size -
+			CMSG_SPACE(0) - 15L) / entry->var_el_size)) {
 		/* the -15 is to account for any padding CMSG_SPACE may add after the data */
 		php_error_docref0(NULL, E_WARNING, "The value for the "
 				"third argument (" ZEND_LONG_FMT ") is too large", n);

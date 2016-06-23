@@ -439,7 +439,7 @@ PHP_FUNCTION(glob)
 	size_t pattern_len;
 	zend_long flags = 0;
 	glob_t globbuf;
-	int n;
+	size_t n;
 	int ret;
 	zend_bool basedir_limit = 0;
 

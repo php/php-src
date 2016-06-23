@@ -2157,7 +2157,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			zval fault;
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
-			int buffer_len;
+			size_t buffer_len;
 #ifdef va_copy
 			va_list argcopy;
 #endif
@@ -2172,7 +2172,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
 #endif
 			buffer[sizeof(buffer)-1]=0;
-			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+			if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
 				buffer_len = sizeof(buffer) - 1;
 			}
 
@@ -2238,7 +2238,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				!service->send_errors) {
 				strcpy(buffer, "Internal Error");
 			} else {
-				int buffer_len;
+				size_t buffer_len;
 				zval outbuflen;
 
 #ifdef va_copy
@@ -2249,7 +2249,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
 #endif
 				buffer[sizeof(buffer)-1]=0;
-				if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+				if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
 					buffer_len = sizeof(buffer) - 1;
 				}
 
