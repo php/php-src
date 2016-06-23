@@ -258,6 +258,7 @@ extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PT
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
+extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);

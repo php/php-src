@@ -177,6 +177,7 @@ struct _zend_executor_globals {
 	/* for extended information support */
 	zend_bool no_extensions;
 
+	zend_bool vm_interrupt;
 	zend_bool timed_out;
 	zend_long hard_timeout;
 
