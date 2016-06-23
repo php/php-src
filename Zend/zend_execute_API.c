@@ -1249,7 +1249,7 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 		return;
 	}
 
-	eg = (zend_bool *)arg;
+	eg = (zend_executor_globals *)arg;
 	eg->timed_out = 1;
 	eg->vm_interrupt = 1;
 }
