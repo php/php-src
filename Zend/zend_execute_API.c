@@ -1262,7 +1262,7 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 
 static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 {
-	zend_execute_data *eg;
+	zend_executor_globals *eg;
 
 #ifdef ZEND_WIN32
 	if(!seconds) {
@@ -1282,13 +1282,7 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 	}
 
 	/* XXX passing NULL means the default timer queue provided by the system is used */
-#ifndef ZTS
-	eg = &execute_data;
-#elif defined(ZEND_ENABLE_STATIC_TSRMLS_CACHE)
-	eg = TSRMG_BULK_STATIC(executor_globals_id, zend_executor_globals *)
-#else
-	eg = TSRMG_BULK(executor_globals_id, zend_executor_globals *)
-#endif
+	eg = ZEND_MODULE_GLOBALS_BULK(executor);
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)eg, seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		tq_timer = NULL;
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
