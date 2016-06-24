@@ -299,7 +299,7 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 #define MIN_FREE_MEMORY 64*1024
 
 #define SHARED_ALLOC_FAILED() do {		\
-		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %zd bytes (%zd bytes free)", (size_t)size, (size_t)ZSMMG(shared_free)); \
+		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate "ZEND_LONG_FMT" bytes ("ZEND_LONG_FMT" bytes free)", (zend_long)size, (zend_long)ZSMMG(shared_free)); \
 		if (zend_shared_alloc_get_largest_free_block() < MIN_FREE_MEMORY) { \
 			ZSMMG(memory_exhausted) = 1; \
 		} \
