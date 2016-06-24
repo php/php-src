@@ -49,6 +49,10 @@
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("pcntl.async_signals", "0", PHP_INI_ALL, OnUpdateBool, async_signals, zend_pcntl_globals, pcntl_globals)
+PHP_INI_END()
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_pcntl_void, 0)
 ZEND_END_ARG_INFO()
@@ -207,8 +211,11 @@ zend_module_entry pcntl_module_entry = {
 ZEND_GET_MODULE(pcntl)
 #endif
 
+static void (*orig_interrupt_function)(zend_execute_data *execute_data);
+
 static void pcntl_signal_handler(int);
 static void pcntl_signal_dispatch();
+static void pcntl_interrupt_function(zend_execute_data *execute_data);
 
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
@@ -511,9 +518,12 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
+	REGISTER_INI_ENTRIES();
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_add_tick_function(pcntl_signal_dispatch, NULL);
+	orig_interrupt_function = zend_interrupt_function;
+	zend_interrupt_function = pcntl_interrupt_function;
 
 	return SUCCESS;
 }
@@ -548,6 +558,7 @@ PHP_MINFO_FUNCTION(pcntl)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "pcntl support", "enabled");
 	php_info_print_table_end();
+	DISPLAY_INI_ENTRIES();
 }
 
 /* {{{ proto int pcntl_fork(void)
@@ -1317,6 +1328,9 @@ static void pcntl_signal_handler(int signo)
 	}
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = 1;
+	if (PCNTL_G(async_signals)) {
+		EG(vm_interrupt) = 1;
+	}
 }
 
 void pcntl_signal_dispatch()
@@ -1375,7 +1389,13 @@ void pcntl_signal_dispatch()
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
-
+static void pcntl_interrupt_function(zend_execute_data *execute_data)
+{
+	pcntl_signal_dispatch();
+	if (orig_interrupt_function) {
+		orig_interrupt_function(execute_data);
+	}
+}
 
 /*
  * Local variables:
