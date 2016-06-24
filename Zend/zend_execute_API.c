@@ -1262,9 +1262,9 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 
 static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 {
+#ifdef ZEND_WIN32
 	zend_executor_globals *eg;
 
-#ifdef ZEND_WIN32
 	if(!seconds) {
 		return;
 	}
