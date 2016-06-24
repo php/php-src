@@ -704,6 +704,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (flags & FILTER_FLAG_NO_PRIV_RANGE) {
 				if (
 					(ip[0] == 10) ||
+					(ip[0] == 169 && ip[1] == 254) ||
 					(ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||
 					(ip[0] == 192 && ip[1] == 168)
 				) {
@@ -714,10 +715,18 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (flags & FILTER_FLAG_NO_RES_RANGE) {
 				if (
 					(ip[0] == 0) ||
+					(ip[0] == 10) ||
 					(ip[0] == 100 && (ip[1] >= 64 && ip[1] <= 127)) ||
+					(ip[0] == 127) ||
 					(ip[0] == 169 && ip[1] == 254) ||
+					(ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||
+					(ip[0] == 192 && ip[1] == 0 && ip[2] == 0) ||
 					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2) ||
-					(ip[0] == 127 && ip[1] == 0 && ip[2] == 0 && ip[3] == 1) ||
+					(ip[0] == 192 && ip[1] == 88 && ip[2] == 99) ||
+					(ip[0] == 192 && ip[1] == 168) ||
+					(ip[0] == 198 && (ip[1] == 18 || ip[1] == 19)) ||
+					(ip[0] == 198 && ip[1] == 51 && ip[2] == 100) ||
+					(ip[0] == 203 && ip[1] == 0 && ip[2] == 113) ||
 					(ip[0] >= 224 && ip[0] <= 255)
 				) {
 					RETURN_VALIDATION_FAILED
