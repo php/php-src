@@ -191,8 +191,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 # define RAISE_ERROR "raise() failed\n"
 				if (raise(signo) != 0) {
 					/* On some systems raise() fails with errno 3: No such process */
-					write(2, RAISE_ERROR, sizeof(RAISE_ERROR)-1);
-					_exit(1);
+					kill(getpid(), signo);
 				}
 #else
 				kill(getpid(), signo);
