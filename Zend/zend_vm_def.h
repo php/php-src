@@ -8613,7 +8613,7 @@ ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 	} else if (zend_interrupt_function) {
 		SAVE_OPLINE();
 		zend_interrupt_function(execute_data);
-		LOAD_OPLINE();
+		ZEND_VM_ENTER();
 	}
 	ZEND_VM_CONTINUE();
 }

@@ -2081,7 +2081,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper_SPEC(ZEND_OPC
 	} else if (zend_interrupt_function) {
 		SAVE_OPLINE();
 		zend_interrupt_function(execute_data);
-		LOAD_OPLINE();
+		ZEND_VM_ENTER();
 	}
 	ZEND_VM_CONTINUE();
 }
