@@ -1879,7 +1879,16 @@ try_string_offset:
 		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
 		}
-		ZVAL_NULL(result);
+    const char *sdim;
+    if(Z_TYPE_P(dim) == IS_STRING) {
+      sdim = Z_STRVAL_P(dim);
+    } else {
+      convert_to_string(dim);
+      sdim = Z_STRVAL_P(dim);
+    }
+
+		zend_throw_error(NULL, "Cannot access property '%s' on unassigned variable", sdim);
+    ZVAL_NULL(result);
 	}
 }
 
