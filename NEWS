@@ -31,19 +31,45 @@ PHP                                                                        NEWS
 23 Jun 2016 PHP 7.0.8
 
 - Core:
-  . Fixed bug #72221 (segfault, past-the-end access). (Lauri Kenttä)
   . Fixed bug #72218 (If host name cannot be resolved then PHP 7 crashes). 
     (Esminis at esminis dot lt)
+  . Fixed bug #72221 (segfault, past-the-end access). (Lauri Kenttä)
+  . Fixed bug #72268 (Integer Overflow in nl2br()). (Stas)
+  . Fixed bug #72275 (Integer Overflow in json_encode()/json_decode()/
+    json_utf8_to_utf16()). (Stas)
+  . Fixed bug #72400 (Integer Overflow in addcslashes/addslashes). (Stas)
+  . Fixed bug #72403 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
 - FPM:
   . Fixed bug #72308 (fastcgi_finish_request and logging environment
     variables). (Laruence)
 
 - GD:
-  . Fixed bug #72337 (invalid dimensions can lead to crash) (Pierre)
+  . Fixed bug #66387 (Stack overflow with imagefilltoborder). (CVE-2015-8874)
+    (cmb)
+  . Fixed bug #72298 (pass2_no_dither out-of-bounds access). (Stas)
+  . Fixed bug #72337 (invalid dimensions can lead to crash). (Pierre)
+  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in heap 
+    overflow). (CVE-2016-5766) (Pierre)
+  . Fixed bug #72407 (NULL Pointer Dereference at _gdScaleVert). (Stas)
+  . Fixed bug #72446 (Integer Overflow in gdImagePaletteToTrueColor() resulting
+    in heap overflow). (CVE-2016-5767) (Pierre)
 
 - Intl:
-  . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
+  . Fixed bug #70484 (selectordinal doesn't work with named parameters).
+    (Anatol)
+
+- mbstring:
+   . Fixed bug #72402 (_php_mb_regex_ereg_replace_exec - double free).
+     (CVE-2016-5768) (Stas)
+
+- mcrypt:
+   . Fixed bug #72455 (Heap Overflow due to integer overflows). (CVE-2016-5769)
+     (Stas)
+
+- OpenSSL:
+  . Fixed bug #72140 (segfault after calling ERR_free_strings()).
+    (Jakub Zelenka)
 
 - PCRE:
   . Fixed bug #72143 (preg_replace uses int instead of size_t). (Joe)
@@ -53,6 +79,10 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #72294 (Segmentation fault/invalid pointer in connection
     with pgsql_stmt_dtor). (Anatol)
+
+- Phar:
+  . Fixed bug #72321 (invalid free in phar_extract_file()).
+    (hji at dyntopia dot com)
 
 - Phpdbg:
   . Fixed bug #72284 (phpdbg fatal errors with coverage). (Bob)
@@ -71,6 +101,10 @@ PHP                                                                        NEWS
   . Fixed bug #72017 (range() with float step produces unexpected result).
     (Thomas Punt)
 
+- WDDX:
+  . Fixed bug #72340 (Double Free Courruption in wddx_deserialize).
+    (CVE-2016-5772) (Stas)
+
 - XML:
   . Fixed bug #72206 (xml_parser_create/xml_parser_free leaks mem). (Joe)
 
@@ -81,6 +115,8 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed ug #72258 (ZipArchive converts filenames to unrecoverable form).
     (Anatol)
+  . Fixed bug #72434 (ZipArchive class Use After Free Vulnerability in PHP's GC
+    algorithm and unserialize). (CVE-2016-5773) (Dmitry)
 
 26 May 2016 PHP 7.0.7
 
@@ -109,7 +145,8 @@ PHP                                                                        NEWS
   . Fixed bug #72227 (imagescale out-of-bounds read). (Stas)
 
 - Intl:
-  . Fixed #72241 (get_icu_value_internal out-of-bounds read). (Stas)
+  . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
+  . Fixed bug #72241 (get_icu_value_internal out-of-bounds read). (Stas)
 
 - JSON:
   . Fixed bug #72069 (Behavior \JsonSerializable different from json_encode).
