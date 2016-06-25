@@ -3625,6 +3625,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
+	register_type_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	BASIC_ADD_SUBMODULE(dl)
 	BASIC_ADD_SUBMODULE(mail)

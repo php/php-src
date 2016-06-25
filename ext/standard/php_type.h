@@ -21,6 +21,8 @@
 #ifndef PHP_TYPE_H
 #define PHP_TYPE_H
 
+void register_type_constants(INIT_FUNC_ARGS);
+
 PHP_FUNCTION(intval);
 PHP_FUNCTION(floatval);
 PHP_FUNCTION(strval);
@@ -39,4 +41,4 @@ PHP_FUNCTION(is_object);
 PHP_FUNCTION(is_scalar);
 PHP_FUNCTION(is_callable);
 
-#endif
+#endif /* PHP_TYPE_H */
