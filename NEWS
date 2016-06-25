@@ -92,15 +92,17 @@ PHP                                                                        NEWS
   . Fixed bug #72172 (zend_hex_strtod should not use strlen).
     (bwitz at hotmail dot com )
   . Fixed bug #72114 (Integer underflow / arbitrary null write in
-    fread/gzread). (Stas)
-  . Fixed bug #72135 (Integer Overflow in php_html_entities). (Stas)
+    fread/gzread). (CVE-2016-5096) (Stas)
+  . Fixed bug #72135 (Integer Overflow in php_html_entities). (CVE-2016-5094)
+    (Stas)
 
 - GD:
-  . Fixed bug #72227 (imagescale out-of-bounds read). (Stas)
+  . Fixed bug #72227 (imagescale out-of-bounds read). (CVE-2013-7456) (Stas)
 
 - Intl
   . Fixed bug #64524 (Add intl.use_exceptions to php.ini-*). (Anatol)
-  . Fixed bug #72241 (get_icu_value_internal out-of-bounds read). (Stas)
+  . Fixed bug #72241 (get_icu_value_internal out-of-bounds read).
+    (CVE-2016-5093) (Stas)
 
 - Postgres:
   . Fixed bug #72151 (mysqli_fetch_object changed behaviour). (Anatol)
