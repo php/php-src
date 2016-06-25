@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.9
 
+- CLI:
+  . Fixed bug #72484 (SCRIPT_FILENAME shows wrong path if the user specify
+    router.php). (Laruence)
+
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
