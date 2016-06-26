@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Standard:
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
 
+- OpenSSL:
+  . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
+    (Dominic Luechinger)
+
 23 Jun 2016, PHP 7.1.0alpha2
 
 - Core:
