@@ -776,7 +776,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 	This is how the time string is formatted:
 
    snprintf(p, sizeof(p), "%02d%02d%02d%02d%02d%02dZ",ts->tm_year%100,
-      ts->tm_mon+1,ts->tm_mday,ts->tm_hour,ts->tm_min,ts->tm_sec);
+	  ts->tm_mon+1,ts->tm_mday,ts->tm_hour,ts->tm_min,ts->tm_sec);
 */
 
 	time_t ret;
@@ -4024,11 +4024,11 @@ PHP_FUNCTION(openssl_pkey_new)
 #ifdef HAVE_EVP_PKEY_EC
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "ec", sizeof("ec") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
-			pkey = EVP_PKEY_new();
 			EC_KEY *eckey = NULL;
 			EC_GROUP *group = NULL;
 			EC_POINT *pnt = NULL;
 			const BIGNUM *d;
+			pkey = EVP_PKEY_new();
 			if (pkey) {
 				eckey = EC_KEY_new();
 				if (eckey) {
@@ -4037,14 +4037,21 @@ PHP_FUNCTION(openssl_pkey_new)
 					zval *x;
 					zval *y;
 
-					if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1)) != NULL
-						&& Z_TYPE_P(bn) == IS_STRING) {
+					if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1)) != NULL &&
+							Z_TYPE_P(bn) == IS_STRING) {
 						int nid = OBJ_sn2nid(Z_STRVAL_P(bn));
 						if (nid != NID_undef) {
 							group = EC_GROUP_new_by_curve_name(nid);
+							if (!group) {
+								php_openssl_store_errors();
+								goto clean_exit;
+							}
 							EC_GROUP_set_asn1_flag(group, OPENSSL_EC_NAMED_CURVE);
 							EC_GROUP_set_point_conversion_form(group, POINT_CONVERSION_UNCOMPRESSED);
-							EC_KEY_set_group(eckey, group);
+							if (!EC_KEY_set_group(eckey, group)) {
+								php_openssl_store_errors();
+								goto clean_exit;
+							}
 						}
 					}
 
@@ -4054,48 +4061,62 @@ PHP_FUNCTION(openssl_pkey_new)
 					}
 
 					// The public key 'pnt' can be calculated from 'd' or is defined by 'x' and 'y'
-					if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "d", sizeof("d") - 1)) != NULL
-						&& Z_TYPE_P(bn) == IS_STRING) {
+					if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "d", sizeof("d") - 1)) != NULL &&
+							Z_TYPE_P(bn) == IS_STRING) {
 						d = BN_bin2bn((unsigned char*) Z_STRVAL_P(bn), Z_STRLEN_P(bn), NULL);
 						if (!EC_KEY_set_private_key(eckey, d)) {
+							php_openssl_store_errors();
 							goto clean_exit;
 						}
 						// Calculate the public key by multiplying the Point Q with the public key
 						// P = d * Q
 						pnt = EC_POINT_new(group);
-						if (!EC_POINT_mul(group, pnt, d, NULL, NULL, NULL)) {
+						if (!pnt || !EC_POINT_mul(group, pnt, d, NULL, NULL, NULL)) {
+							php_openssl_store_errors();
 							goto clean_exit;
 						}
-					} else if ((x = zend_hash_str_find(Z_ARRVAL_P(data), "x", sizeof("x") - 1)) != NULL
-						&& Z_TYPE_P(x) == IS_STRING
-						&& (y = zend_hash_str_find(Z_ARRVAL_P(data), "y", sizeof("y") - 1)) != NULL
-						&& Z_TYPE_P(y) == IS_STRING) {
+					} else if ((x = zend_hash_str_find(Z_ARRVAL_P(data), "x", sizeof("x") - 1)) != NULL &&
+							Z_TYPE_P(x) == IS_STRING &&
+							(y = zend_hash_str_find(Z_ARRVAL_P(data), "y", sizeof("y") - 1)) != NULL &&
+							Z_TYPE_P(y) == IS_STRING) {
 						pnt = EC_POINT_new(group);
 						if (pnt == NULL) {
+							php_openssl_store_errors();
 							goto clean_exit;
 						}
-						if (!EC_POINT_set_affine_coordinates_GFp(group, pnt, BN_bin2bn((unsigned char*) Z_STRVAL_P(x), Z_STRLEN_P(x), NULL),
-							BN_bin2bn((unsigned char*) Z_STRVAL_P(y), Z_STRLEN_P(y), NULL), NULL)) {
+						if (!EC_POINT_set_affine_coordinates_GFp(
+								group, pnt, BN_bin2bn((unsigned char*) Z_STRVAL_P(x), Z_STRLEN_P(x), NULL),
+								BN_bin2bn((unsigned char*) Z_STRVAL_P(y), Z_STRLEN_P(y), NULL), NULL)) {
+							php_openssl_store_errors();
 							goto clean_exit;
 						}
 					}
-
-					EC_GROUP_free(group);
 
 					if (pnt != NULL) {
 						if (!EC_KEY_set_public_key(eckey, pnt)) {
+							php_openssl_store_errors();
 							goto clean_exit;
 						}
 						EC_POINT_free(pnt);
+						pnt = NULL;
 					}
 
 					if (!EC_KEY_check_key(eckey)) {
+						PHP_OPENSSL_RAND_ADD_TIME();
 						EC_KEY_generate_key(eckey);
+						php_openssl_store_errors();
 					}
 					if (EC_KEY_check_key(eckey) && EVP_PKEY_assign_EC_KEY(pkey, eckey)) {
+						EC_GROUP_free(group);
 						RETURN_RES(zend_register_resource(pkey, le_key));
+					} else {
+						php_openssl_store_errors();
 					}
+				} else {
+					php_openssl_store_errors();
 				}
+			} else {
+				php_openssl_store_errors();
 			}
 clean_exit:
 			if (pnt != NULL) {
@@ -4447,6 +4468,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			if (pkey->pkey.ec != NULL) {
 				zval ec;
 				const EC_GROUP *ec_group;
+				const EC_POINT *pub;
 				int nid;
 				char *crv_sn;
 				ASN1_OBJECT *obj;
@@ -4479,11 +4501,13 @@ PHP_FUNCTION(openssl_pkey_get_details)
 					ASN1_OBJECT_free(obj);
 				}
 
-				const EC_POINT *pub = EC_KEY_get0_public_key(ec_key);
+				pub = EC_KEY_get0_public_key(ec_key);
 
 				if (EC_POINT_get_affine_coordinates_GFp(ec_group, pub, x, y, NULL)) {
 					OPENSSL_GET_BN(ec, x, x);
 					OPENSSL_GET_BN(ec, y, y);
+				} else {
+					php_openssl_store_errors();
 				}
 
 				if ((d = EC_KEY_get0_private_key(pkey->pkey.ec)) != NULL) {
@@ -5710,14 +5734,14 @@ PHP_FUNCTION(openssl_get_curve_names)
 	EC_builtin_curve *curves = NULL;
 	const char *sname;
 	int i;
-
-	array_init(return_value);
 	size_t len = EC_get_builtin_curves(NULL, 0);
+
 	curves = emalloc(sizeof(EC_builtin_curve) * len);
 	if (!EC_get_builtin_curves(curves, len)) {
 		RETURN_FALSE;
 	}
 
+	array_init(return_value);
 	for (i = 0; i < len; i++) {
 		sname = OBJ_nid2sn(curves[i].nid);
 		if (sname != NULL) {
