@@ -26,6 +26,7 @@
 
 PHP_FUNCTION(var_dump);
 PHP_FUNCTION(var_export);
+PHP_FUNCTION(var_info);
 PHP_FUNCTION(debug_zval_dump);
 PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
