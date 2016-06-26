@@ -1018,7 +1018,8 @@ zend_object_iterator_funcs spl_fixedarray_it_funcs = {
 	spl_fixedarray_it_get_current_data,
 	spl_fixedarray_it_get_current_key,
 	spl_fixedarray_it_move_forward,
-	spl_fixedarray_it_rewind
+	spl_fixedarray_it_rewind,
+	NULL
 };
 
 zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

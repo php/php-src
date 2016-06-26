@@ -1329,7 +1329,7 @@ pass2_no_dither (j_decompress_ptr cinfo,
 	  /* If the pixel is transparent, we assign it the palette index that
 	   * will later be added at the end of the palette as the transparent
 	   * index. */
-	  if ((oim->transparent >= 0) && (oim->transparent == *(inptr - 1)))
+	  if ((oim->transparent >= 0) && (oim->transparent == *inptr))
 	    {
 	      *outptr++ = nim->colorsTotal;
 	      inptr++;

@@ -89,10 +89,14 @@ require_once('skipifconnectfailure.inc');
 		mysqli_fetch_object($res);
 	}
 
-	$obj = $res->fetch_object('mysqli_fetch_object_construct', array('a'));
-	if (($obj->ID !== "4") || ($obj->label !== "d") || ($obj->a !== 'a') || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
-		printf("[010] Object seems wrong. [%d] %s\n", $mysqli->errno, $mysqli->error);
-		var_dump($obj);
+	try {
+		$obj = $res->fetch_object('mysqli_fetch_object_construct', array('a'));
+		if (($obj->ID !== "4") || ($obj->label !== "d") || ($obj->a !== 'a') || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
+			printf("[010] Object seems wrong. [%d] %s\n", $mysqli->errno, $mysqli->error);
+			var_dump($obj);
+		}
+	} catch (Throwable $e) {
+		echo "Exception: " . $e->getMessage() . "\n";
 	}
 
 	$obj = $res->fetch_object('mysqli_fetch_object_construct', array('a', 'b'));
@@ -132,8 +136,7 @@ require_once('skipifconnectfailure.inc');
 [0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
 [0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
 [0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, null given in %s on line %d
-[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
-[E_NOTICE] Undefined variable: b in %s on line %d
+Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL
 NULL
 [E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d

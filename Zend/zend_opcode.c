@@ -85,8 +85,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
 
-	op_array->this_var = -1;
-
 	op_array->fn_flags = 0;
 
 	op_array->early_binding = -1;
@@ -467,7 +465,7 @@ zend_op *get_next_op(zend_op_array *op_array)
 	return next_op;
 }
 
-int get_next_op_number(zend_op_array *op_array)
+uint32_t get_next_op_number(zend_op_array *op_array)
 {
 	return op_array->last;
 }

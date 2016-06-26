@@ -248,7 +248,10 @@ END_EXTERN_C()
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-# ifdef PATH_MAX
+# if PHP_WIN32
+#  include "win32/ioutil.h"
+#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
+# elif PATH_MAX
 #  define MAXPATHLEN PATH_MAX
 # elif defined(MAX_PATH)
 #  define MAXPATHLEN MAX_PATH
@@ -280,7 +283,12 @@ PHPAPI size_t php_write(void *buf, size_t size);
 PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
 		2);
 PHPAPI int php_get_module_initialized(void);
+#ifdef HAVE_SYSLOG_H
+#include "php_syslog.h"
 #define php_log_err(msg) php_log_err_with_severity(msg, LOG_NOTICE)
+#else
+#define php_log_err(msg) php_log_err_with_severity(msg, 5)
+#endif
 PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int);
 int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 int cfgparse(void);

@@ -299,11 +299,11 @@ PHPAPI void php_session_reset_id(void);
 	HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
-			php_error_docref(NULL, E_NOTICE,				\
-					"Skipping numeric key %pd", num_key);			\
+			php_error_docref(NULL, E_NOTICE,						\
+					"Skipping numeric key " ZEND_LONG_FMT, num_key);\
 			continue;												\
 		}															\
-		if ((struc = php_get_session_var(key))) {			\
+		if ((struc = php_get_session_var(key))) {					\
 			code;		 											\
 		} 															\
 	} ZEND_HASH_FOREACH_END();										\

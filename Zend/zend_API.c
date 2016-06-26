@@ -495,6 +495,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
 	int check_null = 0;
+	int separate = 0;
 	zval *real_arg = arg;
 
 	/* scan through modifiers */
@@ -503,6 +504,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		if (*spec_walk == '/') {
 			SEPARATE_ZVAL_NOREF(arg);
 			real_arg = arg;
+			separate = 1;
 		} else if (*spec_walk == '!') {
 			check_null = 1;
 		} else {
@@ -622,7 +624,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				HashTable **p = va_arg(*va, HashTable **);
 
-				if (!zend_parse_arg_array_ht(arg, p, check_null, c == 'H')) {
+				if (!zend_parse_arg_array_ht(arg, p, check_null, c == 'H', separate)) {
 					return "array";
 				}
 			}
@@ -2890,7 +2892,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		*strict_class = 1;
 		ret = 1;
 	} else {
-		if (error) zend_spprintf(error, 0, "class '%.*s' not found", name_len, ZSTR_VAL(name));
+		if (error) zend_spprintf(error, 0, "class '%.*s' not found", (int)name_len, ZSTR_VAL(name));
 	}
 	ZSTR_ALLOCA_FREE(lcname, use_heap);
 	return ret;
@@ -3844,7 +3846,7 @@ ZEND_API void zend_update_property_ex(zend_class_entry *scope, zval *object, zen
 	EG(fake_scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, ZSTR_VAL(Z_OBJCE_P(object)->name));
+		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be updated", ZSTR_VAL(name), ZSTR_VAL(Z_OBJCE_P(object)->name));
 	}
 	ZVAL_STR(&property, name);
 	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL);
@@ -4039,7 +4041,7 @@ ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zval *object, zend
 	EG(fake_scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->read_property) {
-		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be read", name, ZSTR_VAL(Z_OBJCE_P(object)->name));
+		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be read", ZSTR_VAL(name), ZSTR_VAL(Z_OBJCE_P(object)->name));
 	}
 
 	ZVAL_STR(&property, name);

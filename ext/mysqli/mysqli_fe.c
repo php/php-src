@@ -579,7 +579,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(thread_safe, mysqli_thread_safe, arginfo_mysqli_no_params)
 	PHP_FALIAS(use_result, mysqli_use_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(refresh,mysqli_refresh, arginfo_class_mysqli_refresh)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -604,7 +604,7 @@ const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_row, mysqli_fetch_row, arginfo_mysqli_no_params)
 	PHP_FALIAS(field_seek, mysqli_field_seek, arginfo_class_mysqli_result_and_fieldnr)
 	PHP_FALIAS(free_result, mysqli_free_result, arginfo_mysqli_no_params)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -637,7 +637,7 @@ const zend_function_entry mysqli_stmt_methods[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(get_result, mysqli_stmt_get_result, arginfo_mysqli_no_params)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

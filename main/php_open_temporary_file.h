@@ -21,9 +21,12 @@
 #ifndef PHP_OPEN_TEMPORARY_FILE_H
 #define PHP_OPEN_TEMPORARY_FILE_H
 
+#define PHP_TMP_FILE_OPEN_BASEDIR_CHECK (1<<0)
+#define PHP_TMP_FILE_SILENT (1<<1)
+
 BEGIN_EXTERN_C()
 PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, zend_string **opened_path_p);
-PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, zend_bool open_basedir_check);
+PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, uint32_t flags);
 PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, zend_string **opened_path_p);
 PHPAPI const char *php_get_temporary_directory(void);
 END_EXTERN_C()

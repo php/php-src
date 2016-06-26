@@ -1169,7 +1169,8 @@ static php_stream_ops php_stream_sqlite3_ops = {
 	"SQLite3",
 	php_sqlite3_stream_seek,
 	php_sqlite3_stream_cast,
-	php_sqlite3_stream_stat
+	php_sqlite3_stream_stat,
+	NULL
 };
 
 /* {{{ proto resource SQLite3::openBlob(string table, string column, int rowid [, string dbname])

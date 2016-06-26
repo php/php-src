@@ -167,7 +167,7 @@ static void _php_curl_close(zend_resource *rsrc);
 # define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
-static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, const int len, zend_bool make_copy)
+static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, const size_t len, zend_bool make_copy)
 {
 	CURLcode error = CURLE_OK;
 
@@ -196,7 +196,7 @@ static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, 
 	return error == CURLE_OK ? SUCCESS : FAILURE;
 }
 
-static int php_curl_option_url(php_curl *ch, const char *url, const int len) /* {{{ */
+static int php_curl_option_url(php_curl *ch, const char *url, const size_t len) /* {{{ */
 {
 	/* Disable file:// if open_basedir are used */
 	if (PG(open_basedir) && *PG(open_basedir)) {

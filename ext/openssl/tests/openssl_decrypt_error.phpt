@@ -22,6 +22,9 @@ var_dump(openssl_decrypt($wrong, $wrong, $wrong));
 var_dump(openssl_decrypt(array(), $method, $password));
 var_dump(openssl_decrypt($encrypted, array(), $password));
 var_dump(openssl_decrypt($encrypted, $method, array()));
+
+// invalid using of an authentication tag
+var_dump(openssl_encrypt($data, $method, $password, 0, $iv, $wrong));
 ?>
 --EXPECTF--
 
@@ -51,3 +54,6 @@ NULL
 
 Warning: openssl_decrypt() expects parameter 3 to be string, array given in %s on line %d
 NULL
+
+Warning: openssl_encrypt(): The authenticated tag cannot be provided for cipher that doesn not support AEAD in %s on line %d
+string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="

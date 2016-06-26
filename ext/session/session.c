@@ -2597,7 +2597,7 @@ static const zend_function_entry php_session_iface_functions[] = {
 	PHP_ABSTRACT_ME(SessionHandlerInterface, write, arginfo_session_class_write)
 	PHP_ABSTRACT_ME(SessionHandlerInterface, destroy, arginfo_session_class_destroy)
 	PHP_ABSTRACT_ME(SessionHandlerInterface, gc, arginfo_session_class_gc)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 
@@ -2605,7 +2605,7 @@ static const zend_function_entry php_session_iface_functions[] = {
 */
 static const zend_function_entry php_session_id_iface_functions[] = {
 	PHP_ABSTRACT_ME(SessionIdInterface, create_sid, arginfo_session_class_create_sid)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 
@@ -2614,7 +2614,7 @@ static const zend_function_entry php_session_id_iface_functions[] = {
 static const zend_function_entry php_session_update_timestamp_iface_functions[] = {
 	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateId, arginfo_session_class_validateId)
 	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_session_class_updateTimestamp)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 
@@ -2628,7 +2628,7 @@ static const zend_function_entry php_session_class_functions[] = {
 	PHP_ME(SessionHandler, destroy, arginfo_session_class_destroy, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, gc, arginfo_session_class_gc, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, create_sid, arginfo_session_class_create_sid, ZEND_ACC_PUBLIC)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

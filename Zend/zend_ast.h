@@ -266,5 +266,11 @@ static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, z
 static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast *op0) {
 	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
 }
-
+static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
+	zend_ast_list *list = zend_ast_get_list(ast);
+	if (list->children && list->child[list->children - 1] == NULL) {
+		list->children--;
+	}
+	return ast;
+}
 #endif

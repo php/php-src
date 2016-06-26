@@ -676,7 +676,8 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 {
 	spl_filesystem_object *intern;
 	char *path;
-	size_t parsed, len;
+	int parsed;
+	size_t len;
 	zend_long flags;
 	zend_error_handling error_handling;
 
@@ -834,7 +835,7 @@ SPL_METHOD(DirectoryIterator, seek)
 			zval_ptr_dtor(&retval);
 		}
 		if (!valid) {
-			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position %ld is out of range", pos);
+			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
 			return;
 		}
 		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_next, "next", NULL);
@@ -1608,7 +1609,8 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 	spl_filesystem_dir_it_current_data,
 	spl_filesystem_dir_it_current_key,
 	spl_filesystem_dir_it_move_forward,
-	spl_filesystem_dir_it_rewind
+	spl_filesystem_dir_it_rewind,
+	NULL
 };
 /* }}} */
 
@@ -1806,7 +1808,8 @@ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_current_data,
 	spl_filesystem_tree_it_current_key,
 	spl_filesystem_tree_it_move_forward,
-	spl_filesystem_tree_it_rewind
+	spl_filesystem_tree_it_rewind,
+	NULL
 };
 /* }}} */
 
@@ -2322,7 +2325,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 		intern->file_name = "php://memory";
 		intern->file_name_len = 12;
 	} else if (ZEND_NUM_ARGS()) {
-		intern->file_name_len = slprintf(tmp_fname, sizeof(tmp_fname), "php://temp/maxmemory:%pd", max_memory);
+		intern->file_name_len = slprintf(tmp_fname, sizeof(tmp_fname), "php://temp/maxmemory:" ZEND_LONG_FMT, max_memory);
 		intern->file_name = tmp_fname;
 	} else {
 		intern->file_name = "php://temp";
@@ -2966,7 +2969,7 @@ SPL_METHOD(SplFileObject, seek)
 	}
 
 	if (line_pos < 0) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line %pd", intern->file_name, line_pos);
+		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line " ZEND_LONG_FMT, intern->file_name, line_pos);
 		RETURN_FALSE;
 	}
 

@@ -527,11 +527,13 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 		case IS_ARRAY:
 			smart_str_appends(str, "Array, ");
 			break;
-		case IS_OBJECT:
+		case IS_OBJECT: {
+			zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
 			smart_str_appends(str, "Object(");
-			smart_str_appends(str, ZSTR_VAL(Z_OBJCE_P(arg)->name));
+			smart_str_appends(str, ZSTR_VAL(class_name));
 			smart_str_appends(str, "), ");
 			break;
+		}
 	}
 }
 /* }}} */
@@ -617,7 +619,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	}
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
-			zend_error(E_WARNING, "Expected array for frame %pu", index);
+			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
 			continue;
 		}
 

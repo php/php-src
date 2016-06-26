@@ -204,7 +204,7 @@ array(14) {
     float(1.23456789E-13)
     ["E"]=>
     float(1.23456789E+34)
-    ["_empty_"]=>
+    [""]=>
     float(INF)
     ["E no ."]=>
     float(4000000000000)
@@ -527,7 +527,7 @@ array(14) {
   string(7) "rosebud"
 }
 ENCODE: FROM OBJECT
-["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},{},[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"_empty_":0,"E no .":4000000000000,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":{},"123":{"456":{"abc":{"789":"def","012":[1,2,"5",500],"ghi":[1,2,"five",50,"sixty"]}}},"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
+["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},{},[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"":0,"E no .":4000000000000,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":{},"123":{"456":{"abc":{"789":"def","012":[1,2,"5",500],"ghi":[1,2,"five",50,"sixty"]}}},"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
 ENCODE: FROM ARRAY
 ["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},[],[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"":0,"E no .":4000000000000,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":[],"123":{"456":{"abc":{"789":"def","012":[1,2,"5",500],"ghi":[1,2,"five",50,"sixty"]}}},"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
 DECODE AGAIN: AS OBJECT
@@ -566,7 +566,7 @@ array(14) {
     float(1.23456789E-13)
     ["E"]=>
     float(1.23456789E+34)
-    ["_empty_"]=>
+    [""]=>
     int(0)
     ["E no ."]=>
     int(4000000000000)

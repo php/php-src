@@ -311,7 +311,7 @@ void pdo_sqlstate_fini_error_table(void)
 
 int pdo_sqlstate_init_error_table(void)
 {
-	int i;
+	size_t i;
 	const struct pdo_sqlstate_info *info;
 
 	zend_hash_init(&err_hash, sizeof(err_initializer)/sizeof(err_initializer[0]), NULL, NULL, 1);

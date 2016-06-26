@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2014 University of Cambridge
+           Copyright (c) 1997-2016 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -275,7 +275,7 @@ pcre.h(.in) and disable (comment out) this message. */
 
 typedef pcre_uint16 pcre_uchar;
 #define UCHAR_SHIFT (1)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 2)
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
@@ -283,7 +283,7 @@ typedef pcre_uint16 pcre_uchar;
 
 typedef pcre_uint32 pcre_uchar;
 #define UCHAR_SHIFT (2)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 4)
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
@@ -2289,7 +2289,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
        ERR70, ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79,
-       ERR80, ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERRCOUNT };
+       ERR80, ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERRCOUNT };
 
 /* JIT compiling modes. The function list is indexed by them. */
 

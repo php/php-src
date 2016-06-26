@@ -620,7 +620,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
 				hostname.s?hostname.s:"", username.s?username.s:"", database.s?database.s:"", port, mysql_flags,
-				conn? conn->persistent:0, conn? GET_CONNECTION_STATE(&conn->state):-1);
+				conn? conn->persistent:0, conn? (int)GET_CONNECTION_STATE(&conn->state):-1);
 
 	if (GET_CONNECTION_STATE(&conn->state) > CONN_ALLOCED) {
 		DBG_INF("Connecting on a connected handle.");

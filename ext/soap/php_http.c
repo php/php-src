@@ -336,7 +336,7 @@ int make_http_soap_request(zval        *this_ptr,
 	zend_string *request;
 	smart_str soap_headers = {0};
 	smart_str soap_headers_z = {0};
-	int err;
+	size_t err;
 	php_url *phpurl = NULL;
 	php_stream *stream;
 	zval *trace, *tmp;
@@ -651,7 +651,7 @@ try_again:
 					if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "nc", sizeof("nc")-1)) != NULL &&
 					    Z_TYPE_P(tmp) == IS_LONG) {
 						Z_LVAL_P(tmp)++;
-						snprintf(nc, sizeof(nc), "%08ld", Z_LVAL_P(tmp));
+						snprintf(nc, sizeof(nc), "%08" ZEND_LONG_FMT_SPEC, Z_LVAL_P(tmp));
 					} else {
 						add_assoc_long(digest, "nc", 1);
 						strcpy(nc, "00000001");
@@ -980,10 +980,10 @@ try_again:
 					sempos = strstr(options, ";");
 					if (strstr(options,"path=") == options) {
 						eqpos = options + sizeof("path=")-1;
-						add_index_stringl(&zcookie, 1, eqpos, sempos?(sempos-eqpos):strlen(eqpos));
+						add_index_stringl(&zcookie, 1, eqpos, sempos?(size_t)(sempos-eqpos):strlen(eqpos));
 					} else if (strstr(options,"domain=") == options) {
 						eqpos = options + sizeof("domain=")-1;
-						add_index_stringl(&zcookie, 2, eqpos, sempos?(sempos-eqpos):strlen(eqpos));
+						add_index_stringl(&zcookie, 2, eqpos, sempos?(size_t)(sempos-eqpos):strlen(eqpos));
 					} else if (strstr(options,"secure") == options) {
 						add_index_bool(&zcookie, 3, 1);
 					}

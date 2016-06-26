@@ -67,6 +67,7 @@ static int dummy_internal_encoding_setter(const zend_encoding *encoding)
 	return FAILURE;
 }
 
+static zend_multibyte_functions multibyte_functions_dummy;
 static zend_multibyte_functions multibyte_functions = {
 	NULL,
 	dummy_encoding_fetcher,
@@ -108,6 +109,7 @@ ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functi
 		return FAILURE;
 	}
 
+	multibyte_functions_dummy = multibyte_functions;
 	multibyte_functions = *functions;
 
 	/* As zend_multibyte_set_functions() gets called after ini settings were
@@ -118,6 +120,11 @@ ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functi
 		zend_multibyte_set_script_encoding_by_string(value, strlen(value));
 	}
 	return SUCCESS;
+}
+
+ZEND_API void zend_multibyte_restore_functions(void)
+{
+	multibyte_functions = multibyte_functions_dummy;
 }
 
 ZEND_API const zend_multibyte_functions *zend_multibyte_get_functions(void)

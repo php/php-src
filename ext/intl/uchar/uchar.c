@@ -11,7 +11,7 @@ static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
 	} else if (Z_TYPE_P(zcp) == IS_STRING) {
-		int i = 0;
+		size_t i = 0;
 		U8_NEXT(Z_STRVAL_P(zcp), i, Z_STRLEN_P(zcp), cp);
 		if (i != Z_STRLEN_P(zcp)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);

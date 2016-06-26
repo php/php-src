@@ -1033,7 +1033,7 @@ ZEND_FUNCTION(gmp_init)
 	}
 
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, GMP_MAX_BASE);
+		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1049,7 +1049,7 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 {
 	if (size < 1) {
 		php_error_docref(NULL, E_WARNING,
-			"Word size must be positive, %pd given", size);
+			"Word size must be positive, " ZEND_LONG_FMT " given", size);
 		return FAILURE;
 	}
 
@@ -1190,7 +1190,7 @@ ZEND_FUNCTION(gmp_strval)
 	/* Although the maximum base in general in GMP is 62, mpz_get_str()
 	 * is explicitly limited to -36 when dealing with negative bases. */
 	if ((base < 2 && base > -2) || base > GMP_MAX_BASE || base < -36) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
+		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 

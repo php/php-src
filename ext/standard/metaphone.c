@@ -168,7 +168,7 @@ static char Lookahead(char *word, int how_far)
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
-	int p_idx = 0;				/* end of the phoned phrase */
+	size_t p_idx = 0;				/* end of the phoned phrase */
 	size_t max_buffer_len = 0;		/* maximum length of the destination buffer */
 
 /*-- Parameter checks --*/
@@ -265,7 +265,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 
 	/* On to the metaphoning */
 	for (; Curr_Letter != '\0' &&
-		 (max_phonemes == 0 || Phone_Len < max_phonemes);
+		 (max_phonemes == 0 || Phone_Len < (size_t)max_phonemes);
 		 w_idx++) {
 		/* How many letters to skip because an eariler encoding handled
 		 * multiple letters */

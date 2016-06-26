@@ -665,7 +665,7 @@ static void zend_end_live_range(zend_op_array *op_array, uint32_t offset, uint32
 {
 	zend_live_range *range = op_array->live_range + offset;
 
-	if (range->start == end && offset == op_array->last_live_range - 1) {
+	if (range->start == end && offset == (uint32_t)op_array->last_live_range - 1) {
 		op_array->last_live_range--;
 	} else {
 		range->end = end;
@@ -756,6 +756,9 @@ void zend_do_free(znode *op1) /* {{{ */
 				   additional FREE opcode and simplify the FETCH handlers
 				   their selves */
 				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
+			} else if (opline->opcode == ZEND_FETCH_THIS) {
+				opline->opcode = ZEND_NOP;
+				opline->result_type = IS_UNUSED;
 			} else {
 				opline->result_type = IS_UNUSED;
 			}
@@ -1148,7 +1151,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
 			 * approach to work.
 			 */
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare  %s, because the name is already in use", zend_get_object_type(Z_OBJCE_P(lcname)), Z_STRVAL_P(lcname));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare  %s, because the name is already in use", zend_get_object_type(Z_OBJCE_P(lcname)));
 		}
 		return NULL;
 	}
@@ -1928,6 +1931,10 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 {
 	zend_uchar factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
 	
+	if (opline->opcode == ZEND_FETCH_THIS) {
+		return;
+	}
+
 	switch (type & BP_VAR_MASK) {
 		case BP_VAR_R:
 			return;
@@ -2329,7 +2336,8 @@ void zend_emit_final_return(int return_one) /* {{{ */
 	zend_op *ret;
 	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
-	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE
+			&& !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR)) {
 		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1, 1);
 	}
 
@@ -2526,9 +2534,6 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 		/* lookup_cv may be using another zend_string instance  */
 		name = CG(active_op_array)->vars[EX_VAR_TO_NUM(result->u.op.var)];
 
-		if (zend_string_equals_literal(name, "this")) {
-			CG(active_op_array)->this_var = result->u.op.var;
-		}
 		return SUCCESS;
 	}
 
@@ -2559,22 +2564,31 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		opline->extended_value = ZEND_FETCH_GLOBAL;
 	} else {
 		opline->extended_value = ZEND_FETCH_LOCAL;
-		/* there is a chance someone is accessing $this */
-		if (ast->kind != ZEND_AST_ZVAL
-			&& CG(active_op_array)->scope && CG(active_op_array)->this_var == (uint32_t)-1
-		) {
-			zend_string *key = CG(known_strings)[ZEND_STR_THIS];
-			CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key);
-		}
 	}
 
 	return opline;
 }
 /* }}} */
 
+static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
+{
+	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
+		zval *name = zend_ast_get_zval(ast->child[0]);
+		return Z_TYPE_P(name) == IS_STRING && zend_string_equals_literal(Z_STR_P(name), "this");
+	}
+
+	return 0;
+}
+/* }}} */
+
 static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
-	if (zend_try_compile_cv(result, ast) == FAILURE) {
+	zend_op *opline;
+
+	if (is_this_fetch(ast)) {
+		opline = zend_emit_op(result, ZEND_FETCH_THIS, NULL, NULL);
+		zend_adjust_for_fetch_type(opline, type);
+	} else if (zend_try_compile_cv(result, ast) == FAILURE) {
 		zend_op *opline = zend_compile_simple_var_no_cv(result, ast, type, delayed);
 		zend_adjust_for_fetch_type(opline, type);
 	}
@@ -2652,17 +2666,6 @@ void zend_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	zend_op *opline = zend_compile_dim_common(result, ast, type);
 	zend_adjust_for_fetch_type(opline, type);
-}
-/* }}} */
-
-static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
-{
-	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
-		zval *name = zend_ast_get_zval(ast->child[0]);
-		return Z_TYPE_P(name) == IS_STRING && zend_string_equals_literal(Z_STR_P(name), "this");
-	}
-
-	return 0;
 }
 /* }}} */
 
@@ -2795,9 +2798,10 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 		zend_emit_assign_znode(var_ast, &fetch_result);
 	}
 
-	if (!has_elems) {
+	if (has_elems == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
 	}
+
 }
 /* }}} */
 
@@ -2815,6 +2819,10 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
 		}
 
+		if (key_ast == NULL) {
+			zend_error(E_COMPILE_ERROR, "Cannot mix keyed and unkeyed array entries in assignments");
+		}
+
 		zend_compile_expr(&dim_node, key_ast);
 
 		if (expr_node->op_type == IS_CONST) {
@@ -2823,10 +2831,6 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 
 		if (var_ast == NULL) {
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array entries in keyed array");
-		}
-
-		if (key_ast == NULL) {
-			zend_error(E_COMPILE_ERROR, "Cannot mix keyed and unkeyed array entries in assignments");
 		}
 
 		zend_verify_list_assign_target(var_ast, old_style);
@@ -2963,7 +2967,8 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_dim(result, var_ast, BP_VAR_W);
 
-			if (zend_is_assign_to_self(var_ast, expr_ast)) {
+			if (zend_is_assign_to_self(var_ast, expr_ast)
+			 && !is_this_fetch(expr_ast)) {
 				/* $a[0] = $a should evaluate the right $a first */
 				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
 			} else {
@@ -3897,7 +3902,9 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 		convert_to_string(&name_node.u.constant);
 	}
 
-	if (zend_try_compile_cv(&result, var_ast) == SUCCESS) {
+	if (is_this_fetch(var_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as global variable");
+	} else if (zend_try_compile_cv(&result, var_ast) == SUCCESS) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node);
 		zend_alloc_cache_slot(opline->op2.constant);
 	} else {
@@ -3942,6 +3949,10 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 	}
 	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
 
+	if (zend_string_equals_literal(Z_STR(var_node.u.constant), "this")) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as static variable");
+	}
+
 	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, &var_node);
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR(var_node.u.constant)));
@@ -3975,7 +3986,9 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
-			if (zend_try_compile_cv(&var_node, var_ast) == SUCCESS) {
+			if (is_this_fetch(var_ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot unset $this");
+			} else if (zend_try_compile_cv(&var_node, var_ast) == SUCCESS) {
 				opline = zend_emit_op(NULL, ZEND_UNSET_VAR, &var_node, NULL);
 				opline->extended_value = ZEND_FETCH_LOCAL | ZEND_QUICK_SET;
 			} else {
@@ -4000,7 +4013,7 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
+static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value) /* {{{ */
 {
 	zend_loop_var *base;
 	zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
@@ -4017,7 +4030,11 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 			opline->result_type = IS_TMP_VAR;
 			opline->result.var = loop_var->var_num;
 			SET_UNUSED(opline->op1);
-			SET_UNUSED(opline->op2);
+			if (return_value) {
+				SET_NODE(opline->op2, return_value);
+			} else {
+				SET_UNUSED(opline->op2);
+			}
 			opline->op1.num = loop_var->u.try_catch_offset;
 		} else if (loop_var->opcode == ZEND_DISCARD_EXCEPTION) {
 			zend_op *opline = get_next_op(CG(active_op_array));
@@ -4051,9 +4068,9 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 }
 /* }}} */
 
-static int zend_handle_loops_and_finally(void) /* {{{ */
+static int zend_handle_loops_and_finally(znode *return_value) /* {{{ */
 {
-	return zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
+	return zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1, return_value);
 }
 /* }}} */
 
@@ -4080,7 +4097,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
 	}
 
-	zend_handle_loops_and_finally();
+	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
 
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
@@ -4150,7 +4167,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "'%s' not in the 'loop' or 'switch' context",
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
-		if (!zend_handle_loops_and_finally_ex(depth)) {
+		if (!zend_handle_loops_and_finally_ex(depth, NULL)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
 				depth, depth == 1 ? "" : "s");
@@ -4233,7 +4250,7 @@ void zend_compile_goto(zend_ast *ast) /* {{{ */
 	zend_compile_expr(&label_node, label_ast);
 
 	/* Label resolution and unwinding adjustments happen in pass two. */
-	zend_handle_loops_and_finally();
+	zend_handle_loops_and_finally(NULL);
 	opline = zend_emit_op(NULL, ZEND_GOTO, NULL, &label_node);
 	opline->op1.num = get_next_op_number(CG(active_op_array)) - opnum_start - 1;
 	opline->extended_value = CG(context).current_brk_cont;
@@ -4406,7 +4423,9 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opnum_fetch = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 
-	if (value_ast->kind == ZEND_AST_VAR &&
+	if (is_this_fetch(value_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
+	} else if (value_ast->kind == ZEND_AST_VAR &&
 	    zend_try_compile_cv(&value_node, value_ast) == SUCCESS) {
 		SET_NODE(opline->op2, &value_node);
 	} else {
@@ -4659,6 +4678,10 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 			opline->op1_type = IS_CONST;
 			opline->op1.constant = zend_add_class_name_literal(CG(active_op_array),
 					zend_resolve_class_name_ast(class_ast));
+
+			if (zend_string_equals_literal(Z_STR_P(var_name), "this")) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
+			}
 
 			opline->op2_type = IS_CV;
 			opline->op2.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR_P(var_name)));
@@ -5003,11 +5026,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter $%s",
 				ZSTR_VAL(name));
 		} else if (zend_string_equals_literal(name, "this")) {
-			if ((op_array->scope || (op_array->fn_flags & ZEND_ACC_CLOSURE))
-					&& (op_array->fn_flags & ZEND_ACC_STATIC) == 0) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as parameter");
-			}
-			op_array->this_var = var_node.u.op.var;
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as parameter");
 		}
 
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
@@ -6990,7 +7009,9 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
-			if (zend_try_compile_cv(&var_node, var_ast) == SUCCESS) {
+			if (is_this_fetch(var_ast)) {
+				opline = zend_emit_op(result, ZEND_ISSET_ISEMPTY_THIS, NULL, NULL);
+			} else if (zend_try_compile_cv(&var_node, var_ast) == SUCCESS) {
 				opline = zend_emit_op(result, ZEND_ISSET_ISEMPTY_VAR, &var_node, NULL);
 				opline->extended_value = ZEND_FETCH_LOCAL | ZEND_QUICK_SET;
 			} else {
@@ -7078,6 +7099,7 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *value_ast, *key_ast;
 		zend_bool by_ref;
+		znode value_node, key_node, *key_node_ptr = NULL;
 
 		if (elem_ast == NULL) {
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
@@ -7086,8 +7108,6 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		value_ast = elem_ast->child[0];
 		key_ast = elem_ast->child[1];
 		by_ref = elem_ast->attr;
-
-		znode value_node, key_node, *key_node_ptr = NULL;
 
 		if (key_ast) {
 			zend_compile_expr(&key_node, key_ast);

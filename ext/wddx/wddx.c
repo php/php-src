@@ -784,6 +784,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 
 		if (atts) for (i = 0; atts[i]; i++) {
 			if (!strcmp((char *)atts[i], EL_NAME) && atts[++i] && atts[i][0]) {
+				if (stack->varname) efree(stack->varname);
 				stack->varname = estrdup((char *)atts[i]);
 				break;
 			}
@@ -1015,6 +1016,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 					zval_ptr_dtor(&ent->data);
 					if (ent->varname) {
 						efree(ent->varname);
+						ent->varname = NULL;
 					}
 					ZVAL_UNDEF(&ent->data);
 				}

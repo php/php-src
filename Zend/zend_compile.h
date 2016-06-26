@@ -364,8 +364,6 @@ struct _zend_op_array {
 
 	uint32_t *refcount;
 
-	uint32_t this_var;
-
 	uint32_t last;
 	zend_op *opcodes;
 
@@ -785,7 +783,7 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 
 zend_op *get_next_op(zend_op_array *op_array);
 void init_op(zend_op *op);
-int get_next_op_number(zend_op_array *op_array);
+uint32_t get_next_op_number(zend_op_array *op_array);
 ZEND_API int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);

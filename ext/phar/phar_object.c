@@ -1315,7 +1315,7 @@ PHP_METHOD(Phar, unlinkArchive)
 	zname_len = strlen(zname);
 
 	if (zname_len > 7 && !memcmp(zname, "phar://", 7) && SUCCESS == phar_split_fname(zname, zname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
-		if (arch_len == fname_len && !memcmp(arch, fname, arch_len)) {
+		if ((size_t)arch_len == fname_len && !memcmp(arch, fname, arch_len)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar archive \"%s\" cannot be unlinked from within itself", fname);
 			efree(arch);
 			efree(entry);
@@ -1404,7 +1404,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 	if (!value) {
 		/* failure in get_current_data */
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned no value", ZSTR_VAL(ce->name));
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned no value", ZSTR_VAL(ce->name));
 		return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -1415,7 +1415,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			php_stream_from_zval_no_verify(fp, value);
 
 			if (!fp) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %v returned an invalid stream handle", ZSTR_VAL(ce->name));
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %s returned an invalid stream handle", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -1429,7 +1429,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 				if (Z_TYPE(key) != IS_STRING) {
 					zval_dtor(&key);
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 					return ZEND_HASH_APPLY_STOP;
 				}
 
@@ -1439,7 +1439,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				save = str_key;
 				zval_dtor(&key);
 			} else {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -1453,7 +1453,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				spl_filesystem_object *intern = (spl_filesystem_object*)((char*)Z_OBJ_P(value) - Z_OBJ_P(value)->handlers->offset);
 
 				if (!base_len) {
-					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %v returns an SplFileInfo object, so base directory must be specified", ZSTR_VAL(ce->name));
+					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %s returns an SplFileInfo object, so base directory must be specified", ZSTR_VAL(ce->name));
 					return ZEND_HASH_APPLY_STOP;
 				}
 
@@ -1497,7 +1497,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			}
 			/* fall-through */
 		default:
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid value (must return a string)", ZSTR_VAL(ce->name));
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid value (must return a string)", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -1537,7 +1537,7 @@ phar_spl_fileinfo:
 			}
 
 		} else {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned a path \"%s\" that is not in the base directory \"%s\"", ZSTR_VAL(ce->name), fname, base);
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned a path \"%s\" that is not in the base directory \"%s\"", ZSTR_VAL(ce->name), fname, base);
 
 			if (save) {
 				efree(save);
@@ -1557,7 +1557,7 @@ phar_spl_fileinfo:
 
 			if (Z_TYPE(key) != IS_STRING) {
 				zval_dtor(&key);
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -1567,13 +1567,13 @@ phar_spl_fileinfo:
 			save = str_key;
 			zval_dtor(&key);
 		} else {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
 
 	if (php_check_open_basedir(fname)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned a path \"%s\" that open_basedir prevents opening", ZSTR_VAL(ce->name), fname);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned a path \"%s\" that open_basedir prevents opening", ZSTR_VAL(ce->name), fname);
 
 		if (save) {
 			efree(save);
@@ -1590,7 +1590,7 @@ phar_spl_fileinfo:
 	fp = php_stream_open_wrapper(fname, "rb", STREAM_MUST_SEEK|0, &opened);
 
 	if (!fp) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned a file that could not be opened \"%s\"", ZSTR_VAL(ce->name), fname);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned a file that could not be opened \"%s\"", ZSTR_VAL(ce->name), fname);
 
 		if (save) {
 			efree(save);
@@ -2655,7 +2655,7 @@ PHP_METHOD(Phar, setAlias)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &alias, &alias_len) == SUCCESS) {
-		if (alias_len == phar_obj->archive->alias_len && memcmp(phar_obj->archive->alias, alias, alias_len) == 0) {
+		if (alias_len == (size_t)phar_obj->archive->alias_len && memcmp(phar_obj->archive->alias, alias, alias_len) == 0) {
 			RETURN_TRUE;
 		}
 		if (alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
@@ -3525,7 +3525,7 @@ PHP_METHOD(Phar, offsetGet)
 		}
 
 		if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot directly get any files or directories in magic \".phar\" directory", phar_obj->archive->fname);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot directly get any files or directories in magic \".phar\" directory");
 			return;
 		}
 
@@ -3551,8 +3551,8 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 	phar_entry_data *data;
 	php_stream *contents_file;
 
-	if (filename_len >= sizeof(".phar")-1 && !memcmp(filename, ".phar", sizeof(".phar")-1) && (filename[5] == '/' || filename[5] == '\\' || filename[5] == '\0')) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory", (*pphar)->fname);
+	if (filename_len >= (int)sizeof(".phar")-1 && !memcmp(filename, ".phar", sizeof(".phar")-1) && (filename[5] == '/' || filename[5] == '\\' || filename[5] == '\0')) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
 		return;
 	}
 
@@ -3669,7 +3669,7 @@ PHP_METHOD(Phar, offsetSet)
 	}
 
 	if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set any files or directories in magic \".phar\" directory", phar_obj->archive->fname);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set any files or directories in magic \".phar\" directory");
 		return;
 	}
 
@@ -4120,14 +4120,14 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			if (!php_stream_mkdir(fullpath, entry->flags & PHAR_ENT_PERM_MASK,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
 				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
 				efree(fullpath);
-				free(new_state.cwd);
+				efree(new_state.cwd);
 				return FAILURE;
 			}
 		} else {
 			if (!php_stream_mkdir(fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
 				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
 				efree(fullpath);
-				free(new_state.cwd);
+				efree(new_state.cwd);
 				return FAILURE;
 			}
 		}

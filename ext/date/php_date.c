@@ -1071,7 +1071,8 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 static zend_string *date_format(char *format, size_t format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
-	int                  i, length = 0;
+	size_t               i;
+	int                  length = 0;
 	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
@@ -2013,6 +2014,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_immutable.clone_obj = date_object_clone_date;
 	date_object_handlers_immutable.compare_objects = date_object_compare_date;
 	date_object_handlers_immutable.get_properties = date_object_get_properties;
+	date_object_handlers_immutable.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_immutable, 1, date_ce_interface);
 
 	INIT_CLASS_ENTRY(ce_timezone, "DateTimeZone", date_funcs_timezone);
@@ -2170,7 +2172,7 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 
 	props = zend_std_get_properties(object);
 
-	if (!dateobj->time || GC_G(gc_active)) {
+	if (!dateobj->time) {
 		return props;
 	}
 
@@ -4216,7 +4218,8 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 static zend_string *date_interval_format(char *format, size_t format_len, timelib_rel_time *t)
 {
 	smart_str            string = {0};
-	int                  i, length, have_format_spec = 0;
+	size_t               i;
+	int                  length, have_format_spec = 0;
 	char                 buffer[33];
 
 	if (!format_len) {
@@ -4851,7 +4854,7 @@ static HashTable *date_object_get_properties_period(zval *object) /* {{{ */
 
 	props = zend_std_get_properties(object);
 
-	if (!period_obj->start || GC_G(gc_active)) {
+	if (!period_obj->start) {
 		return props;
 	}
 

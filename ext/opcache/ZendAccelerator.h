@@ -75,7 +75,8 @@
 
 #ifdef ZEND_WIN32
 # ifndef MAXPATHLEN
-#  define MAXPATHLEN     _MAX_PATH
+#  include "win32/ioutil.h"
+#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # endif
 # include <direct.h>
 #else

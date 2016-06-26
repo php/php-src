@@ -2703,7 +2703,8 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
  * Process nested IFDs directories in Maker Note. */
 static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, char *offset_base, size_t IFDlength, size_t displacement)
 {
-	int de, i=0, section_index = SECTION_MAKERNOTE;
+	size_t i;
+	int de, section_index = SECTION_MAKERNOTE;
 	int NumDirEntries, old_motorola_intel, offset_diff;
 	const maker_note_type *maker_note;
 	char *dir_start;
@@ -2869,11 +2870,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			}
 
 			fpos = php_stream_tell(ImageInfo->infile);
-			php_stream_seek(ImageInfo->infile, offset_val, SEEK_SET);
+			php_stream_seek(ImageInfo->infile, displacement+offset_val, SEEK_SET);
 			fgot = php_stream_tell(ImageInfo->infile);
-			if (fgot!=offset_val) {
+			if (fgot!=displacement+offset_val) {
 				EFREE_IF(outside);
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x%08X", fgot, offset_val);
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x%08X", fgot, displacement+offset_val);
 				return FALSE;
 			}
 			fgot = php_stream_read(ImageInfo->infile, value_ptr, byte_count);
@@ -3317,11 +3318,11 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 		}
 
 		/* Read the length of the section. */
-		if ((lh = php_stream_getc(ImageInfo->infile)) == EOF) {
+		if ((lh = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {
 			EXIF_ERRLOG_CORRUPT(ImageInfo)
 			return FALSE;
 		}
-		if ((ll = php_stream_getc(ImageInfo->infile)) == EOF) {
+		if ((ll = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {
 			EXIF_ERRLOG_CORRUPT(ImageInfo)
 			return FALSE;
 		}
