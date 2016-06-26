@@ -33,14 +33,6 @@
 #include "php_json_parser.h"
 #include <zend_exceptions.h>
 
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define NUM_BUF_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define NUM_BUF_SIZE 1080
-#endif
-
-
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);

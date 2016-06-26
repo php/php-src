@@ -35,17 +35,6 @@
 
 #define COMMON (is_ref ? "&" : "")
 
-/* Copied from main/spprintf.c and use the same buffer size
- *
- * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
- *
- * XXX: this is a magic number; do not decrease it
- * Emax = 1023
- * NDIG = 320
- * NUM_BUF_SIZE >= strlen("-") + Emax + strlrn(".") + NDIG + strlen("E+1023") + 1;
- */
-#define NUM_BUF_SIZE		2048
-
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
@@ -447,7 +436,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	char tmp_str[NUM_BUF_SIZE];
+	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
@@ -853,7 +842,7 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-			char tmp_str[NUM_BUF_SIZE];
+			char tmp_str[PHP_DOUBLE_MAX_LENGTH];
 			smart_str_appendl(buf, "d:", 2);
 			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
 			smart_str_appends(buf, tmp_str);

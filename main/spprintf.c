@@ -152,13 +152,9 @@
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
- *
- * XXX: this is a magic number; do not decrease it
- * Emax = 1023
- * NDIG = 320
- * NUM_BUF_SIZE >= strlen("-") + Emax + strlrn(".") + NDIG + strlen("E+1023") + 1;
+ * which can be at most max length of double
  */
-#define NUM_BUF_SIZE		2048
+#define NUM_BUF_SIZE PHP_DOUBLE_MAX_LENGTH
 
 #define NUM(c) (c - '0')
 
