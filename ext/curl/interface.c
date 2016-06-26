@@ -392,12 +392,20 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
 	ZEND_ARG_INFO(0, mh)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_errno, 0)
+	ZEND_ARG_INFO(0, mh)
+ZEND_END_ARG_INFO()
+
 #if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
 ZEND_BEGIN_ARG_INFO(arginfo_curl_strerror, 0)
 	ZEND_ARG_INFO(0, errornum)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_strerror, 0)
+	ZEND_ARG_INFO(0, errornum)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_curl_share_strerror, 0)
 	ZEND_ARG_INFO(0, errornum)
 ZEND_END_ARG_INFO()
 #endif
@@ -413,6 +421,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_share_setopt, 0)
 	ZEND_ARG_INFO(0, sh)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_curl_share_errno, 0)
+	ZEND_ARG_INFO(0, sh)
 ZEND_END_ARG_INFO()
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
@@ -445,6 +457,7 @@ const zend_function_entry curl_functions[] = {
 #if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
 	PHP_FE(curl_strerror,            arginfo_curl_strerror)
 	PHP_FE(curl_multi_strerror,      arginfo_curl_multi_strerror)
+	PHP_FE(curl_share_strerror,      arginfo_curl_share_strerror)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 	PHP_FE(curl_reset,               arginfo_curl_reset)
@@ -464,12 +477,14 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_multi_getcontent,    arginfo_curl_multi_getcontent)
 	PHP_FE(curl_multi_info_read,     arginfo_curl_multi_info_read)
 	PHP_FE(curl_multi_close,         arginfo_curl_multi_close)
+	PHP_FE(curl_multi_errno,         arginfo_curl_multi_errno)
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 	PHP_FE(curl_multi_setopt,        arginfo_curl_multi_setopt)
 #endif
 	PHP_FE(curl_share_init,          arginfo_curl_share_init)
 	PHP_FE(curl_share_close,         arginfo_curl_share_close)
 	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
+	PHP_FE(curl_share_errno,         arginfo_curl_share_errno)
 	PHP_FE(curl_file_create,         arginfo_curlfile_create)
 	PHP_FE_END
 };
