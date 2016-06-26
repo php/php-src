@@ -468,22 +468,17 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			/* TODO: check INF, -INF and NAN in the new logic
-			tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_P(struc));
-			smart_str_appendl(buf, tmp_str, tmp_len);
-			 * Without a decimal point, PHP treats a number literal as an int.
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			smart_str_appends(buf, tmp_str);
+			/* Without a decimal point, PHP treats a number literal as an int.
 			 * This check even works for scientific notation, because the
 			 * mantissa always contains a decimal point.
 			 * We need to check for finiteness, because INF, -INF and NAN
 			 * must not have a decimal point added.
-			 *
+			 */
 			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
 				smart_str_appendl(buf, ".0", 2);
 			}
-			efree(tmp_str);
-			*/
-			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			smart_str_appends(buf, tmp_str);
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STR_P(struc), 0, "'\\", 2);
