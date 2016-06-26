@@ -2837,7 +2837,7 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 	if (flags & PHP_LDAP_ESCAPE_DN && value[0] == ' ') {
 		len += 2;
 	}
-	if (flags & PHP_LDAP_ESCAPE_DN && valuelen && value[valuelen - 1] == ' ') {
+	if (flags & PHP_LDAP_ESCAPE_DN && valuelen > 1 && value[valuelen - 1] == ' ') {
 		len += 2;
 	}
 
