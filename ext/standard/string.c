@@ -4267,7 +4267,7 @@ PHP_FUNCTION(nl2br)
 {
 	/* in brief this inserts <br /> or <br> before matched regexp \n\r?|\r\n? */
 	char		*tmp, *str;
-	int		new_length;
+	size_t		new_length;
 	char		*end, *target;
 	int		repl_cnt = 0;
 	int		str_len;
