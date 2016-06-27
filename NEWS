@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #72336 (openssl_pkey_new does not fail for invalid DSA params).
     (Jakub Zelenka)
 
+- SQLite3:
+  . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
+    (cmb)
+
 - Streams:
   . Fixed bug #72439 (Stream socket with remote address leads to a segmentation
     fault). (Laruence)
