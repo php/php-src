@@ -1230,7 +1230,7 @@ static void unset_zval_property(zval* object, char* name)
 
 static void model_to_zval_any(zval *ret, xmlNodePtr node)
 {
-	zval rv, arr, val;
+	zval rv, arr, val, keepVal;
 	zval* any = NULL;
 	char* name = NULL;
 
@@ -1277,7 +1277,9 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node)
 					any = &arr;
 					name = NULL;
 				} else {
-					any = &val;
+					ZVAL_DUP(&keepVal, &val);
+					zval_dtor(&val);
+					any = &keepVal;
 				}
 			} else {
 				/* Add array element */
