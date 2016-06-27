@@ -15,6 +15,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - Standard:
+  . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
 
 - OpenSSL:

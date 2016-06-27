@@ -46,6 +46,8 @@ PHP 7.1 UPGRADE NOTES
     the notice level only.
 
 - JSON:
+  . The serialize_precision is used instead of precision when encoding double
+    valuse.
   . An empty key is decoded as an empty property name instead of using _empty_
     property name when decoding object to stdClass.
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
@@ -152,6 +154,14 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- serialize_precision
+  . If value -1 is set, then the dtoa mode 0 is used. The value -1 is now
+    used by defualt.
+
+- precision
+  . If value -1 is set, then the dtoa mode 0 is used. No changes in default
+    value which is still 14.
 
 ========================================
 12. Windows Support

@@ -131,7 +131,7 @@ static PHP_INI_MH(OnSetPrecision)
 	zend_long i;
 
 	ZEND_ATOL(i, ZSTR_VAL(new_value));
-	if (i >= 0) {
+	if (i >= -1) {
 		EG(precision) = i;
 		return SUCCESS;
 	} else {
@@ -139,6 +139,23 @@ static PHP_INI_MH(OnSetPrecision)
 	}
 }
 /* }}} */
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnSetSerializePrecision)
+{
+	zend_long i;
+
+	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	if (i >= -1) {
+		PG(serialize_precision) = i;
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
 
 /* {{{ PHP_INI_MH
  */
@@ -533,7 +550,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("serialize_precision",	"17",	PHP_INI_ALL,		OnUpdateLongGEZero,			serialize_precision,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator.output",	"&",		PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator.output,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator.input",	"&",		PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateStringUnempty,	arg_separator.input,	php_core_globals,	core_globals)
 
