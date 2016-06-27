@@ -43,7 +43,7 @@ Version: PVERSION
 Release: PRELEASE
 Group: Networking/Daemons
 Source0: http://www.php.net/distributions/php-%{PACKAGE_VERSION}.tar.gz
-Copyright: PHP License
+License: PHP License
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Requires: PREQUIRES
 
@@ -200,4 +200,4 @@ cp -a $SPEC $SPECDIR/${SPEC}
 #cp -a *.patch $SRCDIR
 cd $SRCDIR
 cd $SPECDIR
-rpm -ba -v ${SPEC}
+rpmbuild -ba -v ${SPEC}
