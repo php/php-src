@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
 
+- SQLite3:
+  . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
+    (cmb)
+
 - Standard:
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
 
