@@ -90,14 +90,17 @@ PHP_FUNCTION(curl_multi_info_read);
 PHP_FUNCTION(curl_multi_init);
 PHP_FUNCTION(curl_multi_remove_handle);
 PHP_FUNCTION(curl_multi_select);
+PHP_FUNCTION(curl_multi_errno);
 
 PHP_FUNCTION(curl_share_close);
 PHP_FUNCTION(curl_share_init);
 PHP_FUNCTION(curl_share_setopt);
+PHP_FUNCTION(curl_share_errno);
 
 #if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
 PHP_FUNCTION(curl_strerror);
 PHP_FUNCTION(curl_multi_strerror);
+PHP_FUNCTION(curl_share_strerror);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
@@ -114,6 +117,7 @@ PHP_FUNCTION(curl_multi_setopt);
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 PHP_FUNCTION(curl_pause);
 #endif
+
 PHP_FUNCTION(curl_file_create);
 
 
@@ -190,10 +194,16 @@ typedef struct {
 	int         still_running;
 	CURLM      *multi;
 	zend_llist  easyh;
+	struct {
+		int no;
+	} err;
 } php_curlm;
 
 typedef struct {
 	CURLSH                   *share;
+	struct {
+		int no;
+	} err;
 } php_curlsh;
 
 void _php_curl_cleanup_handle(php_curl *);

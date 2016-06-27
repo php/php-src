@@ -49,6 +49,8 @@
 #include <unistd.h>
 #endif
 
+#define SAVE_CURLM_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
+
 /* {{{ proto resource curl_multi_init(void)
    Returns a new cURL multi handle */
 PHP_FUNCTION(curl_multi_init)
@@ -77,6 +79,7 @@ PHP_FUNCTION(curl_multi_add_handle)
 	php_curlm *mh;
 	php_curl  *ch;
 	zval tmp_val;
+	CURLMcode error = CURLM_OK;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &z_mh, &z_ch) == FAILURE) {
 		return;
@@ -97,7 +100,10 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	zend_llist_add_element(&mh->easyh, &tmp_val);
 
-	RETURN_LONG((zend_long)curl_multi_add_handle(mh->multi, ch->cp));
+	error = curl_multi_add_handle(mh->multi, ch->cp);
+	SAVE_CURLM_ERROR(mh, error);
+
+	RETURN_LONG((zend_long) error);
 }
 /* }}} */
 
@@ -137,6 +143,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 	zval      *z_ch;
 	php_curlm *mh;
 	php_curl  *ch;
+	CURLMcode error = CURLM_OK;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &z_mh, &z_ch) == FAILURE) {
 		return;
@@ -150,7 +157,10 @@ PHP_FUNCTION(curl_multi_remove_handle)
 		RETURN_FALSE;
 	}
 
-	RETVAL_LONG((zend_long)curl_multi_remove_handle(mh->multi, ch->cp));
+	error = curl_multi_remove_handle(mh->multi, ch->cp);
+	SAVE_CURLM_ERROR(mh, error);
+
+	RETVAL_LONG((zend_long) error);
 	zend_llist_del_element(&mh->easyh, z_ch, (int (*)(void *, void *))curl_compare_resources);
 
 }
@@ -178,6 +188,7 @@ PHP_FUNCTION(curl_multi_select)
 	int             maxfd;
 	double          timeout = 1.0;
 	struct timeval  to;
+	CURLMcode error = CURLM_OK;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|d", &z_mh, &timeout) == FAILURE) {
 		return;
@@ -193,7 +204,9 @@ PHP_FUNCTION(curl_multi_select)
 	FD_ZERO(&writefds);
 	FD_ZERO(&exceptfds);
 
-	curl_multi_fdset(mh->multi, &readfds, &writefds, &exceptfds, &maxfd);
+	error = curl_multi_fdset(mh->multi, &readfds, &writefds, &exceptfds, &maxfd);
+	SAVE_CURLM_ERROR(mh, error);
+
 	if (maxfd == -1) {
 		RETURN_LONG(-1);
 	}
@@ -209,7 +222,7 @@ PHP_FUNCTION(curl_multi_exec)
 	zval      *z_still_running;
 	php_curlm *mh;
 	int        still_running;
-	int        result;
+	CURLMcode error = CURLM_OK;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/", &z_mh, &z_still_running) == FAILURE) {
 		return;
@@ -237,10 +250,11 @@ PHP_FUNCTION(curl_multi_exec)
 
 	convert_to_long(z_still_running);
 	still_running = Z_LVAL_P(z_still_running);
-	result = curl_multi_perform(mh->multi, &still_running);
+	error = curl_multi_perform(mh->multi, &still_running);
 	ZVAL_LONG(z_still_running, still_running);
 
-	RETURN_LONG(result);
+	SAVE_CURLM_ERROR(mh, error);
+	RETURN_LONG((zend_long) error);
 }
 /* }}} */
 
@@ -383,6 +397,25 @@ void _php_curl_multi_close(zend_resource *rsrc) /* {{{ */
 }
 /* }}} */
 
+/* {{{ proto int curl_multi_errno(resource mh)
+         Return an integer containing the last multi curl error number */
+PHP_FUNCTION(curl_multi_errno)
+{
+	zval        *z_mh;
+	php_curlm   *mh;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_mh) == FAILURE) {
+		return;
+	}
+
+	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(mh->err.no);
+}
+/* }}} */
+
 #if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
 /* {{{ proto bool curl_multi_strerror(int code)
          return string describing error code */
@@ -433,6 +466,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 			break;
 	}
 
+	SAVE_CURLM_ERROR(mh, error);
 	if (error != CURLM_OK) {
 		return 1;
 	} else {
