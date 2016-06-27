@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - CURL:
   . Add curl_multi_errno(), curl_share_errno() and curl_share_strerror()
 	functions. (Pierrick)
+  . Add support for HTTP/2 Server Push (davey)
 
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
