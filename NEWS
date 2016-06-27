@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
+  . Fixed bug #73237 (Nested object in "any" element overwrites other fields).
+    (Keith Smiley)
 
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
