@@ -2075,6 +2075,12 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 		} \
 	} while (0)
 
+#define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
+		if (UNEXPECTED(EG(vm_interrupt))) { \
+			ZEND_VM_LOOP_INTERRUPT(); \
+		} \
+	} while (0)
+
 /*
  * Stack Frame Layout (the whole stack frame is allocated at once)
  * ==================
