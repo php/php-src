@@ -66,6 +66,8 @@ extern int  le_curl_multi_handle;
 #define le_curl_multi_handle_name "cURL Multi Handle"
 extern int  le_curl_share_handle;
 #define le_curl_share_handle_name "cURL Share Handle"
+//extern int  le_curl_pushheaders;
+//#define le_curl_pushheaders "cURL Push Headers"
 
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
@@ -146,7 +148,7 @@ typedef struct {
 	zval                  func_name;
 	zend_fcall_info_cache fci_cache;
 	int                   method;
-} php_curl_progress, php_curl_fnmatch;
+} php_curl_progress, php_curl_fnmatch, php_curlm_server_push;
 
 typedef struct {
 	php_curl_write    *write;
@@ -191,9 +193,14 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
+	php_curlm_server_push	*server_push;
+} php_curlm_handlers;
+
+typedef struct {
 	int         still_running;
 	CURLM      *multi;
 	zend_llist  easyh;
+	php_curlm_handlers	*handlers;
 	struct {
 		int no;
 	} err;
@@ -206,9 +213,11 @@ typedef struct {
 	} err;
 } php_curlsh;
 
+php_curl *alloc_curl_handle();
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, int reporterror);
+void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 
 void curlfile_register_class(void);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;

@@ -63,6 +63,7 @@ PHP_FUNCTION(curl_multi_init)
 
 	mh = ecalloc(1, sizeof(php_curlm));
 	mh->multi = curl_multi_init();
+	mh->handlers = ecalloc(1, sizeof(php_curlm_handlers));
 
 	zend_llist_init(&mh->easyh, sizeof(zval), _php_curl_multi_cleanup_list, 0);
 
@@ -132,6 +133,29 @@ static int curl_compare_resources( zval *z1, zval *z2 ) /* {{{ */
 	return (Z_TYPE_P(z1) == Z_TYPE_P(z2) &&
 			Z_TYPE_P(z1) == IS_RESOURCE &&
 			Z_RES_P(z1) == Z_RES_P(z2));
+}
+/* }}} */
+
+/* Used to find the php_curl resource for a given curl easy handle */
+static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy) /* {{{ */
+{
+	php_curl 			*tmp_ch;
+	zend_llist_position pos;
+	zval				*pz_ch_temp;
+
+	for(pz_ch_temp = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch_temp;
+		pz_ch_temp = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+
+		if ((tmp_ch = (php_curl *)zend_fetch_resource(Z_RES_P(pz_ch_temp), le_curl_name, le_curl)) == NULL) {
+			return NULL;
+		}
+
+		if (tmp_ch->cp == easy) {
+			return pz_ch_temp;
+		}
+	}
+
+	return NULL;
 }
 /* }}} */
 
@@ -318,35 +342,21 @@ PHP_FUNCTION(curl_multi_info_read)
 
 	/* find the original easy curl handle */
 	{
-		zend_llist_position pos;
-		php_curl *ch;
-		zval	*pz_ch;
+		zval	*pz_ch = _php_curl_multi_find_easy_handle(mh, tmp_msg->easy_handle);
+		if (pz_ch != NULL) {
+			/* we are adding a reference to the underlying php_curl
+			   resource, so we need to add one to the resource's refcount
+			   in order to ensure it doesn't get destroyed when the
+			   underlying curl easy handle goes out of scope.
+			   Normally you would call zval_copy_ctor( pz_ch ), or
+			   SEPARATE_ZVAL, but those create new zvals, which is already
+			   being done in add_assoc_resource */
+			Z_ADDREF_P(pz_ch);
 
-		/* search the list of easy handles hanging off the multi-handle */
-		for(pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
-			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+			/* add_assoc_resource automatically creates a new zval to
+			   wrap the "resource" represented by the current pz_ch */
 
-			if ((ch = (php_curl *)zend_fetch_resource(Z_RES_P(pz_ch), le_curl_name, le_curl)) == NULL) {
-				RETURN_FALSE;
-			}
-			if (ch->cp == tmp_msg->easy_handle) {
-
-				/* we are adding a reference to the underlying php_curl
-				   resource, so we need to add one to the resource's refcount
-				   in order to ensure it doesn't get destroyed when the
-				   underlying curl easy handle goes out of scope.
-				   Normally you would call zval_copy_ctor( pz_ch ), or
-				   SEPARATE_ZVAL, but those create new zvals, which is already
-				   being done in add_assoc_resource */
-				Z_ADDREF_P(pz_ch);
-
-				/* add_assoc_resource automatically creates a new zval to
-				   wrap the "resource" represented by the current pz_ch */
-
-				add_assoc_zval(return_value, "handle", pz_ch);
-
-				break;
-			}
+			add_assoc_zval(return_value, "handle", pz_ch);
 		}
 	}
 }
@@ -391,6 +401,12 @@ void _php_curl_multi_close(zend_resource *rsrc) /* {{{ */
 
 		curl_multi_cleanup(mh->multi);
 		zend_llist_clean(&mh->easyh);
+		if (mh->handlers->server_push) {
+			efree(mh->handlers->server_push);
+		}
+		if (mh->handlers) {
+			efree(mh->handlers);
+		}
 		efree(mh);
 		rsrc->ptr = NULL;
 	}
@@ -438,6 +454,83 @@ PHP_FUNCTION(curl_multi_strerror)
 /* }}} */
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x072C00 /* Available since 7.44.0 */
+
+static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_headers, struct curl_pushheaders *push_headers, void *userp) /* {{{ */
+{
+	php_curl 				*ch;
+	php_curl 				*parent;
+	php_curlm 				*mh 			= (php_curlm *)userp;
+	size_t 					rval 			= CURL_PUSH_DENY;
+	php_curlm_server_push 	*t 				= mh->handlers->server_push;
+	zval					*pz_parent_ch 	= NULL;
+	zval 					pz_ch;
+	zval 					headers;
+	zval 					retval;
+	zend_resource 			*res;
+	char 					*header;
+	int  					error;
+	zend_fcall_info 		fci 			= empty_fcall_info;
+
+	pz_parent_ch = _php_curl_multi_find_easy_handle(mh, parent_ch);
+	if (pz_parent_ch == NULL) {
+		return rval;
+	}
+
+	parent = (php_curl*)zend_fetch_resource(Z_RES_P(pz_parent_ch), le_curl_name, le_curl);
+
+	ch = alloc_curl_handle();
+	ch->cp = easy;
+	_php_setup_easy_copy_handlers(ch, parent);
+
+	Z_ADDREF_P(pz_parent_ch);
+
+	res = zend_register_resource(ch, le_curl);
+	ZVAL_RES(&pz_ch, res);
+
+	size_t i;
+	array_init(&headers);
+	for(i=0; i<num_headers; i++) {
+		header = curl_pushheader_bynum(push_headers, i);
+		add_next_index_string(&headers, header);
+  	}
+
+	zend_fcall_info_init(&t->func_name, 0, &fci, &t->fci_cache, NULL, NULL);
+
+	zend_fcall_info_argn(
+		&fci, 3,
+		pz_parent_ch,
+		&pz_ch,
+		&headers
+	);
+
+	fci.retval = &retval;
+
+	error = zend_call_function(&fci, &t->fci_cache);
+	zend_fcall_info_args_clear(&fci, 1);
+	zval_dtor(&headers);
+
+	if (error == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Cannot call the CURLMOPT_PUSHFUNCTION");
+	} else if (!Z_ISUNDEF(retval)) {
+		if (CURL_PUSH_DENY != zval_get_long(&retval)) {
+		    rval = CURL_PUSH_OK;
+
+			/* we want to create a copy of this zval that we store in the multihandle structure element "easyh" */
+			zval tmp_val;
+			ZVAL_DUP(&tmp_val, &pz_ch);
+			zend_llist_add_element(&mh->easyh, &tmp_val);
+		} else {
+			/* libcurl will free this easy handle, avoid double free */
+			ch->cp = NULL;
+		}
+	}
+
+	return rval;
+}
+
+#endif
+
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
@@ -459,7 +552,29 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 #endif
 			error = curl_multi_setopt(mh->multi, option, zval_get_long(zvalue));
 			break;
+#if LIBCURL_VERSION_NUM > 0x072D00 /* Available since 7.46.0 */
+		case CURLMOPT_PUSHFUNCTION:
+			if (mh->handlers->server_push == NULL) {
+				mh->handlers->server_push = ecalloc(1, sizeof(php_curlm_server_push));
+			} else if (!Z_ISUNDEF(mh->handlers->server_push->func_name)) {
+				zval_ptr_dtor(&mh->handlers->server_push->func_name);
+				mh->handlers->server_push->fci_cache = empty_fcall_info_cache;
+			}
 
+			ZVAL_COPY(&mh->handlers->server_push->func_name, zvalue);
+			mh->handlers->server_push->method = PHP_CURL_USER;
+			if (!Z_ISUNDEF(mh->handlers->server_push->func_name)) {
+				zval_ptr_dtor(&mh->handlers->server_push->func_name);
+				mh->handlers->server_push->fci_cache = empty_fcall_info_cache;
+
+			}
+			error = curl_multi_setopt(mh->multi, option, _php_server_push_callback);
+			if (error != CURLM_OK) {
+				return 0;
+			}
+			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHDATA, mh);
+			break;
+#endif
 		default:
 			php_error_docref(NULL, E_WARNING, "Invalid curl multi configuration option");
 			error = CURLM_UNKNOWN_OPTION;
