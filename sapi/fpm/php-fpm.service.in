@@ -39,6 +39,34 @@ CapabilityBoundingSet=CAP_SETGID CAP_SETUID
 # or to change existing memory mappings to become executable are prohibited.
 MemoryDenyWriteExecute=true
 
+# Explicit module loading will be denied. This allows to turn off module load and unload
+# operations on modular kernels. It is recommended to turn this on for most services that
+# do not need special file systems or extra kernel modules to work.
+ProtectKernelModules=true
+
+# Kernel variables accessible through /proc/sys, /sys, /proc/sysrq-trigger, /proc/latency_stats,
+# /proc/acpi, /proc/timer_stats, /proc/fs and /proc/irq will be made read-only to all processes
+# of the unit. Usually, tunable kernel variables should only be written at boot-time, with the
+# sysctl.d(5) mechanism. Almost no services need to write to these at runtime; it is hence
+# recommended to turn this on for most services.
+ProtectKernelTunables=true
+
+# The Linux Control Groups (cgroups(7)) hierarchies accessible through /sys/fs/cgroup will be
+# made read-only to all processes of the unit. Except for container managers no services should
+# require write access to the control groups hierarchies; it is hence recommended to turn this on
+# for most services
+ProtectControlGroups=true
+
+# Any attempts to enable realtime scheduling in a process of the unit are refused.
+RestrictRealtime=true
+
+# Restricts the set of socket address families accessible to the processes of this unit.
+# Protects against vulnerabilities such as CVE-2016-8655
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# Takes away the ability to create or manage any kind of namespace
+RestrictNamespaces=true
+
 [Install]
 WantedBy=multi-user.target
 
