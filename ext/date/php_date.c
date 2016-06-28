@@ -3100,7 +3100,7 @@ PHP_METHOD(DateTimeImmutable, modify)
 		RETURN_FALSE;
 	}
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 
@@ -3151,7 +3151,7 @@ PHP_METHOD(DateTimeImmutable, add)
 	date_clone_immutable(object, &new_object);
 	php_date_add(&new_object, interval, return_value);
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 
@@ -3207,7 +3207,7 @@ PHP_METHOD(DateTimeImmutable, sub)
 	date_clone_immutable(object, &new_object);
 	php_date_sub(&new_object, interval, return_value);
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 
@@ -3311,7 +3311,7 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 	date_clone_immutable(object, &new_object);
 	php_date_timezone_set(&new_object, timezone_object, return_value);
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 
@@ -3395,7 +3395,7 @@ PHP_METHOD(DateTimeImmutable, setTime)
 	date_clone_immutable(object, &new_object);
 	php_date_time_set(&new_object, h, i, s, return_value);
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 
@@ -3444,7 +3444,7 @@ PHP_METHOD(DateTimeImmutable, setDate)
 	date_clone_immutable(object, &new_object);
 	php_date_date_set(&new_object, y, m, d, return_value);
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 
@@ -3497,7 +3497,7 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 	date_clone_immutable(object, &new_object);
 	php_date_isodate_set(&new_object, y, w, d, return_value);
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 
@@ -3544,7 +3544,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 	date_clone_immutable(object, &new_object);
 	php_date_timestamp_set(&new_object, timestamp, return_value);
 
-	ZVAL_COPY_VALUE(return_value, &new_object);
+	ZVAL_OBJ(return_value, Z_OBJ(new_object));
 }
 /* }}} */
 

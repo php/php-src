@@ -2676,6 +2676,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_version_compare, 0, 0, 2)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ win32/codepage.c */
+#ifdef PHP_WIN32
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_set, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -2691,6 +2692,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
 	ZEND_ARG_INFO(0, out_codepage)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 /* }}} */
 

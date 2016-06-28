@@ -1081,11 +1081,14 @@ static int fcgi_read_request(fcgi_request *req)
 	req->id = (hdr.requestIdB1 << 8) + hdr.requestIdB0;
 
 	if (hdr.type == FCGI_BEGIN_REQUEST && len == sizeof(fcgi_begin_request)) {
+		fcgi_begin_request *b;
+
 		if (safe_read(req, buf, len+padding) != len+padding) {
 			return 0;
 		}
 
-		req->keep = (((fcgi_begin_request*)buf)->flags & FCGI_KEEP_CONN);
+		b = (fcgi_begin_request*)buf;
+		req->keep = (b->flags & FCGI_KEEP_CONN);
 #ifdef TCP_NODELAY
 		if (req->keep && req->tcp && !req->nodelay) {
 # ifdef _WIN32
@@ -1098,7 +1101,7 @@ static int fcgi_read_request(fcgi_request *req)
 			req->nodelay = 1;
 		}
 #endif
-		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
+		switch ((b->roleB1 << 8) + b->roleB0) {
 			case FCGI_RESPONDER:
 				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "RESPONDER", sizeof("RESPONDER")-1);
 				break;
