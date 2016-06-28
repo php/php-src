@@ -11,7 +11,33 @@ Type=@php_fpm_systemd@
 PIDFile=@localstatedir@/run/php-fpm.pid
 ExecStart=@sbindir@/php-fpm --nodaemonize --fpm-config @sysconfdir@/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
+
+# Set up a new file system namespace and mounts private /tmp and /var/tmp directories
+# so this service cannot access the global directories and other processes cannot
+# access this service's directories.
 PrivateTmp=true
+
+# The directories /home, /root and /run/user are made inaccessible and empty for processes
+# invoked by this unit.
+ProtectHome=true
+
+# Mounts the /usr, /boot, and /etc directories read-only for processes invoked by this unit.
+ProtectSystem=full
+
+# Ensures that the service process and all its children can never gain new privileges
+NoNewPrivileges=true
+
+# Sets up a new /dev namespace for the executed processes and only adds API pseudo devices
+# such as /dev/null, /dev/zero or /dev/random (as well as the pseudo TTY subsystem) to it,
+# but no physical devices such as /dev/sda.
+PrivateDevices=true
+
+# Required for dropping privileges and running as a different user
+CapabilityBoundingSet=CAP_SETGID CAP_SETUID
+
+# Attempts to create memory mappings that are writable and executable at the same time,
+# or to change existing memory mappings to become executable are prohibited.
+MemoryDenyWriteExecute=true
 
 [Install]
 WantedBy=multi-user.target
