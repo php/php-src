@@ -3247,7 +3247,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_FETCH_OBJ_UNSET:
 							break;
 						default	:
-							ZEND_ASSERT(0);
 							break;
 					}
 					j = zend_ssa_next_use(ssa_ops, ssa_ops[i].result_def, j);
