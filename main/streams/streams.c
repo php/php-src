@@ -1396,7 +1396,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC)
 		if (p) {
 			do {
 				/* output functions return int, so pass in int max */
-				if (0 < (b = PHPWRITE(p, MIN(mapped - bcount, INT_MAX)))) {
+				if (0 < (b = PHPWRITE(p + bcount, MIN(mapped - bcount, INT_MAX)))) {
 					bcount += b;
 				}
 			} while (b > 0 && mapped > bcount);

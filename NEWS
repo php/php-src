@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
 
 - Standard:
+  . Fixed bug #72505 (readfile() mangles files larger than 2G). (Cschneid)
   . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
     (Laruence)
 
