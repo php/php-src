@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
 
+- FPM:
+  . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
+
 - GD:
   . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
     (cmb)
