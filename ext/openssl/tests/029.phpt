@@ -4,6 +4,7 @@ openssl_pkey_new() with EC key
 <?php
 if (!extension_loaded("openssl")) die("skip");
 if (!defined("OPENSSL_KEYTYPE_EC")) die("skip no EC available");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php

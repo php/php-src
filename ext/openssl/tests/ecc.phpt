@@ -1,7 +1,10 @@
 --TEST--
 openssl_*() with OPENSSL_KEYTYPE_EC
 --SKIPIF--
-<?php if (!extension_loaded("openssl") && !defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
+<?php
+if (!extension_loaded("openssl") && !defined("OPENSSL_KEYTYPE_EC")) print "skip";
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+?>
 --FILE--
 <?php
 $args = array(
