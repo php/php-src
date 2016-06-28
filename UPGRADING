@@ -47,7 +47,7 @@ PHP 7.1 UPGRADE NOTES
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
-    valuse.
+    values.
   . An empty key is decoded as an empty property name instead of using _empty_
     property name when decoding object to stdClass.
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
@@ -156,12 +156,12 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 
 - serialize_precision
-  . If value -1 is set, then the dtoa mode 0 is used. The value -1 is now
-    used by defualt.
+  . If the value is set to -1, then the dtoa mode 0 is used. The value -1
+    is now used by default.
 
 - precision
-  . If value -1 is set, then the dtoa mode 0 is used. No changes in default
-    value which is still 14.
+  . If the value is set to -1, then the dtoa mode 0 is used. No changes
+    in default value which is still 14.
 
 ========================================
 12. Windows Support
