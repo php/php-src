@@ -758,6 +758,7 @@ int fcgi_listen(const char *path, int backlog)
 	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
 	    listen(listen_socket, backlog) < 0) {
 
+		close(listen_socket);
 		fcgi_log(FCGI_ERROR, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
 		return -1;
 	}
