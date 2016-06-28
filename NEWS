@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Standard:
   . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
+  . Fixed bug #72505 (readfile() mangles files larger than 2G). (Cschneid)
 
 - OpenSSL:
   . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
