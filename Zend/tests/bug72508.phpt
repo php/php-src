@@ -16,8 +16,6 @@ function c ($option) {
 		$copy = $option;
 		$copy['bla'] = 'copy';
 		break;
-	case NULL:
-		break;
 	}
 }
 a(array('bla' => 'fasel'));
