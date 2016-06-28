@@ -3070,19 +3070,9 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		zend_ast *arg_ast = args->child[i];
 		znode arg_node;
 		zend_op *opline;
-		zend_bool send_user = 0;
 
-		if (zend_is_variable(arg_ast) && !zend_is_call(arg_ast)) {
-			zend_compile_var(&arg_node, arg_ast, BP_VAR_FUNC_ARG | (i << BP_VAR_SHIFT));
-			send_user = 1;
-		} else {
-			zend_compile_expr(&arg_node, arg_ast);
-			if (arg_node.op_type & (IS_VAR|IS_CV)) {
-				send_user = 1;
-			}
-		}
-
-		if (send_user) {
+		zend_compile_expr(&arg_node, arg_ast);
+		if (arg_node.op_type & (IS_VAR|IS_CV)) {
 			opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
 		} else {
 			opline = zend_emit_op(NULL, ZEND_SEND_VAL, &arg_node, NULL);
