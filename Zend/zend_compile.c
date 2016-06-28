@@ -4529,7 +4529,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 		zend_begin_loop(ZEND_NOP, NULL);
 		zend_compile_stmt(stmt_ast);
-		zend_end_loop(get_next_op_number(CG(active_op_array)));
+		zend_end_loop(get_next_op_number(CG(active_op_array)), NULL);
 		return;
 	}
 
