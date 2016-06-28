@@ -24,6 +24,7 @@ PHP                                                                        NEWS
   . Timezone initialization failure from serialized data will now throw an
     instance of Error from __wakeup() or __set_state() instead of resulting in
     a fatal error. (Aaron Piotrowski)
+  . Export date_get_interface_ce() for extension use. (Jeremy Mikola)
 
 - DOM:
   . Invalid schema or RelaxNG validation contexts will throw an instance of
