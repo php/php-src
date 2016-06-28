@@ -252,7 +252,6 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 				break;
 			}
 
-			/* php_search_array() body should be in some ZEND_API function... */
 			ZEND_HASH_FOREACH_STR_KEY_PTR(Z_ARRVAL_P(zvp), strkey, name) {
 				if (Z_TYPE_P(name) == IS_STRING && !zend_binary_strcmp(extension->name, strlen(extension->name), Z_STRVAL_P(name), Z_STRLEN_P(name))) {
 					break;
