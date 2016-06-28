@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.9
 
+- Core:
+  . Fixed bug #72508 (strange references after recursive function call and
+    "switch" statement). (Laruence)
+
 - CLI:
   . Fixed bug #72484 (SCRIPT_FILENAME shows wrong path if the user specify
     router.php). (Laruence)
