@@ -1439,6 +1439,7 @@ phpdbg_main:
 			case 'i': { /* set init file */
 				if (init_file) {
 					free(init_file);
+					init_file = NULL;
 				}
 
 				init_file_len = strlen(php_optarg);
@@ -1792,7 +1793,9 @@ phpdbg_main:
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			phpdbg_init(init_file, init_file_len, init_file_default);
+			if (init_file) {
+				phpdbg_init(init_file, init_file_len, init_file_default);
+			}
 			if (bp_tmp) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 				phpdbg_string_init(bp_tmp);
