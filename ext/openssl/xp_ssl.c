@@ -60,19 +60,15 @@
 #define HAVE_SSL3 1
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
 #define HAVE_TLS11 1
 #define HAVE_TLS12 1
-#endif
 
-#if !defined(OPENSSL_NO_ECDH) && OPENSSL_VERSION_NUMBER >= 0x0090800fL
+#ifndef OPENSSL_NO_ECDH
 #define HAVE_ECDH 1
 #endif
 
-#if !defined(OPENSSL_NO_TLSEXT)
-#if OPENSSL_VERSION_NUMBER >= 0x00908070L
+#ifndef OPENSSL_NO_TLSEXT
 #define HAVE_TLS_SNI 1
-#endif
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L
 #define HAVE_TLS_ALPN 1
 #endif
@@ -583,7 +579,7 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 }
 /* }}} */
 
-#if defined(PHP_WIN32) && OPENSSL_VERSION_NUMBER >= 0x00907000L
+#ifdef PHP_WIN32
 #define RETURN_CERT_VERIFY_FAILURE(code) X509_STORE_CTX_set_error(x509_store_ctx, code); return 0;
 static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
 {
@@ -863,7 +859,7 @@ static int enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 			}
 		}
 	} else {
-#if defined(PHP_WIN32) && OPENSSL_VERSION_NUMBER >= 0x00907000L
+#ifdef PHP_WIN32
 		SSL_CTX_set_cert_verify_callback(ctx, win_cert_verify_callback, (void *)stream);
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 #else
@@ -921,22 +917,6 @@ static int set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 				}
 			}
 
-#if OPENSSL_VERSION_NUMBER < 0x10001001L
-			do {
-				/* Unnecessary as of OpenSSLv1.0.1 (will segfault if used with >= 10001001 ) */
-				X509 *cert = NULL;
-				EVP_PKEY *key = NULL;
-				SSL *tmpssl = SSL_new(ctx);
-				cert = SSL_get_certificate(tmpssl);
-
-				if (cert) {
-					key = X509_get_pubkey(cert);
-					EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
-					EVP_PKEY_free(key);
-				}
-				SSL_free(tmpssl);
-			} while (0);
-#endif
 			if (!SSL_CTX_check_private_key(ctx)) {
 				php_error_docref(NULL, E_WARNING, "Private key does not match certificate!");
 			}
@@ -1519,33 +1499,22 @@ int php_openssl_setup_crypto(php_stream *stream,
 		}
 	}
 
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	sslsock->ctx = SSL_CTX_new(method);
-#else
-	/* Avoid const warning with old versions */
-	sslsock->ctx = SSL_CTX_new((SSL_METHOD*)method);
-#endif
 
 	if (sslsock->ctx == NULL) {
 		php_error_docref(NULL, E_WARNING, "SSL context creation failure");
 		return FAILURE;
 	}
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090806fL
 	if (GET_VER_OPT("no_ticket") && zend_is_true(val)) {
 		ssl_ctx_options |= SSL_OP_NO_TICKET;
 	}
-#endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
 	ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
 	if (!GET_VER_OPT("disable_compression") || zend_is_true(val)) {
 		ssl_ctx_options |= SSL_OP_NO_COMPRESSION;
 	}
-#endif
 
 	if (GET_VER_OPT("verify_peer") && !zend_is_true(val)) {
 		disable_peer_verification(sslsock->ctx, stream);

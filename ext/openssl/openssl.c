@@ -73,13 +73,11 @@
 #define OPENSSL_ALGO_MD2	4
 #endif
 #define OPENSSL_ALGO_DSS1	5
-#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
 #define OPENSSL_ALGO_SHA224 6
 #define OPENSSL_ALGO_SHA256 7
 #define OPENSSL_ALGO_SHA384 8
 #define OPENSSL_ALGO_SHA512 9
 #define OPENSSL_ALGO_RMD160 10
-#endif
 #define DEBUG_SMIME	0
 
 #if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
@@ -267,7 +265,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_details, 0)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, salt)
@@ -275,7 +272,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
 	ZEND_ARG_INFO(0, iterations)
 	ZEND_ARG_INFO(0, digest_algorithm)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
 	ZEND_ARG_INFO(0, filename)
@@ -506,9 +502,7 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_seal,				arginfo_openssl_seal)
 	PHP_FE(openssl_open,				arginfo_openssl_open)
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
 	PHP_FE(openssl_pbkdf2,	arginfo_openssl_pbkdf2)
-#endif
 
 /* for S/MIME handling */
 	PHP_FE(openssl_pkcs7_verify,		arginfo_openssl_pkcs7_verify)
@@ -664,13 +658,8 @@ int php_openssl_get_ssl_stream_data_index()
 static char default_ssl_conf_filename[MAXPATHLEN];
 
 struct php_x509_request { /* {{{ */
-#if OPENSSL_VERSION_NUMBER >= 0x10000002L
 	LHASH_OF(CONF_VALUE) * global_config;	/* Global SSL config */
 	LHASH_OF(CONF_VALUE) * req_config;		/* SSL config for this request */
-#else
-	LHASH * global_config;	/* Global SSL config */
-	LHASH * req_config;	/* SSL config for this request */
-#endif
 	const EVP_MD * md_alg;
 	const EVP_MD * digest;
 	char	* section_name,
@@ -862,11 +851,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 }
 /* }}} */
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000002L
 static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, LHASH_OF(CONF_VALUE) * config) /* {{{ */
-#else
-static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, LHASH * config)
-#endif
 {
 	X509V3_CTX ctx;
 
@@ -1185,7 +1170,6 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo) { /* {{{ */
 		case OPENSSL_ALGO_DSS1:
 			mdtype = (EVP_MD *) EVP_dss1();
 			break;
-#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
 		case OPENSSL_ALGO_SHA224:
 			mdtype = (EVP_MD *) EVP_sha224();
 			break;
@@ -1201,7 +1185,6 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo) { /* {{{ */
 		case OPENSSL_ALGO_RMD160:
 			mdtype = (EVP_MD *) EVP_ripemd160();
 			break;
-#endif
 		default:
 			return NULL;
 			break;
@@ -1309,13 +1292,11 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
-#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA224", OPENSSL_ALGO_SHA224, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA256", OPENSSL_ALGO_SHA256, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA384", OPENSSL_ALGO_SHA384, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA512", OPENSSL_ALGO_SHA512, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_RMD160", OPENSSL_ALGO_RMD160, CONST_CS|CONST_PERSISTENT);
-#endif
 
 	/* flags for S/MIME */
 	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
@@ -1365,8 +1346,8 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_RAW_DATA", OPENSSL_RAW_DATA, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ZERO_PADDING", OPENSSL_ZERO_PADDING, CONST_CS|CONST_PERSISTENT);
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
-	/* SNI support included in OpenSSL >= 0.9.8j */
+#ifndef OPENSSL_NO_TLSEXT
+	/* SNI support included */
 	REGISTER_LONG_CONSTANT("OPENSSL_TLSEXT_SERVER_NAME", 1, CONST_CS|CONST_PERSISTENT);
 #endif
 
@@ -1391,10 +1372,8 @@ PHP_MINIT_FUNCTION(openssl)
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("tlsv1.0", php_openssl_ssl_socket_factory);
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	php_stream_xport_register("tlsv1.1", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory);
-#endif
 
 	/* override the default tcp socket provider */
 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory);
@@ -1449,12 +1428,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 	EVP_cleanup();
 
-#if OPENSSL_VERSION_NUMBER >= 0x00090805f
 	/* prevent accessing locking callback from unloaded extension */
 	CRYPTO_set_locking_callback(NULL);
 	/* free allocated error strings */
 	ERR_free_strings();
-#endif
 
 	php_unregister_url_stream_wrapper("https");
 	php_unregister_url_stream_wrapper("ftps");
@@ -1465,10 +1442,8 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #endif
 	php_stream_xport_unregister("tls");
 	php_stream_xport_unregister("tlsv1.0");
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	php_stream_xport_unregister("tlsv1.1");
 	php_stream_xport_unregister("tlsv1.2");
-#endif
 
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory);
@@ -4527,8 +4502,6 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 /* }}} */
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
-
 /* {{{ proto string openssl_pbkdf2(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
    Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
 PHP_FUNCTION(openssl_pbkdf2)
@@ -4584,8 +4557,6 @@ PHP_FUNCTION(openssl_pbkdf2)
 	}
 }
 /* }}} */
-
-#endif
 
 /* {{{ PKCS7 S/MIME functions */
 
