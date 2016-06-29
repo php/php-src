@@ -79,7 +79,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 
 	/* ignore leading spaces in the variable name */
-	while (*var_name && *var_name==' ') {
+	while (*var_name==' ') {
 		var_name++;
 	}
 
