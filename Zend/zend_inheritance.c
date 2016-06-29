@@ -167,9 +167,9 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_iterable_type_check(zend_arg_info *arg_info) /* {{{ */
+static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_info *arg_info) /* {{{ */
 {
-	if (arg_info->type_hint == IS_ITERABLE || arg_info->type_hint == IS_ARRAY) {
+	if (arg_info->type_hint == IS_ARRAY) {
 		return 1;
 	}
 	
@@ -329,12 +329,17 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
 		
-		if (fe_arg_info->type_hint == IS_ITERABLE) {
-			if (!zend_iterable_type_check(proto_arg_info)) {
-				return 0;
+		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
+			switch (fe_arg_info->type_hint) {
+				case IS_ITERABLE:
+					if (!zend_iterable_compatibility_check(proto_arg_info)) {
+						return 0;
+					}
+					break;
+					
+				default:
+					return 0;
 			}
-		} else if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
-			return 0;
 		}
 
 		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
@@ -357,12 +362,17 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 		
-		if (proto->common.arg_info[-1].type_hint == IS_ITERABLE) {
-			if (!zend_iterable_type_check(fe->common.arg_info - 1)) {
-				return 0;
+		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
+			switch (proto->common.arg_info[-1].type_hint) {
+				case IS_ITERABLE:
+					if (!zend_iterable_compatibility_check(fe->common.arg_info - 1)) {
+						return 0;
+					}
+					break;
+					
+				default:
+					return 0;
 			}
-		} else if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
-			return 0;
 		}
 
 		if (fe->common.arg_info[-1].allow_null && !proto->common.arg_info[-1].allow_null) {
