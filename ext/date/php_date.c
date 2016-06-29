@@ -3697,7 +3697,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 	HashTable        *myht;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &array) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	myht = Z_ARRVAL_P(array);
@@ -3707,7 +3707,6 @@ PHP_METHOD(DateTimeZone, __set_state)
 	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
 		zend_throw_error(NULL, "Timezone initialization failed");
 		zval_dtor(return_value);
-		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -3726,7 +3725,6 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
 		zend_throw_error(NULL, "Timezone initialization failed");
-		RETURN_FALSE;
 	}
 }
 /* }}} */
