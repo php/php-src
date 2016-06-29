@@ -5636,7 +5636,7 @@ ZEND_METHOD(reflection_property, getValue)
 		}
 		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
 			zend_throw_error(NULL, "Internal error: Could not find the property %s::%s", ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->prop.name));
-			/* Bails out */
+			return;
 		}
 		member_p = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
 		ZVAL_DEREF(member_p);
