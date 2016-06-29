@@ -2834,10 +2834,10 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 		len += (map[(unsigned char) value[i]]) ? 3 : 1;
 	}
 	/* Per RFC 4514, a leading and trailing space must be escaped */
-	if (flags & PHP_LDAP_ESCAPE_DN && value[0] == ' ') {
+	if ((flags & PHP_LDAP_ESCAPE_DN) && (value[0] == ' ')) {
 		len += 2;
 	}
-	if (flags & PHP_LDAP_ESCAPE_DN && valuelen > 1 && value[valuelen - 1] == ' ') {
+	if ((flags & PHP_LDAP_ESCAPE_DN) && ((valuelen > 1) && (value[valuelen - 1] == ' '))) {
 		len += 2;
 	}
 
@@ -2846,7 +2846,7 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 	for (i = 0; i < valuelen; i++) {
 		unsigned char v = (unsigned char) value[i];
 
-		if (map[v] || (flags & PHP_LDAP_ESCAPE_DN && (i == 0 || i + 1 == valuelen) && v == ' ')) {
+		if (map[v] || ((flags & PHP_LDAP_ESCAPE_DN) && ((i == 0) || (i + 1 == valuelen)) && (v == ' '))) {
 			ZSTR_VAL(ret)[p++] = '\\';
 			ZSTR_VAL(ret)[p++] = hex[v >> 4];
 			ZSTR_VAL(ret)[p++] = hex[v & 0x0f];
