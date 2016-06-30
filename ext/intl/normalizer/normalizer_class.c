@@ -63,7 +63,7 @@ void normalizer_register_Normalizer_class( void )
 	/* Declare 'Normalizer' class properties. */
 	if( !Normalizer_ce_ptr )
 	{
-		zend_throw_error( NULL,
+		zend_error( E_ERROR,
 			"Normalizer: attempt to create properties "
 			"on a non-registered class." );
 		return;
