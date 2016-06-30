@@ -39,6 +39,7 @@
 typedef struct _optimizer_call_info {
 	zend_function *func;
 	zend_op       *opline;
+	zend_bool      try_inline;
 } optimizer_call_info;
 
 static void zend_delete_call_instructions(zend_op *opline)
@@ -159,6 +160,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_FCALL:
 				call_stack[call].func = zend_optimizer_get_called_func(
 					ctx->script, op_array, opline, 0);
+				call_stack[call].try_inline = 1;
 				/* break missing intentionally */
 			case ZEND_NEW:
 			case ZEND_INIT_DYNAMIC_CALL:
@@ -198,12 +200,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						ZEND_ASSERT(0);
 					}
 
-					if (ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level) {
+					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)
+					 && call_stack[call].try_inline) {
 						zend_try_inline_call(op_array, fcall, opline, call_stack[call].func);
 					}
 				}
 				call_stack[call].func = NULL;
 				call_stack[call].opline = NULL;
+				call_stack[call].try_inline = 0;
 				break;
 			case ZEND_FETCH_FUNC_ARG:
 			case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
@@ -257,17 +261,10 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				}
 				break;
-#if 0
-			case ZEND_SEND_REF:
-				if (call_stack[call - 1].func) {
-					/* We won't handle run-time pass by reference */
-					call_stack[call - 1].opline = NULL;
-				}
-				break;
-#endif
 			case ZEND_SEND_UNPACK:
-				call_stack[call - 1].func = NULL;
-				call_stack[call - 1].opline = NULL;
+			case ZEND_SEND_USER:
+			case ZEND_SEND_ARRAY:
+				call_stack[call - 1].try_inline = 0;
 				break;
 			default:
 				break;
