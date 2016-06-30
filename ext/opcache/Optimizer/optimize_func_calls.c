@@ -103,7 +103,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				uint32_t n = fcall->extended_value;
 
 				do {
-					if (Z_CONSTANT_P(RT_CONSTANT_EX(&func->op_array, func->op_array.opcodes[n].op2))) {
+					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array, func->op_array.opcodes[n].op2))) {
 						return;
 					}
 					n++;
@@ -112,7 +112,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
-				ZVAL_DUP(&zv, RT_CONSTANT_EX(&func->op_array, ret_opline->op1));
+				ZVAL_DUP(&zv, RT_CONSTANT(&func->op_array, ret_opline->op1));
 				opline->opcode = ZEND_QM_ASSIGN;
 				opline->op1_type = IS_CONST;
 				opline->op1.constant = zend_optimizer_add_literal(op_array, &zv);
