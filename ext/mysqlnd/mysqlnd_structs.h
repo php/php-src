@@ -201,6 +201,7 @@ typedef struct st_mysqlnd_net_options
 	char		*ssl_key;
 	char		*ssl_cert;
 	char		*ssl_ca;
+	char        *ssl_cn;
 	char		*ssl_capath;
 	char		*ssl_cipher;
 	char		*ssl_passphrase;
@@ -483,7 +484,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CON
 typedef enum_func_status	(*func_mysqlnd_conn_data__end_psession)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_close)(MYSQLND_CONN_DATA * conn);
 
-typedef enum_func_status    (*func_mysqlnd_conn_data__ssl_set)(MYSQLND_CONN_DATA * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher);
+typedef enum_func_status    (*func_mysqlnd_conn_data__ssl_set)(MYSQLND_CONN_DATA * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher, const char * const cn);
 
 typedef MYSQLND_RES * 		(*func_mysqlnd_conn_data__result_init)(unsigned int field_count, zend_bool persistent);
 

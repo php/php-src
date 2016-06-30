@@ -786,6 +786,15 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 				net->data->options.ssl_capath = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
+        case MYSQLND_OPT_SSL_CN:
+             {
+                zend_bool pers = net->persistent;
+                if (net->data->options.ssl_cn) {
+                        mnd_pefree(net->data->options.ssl_cn, pers);
+                }
+                net->data->options.ssl_cn = value? mnd_pestrdup(value, pers) : NULL;
+                break;
+            }
 		case MYSQLND_OPT_SSL_CIPHER:
 			{
 				zend_bool pers = net->persistent;
@@ -949,6 +958,12 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		zval_ptr_dtor(&capath_zval);
 		any_flag = TRUE;
 	}
+	if (net->data->options.ssl_cn) {
+        zval cn_zval;
+        ZVAL_STRING(& cn_zval, net->data->options.ssl_cn);
+        php_stream_context_set_option(context, "ssl", "peer_name", &cn_zval);
+        any_flag = TRUE;
+    }
 	if (net->data->options.ssl_passphrase) {
 		zval passphrase_zval;
 		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase);
@@ -1064,6 +1079,10 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net)
 		mnd_pefree(net->data->options.ssl_capath, pers);
 		net->data->options.ssl_capath = NULL;
 	}
+	if (net->data->options.ssl_cn) {
+        mnd_pefree(net->data->options.ssl_cn, pers);
+        net->data->options.ssl_cn = NULL;
+    }
 	if (net->data->options.ssl_cipher) {
 		mnd_pefree(net->data->options.ssl_cipher, pers);
 		net->data->options.ssl_cipher = NULL;
