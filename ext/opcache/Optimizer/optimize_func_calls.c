@@ -73,8 +73,12 @@ static void zend_delete_call_instructions(zend_op *opline)
 			case ZEND_SEND_VAR_NO_REF:
 			case ZEND_SEND_REF:
 				if (call == 0) {
-					if (opline->op1_type & (IS_CONST|IS_CV)) {
+					if (opline->op1_type == IS_CONST) {
 						MAKE_NOP(opline);
+					} else if (opline->op1_type == IS_CV) {
+						opline->opcode = ZEND_CHECK_VAR;
+						opline->extended_value = 0;
+						opline->result.var = 0;
 					} else {
 						opline->opcode = ZEND_FREE;
 						opline->extended_value = 0;
