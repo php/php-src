@@ -723,8 +723,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			if (ssl_cipher) {
 				zend_string_release(ssl_cipher);
 			}
-			if(ssl_server_cn){
-		        zend_string_release(ssl_server_cn);
+			if (ssl_server_cn) {
+		    zend_string_release(ssl_server_cn);
 			}
 		}
 
