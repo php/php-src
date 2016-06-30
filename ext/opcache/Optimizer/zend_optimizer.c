@@ -228,6 +228,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 {
 	switch (opline->opcode) {
 		case ZEND_ASSIGN_REF:
+		case ZEND_FAST_CALL:
 			zval_dtor(val);
 			return 0;
 		case ZEND_FETCH_CLASS:
