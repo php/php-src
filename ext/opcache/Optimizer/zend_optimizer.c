@@ -195,12 +195,9 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			opline->opcode = ZEND_SEND_VAL;
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			break;
-		case ZEND_SEND_VAR_NO_REF_EX:
-			opline->opcode = ZEND_SEND_VAL_EX;
-			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			break;
 		case ZEND_SEPARATE:
 		case ZEND_SEND_VAR_NO_REF:
+		case ZEND_SEND_VAR_NO_REF_EX:
 			zval_ptr_dtor(val);
 			return 0;
 		case ZEND_CONCAT:
