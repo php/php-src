@@ -3252,8 +3252,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 1;
 	}
 
-	/* If both methods are private do not enforce a signature */
-    if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
+	/* If the prototype method is private do not enforce a signature */
+	if (proto->common.fn_flags & ZEND_ACC_PRIVATE) {
 		return 1;
 	}
 

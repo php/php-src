@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fix bug #71936 (Segmentation fault destroying HTTP_RAW_POST_DATA).
     (mike dot laspina at gmail dot com, Remi)
+  . Fix bug #72496 (Cannot declare public method with signature incompatible
+    with parent private method). (Pedro Magalhães)
 
 - bz2:
   . Fix bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at 
