@@ -3186,7 +3186,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 						}
 					}
 				}
-				ZEND_ASSERT(!ssa_vars[ssa_ops[i].result_def].phi_use_chain);
 				j = ssa_vars[ssa_ops[i].result_def].use_chain;
 				while (j >= 0) {
 					switch (op_array->opcodes[j].opcode) {
