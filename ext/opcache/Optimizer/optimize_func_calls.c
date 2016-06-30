@@ -98,6 +98,12 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 
 		if (ret_opline->op1_type == IS_CONST) {
 
+			if (fcall->opcode == ZEND_INIT_METHOD_CALL && fcall->op1_type == IS_UNUSED) {
+				/* TODO: we can't inlne methods, because $this may be used
+				 *       not in class context ???
+				 */
+				return;
+			}
 			if (fcall->extended_value < func->op_array.num_args) {
 				/* don't inline funcions with named constants in default arguments */
 				uint32_t n = fcall->extended_value;
