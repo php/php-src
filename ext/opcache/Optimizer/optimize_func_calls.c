@@ -100,7 +100,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 
 			if (fcall->opcode == ZEND_INIT_METHOD_CALL && fcall->op1_type == IS_UNUSED) {
 				/* TODO: we can't inlne methods, because $this may be used
-				 *       not in class context ???
+				 *       not in object context ???
 				 */
 				return;
 			}

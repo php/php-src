@@ -1,5 +1,5 @@
 --TEST--
-Pass result of inlined function by reference
+$this not in object context
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
