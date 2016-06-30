@@ -1614,7 +1614,7 @@ mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapest
 /* {{{ mysqlnd_conn_data::ssl_set */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const char * key, const char * const cert,
-									  const char * const ca, const char * const capath, const char * const cn, const char * const cipher)
+									  const char * const ca, const char * const capath, const char * const cipher, const char * const cn)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, ssl_set);
 	enum_func_status ret = FAIL;
