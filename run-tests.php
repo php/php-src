@@ -1103,7 +1103,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 			break;
 		} else if ($n === 0) {
 			/* timed out */
-			$data .= "\n ** ERROR: process timed out **\n";
+			$data .= "\n ** ERROR: process timed out after $timeout second(s) **\n";
 			proc_terminate($proc, 9);
 			return $data;
 		} else if ($n > 0) {
