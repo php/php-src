@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #72484 (SCRIPT_FILENAME shows wrong path if the user specify
     router.php). (Laruence)
 
+- COM:
+  . Fixed bug #72498 (variant_date_from_timestamp null dereference). (Anatol)
+
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
