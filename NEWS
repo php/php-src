@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #72508 (strange references after recursive function call and
     "switch" statement). (Laruence)
 
+- COM:
+  . Fixed bug #72498 (variant_date_from_timestamp null dereference). (Anatol)
+
 - CURL:
   . Add curl_multi_errno(), curl_share_errno() and curl_share_strerror()
 	functions. (Pierrick)
