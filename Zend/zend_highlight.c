@@ -228,6 +228,9 @@ ZEND_API void zend_strip(void)
 		prev_space = 0;
 		ZVAL_UNDEF(&token);
 	}
+
+	/* Discard parse errors thrown during tokenization */
+	zend_clear_exception();
 }
 
 /*

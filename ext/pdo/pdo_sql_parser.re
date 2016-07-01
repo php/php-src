@@ -49,7 +49,7 @@ static int scan(Scanner *s)
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
 	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
-	SPECIALS	= [:?"'];
+	SPECIALS	= [:?"'-/];
 	MULTICHAR	= ([:]{2,}|[?]{2,});
 	ANYNOEOF	= [\001-\377];
 	*/
@@ -86,7 +86,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	Scanner s;
 	char *ptr, *newbuffer;
 	int t;
-	int bindno = 0;
+	uint32_t bindno = 0;
 	int ret = 0;
 	size_t newbuffer_len;
 	HashTable *params;

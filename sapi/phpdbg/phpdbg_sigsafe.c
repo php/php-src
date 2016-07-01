@@ -1,7 +1,7 @@
 #include "phpdbg_sigsafe.h"
 #include "phpdbg.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define STR(x) #x
 #define EXP_STR(x) STR(x)

@@ -614,10 +614,7 @@ finish:
 			} else {
 				php_error_docref(NULL, E_WARNING, "Cannot construct User-agent header");
 			}
-
-			if (ua) {
-				efree(ua);
-			}
+			efree(ua);
 		}
 	}
 
@@ -632,7 +629,7 @@ finish:
 				(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0
 		) {
-			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_P(tmpzval));
+			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %zd\r\n", Z_STRLEN_P(tmpzval));
 			php_stream_write(stream, scratch, scratch_len);
 			have_header |= HTTP_HEADER_CONTENT_LENGTH;
 		}
@@ -647,7 +644,7 @@ finish:
 		(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 		Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_P(tmpzval));
+			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %zd\r\n", Z_STRLEN_P(tmpzval));
 			php_stream_write(stream, scratch, scratch_len);
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
@@ -972,7 +969,8 @@ static php_stream_wrapper_ops http_stream_wops = {
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
-	NULL  /* rmdir */
+	NULL, /* rmdir */
+	NULL
 };
 
 PHPAPI php_stream_wrapper php_stream_http_wrapper = {

@@ -51,7 +51,9 @@ asked to print out a compiled regex for debugging purposes. */
 
 #ifndef PCRE_INCLUDED
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 /* For pcretest program. */
 #define PRIV(name) name

@@ -7,8 +7,12 @@ include 'skipif.inc';
 ?>
 --FILE--
 <?php
+include 'server.inc';
+$host = curl_cli_server_start();
 
-$ch = curl_init('http://www.google.com/');
+$url = "{$host}/get.php";
+
+$ch = curl_init($url);
 curl_setopt_array($ch, array(
 	CURLOPT_HEADER => false,
 	CURLOPT_RETURNTRANSFER => true,
@@ -16,6 +20,7 @@ curl_setopt_array($ch, array(
 	CURLOPT_INFILESIZE => filesize(__FILE__),
 	CURLOPT_INFILE => fopen(__FILE__, 'r'),
 	CURLOPT_HTTPHEADER => array(
+		'Expect:',
 		'Content-Length: 1',
 	),
 	CURLOPT_READFUNCTION => 'curl_read',

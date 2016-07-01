@@ -92,7 +92,7 @@ ZEND_BEGIN_MODULE_GLOBALS(sockets)
 	char *strerror_buf;
 ZEND_END_MODULE_GLOBALS(sockets)
 
-ZEND_EXTERN_MODULE_GLOBALS(sockets);
+ZEND_EXTERN_MODULE_GLOBALS(sockets)
 #define SOCKETS_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(sockets, v)
 
 enum sockopt_return {

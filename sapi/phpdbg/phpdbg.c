@@ -53,7 +53,7 @@
 #endif
 
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
@@ -1241,11 +1241,7 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 			}
 			is_handled = phpdbg_watchpoint_segfault_handler(info, context);
 			if (is_handled == FAILURE) {
-#ifdef ZEND_SIGNALS
 				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
-#else
-				sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
-#endif
 			}
 			break;
 	}
@@ -1342,9 +1338,7 @@ int main(int argc, char **argv) /* {{{ */
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-#ifdef ZEND_SIGNALS
 	zend_signal_startup();
-#endif
 
 phpdbg_main:
 	ini_entries = NULL;
@@ -1439,6 +1433,7 @@ phpdbg_main:
 			case 'i': { /* set init file */
 				if (init_file) {
 					free(init_file);
+					init_file = NULL;
 				}
 
 				init_file_len = strlen(php_optarg);
@@ -1663,14 +1658,6 @@ phpdbg_main:
 		} zend_end_try();
 #endif
 
-#if defined(ZEND_SIGNALS) && !defined(_WIN32)
-		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
-		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
-#elif !defined(_WIN32)
-		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
-		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
-#endif
-
 		PHPDBG_G(sapi_name_ptr) = sapi_name;
 
 		if (exec) { /* set execution context */
@@ -1706,6 +1693,14 @@ phpdbg_main:
 			PUTS("Could not startup");
 			return 1;
 		}
+
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
+		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
+		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
+#elif !defined(_WIN32)
+		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+#endif
 
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
@@ -1792,7 +1787,9 @@ phpdbg_main:
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			phpdbg_init(init_file, init_file_len, init_file_default);
+			if (init_file) {
+				phpdbg_init(init_file, init_file_len, init_file_default);
+			}
 			if (bp_tmp) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 				phpdbg_string_init(bp_tmp);

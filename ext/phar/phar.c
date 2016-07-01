@@ -1030,7 +1030,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			PHAR_GET_32(buffer, len);
 		}
 	}
-	if(len > endbuffer - buffer) {
+	if(len > (size_t)(endbuffer - buffer)) {
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (trying to read past buffer end)");
 	}
 	if (phar_parse_metadata(&buffer, &mydata->metadata, len) == FAILURE) {
@@ -1071,7 +1071,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.manifest_pos = manifest_index;
 		}
 
-		if (entry.filename_len + 20 > endbuffer - buffer) {
+		if (entry.filename_len + 20 > (size_t)(endbuffer - buffer)) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 
@@ -1113,7 +1113,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		} else {
 			entry.metadata_len = 0;
 		}
-		if (len > endbuffer - buffer) {
+		if (len > (size_t)(endbuffer - buffer)) {
 			pefree(entry.filename, entry.is_persistent);
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
@@ -2186,6 +2186,14 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 #endif
 	int ext_len;
 
+	if (CHECK_NULL_PATH(filename, filename_len)) {
+		return FAILURE;
+	}
+
+	if (CHECK_NULL_PATH(filename, filename_len)) {
+		return FAILURE;
+	}
+
 	if (!strncasecmp(filename, "phar://", 7)) {
 		filename += 7;
 		filename_len -= 7;
@@ -3212,7 +3220,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 #ifdef COMPILE_DL_PHAR
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(phar)
 #endif
@@ -3465,7 +3473,7 @@ void phar_request_initialize(void) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
-	int i;
+	uint32_t i;
 
 	PHAR_G(request_ends) = 1;
 

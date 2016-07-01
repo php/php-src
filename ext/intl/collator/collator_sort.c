@@ -370,7 +370,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	char*       sortKeyBuf           = NULL;                     /* buffer to store sort keys */
 	uint32_t    sortKeyBufSize       = DEF_SORT_KEYS_BUF_SIZE;   /* buffer size */
 	ptrdiff_t   sortKeyBufOffset     = 0;                        /* pos in buffer to store sort key */
-	int32_t     sortKeyLen           = 0;                        /* the length of currently processing key */
+	uint32_t    sortKeyLen           = 0;                        /* the length of currently processing key */
 	uint32_t    bufLeft              = 0;
 	uint32_t    bufIncrement         = 0;
 

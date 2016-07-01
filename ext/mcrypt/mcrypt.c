@@ -273,7 +273,7 @@ zend_module_entry mcrypt_module_entry = {
 
 #ifdef COMPILE_DL_MCRYPT
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(mcrypt)
 #endif
@@ -563,7 +563,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	iv_s = emalloc(iv_size + 1);
 	memset(iv_s, 0, iv_size + 1);
 
-	if (key_len > max_key_size) {
+	if (key_len > (size_t)max_key_size) {
 		php_error_docref(NULL, E_WARNING, "Key size too large; supplied length: %zd, max: %d", key_len, max_key_size);
 		key_size = max_key_size;
 	} else {
@@ -571,9 +571,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 	}
 	memcpy(key_s, key, key_len);
 
-	if (iv_len != iv_size) {
+	if (iv_len != (size_t)iv_size) {
 		php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %zd, needed: %d", iv_len, iv_size);
-		if (iv_len > iv_size) {
+		if (iv_len > (size_t)iv_size) {
 			iv_len = iv_size;
 		}
 	}
@@ -637,6 +637,10 @@ PHP_FUNCTION(mcrypt_generic)
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
 		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
+		if (data_size <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Integer overflow in data size");
+			RETURN_FALSE;
+		}
 		data_str = zend_string_alloc(data_size, 0);
 		memset(ZSTR_VAL(data_str), 0, data_size);
 		memcpy(ZSTR_VAL(data_str), data, data_len);
@@ -683,7 +687,11 @@ PHP_FUNCTION(mdecrypt_generic)
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
 		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
-		data_s = emalloc(data_size + 1);
+		if (data_size <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Integer overflow in data size");
+			RETURN_FALSE;
+		}
+		data_s = emalloc((size_t)data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
 	} else { /* It's not a block algorithm */
@@ -1379,7 +1387,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 			}
 		}
 
-		while (read_bytes < size) {
+		while ((zend_long)read_bytes < size) {
 			n = read(*fd, iv + read_bytes, size - read_bytes);
 			if (n <= 0) {
 				break;

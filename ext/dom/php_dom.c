@@ -420,7 +420,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 						*std_props;
 	zend_string			*string_key;
 	dom_prop_handler	*entry;
-	zval object_value;
+	zend_string         *object_str;
 
 	*is_temp = 1;
 
@@ -431,7 +431,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		return debug_info;
 	}
 
-	ZVAL_STRING(&object_value, "(object value omitted)");
+	object_str = zend_string_init("(object value omitted)", sizeof("(object value omitted)")-1, 0);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
 		zval value;
@@ -442,13 +442,14 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 
 		if (Z_TYPE(value) == IS_OBJECT) {
 			zval_dtor(&value);
-			ZVAL_COPY(&value, &object_value);
+			ZVAL_NEW_STR(&value, object_str);
+			zend_string_addref(object_str);
 		}
 
 		zend_hash_add(debug_info, string_key, &value);
 	} ZEND_HASH_FOREACH_END();
 
-	zval_dtor(&object_value);
+	zend_string_release(object_str);
 
 	return debug_info;
 }

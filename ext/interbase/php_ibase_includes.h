@@ -130,7 +130,7 @@ enum php_interbase_option {
 #define IBG(v) ZEND_MODULE_GLOBALS_ACCESSOR(ibase, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_INTERBASE)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #define BLOB_ID_LEN		18
@@ -151,7 +151,7 @@ typedef void (*info_func_t)(char*);
 
 void _php_ibase_error(void);
 void _php_ibase_module_error(char *, ...)
-	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
+	PHP_ATTRIBUTE_FORMAT(printf,1,2);
 
 /* determine if a resource is a link or transaction handle */
 #define PHP_IBASE_LINK_TRANS(zv, lh, th)													\

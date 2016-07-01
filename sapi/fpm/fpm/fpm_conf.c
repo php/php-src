@@ -857,7 +857,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 		/* status */
 		if (wp->config->pm_status_path && *wp->config->pm_status_path) {
-			int i;
+			size_t i;
 			char *status = wp->config->pm_status_path;
 
 			if (*status != '/') {
@@ -881,7 +881,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		/* ping */
 		if (wp->config->ping_path && *wp->config->ping_path) {
 			char *ping = wp->config->ping_path;
-			int i;
+			size_t i;
 
 			if (*ping != '/') {
 				zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must start with a '/'", wp->config->name, ping);
@@ -1254,7 +1254,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 #ifdef HAVE_GLOB
 	glob_t g;
 #endif
-	int i;
+	size_t i;
 
 	if (!inc || !arg) return;
 	if (*error) return; /* We got already an error. Switch to the end. */
@@ -1271,7 +1271,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 				return;
 			}
 #endif /* GLOB_NOMATCH */
-			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%d) from %s at line %d.", inc, i, filename, ini_lineno);
+			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%zd) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;
 			efree(filename);
 			return;

@@ -262,7 +262,7 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
-		php_error_docref(NULL, E_WARNING, "POST Content-Length of %pd bytes exceeds the limit of %pd bytes",
+		php_error_docref(NULL, E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
@@ -856,15 +856,24 @@ SAPI_API int sapi_send_headers(void)
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
-		sapi_header_struct default_header;
-	    uint len;
+	    uint len = 0;
+		char *default_mimetype = get_default_content_type(0, &len);
 
-		SG(sapi_headers).mimetype = get_default_content_type(0, &len);
-		default_header.header_len = sizeof("Content-type: ") - 1 + len;
-		default_header.header = emalloc(default_header.header_len + 1);
-		memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
-		memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
-		sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
+		if (default_mimetype && len) {
+			sapi_header_struct default_header;
+
+			SG(sapi_headers).mimetype = default_mimetype;
+
+			default_header.header_len = sizeof("Content-type: ") - 1 + len;
+			default_header.header = emalloc(default_header.header_len + 1);
+
+			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
+			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+			
+			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
+		} else {
+			efree(default_mimetype);
+		}
 		SG(sapi_headers).send_default_content_type = 0;
 	}
 

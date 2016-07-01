@@ -100,7 +100,7 @@ const zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
 	PHP_FALIAS(setProfiling, xsl_xsltprocessor_set_profiling, arginfo_xsl_xsltprocessor_set_profiling)
 	PHP_FALIAS(setSecurityPrefs, xsl_xsltprocessor_set_security_prefs, arginfo_xsl_xsltprocessor_set_security_prefs)
 	PHP_FALIAS(getSecurityPrefs, xsl_xsltprocessor_get_security_prefs, arginfo_xsl_xsltprocessor_get_security_prefs)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ php_xsl_xslt_string_to_xpathexpr()
@@ -138,7 +138,6 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 	zval *value;
 	char *xpath_expr;
 	zend_string *string_key;
-	zend_ulong num_key;
 	char **params = NULL;
 	int i = 0;
 
@@ -146,7 +145,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 	params = (char **)safe_emalloc((2 * zend_hash_num_elements(parht) + 1), sizeof(char *), 0);
 	memset((char *)params, 0, parsize);
 
-	ZEND_HASH_FOREACH_KEY_VAL(parht, num_key, string_key, value) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(parht, string_key, value) {
 		if (string_key == NULL) {
 			php_error_docref(NULL, E_WARNING, "Invalid argument or parameter array");
 			efree(params);
@@ -266,10 +265,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								nsparent = node->_private;
 								curns = xmlNewNs(NULL, node->name, NULL);
 								if (node->children) {
-									curns->prefix = xmlStrdup((char *)node->children);
+									curns->prefix = xmlStrdup((xmlChar *)node->children);
 								}
 								if (node->children) {
-									node = xmlNewDocNode(node->doc, NULL, (char *) node->children, node->name);
+									node = xmlNewDocNode(node->doc, NULL, (xmlChar *) node->children, node->name);
 								} else {
 									node = xmlNewDocNode(node->doc, NULL, (const xmlChar *) "xmlns", node->name);
 								}
@@ -295,7 +294,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	}
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 	if (fci.param_count > 0) {
 		fci.params = args;
 	} else {
@@ -320,7 +318,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	xmlXPathFreeObject(obj);
 
 	ZVAL_COPY_VALUE(&fci.function_name, &handler);
-	fci.symbol_table = NULL;
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.no_separation = 0;

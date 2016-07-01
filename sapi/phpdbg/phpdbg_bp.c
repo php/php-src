@@ -26,7 +26,7 @@
 #include "phpdbg_opcode.h"
 #include "zend_globals.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ private api functions */
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);

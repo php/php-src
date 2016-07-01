@@ -251,6 +251,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_import_stream, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_export_stream, 0, 0, 1)
+	ZEND_ARG_INFO(0, socket)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_sendmsg, 0, 0, 3)
 	ZEND_ARG_INFO(0, socket)
 	ZEND_ARG_INFO(0, msghdr)
@@ -305,6 +309,7 @@ PHP_FUNCTION(socket_shutdown);
 PHP_FUNCTION(socket_last_error);
 PHP_FUNCTION(socket_clear_error);
 PHP_FUNCTION(socket_import_stream);
+PHP_FUNCTION(socket_export_stream);
 
 /* {{{ sockets_functions[]
  */
@@ -339,6 +344,7 @@ const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_last_error,		arginfo_socket_last_error)
 	PHP_FE(socket_clear_error,		arginfo_socket_clear_error)
 	PHP_FE(socket_import_stream,	arginfo_socket_import_stream)
+	PHP_FE(socket_export_stream,	arginfo_socket_export_stream)
 	PHP_FE(socket_sendmsg,			arginfo_socket_sendmsg)
 	PHP_FE(socket_recvmsg,			arginfo_socket_recvmsg)
 	PHP_FE(socket_cmsg_space,		arginfo_socket_cmsg_space)
@@ -371,7 +377,7 @@ zend_module_entry sockets_module_entry = {
 
 #ifdef COMPILE_DL_SOCKETS
 #ifdef ZTS
-	ZEND_TSRMLS_CACHE_DEFINE();
+	ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(sockets)
 #endif
@@ -425,9 +431,9 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog) /*
 	*php_sock = sock;
 
 #ifndef PHP_WIN32
-	if ((hp = gethostbyname("0.0.0.0")) == NULL) {
+	if ((hp = php_network_gethostbyname("0.0.0.0")) == NULL) {
 #else
-	if ((hp = gethostbyname("localhost")) == NULL) {
+	if ((hp = php_network_gethostbyname("localhost")) == NULL) {
 #endif
 		efree(sock);
 		return 0;
@@ -1371,12 +1377,12 @@ PHP_FUNCTION(socket_create)
 		&& arg1 != AF_INET6
 #endif
 		&& arg1 != AF_INET) {
-		php_error_docref(NULL, E_WARNING, "invalid socket domain [%pd] specified for argument 1, assuming AF_INET", arg1);
+		php_error_docref(NULL, E_WARNING, "invalid socket domain [" ZEND_LONG_FMT "] specified for argument 1, assuming AF_INET", arg1);
 		arg1 = AF_INET;
 	}
 
 	if (arg2 > 10) {
-		php_error_docref(NULL, E_WARNING, "invalid socket type [%pd] specified for argument 2, assuming SOCK_STREAM", arg2);
+		php_error_docref(NULL, E_WARNING, "invalid socket type [" ZEND_LONG_FMT "] specified for argument 2, assuming SOCK_STREAM", arg2);
 		arg2 = SOCK_STREAM;
 	}
 
@@ -1653,9 +1659,9 @@ PHP_FUNCTION(socket_send)
 		RETURN_FALSE;
 	}
 
-	retval = send(php_sock->bsd_socket, buf, (buf_len < len ? buf_len : len), flags);
+	retval = send(php_sock->bsd_socket, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
 
-	if (retval == -1) {
+	if (retval == (size_t)-1) {
 		PHP_SOCKET_ERROR(php_sock, "unable to write to socket", errno);
 		RETURN_FALSE;
 	}
@@ -1821,7 +1827,7 @@ PHP_FUNCTION(socket_sendto)
 			s_un.sun_family = AF_UNIX;
 			snprintf(s_un.sun_path, 108, "%s", addr);
 
-			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 			break;
 
 		case AF_INET:
@@ -1837,7 +1843,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_FALSE;
 			}
 
-			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
 #if HAVE_IPV6
 		case AF_INET6:
@@ -1853,7 +1859,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_FALSE;
 			}
 
-			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
 			break;
 #endif
 		default:
@@ -2147,12 +2153,12 @@ PHP_FUNCTION(socket_create_pair)
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_UNIX) {
-		php_error_docref(NULL, E_WARNING, "invalid socket domain [%pd] specified for argument 1, assuming AF_INET", domain);
+		php_error_docref(NULL, E_WARNING, "invalid socket domain [" ZEND_LONG_FMT "] specified for argument 1, assuming AF_INET", domain);
 		domain = AF_INET;
 	}
 
 	if (type > 10) {
-		php_error_docref(NULL, E_WARNING, "invalid socket type [%pd] specified for argument 2, assuming SOCK_STREAM", type);
+		php_error_docref(NULL, E_WARNING, "invalid socket type [" ZEND_LONG_FMT "] specified for argument 2, assuming SOCK_STREAM", type);
 		type = SOCK_STREAM;
 	}
 
@@ -2307,7 +2313,7 @@ error:
 	return NULL;
 }
 
-/* {{{ proto void socket_import_stream(resource stream)
+/* {{{ proto resource socket_import_stream(resource stream)
    Imports a stream that encapsulates a socket into a socket extension resource. */
 PHP_FUNCTION(socket_import_stream)
 {
@@ -2343,14 +2349,110 @@ PHP_FUNCTION(socket_import_stream)
 #endif
 
 	/* hold a zval reference to the stream (holding a php_stream* directly could
-	 * also be done, but this might be slightly better if in the future we want
-	 * to provide a socket_export_stream) */
+	 * also be done, but this makes socket_export_stream a bit simpler) */
 	ZVAL_COPY(&retsock->zstream, zstream);
 
 	php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER,
 		PHP_STREAM_BUFFER_NONE, NULL);
 
 	RETURN_RES(zend_register_resource(retsock, le_socket));
+}
+/* }}} */
+
+/* {{{ proto resource socket_export_stream(resource socket)
+   Exports a socket extension resource into a stream that encapsulates a socket. */
+PHP_FUNCTION(socket_export_stream)
+{
+	zval *zsocket;
+	php_socket *socket;
+	php_stream *stream = NULL;
+	php_netstream_data_t *stream_data;
+	char *protocol = NULL;
+	size_t protocollen = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zsocket) == FAILURE) {
+		return;
+	}
+	if ((socket = (php_socket *) zend_fetch_resource(Z_RES_P(zsocket), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	/* Either we already exported a stream or the socket came from an import,
+	 * just return the existing stream */
+	if (!Z_ISUNDEF(socket->zstream)) {
+		RETURN_ZVAL(&socket->zstream, 1, 0);
+	}
+
+	/* Determine if socket is using a protocol with one of the default registered
+	 * socket stream wrappers */
+	if (socket->type == PF_INET
+#if HAVE_IPV6
+		 || socket->type == PF_INET6
+#endif
+	) {
+		int protoid;
+		socklen_t protoidlen = sizeof(protoid);
+
+		getsockopt(socket->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
+
+		if (protoid == SOCK_STREAM) {
+			/* SO_PROTOCOL is not (yet?) supported on OS X, so lets assume it's TCP there */
+#ifdef SO_PROTOCOL
+			protoidlen = sizeof(protoid);
+			getsockopt(socket->bsd_socket, SOL_SOCKET, SO_PROTOCOL, (char *) &protoid, &protoidlen);
+			if (protoid == IPPROTO_TCP)
+#endif
+			{
+				protocol = "tcp";
+				protocollen = 3;
+			}
+		} else if (protoid == SOCK_DGRAM) {
+			protocol = "udp";
+			protocollen = 3;
+		}
+#ifdef PF_UNIX
+	} else if (socket->type == PF_UNIX) {
+		int type;
+		socklen_t typelen = sizeof(type);
+
+		getsockopt(socket->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &type, &typelen);
+
+		if (type == SOCK_STREAM) {
+			protocol = "unix";
+			protocollen = 4;
+		} else if (type == SOCK_DGRAM) {
+			protocol = "udg";
+			protocollen = 3;
+		}
+#endif
+	}
+
+	/* Try to get a stream with the registered sockops for the protocol in use
+	 * We don't want streams to actually *do* anything though, so don't give it
+	 * anything apart from the protocol */
+	if (protocol != NULL) {
+		stream = php_stream_xport_create(protocol, protocollen, 0, 0, NULL, NULL, NULL, NULL, NULL);
+	}
+
+	/* Fall back to creating a generic socket stream */
+	if (stream == NULL) {
+		stream = php_stream_sock_open_from_socket(socket->bsd_socket, 0);
+
+		if (stream == NULL) {
+			php_error_docref(NULL, E_WARNING, "failed to create stream");
+			RETURN_FALSE;
+		}
+	}
+
+	stream_data = (php_netstream_data_t *) stream->abstract;
+	stream_data->socket = socket->bsd_socket;
+	stream_data->is_blocked = socket->blocking;
+	stream_data->timeout.tv_sec = FG(default_socket_timeout);
+	stream_data->timeout.tv_usec = 0;
+
+	php_stream_to_zval(stream, &socket->zstream);
+
+	RETURN_ZVAL(&socket->zstream, 1, 0);
 }
 /* }}} */
 

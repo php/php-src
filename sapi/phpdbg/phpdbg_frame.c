@@ -24,7 +24,7 @@
 #include "phpdbg_frame.h"
 #include "phpdbg_list.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 void phpdbg_restore_frame(void) /* {{{ */
 {
@@ -36,8 +36,6 @@ void phpdbg_restore_frame(void) /* {{{ */
 
 	/* move things back */
 	EG(current_execute_data) = PHPDBG_FRAME(execute_data);
-
-	EG(scope) = PHPDBG_EX(func)->op_array.scope;
 } /* }}} */
 
 void phpdbg_switch_frame(int frame) /* {{{ */
@@ -78,8 +76,6 @@ void phpdbg_switch_frame(int frame) /* {{{ */
 		/* backup things and jump back */
 		PHPDBG_FRAME(execute_data) = EG(current_execute_data);
 		EG(current_execute_data) = execute_data;
-
-		EG(scope) = PHPDBG_EX(func)->op_array.scope;
 	}
 
 	phpdbg_notice("frame", "id=\"%d\"", "Switched to frame #%d", frame);

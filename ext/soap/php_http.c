@@ -336,7 +336,7 @@ int make_http_soap_request(zval        *this_ptr,
 	zend_string *request;
 	smart_str soap_headers = {0};
 	smart_str soap_headers_z = {0};
-	int err;
+	size_t err;
 	php_url *phpurl = NULL;
 	php_stream *stream;
 	zval *trace, *tmp;
@@ -651,7 +651,7 @@ try_again:
 					if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "nc", sizeof("nc")-1)) != NULL &&
 					    Z_TYPE_P(tmp) == IS_LONG) {
 						Z_LVAL_P(tmp)++;
-						snprintf(nc, sizeof(nc), "%08ld", Z_LVAL_P(tmp));
+						snprintf(nc, sizeof(nc), "%08" ZEND_LONG_FMT_SPEC, Z_LVAL_P(tmp));
 					} else {
 						add_assoc_long(digest, "nc", 1);
 						strcpy(nc, "00000001");
@@ -700,16 +700,6 @@ try_again:
 						PHP_MD5Update(&md5ctx, (unsigned char*)phpurl->query, strlen(phpurl->query));
 					}
 
-					/* TODO: Support for qop="auth-int" */
-/*
-					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
-					    Z_TYPE_PP(tmp) == IS_STRING &&
-					    Z_STRLEN_PP(tmp) == sizeof("auth-int")-1 &&
-					    stricmp(Z_STRVAL_PP(tmp), "auth-int") == 0) {
-						PHP_MD5Update(&md5ctx, ":", 1);
-						PHP_MD5Update(&md5ctx, HEntity, HASHHEXLEN);
-					}
-*/
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(HA2, hash);
 
@@ -833,8 +823,10 @@ try_again:
 						    Z_TYPE_P(value) == IS_STRING) {
 						  zval *tmp;
 						  if (((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 1)) == NULL ||
+							   Z_TYPE_P(tmp) != IS_STRING ||
 						       strncmp(phpurl->path?phpurl->path:"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0) &&
 						      ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
+							   Z_TYPE_P(tmp) != IS_STRING ||
 						       in_domain(phpurl->host,Z_STRVAL_P(tmp))) &&
 						      (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
 								smart_str_append(&soap_headers, key);
@@ -988,10 +980,10 @@ try_again:
 					sempos = strstr(options, ";");
 					if (strstr(options,"path=") == options) {
 						eqpos = options + sizeof("path=")-1;
-						add_index_stringl(&zcookie, 1, eqpos, sempos?(sempos-eqpos):strlen(eqpos));
+						add_index_stringl(&zcookie, 1, eqpos, sempos?(size_t)(sempos-eqpos):strlen(eqpos));
 					} else if (strstr(options,"domain=") == options) {
 						eqpos = options + sizeof("domain=")-1;
-						add_index_stringl(&zcookie, 2, eqpos, sempos?(sempos-eqpos):strlen(eqpos));
+						add_index_stringl(&zcookie, 2, eqpos, sempos?(size_t)(sempos-eqpos):strlen(eqpos));
 					} else if (strstr(options,"secure") == options) {
 						add_index_bool(&zcookie, 3, 1);
 					}

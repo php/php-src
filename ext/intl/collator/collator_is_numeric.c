@@ -70,7 +70,7 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 
 	if (any) {
 		char buf[64], *numbuf, *bufpos;
-		int length = u - nstart;
+		size_t length = u - nstart;
 		double value;
 
 		if (length < sizeof(buf)) {

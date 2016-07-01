@@ -692,7 +692,7 @@ int fcgi_listen(const char *path, int backlog)
 				if(strlen(host) > MAXFQDNLEN) {
 					hep = NULL;
 				} else {
-					hep = gethostbyname(host);
+					hep = php_network_gethostbyname(host);
 				}
 				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
@@ -734,7 +734,7 @@ int fcgi_listen(const char *path, int backlog)
 #else
 		int path_len = strlen(path);
 
-		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
+		if (path_len >= (int)sizeof(sa.sa_unix.sun_path)) {
 			fcgi_log(FCGI_ERROR, "Listening socket's path name is too long.\n");
 			return -1;
 		}
@@ -757,7 +757,7 @@ int fcgi_listen(const char *path, int backlog)
 #endif
 	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
 	    listen(listen_socket, backlog) < 0) {
-
+		close(listen_socket);
 		fcgi_log(FCGI_ERROR, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
 		return -1;
 	}
@@ -1049,7 +1049,12 @@ static int fcgi_read_request(fcgi_request *req)
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
-	req->has_env = 1;
+
+	if (req->has_env) {
+		fcgi_hash_clean(&req->env);
+	} else {
+		req->has_env = 1;
+	}
 
 	if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 	    hdr.version < FCGI_VERSION_1) {
@@ -1076,11 +1081,14 @@ static int fcgi_read_request(fcgi_request *req)
 	req->id = (hdr.requestIdB1 << 8) + hdr.requestIdB0;
 
 	if (hdr.type == FCGI_BEGIN_REQUEST && len == sizeof(fcgi_begin_request)) {
+		fcgi_begin_request *b;
+
 		if (safe_read(req, buf, len+padding) != len+padding) {
 			return 0;
 		}
 
-		req->keep = (((fcgi_begin_request*)buf)->flags & FCGI_KEEP_CONN);
+		b = (fcgi_begin_request*)buf;
+		req->keep = (b->flags & FCGI_KEEP_CONN);
 #ifdef TCP_NODELAY
 		if (req->keep && req->tcp && !req->nodelay) {
 # ifdef _WIN32
@@ -1093,7 +1101,7 @@ static int fcgi_read_request(fcgi_request *req)
 			req->nodelay = 1;
 		}
 #endif
-		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
+		switch ((b->roleB1 << 8) + b->roleB0) {
 			case FCGI_RESPONDER:
 				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "RESPONDER", sizeof("RESPONDER")-1);
 				break;
@@ -1582,7 +1590,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		}
 		memcpy(req->out_pos, str, len);
 		req->out_pos += len;
-	} else if (len - limit < sizeof(req->out_buf) - sizeof(fcgi_header)) {
+	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
 		if (!req->out_hdr) {
 			open_packet(req, type);
 		}

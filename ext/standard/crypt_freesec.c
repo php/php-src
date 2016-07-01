@@ -580,7 +580,7 @@ static int
 des_cipher(const char *in, char *out, uint32_t salt, int count,
 	struct php_crypt_extended_data *data)
 {
-	uint32_t	l_out, r_out, rawl, rawr;
+	uint32_t	l_out = 0, r_out = 0, rawl, rawr;
 	int	retval;
 
 	setup_salt(salt, data);
@@ -626,7 +626,7 @@ _crypt_extended_r(const char *key, const char *setting,
 	 * and padding with zeros.
 	 */
 	q = (u_char *) keybuf;
-	while (q - (u_char *) keybuf < sizeof(keybuf)) {
+	while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf)) {
 		*q++ = *key << 1;
 		if (*key)
 			key++;
@@ -667,7 +667,7 @@ _crypt_extended_r(const char *key, const char *setting,
 			 * And XOR with the next 8 characters of the key.
 			 */
 			q = (u_char *) keybuf;
-			while (q - (u_char *) keybuf < sizeof(keybuf) && *key)
+			while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf) && *key)
 				*q++ ^= *key++ << 1;
 
 			if (des_setkey((char *) keybuf, data))

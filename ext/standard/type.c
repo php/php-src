@@ -154,7 +154,7 @@ PHP_FUNCTION(intval)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (Z_TYPE_P(num) != IS_STRING) {
+	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
 		RETVAL_LONG(zval_get_long(num));
 	} else {
 		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
@@ -416,7 +416,7 @@ PHP_FUNCTION(is_callable)
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)
-		if (UNEXPECTED(ZSTR_LEN(name)) != strlen(ZSTR_VAL(name))) {
+		if (UNEXPECTED(ZSTR_LEN(name) != strlen(ZSTR_VAL(name)))) {
 			ZVAL_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
 			zend_string_release(name);
 		} else {

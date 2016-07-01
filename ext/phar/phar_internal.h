@@ -196,7 +196,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 #define PHAR_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(phar, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_PHAR)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #include "pharzip.h"

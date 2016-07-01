@@ -24,9 +24,15 @@
 #include "httpd.h"
 #include "http_config.h"
 #include "http_core.h"
+#include "http_log.h"
 
 #include "php.h"
 #include "main/php_streams.h"
+
+/* Enable per-module logging in Apache 2.4+ */
+#ifdef APLOG_USE_MODULE
+APLOG_USE_MODULE(php7);
+#endif
 
 /* Declare this so we can get to it from outside the sapi_apache2.c file */
 extern module AP_MODULE_DECLARE_DATA php7_module;
@@ -80,7 +86,7 @@ extern zend_module_entry apache2_module_entry;
 #ifdef ZTS
 extern int php_apache2_info_id;
 #define AP2(v) ZEND_TSRMG(php_apache2_info_id, php_apache2_info_struct *, v)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #else
 extern php_apache2_info_struct php_apache2_info;
 #define AP2(v) (php_apache2_info.v)

@@ -215,7 +215,7 @@ zend_module_entry gmp_module_entry = {
 
 #ifdef COMPILE_DL_GMP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(gmp)
 #endif
@@ -1033,7 +1033,7 @@ ZEND_FUNCTION(gmp_init)
 	}
 
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, GMP_MAX_BASE);
+		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1049,7 +1049,7 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 {
 	if (size < 1) {
 		php_error_docref(NULL, E_WARNING,
-			"Word size must be positive, %pd given", size);
+			"Word size must be positive, " ZEND_LONG_FMT " given", size);
 		return FAILURE;
 	}
 
@@ -1144,11 +1144,10 @@ ZEND_FUNCTION(gmp_export)
 	} else {
 		size_t bits_per_word = size * 8;
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
-		size_t out_len = count * size;
 
-		zend_string *out_string = zend_string_alloc(out_len, 0);
+		zend_string *out_string = zend_string_safe_alloc(count, size, 0, 0);
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
-		ZSTR_VAL(out_string)[out_len] = '\0';
+		ZSTR_VAL(out_string)[ZSTR_LEN(out_string)] = '\0';
 
 		RETURN_NEW_STR(out_string);
 	}
@@ -1191,7 +1190,7 @@ ZEND_FUNCTION(gmp_strval)
 	/* Although the maximum base in general in GMP is 62, mpz_get_str()
 	 * is explicitly limited to -36 when dealing with negative bases. */
 	if ((base < 2 && base > -2) || base > GMP_MAX_BASE || base < -36) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
+		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 

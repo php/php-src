@@ -673,7 +673,7 @@ static PHP_FUNCTION(name) \
 		} \
 	} \
 	if (level < -1 || level > 9) { \
-		php_error_docref(NULL, E_WARNING, "compression level (%pd) must be within -1..9", level); \
+		php_error_docref(NULL, E_WARNING, "compression level (" ZEND_LONG_FMT ") must be within -1..9", level); \
 		RETURN_FALSE; \
 	} \
 	switch (encoding) { \
@@ -702,7 +702,7 @@ static PHP_FUNCTION(name) \
 		return; \
 	} \
 	if (max_len < 0) { \
-		php_error_docref(NULL, E_WARNING, "length (%pd) must be greater or equal zero", max_len); \
+		php_error_docref(NULL, E_WARNING, "length (" ZEND_LONG_FMT ") must be greater or equal zero", max_len); \
 		RETURN_FALSE; \
 	} \
 	if (SUCCESS != php_zlib_decode(in_buf, in_len, &out_buf, &out_len, encoding, max_len)) { \
@@ -761,7 +761,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
 				zend_string *str = Z_STR_P(option_buffer);
-				int i;
+				size_t i;
 				zend_bool last_null = 1;
 
 				for (i = 0; i < ZSTR_LEN(str); i++) {
@@ -794,7 +794,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 					zend_string **end, **ptr = strings - 1;
 
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						int i;
+						size_t i;
 
 						*++ptr = zval_get_string(cur);
 						if (!*ptr || ZSTR_LEN(*ptr) == 0) {
@@ -863,7 +863,7 @@ PHP_FUNCTION(inflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (%pd) must be within 8..15", window);
+		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
@@ -1033,7 +1033,7 @@ PHP_FUNCTION(deflate_init)
 		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
-		php_error_docref(NULL, E_WARNING, "compression level (%pd) must be within -1..9", level);
+		php_error_docref(NULL, E_WARNING, "compression level (" ZEND_LONG_FMT ") must be within -1..9", level);
 		RETURN_FALSE;
 	}
 
@@ -1041,7 +1041,7 @@ PHP_FUNCTION(deflate_init)
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
-		php_error_docref(NULL, E_WARNING, "compression memory level (%pd) must be within 1..9", memory);
+		php_error_docref(NULL, E_WARNING, "compression memory level (" ZEND_LONG_FMT ") must be within 1..9", memory);
 		RETURN_FALSE;
 	}
 
@@ -1049,7 +1049,7 @@ PHP_FUNCTION(deflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (%pd) must be within 8..15", window);
+		php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
@@ -1187,7 +1187,7 @@ PHP_FUNCTION(deflate_add)
 
 #ifdef COMPILE_DL_ZLIB
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(php_zlib)
 #endif

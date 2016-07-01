@@ -203,6 +203,7 @@ PHP_FUNCTION(shmop_open)
 	}
 
 	if (shmctl(shmop->shmid, IPC_STAT, &shm)) {
+		/* please do not add coverage here: the segment would be leaked and impossible to delete via php */
 		php_error_docref(NULL, E_WARNING, "unable to get shared memory segment information '%s'", strerror(errno));
 		goto err;
 	}
@@ -304,7 +305,7 @@ PHP_FUNCTION(shmop_size)
 PHP_FUNCTION(shmop_write)
 {
 	struct php_shmop *shmop;
-	int writesize;
+	zend_long writesize;
 	zend_long offset;
 	zend_string *data;
 	zval *shmid;
@@ -327,7 +328,7 @@ PHP_FUNCTION(shmop_write)
 		RETURN_FALSE;
 	}
 
-	writesize = (ZSTR_LEN(data) < shmop->size - offset) ? ZSTR_LEN(data) : shmop->size - offset;
+	writesize = ((zend_long)ZSTR_LEN(data) < shmop->size - offset) ? (zend_long)ZSTR_LEN(data) : shmop->size - offset;
 	memcpy(shmop->addr + offset, ZSTR_VAL(data), writesize);
 
 	RETURN_LONG(writesize);

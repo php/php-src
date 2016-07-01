@@ -46,11 +46,33 @@ extern zend_module_entry openssl_module_entry;
 	"DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:" \
 	"AES256-GCM-SHA384:AES128:AES256:HIGH:!SSLv2:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!RC4:!ADH"
 
+#include <openssl/err.h>
+
+struct php_openssl_errors {
+	int buffer[ERR_NUM_ERRORS];
+	int top;
+	int bottom;
+};
+
+ZEND_BEGIN_MODULE_GLOBALS(openssl)
+	struct php_openssl_errors *errors;
+ZEND_END_MODULE_GLOBALS(openssl)
+
+#define OPENSSL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(openssl, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_OPENSSL)
+ZEND_TSRMLS_CACHE_EXTERN();
+#endif
+
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
+
+void php_openssl_store_errors();
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
+PHP_GINIT_FUNCTION(openssl);
+PHP_GSHUTDOWN_FUNCTION(openssl);
 
 PHP_FUNCTION(openssl_pkey_get_private);
 PHP_FUNCTION(openssl_pkey_get_public);

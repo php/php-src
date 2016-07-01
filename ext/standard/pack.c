@@ -92,7 +92,7 @@ static int little_endian_longlong_map[8];
  */
 static void php_pack(zval *val, size_t size, int *map, char *output)
 {
-	int i;
+	size_t i;
 	char *v;
 
 	convert_to_long_ex(val);
@@ -112,13 +112,14 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 PHP_FUNCTION(pack)
 {
 	zval *argv = NULL;
-	int num_args = 0, i;
+	int num_args = 0;
+	size_t i;
 	int currentarg;
 	char *format;
 	size_t formatlen;
 	char *formatcodes;
 	int *formatargs;
-	int formatcount = 0;
+	size_t formatcount = 0;
 	int outputpos = 0, outputsize = 0;
 	zend_string *output;
 
@@ -334,7 +335,7 @@ PHP_FUNCTION(pack)
 			case 'a':
 			case 'A':
 			case 'Z': {
-				int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
+				size_t arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
 
 				zend_string *str = zval_get_string(&argv[currentarg++]);
 
@@ -356,7 +357,7 @@ PHP_FUNCTION(pack)
 				char *v = ZSTR_VAL(str);
 
 				outputpos--;
-				if(arg > ZSTR_LEN(str)) {
+				if ((size_t)arg > ZSTR_LEN(str)) {
 					php_error_docref(NULL, E_WARNING, "Type %c: not enough characters in string", code);
 					arg = ZSTR_LEN(str);
 				}
@@ -519,7 +520,7 @@ static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
 {
 	zend_long result;
 	char *cresult = (char *) &result;
-	int i;
+	size_t i;
 
 	result = issigned ? -1 : 0;
 
@@ -551,9 +552,10 @@ PHP_FUNCTION(unpack)
 	zend_string *formatarg, *inputarg;
 	zend_long formatlen, inputpos, inputlen;
 	int i;
+	zend_long offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &formatarg,
-		&inputarg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|l", &formatarg,
+		&inputarg, &offset) == FAILURE) {
 		return;
 	}
 
@@ -562,6 +564,14 @@ PHP_FUNCTION(unpack)
 	input = ZSTR_VAL(inputarg);
 	inputlen = ZSTR_LEN(inputarg);
 	inputpos = 0;
+
+
+	if (offset < 0 || offset > inputlen) {
+		php_error_docref(NULL, E_WARNING, "Offset " ZEND_LONG_FMT " is out of input range" , offset);
+		RETURN_FALSE;
+	}
+	input += offset;
+	inputlen -= offset;
 
 	array_init(return_value);
 
@@ -717,7 +727,7 @@ PHP_FUNCTION(unpack)
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
-						size_t len = inputlen - inputpos;	/* Remaining string */
+						zend_long len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -759,7 +769,7 @@ PHP_FUNCTION(unpack)
 					case 'Z': {
 						/* Z will strip everything after the first null character */
 						char pad = '\0';
-						size_t	 s,
+						zend_long s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -783,11 +793,11 @@ PHP_FUNCTION(unpack)
 
 					case 'h':
 					case 'H': {
-						size_t len = (inputlen - inputpos) * 2;	/* Remaining */
+						zend_long len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
 						char *buf;
-						size_t ipos, opos;
+						zend_long ipos, opos;
 
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {

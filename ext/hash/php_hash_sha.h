@@ -94,4 +94,12 @@ PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX *);
 PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX *, const unsigned char *, unsigned int);
 PHP_HASH_API void PHP_SHA512Final(unsigned char[64], PHP_SHA512_CTX *);
 
+PHP_HASH_API void PHP_SHA512_256Init(PHP_SHA512_CTX *);
+#define PHP_SHA512_256Update PHP_SHA512Update
+PHP_HASH_API void PHP_SHA512_256Final(unsigned char[32], PHP_SHA512_CTX *);
+
+PHP_HASH_API void PHP_SHA512_224Init(PHP_SHA512_CTX *);
+#define PHP_SHA512_224Update PHP_SHA512Update
+PHP_HASH_API void PHP_SHA512_224Final(unsigned char[28], PHP_SHA512_CTX *);
+
 #endif /* PHP_HASH_SHA_H */

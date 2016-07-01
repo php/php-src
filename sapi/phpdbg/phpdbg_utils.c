@@ -38,7 +38,7 @@
 # endif
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ color structures */
 const static phpdbg_color_t colors[] = {
@@ -804,6 +804,18 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			break;
 		case IS_DOUBLE:
 			spprintf(&decode, 0, "%.*G", 14, Z_DVAL_P(zv));
+
+			/* Make sure it looks like a float */
+			if (zend_finite(Z_DVAL_P(zv)) && !strchr(decode, '.')) {
+				size_t len = strlen(decode);
+				char *decode2 = emalloc(len + strlen(".0") + 1);
+				memcpy(decode2, decode, len);
+				decode2[len] = '.';
+				decode2[len+1] = '0';
+				decode2[len+2] = '\0';
+				efree(decode);
+				decode = decode2;
+			}
 			break;
 		case IS_STRING: {
 			int i;

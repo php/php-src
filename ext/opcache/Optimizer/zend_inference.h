@@ -24,39 +24,7 @@
 #include "zend_bitset.h"
 
 /* Bitmask for type inference (zend_ssa_var_info.type) */
-#define MAY_BE_UNDEF                (1 << IS_UNDEF)
-#define MAY_BE_NULL		            (1 << IS_NULL)
-#define MAY_BE_FALSE	            (1 << IS_FALSE)
-#define MAY_BE_TRUE		            (1 << IS_TRUE)
-#define MAY_BE_LONG		            (1 << IS_LONG)
-#define MAY_BE_DOUBLE	            (1 << IS_DOUBLE)
-#define MAY_BE_STRING	            (1 << IS_STRING)
-#define MAY_BE_ARRAY	            (1 << IS_ARRAY)
-#define MAY_BE_OBJECT	            (1 << IS_OBJECT)
-#define MAY_BE_RESOURCE	            (1 << IS_RESOURCE)
-#define MAY_BE_ANY                  (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
-#define MAY_BE_REF                  (1 << IS_REFERENCE) /* may be reference */
-
-#define MAY_BE_ARRAY_SHIFT          (IS_REFERENCE)
-
-#define MAY_BE_ARRAY_OF_NULL		(MAY_BE_NULL     << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_FALSE		(MAY_BE_FALSE    << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_TRUE		(MAY_BE_TRUE     << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_LONG		(MAY_BE_LONG     << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_DOUBLE		(MAY_BE_DOUBLE   << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_STRING		(MAY_BE_STRING   << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_ARRAY		(MAY_BE_ARRAY    << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_OBJECT		(MAY_BE_OBJECT   << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_RESOURCE	(MAY_BE_RESOURCE << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_ANY			(MAY_BE_ANY      << MAY_BE_ARRAY_SHIFT)
-#define MAY_BE_ARRAY_OF_REF			(MAY_BE_REF      << MAY_BE_ARRAY_SHIFT)
-
-#define MAY_BE_ARRAY_KEY_LONG       (1<<21)
-#define MAY_BE_ARRAY_KEY_STRING     (1<<22)
-#define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING)
-
-#define MAY_BE_ERROR                (1<<23)
-#define MAY_BE_CLASS                (1<<24)
+#include "zend_type_info.h"
 
 #define MAY_BE_IN_REG               (1<<25) /* value allocated in CPU register */
 
@@ -273,7 +241,11 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
 int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist);
 
+void zend_init_func_return_info(const zend_op_array   *op_array,
+                                const zend_script     *script,
+                                zend_ssa_var_info     *ret);
 void zend_func_return_info(const zend_op_array   *op_array,
+                           const zend_script     *script,
                            int                    recursive,
                            int                    widening,
                            zend_ssa_var_info     *ret);
