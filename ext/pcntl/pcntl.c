@@ -949,6 +949,7 @@ PHP_FUNCTION(pcntl_exec)
 PHP_FUNCTION(pcntl_signal)
 {
 	zval *handle;
+	zval *prev_handle;
 	zend_string *func_name;
 	zend_long signo;
 	zend_bool restart_syscalls = 1;
@@ -975,6 +976,12 @@ PHP_FUNCTION(pcntl_signal)
 		}
 	}
 
+	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
+		RETVAL_ZVAL(prev_handle, 1, 0);
+	} else {
+		RETVAL_TRUE;
+	}
+
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
 		if (Z_LVAL_P(handle) != (zend_long) SIG_DFL && Z_LVAL_P(handle) != (zend_long) SIG_IGN) {
@@ -987,7 +994,7 @@ PHP_FUNCTION(pcntl_signal)
 			RETURN_FALSE;
 		}
 		zend_hash_index_del(&PCNTL_G(php_signal_table), signo);
-		RETURN_TRUE;
+		return;
 	}
 
 	if (!zend_is_callable(handle, 0, &func_name)) {
@@ -1008,7 +1015,6 @@ PHP_FUNCTION(pcntl_signal)
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
 }
 /* }}} */
 
