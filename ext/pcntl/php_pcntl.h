@@ -51,6 +51,7 @@ PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
+PHP_FUNCTION(pcntl_signal_get_handler);
 PHP_FUNCTION(pcntl_signal_dispatch);
 PHP_FUNCTION(pcntl_get_last_error);
 PHP_FUNCTION(pcntl_strerror);
