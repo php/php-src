@@ -310,7 +310,8 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	unsigned char rbuf[PS_MAX_SID_LENGTH];
 	zend_string *outid;
 
-	if (php_random_bytes_throw(rbuf, PS(sid_length)) == FAILURE) {
+	/* Read additiona 60 bytes just in case CSPRNG is not safe enough */
+	if (php_random_bytes_throw(rbuf, PS(sid_length) + 60) == FAILURE) {
 		return NULL;
 	}
 
@@ -651,7 +652,7 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
 	if (endptr && (*endptr == '\0')
-		&& val >= 32 && val <= PS_MAX_SID_LENGTH) {
+		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
 		/* Numeric value */
 		PS(sid_length) = val;
 		return SUCCESS;
