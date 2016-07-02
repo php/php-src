@@ -285,7 +285,10 @@ unserialize_callback_func =
 ; When floats & doubles are serialized store serialize_precision significant
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
-serialize_precision = 17
+; The value is also used for json_encode when encoding double values.
+; If -1 is used, then dtoa mode 0 is used which automatically select the best
+; precision.
+serialize_precision = -1
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory

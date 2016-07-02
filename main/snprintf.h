@@ -86,6 +86,7 @@ PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap);
 PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
+PHPAPI char * php_0cvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(char format, double num,
 		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, size_t *len);
 

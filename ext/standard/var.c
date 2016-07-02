@@ -33,9 +33,9 @@
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 #include "zend_types.h"
+/* }}} */
 
 #define COMMON (is_ref ? "&" : "")
-/* }}} */
 
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
@@ -438,8 +438,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	char *tmp_str;
-	size_t tmp_len;
+	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
@@ -460,8 +459,8 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_P(struc));
-			smart_str_appendl(buf, tmp_str, tmp_len);
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			smart_str_appends(buf, tmp_str);
 			/* Without a decimal point, PHP treats a number literal as an int.
 			 * This check even works for scientific notation, because the
 			 * mantissa always contains a decimal point.
@@ -471,7 +470,6 @@ again:
 			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
 				smart_str_appendl(buf, ".0", 2);
 			}
-			efree(tmp_str);
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STR_P(struc), 0, "'\\", 2);
@@ -964,16 +962,13 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-				char *s;
-
-				smart_str_appendl(buf, "d:", 2);
-				s = (char *) safe_emalloc(PG(serialize_precision), 1, MAX_LENGTH_OF_DOUBLE + 1);
-				php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', s);
-				smart_str_appends(buf, s);
-				smart_str_appendc(buf, ';');
-				efree(s);
-				return;
-			}
+			char tmp_str[PHP_DOUBLE_MAX_LENGTH];
+			smart_str_appendl(buf, "d:", 2);
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			smart_str_appends(buf, tmp_str);
+			smart_str_appendc(buf, ';');
+			return;
+		}
 
 		case IS_STRING:
 			php_var_serialize_string(buf, Z_STRVAL_P(struc), Z_STRLEN_P(struc));

@@ -767,7 +767,7 @@ ZEND_FUNCTION(each)
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
-	zval *err;
+	zval *err = NULL;
 	int old_error_reporting;
 
 #ifndef FAST_ZPP

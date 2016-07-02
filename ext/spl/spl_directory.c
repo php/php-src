@@ -1851,7 +1851,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 
 				ZVAL_STRINGL(retval_ptr, intern->file_name, intern->file_name_len);
 				zval_ptr_dtor(readobj);
-				ZVAL_COPY_VALUE(writeobj, retval_ptr);
+				ZVAL_NEW_STR(writeobj, Z_STR_P(retval_ptr));
 			} else {
 				ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len);
 			}
@@ -1863,7 +1863,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 
 				ZVAL_STRING(retval_ptr, intern->u.dir.entry.d_name);
 				zval_ptr_dtor(readobj);
-				ZVAL_COPY_VALUE(writeobj, retval_ptr);
+				ZVAL_NEW_STR(writeobj, Z_STR_P(retval_ptr));
 			} else {
 				ZVAL_STRING(writeobj, intern->u.dir.entry.d_name);
 			}

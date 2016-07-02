@@ -1398,7 +1398,6 @@ static void reflection_class_constant_factory(zend_class_entry *ce, zend_string 
 static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
 {
 	zval reflector;
-	zval output, *output_ptr = &output;
 	zval *argument_ptr, *argument2_ptr;
 	zval retval, params[2];
 	int result;
@@ -1455,9 +1454,8 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	}
 
 	/* Call static reflection::export */
-	ZVAL_BOOL(&output, return_output);
 	ZVAL_COPY_VALUE(&params[0], &reflector);
-	ZVAL_COPY_VALUE(&params[1], output_ptr);
+	ZVAL_BOOL(&params[1], return_output);
 
 	ZVAL_STRINGL(&fci.function_name, "reflection::export", sizeof("reflection::export") - 1);
 	fci.object = NULL;

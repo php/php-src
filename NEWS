@@ -2,12 +2,35 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0beta1
 
+- Core:
+  . Fixed bug #72523 (dtrace issue with reflection (failed test)). (Laruence)
+  . Fixed bug #72508 (strange references after recursive function call and
+    "switch" statement). (Laruence)
+
+- COM:
+  . Fixed bug #72498 (variant_date_from_timestamp null dereference). (Anatol)
+
+- CURL:
+  . Add curl_multi_errno(), curl_share_errno() and curl_share_strerror()
+	functions. (Pierrick)
+  . Add support for HTTP/2 Server Push (davey)
+
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
 
+- SQLite3:
+  . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
+    (cmb)
+
 - Standard:
+  . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
+  . Fixed bug #72505 (readfile() mangles files larger than 2G). (Cschneid)
+
+- OpenSSL:
+  . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
+    (Dominic Luechinger)
 
 23 Jun 2016, PHP 7.1.0alpha2
 

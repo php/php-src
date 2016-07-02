@@ -4046,7 +4046,9 @@ ZEND_VM_HANDLER(41, ZEND_GENERATOR_CREATE, ANY, ANY)
 		gen_execute_data->return_value = (zval*)generator;
 		call_info = Z_TYPE_INFO(EX(This));
 		if ((call_info & Z_TYPE_MASK) == IS_OBJECT
-		 && !(call_info & ((ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS) << ZEND_CALL_INFO_SHIFT))) {
+		 && (!(call_info & ((ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS) << ZEND_CALL_INFO_SHIFT))
+			 /* Bug #72523 */
+			|| UNEXPECTED(zend_execute_ex != execute_ex))) {
 			ZEND_ADD_CALL_FLAG_EX(call_info, ZEND_CALL_RELEASE_THIS);
 			Z_ADDREF(gen_execute_data->This);
 		}
@@ -4675,31 +4677,26 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, NUM)
 	arg = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-		if (UNEXPECTED(!Z_ISREF_P(arg))) {
-			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
+	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+			opline->op2.num,
+			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+			EX(call)->func->common.scope ? "::" : "",
+			ZSTR_VAL(EX(call)->func->common.function_name));
 
-				zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
-					opline->op2.num,
-					EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-					EX(call)->func->common.scope ? "::" : "",
-					ZSTR_VAL(EX(call)->func->common.function_name));
-
-				if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_CLOSURE) {
-					OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
-				}
-				if (Z_TYPE(EX(call)->This) == IS_OBJECT) {
-					OBJ_RELEASE(Z_OBJ(EX(call)->This));
-				}
-				ZVAL_UNDEF(param);
-				EX(call)->func = (zend_function*)&zend_pass_function;
-				Z_OBJ(EX(call)->This) = NULL;
-				ZEND_SET_CALL_INFO(EX(call), 0, ZEND_CALL_INFO(EX(call)) & ~ZEND_CALL_RELEASE_THIS);
-
-				FREE_OP1();
-				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-			}
+		if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_CLOSURE) {
+			OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
 		}
+		if (Z_TYPE(EX(call)->This) == IS_OBJECT) {
+			OBJ_RELEASE(Z_OBJ(EX(call)->This));
+		}
+		ZVAL_UNDEF(param);
+		EX(call)->func = (zend_function*)&zend_pass_function;
+		Z_OBJ(EX(call)->This) = NULL;
+		ZEND_SET_CALL_INFO(EX(call), 0, ZEND_CALL_INFO(EX(call)) & ~ZEND_CALL_RELEASE_THIS);
+
+		FREE_OP1();
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
 		if (Z_ISREF_P(arg) &&
 		    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
@@ -8102,6 +8099,19 @@ ZEND_VM_HANDLER(186, ZEND_ISSET_ISEMPTY_THIS, UNUSED, UNUSED)
 		(opline->extended_value & ZEND_ISSET) ?
 			 (Z_TYPE(EX(This)) == IS_OBJECT) :
 			 (Z_TYPE(EX(This)) != IS_OBJECT));
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(49, ZEND_CHECK_VAR, CV, UNUSED)
+{
+	USE_OPLINE
+	zval *op1 = EX_VAR(opline->op1.var);
+
+	if (UNEXPECTED(Z_TYPE_INFO_P(op1) == IS_UNDEF)) {
+		SAVE_OPLINE();
+		GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
