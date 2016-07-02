@@ -311,20 +311,11 @@ ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create_from_rules, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, direction )
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create_inverse, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, orig_trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_me_transliterate, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, subject )
 	ZEND_ARG_INFO( 0, start )
 	ZEND_ARG_INFO( 0, end )
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_error, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ Transliterator_class_functions

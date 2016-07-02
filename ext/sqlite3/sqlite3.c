@@ -1318,6 +1318,12 @@ PHP_METHOD(sqlite3stmt, clear)
 		RETURN_FALSE;
 	}
 
+	if (stmt_obj->bound_params) {
+		zend_hash_destroy(stmt_obj->bound_params);
+		FREE_HASHTABLE(stmt_obj->bound_params);
+		stmt_obj->bound_params = NULL;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */

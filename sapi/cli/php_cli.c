@@ -222,8 +222,9 @@ static int print_extension_info(zend_extension *ext, void *arg) /* {{{ */
 
 static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s) /* {{{ */
 {
-	return strcmp(((zend_extension *)(*f)->data)->name,
-				  ((zend_extension *)(*s)->data)->name);
+	zend_extension *fe = (zend_extension*)(*f)->data;
+	zend_extension *se = (zend_extension*)(*s)->data;
+	return strcmp(fe->name, se->name);
 }
 /* }}} */
 
@@ -557,7 +558,6 @@ static php_stream *s_in_process = NULL;
 
 static void cli_register_file_handles(void) /* {{{ */
 {
-	zval zin, zout, zerr;
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
 	zend_constant ic, oc, ec;
@@ -581,23 +581,20 @@ static void cli_register_file_handles(void) /* {{{ */
 
 	s_in_process = s_in;
 
-	php_stream_to_zval(s_in,  &zin);
-	php_stream_to_zval(s_out, &zout);
-	php_stream_to_zval(s_err, &zerr);
+	php_stream_to_zval(s_in,  &ic.value);
+	php_stream_to_zval(s_out, &oc.value);
+	php_stream_to_zval(s_err, &ec.value);
 
-	ZVAL_COPY_VALUE(&ic.value, &zin);
 	ic.flags = CONST_CS;
 	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
 	ic.module_number = 0;
 	zend_register_constant(&ic);
 
-	ZVAL_COPY_VALUE(&oc.value, &zout);
 	oc.flags = CONST_CS;
 	oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
 	oc.module_number = 0;
 	zend_register_constant(&oc);
 
-	ZVAL_COPY_VALUE(&ec.value, &zerr);
 	ec.flags = CONST_CS;
 	ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
 	ec.module_number = 0;

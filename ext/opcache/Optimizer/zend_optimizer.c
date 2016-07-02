@@ -191,6 +191,15 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			alloc_cache_slots_op1(op_array, opline, 2);
 			break;
+		case ZEND_SEND_VAR:
+			opline->opcode = ZEND_SEND_VAL;
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			break;
+		case ZEND_SEPARATE:
+		case ZEND_SEND_VAR_NO_REF:
+		case ZEND_SEND_VAR_NO_REF_EX:
+			zval_ptr_dtor(val);
+			return 0;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 		case ZEND_FETCH_R:
@@ -219,6 +228,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 {
 	switch (opline->opcode) {
 		case ZEND_ASSIGN_REF:
+		case ZEND_FAST_CALL:
 			zval_dtor(val);
 			return 0;
 		case ZEND_FETCH_CLASS:
@@ -659,7 +669,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_3 & ctx->optimization_level) {
 		zend_optimizer_pass3(op_array);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_3) {
-			zend_dump_op_array(op_array, 0, "after pass 1", NULL);
+			zend_dump_op_array(op_array, 0, "after pass 3", NULL);
 		}
 	}
 
@@ -669,7 +679,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_4 & ctx->optimization_level) {
 		zend_optimize_func_calls(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_4) {
-			zend_dump_op_array(op_array, 0, "after pass 1", NULL);
+			zend_dump_op_array(op_array, 0, "after pass 4", NULL);
 		}
 	}
 

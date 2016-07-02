@@ -3195,9 +3195,9 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
-	if (fbc && init_op->opcode == ZEND_INIT_FCALL) {
+	if (fbc) {
 		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
-			if (!zend_execute_internal) {
+			if (init_op->opcode == ZEND_INIT_FCALL && !zend_execute_internal) {
 				if (!(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_RETURN_REFERENCE))) {
 					return ZEND_DO_ICALL;
 				} else {
@@ -3205,7 +3205,7 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 				}
 			}
 		} else {
-			if (zend_execute_ex == execute_ex) {
+			if (zend_execute_ex == execute_ex && !(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 				return ZEND_DO_UCALL;
 			}
 		}
@@ -3518,19 +3518,9 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		zend_ast *arg_ast = args->child[i];
 		znode arg_node;
 		zend_op *opline;
-		zend_bool send_user = 0;
 
-		if (zend_is_variable(arg_ast) && !zend_is_call(arg_ast)) {
-			zend_compile_var(&arg_node, arg_ast, BP_VAR_FUNC_ARG | (i << BP_VAR_SHIFT));
-			send_user = 1;
-		} else {
-			zend_compile_expr(&arg_node, arg_ast);
-			if (arg_node.op_type & (IS_VAR|IS_CV)) {
-				send_user = 1;
-			}
-		}
-
-		if (send_user) {
+		zend_compile_expr(&arg_node, arg_ast);
+		if (arg_node.op_type & (IS_VAR|IS_CV)) {
 			opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
 		} else {
 			opline = zend_emit_op(NULL, ZEND_SEND_VAL, &arg_node, NULL);
@@ -4513,16 +4503,32 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	znode expr_node, case_node;
 	zend_op *opline;
-	uint32_t *jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
-	uint32_t opnum_default_jmp;
+	uint32_t *jmpnz_opnums, opnum_default_jmp;
 
 	zend_compile_expr(&expr_node, expr_ast);
+
+	if (cases->children == 1 && cases->child[0]->child[0] == NULL) {
+		/* we have to take care about the case that only have one default branch,
+		 * expr result will not be unrefed in this case, but it should be like in ZEND_CASE */
+		zend_ast *stmt_ast = cases->child[0]->child[1];
+		if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
+			zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
+		} else if (expr_node.op_type == IS_CONST) {
+			zval_dtor(&expr_node.u.constant);
+		}
+
+		zend_begin_loop(ZEND_NOP, NULL);
+		zend_compile_stmt(stmt_ast);
+		zend_end_loop(get_next_op_number(CG(active_op_array)), NULL);
+		return;
+	}
 
 	zend_begin_loop(ZEND_FREE, &expr_node);
 
 	case_node.op_type = IS_TMP_VAR;
 	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
 
+	jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
 	for (i = 0; i < cases->children; ++i) {
 		zend_ast *case_ast = cases->child[i];
 		zend_ast *cond_ast = case_ast->child[0];
