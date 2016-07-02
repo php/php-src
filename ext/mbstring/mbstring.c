@@ -687,8 +687,8 @@ static sapi_post_entry mbstr_post_entries[] = {
 static int
 php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_encoding ***return_list, size_t *return_size, int persistent)
 {
-	int size, bauto, ret = SUCCESS;
-	size_t n;
+	int bauto, ret = SUCCESS;
+	size_t n, size;
 	char *p, *p1, *p2, *endp, *tmpstr;
 	const mbfl_encoding **entry, **list;
 
@@ -1594,6 +1594,8 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
 	UNREGISTER_INI_ENTRIES();
 
+	zend_multibyte_restore_functions();
+
 #if HAVE_MBREGEX
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -2097,8 +2099,13 @@ PHP_FUNCTION(mb_parse_str)
 		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
 	} else {
 		zval tmp;
-		zend_array *symbol_table = zend_rebuild_symbol_table();
+		zend_array *symbol_table;
+		if (zend_forbid_dynamic_call("mb_parse_str() with a single argument") == FAILURE) {
+			efree(encstr);
+			return;
+		}
 
+		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr);
 	}

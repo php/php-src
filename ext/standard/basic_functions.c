@@ -2675,6 +2675,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_version_compare, 0, 0, 2)
 	ZEND_ARG_INFO(0, oper)
 ZEND_END_ARG_INFO()
 /* }}} */
+/* {{{ win32/codepage.c */
+#ifdef PHP_WIN32
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_set, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_get, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_is_utf8, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
+	ZEND_ARG_INFO(0, in_codepage)
+	ZEND_ARG_INFO(0, out_codepage)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+/* }}} */
 /* }}} */
 
 const zend_function_entry basic_functions[] = { /* {{{ */
@@ -3368,6 +3387,12 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
 
+#ifdef PHP_WIN32
+	PHP_FE(sapi_windows_cp_set, arginfo_sapi_windows_cp_set)
+	PHP_FE(sapi_windows_cp_get, arginfo_sapi_windows_cp_get)
+	PHP_FE(sapi_windows_cp_is_utf8, arginfo_sapi_windows_cp_is_utf8)
+	PHP_FE(sapi_windows_cp_conv, arginfo_sapi_windows_cp_conv)
+#endif
 	PHP_FE_END
 };
 /* }}} */
@@ -3834,20 +3859,21 @@ PHP_FUNCTION(constant)
 {
 	zend_string *const_name;
 	zval *c;
+	zend_class_entry *scope;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &const_name) == FAILURE) {
 		return;
 	}
 
-	c = zend_get_constant_ex(const_name, NULL, ZEND_FETCH_CLASS_SILENT);
+	scope = zend_get_executed_scope();
+	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
 	if (c) {
-		ZVAL_COPY_VALUE(return_value, c);
+		ZVAL_DUP(return_value, c);
 		if (Z_CONSTANT_P(return_value)) {
-			if (UNEXPECTED(zval_update_constant_ex(return_value, 1, NULL) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
 				return;
 			}
 		}
-		zval_copy_ctor(return_value);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
 		RETURN_NULL();
@@ -4703,7 +4729,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
 			break;
 
 		default:
-			php_log_err(message);
+			php_log_err_with_severity(message, LOG_NOTICE);
 			break;
 	}
 	return SUCCESS;
@@ -5114,7 +5140,8 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 PHP_FUNCTION(highlight_file)
 {
 	char *filename;
-	size_t filename_len, ret;
+	size_t filename_len;
+	int ret;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	zend_bool i = 0;
 
@@ -5157,7 +5184,7 @@ PHP_FUNCTION(php_strip_whitespace)
 	char *filename;
 	size_t filename_len;
 	zend_lex_state original_lex_state;
-	zend_file_handle file_handle = {{0}};
+	zend_file_handle file_handle;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
@@ -5165,6 +5192,7 @@ PHP_FUNCTION(php_strip_whitespace)
 
 	php_output_start_default();
 
+	memset(&file_handle, 0, sizeof(file_handle));
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
 	file_handle.free_filename = 0;
@@ -5476,15 +5504,9 @@ PHP_FUNCTION(print_r)
 	}
 
 	if (do_return) {
-		php_output_start_default();
-	}
-
-	zend_print_zval_r(var, 0);
-
-	if (do_return) {
-		php_output_get_contents(return_value);
-		php_output_discard();
+		RETURN_STR(zend_print_zval_r_to_str(var, 0));
 	} else {
+		zend_print_zval_r(var, 0);
 		RETURN_TRUE;
 	}
 }
@@ -5519,7 +5541,7 @@ PHP_FUNCTION(ignore_user_abort)
 
 	old_setting = PG(ignore_user_abort);
 
-	if (arg) {
+	if (ZEND_NUM_ARGS()) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(key);

@@ -535,7 +535,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					xReturn = XMLRPC_CreateValueBoolean(key, Z_TYPE(val) == IS_TRUE);
 					break;
 				case xmlrpc_int:
-					convert_to_long(&val);
+					ZVAL_LONG(&val, zval_get_long(&val));
 					xReturn = XMLRPC_CreateValueInt(key, Z_LVAL(val));
 					break;
 				case xmlrpc_double:
@@ -576,7 +576,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 								char *num_str = NULL;
 
 								if (vtype != xmlrpc_vector_array) {
-									spprintf(&num_str, 0, "%ld", num_index);
+									spprintf(&num_str, 0, ZEND_LONG_FMT, num_index);
 								}
 
 								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(num_str, pIter, depth++));

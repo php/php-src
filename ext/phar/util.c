@@ -178,7 +178,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 
-	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -1225,7 +1225,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		*error = NULL;
 	}
 
-	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}
@@ -1403,7 +1403,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 		ZVAL_EMPTY_STRING(&zp[0]);
 	}
 
-	if (end != Z_STRLEN(zp[0])) {
+	if ((size_t)end != Z_STRLEN(zp[0])) {
 		zval_dtor(&zp[0]);
 		zval_dtor(&zp[1]);
 		zval_dtor(&zp[2]);
@@ -1563,7 +1563,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			EVP_VerifyInit(&md_ctx, mdtype);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1605,7 +1605,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			PHP_SHA512Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1638,7 +1638,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			PHP_SHA256Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1679,7 +1679,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			PHP_SHA1Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1712,7 +1712,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			PHP_MD5Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;

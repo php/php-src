@@ -13,6 +13,4 @@ $x = $c->test();
 print_r($x);
 unset($c, $x);
 --EXPECTF--
-Array
-(
-)
+Fatal error: Cannot unset $this in %sbug68370.php on line 4

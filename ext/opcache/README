@@ -215,4 +215,4 @@ opcache.mmap_base
 	errors.
 
 opcache.lockfile_path (default "/tmp")
-	Absolute path used to store shared lockfiles.
+	Absolute path used to store shared lockfiles (for *nix only)

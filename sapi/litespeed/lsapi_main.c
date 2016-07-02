@@ -442,15 +442,8 @@ static sapi_module_struct lsapi_sapi_module =
 
     sapi_lsapi_register_variables,  /* register server variables */
     sapi_lsapi_log_message,         /* Log message */
-
-    NULL,                           /* php.ini path override */
-    NULL,                           /* block interruptions */
-    NULL,                           /* unblock interruptions */
-    NULL,                           /* default post reader */
-    NULL,                           /* treat data */
-    NULL,                           /* executable location */
-
-    0,                              /* php.ini ignore */
+	NULL,							/* Get request time */
+	NULL,							/* Child terminate */
 
     STANDARD_SAPI_MODULE_PROPERTIES
 
@@ -1009,9 +1002,7 @@ int main( int argc, char * argv[] )
     tsrm_startup(1, 1, 0, NULL);
 #endif
 
-#ifdef ZEND_SIGNALS
 	zend_signal_startup();
-#endif
 
     if (argc > 1 ) {
         if ( parse_opt( argc, argv, &climode,

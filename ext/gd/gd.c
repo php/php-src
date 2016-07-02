@@ -2809,14 +2809,14 @@ PHP_FUNCTION(imagecolorat)
 		if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
 			RETURN_LONG(gdImageTrueColorPixel(im, x, y));
 		} else {
-			php_error_docref(NULL, E_NOTICE, "%pd,%pd is out of bounds", x, y);
+			php_error_docref(NULL, E_NOTICE, "" ZEND_LONG_FMT "," ZEND_LONG_FMT " is out of bounds", x, y);
 			RETURN_FALSE;
 		}
 	} else {
 		if (im->pixels && gdImageBoundsSafe(im, x, y)) {
 			RETURN_LONG(im->pixels[y][x]);
 		} else {
-			php_error_docref(NULL, E_NOTICE, "%pd,%pd is out of bounds", x, y);
+			php_error_docref(NULL, E_NOTICE, "" ZEND_LONG_FMT "," ZEND_LONG_FMT " is out of bounds", x, y);
 			RETURN_FALSE;
 		}
 	}
@@ -4667,6 +4667,10 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
+	if (tmp_h <= 0 || tmp_w <= 0) {
+		RETURN_FALSE;
+	}
+
 	new_width = tmp_w;
 	new_height = tmp_h;
 
@@ -4846,7 +4850,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		}
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid type for element %li", type);
+			php_error_docref(NULL, E_WARNING, "Invalid type for element " ZEND_LONG_FMT, type);
 			RETURN_FALSE;
 	}
 

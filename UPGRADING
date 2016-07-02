@@ -18,6 +18,7 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 1. Backward Incompatible Changes
 ========================================
+
 - Core:
   . 'void' can no longer be used as the name of a class, interface, or trait.
     This applies to declarations, class_alias() and use statements.
@@ -25,8 +26,30 @@ PHP 7.1 UPGRADE NOTES
     decoct(), dechex(), integer operators and other conversions now always
     respect scientific notation in numeric strings.
     (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
+  . The ASCII 0x7F Delete control character is no longer permitted in unquoted
+    identifiers in source code.
+  . The following functions may no longer be called dynamically using $func(),
+    call_user_func(), array_map() or similar:
+     . extract()
+     . compact()
+     . get_defined_vars()
+     . func_get_args()
+     . func_get_arg()
+     . func_num_args()
+     . parse_str() with one argument
+     . mb_parse_str() with one argument
+     . assert() with a string argument
+    (RFC: https://wiki.php.net/rfc/forbid_dynamic_scope_introspection)
+  . If the error_log is set to syslog, the PHP error levels are mapped to the
+    syslog error levels. This brings finer differentiation in the error logs
+    in contrary to the previous approach where all the errors are loggged with
+    the notice level only.
 
 - JSON:
+  . The serialize_precision is used instead of precision when encoding double
+    values.
+  . An empty key is decoded as an empty property name instead of using _empty_
+    property name when decoding object to stdClass.
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
     U+2029 are escaped.
 
@@ -41,6 +64,8 @@ PHP 7.1 UPGRADE NOTES
     (RFC: https://wiki.php.net/rfc/negative-string-offsets)
   . Added a form of the list() construct where keys can be specified.
     (RFC: https://wiki.php.net/rfc/list_keys)
+  . Added [] = as alternative construct to list() =.
+    (RFC: https://wiki.php.net/rfc/short_list_syntax)
   . Number operators taking numeric strings now emit "A non well formed numeric
     value encountered" E_NOTICEs for leading-numeric strings, and "A
     non-numeric value encountered" E_WARNINGs for non-numeric strings.
@@ -91,10 +116,14 @@ PHP 7.1 UPGRADE NOTES
   mb_strpos() and mb_stripos() now accept negative string offsets.
 - substr_count() and mb_strimwidth() additionally also accept negative length.
 - file_get_contents() accepts a negative seek offset if the stream is seekable.
+- tempnam() throws a notice when failing back to the system temp dir.
 
 ========================================
 6. New Functions
 ========================================
+- Core:
+  . Added sapi_windows_cp_set(), sapi_windows_cp_get(), sapi_windows_cp_is_utf8(),
+    sapi_windows_cp_conv() for codepage handling.
 
 ========================================
 7. New Classes and Interfaces
@@ -108,7 +137,7 @@ PHP 7.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 - SQLite3:
-  . Upgraded bundled SQLite lib to 3.9.2
+  . Upgraded bundled SQLite lib to 3.13.0
 
 ========================================
 10. New Global Constants
@@ -126,11 +155,61 @@ PHP 7.1 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- serialize_precision
+  . If the value is set to -1, then the dtoa mode 0 is used. The value -1
+    is now used by default.
+
+- precision
+  . If the value is set to -1, then the dtoa mode 0 is used. No changes
+    in default value which is still 14.
+
 ========================================
 12. Windows Support
 ========================================
 
 - Core:
+  . Support for long and UTF-8 path;
+
+    If an application is UTF-8 conform, no further action is required. For
+    applications depending on paths in non UTF-8 encodings for I/O, an explicit
+    INI directive has to be set. The encoding INI settings check relies on the
+    order in the core:
+      - internal_encoding
+      - default_charset
+      - zend.multibyte
+
+    Several functions for codepage handling were itroduced:
+      - sapi_windows_cp_set() to set the default codepage
+      - sapi_windows_cp_get() to retrieve the current codepage
+      - sapi_windows_cp_is_utf8()
+      - sapi_windows_cp_conv() to convert between codepages, using iconv()
+        compatible signature
+    These functions are thread safe.
+
+    The console output codepage is adjusted depending on the encoding used in
+    PHP. Depending on the concrete system OEM codepage, the visible output
+    might or might be not correct. For example, in the default cmd.exe and on
+    a system with the OEM codepage 437, outputs in codepages 1251, 1252, 1253
+    and some others can be shown correctly when using UTF-8. On the same system,
+    chars in codepage like 20932 probably won't be shown correctly. This refers
+    to the particular system rules for codepage, font compatibility and the
+    particular console program used. PHP automatically sets the console codepage
+    according to the encoding rules from php.ini. Using alternative consoles
+    instead of cmd.exe directly might bring better experience in some cases.
+
+    As a result of UTF-8 support in the streams, PHP scripts are not limited
+    to ASCII or ANSI filenames anymore. This is supported out of the box on
+    CLI. For other SAPI, the documentation for the corresponding server
+    is useful.
+
+    Long paths support is transparent. Paths longer than 260 bytes get
+    automatically prefixed with \\?\. The max path length is limited to
+    2048 bytes. Be aware, that the path segment limit (basename length) still
+    persists.
+
+    The recommended way to handle file paths, I/O and other related topics is
+    by utilizing UTF-8.
+
   . Support for ftok()
 
 - FCGI

@@ -626,7 +626,7 @@ _crypt_extended_r(const char *key, const char *setting,
 	 * and padding with zeros.
 	 */
 	q = (u_char *) keybuf;
-	while (q - (u_char *) keybuf < sizeof(keybuf)) {
+	while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf)) {
 		*q++ = *key << 1;
 		if (*key)
 			key++;
@@ -667,7 +667,7 @@ _crypt_extended_r(const char *key, const char *setting,
 			 * And XOR with the next 8 characters of the key.
 			 */
 			q = (u_char *) keybuf;
-			while (q - (u_char *) keybuf < sizeof(keybuf) && *key)
+			while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf) && *key)
 				*q++ ^= *key++ << 1;
 
 			if (des_setkey((char *) keybuf, data))

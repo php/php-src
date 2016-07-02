@@ -102,7 +102,7 @@ retry:
 			} while (err == EINTR);
 		}
 		estr = php_socket_strerror(err, NULL, 0);
-		php_error_docref(NULL, E_NOTICE, "send of " ZEND_LONG_FMT " bytes failed with errno=%ld %s",
+		php_error_docref(NULL, E_NOTICE, "send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
 				(zend_long)count, err, estr);
 		efree(estr);
 	}
@@ -266,16 +266,26 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 		struct sockaddr **addr, socklen_t *addrlen
 		)
 {
-	php_sockaddr_storage sa;
-	socklen_t sl = sizeof(sa);
 	int ret;
 	int want_addr = textaddr || addr;
 
 	if (want_addr) {
+		php_sockaddr_storage sa;
+		socklen_t sl = sizeof(sa);
 		ret = recvfrom(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, (struct sockaddr*)&sa, &sl);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
-		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
-			textaddr, addr, addrlen);
+		if (sl) {
+			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
+					textaddr, addr, addrlen);
+		} else {
+			if (textaddr) {
+				*textaddr = ZSTR_EMPTY_ALLOC();
+			}
+			if (addr) {
+				*addr = NULL;
+				*addrlen = 0;
+			}
+		}
 	} else {
 		ret = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
@@ -742,6 +752,18 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	}
 #endif
 
+	if (stream->ops != &php_stream_udp_socket_ops /* TCP_NODELAY is only applicable for TCP */
+#ifdef AF_UNIX
+		&& stream->ops != &php_stream_unix_socket_ops
+		&& stream->ops != &php_stream_unixdg_socket_ops
+#endif
+		&& PHP_STREAM_CONTEXT(stream)
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL
+		&& zend_is_true(tmpzval)
+	) {
+		sockopts |= STREAM_SOCKOP_TCP_NODELAY;
+	}
+
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we
 	 * want the default to be TCP sockets so that the openssl extension can
 	 * re-use this code. */
@@ -783,36 +805,37 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		php_stream_xport_param *xparam STREAMS_DC)
 {
 	int clisock;
+	zend_bool nodelay = 0;
+	zval *tmpzval = NULL;
 
 	xparam->outputs.client = NULL;
 
+	if ((NULL != PHP_STREAM_CONTEXT(stream)) &&
+		(tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
+		zend_is_true(tmpzval)) {
+		nodelay = 1;
+	}
+
 	clisock = php_network_accept_incoming(sock->socket,
-			xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
-			xparam->want_addr ? &xparam->outputs.addr : NULL,
-			xparam->want_addr ? &xparam->outputs.addrlen : NULL,
-			xparam->inputs.timeout,
-			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
-			&xparam->outputs.error_code
-			);
+		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+		xparam->want_addr ? &xparam->outputs.addr : NULL,
+		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
+		xparam->inputs.timeout,
+		xparam->want_errortext ? &xparam->outputs.error_text : NULL,
+		&xparam->outputs.error_code,
+		nodelay);
 
 	if (clisock >= 0) {
-		php_netstream_data_t *clisockdata;
+		php_netstream_data_t *clisockdata = (php_netstream_data_t*) emalloc(sizeof(*clisockdata));
 
-		clisockdata = emalloc(sizeof(*clisockdata));
+		memcpy(clisockdata, sock, sizeof(*clisockdata));
+		clisockdata->socket = clisock;
 
-		if (clisockdata == NULL) {
-			close(clisock);
-			/* technically a fatal error */
-		} else {
-			memcpy(clisockdata, sock, sizeof(*clisockdata));
-			clisockdata->socket = clisock;
-
-			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
-			if (xparam->outputs.client) {
-				xparam->outputs.client->ctx = stream->ctx;
-				if (stream->ctx) {
-					GC_REFCOUNT(stream->ctx)++;
-				}
+		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
+		if (xparam->outputs.client) {
+			xparam->outputs.client->ctx = stream->ctx;
+			if (stream->ctx) {
+				GC_REFCOUNT(stream->ctx)++;
 			}
 		}
 	}

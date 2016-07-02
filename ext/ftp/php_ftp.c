@@ -1491,7 +1491,7 @@ PHP_FUNCTION(ftp_set_option)
 			RETURN_TRUE;
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option '%pd'", option);
+			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
 			RETURN_FALSE;
 			break;
 	}
@@ -1525,7 +1525,7 @@ PHP_FUNCTION(ftp_get_option)
 			RETURN_BOOL(ftp->usepasvaddress);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown option '%pd'", option);
+			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
 			RETURN_FALSE;
 			break;
 	}

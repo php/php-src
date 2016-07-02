@@ -363,7 +363,7 @@ static dba_handler handler[] = {
 #if DBA_TCADB
 	DBA_HND(tcadb, DBA_LOCK_ALL)
 #endif
-	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
+	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
 #if DBA_FLATFILE
@@ -658,11 +658,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	/* we only take string arguments */
 	for (i = 0; i < ac; i++) {
-		if (Z_TYPE(args[i]) != IS_STRING) {
-			convert_to_string_ex(&args[i]);
-		} else if (Z_REFCOUNTED(args[i])) {
-			Z_ADDREF(args[i]);
-		}
+		ZVAL_STR(&args[i], zval_get_string(&args[i]));
 		keylen += Z_STRLEN(args[i]);
 	}
 

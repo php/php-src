@@ -122,8 +122,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_readline_redisplay, 0)
 ZEND_END_ARG_INFO()
 
+#if HAVE_RL_ON_NEW_LINE
 ZEND_BEGIN_ARG_INFO(arginfo_readline_on_new_line, 0)
 ZEND_END_ARG_INFO()
+#endif
 #endif
 /* }}} */
 

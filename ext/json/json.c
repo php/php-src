@@ -33,14 +33,6 @@
 #include "php_json_parser.h"
 #include <zend_exceptions.h>
 
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define NUM_BUF_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define NUM_BUF_SIZE 1080
-#endif
-
-
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
@@ -192,13 +184,15 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
 	php_json_encode_zval(buf, val, options);
+
+	return JSON_G(error_code) > 0 ? FAILURE : SUCCESS;
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
+PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
 
@@ -206,8 +200,11 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_l
 
 	if (php_json_yyparse(&parser)) {
 		JSON_G(error_code) = php_json_parser_error_code(&parser);
-		RETURN_NULL();
+		RETVAL_NULL();
+		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -254,7 +251,7 @@ static PHP_FUNCTION(json_decode)
 		return;
 	}
 
-	JSON_G(error_code) = 0;
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;

@@ -66,6 +66,8 @@ extern int  le_curl_multi_handle;
 #define le_curl_multi_handle_name "cURL Multi Handle"
 extern int  le_curl_share_handle;
 #define le_curl_share_handle_name "cURL Share Handle"
+//extern int  le_curl_pushheaders;
+//#define le_curl_pushheaders "cURL Push Headers"
 
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
@@ -90,14 +92,17 @@ PHP_FUNCTION(curl_multi_info_read);
 PHP_FUNCTION(curl_multi_init);
 PHP_FUNCTION(curl_multi_remove_handle);
 PHP_FUNCTION(curl_multi_select);
+PHP_FUNCTION(curl_multi_errno);
 
 PHP_FUNCTION(curl_share_close);
 PHP_FUNCTION(curl_share_init);
 PHP_FUNCTION(curl_share_setopt);
+PHP_FUNCTION(curl_share_errno);
 
 #if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
 PHP_FUNCTION(curl_strerror);
 PHP_FUNCTION(curl_multi_strerror);
+PHP_FUNCTION(curl_share_strerror);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
@@ -114,6 +119,7 @@ PHP_FUNCTION(curl_multi_setopt);
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 PHP_FUNCTION(curl_pause);
 #endif
+
 PHP_FUNCTION(curl_file_create);
 
 
@@ -142,7 +148,7 @@ typedef struct {
 	zval                  func_name;
 	zend_fcall_info_cache fci_cache;
 	int                   method;
-} php_curl_progress, php_curl_fnmatch;
+} php_curl_progress, php_curl_fnmatch, php_curlm_server_push;
 
 typedef struct {
 	php_curl_write    *write;
@@ -187,18 +193,31 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
+	php_curlm_server_push	*server_push;
+} php_curlm_handlers;
+
+typedef struct {
 	int         still_running;
 	CURLM      *multi;
 	zend_llist  easyh;
+	php_curlm_handlers	*handlers;
+	struct {
+		int no;
+	} err;
 } php_curlm;
 
 typedef struct {
 	CURLSH                   *share;
+	struct {
+		int no;
+	} err;
 } php_curlsh;
 
+php_curl *alloc_curl_handle();
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, int reporterror);
+void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 
 void curlfile_register_class(void);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;

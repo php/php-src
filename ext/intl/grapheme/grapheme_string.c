@@ -110,7 +110,7 @@ PHP_FUNCTION(grapheme_strpos)
 	size_t haystack_len, needle_len;
 	const char *found;
 	zend_long loffset = 0;
-	int32_t offset = 0;
+	int32_t offset = 0, noffset = 0;
 	zend_long ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
@@ -126,6 +126,7 @@ PHP_FUNCTION(grapheme_strpos)
 
 	/* we checked that it will fit: */
 	offset = (int32_t) loffset;
+	noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
@@ -138,7 +139,7 @@ PHP_FUNCTION(grapheme_strpos)
 		/* quick check to see if the string might be there
 		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
 		*/
-		found = php_memnstr(haystack + offset, needle, needle_len, haystack + haystack_len);
+		found = php_memnstr(haystack + noffset, needle, needle_len, haystack + haystack_len);
 
 		/* if it isn't there the we are done */
 		if (!found) {
@@ -199,13 +200,13 @@ PHP_FUNCTION(grapheme_stripos)
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
+		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
 		php_strtolower(needle_dup, needle_len);
 		haystack_dup = estrndup(haystack, haystack_len);
 		php_strtolower(haystack_dup, haystack_len);
 
-		found = php_memnstr(haystack_dup + offset + ((offset < 0) ? haystack_len : 0)
-			, needle_dup, needle_len, haystack_dup + haystack_len);
+		found = php_memnstr(haystack_dup + noffset, needle_dup, needle_len, haystack_dup + haystack_len);
 
 		efree(haystack_dup);
 		efree(needle_dup);
@@ -827,7 +828,7 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_FALSE;
 	}
 
-	if ( lstart > INT32_MAX || lstart < 0 || lstart >= str_len ) {
+	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: start not contained in string", 0 );
 		RETURN_FALSE;
 	}

@@ -335,6 +335,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 		if( U_FAILURE( status ) ) {
 			if( status == U_BUFFER_OVERFLOW_ERROR ) {
 				status = U_ZERO_ERROR;
+				buflen++; /* add space for \0 */
 				continue;
 			}
 
@@ -1428,7 +1429,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	char* cur_loc_range	= NULL;
 	zend_string* can_loc_range	= NULL;
-	int	saved_pos = 0;
+	size_t	saved_pos = 0;
 
 	zend_string* return_value = NULL;
 
@@ -1548,7 +1549,11 @@ PHP_FUNCTION(locale_lookup)
 	}
 
 	if(loc_range_len == 0) {
-		loc_range = intl_locale_get_default();
+		if(fallback_loc_str) {
+			loc_range = ZSTR_VAL(fallback_loc_str);
+		} else {
+			loc_range = intl_locale_get_default();
+		}
 	}
 
 	hash_arr = Z_ARRVAL_P(arr);
