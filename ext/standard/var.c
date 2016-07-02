@@ -589,7 +589,7 @@ PHP_FUNCTION(var_export)
 	RETURN_INTERNED_STR(CG(known_strings)[key]);
 
 /* {{{ proto string var_type(mixed var)
-   Get the type of a variable. */
+   Get the type of a variable's current value. */
 PHP_FUNCTION(var_type)
 {
 	zval *var;
