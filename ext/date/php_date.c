@@ -585,6 +585,11 @@ PHPAPI zend_class_entry *php_date_get_immutable_ce(void)
 	return date_ce_immutable;
 }
 
+PHPAPI zend_class_entry *php_date_get_interface_ce(void)
+{
+	return date_ce_interface;
+}
+
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void)
 {
 	return date_ce_timezone;
