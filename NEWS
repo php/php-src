@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
 
+- Readline:
+  . Fixed bug #72538 (readline_redisplay crashes php). (Laruence)
+
 - SQLite3:
   . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
     (cmb)
