@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
 
+- Readline:
+  . Fixed bug #72538 (readline_redisplay crashes php). (Laruence)
+
 - Standard:
   . Fixed bug #72505 (readfile() mangles files larger than 2G). (Cschneid)
   . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
