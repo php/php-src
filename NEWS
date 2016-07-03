@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 	functions. (Pierrick)
   . Add support for HTTP/2 Server Push (davey)
 
+- GD:
+  . Fixed bug #72404 (imagecreatefromjpeg fails on selfie). (cmb)
+
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)

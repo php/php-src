@@ -136,6 +136,10 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- GD:
+  . Changed the default of the ini setting gd.jpeg_ignore_warning to 1.
+
 - SQLite3:
   . Upgraded bundled SQLite lib to 3.13.0
 
