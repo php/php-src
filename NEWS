@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
     (cmb)
 
+- Session:
+  . Fixed bug #72531 (ps_files_cleanup_dir Buffer overflow). (Laruence)
+
 - Standard:
   . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
