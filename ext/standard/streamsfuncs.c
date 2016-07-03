@@ -322,7 +322,7 @@ PHP_FUNCTION(stream_socket_get_name)
 	if (0 != php_stream_xport_get_name(stream, want_peer,
 				&name,
 				NULL, NULL
-				)) {
+				) || !name) {
 		RETURN_FALSE;
 	}
 
