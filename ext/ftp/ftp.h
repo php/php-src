@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,7 @@
 
 #define	FTP_DEFAULT_TIMEOUT	90
 #define FTP_DEFAULT_AUTOSEEK 1
+#define FTP_DEFAULT_USEPASVADDRESS	1
 #define PHP_FTP_FAILED			0
 #define PHP_FTP_FINISHED		1
 #define PHP_FTP_MOREDATA		2
@@ -69,8 +70,9 @@ typedef struct ftpbuf
 	ftptype_t	type;			/* current transfer type */
 	int		pasv;			/* 0=off; 1=pasv; 2=ready */
 	php_sockaddr_storage	pasvaddr;	/* passive mode address */
-	long	timeout_sec;	/* User configureable timeout (seconds) */
-	int			autoseek;	/* User configureable autoseek flag */
+	long	timeout_sec;	/* User configurable timeout (seconds) */
+	int			autoseek;	/* User configurable autoseek flag */
+	int			usepasvaddress;	/* Use the address returned by the pasv command */
 
 	int				nb;		/* "nonblocking" transfer in progress */
 	databuf_t		*data;	/* Data connection for "nonblocking" transfers */

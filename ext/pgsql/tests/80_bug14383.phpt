@@ -1,5 +1,5 @@
 --TEST--
-Bug #14383 (using postgres with DBA causes DBA not to be able to find any keys)
+Bug #14383 (8.0+) (using postgres with DBA causes DBA not to be able to find any keys)
 --SKIPIF--
 <?php 
 require_once(dirname(__FILE__).'/../../dba/tests/skipif.inc');

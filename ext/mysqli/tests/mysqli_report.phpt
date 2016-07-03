@@ -43,8 +43,6 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_multi_query($link, "BAR; FOO;");
 	mysqli_query($link, "FOO");
-	/* This might work if you accept anonymous users in your setup */
-	mysqli_change_user($link, "0123456789-10-456789-20-456789-30-456789-40-456789-50-456789-60-456789-70-456789-80-456789-90-456789", "password", $db);
 	mysqli_kill($link, -1);
 
 	// mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
@@ -61,7 +59,6 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_multi_query($link, "BAR; FOO;");
 	mysqli_query($link, "FOO");
-	mysqli_change_user($link, "This might work if you accept anonymous users in your setup", "password", $db);
 	mysqli_kill($link, -1);
 	mysqli_prepare($link, "FOO");
 	mysqli_real_query($link, "FOO");
@@ -290,8 +287,6 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
 
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
-
-Warning: mysqli_change_user(): (%d/%d): Access denied for user '%s'@'%s' (using password: %s) in %s on line %d
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 

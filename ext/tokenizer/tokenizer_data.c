@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,8 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_LOGICAL_XOR", T_LOGICAL_XOR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_LOGICAL_AND", T_LOGICAL_AND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_PRINT", T_PRINT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_YIELD", T_YIELD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_POW_EQUAL", T_POW_EQUAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_SR_EQUAL", T_SR_EQUAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_SL_EQUAL", T_SL_EQUAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_XOR_EQUAL", T_XOR_EQUAL, CONST_CS | CONST_PERSISTENT);
@@ -69,6 +71,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_INT_CAST", T_INT_CAST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DEC", T_DEC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_INC", T_INC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_POW", T_POW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_CLONE", T_CLONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_NEW", T_NEW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_EXIT", T_EXIT, CONST_CS | CONST_PERSISTENT);
@@ -108,7 +111,6 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_FUNCTION", T_FUNCTION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_CONST", T_CONST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_RETURN", T_RETURN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("T_YIELD", T_YIELD, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_TRY", T_TRY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_CATCH", T_CATCH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_FINALLY", T_FINALLY, CONST_CS | CONST_PERSISTENT);
@@ -158,6 +160,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_NS_C", T_NS_C, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DIR", T_DIR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_NS_SEPARATOR", T_NS_SEPARATOR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_ELLIPSIS", T_ELLIPSIS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);
 }
 
@@ -174,6 +177,8 @@ char *get_token_type_name(int token_type)
 		case T_LOGICAL_XOR: return "T_LOGICAL_XOR";
 		case T_LOGICAL_AND: return "T_LOGICAL_AND";
 		case T_PRINT: return "T_PRINT";
+		case T_YIELD: return "T_YIELD";
+		case T_POW_EQUAL: return "T_POW_EQUAL";
 		case T_SR_EQUAL: return "T_SR_EQUAL";
 		case T_SL_EQUAL: return "T_SL_EQUAL";
 		case T_XOR_EQUAL: return "T_XOR_EQUAL";
@@ -205,6 +210,7 @@ char *get_token_type_name(int token_type)
 		case T_INT_CAST: return "T_INT_CAST";
 		case T_DEC: return "T_DEC";
 		case T_INC: return "T_INC";
+		case T_POW: return "T_POW";
 		case T_CLONE: return "T_CLONE";
 		case T_NEW: return "T_NEW";
 		case T_EXIT: return "T_EXIT";
@@ -244,7 +250,6 @@ char *get_token_type_name(int token_type)
 		case T_FUNCTION: return "T_FUNCTION";
 		case T_CONST: return "T_CONST";
 		case T_RETURN: return "T_RETURN";
-		case T_YIELD: return "T_YIELD";
 		case T_TRY: return "T_TRY";
 		case T_CATCH: return "T_CATCH";
 		case T_FINALLY: return "T_FINALLY";
@@ -294,6 +299,7 @@ char *get_token_type_name(int token_type)
 		case T_NS_C: return "T_NS_C";
 		case T_DIR: return "T_DIR";
 		case T_NS_SEPARATOR: return "T_NS_SEPARATOR";
+		case T_ELLIPSIS: return "T_ELLIPSIS";
 
 	}
 	return "UNKNOWN";

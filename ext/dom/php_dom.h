@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,6 +123,8 @@ xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce TSRMLS_DC);
+zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type TSRMLS_DC);
+int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC);
 
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
@@ -145,6 +147,20 @@ entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
 #define DOM_NOT_IMPLEMENTED() \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not yet implemented"); \
 	return;
+
+#define convert_to_copy_master(orig, copy, lower_type, upper_type) \
+	if (Z_TYPE_P(orig) != IS_##upper_type) { \
+		if (Z_REFCOUNT_P(orig) > 1) {        \
+			copy = *orig;                    \
+			zval_copy_ctor(&copy);           \
+			orig = &copy;                    \
+		}                                    \
+		convert_to_##lower_type(orig);       \
+	}
+
+#define convert_to_string_copy(orig, copy)  convert_to_copy_master(orig, copy, string, STRING);
+#define convert_to_long_copy(orig, copy)    convert_to_copy_master(orig, copy, long, LONG);
+#define convert_to_boolean_copy(orig, copy) convert_to_copy_master(orig, copy, boolean, BOOL);
 
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1

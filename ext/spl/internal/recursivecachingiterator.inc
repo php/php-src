@@ -80,7 +80,7 @@ class RecursiveCachingIterator extends CachingIterator implements RecursiveItera
 	/** @return whether the current element has children
 	 * @note The check whether the Iterator for the children can be created was
 	 *       already executed. Hence when flag CATCH_GET_CHILD was given in
-	 *       constructor this fucntion returns false so that getChildren does 
+	 *       constructor this function returns false so that getChildren does 
 	 *       not try to access those children.
 	 */
 	function hasChildren()

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -488,7 +488,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_prepend(resource brigade, resource bucket)
+/* {{{ proto void stream_bucket_prepend(resource brigade, object bucket)
    Prepend bucket to brigade */
 PHP_FUNCTION(stream_bucket_prepend)
 {
@@ -496,7 +496,7 @@ PHP_FUNCTION(stream_bucket_prepend)
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_append(resource brigade, resource bucket)
+/* {{{ proto void stream_bucket_append(resource brigade, object bucket)
    Append bucket to brigade */
 PHP_FUNCTION(stream_bucket_append)
 {

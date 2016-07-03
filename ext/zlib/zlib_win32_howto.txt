@@ -1,7 +1,7 @@
 Rules for building ZLIB
 -----------------------
 
-The zlib project requires the folowing files:
+The zlib project requires the following files:
 
 php_build\zlib\include\zlib.h
 php_build\zlib\include\zconf.h

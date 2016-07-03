@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,6 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->result = NULL;
 	}
 
-#if HAVE_PQPREPARE
 	if (S->stmt_name) {
 		pdo_pgsql_db_handle *H = S->H;
 		char *q = NULL;
@@ -91,7 +90,6 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		efree(S->query);
 		S->query = NULL;
 	}
-#endif
 
 	if (S->cursor_name) {
 		pdo_pgsql_db_handle *H = S->H;
@@ -105,7 +103,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		efree(S->cursor_name);
 		S->cursor_name = NULL;
 	}
-	
+
 	if(S->cols) {
 		efree(S->cols);
 		S->cols = NULL;
@@ -126,7 +124,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		PQclear(S->result);
 		S->result = NULL;
 	}
-	
+
 	S->current_row = 0;
 
 	if (S->cursor_name) {
@@ -156,16 +154,14 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);
 		S->result = PQexec(H->server, q);
 		efree(q);
-	} else
-#if HAVE_PQPREPARE
-	if (S->stmt_name) {
+	} else if (S->stmt_name) {
 		/* using a prepared statement */
 
 		if (!S->is_prepared) {
 stmt_retry:
 			/* we deferred the prepare until now, because we didn't
 			 * know anything about the parameter types; now we do */
-			S->result = PQprepare(H->server, S->stmt_name, S->query, 
+			S->result = PQprepare(H->server, S->stmt_name, S->query,
 						stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
 						S->param_types);
 			status = PQresultStatus(S->result);
@@ -178,10 +174,10 @@ stmt_retry:
 					break;
 				default: {
 					char *sqlstate = pdo_pgsql_sqlstate(S->result);
-					/* 42P05 means that the prepared statement already existed. this can happen if you use 
-					 * a connection pooling software line pgpool which doesn't close the db-connection once 
-					 * php disconnects. if php dies (no chance to run RSHUTDOWN) during execution it has no 
-					 * chance to DEALLOCATE the prepared statements it has created. so, if we hit a 42P05 we 
+					/* 42P05 means that the prepared statement already existed. this can happen if you use
+					 * a connection pooling software line pgpool which doesn't close the db-connection once
+					 * php disconnects. if php dies (no chance to run RSHUTDOWN) during execution it has no
+					 * chance to DEALLOCATE the prepared statements it has created. so, if we hit a 42P05 we
 					 * deallocate it and retry ONCE (thies 2005.12.15)
 					 */
 					if (sqlstate && !strcmp(sqlstate, "42P05")) {
@@ -208,9 +204,17 @@ stmt_retry:
 				S->param_lengths,
 				S->param_formats,
 				0);
-	} else
-#endif
-	{
+	} else if (stmt->supports_placeholders == PDO_PLACEHOLDER_NAMED) {
+		/* execute query with parameters */
+		S->result = PQexecParams(H->server, S->query,
+				stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
+				S->param_types,
+				(const char**)S->param_values,
+				S->param_lengths,
+				S->param_formats,
+				0);
+	} else {
+		/* execute plain query (with embedded parameters) */
 		S->result = PQexec(H->server, stmt->active_query_string);
 	}
 	status = PQresultStatus(S->result);
@@ -238,10 +242,9 @@ stmt_retry:
 static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
-#if HAVE_PQPREPARE
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
-	if (S->stmt_name && param->is_param) {
+	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NAMED && param->is_param) {
 		switch (event_type) {
 			case PDO_PARAM_EVT_FREE:
 				if (param->driver_data) {
@@ -320,10 +323,10 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 								return 1;
 							} else {
 								int len;
-								
+
 								SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
 								Z_TYPE_P(param->parameter) = IS_STRING;
-								
+
 								if ((len = php_stream_copy_to_mem(stm, &Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0)) > 0) {
 									Z_STRLEN_P(param->parameter) = len;
 								} else {
@@ -362,21 +365,16 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				}
 				break;
 		}
-	} else {
-#endif
-	if (param->is_param) {
-        /* We need to manually convert to a pg native boolean value */
-        if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
-            ((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
-            SEPARATE_ZVAL(&param->parameter);
-            param->param_type = PDO_PARAM_STR;
+	} else if (param->is_param) {
+		/* We need to manually convert to a pg native boolean value */
+		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
+			((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
+			SEPARATE_ZVAL(&param->parameter);
+			param->param_type = PDO_PARAM_STR;
 			convert_to_boolean(param->parameter);
-            ZVAL_STRINGL(param->parameter, Z_BVAL_P(param->parameter) ? "t" : "f", 1, 1);
-        }
-    }
-#if HAVE_PQPREPARE
+			ZVAL_STRINGL(param->parameter, Z_BVAL_P(param->parameter) ? "t" : "f", 1, 1);
+		}
 	}
-#endif
 	return 1;
 }
 
@@ -400,7 +398,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			default:
 				return 0;
 		}
-		
+
 		spprintf(&q, 0, "FETCH %s FROM %s", ori_str, S->cursor_name);
 		efree(ori_str);
 		S->result = PQexec(S->H->server, q);
@@ -433,7 +431,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
 	struct pdo_bound_param_data *param;
-	
+
 	if (!S->result) {
 		return 0;
 	}
@@ -443,13 +441,13 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	cols[colno].maxlen = PQfsize(S->result, colno);
 	cols[colno].precision = PQfmod(S->result, colno);
 	S->cols[colno].pgsql_type = PQftype(S->result, colno);
-	
+
 	switch(S->cols[colno].pgsql_type) {
 
 		case BOOLOID:
 			cols[colno].param_type = PDO_PARAM_BOOL;
 			break;
-	
+
 		case OIDOID:
 			/* did the user bind the column as a LOB ? */
 			if (stmt->bound_columns && (
@@ -507,7 +505,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 	} else {
 		*ptr = PQgetvalue(S->result, S->current_row - 1, colno);
 		*len = PQgetlength(S->result, S->current_row - 1, colno);
-		
+
 		switch(cols[colno].param_type) {
 
 			case PDO_PARAM_INT:
@@ -521,7 +519,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 				*ptr = (char *) &(S->cols[colno].boolval);
 				*len = sizeof(zend_bool);
 				break;
-				
+
 			case PDO_PARAM_LOB:
 				if (S->cols[colno].pgsql_type == OIDOID) {
 					/* ooo, a real large object */
@@ -575,15 +573,15 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 	PGresult *res;
 	char *q=NULL;
 	ExecStatusType status;
-	
+
 	if (!S->result) {
 		return FAILURE;
 	}
-	
+
 	if (colno >= stmt->column_count) {
 		return FAILURE;
 	}
-	
+
 	array_init(return_value);
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 
@@ -591,9 +589,9 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
 	res = PQexec(S->H->server, q);
 	efree(q);
-	
+
 	status = PQresultStatus(res);
-	
+
 	if (status != PGRES_TUPLES_OK) {
 		/* Failed to get system catalogue, but return success
 		 * with the data we have collected so far
@@ -608,7 +606,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 
 	add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0), 1);
 done:
-	PQclear(res);		
+	PQclear(res);
 	return 1;
 }
 

@@ -10,6 +10,7 @@ include('config.inc');
 
 $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE ".$table_name);
+@pg_query($db, "DROP TABLE ".$table_name_92);
 
 echo "OK";
 

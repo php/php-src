@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <zend.h>
 
-const char *zend_vm_opcodes_map[164] = {
+const char *zend_vm_opcodes_map[168] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -186,6 +186,10 @@ const char *zend_vm_opcodes_map[164] = {
 	"ZEND_GENERATOR_RETURN",
 	"ZEND_FAST_CALL",
 	"ZEND_FAST_RET",
+	"ZEND_RECV_VARIADIC",
+	"ZEND_SEND_UNPACK",
+	"ZEND_POW",
+	"ZEND_ASSIGN_POW",
 };
 
 ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {

@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 #include <ctype.h>
@@ -24,7 +28,7 @@
 
 #define TIMELIB_TIME_FREE(m) 	\
 	if (m) {		\
-		free(m);	\
+		timelib_free(m);	\
 		m = NULL;	\
 	}			\
 
@@ -35,7 +39,7 @@
 timelib_time* timelib_time_ctor(void)
 {
 	timelib_time *t;
-	t = calloc(1, sizeof(timelib_time));
+	t = timelib_calloc(1, sizeof(timelib_time));
 
 	return t;
 }
@@ -43,7 +47,7 @@ timelib_time* timelib_time_ctor(void)
 timelib_rel_time* timelib_rel_time_ctor(void)
 {
 	timelib_rel_time *t;
-	t = calloc(1, sizeof(timelib_rel_time));
+	t = timelib_calloc(1, sizeof(timelib_rel_time));
 
 	return t;
 }
@@ -53,12 +57,29 @@ timelib_time* timelib_time_clone(timelib_time *orig)
 	timelib_time *tmp = timelib_time_ctor();
 	memcpy(tmp, orig, sizeof(timelib_time));
 	if (orig->tz_abbr) {
-		tmp->tz_abbr = strdup(orig->tz_abbr);
+		tmp->tz_abbr = timelib_strdup(orig->tz_abbr);
 	}
 	if (orig->tz_info) {
 		tmp->tz_info = orig->tz_info;
 	}
 	return tmp;
+}
+
+int timelib_time_compare(timelib_time *t1, timelib_time *t2)
+{
+	if (t1->sse == t2->sse) {
+		if (t1->f == t2->f) {
+			return 0;
+		}
+
+		if (t1->sse < 0) {
+			return (t1->f < t2->f) ? 1 : -1;
+		} else {
+			return (t1->f < t2->f) ? -1 : 1;
+		}
+	}
+
+	return (t1->sse < t2->sse) ? -1 : 1;
 }
 
 timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
@@ -71,10 +92,11 @@ timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	unsigned int i;
-	
+	size_t tz_abbr_len = strlen(tz_abbr);
+
 	TIMELIB_TIME_FREE(tm->tz_abbr);
-	tm->tz_abbr = strdup(tz_abbr);
-	for (i = 0; i < strlen(tz_abbr); i++) {
+	tm->tz_abbr = timelib_strdup(tz_abbr);
+	for (i = 0; i < tz_abbr_len; i++) {
 		tm->tz_abbr[i] = toupper(tz_abbr[i]);
 	}
 }
@@ -93,7 +115,7 @@ void timelib_rel_time_dtor(timelib_rel_time* t)
 timelib_time_offset* timelib_time_offset_ctor(void)
 {
 	timelib_time_offset *t;
-	t = calloc(1, sizeof(timelib_time_offset));
+	t = timelib_calloc(1, sizeof(timelib_time_offset));
 
 	return t;
 }
@@ -107,8 +129,8 @@ void timelib_time_offset_dtor(timelib_time_offset* t)
 timelib_tzinfo* timelib_tzinfo_ctor(char *name)
 {
 	timelib_tzinfo *t;
-	t = calloc(1, sizeof(timelib_tzinfo));
-	t->name = strdup(name);
+	t = timelib_calloc(1, sizeof(timelib_tzinfo));
+	t->name = timelib_strdup(name);
 
 	return t;
 }
@@ -123,18 +145,18 @@ timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 	tmp->bit32.typecnt = tz->bit32.typecnt;
 	tmp->bit32.charcnt = tz->bit32.charcnt;
 
-	tmp->trans = (int32_t *) malloc(tz->bit32.timecnt * sizeof(int32_t));
-	tmp->trans_idx = (unsigned char*) malloc(tz->bit32.timecnt * sizeof(unsigned char));
+	tmp->trans = (int32_t *) timelib_malloc(tz->bit32.timecnt * sizeof(int32_t));
+	tmp->trans_idx = (unsigned char*) timelib_malloc(tz->bit32.timecnt * sizeof(unsigned char));
 	memcpy(tmp->trans, tz->trans, tz->bit32.timecnt * sizeof(int32_t));
 	memcpy(tmp->trans_idx, tz->trans_idx, tz->bit32.timecnt * sizeof(unsigned char));
 
-	tmp->type = (ttinfo*) malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
+	tmp->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
 	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(struct ttinfo));
 
-	tmp->timezone_abbr = (char*) malloc(tz->bit32.charcnt);
+	tmp->timezone_abbr = (char*) timelib_malloc(tz->bit32.charcnt);
 	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->bit32.charcnt);
 
-	tmp->leap_times = (tlinfo*) malloc(tz->bit32.leapcnt * sizeof(tlinfo));
+	tmp->leap_times = (tlinfo*) timelib_malloc(tz->bit32.leapcnt * sizeof(tlinfo));
 	memcpy(tmp->leap_times, tz->leap_times, tz->bit32.leapcnt * sizeof(tlinfo));
 
 	return tmp;
@@ -166,23 +188,23 @@ void timelib_error_container_dtor(timelib_error_container *errors)
 	int i;
 
 	for (i = 0; i < errors->warning_count; i++) {
-		free(errors->warning_messages[i].message);
+		timelib_free(errors->warning_messages[i].message);
 	}
-	free(errors->warning_messages);
+	timelib_free(errors->warning_messages);
 	for (i = 0; i < errors->error_count; i++) {
-		free(errors->error_messages[i].message);
+		timelib_free(errors->error_messages[i].message);
 	}
-	free(errors->error_messages);
-	free(errors);
+	timelib_free(errors->error_messages);
+	timelib_free(errors);
 }
 
-signed long timelib_date_to_int(timelib_time *d, int *error)
+timelib_long timelib_date_to_int(timelib_time *d, int *error)
 {
 	timelib_sll ts;
 
 	ts = d->sse;
 
-	if (ts < LONG_MIN || ts > LONG_MAX) {
+	if (ts < TIMELIB_LONG_MIN || ts > TIMELIB_LONG_MAX) {
 		if (error) {
 			*error = 1;
 		}
@@ -191,7 +213,7 @@ signed long timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return (signed long) d->sse;
+	return (timelib_long) d->sse;
 }
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
@@ -286,35 +308,35 @@ void timelib_dump_rel_time(timelib_rel_time *d)
 	printf("\n");
 }
 
-long timelib_parse_tz_cor(char **ptr)
+timelib_long timelib_parse_tz_cor(char **ptr)
 {
-        char *begin = *ptr, *end;
-        long  tmp;
+	char *begin = *ptr, *end;
+	timelib_long  tmp;
 
-        while (isdigit(**ptr) || **ptr == ':') {
-                ++*ptr;
-        }
-        end = *ptr;
-        switch (end - begin) {
-                case 1:
-                case 2:
-                        return HOUR(strtol(begin, NULL, 10));
-                        break;
-                case 3:
-                case 4:
-                        if (begin[1] == ':') {
-                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
-                                return tmp;
-                        } else if (begin[2] == ':') {
-                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-                                return tmp;
-                        } else {
-                                tmp = strtol(begin, NULL, 10);
-                                return HOUR(tmp / 100) + tmp % 100;
-                        }
-                case 5:
-                        tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-                        return tmp;
-        }
-        return 0;
+	while (isdigit(**ptr) || **ptr == ':') {
+		++*ptr;
+	}
+	end = *ptr;
+	switch (end - begin) {
+		case 1: /* H */
+		case 2: /* HH */
+			return HOUR(strtol(begin, NULL, 10));
+			break;
+		case 3: /* H:M */
+		case 4: /* H:MM, HH:M, HHMM */
+			if (begin[1] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
+				return tmp;
+			} else if (begin[2] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+				return tmp;
+			} else {
+				tmp = strtol(begin, NULL, 10);
+				return HOUR(tmp / 100) + tmp % 100;
+			}
+		case 5: /* HH:MM */
+			tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+			return tmp;
+	}
+	return 0;
 }

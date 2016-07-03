@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -356,6 +356,7 @@ typedef struct {
 	size_t      smax;
 	int			mode;
 	zval*       meta;
+	char*		tmpdir;
 } php_stream_temp_data;
 
 
@@ -373,7 +374,7 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 		char *membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
 
 		if (memsize + count >= ts->smax) {
-			php_stream *file = php_stream_fopen_tmpfile();
+			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
 			if (file == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file, Check permissions in temporary files directory.");
 				return 0;
@@ -426,6 +427,10 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 	if (ts->meta) {
 		zval_ptr_dtor(&ts->meta);
+	}
+
+	if (ts->tmpdir) {
+		efree(ts->tmpdir);
 	}
 
 	efree(ts);
@@ -555,8 +560,8 @@ PHPAPI php_stream_ops	php_stream_temp_ops = {
 
 /* }}} */
 
-/* {{{ _php_stream_temp_create */
-PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+/* {{{ _php_stream_temp_create_ex */
+PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage, const char *tmpdir STREAMS_DC TSRMLS_DC)
 {
 	php_stream_temp_data *self;
 	php_stream *stream;
@@ -564,7 +569,9 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self = ecalloc(1, sizeof(*self));
 	self->smax = max_memory_usage;
 	self->mode = mode;
-	self->meta = NULL;
+	if (tmpdir) {
+		self->tmpdir = estrdup(tmpdir);
+	}
 	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create_rel(mode);
@@ -574,6 +581,12 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 }
 /* }}} */
 
+/* {{{ _php_stream_temp_create */
+PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+{
+	return php_stream_temp_create_ex(mode, max_memory_usage, NULL);
+}
+/* }}} */
 
 /* {{{ _php_stream_temp_open */
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)
@@ -606,7 +619,9 @@ PHPAPI php_stream_ops php_stream_rfc2397_ops = {
 	php_stream_temp_set_option
 };
 
-static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, const char *path,
+												const char *mode, int options, char **opened_path,
+												php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
@@ -648,11 +663,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		MAKE_STD_ZVAL(meta);
 		array_init(meta);
 		if (!semi) { /* there is only a mime type */
-			add_assoc_stringl(meta, "mediatype", path, mlen, 1);
+			add_assoc_stringl(meta, "mediatype", (char *) path, mlen, 1);
 			mlen = 0;
 		} else if (sep && sep < semi) { /* there is a mime type */
 			plen = semi - path;
-			add_assoc_stringl(meta, "mediatype", path, plen, 1);
+			add_assoc_stringl(meta, "mediatype", (char *) path, plen, 1);
 			mlen -= plen;
 			path += plen;
 		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */

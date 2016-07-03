@@ -20,12 +20,22 @@ $ids = array('num'=>'1234');
 $res = pg_select($db, $table_name, $ids) or print "Error\n";
 var_dump($res);
 echo pg_select($db, $table_name, $ids, PGSQL_DML_STRING)."\n";
+echo pg_select($db, $table_name, $ids, PGSQL_DML_STRING|PGSQL_DML_ESCAPE)."\n";
 echo "Ok\n";
 
 ?>
 --EXPECT--
-array(1) {
+array(2) {
   [0]=>
+  array(3) {
+    ["num"]=>
+    string(4) "1234"
+    ["str"]=>
+    string(3) "AAA"
+    ["bin"]=>
+    string(8) "\x424242"
+  }
+  [1]=>
   array(3) {
     ["num"]=>
     string(4) "1234"
@@ -36,4 +46,5 @@ array(1) {
   }
 }
 SELECT * FROM "php_pgsql_test" WHERE "num"=1234;
+SELECT * FROM "php_pgsql_test" WHERE "num"='1234';
 Ok

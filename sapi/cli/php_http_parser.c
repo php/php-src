@@ -89,6 +89,7 @@ static const char *method_strings[] =
   , "LOCK"
   , "MKCOL"
   , "MOVE"
+  , "MKCALENDAR"
   , "PROPFIND"
   , "PROPPATCH"
   , "UNLOCK"
@@ -583,7 +584,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'G': parser->method = PHP_HTTP_GET; break;
           case 'H': parser->method = PHP_HTTP_HEAD; break;
           case 'L': parser->method = PHP_HTTP_LOCK; break;
-          case 'M': parser->method = PHP_HTTP_MKCOL; /* or MOVE, MKACTIVITY, MERGE, M-SEARCH */ break;
+          case 'M': parser->method = PHP_HTTP_MKCOL; /* or MOVE, MKCALENDAR, MKACTIVITY, MERGE, M-SEARCH */ break;
           case 'N': parser->method = PHP_HTTP_NOTIFY; break;
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
@@ -604,25 +605,34 @@ size_t php_http_parser_execute (php_http_parser *parser,
           goto error;
 
         matcher = method_strings[parser->method];
-        if (ch == ' ' && (matcher[index] == '\0' || parser->method == PHP_HTTP_NOT_IMPLEMENTED)) {
+        if (ch == ' ') {
+          if (parser->method != PHP_HTTP_NOT_IMPLEMENTED && matcher[index] != '\0') {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
+          }
           state = s_req_spaces_before_url;
-        } else if (ch == matcher[index]) {
+        } else if (parser->method == PHP_HTTP_NOT_IMPLEMENTED || ch == matcher[index]) {
           ; /* nada */
         } else if (parser->method == PHP_HTTP_CONNECT) {
           if (index == 1 && ch == 'H') {
             parser->method = PHP_HTTP_CHECKOUT;
           } else if (index == 2  && ch == 'P') {
             parser->method = PHP_HTTP_COPY;
+          } else {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
           }
         } else if (parser->method == PHP_HTTP_MKCOL) {
           if (index == 1 && ch == 'O') {
             parser->method = PHP_HTTP_MOVE;
+          } else if (index == 3 && ch == 'A') {
+            parser->method = PHP_HTTP_MKCALENDAR;
           } else if (index == 1 && ch == 'E') {
             parser->method = PHP_HTTP_MERGE;
           } else if (index == 1 && ch == '-') {
             parser->method = PHP_HTTP_MSEARCH;
           } else if (index == 2 && ch == 'A') {
             parser->method = PHP_HTTP_MKACTIVITY;
+          } else {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
           }
         } else if (index == 1 && parser->method == PHP_HTTP_POST && ch == 'R') {
           parser->method = PHP_HTTP_PROPFIND; /* or HTTP_PROPPATCH */
@@ -1378,7 +1388,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
         /* Here we call the headers_complete callback. This is somewhat
          * different than other callbacks because if the user returns 1, we
          * will interpret that as saying that this message has no body. This
-         * is needed for the annoying case of recieving a response to a HEAD
+         * is needed for the annoying case of receiving a response to a HEAD
          * request.
          */
         if (settings->on_headers_complete) {

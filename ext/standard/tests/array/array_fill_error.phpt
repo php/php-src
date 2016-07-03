@@ -32,10 +32,6 @@ var_dump( array_fill($start_key,$num) );
 $num = -1;
 var_dump( array_fill($start_key,$num,$val) );
 
-//callin array_fill with 'num' equal to zero value
-$num = 0;
-var_dump( array_fill($start_key,$num,$val) );
-
 echo "Done";
 ?>
 --EXPECTF--
@@ -53,9 +49,6 @@ NULL
 Warning: array_fill() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
+Warning: array_fill(): Number of elements can't be negative in %s on line %d
 bool(false)
 Done

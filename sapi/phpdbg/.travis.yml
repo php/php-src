@@ -1,0 +1,12 @@
+language: c
+
+env:
+- PHP="PHP-5.4"
+- PHP="PHP-5.5"
+- PHP="PHP-5.6"
+- PHP="master"
+
+before_script: ./travis/ci.sh
+
+script:
+- ./php-src/sapi/cli/php php-src/sapi/phpdbg/tests/run-tests.php -diff2stdout --phpdbg php-src/sapi/phpdbg/phpdbg

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -139,6 +139,19 @@ static zend_object_handlers spl_handlers_dual_it;
 		(var) = it; \
 	} while (0)
 
+#define SPL_FETCH_SUB_ELEMENT(var, object, element) \
+	do { \
+		if(!(object)->iterators) { \
+			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, \
+				"The object is in an invalid state as the parent constructor was not called"); \
+			return; \
+		} \
+		(var) = (object)->iterators[(object)->level].element; \
+	} while (0)
+
+#define SPL_FETCH_SUB_ITERATOR(var, object) SPL_FETCH_SUB_ELEMENT(var, object, iterator)
+
+
 static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 {
 	spl_recursive_it_iterator *iter   = (spl_recursive_it_iterator*)_iter;
@@ -161,7 +174,10 @@ static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthi
 {
 	zend_object_iterator      *sub_iter;
 	int                       level = object->level;
-	
+
+	if(!object->iterators) {
+		return FAILURE;
+	}
 	while (level >=0) {
 		sub_iter = object->iterators[level].iterator;
 		if (sub_iter->funcs->valid(sub_iter TSRMLS_CC) == SUCCESS) {
@@ -211,6 +227,8 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zv
 	zval                      *retval, *child;
 	zend_object_iterator      *sub_iter;
 	int                       has_children;
+
+	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
 	while (!EG(exception)) {
 next_step:
@@ -362,9 +380,11 @@ next_step:
 					}
 				}
 			}
-			iterator->funcs->dtor(iterator TSRMLS_CC);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
-			object->level--;
+			if (object->level > 0) {
+				iterator->funcs->dtor(iterator TSRMLS_CC);
+				zval_ptr_dtor(&object->iterators[object->level].zobject);
+				object->level--;
+			}
 		} else {
 			return; /* done completeley */
 		}
@@ -375,9 +395,7 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 {
 	zend_object_iterator      *sub_iter;
 	
-	if (!object->iterators) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", Z_OBJCE_P(zthis)->name);
-	}
+	SPL_FETCH_SUB_ITERATOR(sub_iter, object);
 
 	while (object->level) {
 		sub_iter = object->iterators[object->level].iterator;
@@ -597,7 +615,7 @@ SPL_METHOD(RecursiveIteratorIterator, rewind)
 SPL_METHOD(RecursiveIteratorIterator, valid)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -610,11 +628,13 @@ SPL_METHOD(RecursiveIteratorIterator, valid)
 SPL_METHOD(RecursiveIteratorIterator, key)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
-	
+	zend_object_iterator      *iterator;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
 	if (iterator->funcs->get_current_key) {
 		iterator->funcs->get_current_key(iterator, return_value TSRMLS_CC);
@@ -628,12 +648,14 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 SPL_METHOD(RecursiveIteratorIterator, current)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
+	zend_object_iterator      *iterator;
 	zval                      **data;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
 	iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
 	if (data && *data) {
@@ -673,6 +695,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long  level = object->level;
+	zval      *zobject;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &level) == FAILURE) {
 		return;
@@ -680,6 +703,13 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 	if (level < 0 || level > object->level) {
 		RETURN_NULL();
 	}
+
+	if(!object->iterators) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC,
+			"The object is in an invalid state as the parent constructor was not called");
+		return;
+	}
+
 	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
 } /* }}} */
 
@@ -688,13 +718,15 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	long  level = object->level;
+	zval      *zobject;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
-	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
+
+	SPL_FETCH_SUB_ELEMENT(zobject, object, zobject);
+
+	RETURN_ZVAL(zobject, 1, 0);
 } /* }}} */
 
 /* {{{ proto RecursiveIterator RecursiveIteratorIterator::beginIteration()
@@ -722,12 +754,18 @@ SPL_METHOD(RecursiveIteratorIterator, endIteration)
 SPL_METHOD(RecursiveIteratorIterator, callHasChildren)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_class_entry *ce = object->iterators[object->level].ce;
+	zend_class_entry *ce;
 	zval *retval, *zobject;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	if (!object->iterators) {
+		RETURN_NULL();
+	}
+
+	SPL_FETCH_SUB_ELEMENT(ce, object, ce);
 
 	zobject = object->iterators[object->level].zobject;
 	if (!zobject) {
@@ -747,12 +785,14 @@ SPL_METHOD(RecursiveIteratorIterator, callHasChildren)
 SPL_METHOD(RecursiveIteratorIterator, callGetChildren)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_class_entry *ce = object->iterators[object->level].ce;
+	zend_class_entry *ce;
 	zval *retval, *zobject;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	SPL_FETCH_SUB_ELEMENT(ce, object, ce);
 
 	zobject = object->iterators[object->level].zobject;
 	if (!zobject) {
@@ -1072,6 +1112,13 @@ SPL_METHOD(RecursiveTreeIterator, getPrefix)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	if(!object->iterators) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC,
+			"The object is in an invalid state as the parent constructor was not called");
+		return;
+	} 
+    
 	spl_recursive_tree_iterator_get_prefix(object, return_value TSRMLS_CC);
 } /* }}} */
 
@@ -1100,6 +1147,12 @@ SPL_METHOD(RecursiveTreeIterator, getEntry)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	if(!object->iterators) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC,
+			"The object is in an invalid state as the parent constructor was not called");
+		return;
+	}
 	
 	spl_recursive_tree_iterator_get_entry(object, return_value TSRMLS_CC);
 } /* }}} */
@@ -1111,6 +1164,12 @@ SPL_METHOD(RecursiveTreeIterator, getPostfix)
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if(!object->iterators) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC,
+			"The object is in an invalid state as the parent constructor was not called");
 		return;
 	}
 	
@@ -1130,10 +1189,17 @@ SPL_METHOD(RecursiveTreeIterator, current)
 		return;
 	}
 
+	if(!object->iterators) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC,
+			"The object is in an invalid state as the parent constructor was not called");
+		return;
+	} 
+
 	if (object->flags & RTIT_BYPASS_CURRENT) {
-		zend_object_iterator      *iterator = object->iterators[object->level].iterator;
+		zend_object_iterator      *iterator;
 		zval                      **data;
 
+        SPL_FETCH_SUB_ITERATOR(iterator, object);
 		iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
 		if (data && *data) {
 			RETURN_ZVAL(*data, 1, 0);
@@ -1177,7 +1243,7 @@ SPL_METHOD(RecursiveTreeIterator, current)
 SPL_METHOD(RecursiveTreeIterator, key)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
+	zend_object_iterator      *iterator;
 	zval                       prefix, key, postfix, key_copy;
 	char                      *str, *ptr;
 	size_t                     str_len;
@@ -1185,6 +1251,8 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
 	if (iterator->funcs->get_current_key) {
 		iterator->funcs->get_current_key(iterator, &key TSRMLS_CC);
@@ -1899,7 +1967,7 @@ SPL_METHOD(RecursiveCallbackFilterIterator, getChildren)
 		return;
 	}
 
-	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
 	if (!EG(exception) && retval) {
@@ -2062,7 +2130,7 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	if (use_copy) {
-		efree(subject);
+		str_efree(subject);
 	}
 } /* }}} */
 

@@ -24,6 +24,7 @@ CREDIT_LINE("FastCGI Process Manager", "Andrei Nigmatulin, dreamcat4, Antony Dov
 CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
 CREDIT_LINE("litespeed", "George Wang");
 CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy, Uwe Schindler");
+CREDIT_LINE("phpdbg", "Felipe Pena, Joe Watkins, Bob Weinand");
 CREDIT_LINE("phttpd", "Thies C. Arntzen");
 CREDIT_LINE("pi3web", "Holger Zimmermann");
 CREDIT_LINE("Sendmail Milter", "Harald Radi");

@@ -9,15 +9,9 @@
 #include <limits.h>
 
 #ifdef PHP_WIN32
-# include "win32/php_stdint.h"
 # define __alignof__ __alignof
 # define alloca _alloca
 #else
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# elif HAVE_STDINT_H
-#  include <stdint.h>
-# endif
 # ifndef HAVE_ALIGNOF
 #  include <stddef.h>
 #  define __alignof__(type) offsetof (struct { char c; type member;}, member)

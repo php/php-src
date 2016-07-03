@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -137,8 +137,40 @@ ZEND_API HashTable *zend_std_get_gc(zval *object, zval ***table, int *n TSRMLS_D
 
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
-	*is_temp = 0;
-	return zend_std_get_properties(object TSRMLS_CC);
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval *retval = NULL;
+
+	if (!ce->__debugInfo) {
+		*is_temp = 0;
+		return Z_OBJ_HANDLER_P(object, get_properties)
+			? Z_OBJ_HANDLER_P(object, get_properties)(object TSRMLS_CC)
+			: NULL;
+	}
+
+	zend_call_method_with_0_params(&object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
+	if (retval && Z_TYPE_P(retval) == IS_ARRAY) {
+		HashTable *ht = Z_ARRVAL_P(retval);
+		if (Z_REFCOUNT_P(retval) <= 1) {
+			*is_temp = 1;
+			efree(retval);
+			return ht;
+		} else {
+			*is_temp = 0;
+			zval_ptr_dtor(&retval);
+		}
+		return ht;
+	}
+	if (retval && Z_TYPE_P(retval) == IS_NULL) {
+		zval ret;
+		array_init(&ret);
+		*is_temp = 1;
+		zval_ptr_dtor(&retval);
+		return Z_ARRVAL(ret);
+	}
+
+	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
+
+	return NULL; /* Compilers are dumb and don't understand that noreturn means that the function does NOT need a return value... */
 }
 /* }}} */
 
@@ -899,11 +931,8 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zend_call_method_with_2_params(&this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */
@@ -1116,11 +1145,8 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */
@@ -1647,9 +1673,11 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
-	NULL,									/* get_debug_info */
+	zend_std_get_debug_info,				/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
+	NULL,									/* do_operation */
+	NULL,									/* compare */
 };
 
 /*

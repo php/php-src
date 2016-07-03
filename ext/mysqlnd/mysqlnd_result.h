@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,9 @@
 #define MYSQLND_RESULT_H
 
 PHPAPI MYSQLND_RES * mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC);
+PHPAPI MYSQLND_RES_UNBUFFERED * mysqlnd_result_unbuffered_init(unsigned int field_count, zend_bool ps, zend_bool persistent TSRMLS_DC);
+PHPAPI MYSQLND_RES_BUFFERED_ZVAL * mysqlnd_result_buffered_zval_init(unsigned int field_count, zend_bool ps, zend_bool persistent TSRMLS_DC);
+PHPAPI MYSQLND_RES_BUFFERED_C * mysqlnd_result_buffered_c_init(unsigned int field_count, zend_bool ps, zend_bool persistent TSRMLS_DC);
 
 enum_func_status mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * stmt TSRMLS_DC);
 

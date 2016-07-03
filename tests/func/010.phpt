@@ -8,7 +8,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 <?php
 
 // the stack size + some random constant
-$boundary = 64*1024;
+$boundary = 16*1024-16;
 $limit    = $boundary+42;
 
 

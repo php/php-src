@@ -102,7 +102,10 @@ OK
 Failed, not created in the correct directory %s vs %s
 0
 -- Iteration 6 --
-OK
+
+Warning: tempnam() expects parameter 2 to be a valid path, string given in %stempnam_variation3-win32.php on line %d
+Failed, not created in the correct directory %s vs %stempnamVar3
+0
 -- Iteration 7 --
 
 Warning: tempnam() expects parameter 2 to be a valid path, array given in %s\ext\standard\tests\file\tempnam_variation3-win32.php on line %d

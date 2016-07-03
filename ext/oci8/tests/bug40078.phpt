@@ -11,15 +11,15 @@ require(dirname(__FILE__).'/skipif.inc');
 require dirname(__FILE__).'/connect.inc';
 
 $create_pkg = "
-CREATE OR REPLACE PACKAGE ARRAYBINDPKG1 AS
+CREATE OR REPLACE PACKAGE BUG40078_PKG AS
     TYPE ARRTYPE IS TABLE OF VARCHAR(20) INDEX BY BINARY_INTEGER;
     PROCEDURE nullbind(c1 OUT ARRTYPE);
-END ARRAYBINDPKG1;";
+END BUG40078_PKG;";
 $statement = oci_parse($c, $create_pkg);
 oci_execute($statement);
 
 $create_pkg_body = "
-CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS
+CREATE OR REPLACE PACKAGE BODY BUG40078_PKG AS
     PROCEDURE nullbind(c1 OUT ARRTYPE) IS
     BEGIN
         c1(1) := 'one';
@@ -28,11 +28,11 @@ CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS
         c1(4) := 'four';
         c1(5) := 'five';
     END nullbind;
-END ARRAYBINDPKG1;";
+END BUG40078_PKG;";
 $statement = oci_parse($c, $create_pkg_body);
 oci_execute($statement);
 
-$statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.nullbind(:c1); END;");
+$statement = oci_parse($c, "BEGIN bug40078_pkg.nullbind(:c1); END;");
 
 oci_bind_array_by_name($statement, ":c1", $array, 5, 20, SQLT_CHR);
 

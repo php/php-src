@@ -58,15 +58,15 @@ echo "Done\n";
 Test 1
 bool(true)
 Test 2
-%unicode|string%(4) "1234"
-%unicode|string%(4) "some"
-%unicode|string%(4) "some"
-%unicode|string%(4) "some"
-%unicode|string%(4) "1234"
-%unicode|string%(4) "some"
+string(4) "1234"
+string(4) "some"
+string(4) "some"
+string(4) "some"
+string(4) "1234"
+string(4) "some"
 Test 3
 bool(true)
-%unicode|string%(4) "some"
+string(4) "some"
 
 Warning: oci_result(): %d is not a valid oci8 statement resource in %s on line %d
 bool(false)

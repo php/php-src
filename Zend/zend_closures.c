@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,14 +59,8 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	} else if (call_user_function_ex(CG(function_table), NULL, this_ptr, &closure_result_ptr, ZEND_NUM_ARGS(), arguments, 1, NULL TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	} else if (closure_result_ptr) {
-		if (Z_ISREF_P(closure_result_ptr) && return_value_ptr) {
-			if (return_value) {
-				zval_ptr_dtor(&return_value);
-			}
-			*return_value_ptr = closure_result_ptr;
-		} else {
-			RETVAL_ZVAL(closure_result_ptr, 1, 1);
-		}
+		zval_ptr_dtor(&return_value);
+		*return_value_ptr = closure_result_ptr;
 	}
 	efree(arguments);
 
@@ -92,6 +86,12 @@ ZEND_METHOD(Closure, bind)
 
 	if ((newthis != NULL) && (closure->func.common.fn_flags & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
+	}
+
+	if (newthis == NULL && !(closure->func.common.fn_flags & ZEND_ACC_STATIC)
+			&& closure->func.common.scope && closure->func.type == ZEND_INTERNAL_FUNCTION) {
+		zend_error(E_WARNING, "Cannot unbind $this of internal method");
+		return;
 	}
 
 	if (scope_arg != NULL) { /* scope argument was given */
@@ -133,6 +133,19 @@ ZEND_METHOD(Closure, bind)
 		ce = closure->func.common.scope;
 	}
 
+	/* verify that we aren't binding internal function to a wrong scope */
+	if (closure->func.type == ZEND_INTERNAL_FUNCTION && closure->func.common.scope != NULL) {
+		if (ce && !instanceof_function(ce, closure->func.common.scope TSRMLS_CC)) {
+			zend_error(E_WARNING, "Cannot bind function %s::%s to scope class %s", closure->func.common.scope->name, closure->func.common.function_name, ce->name);
+			return;
+		}
+		if (ce && newthis && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope TSRMLS_CC)) {
+			zend_error(E_WARNING, "Cannot bind internal method %s::%s() to object of class %s", closure->func.common.scope->name, closure->func.common.function_name, Z_OBJCE_P(newthis)->name);
+			return;
+		}
+	}
+
 	zend_create_closure(return_value, &closure->func, ce, newthis TSRMLS_CC);
 }
 /* }}} */
@@ -154,10 +167,12 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {
 {
 	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
+	const zend_uint keep_flags = ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC;
 
 	invoke->common = closure->func.common;
 	invoke->type = ZEND_INTERNAL_FUNCTION;
-	invoke->internal_function.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & ZEND_ACC_RETURN_REFERENCE);
+	invoke->internal_function.fn_flags =
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & keep_flags);
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
@@ -468,19 +483,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		closure->func.op_array.run_time_cache = NULL;
 		(*closure->func.op_array.refcount)++;
 	} else {
-		/* verify that we aren't binding internal function to a wrong scope */
-		if(func->common.scope != NULL) {
-			if(scope && !instanceof_function(scope, func->common.scope TSRMLS_CC)) {
-				zend_error(E_WARNING, "Cannot bind function %s::%s to scope class %s", func->common.scope->name, func->common.function_name, scope->name);
-				scope = NULL;
-			}
-			if(scope && this_ptr && (func->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
-					!instanceof_function(Z_OBJCE_P(this_ptr), closure->func.common.scope TSRMLS_CC)) {
-				zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", func->common.scope->name, func->common.function_name, Z_OBJCE_P(this_ptr)->name);
-				scope = NULL;
-				this_ptr = NULL;
-			}
-		} else {
+		if (!func->common.scope) {
 			/* if it's a free function, we won't set scope & this since they're meaningless */
 			this_ptr = NULL;
 			scope = NULL;

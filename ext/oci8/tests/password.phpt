@@ -14,28 +14,28 @@ if ($test_drcp) die("skip password change not supported in DRCP Mode");
 require(dirname(__FILE__)."/connect.inc");
 
 $stmtarray = array(
-	"drop user testuser cascade",
-	"create user testuser identified by testuserpwd",
-    "grant connect, create session to testuser"
+	"drop user testuser_pw cascade",
+	"create user testuser_pw identified by testuserpwd",
+    "grant connect, create session to testuser_pw"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
 
 
 // Connect and change the password
-$c1 = oci_connect("testuser", "testuserpwd", $dbase);
+$c1 = oci_connect("testuser_pw", "testuserpwd", $dbase);
 var_dump($c1);
 $rn1 = (int)$c1;
 
-oci_password_change($c1, "testuser", "testuserpwd", "testuserpwd2");
+oci_password_change($c1, "testuser_pw", "testuserpwd", "testuserpwd2");
 
 // Second connect should return a new resource because the hash string will be different from $c1
-$c2 = oci_connect("testuser", "testuserpwd2", $dbase);
+$c2 = oci_connect("testuser_pw", "testuserpwd2", $dbase);
 var_dump($c2);
 $rn2 = (int)$c2;
 
 // Despite using the old password this connect should succeed and return the original resource
-$c3 = oci_connect("testuser", "testuserpwd", $dbase);  
+$c3 = oci_connect("testuser_pw", "testuserpwd", $dbase);  
 var_dump($c3);
 $rn3 = (int)$c3;
 
@@ -67,7 +67,7 @@ echo "Done\n";
 require(dirname(__FILE__)."/connect.inc");
 
 $stmtarray = array(
-    "drop user testuser cascade"
+    "drop user testuser_pw cascade"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

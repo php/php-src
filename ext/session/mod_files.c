@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -358,6 +358,10 @@ PS_READ_FUNC(files)
 		}
 		php_session_reset_id(TSRMLS_C);
 		PS(session_status) = php_session_active;
+	}
+
+	if (!PS(id)) {
+		return FAILURE;
 	}
 
 	ps_files_open(data, PS(id) TSRMLS_CC);

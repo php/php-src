@@ -42,7 +42,7 @@ Exceptions:
 
 4.  When writing functions that deal with strings, be sure to remember
     that PHP holds the length property of each string, and that it
-    shouldn't be calculated with strlen().  Write your functions in a such
+    shouldn't be calculated with strlen().  Write your functions in such
     a way so that they'll take advantage of the length property, both
     for efficiency and in order for them to be binary-safe.
     Functions that change strings and obtain their new lengths while
@@ -279,7 +279,10 @@ The file labelled 'EXPERIMENTAL' should include the following
 information::
 
   Any authoring information (known bugs, future directions of the module).
-  Ongoing status notes which may not be appropriate for SVN comments.
+  Ongoing status notes which may not be appropriate for Git comments.
+
+In general new features should go to PECL or experimental branches until
+there are specific reasons for directly adding it to the core distribution.
 
 Aliases & Legacy Documentation
 -----------------------------------

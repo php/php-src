@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -210,7 +210,7 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 			if (gdImageGetPixel(image, x, y) == fg) {
 				c |= b;
 			}
-			if ((b == 128) || (x == sx && y == sy)) {
+			if ((b == 128) || (x == sx - 1)) {
 				b = 1;
 				if (p) {
 					gdCtxPrintf(out, ", ");

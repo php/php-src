@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -315,6 +315,7 @@ PHP_MINIT_FUNCTION(ftp)
 	REGISTER_LONG_CONSTANT("FTP_AUTORESUME", PHP_FTP_AUTORESUME, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_TIMEOUT_SEC", PHP_FTP_OPT_TIMEOUT_SEC, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_AUTOSEEK", PHP_FTP_OPT_AUTOSEEK, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("FTP_USEPASVADDRESS", PHP_FTP_OPT_USEPASVADDRESS, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_FAILED", PHP_FTP_FAILED, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_FINISHED", PHP_FTP_FINISHED, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_MOREDATA", PHP_FTP_MOREDATA, CONST_PERSISTENT | CONST_CS);
@@ -363,6 +364,7 @@ PHP_FUNCTION(ftp_connect)
 
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
+	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
 #if HAVE_OPENSSL_EXT
 	/* disable ssl */
 	ftp->use_ssl = 0;
@@ -399,6 +401,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
+	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
 	/* enable ssl */
 	ftp->use_ssl = 1;
 
@@ -1399,6 +1402,15 @@ PHP_FUNCTION(ftp_set_option)
 			ftp->autoseek = Z_LVAL_P(z_value);
 			RETURN_TRUE;
 			break;
+		case PHP_FTP_OPT_USEPASVADDRESS:
+			if (Z_TYPE_P(z_value) != IS_BOOL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option USEPASVADDRESS expects value of type boolean, %s given",
+					zend_zval_type_name(z_value));
+				RETURN_FALSE;
+			}
+			ftp->usepasvaddress = Z_LVAL_P(z_value);
+			RETURN_TRUE;
+			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option '%ld'", option);
 			RETURN_FALSE;
@@ -1427,6 +1439,9 @@ PHP_FUNCTION(ftp_get_option)
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			RETURN_BOOL(ftp->autoseek);
+			break;
+		case PHP_FTP_OPT_USEPASVADDRESS:
+			RETURN_BOOL(ftp->usepasvaddress);
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option '%ld'", option);

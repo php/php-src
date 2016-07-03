@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -230,7 +230,7 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 #endif
 }
 
-static inline int sock_sendto(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
+static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_t buflen, int flags,
 		struct sockaddr *addr, socklen_t addrlen
 		TSRMLS_DC)
 {
@@ -247,16 +247,27 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 		struct sockaddr **addr, socklen_t *addrlen
 		TSRMLS_DC)
 {
-	php_sockaddr_storage sa;
-	socklen_t sl = sizeof(sa);
 	int ret;
 	int want_addr = textaddr || addr;
 
 	if (want_addr) {
+		php_sockaddr_storage sa;
+		socklen_t sl = sizeof(sa);
 		ret = recvfrom(sock->socket, buf, buflen, flags, (struct sockaddr*)&sa, &sl);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
-		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
-			textaddr, textaddrlen, addr, addrlen TSRMLS_CC);
+		if (sl) {
+			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
+					textaddr, textaddrlen, addr, addrlen TSRMLS_CC);
+		} else {
+			if (textaddr) {
+				*textaddr = estrndup("", 0);
+				*textaddrlen = 0;
+			}
+			if (addr) {
+				*addr = NULL;
+				*addrlen = 0;
+			}
+		}
 	} else {
 		ret = recv(sock->socket, buf, buflen, flags);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
@@ -293,7 +304,17 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				if (sock->socket == -1) {
 					alive = 0;
 				} else if (php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
-					if (0 >= recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EWOULDBLOCK) {
+#ifdef PHP_WIN32
+					int ret;
+#else
+					ssize_t ret;
+#endif
+					int err;
+
+					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK);
+					err = php_socket_errno();
+					if (0 == ret || /* the counterpart did properly shutdown*/
+						(0 > ret && err != EWOULDBLOCK && err != EAGAIN)) { /* there was an unrecoverable error */
 						alive = 0;
 					}
 				}
@@ -521,7 +542,7 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 }
 #endif
 
-static inline char *parse_ip_address_ex(const char *str, int str_len, int *portno, int get_err, char **err TSRMLS_DC)
+static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *portno, int get_err, char **err TSRMLS_DC)
 {
 	char *colon;
 	char *host = NULL;
@@ -775,8 +796,8 @@ static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, 
 }
 
 
-PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, long protolen,
-		char *resourcename, long resourcenamelen,
+PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t protolen,
+		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
 		php_stream_context *context STREAMS_DC TSRMLS_DC)

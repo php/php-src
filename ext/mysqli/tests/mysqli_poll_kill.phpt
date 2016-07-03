@@ -90,6 +90,7 @@ if (!$IS_MYSQLND)
 
 	// Yes, 1 - fetch OK packet of kill!
 	$processed = 0;
+	$begin = microtime(true);
 	do {
 		$links = array($link, $link);
 		$errors = array($link, $link);
@@ -106,9 +107,14 @@ if (!$IS_MYSQLND)
 			break;
 		}
 
+		if (FALSE === $ready) {
+			printf("[013] MySQLi indicates some error\n");
+			break;
+		}
+
 		if (!empty($reject)) {
 			foreach ($reject as $mysqli) {
-				printf("[013] Rejecting thread %d: %s/%s\n",
+				printf("[014] Rejecting thread %d: %s/%s\n",
 					mysqli_thread_id($mysqli),
 					mysqli_errno($mysqli),
 					mysqli_error($mysqli));
@@ -121,9 +127,14 @@ if (!$IS_MYSQLND)
 				printf("Fetching from thread %d...\n", mysqli_thread_id($mysqli));
 				var_dump(mysqli_fetch_assoc($res));
 			} else if (mysqli_errno($mysqli) > 0) {
-				printf("[014] %d/%s\n", mysqli_errno($mysqli), mysqli_error($mysqli));
+				printf("[015] %d/%s\n", mysqli_errno($mysqli), mysqli_error($mysqli));
 			}
 			$processed++;
+		}
+
+		if ((microtime(true) - $begin) > 5) {
+			printf("[016] Pulling the emergency break after 5s, something is wrong...\n");
+			break;
 		}
 
 	} while ($processed < 2);
@@ -137,17 +148,17 @@ if (!$IS_MYSQLND)
 	// Sleep 0.1s  to ensure the KILL gets recognized
 	usleep(100000);
 	if (false !== ($tmp = mysqli_query($link, "SELECT 1 AS 'processed before killed'", MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
-		printf("[015] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
+		printf("[017] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	$links = array($link);
 	$errors = array($link);
 	$reject = array($link);
 
 	if (0 !== ($tmp = (mysqli_poll($links, $errors, $reject, 0, 10000))))
-		printf("[016] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
+		printf("[018] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	if (!is_array($links) || empty($links))
-		printf("[017] Expecting non-empty array got %s/%s\n", gettype($links), var_export($links, true));
+		printf("[019] Expecting non-empty array got %s/%s\n", gettype($links), var_export($links, true));
 	else
 		foreach ($links as $link) {
 			if (is_object($res = mysqli_reap_async_query($link))) {
@@ -156,16 +167,16 @@ if (!$IS_MYSQLND)
 				mysqli_free_result($res);
 			} else if ($link->errno > 0) {
 				// But you are supposed to handle the error the way its shown here!
-				printf("[018] Error: %d/%s\n", $link->errno, $link->error);
+				printf("[020] Error: %d/%s\n", $link->errno, $link->error);
 			}
 		}
 
 	// None of these will indicate an error, check errno on the list of returned connections!
 	if (!is_array($errors) || !empty($errors))
-		printf("[019] Expecting non-empty array got %s/%s\n", gettype($errors), var_export($errors, true));
+		printf("[021] Expecting non-empty array got %s/%s\n", gettype($errors), var_export($errors, true));
 
 	if (!is_array($reject) || !empty($reject))
-		printf("[020] Expecting empty array got %s/%s\n", gettype($reject), var_export($reject, true));
+		printf("[021] Expecting empty array got %s/%s\n", gettype($reject), var_export($reject, true));
 
 
 	mysqli_close($link);

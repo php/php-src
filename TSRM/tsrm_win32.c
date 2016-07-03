@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@
 #ifdef TSRM_WIN32
 #include <Sddl.h>
 #include "tsrm_win32.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;

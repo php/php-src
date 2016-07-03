@@ -38,9 +38,9 @@ var_dump(file_get_contents(dirname(__FILE__) . '/extract1/file1.txt'));
 $a->extractTo(dirname(__FILE__) . '/extract1', 'subdir/ectory/file.txt');
 var_dump(file_get_contents(dirname(__FILE__) . '/extract1/subdir/ectory/file.txt'));
 
-$a->extractTo(dirname(__FILE__) . '/extract2', array('file2.txt', 'one/level'));
-var_dump(file_get_contents(dirname(__FILE__) . '/extract2/file2.txt'));
-var_dump(is_dir(dirname(__FILE__) . '/extract2/one/level'));
+$a->extractTo(dirname(__FILE__) . '/extract1-2', array('file2.txt', 'one/level'));
+var_dump(file_get_contents(dirname(__FILE__) . '/extract1-2/file2.txt'));
+var_dump(is_dir(dirname(__FILE__) . '/extract1-2/one/level'));
 
 try {
 	$a->extractTo(dirname(__FILE__) . '/whatever', 134);
@@ -119,7 +119,7 @@ $e = dirname(__FILE__) . '/extract1/';
 @rmdir($e . 'subdir/ectory');
 @rmdir($e . 'subdir');
 @rmdir($e);
-$e = dirname(__FILE__) . '/extract2/';
+$e = dirname(__FILE__) . '/extract1-2/';
 @unlink($e . 'file2.txt');
 @rmdir($e . 'one/level');
 @rmdir($e . 'one');

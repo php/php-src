@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -131,8 +131,12 @@ struct _zend_compiler_globals {
 
 	zval      *current_namespace;
 	HashTable *current_import;
+	HashTable *current_import_function;
+	HashTable *current_import_const;
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
+
+	HashTable const_filenames;
 
 	zend_compiler_context context;
 	zend_stack context_stack;
@@ -142,6 +146,9 @@ struct _zend_compiler_globals {
 	char *interned_strings_end;
 	char *interned_strings_top;
 	char *interned_strings_snapshot_top;
+#ifndef ZTS
+	char *interned_empty_string;
+#endif
 
 	HashTable interned_strings;
 
@@ -276,7 +283,7 @@ struct _zend_ini_scanner_globals {
 	char *filename;
 	int lineno;
 
-	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
+	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
 	int scanner_mode;
 };
 

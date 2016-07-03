@@ -10,5 +10,5 @@ fread($fp, 2147483648);
 ?>
 Done
 --EXPECTF--
-Warning: fread(): Length parameter must be no more than 2147483647 in %s/bug72114.php on line %d
+Warning: fread(): Length parameter must be no more than 2147483647 in %s%ebug72114.php on line %d
 Done

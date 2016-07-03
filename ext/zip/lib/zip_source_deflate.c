@@ -60,14 +60,14 @@ static void deflate_free(struct deflate *);
 
 
 
-ZIP_EXTERN(struct zip_source *)
+struct zip_source *
 zip_source_deflate(struct zip *za, struct zip_source *src,
-		   zip_uint16_t cm, int flags)
+		   zip_int32_t cm, int flags)
 {
     struct deflate *ctx;
     struct zip_source *s2;
 
-    if (src == NULL || cm != ZIP_CM_DEFLATE) {
+    if (src == NULL || (cm != ZIP_CM_DEFLATE && !ZIP_CM_IS_DEFAULT(cm))) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return NULL;
     }
@@ -113,7 +113,7 @@ compress_read(struct zip_source *src, struct deflate *ctx,
 	return 0;
 	
     ctx->zstr.next_out = (Bytef *)data;
-    ctx->zstr.avail_out = len;
+    ctx->zstr.avail_out = (uInt)len; /* TODO: check for overflow */
 
     end = 0;
     while (!end) {
@@ -136,8 +136,7 @@ compress_read(struct zip_source *src, struct deflate *ctx,
 		    break;
 		}
 
-		if ((n=zip_source_read(src, ctx->buffer,
-				       sizeof(ctx->buffer))) < 0) {
+		if ((n=zip_source_read(src, ctx->buffer, sizeof(ctx->buffer))) < 0) {
 		    zip_source_error(src, ctx->e, ctx->e+1);
 		    end = 1;
 		    break;
@@ -145,11 +144,11 @@ compress_read(struct zip_source *src, struct deflate *ctx,
 		else if (n == 0) {
 		    ctx->eof = 1;
 		    ctx->size = ctx->zstr.total_in;
-		    /* XXX: check against stat of src? */
+		    /* TODO: check against stat of src? */
 		}
 		else {
 		    ctx->zstr.next_in = (Bytef *)ctx->buffer;
-		    ctx->zstr.avail_in = n;
+		    ctx->zstr.avail_in = (uInt)n;
 		}
 		continue;
 	    }
@@ -167,7 +166,7 @@ compress_read(struct zip_source *src, struct deflate *ctx,
     }
 
     if (ctx->zstr.avail_out < len)
-	return len - ctx->zstr.avail_out;
+	return (zip_int64_t)(len - ctx->zstr.avail_out);
 
     return (ctx->e[0] == 0) ? 0 : -1;
 }
@@ -188,7 +187,7 @@ decompress_read(struct zip_source *src, struct deflate *ctx,
 	return 0;
 	
     ctx->zstr.next_out = (Bytef *)data;
-    ctx->zstr.avail_out = len;
+    ctx->zstr.avail_out = (uInt)len; /* TODO: check for overflow */
 
     end = 0;
     while (!end && ctx->zstr.avail_out) {
@@ -210,8 +209,7 @@ decompress_read(struct zip_source *src, struct deflate *ctx,
 		    break;
 		}
 
-		if ((n=zip_source_read(src, ctx->buffer,
-			    sizeof(ctx->buffer))) < 0) {
+		if ((n=zip_source_read(src, ctx->buffer, sizeof(ctx->buffer))) < 0) {
 		    zip_source_error(src, ctx->e, ctx->e+1);
 		    end = 1;
 		    break;
@@ -220,7 +218,7 @@ decompress_read(struct zip_source *src, struct deflate *ctx,
 		    ctx->eof = 1;
 		else {
 		    ctx->zstr.next_in = (Bytef *)ctx->buffer;
-		    ctx->zstr.avail_in = n;
+		    ctx->zstr.avail_in = (uInt)n;
 		}
 		continue;
 	    }
@@ -237,7 +235,7 @@ decompress_read(struct zip_source *src, struct deflate *ctx,
     }
 
     if (ctx->zstr.avail_out < len)
-	return len - ctx->zstr.avail_out;
+	return (zip_int64_t)(len - ctx->zstr.avail_out);
 
     return (ctx->e[0] == 0) ? 0 : -1;
 }
@@ -334,7 +332,7 @@ deflate_decompress(struct zip_source *src, void *ud, void *data,
 	ctx->zstr.zfree = Z_NULL;
 	ctx->zstr.opaque = NULL;
 	ctx->zstr.next_in = (Bytef *)ctx->buffer;
-	ctx->zstr.avail_in = n;
+	ctx->zstr.avail_in = (uInt)n /* TODO: check for overflow */;
 
 	/* negative value to tell zlib that there is no header */
 	if ((ret=inflateInit2(&ctx->zstr, -MAX_WBITS)) != Z_OK) {
@@ -372,7 +370,7 @@ deflate_decompress(struct zip_source *src, void *ud, void *data,
 	return sizeof(int)*2;
 
     case ZIP_SOURCE_FREE:
-	/* XXX: inflateEnd if close was not called */
+	/* TODO: inflateEnd if close was not called */
 	free(ctx);
 	return 0;
 
@@ -389,6 +387,6 @@ deflate_decompress(struct zip_source *src, void *ud, void *data,
 static void
 deflate_free(struct deflate *ctx)
 {
-    /* XXX: deflateEnd if close was not called */
+    /* TODO: deflateEnd if close was not called */
     free(ctx);
 }

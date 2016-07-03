@@ -17,6 +17,14 @@
 #include <sys/prctl.h>
 #endif
 
+#ifdef HAVE_APPARMOR
+#include <sys/apparmor.h>
+#endif
+
+#ifdef HAVE_SYS_ACL_H
+#include <sys/acl.h>
+#endif
+
 #include "fpm.h"
 #include "fpm_conf.h"
 #include "fpm_cleanup.h"
@@ -31,8 +39,12 @@ size_t fpm_pagesize;
 int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct fpm_worker_pool_config_s *c = wp->config;
+#ifdef HAVE_FPM_ACL
+	int n;
 
 	/* uninitialized */
+	wp->socket_acl  = NULL;
+#endif
 	wp->socket_uid = -1;
 	wp->socket_gid = -1;
 	wp->socket_mode = 0660;
@@ -40,6 +52,117 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (!c) {
 		return 0;
 	}
+
+	if (c->listen_mode && *c->listen_mode) {
+		wp->socket_mode = strtoul(c->listen_mode, 0, 8);
+	}
+
+#ifdef HAVE_FPM_ACL
+	/* count the users and groups configured */
+	n = 0;
+	if (c->listen_acl_users && *c->listen_acl_users) {
+		char *p;
+		n++;
+		for (p=strchr(c->listen_acl_users, ',') ; p ; p=strchr(p+1, ',')) {
+			n++;
+		}
+	}
+	if (c->listen_acl_groups && *c->listen_acl_groups) {
+		char *p;
+		n++;
+		for (p=strchr(c->listen_acl_groups, ',') ; p ; p=strchr(p+1, ',')) {
+			n++;
+		}
+	}
+	/* if ACL configured */
+	if (n) {
+		acl_t acl;
+		acl_entry_t entry;
+		acl_permset_t perm;
+		char *tmp, *p, *end;
+
+		acl = acl_init(n);
+		if (!acl) {
+			zlog(ZLOG_SYSERROR, "[pool %s] cannot allocate ACL", wp->config->name);
+			return -1;
+		}
+		/* Create USER ACL */
+		if (c->listen_acl_users && *c->listen_acl_users) {
+			struct passwd *pwd;
+
+			tmp = estrdup(c->listen_acl_users);
+			for (p=tmp ; p ; p=end) {
+				if ((end = strchr(p, ','))) {
+					*end++ = 0;
+				}
+				pwd = getpwnam(p);
+				if (pwd) {
+					zlog(ZLOG_DEBUG, "[pool %s] user '%s' have uid=%d", wp->config->name, p, pwd->pw_uid);
+				} else {
+					zlog(ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, p);
+					acl_free(acl);
+					efree(tmp);
+					return -1;
+				}
+				if (0 > acl_create_entry(&acl, &entry) ||
+					0 > acl_set_tag_type(entry, ACL_USER) ||
+					0 > acl_set_qualifier(entry, &pwd->pw_uid) ||
+					0 > acl_get_permset(entry, &perm) ||
+					0 > acl_clear_perms (perm) ||
+					0 > acl_add_perm (perm, ACL_READ) ||
+					0 > acl_add_perm (perm, ACL_WRITE)) {
+					zlog(ZLOG_SYSERROR, "[pool %s] cannot create ACL for user '%s'", wp->config->name, p);
+					acl_free(acl);
+					efree(tmp);
+					return -1;
+				}
+			}
+			efree(tmp);
+		}
+		/* Create GROUP ACL */
+		if (c->listen_acl_groups && *c->listen_acl_groups) {
+			struct group *grp;
+
+			tmp = estrdup(c->listen_acl_groups);
+			for (p=tmp ; p ; p=end) {
+				if ((end = strchr(p, ','))) {
+					*end++ = 0;
+				}
+				grp = getgrnam(p);
+				if (grp) {
+					zlog(ZLOG_DEBUG, "[pool %s] group '%s' have gid=%d", wp->config->name, p, grp->gr_gid);
+				} else {
+					zlog(ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, p);
+					acl_free(acl);
+					efree(tmp);
+					return -1;
+				}
+				if (0 > acl_create_entry(&acl, &entry) ||
+					0 > acl_set_tag_type(entry, ACL_GROUP) ||
+					0 > acl_set_qualifier(entry, &grp->gr_gid) ||
+					0 > acl_get_permset(entry, &perm) ||
+					0 > acl_clear_perms (perm) ||
+					0 > acl_add_perm (perm, ACL_READ) ||
+					0 > acl_add_perm (perm, ACL_WRITE)) {
+					zlog(ZLOG_SYSERROR, "[pool %s] cannot create ACL for group '%s'", wp->config->name, p);
+					acl_free(acl);
+					efree(tmp);
+					return -1;
+				}
+			}
+			efree(tmp);
+		}
+		if (c->listen_owner && *c->listen_owner) {
+			zlog(ZLOG_WARNING, "[pool %s] ACL set, listen.owner = '%s' is ignored", wp->config->name, c->listen_owner);
+		}
+		if (c->listen_group && *c->listen_group) {
+			zlog(ZLOG_WARNING, "[pool %s] ACL set, listen.group = '%s' is ignored", wp->config->name, c->listen_group);
+		}
+		wp->socket_acl  = acl;
+		return 0;
+	}
+	/* When listen.users and listen.groups not configured, continue with standard right */
+#endif
 
 	if (c->listen_owner && *c->listen_owner) {
 		struct passwd *pwd;
@@ -65,9 +188,68 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 		wp->socket_gid = grp->gr_gid;
 	}
 
-	if (c->listen_mode && *c->listen_mode) {
-		wp->socket_mode = strtoul(c->listen_mode, 0, 8);
+	return 0;
+}
+/* }}} */
+
+int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *path) /* {{{ */
+{
+#ifdef HAVE_FPM_ACL
+	if (wp->socket_acl) {
+		acl_t aclfile, aclconf;
+		acl_entry_t entryfile, entryconf;
+		int i;
+
+		/* Read the socket ACL */
+		aclconf = wp->socket_acl;
+		aclfile = acl_get_file (path, ACL_TYPE_ACCESS);
+		if (!aclfile) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to read the ACL of the socket '%s'", wp->config->name, path);
+			return -1;
+		}
+		/* Copy the new ACL entry from config */
+		for (i=ACL_FIRST_ENTRY ; acl_get_entry(aclconf, i, &entryconf) ; i=ACL_NEXT_ENTRY) {
+			if (0 > acl_create_entry (&aclfile, &entryfile) ||
+			    0 > acl_copy_entry(entryfile, entryconf)) {
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to add entry to the ACL of the socket '%s'", wp->config->name, path);
+				acl_free(aclfile);
+				return -1;
+			}
+		}
+		/* Write the socket ACL */
+		if (0 > acl_calc_mask (&aclfile) ||
+			0 > acl_valid (aclfile) ||
+			0 > acl_set_file (path, ACL_TYPE_ACCESS, aclfile)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to write the ACL of the socket '%s'", wp->config->name, path);
+			acl_free(aclfile);
+			return -1;
+		} else {
+			zlog(ZLOG_DEBUG, "[pool %s] ACL of the socket '%s' is set", wp->config->name, path);
+		}
+
+		acl_free(aclfile);
+		return 0;
 	}
+	/* When listen.users and listen.groups not configured, continue with standard right */
+#endif
+
+	if (wp->socket_uid != -1 || wp->socket_gid != -1) {
+		if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to chown() the socket '%s'", wp->config->name, wp->config->listen_address);
+			return -1;
+		}
+	}
+	return 0;
+}
+/* }}} */
+
+int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
+{
+#ifdef HAVE_FPM_ACL
+	if (wp->socket_acl) {
+		return acl_free(wp->socket_acl);
+	}
+#endif
 	return 0;
 }
 /* }}} */
@@ -183,7 +365,9 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			return -1;
 		}
 	} else if (made_chroot) {
-		chdir("/");
+		if (0 > chdir("/")) {
+			zlog(ZLOG_WARNING, "[pool %s] failed to chdir(/)", wp->config->name);
+		}
 	}
 
 	if (is_root) {
@@ -222,6 +406,37 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (0 > fpm_clock_init()) {
 		return -1;
 	}
+
+#ifdef HAVE_APPARMOR
+	if (wp->config->apparmor_hat) {
+		char *con, *new_con;
+
+		if (aa_getcon(&con, NULL) == -1) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to query apparmor confinement. Please check if \"/proc/*/attr/current\" is read and writeable.", wp->config->name);
+			return -1;
+		}
+
+		new_con = malloc(strlen(con) + strlen(wp->config->apparmor_hat) + 3); // // + 0 Byte
+		if (!new_con) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to allocate memory for apparmor hat change.", wp->config->name);
+			return -1;
+		}
+
+		if (0 > sprintf(new_con, "%s//%s", con, wp->config->apparmor_hat)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to construct apparmor confinement.", wp->config->name);
+			return -1;
+		}
+
+		if (0 > aa_change_profile(new_con)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to change to new confinement (%s). Please check if \"/proc/*/attr/current\" is read and writeable and \"change_profile -> %s//*\" is allowed.", wp->config->name, new_con, con);
+			return -1;
+		}
+
+		free(con);
+		free(new_con);
+	}
+#endif
+
 	return 0;
 }
 /* }}} */

@@ -1,6 +1,6 @@
 /*
   zip_get_name.c -- get filename for a file in zip file
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -33,12 +33,14 @@
 
 
 
+#include <string.h>
+
 #include "zipint.h"
 
 
 
-ZIP_EXTERN(const char *)
-zip_get_name(struct zip *za, zip_uint64_t idx, int flags)
+ZIP_EXTERN const char *
+zip_get_name(struct zip *za, zip_uint64_t idx, zip_flags_t flags)
 {
     return _zip_get_name(za, idx, flags, &za->error);
 }
@@ -46,27 +48,16 @@ zip_get_name(struct zip *za, zip_uint64_t idx, int flags)
 
 
 const char *
-_zip_get_name(struct zip *za, zip_uint64_t idx, int flags,
-	      struct zip_error *error)
+_zip_get_name(struct zip *za, zip_uint64_t idx, zip_flags_t flags, struct zip_error *error)
 {
-    if (idx >= za->nentry) {
-	_zip_error_set(error, ZIP_ER_INVAL, 0);
-	return NULL;
-    }
+    struct zip_dirent *de;
+    const zip_uint8_t *str;
 
-    if ((flags & ZIP_FL_UNCHANGED) == 0) {
-	if (za->entry[idx].state == ZIP_ST_DELETED) {
-	    _zip_error_set(error, ZIP_ER_DELETED, 0);
-	    return NULL;
-	}
-	if (za->entry[idx].ch_filename)
-	    return za->entry[idx].ch_filename;
-    }
-
-    if (za->cdir == NULL || idx >= za->cdir->nentry) {
-	_zip_error_set(error, ZIP_ER_INVAL, 0);
+    if ((de=_zip_get_dirent(za, idx, flags, error)) == NULL)
 	return NULL;
-    }
-    
-    return za->cdir->entry[idx].filename;
+
+    if ((str=_zip_string_get(de->filename, NULL, flags, error)) == NULL)
+	return NULL;
+
+    return (const char *)str;
 }

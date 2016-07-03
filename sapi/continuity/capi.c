@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -462,7 +462,7 @@ int phpFinit(lstTset * opt)
    core_globals = ts_resource(core_globals_id);
 
    logFmsg(0, "mod/php: PHP Interface v3 (module)");
-   logFmsg(0, "mod/php: Copyright (c) 1999-2005 The PHP Group. All rights reserved.");
+   logFmsg(0, "mod/php: Copyright (c) 1999-2016 The PHP Group. All rights reserved.");
 
    sapi_startup(&capi_sapi_module);
    capi_sapi_module.startup(&capi_sapi_module);

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -43,23 +43,28 @@
 #define MYSQLI_ZEND_ARG_OBJ_INFO_STMT() ZEND_ARG_INFO(0, stmt)
 #endif
 
-ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_result, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_result, 0)
 	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_param, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_param, 0)
 	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
 	ZEND_ARG_INFO(0, types)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_result, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_result, 0)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 0)
 	ZEND_ARG_INFO(0, types)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
+ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 0)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_poll, 0, 0, 4)
@@ -136,6 +141,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_rollback, 0, 0, 0)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_store_result, 0, 0, 1)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_store_result, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_change_user, 0, 0, 4)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
@@ -368,6 +384,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_refresh, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_no_options, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 
 /* {{{ mysqli_functions[]
  *
@@ -420,6 +439,7 @@ const zend_function_entry mysqli_functions[] = {
 #endif
 	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_client_version,					arginfo_mysqli_only_link)
+	PHP_FE(mysqli_get_links_stats,						arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_host_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_proto_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_server_info,						arginfo_mysqli_only_link)
@@ -489,7 +509,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_sqlstate,   							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_ssl_set,								arginfo_mysqli_ssl_set)
 	PHP_FE(mysqli_stat,									arginfo_mysqli_only_link)
-	PHP_FE(mysqli_store_result,							arginfo_mysqli_only_link)
+	PHP_FE(mysqli_store_result,							arginfo_mysqli_store_result)
 	PHP_FE(mysqli_thread_id,							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_thread_safe,							arginfo_mysqli_no_params)
 	PHP_FE(mysqli_use_result,							arginfo_mysqli_only_link)
@@ -559,7 +579,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(ssl_set, mysqli_ssl_set, arginfo_class_mysqli_ssl_set)
 	PHP_FALIAS(stat, mysqli_stat, arginfo_mysqli_no_params)
 	PHP_FALIAS(stmt_init, mysqli_stmt_init, arginfo_mysqli_no_params)
-	PHP_FALIAS(store_result, mysqli_store_result, arginfo_mysqli_no_params)
+	PHP_FALIAS(store_result, mysqli_store_result, arginfo_class_store_result)
 	PHP_FALIAS(thread_safe, mysqli_thread_safe, arginfo_mysqli_no_params)
 	PHP_FALIAS(use_result, mysqli_use_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(refresh,mysqli_refresh, arginfo_class_mysqli_refresh)

@@ -10,6 +10,9 @@ a=ABC&y=XYZ&c[]=1&c[]=2&c[a]=3
 var_dump($_POST, $HTTP_RAW_POST_DATA);
 ?>
 --EXPECT--
+Deprecated: Automatically populating $HTTP_RAW_POST_DATA is deprecated and will be removed in a future version. To avoid this warning set 'always_populate_raw_post_data' to '-1' in php.ini and use the php://input stream instead. in Unknown on line 0
+
+Warning: Cannot modify header information - headers already sent in Unknown on line 0
 array(3) {
   ["a"]=>
   string(3) "ABC"

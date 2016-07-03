@@ -10,6 +10,9 @@ require_once('table.inc');
 if (!$IS_MYSQLND && (mysqli_get_server_version($link) < 50118 && mysqli_get_server_version($link) > 50100)) {
 	die("skip Your MySQL Server version has a known bug that will cause a crash");
 }
+
+if (mysqli_get_server_version($link) >= 50600)
+	die("SKIP For MySQL < 5.6.0");
 ?>
 --FILE--
 <?php

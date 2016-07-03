@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,6 +51,7 @@
 typedef void (*zend_persist_func_t)(void * TSRMLS_DC);
 
 static void zend_persist_zval_ptr(zval **zp TSRMLS_DC);
+static void zend_persist_zval(zval *z TSRMLS_DC);
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 static const Bucket *uninitialized_bucket = NULL;
@@ -138,6 +139,29 @@ static void zend_hash_persist(HashTable *ht, void (*pPersistElement)(void *pElem
 #endif
 }
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+static zend_ast *zend_persist_ast(zend_ast *ast TSRMLS_DC)
+{
+	int i;
+	zend_ast *node;
+
+	if (ast->kind == ZEND_CONST) {
+		node = zend_accel_memdup(ast, sizeof(zend_ast) + sizeof(zval));
+		node->u.val = (zval*)(node + 1);
+		zend_persist_zval(node->u.val TSRMLS_CC);
+	} else {
+		node = zend_accel_memdup(ast, sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
+		for (i = 0; i < ast->children; i++) {
+			if ((&node->u.child)[i]) {
+				(&node->u.child)[i] = zend_persist_ast((&node->u.child)[i] TSRMLS_CC);
+			}
+		}
+	}
+	efree(ast);
+	return node;
+}
+#endif
+
 static void zend_persist_zval(zval *z TSRMLS_DC)
 {
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
@@ -150,10 +174,17 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			zend_accel_store_interned_string(z->value.str.val, z->value.str.len + 1);
 			break;
 		case IS_ARRAY:
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 		case IS_CONSTANT_ARRAY:
+#endif
 			zend_accel_store(z->value.ht, sizeof(HashTable));
 			zend_hash_persist(z->value.ht, (zend_persist_func_t) zend_persist_zval_ptr, sizeof(zval**) TSRMLS_CC);
 			break;
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		case IS_CONSTANT_AST:
+			Z_AST_P(z) = zend_persist_ast(Z_AST_P(z) TSRMLS_CC);
+			break;
+#endif
 	}
 }
 
@@ -653,6 +684,12 @@ static int zend_update_parent_ce(zend_class_entry **pce TSRMLS_DC)
 	if (ce->__callstatic) {
 		ce->__callstatic = zend_shared_alloc_get_xlat_entry(ce->__callstatic);
 		ce->__callstatic->op_array.refcount++;
+	}
+#endif
+#if ZEND_EXTENSION_API_NO >= PHP_5_6_X_API_NO
+	if (ce->__debugInfo) {
+		ce->__debugInfo = zend_shared_alloc_get_xlat_entry(ce->__debugInfo);
+		ce->__debugInfo->op_array.refcount++;
 	}
 #endif
 	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce TSRMLS_CC);

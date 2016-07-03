@@ -53,19 +53,19 @@ echo "Done\n";
 int(2)
 array(2) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
   [1]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 int(2)
 array(4) {
   [0]=>
-  %unicode|string%(1) "1"
-  [%u|b%"ID"]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  %unicode|string%(1) "1"
-  [%u|b%"VALUE"]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 Done

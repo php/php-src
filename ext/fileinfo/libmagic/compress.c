@@ -36,7 +36,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.73 2014/01/05 15:55:21 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -85,6 +85,7 @@ private const struct {
 	{ "LZIP",     4, { "lzip", "-cdq", NULL }, 1 },
  	{ "\3757zXZ\0",6,{ "xz", "-cd", NULL }, 1 },		/* XZ Utils */
  	{ "LRZI",     4, { "lrzip", "-dqo-", NULL }, 1 },	/* LRZIP */
+ 	{ "\004\"M\030", 4, { "lz4", "-cd", NULL }, 1 },	/* LZ4 */
 };
 
 #define NODATA ((size_t)~0)
@@ -128,14 +129,12 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 				if (file_printf(ms, mime ?
 				    " compressed-encoding=" : " (") == -1)
 					goto error;
+				if (file_buffer(ms, -1, NULL, buf, nbytes) == -1)
+					goto error;
+				if (!mime && file_printf(ms, ")") == -1)
+					goto error;
 			}
 
-			if ((mime == 0 || mime & MAGIC_MIME_ENCODING) &&
-			    file_buffer(ms, -1, NULL, buf, nbytes) == -1)
-				goto error;
-
-			if (!mime && file_printf(ms, ")") == -1)
-				goto error;
 			rv = 1;
 			break;
 		}
@@ -481,7 +480,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 #endif
 			efree(*newch);
 			n = 0;
-			newch[0] = '\0';
+			*newch = NULL;
 			goto err;
 		} else {
 			n = r;

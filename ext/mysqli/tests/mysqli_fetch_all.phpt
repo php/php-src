@@ -299,6 +299,26 @@ if (!function_exists('mysqli_fetch_all'))
 	if (null !== ($tmp = mysqli_fetch_array($res, MYSQLI_ASSOC)))
 			printf("[015] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+		printf("[016] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
+	}
+
+	if (!$res = mysqli_real_query($link, "SELECT 1 AS _one"))
+		printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	/* on mysqlnd level this would not be allowed */
+	if (!is_object($res = mysqli_use_result($link)))
+		printf("[018] Expecting object, got %s/%s. [%d] %s\n",
+			gettype($res), $res, mysqli_errno($link), mysqli_error($link));
+
+	$rows = mysqli_fetch_all($res, MYSQLI_ASSOC);
+	if (!is_array($rows) || (count($rows) > 1) || !isset($rows[0]['_one']) || ($rows[0]['_one'] != 1)) {
+		printf("[019] Results seem wrong, dumping\n");
+		var_dump($rows);
+	}
+
+
 	print "done!";
 ?>
 --CLEAN--

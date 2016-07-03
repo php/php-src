@@ -1985,7 +1985,7 @@ Version 8.10 25-Jun-2010
 
 7.  Minor change to pcretest.c to avoid a compiler warning.
 
-8.  Added four artifical Unicode properties to help with an option to make
+8.  Added four artificial Unicode properties to help with an option to make
     \s etc use properties (see next item). The new properties are: Xan
     (alphanumeric), Xsp (Perl space), Xps (POSIX space), and Xwd (word).
 
@@ -4610,7 +4610,7 @@ Version 4.3 21-May-03
    (i)   The utf8_table... variables are now declared "const".
 
    (ii)  The code for \cx, which used the "case flipping" table to upper case
-         lower case letters, now just substracts 32. This is ASCII-specific,
+         lower case letters, now just subtracts 32. This is ASCII-specific,
          but the whole concept of \cx is ASCII-specific, so it seems
          reasonable.
 

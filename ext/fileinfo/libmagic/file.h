@@ -27,7 +27,7 @@
  */
 /*
  * file.h - definitions for file(1) program
- * @(#)$File: file.h,v 1.144 2013/02/18 15:40:59 christos Exp $
+ * @(#)$File: file.h,v 1.148 2014/02/12 23:20:53 christos Exp $
  */
 
 #ifndef __file_h__
@@ -135,7 +135,7 @@
 #define MAXstring 64		/* max len of "string" types */
 
 #define MAGICNO		0xF11E041C
-#define VERSIONNO	10
+#define VERSIONNO	11
 #define FILE_MAGICSIZE	248
 
 #define	FILE_LOAD	0
@@ -224,7 +224,8 @@ struct magic {
 #define				FILE_BEQWDATE	44
 #define				FILE_NAME	45
 #define				FILE_USE	46
-#define				FILE_NAMES_SIZE	47 /* size of array to contain all names */
+#define				FILE_CLEAR	47
+#define				FILE_NAMES_SIZE	48 /* size of array to contain all names */
 
 #define IS_LIBMAGIC_STRING(t) \
 	((t) == FILE_STRING || \
@@ -234,8 +235,7 @@ struct magic {
 	 (t) == FILE_REGEX || \
 	 (t) == FILE_SEARCH || \
 	 (t) == FILE_NAME || \
-	 (t) == FILE_USE || \
-	 (t) == FILE_DEFAULT)
+	 (t) == FILE_USE)
 
 #define FILE_FMT_NONE 0
 #define FILE_FMT_NUM  1 /* "cduxXi" */
@@ -250,7 +250,7 @@ struct magic {
 #ifdef ENABLE_CONDITIONALS
 	uint8_t cond;		/* conditional type */
 #else
-	uint8_t dummy;	
+	uint8_t dummy;
 #endif
 	uint8_t factor_op;
 #define		FILE_FACTOR_OP_PLUS	'+'
@@ -349,7 +349,7 @@ struct magic {
 /* list of magic entries */
 struct mlist {
 	struct magic *magic;		/* array of magic entries */
-	uint32_t nmagic;			/* number of entries in array */
+	uint32_t nmagic;		/* number of entries in array */
 	void *map;			/* internal resources used by entry */
 	struct mlist *next, *prev;
 };
@@ -422,7 +422,7 @@ protected int file_printf(struct magic_set *, const char *, ...);
 protected int file_reset(struct magic_set *);
 protected int file_trycdf(struct magic_set *, int, const unsigned char *,
     size_t);
-#ifdef PHP_FILEINFO_UNCOMPRESS 
+#ifdef PHP_FILEINFO_UNCOMPRESS
 protected int file_zmagic(struct magic_set *, int, const char *,
     const unsigned char *, size_t);
 #endif
@@ -477,14 +477,23 @@ extern char *sys_errlist[];
 #endif
 
 #ifndef strlcpy
-size_t strlcpy(char *dst, const char *src, size_t siz);
+size_t strlcpy(char *, const char *, size_t);
 #endif
 #ifndef strlcat
-size_t strlcat(char *dst, const char *src, size_t siz);
+size_t strlcat(char *, const char *, size_t);
+#endif
+#ifndef HAVE_STRCASESTR
+char *strcasestr(const char *, const char *);
 #endif
 #ifndef HAVE_GETLINE
-ssize_t getline(char **dst, size_t *len, FILE *fp);
-ssize_t getdelim(char **dst, size_t *len, int delimiter, FILE *fp);
+ssize_t getline(char **, size_t *, FILE *);
+ssize_t getdelim(char **, size_t *, int, FILE *);
+#endif
+#ifndef HAVE_CTIME_R
+char   *ctime_r(const time_t *, char *);
+#endif
+#ifndef HAVE_ASCTIME_R
+char   *asctime_r(const struct tm *, char *);
 #endif
 
 #if defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H) && !defined(QUICK)

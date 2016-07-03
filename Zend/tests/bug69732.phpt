@@ -24,7 +24,4 @@ Notice: Undefined property: wpq::$interesting in %sbug69732.php on line 6
 
 Notice: Indirect modification of overloaded property wpq::$interesting has no effect in %sbug69732.php on line 16
 
-Strict Standards: Only variables should be assigned by reference in %sbug69732.php on line 16
-
-Notice: Undefined property: wpq::$interesting in %sbug69732.php on line 6
-XXX
+Fatal error: Cannot assign by reference to overloaded object in %sbug69732.php on line 16

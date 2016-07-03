@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -96,6 +96,10 @@ struct _php_core_globals {
 	char *auto_prepend_file;
 	char *auto_append_file;
 
+	char *input_encoding;
+	char *internal_encoding;
+	char *output_encoding;
+
 	arg_separators arg_separator;
 
 	char *variables_order;
@@ -131,7 +135,7 @@ struct _php_core_globals {
 	zend_bool during_request_startup;
 	zend_bool allow_url_fopen;
 	zend_bool enable_post_data_reading;
-	zend_bool always_populate_raw_post_data;
+	signed char always_populate_raw_post_data;
 	zend_bool report_zend_debug;
 
 	int last_error_type;

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -43,14 +43,12 @@ typedef struct {
 	unsigned 	_reserved:31;
 	pdo_pgsql_error_info	einfo;
 	Oid 		pgoid;
-#if HAVE_PQPREPARE
 	/* The following two variables have the same purpose. Unfortunately we need
-	   to keep track of two different attributes having the same effect.
-	   It might be worth to deprecate the driver specific one soon. */
+	   to keep track of two different attributes having the same effect. */
 	int		emulate_prepares;
-	int		disable_native_prepares;
-#endif
-	unsigned int stmt_counter;
+	int		disable_native_prepares; /* deprecated since 5.6 */
+	int		disable_prepares;
+	unsigned int	stmt_counter;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -66,14 +64,12 @@ typedef struct {
 	int                     current_row;
 	pdo_pgsql_column        *cols;
 	char *cursor_name;
-#if HAVE_PQPREPARE
 	char *stmt_name;
 	char *query;
 	char **param_values;
 	int *param_lengths;
 	int *param_formats;
 	Oid *param_types;
-#endif
 	zend_bool is_prepared;
 } pdo_pgsql_stmt;
 
@@ -83,9 +79,11 @@ typedef struct {
 
 extern pdo_driver_t pdo_pgsql_driver;
 
-extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *file, int line TSRMLS_DC);
-#define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, __FILE__, __LINE__ TSRMLS_CC)
+extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line TSRMLS_DC);
+#define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_pgsql_error_msg(d,e,m)	_pdo_pgsql_error(d, NULL, e, NULL, m, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, NULL, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_pgsql_error_stmt_msg(s,e,m)	_pdo_pgsql_error(s->dbh, s, e, NULL, m, __FILE__, __LINE__ TSRMLS_CC)
 
 extern struct pdo_stmt_methods pgsql_stmt_methods;
 
@@ -93,6 +91,7 @@ extern struct pdo_stmt_methods pgsql_stmt_methods;
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_PGSQL_ATTR_DISABLE_PREPARES,
 };
 
 struct pdo_pgsql_lob_self {

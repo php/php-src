@@ -12,10 +12,10 @@ require_once('skipifbindfailure.inc');
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
-$dn = "dc=my-domain,dc=com";
-$filter = "(cn=*)";
+$dn = "$base";
+$filter = "(cn=user*)";
 var_dump(
 	ldap_control_paged_result($link, 1),
 	$result = ldap_search($link, $dn, $filter, array('cn')),
@@ -28,11 +28,11 @@ var_dump(
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 bool(true)
-resource(6) of type (ldap result)
+resource(%d) of type (ldap result)
 array(2) {
   ["count"]=>
   int(1)
@@ -50,7 +50,7 @@ array(2) {
     ["count"]=>
     int(1)
     ["dn"]=>
-    string(28) "cn=userA,dc=my-domain,dc=com"
+    string(%d) "cn=userA,%s"
   }
 }
 ===DONE===

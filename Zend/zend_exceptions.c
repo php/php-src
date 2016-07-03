@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,7 @@ ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
 void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
 {
-	zval *previous;
+	zval *previous, *ancestor;
 
 	if (exception == add_previous || !add_previous || !exception) {
 		return;
@@ -46,6 +46,14 @@ void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
 		return;
 	}
 	while (exception && exception != add_previous && Z_OBJ_HANDLE_P(exception) != Z_OBJ_HANDLE_P(add_previous)) {
+		ancestor = zend_read_property(default_exception_ce, add_previous, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+		while (Z_TYPE_P(ancestor) == IS_OBJECT) {
+			if (Z_OBJ_HANDLE_P(ancestor) == Z_OBJ_HANDLE_P(exception)) {
+				zval_ptr_dtor(&add_previous);
+				return;
+			}
+			ancestor = zend_read_property(default_exception_ce, ancestor, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+		}
 		previous = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property(default_exception_ce, exception, "previous", sizeof("previous")-1, add_previous TSRMLS_CC);
@@ -234,7 +242,6 @@ ZEND_METHOD(exception, __wakeup)
 {
 	zval *value;
 	zval *object = getThis();
-	HashTable *intern_ht = zend_std_get_properties(getThis() TSRMLS_CC);
 	CHECK_EXC_TYPE("message", IS_STRING);
 	CHECK_EXC_TYPE("string", IS_STRING);
 	CHECK_EXC_TYPE("code", IS_LONG);
@@ -645,6 +652,7 @@ ZEND_METHOD(exception, getPrevious)
 	previous = zend_read_property(default_exception_ce, getThis(), "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 	RETURN_ZVAL(previous, 1, 0);
 }
+/* }}} */
 
 int zend_spprintf(char **message, int max_len, const char *format, ...) /* {{{ */
 {

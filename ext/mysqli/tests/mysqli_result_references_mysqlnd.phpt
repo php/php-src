@@ -48,7 +48,7 @@ if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1))
 		$references[$idx]['row_copy'] 	= $rows[$i];
 		$references[$idx]['id_ref'] 		= &$rows[$i]['id'];
 		$references[$idx]['id_copy']		= $rows[$i]['id'];
-		/* enforce seperation */
+		/* enforce separation */
 		$references[$idx]['id_copy_mod']= $rows[$i]['id'] + 0;
 	}
 	mysqli_free_result($res);

@@ -27,8 +27,9 @@ function do_translit($st) {
         $st = mb_eregi_replace($i,$u,$st);
     }
     return $st;
-} 
+}
 
+mb_regex_encoding('ISO-8859-1');
 echo do_translit("Пеар");
 ?>
 --EXPECT--

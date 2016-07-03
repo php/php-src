@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,18 +21,19 @@
 #ifndef SAPI_H
 #define SAPI_H
 
+#include "php.h"
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_llist.h"
 #include "zend_operators.h"
 #ifdef PHP_WIN32
 #include "win95nt.h"
+#include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
 
 #define SAPI_OPTION_NO_CHDIR 1
-
-#define SAPI_POST_BLOCK_SIZE 4000
+#define SAPI_POST_BLOCK_SIZE 0x4000
 
 #ifdef PHP_WIN32
 #	ifdef SAPI_EXPORTS
@@ -79,13 +80,14 @@ END_EXTERN_C()
 typedef struct {
 	const char *request_method;
 	char *query_string;
-	char *post_data, *raw_post_data;
 	char *cookie_data;
 	long content_length;
-	uint post_data_length, raw_post_data_length;
 
 	char *path_translated;
 	char *request_uri;
+
+	/* Do not use request_body directly, but the php://input stream wrapper instead */
+	struct _php_stream *request_body;
 
 	const char *content_type;
 
@@ -119,7 +121,8 @@ typedef struct _sapi_globals_struct {
 	void *server_context;
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
-	int read_post_bytes;
+	int64_t read_post_bytes;
+	unsigned char post_read;
 	unsigned char headers_sent;
 	struct stat global_stat;
 	char *default_mimetype;
@@ -188,7 +191,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 SAPI_API int sapi_send_headers(TSRMLS_D);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);
-
+SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC);
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
@@ -289,7 +292,7 @@ struct _sapi_post_entry {
 #define SAPI_HEADER_SEND_FAILED			3
 
 #define SAPI_DEFAULT_MIMETYPE		"text/html"
-#define SAPI_DEFAULT_CHARSET		""
+#define SAPI_DEFAULT_CHARSET		PHP_DEFAULT_CHARSET
 #define SAPI_PHP_VERSION_HEADER		"X-Powered-By: PHP/" PHP_VERSION
 
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(TSRMLS_D)

@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.81 2013/11/29 15:42:51 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -263,7 +263,7 @@ public int
 magic_load(struct magic_set *ms, const char *magicfile)
 {
 	if (ms == NULL)
-	return -1;
+		return -1;
 	return file_apprentice(ms, magicfile, FILE_LOAD);
 }
 
@@ -383,11 +383,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 
 	if (!stream && inname) {
 		no_in_stream = 1;
-#if PHP_API_VERSION < 20100412
-		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
-#else
 		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS, NULL);
-#endif
 	}
 
 	if (!stream) {

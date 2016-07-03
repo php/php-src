@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -341,7 +341,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta 
 
 /* {{{ mysqlnd_res_meta::fetch_field_direct */
 static const MYSQLND_FIELD *
-MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
 	DBG_INF_FMT("fieldnr=%u", fieldnr);
@@ -371,6 +371,17 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const 
 }
 /* }}} */
 
+/* {{{ mysqlnd_res_meta::field_seek */
+static MYSQLND_FIELD_OFFSET
+MYSQLND_METHOD(mysqlnd_res_meta, field_seek)(MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET field_offset TSRMLS_DC)
+{
+	MYSQLND_FIELD_OFFSET return_value = 0;
+	DBG_ENTER("mysqlnd_res_meta::fetch_fields");
+	return_value = meta->current_field;
+	meta->current_field = field_offset;
+	DBG_RETURN(return_value);
+}
+/* }}} */
 
 static
 MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
@@ -378,6 +389,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct),
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_fields),
 	MYSQLND_METHOD(mysqlnd_res_meta, field_tell),
+	MYSQLND_METHOD(mysqlnd_res_meta, field_seek),
 	MYSQLND_METHOD(mysqlnd_res_meta, read_metadata),
 	MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata),
 	MYSQLND_METHOD(mysqlnd_res_meta, free),

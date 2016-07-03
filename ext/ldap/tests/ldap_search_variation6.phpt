@@ -14,9 +14,9 @@ require_once('skipifbindfailure.inc');
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
-$dn = "dc=my-domain,dc=com";
+$dn = "$base";
 $filter = "(objectclass=person)";
 
 var_dump(
@@ -41,7 +41,7 @@ var_dump(
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 array(2) {
@@ -112,7 +112,7 @@ array(4) {
     ["count"]=>
     int(6)
     ["dn"]=>
-    string(28) "cn=userA,dc=my-domain,dc=com"
+    string(%d) "cn=userA,%s"
   }
   [1]=>
   array(12) {
@@ -164,7 +164,7 @@ array(4) {
     ["count"]=>
     int(5)
     ["dn"]=>
-    string(28) "cn=userB,dc=my-domain,dc=com"
+    string(%d) "cn=userB,%s"
   }
   [2]=>
   array(10) {
@@ -207,7 +207,7 @@ array(4) {
     ["count"]=>
     int(4)
     ["dn"]=>
-    string(37) "cn=userC,cn=userB,dc=my-domain,dc=com"
+    string(%d) "cn=userC,cn=userB,%s"
   }
 }
 bool(true)

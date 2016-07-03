@@ -50,6 +50,14 @@ $TS \
 --with-bz2 \
 --with-openssl \
 --with-gmp \
---enable-bcmath
+--enable-bcmath \
+--enable-phpdbg \
+--enable-calendar \
+--enable-ftp \
+--with-pspell=/usr \
+--with-recode=/usr \
+--with-enchant=/usr \
+--enable-wddx \
+--enable-sysvmsg 
 make -j2 --quiet
 make install

@@ -19,15 +19,15 @@ $statement = oci_parse($c, $create);
 oci_execute($statement);
 
 $create_pkg = "
-CREATE OR REPLACE PACKAGE ARRAYBINDPKG1 AS 
+CREATE OR REPLACE PACKAGE ARRAY_BIND_003_PKG AS 
   TYPE ARRTYPE IS TABLE OF DATE INDEX BY BINARY_INTEGER; 
   PROCEDURE iobind(c1 IN OUT ARRTYPE); 
-END ARRAYBINDPKG1;";
+END ARRAY_BIND_003_PKG;";
 $statement = oci_parse($c, $create_pkg);
 oci_execute($statement);
 
 $create_pkg_body = "
-CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS 
+CREATE OR REPLACE PACKAGE BODY ARRAY_BIND_003_PKG AS 
   CURSOR CUR IS SELECT name FROM bind_test;
   PROCEDURE iobind(c1 IN OUT ARRTYPE) IS
     BEGIN
@@ -45,11 +45,11 @@ CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS
       END IF;
     END LOOP;
   END iobind;
-END ARRAYBINDPKG1;";
+END ARRAY_BIND_003_PKG;";
 $statement = oci_parse($c, $create_pkg_body);
 oci_execute($statement);
 
-$statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.iobind(:c1); END;");
+$statement = oci_parse($c, "BEGIN array_bind_003_pkg.iobind(:c1); END;");
 
 $array = Array("06-DEC-05","10-DEC-80","21-AUG-91","26-OCT-17");
 
@@ -63,7 +63,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 Warning: oci_execute(): ORA-01403: %s
-ORA-06512: at "SYSTEM.ARRAYBINDPKG1", line %d
+ORA-06512: at "SYSTEM.ARRAY_BIND_003_PKG", line %d
 ORA-06512: at line %d in %sarray_bind_003.php on line %d
 array(4) {
   [0]=>

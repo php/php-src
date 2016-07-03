@@ -11,4 +11,4 @@ echo 'foo';
 Warning: Header may not contain NUL bytes in %s on line %d
 foo
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8

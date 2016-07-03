@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -269,9 +269,15 @@ ZEND_GET_MODULE(fileinfo)
  */
 PHP_MINFO_FUNCTION(fileinfo)
 {
+	char magic_ver[5];
+
+	(void)snprintf(magic_ver, 4, "%d", magic_version());
+	magic_ver[4] = '\0';
+
 	php_info_print_table_start();
 	php_info_print_table_row(2, "fileinfo support", "enabled");
 	php_info_print_table_row(2, "version", PHP_FILEINFO_VERSION);
+	php_info_print_table_row(2, "libmagic", magic_ver);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -315,11 +321,7 @@ PHP_FUNCTION(finfo_open)
 		file = NULL;
 	} else if (file && *file) { /* user specified file, perform open_basedir checks */
 
-#if PHP_API_VERSION < 20100412
-		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
-#else
 		if (php_check_open_basedir(file TSRMLS_CC)) {
-#endif
 			FILEINFO_DESTROY_OBJECT(object);
 			RETURN_FALSE;
 		}
@@ -497,7 +499,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		case FILEINFO_MODE_FILE:
 		{
 			/* determine if the file is a local file or remote URL */
-			char *tmp2;
+			const char *tmp2;
 			php_stream_wrapper *wrap;
 			php_stream_statbuf ssb;
 

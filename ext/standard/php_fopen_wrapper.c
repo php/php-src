@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,6 +63,12 @@ php_stream_ops php_stream_output_ops = {
 	NULL  /* set_option */
 };
 
+typedef struct php_stream_input { /* {{{ */
+	php_stream *body;
+	off_t position;
+} php_stream_input_t;
+/* }}} */
+
 static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return -1;
@@ -71,42 +77,36 @@ static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t
 
 static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
-	off_t *position = (off_t*)stream->abstract;
-	size_t read_bytes = 0;
+	php_stream_input_t *input = stream->abstract;
+	size_t read;
 
-	if (!stream->eof) {
-		if (SG(request_info).raw_post_data) { /* data has already been read by a post handler */
-			read_bytes = SG(request_info).raw_post_data_length - *position;
-			if (read_bytes <= count) {
-				stream->eof = 1;
-			} else {
-				read_bytes = count;
-			}
-			if (read_bytes) {
-				memcpy(buf, SG(request_info).raw_post_data + *position, read_bytes);
-			}
-		} else if (sapi_module.read_post) {
-			read_bytes = sapi_module.read_post(buf, count TSRMLS_CC);
-			if (read_bytes <= 0) {
-				stream->eof = 1;
-				read_bytes = 0;
-			}
-			/* Increment SG(read_post_bytes) only when something was actually read. */
-			SG(read_post_bytes) += read_bytes;
-		} else {
-			stream->eof = 1;
+	if (!SG(post_read) && SG(read_post_bytes) < input->position + count) {
+		/* read requested data from SAPI */
+		int read_bytes = sapi_read_post_block(buf, count TSRMLS_CC);
+
+		if (read_bytes > 0) {
+			php_stream_seek(input->body, 0, SEEK_END);
+			php_stream_write(input->body, buf, read_bytes);
 		}
 	}
 
-	*position += read_bytes;
+	php_stream_seek(input->body, input->position, SEEK_SET);
+	read = php_stream_read(input->body, buf, count);
 
-	return read_bytes;
+	if (!read || read == (size_t) -1) {
+		stream->eof = 1;
+	} else {
+		input->position += read;
+	}
+
+	return read;
 }
 /* }}} */
 
 static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	efree(stream->abstract);
+	stream->abstract = NULL;
 
 	return 0;
 }
@@ -118,13 +118,27 @@ static int php_stream_input_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static int php_stream_input_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+{
+	php_stream_input_t *input = stream->abstract;
+
+	if (input->body) {
+		int sought = php_stream_seek(input->body, offset, whence);
+		*newoffset = (input->body)->position;
+		return sought;
+	}
+
+	return -1;
+}
+/* }}} */
+
 php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
 	php_stream_input_read,
 	php_stream_input_close,
 	php_stream_input_flush,
 	"Input",
-	NULL, /* seek */
+	php_stream_input_seek,
 	NULL, /* cast */
 	NULL, /* stat */
 	NULL  /* set_option */
@@ -157,7 +171,8 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 }
 /* }}} */
 
-php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
+									 char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	int fd = -1;
 	int mode_rw = 0;
@@ -203,13 +218,24 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	}
 
 	if (!strcasecmp(path, "input")) {
+		php_stream_input_t *input;
+
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}
-		return php_stream_alloc(&php_stream_input_ops, ecalloc(1, sizeof(off_t)), 0, "rb");
+
+		input = ecalloc(1, sizeof(*input));
+		if ((input->body = SG(request_info).request_body)) {
+			php_stream_rewind(input->body);
+		} else {
+			input->body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
+			SG(request_info).request_body = input->body;
+		}
+
+		return php_stream_alloc(&php_stream_input_ops, input, 0, "rb");
 	}
 
 	if (!strcasecmp(path, "stdin")) {
@@ -258,8 +284,8 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 			fd = dup(STDERR_FILENO);
 		}
 	} else if (!strncasecmp(path, "fd/", 3)) {
-		char	   *start,
-				   *end;
+		const char *start;
+		char       *end;
 		long	   fildes_ori;
 		int		   dtablesize;
 

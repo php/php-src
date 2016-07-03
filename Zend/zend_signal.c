@@ -78,8 +78,8 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 
 	if (SIGG(active)) {
 		if (SIGG(depth) == 0) { /* try to handle signal */
-			if (SIGG(blocked) != 0) { /* inverse */
-				SIGG(blocked) = 0; /* signal is not blocked */
+			if (SIGG(blocked) != -1) { /* inverse */
+				SIGG(blocked) = -1; /* signal is not blocked */
 			}
 			if (SIGG(running) == 0) {
 				SIGG(running) = 1;
@@ -99,7 +99,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 				SIGG(running) = 0;
 			}
 		} else { /* delay signal handling */
-			SIGG(blocked) = 1; /* signal is blocked */
+			SIGG(blocked) = 0; /* signal is blocked */
 
 			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotton */
 				SIGG(pavail) = queue->next;
@@ -314,7 +314,7 @@ void zend_signal_deactivate(TSRMLS_D)
 	SIGNAL_BEGIN_CRITICAL();
 	SIGG(active) = 0;
 	SIGG(running) = 0;
-	SIGG(blocked) = 0;
+	SIGG(blocked) = -1;
 	SIGG(depth) = 0;
 	SIGNAL_END_CRITICAL();
 }

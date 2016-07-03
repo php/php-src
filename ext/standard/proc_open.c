@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,7 @@
 #include "exec.h"
 #include "php_globals.h"
 #include "SAPI.h"
+#include "main/php_network.h"
 
 #ifdef NETWARE
 #include <proc.h>
@@ -556,7 +557,7 @@ PHP_FUNCTION(proc_open)
 		if (Z_TYPE_PP(descitem) == IS_RESOURCE) {
 			/* should be a stream - try and dup the descriptor */
 			php_stream *stream;
-			int fd;
+			php_socket_t fd;
 
 			php_stream_from_zval(stream, descitem);
 
@@ -629,7 +630,7 @@ PHP_FUNCTION(proc_open)
 
 			} else if (strcmp(Z_STRVAL_PP(ztype), "file") == 0) {
 				zval **zfile, **zmode;
-				int fd;
+				php_socket_t fd;
 				php_stream *stream;
 
 				descriptors[ndesc].mode = DESC_FILE;

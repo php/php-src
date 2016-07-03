@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -150,7 +150,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_DOC_COMMENT:
 					break;
 				default:
-					efree(token.value.str.val);
+					str_efree(token.value.str.val);
 					break;
 			}
 		}
@@ -211,7 +211,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 					break;
 
 				default:
-					efree(token.value.str.val);
+					STR_FREE(token.value.str.val);
 					break;
 			}
 		}

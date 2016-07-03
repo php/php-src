@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -961,7 +961,7 @@ class testHarness {
 			if ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 				/*  
 				 * Collect information about the host system for our report
-				 * Fetch phpinfo() output so that we can see the PHP enviroment
+				 * Fetch phpinfo() output so that we can see the PHP environment
 				 * Make an archive of all the failed tests
 				 * Send an email
 				 */

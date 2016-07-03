@@ -57,7 +57,7 @@ typedef enum WebPResultType {
  *      3. p_Y/p_U/p_V : pointer to the Y/U/V data buffer (this routine will
  *                       allocate memory for the buffer, fill the buffer with
  *                       appropriate data and transfer owner ship of the buffer
- *                       to caller. Caller is reponsible for freeing the memory).
+ *                       to caller. Caller is responsible for freeing the memory).
  *                       Note that the memory for Y, U, V buffers is alloacted
  *                       in one chunk, hence one should call free(*p_Y) only.
  *                       Do not try to free the U and V buffers.

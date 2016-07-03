@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,9 +26,10 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20121113
+#define PHP_API_VERSION 20131106
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
+#define PHP_DEFAULT_CHARSET "UTF-8"
 
 #include "php_version.h"
 #include "zend.h"
@@ -179,6 +180,8 @@ typedef unsigned int socklen_t;
 #  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
+
+#include "php_stdint.h"
 
 #include "zend_hash.h"
 #include "zend_alloc.h"
@@ -398,7 +401,7 @@ END_EXTERN_C()
 
 
 /* Virtual current working directory support */
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #include "zend_constants.h"
 

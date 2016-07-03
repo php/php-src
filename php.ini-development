@@ -78,9 +78,9 @@
 ; compatibility with older or less security conscience applications. We
 ; recommending using the production ini in production and testing environments.
 
-; php.ini-development is very similar to its production variant, except it's
-; much more verbose when it comes to errors. We recommending using the
-; development version only in development environments as errors shown to
+; php.ini-development is very similar to its production variant, except it is
+; much more verbose when it comes to errors. We recommend using the
+; development version only in development environments, as errors shown to
 ; application users can inadvertently leak otherwise secure information.
 
 ; This is php.ini-development INI file.
@@ -420,7 +420,7 @@ memory_limit = 128M
 ; E_NOTICE          - run-time notices (these are warnings which often result
 ;                     from a bug in your code, but it's possible that it was
 ;                     intentional (e.g., using an uninitialized variable and
-;                     relying on the fact it's automatically initialized to an
+;                     relying on the fact it is automatically initialized to an
 ;                     empty string)
 ; E_STRICT          - run-time notices, enable to have PHP suggest changes
 ;                     to your code which will ensure the best interoperability
@@ -453,8 +453,8 @@ error_reporting = E_ALL
 ; it could be very dangerous in production environments. Depending on the code
 ; which is triggering the error, sensitive information could potentially leak
 ; out of your application such as database usernames and passwords or worse.
-; It's recommended that errors be logged on production servers rather than
-; having the errors sent to STDOUT.
+; For production environments, we recommend logging errors rather than
+; sending them to STDOUT.
 ; Possible Values:
 ;   Off = Do not display any errors
 ;   stderr = Display errors to STDERR (affects only CGI/CLI binaries!)
@@ -468,8 +468,8 @@ display_errors = On
 ; The display of errors which occur during PHP's startup sequence are handled
 ; separately from display_errors. PHP's default behavior is to suppress those
 ; errors from clients. Turning the display of startup errors on can be useful in
-; debugging configuration problems. But, it's strongly recommended that you
-; leave this setting off on production servers.
+; debugging configuration problems. We strongly recommend you
+; set this to 'off' for production servers.
 ; Default Value: Off
 ; Development Value: On
 ; Production Value: Off
@@ -608,13 +608,13 @@ html_errors = On
 ; http://php.net/variables-order
 variables_order = "GPCS"
 
-; This directive determines which super global data (G,P,C,E & S) should
-; be registered into the super global array REQUEST. If so, it also determines
-; the order in which that data is registered. The values for this directive are
-; specified in the same manner as the variables_order directive, EXCEPT one.
-; Leaving this value empty will cause PHP to use the value set in the
-; variables_order directive. It does not mean it will leave the super globals
-; array REQUEST empty.
+; This directive determines which super global data (G,P & C) should be
+; registered into the super global array REQUEST. If so, it also determines
+; the order in which that data is registered. The values for this directive
+; are specified in the same manner as the variables_order directive,
+; EXCEPT one. Leaving this value empty will cause PHP to use the value set
+; in the variables_order directive. It does not mean it will leave the super
+; globals array REQUEST empty.
 ; Default Value: None
 ; Development Value: "GP"
 ; Production Value: "GP"
@@ -667,23 +667,40 @@ auto_prepend_file =
 ; http://php.net/auto-append-file
 auto_append_file =
 
-; By default, PHP will output a character encoding using
-; the Content-type: header.  To disable sending of the charset, simply
-; set it to be empty.
+; By default, PHP will output a media type using the Content-Type header. To
+; disable this, simply set it to be empty.
 ;
-; PHP's built-in default is text/html
+; PHP's built-in default media type is set to text/html.
 ; http://php.net/default-mimetype
 default_mimetype = "text/html"
 
-; PHP's default character set is set to empty.
+; PHP's default character set is set to UTF-8.
 ; http://php.net/default-charset
-;default_charset = "UTF-8"
+default_charset = "UTF-8"
+
+; PHP internal character encoding is set to empty.
+; If empty, default_charset is used.
+; http://php.net/internal-encoding
+;internal_encoding =
+
+; PHP input character encoding is set to empty.
+; If empty, default_charset is used.
+; http://php.net/input-encoding
+;input_encoding =
+
+; PHP output character encoding is set to empty.
+; If empty, default_charset is used.
+; mbstring or iconv output handler is used.
+; See also output_buffer.
+; http://php.net/output-encoding
+;output_encoding =
 
 ; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
-; to disable this feature. If post reading is disabled through
-; enable_post_data_reading, $HTTP_RAW_POST_DATA is *NOT* populated.
+; to disable this feature and it will be removed in a future version.
+; If post reading is disabled through enable_post_data_reading,
+; $HTTP_RAW_POST_DATA is *NOT* populated.
 ; http://php.net/always-populate-raw-post-data
-;always_populate_raw_post_data = On
+;always_populate_raw_post_data = -1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
@@ -743,7 +760,7 @@ enable_dl = Off
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
 ; http://php.net/cgi.redirect-status-env
-;cgi.redirect_status_env = 
+;cgi.redirect_status_env =
 
 ; cgi.fix_pathinfo provides *real* PATH_INFO/PATH_TRANSLATED support for CGI.  PHP's
 ; previous behaviour was to set PATH_TRANSLATED to SCRIPT_FILENAME, and to not grok
@@ -767,8 +784,8 @@ enable_dl = Off
 ;fastcgi.logging = 0
 
 ; cgi.rfc2616_headers configuration option tells PHP what type of headers to
-; use when sending HTTP response code. If it's set 0 PHP sends Status: header that
-; is supported by Apache. When this option is set to 1 PHP will send
+; use when sending HTTP response code. If set to 0, PHP sends Status: header that
+; is supported by Apache. When this option is set to 1, PHP will send
 ; RFC2616 compliant header.
 ; Default is zero.
 ; http://php.net/cgi.rfc2616-headers
@@ -871,8 +888,7 @@ default_socket_timeout = 60
 ;extension=php_exif.dll      ; Must be after mbstring as it depends on it
 ;extension=php_mysql.dll
 ;extension=php_mysqli.dll
-;extension=php_oci8.dll      ; Use with Oracle 10gR2 Instant Client
-;extension=php_oci8_11g.dll  ; Use with Oracle 11gR2 Instant Client
+;extension=php_oci8_12c.dll  ; Use with Oracle Database 12c Instant Client
 ;extension=php_openssl.dll
 ;extension=php_pdo_firebird.dll
 ;extension=php_pdo_mysql.dll
@@ -881,7 +897,6 @@ default_socket_timeout = 60
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_sqlite.dll
 ;extension=php_pgsql.dll
-;extension=php_pspell.dll
 ;extension=php_shmop.dll
 
 ; The MIBS data available in the PHP distribution must be installed. 
@@ -929,9 +944,22 @@ cli_server.color = On
 ;filter.default_flags =
 
 [iconv]
-;iconv.input_encoding = ISO-8859-1
-;iconv.internal_encoding = ISO-8859-1
-;iconv.output_encoding = ISO-8859-1
+; Use of this INI entry is deprecated, use global input_encoding instead.
+; If empty, default_charset or input_encoding or iconv.input_encoding is used.
+; The precedence is: default_charset < intput_encoding < iconv.input_encoding
+;iconv.input_encoding =
+
+; Use of this INI entry is deprecated, use global internal_encoding instead.
+; If empty, default_charset or internal_encoding or iconv.internal_encoding is used.
+; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
+;iconv.internal_encoding =
+
+; Use of this INI entry is deprecated, use global output_encoding instead.
+; If empty, default_charset or output_encoding or iconv.output_encoding is used.
+; The precedence is: default_charset < output_encoding < iconv.output_encoding
+; To use an output encoding conversion, iconv's output handler must be set
+; otherwise output encoding conversion cannot be performed.
+;iconv.output_encoding =
 
 [intl]
 ;intl.default_locale =
@@ -939,10 +967,7 @@ cli_server.color = On
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
 ;intl.error_level = E_WARNING
-
-[sqlite]
-; http://php.net/sqlite.assoc-case
-;sqlite.assoc_case = 0
+;intl.use_exceptions = 0
 
 [sqlite3]
 ;sqlite3.extension_dir =
@@ -1367,9 +1392,9 @@ session.save_handler = files
 ;
 ; where N is an integer.  Instead of storing all the session files in
 ; /path, what this will do is use subdirectories N-levels deep, and
-; store the session data in those directories.  This is useful if you
-; or your OS have problems with lots of files in one directory, and is
-; a more efficient layout for servers that handle lots of sessions.
+; store the session data in those directories.  This is useful if
+; your OS has problems with many files in one directory, and is
+; a more efficient layout for servers that handle many sessions.
 ;
 ; NOTE 1: PHP will not create this directory structure automatically.
 ;         You can use the script in the ext/session dir for that purpose.
@@ -1404,7 +1429,7 @@ session.use_cookies = 1
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
 ; the session id. We encourage this operation as it's very helpful in combating
 ; session hijacking when not specifying and managing your own session id. It is
-; not the end all be all of session hijacking defense, but it's a good start.
+; not the be-all and end-all of session hijacking defense, but it's a good start.
 ; http://php.net/session.use-only-cookies
 session.use_only_cookies = 1
 
@@ -1504,7 +1529,7 @@ session.cache_limiter = nocache
 session.cache_expire = 180
 
 ; trans sid support is disabled by default.
-; Use of trans sid may risk your users security.
+; Use of trans sid may risk your users' security.
 ; Use this option with caution.
 ; - User may send URL contains active session ID
 ;   to other person via. email/irc/etc.
@@ -1694,23 +1719,34 @@ mssql.secure_connection = Off
 
 [mbstring]
 ; language for internal character representation.
+; This affects mb_send_mail() and mbstrig.detect_order.
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
+; Use of this INI entry is deprecated, use global internal_encoding instead.
 ; internal/script encoding.
-; Some encoding cannot work as internal encoding.
-; (e.g. SJIS, BIG5, ISO-2022-*)
-; http://php.net/mbstring.internal-encoding
-;mbstring.internal_encoding = UTF-8
+; Some encoding cannot work as internal encoding. (e.g. SJIS, BIG5, ISO-2022-*)
+; If empty, default_charset or internal_encoding or iconv.internal_encoding is used.
+; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
+;mbstring.internal_encoding =
 
+; Use of this INI entry is deprecated, use global input_encoding instead.
 ; http input encoding.
+; mbstring.encoding_traslation = On is needed to use this setting.
+; If empty, default_charset or input_encoding or mbstring.input is used.
+; The precedence is: default_charset < intput_encoding < mbsting.http_input
 ; http://php.net/mbstring.http-input
-;mbstring.http_input = UTF-8
+;mbstring.http_input =
 
-; http output encoding. mb_output_handler must be
-; registered as output buffer to function
+; Use of this INI entry is deprecated, use global output_encoding instead.
+; http output encoding.
+; mb_output_handler must be registered as output buffer to function.
+; If empty, default_charset or output_encoding or mbstring.http_output is used.
+; The precedence is: default_charset < output_encoding < mbstring.http_output
+; To use an output encoding conversion, mbstring's output handler must be set
+; otherwise output encoding conversion cannot be performed.
 ; http://php.net/mbstring.http-output
-;mbstring.http_output = pass
+;mbstring.http_output =
 
 ; enable automatic encoding translation according to
 ; mbstring.internal_encoding setting. Input chars are
@@ -1721,7 +1757,7 @@ mssql.secure_connection = Off
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
-; auto means
+; "auto" detect order is changed according to mbstring.language
 ; http://php.net/mbstring.detect-order
 ;mbstring.detect_order = auto
 
@@ -1742,6 +1778,7 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
+; Default: Off
 ;mbstring.strict_detection = On
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
@@ -1930,6 +1967,24 @@ ldap.max_links = -1
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
 ; absolute path.
 ;curl.cainfo =
+
+[openssl]
+; The location of a Certificate Authority (CA) file on the local filesystem
+; to use when verifying the identity of SSL/TLS peers. Most users should
+; not specify a value for this directive as PHP will attempt to use the
+; OS-managed cert stores in its absence. If specified, this value may still
+; be overridden on a per-stream basis via the "cafile" SSL stream context
+; option.
+;openssl.cafile=
+
+; If openssl.cafile is not specified or if the CA file is not found, the
+; directory pointed to by openssl.capath is searched for a suitable
+; certificate. This value must be a correctly hashed certificate directory.
+; Most users should not specify a value for this directive as PHP will
+; attempt to use the OS-managed cert stores in its absence. If specified,
+; this value may still be overridden on a per-stream basis via the "capath"
+; SSL stream context option.
+;openssl.capath=
 
 ; Local Variables:
 ; tab-width: 4

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -74,11 +74,11 @@ PHP_MINIT_FUNCTION(user_streams);
 
 PHPAPI int php_le_stream_context(TSRMLS_D);
 PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC);
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC);
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_chk TSRMLS_DC);
-PHPAPI int php_copy_file_ctx(char *src, char *dest, int src_chk, php_stream_context *ctx TSRMLS_DC);
-PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC);
-PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC);
+PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC);
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk TSRMLS_DC);
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx TSRMLS_DC);
+PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC);
+PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC);
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
 PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
 
@@ -121,7 +121,7 @@ typedef struct {
 	long default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */
-	char *user_stream_current_filename; /* for simple recursion protection */
+	const char *user_stream_current_filename; /* for simple recursion protection */
 	php_stream_context *default_context;
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -173,5 +173,9 @@ END_EXTERN_C()
 #define ZEND_GENERATOR_RETURN                161
 #define ZEND_FAST_CALL                       162
 #define ZEND_FAST_RET                        163
+#define ZEND_RECV_VARIADIC                   164
+#define ZEND_SEND_UNPACK                     165
+#define ZEND_POW                             166
+#define ZEND_ASSIGN_POW                      167
 
 #endif

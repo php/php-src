@@ -3,7 +3,7 @@ define ("PHP_CLI_SERVER_HOSTNAME", "localhost");
 define ("PHP_CLI_SERVER_PORT", 8964);
 define ("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
 
-function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.php') {
+function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.php', $cmd_args = null) {
 	$php_executable = getenv('TEST_PHP_EXECUTABLE');
 	$doc_root = __DIR__;
 
@@ -18,14 +18,14 @@ function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.ph
 	);
 
 	if (substr(PHP_OS, 0, 3) == 'WIN') {
-		$cmd = "{$php_executable} -t {$doc_root} -n -S " . PHP_CLI_SERVER_ADDRESS;
+		$cmd = "{$php_executable} -t {$doc_root} -n {$cmd_args} -S " . PHP_CLI_SERVER_ADDRESS;
 		if (!is_null($router)) {
 			$cmd .= " {$router}";
 		}
 
 		$handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, array("bypass_shell" => true,  "suppress_errors" => true));
 	} else {
-		$cmd = "exec {$php_executable} -t {$doc_root} -n -S " . PHP_CLI_SERVER_ADDRESS;
+		$cmd = "exec {$php_executable} -t {$doc_root} -n {$cmd_args} -S " . PHP_CLI_SERVER_ADDRESS;
 		if (!is_null($router)) {
 			$cmd .= " {$router}";
 		}

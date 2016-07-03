@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,6 +66,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_acquire, 0, 0, 1)
 	ZEND_ARG_INFO(0, sem_identifier)
+	ZEND_ARG_INFO(0, nowait)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_release, 0, 0, 1)
@@ -298,11 +299,18 @@ PHP_FUNCTION(sem_get)
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	zval *arg_id;
+	zend_bool nowait = 0;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id) == FAILURE) {
-		return;
+	if (acquire) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &arg_id, &nowait) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id) == FAILURE) {
+			return;
+		}
 	}
 
 	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, &arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
@@ -314,11 +322,13 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 
 	sop.sem_num = SYSVSEM_SEM;
 	sop.sem_op  = acquire ? -1 : 1;
-	sop.sem_flg = SEM_UNDO;
+	sop.sem_flg = SEM_UNDO | (nowait ? IPC_NOWAIT : 0);
 
 	while (semop(sem_ptr->semid, &sop, 1) == -1) {
 		if (errno != EINTR) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to %s key 0x%x: %s", acquire ? "acquire" : "release", sem_ptr->key, strerror(errno));
+			if (errno != EAGAIN) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to %s key 0x%x: %s", acquire ? "acquire" : "release", sem_ptr->key, strerror(errno));
+			}
 			RETURN_FALSE;
 		}
 	}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_array.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_smart_str.h"
 #include "zend_interfaces.h"
@@ -274,11 +275,6 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_SplOjectStorage_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_handler_SplObjectStorage;
 
-	if (orig) {
-		spl_SplObjectStorage *other = (spl_SplObjectStorage*)zend_object_store_get_object(orig TSRMLS_CC);
-		spl_object_storage_addall(intern, orig, other TSRMLS_CC);
-	}
-
 	while (parent) {
 		if (parent == spl_ce_SplObjectStorage) {
 			if (class_type != spl_ce_SplObjectStorage) {
@@ -291,6 +287,11 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 		}
 
 		parent = parent->parent;
+	}
+
+	if (orig) {
+		spl_SplObjectStorage *other = (spl_SplObjectStorage*)zend_object_store_get_object(orig TSRMLS_CC);
+		spl_object_storage_addall(intern, orig, other TSRMLS_CC);
 	}
 
 	return retval;
@@ -610,8 +611,24 @@ SPL_METHOD(SplObjectStorage, contains)
 SPL_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long mode = COUNT_NORMAL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mode) == FAILURE) {
+		return;
+	}
+
+	if (mode == COUNT_RECURSIVE) {
+		long ret = zend_hash_num_elements(&intern->storage);
+		HashPosition position;
+		zval *element;
+
+		for (zend_hash_internal_pointer_reset_ex(&intern->storage, &position);
+		     zend_hash_get_current_data_ex(&intern->storage, (void**) &element, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(&intern->storage, &position)) {
+			ret += php_count_recursive(element, mode TSRMLS_CC);
+		}
+
+		RETURN_LONG(ret);
 		return;
 	}
 
@@ -804,7 +821,6 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
 		return;
 	}
 

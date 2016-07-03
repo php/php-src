@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,9 +109,9 @@ PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC
 }
 /* }}} */
 
-static void php_glob_stream_path_split(glob_s_t *pglob, char *path, int get_path, char **p_file TSRMLS_DC) /* {{{ */
+static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int get_path, const char **p_file TSRMLS_DC) /* {{{ */
 {
-	char *pos, *gpath = path;
+	const char *pos, *gpath = path;
 
 	if ((pos = strrchr(path, '/')) != NULL) {
 		path = pos+1;
@@ -141,7 +141,7 @@ static size_t php_glob_stream_read(php_stream *stream, char *buf, size_t count T
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
-	char *path;
+	const char *path;
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count == sizeof(php_stream_dirent) && pglob) {
@@ -206,12 +206,12 @@ php_stream_ops  php_glob_stream_ops = {
 };
 
  /* {{{ php_glob_stream_opener */
-static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *path, char *mode,
+static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const char *path, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	glob_s_t *pglob;
 	int ret;
-	char *tmp, *pos;
+	const char *tmp, *pos;
 
 	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
 		return NULL;

@@ -1,5 +1,5 @@
 --TEST--
-Request #50698_2 (SoapClient should handle wsdls with some incompatiable endpoints -- EDGECASE: Large mix of compatiable and incompatiable endpoints.)
+Request #50698_2 (SoapClient should handle wsdls with some incompatiable endpoints -- EDGECASE: Large mix of compatible and incompatiable endpoints.)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--

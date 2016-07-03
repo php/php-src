@@ -52,19 +52,19 @@ echo "Done\n";
 ?>
 --EXPECTF--
 array(2) {
-  [%u|b%"ID"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"VALUE"]=>
-  %unicode|string%(1) "1"
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 bool(true)
 
 Warning: ocifetchinto():%sORA-01002: %s in %scursors_old.php on line %d
 array(2) {
-  [%u|b%"ID"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"VALUE"]=>
-  %unicode|string%(1) "1"
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 bool(true)
 Done

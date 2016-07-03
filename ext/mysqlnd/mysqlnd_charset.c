@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -418,17 +418,57 @@ static uint mysqlnd_mbcharlen_utf16(unsigned int utf16)
 
 
 /* {{{ utf32 functions */
-static uint
-check_mb_utf32(const char *start __attribute((unused)), const char *end __attribute((unused)))
+static unsigned int check_mb_utf32(const char *start __attribute((unused)), const char *end __attribute((unused)))
 {
 	return 4;
 }
 
 
-static uint
-mysqlnd_mbcharlen_utf32(unsigned int utf32 __attribute((unused)))
+static unsigned int mysqlnd_mbcharlen_utf32(unsigned int utf32 __attribute((unused)))
 {
 	return 4;
+}
+/* }}} */
+
+
+/* {{{ gb18030 functions */
+#define is_gb18030_odd(c)          (0x81 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0xFE)
+#define is_gb18030_even_2(c)       ((0x40 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0x7E) || (0x80 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0xFE))
+#define is_gb18030_even_4(c)       (0x30 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0x39)
+
+
+static unsigned int mysqlnd_mbcharlen_gb18030(unsigned int c)
+{
+	if (c <= 0xFF) {
+		return !is_gb18030_odd(c);
+	}
+	if (c > 0xFFFF || !is_gb18030_odd((c >> 8) & 0xFF)) {
+		return 0;
+	}
+	if (is_gb18030_even_2((c & 0xFF))) {
+	    return 2;
+	}
+	if (is_gb18030_even_4((c & 0xFF))) {
+		return 4;
+	}
+
+	return 0;
+}
+
+
+static unsigned int my_ismbchar_gb18030(const char * start, const char * end)
+{
+	if (end - start <= 1 || !is_gb18030_odd(start[0])) {
+		return 0;
+	}
+
+	if (is_gb18030_even_2(start[1])) {
+		return 2;
+	} else if (end - start > 3 && is_gb18030_even_4(start[1]) && is_gb18030_odd(start[2]) && is_gb18030_even_4(start[3])) {
+		return 4;
+	}
+
+	return 0;
 }
 /* }}} */
 
@@ -643,6 +683,8 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{ 245, UTF8_MB4, UTF8_MB4"_croatian_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{ 246, UTF8_MB4, UTF8_MB4"_unicode_520_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{ 247, UTF8_MB4, UTF8_MB4"_vietnamese_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 248, "gb18030", "gb18030_chinese_ci", 1, 4, "", mysqlnd_mbcharlen_gb18030, my_ismbchar_gb18030},
+	{ 249, "gb18030", "gb18030_bin", 1, 4, "", mysqlnd_mbcharlen_gb18030, my_ismbchar_gb18030},
 
 	{ 254, UTF8_MB3, UTF8_MB3"_general_cs", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{   0, NULL, NULL, 0, 0, NULL, NULL, NULL}

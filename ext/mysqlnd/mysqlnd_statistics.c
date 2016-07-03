@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -153,6 +153,7 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_datetime") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_timestamp") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_string") },
+	{ MYSQLND_STR_W_LEN("proto_binary_fetched_json") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_blob") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_enum") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_set") },

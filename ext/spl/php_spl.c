@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -358,7 +358,7 @@ PHP_FUNCTION(spl_autoload)
 		 * The "scope" is determined by an opcode, if it is ZEND_FETCH_CLASS we know function was called indirectly by
 		 * the Zend engine.
 		 */
-		if (active_opline->opcode != ZEND_FETCH_CLASS) {
+		if (EG(opline_ptr) && active_opline->opcode != ZEND_FETCH_CLASS) {
 			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", class_name);
@@ -669,10 +669,14 @@ PHP_FUNCTION(spl_autoload_unregister)
 	if (SPL_G(autoload_functions)) {
 		if (func_name_len == sizeof("spl_autoload_call")-1 && !strcmp(lc_name, "spl_autoload_call")) {
 			/* remove all */
-			zend_hash_destroy(SPL_G(autoload_functions));
-			FREE_HASHTABLE(SPL_G(autoload_functions));
-			SPL_G(autoload_functions) = NULL;
-			EG(autoload_func) = NULL;
+			if (!SPL_G(autoload_running)) {
+				zend_hash_destroy(SPL_G(autoload_functions));
+				FREE_HASHTABLE(SPL_G(autoload_functions));
+				SPL_G(autoload_functions) = NULL;
+				EG(autoload_func) = NULL;
+			} else {
+				zend_hash_clean(SPL_G(autoload_functions));
+			}
 			success = SUCCESS;
 		} else {
 			/* remove specific */

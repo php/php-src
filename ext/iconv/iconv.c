@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -220,21 +220,52 @@ static char _generic_superset_name[] = ICONV_UCS4_ENCODING;
 #define GENERIC_SUPERSET_NBYTES 4
 /* }}} */
 
-static PHP_INI_MH(OnUpdateStringIconvCharset)
+
+static PHP_INI_MH(OnUpdateInputEncoding)
 {
-	if(new_value_length >= ICONV_CSNMAXLEN) {
+	if (new_value_length >= ICONV_CSNMAXLEN) {
 		return FAILURE;
+	}
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.input_encoding is deprecated");
 	}
 	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 
+
+static PHP_INI_MH(OnUpdateOutputEncoding)
+{
+	if(new_value_length >= ICONV_CSNMAXLEN) {
+		return FAILURE;
+	}
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.output_encoding is deprecated");
+	}
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+
+
+static PHP_INI_MH(OnUpdateInternalEncoding)
+{
+	if(new_value_length >= ICONV_CSNMAXLEN) {
+		return FAILURE;
+	}
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.internal_encoding is deprecated");
+	}
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+
+
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("iconv.input_encoding",    ICONV_INPUT_ENCODING,    PHP_INI_ALL, OnUpdateStringIconvCharset, input_encoding,    zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.output_encoding",   ICONV_OUTPUT_ENCODING,   PHP_INI_ALL, OnUpdateStringIconvCharset, output_encoding,   zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.internal_encoding", ICONV_INTERNAL_ENCODING, PHP_INI_ALL, OnUpdateStringIconvCharset, internal_encoding, zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.input_encoding",    "", PHP_INI_ALL, OnUpdateInputEncoding,    input_encoding,    zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.output_encoding",   "", PHP_INI_ALL, OnUpdateOutputEncoding,   output_encoding,   zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.internal_encoding", "", PHP_INI_ALL, OnUpdateInternalEncoding, internal_encoding, zend_iconv_globals, iconv_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -313,6 +344,40 @@ PHP_MINFO_FUNCTION(miconv)
 }
 /* }}} */
 
+static char *get_internal_encoding(TSRMLS_D) {
+	if (ICONVG(internal_encoding) && ICONVG(internal_encoding)[0]) {
+		return ICONVG(internal_encoding);
+	} else if (PG(internal_encoding) && PG(internal_encoding)[0]) {
+		return PG(internal_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+static char *get_input_encoding(TSRMLS_D) {
+	if (ICONVG(input_encoding) && ICONVG(input_encoding)[0]) {
+		return ICONVG(input_encoding);
+	} else if (PG(input_encoding) && PG(input_encoding)[0]) {
+		return PG(input_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+static char *get_output_encoding(TSRMLS_D) {
+	if (ICONVG(output_encoding) && ICONVG(output_encoding)[0]) {
+		return ICONVG(output_encoding);
+	} else if (PG(output_encoding) && PG(output_encoding)[0]) {
+		return PG(output_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+
 static int php_iconv_output_conflict(const char *handler_name, size_t handler_name_len TSRMLS_DC)
 {
 	if (php_output_get_level(TSRMLS_C)) {
@@ -354,12 +419,12 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 
 		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
 			int len;
-			char *p = strstr(ICONVG(output_encoding), "//");
+			char *p = strstr(get_output_encoding(TSRMLS_C), "//");
 
 			if (p) {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, (int)(p - ICONVG(output_encoding)), ICONVG(output_encoding));
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, (int)(p - get_output_encoding(TSRMLS_C)), get_output_encoding(TSRMLS_C));
 			} else {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, ICONVG(output_encoding));
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, get_output_encoding(TSRMLS_C));
 			}
 			if (content_type && SUCCESS == sapi_add_header(content_type, len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
@@ -370,7 +435,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 
 	if (output_context->in.used) {
 		output_context->out.free = 1;
-		_php_iconv_show_error(php_iconv_string(output_context->in.data, output_context->in.used, &output_context->out.data, &output_context->out.used, ICONVG(output_encoding), ICONVG(internal_encoding)), ICONVG(output_encoding), ICONVG(internal_encoding) TSRMLS_CC);
+		_php_iconv_show_error(php_iconv_string(output_context->in.data, output_context->in.used, &output_context->out.data, &output_context->out.used, get_output_encoding(TSRMLS_C), get_internal_encoding(TSRMLS_C)), get_output_encoding(TSRMLS_C), get_internal_encoding(TSRMLS_C) TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -1987,7 +2052,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
    Returns the character count of str */
 PHP_FUNCTION(iconv_strlen)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset = get_internal_encoding(TSRMLS_C);
 	int charset_len = 0;
 	char *str;
 	int str_len;
@@ -2020,7 +2085,7 @@ PHP_FUNCTION(iconv_strlen)
    Returns specified part of a string */
 PHP_FUNCTION(iconv_substr)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset = get_internal_encoding(TSRMLS_C);
 	int charset_len = 0;
 	char *str;
 	int str_len;
@@ -2060,7 +2125,7 @@ PHP_FUNCTION(iconv_substr)
    Finds position of first occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strpos)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset = get_internal_encoding(TSRMLS_C);
 	int charset_len = 0;
 	char *haystk;
 	int haystk_len;
@@ -2108,7 +2173,7 @@ PHP_FUNCTION(iconv_strpos)
    Finds position of last occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strrpos)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset = get_internal_encoding(TSRMLS_C);
 	int charset_len = 0;
 	char *haystk;
 	int haystk_len;
@@ -2159,7 +2224,7 @@ PHP_FUNCTION(iconv_mime_encode)
 	smart_str retval = {0};
 	php_iconv_err_t err;
 
-	const char *in_charset = ICONVG(internal_encoding);
+	const char *in_charset = get_internal_encoding(TSRMLS_C);
 	const char *out_charset = in_charset;
 	long line_len = 76;
 	const char *lfchars = "\r\n";
@@ -2272,7 +2337,7 @@ PHP_FUNCTION(iconv_mime_decode)
 {
 	char *encoded_str;
 	int encoded_str_len;
-	char *charset = ICONVG(internal_encoding);
+	char *charset = get_internal_encoding(TSRMLS_C);
 	int charset_len = 0;
 	long mode = 0;
 
@@ -2313,7 +2378,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 {
 	const char *encoded_str;
 	int encoded_str_len;
-	char *charset = ICONVG(internal_encoding);
+	char *charset = get_internal_encoding(TSRMLS_C);
 	int charset_len = 0;
 	long mode = 0;
 
@@ -2481,15 +2546,15 @@ PHP_FUNCTION(iconv_get_encoding)
 
 	if (!strcasecmp("all", type)) {
 		array_init(return_value);
-		add_assoc_string(return_value, "input_encoding",    ICONVG(input_encoding), 1);
-		add_assoc_string(return_value, "output_encoding",   ICONVG(output_encoding), 1);
-		add_assoc_string(return_value, "internal_encoding", ICONVG(internal_encoding), 1);
+		add_assoc_string(return_value, "input_encoding",    get_input_encoding(TSRMLS_C), 1);
+		add_assoc_string(return_value, "output_encoding",   get_output_encoding(TSRMLS_C), 1);
+		add_assoc_string(return_value, "internal_encoding", get_internal_encoding(TSRMLS_C), 1);
 	} else if (!strcasecmp("input_encoding", type)) {
-		RETVAL_STRING(ICONVG(input_encoding), 1);
+		RETVAL_STRING(get_input_encoding(TSRMLS_C), 1);
 	} else if (!strcasecmp("output_encoding", type)) {
-		RETVAL_STRING(ICONVG(output_encoding), 1);
+		RETVAL_STRING(get_output_encoding(TSRMLS_C), 1);
 	} else if (!strcasecmp("internal_encoding", type)) {
-		RETVAL_STRING(ICONVG(internal_encoding), 1);
+		RETVAL_STRING(get_internal_encoding(TSRMLS_C), 1);
 	} else {
 		RETURN_FALSE;
 	}

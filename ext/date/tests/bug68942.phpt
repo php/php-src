@@ -6,4 +6,4 @@ $data = unserialize('a:2:{i:0;O:12:"DateTimeZone":2:{s:13:"timezone_type";a:2:{i
 var_dump($data);
 ?>
 --EXPECTF--
-Fatal error: DateTimeZone::__wakeup(): Timezone initialization failed in %s/bug68942.php on line %d
+Fatal error: DateTimeZone::__wakeup(): Timezone initialization failed in %s%ebug68942.php on line %d

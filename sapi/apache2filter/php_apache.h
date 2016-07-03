@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,14 +36,10 @@ typedef struct php_struct {
 	int state;
 	request_rec *r;
 	ap_filter_t *f; /* downstream output filters after the PHP filter. */
-	/* Length of post_data buffer */
-	int post_len;
-	/* Index for reading from buffer */
-	int post_idx;
 	/* stat structure of the current file */	
 	struct stat finfo;
-	/* Buffer for request body filter */
-	char *post_data;
+	/* Set-aside request body bucket brigade */
+	apr_bucket_brigade *post_data;
 	/* Whether or not we've processed PHP in the output filters yet. */
 	int request_processed;
 } php_struct;

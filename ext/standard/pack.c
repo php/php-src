@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,6 +82,13 @@ static int machine_endian_long_map[4];
 static int big_endian_long_map[4];
 static int little_endian_long_map[4];
 
+#if SIZEOF_LONG > 4
+/* Mappings of bytes from quads (64bit) for all endian environments */
+static int machine_endian_longlong_map[8];
+static int big_endian_longlong_map[8];
+static int little_endian_longlong_map[8];
+#endif
+
 /* {{{ php_pack
  */
 static void php_pack(zval **val, int size, int *map, char *output)
@@ -98,8 +105,8 @@ static void php_pack(zval **val, int size, int *map, char *output)
 }
 /* }}} */
 
-/* pack() idea stolen from Perl (implemented formats behave the same as there)
- * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
+/* pack() idea stolen from Perl (implemented formats behave the same as there except J and P)
+ * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  */
 /* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
    Takes one or more arguments and packs them into a binary string according to the format argument */
@@ -199,11 +206,22 @@ PHP_FUNCTION(pack)
 				break;
 
 			/* Use as many args as specified */
-			case 'c':
-			case 'C':
-			case 's':
-			case 'S':
-			case 'i':
+			case 'q':
+			case 'Q':
+			case 'J':
+			case 'P':
+#if SIZEOF_LONG < 8
+					efree(argv);
+					efree(formatcodes);
+					efree(formatargs);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
+					RETURN_FALSE;
+#endif
+			case 'c': 
+			case 'C': 
+			case 's': 
+			case 'S': 
+			case 'i': 
 			case 'I':
 			case 'l':
 			case 'L':
@@ -282,6 +300,15 @@ PHP_FUNCTION(pack)
 			case 'V':
 				INC_OUTPUTPOS(arg,4)		/* 32 bit per arg */
 				break;
+
+#if SIZEOF_LONG > 4
+			case 'q':
+			case 'Q':
+			case 'J':
+			case 'P':
+				INC_OUTPUTPOS(arg,8)		/* 32 bit per arg */
+				break;
+#endif
 
 			case 'f':
 				INC_OUTPUTPOS(arg,sizeof(float))
@@ -437,6 +464,27 @@ PHP_FUNCTION(pack)
 				break;
 			}
 
+#if SIZEOF_LONG > 4
+			case 'q':
+			case 'Q':
+			case 'J':
+			case 'P': {
+				int *map = machine_endian_longlong_map;
+
+				if (code == 'J') {
+					map = big_endian_longlong_map;
+				} else if (code == 'P') {
+					map = little_endian_longlong_map;
+				}
+
+				while (arg-- > 0) {
+					php_pack(argv[currentarg++], 8, map, &output[outputpos]);
+					outputpos += 8;
+				}
+				break;
+			}
+#endif
+
 			case 'f': {
 				float v;
 
@@ -522,7 +570,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
  * chars1, chars2, and ints.
  * Numeric pack types will return numbers, a and A will return strings,
  * f and d will return doubles.
- * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
+ * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  */
 /* {{{ proto array unpack(string format, string input)
    Unpack binary string into named array elements according to format argument */
@@ -636,6 +684,20 @@ PHP_FUNCTION(unpack)
 			case 'V':
 				size = 4;
 				break;
+
+			/* Use 8 bytes of input */
+			case 'q':
+			case 'Q':
+			case 'J':
+			case 'P':
+#if SIZEOF_LONG > 4
+				size = 8;
+				break;
+#else
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
+				zval_dtor(return_value);
+				RETURN_FALSE;
+#endif
 
 			/* Use sizeof(float) bytes of input */
 			case 'f':
@@ -867,6 +929,38 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
+#if SIZEOF_LONG > 4
+					case 'q':
+					case 'Q':
+					case 'J':
+					case 'P': {
+						int issigned = 0;
+						int *map = machine_endian_longlong_map;
+						long v = 0;
+
+						if (type == 'q' || type == 'Q') {
+							issigned = input[inputpos + (machine_little_endian ? 7 : 0)] & 0x80;
+						} else if (type == 'J') {
+							issigned = input[inputpos] & 0x80;
+							map = big_endian_longlong_map;
+						} else if (type == 'P') {
+							issigned = input[inputpos + 7] & 0x80;
+							map = little_endian_longlong_map;
+						}
+
+						v = php_unpack(&input[inputpos], 8, issigned, map);
+
+						if (type == 'q') {
+							v = (signed long int) v;
+						} else {
+							v = (unsigned long int) v;
+						}
+
+						add_assoc_long(return_value, n, v);
+						break;
+					}
+#endif
+
 					case 'f': {
 						float v;
 
@@ -968,6 +1062,33 @@ PHP_MINIT_FUNCTION(pack)
 		little_endian_long_map[1] = 1;
 		little_endian_long_map[2] = 2;
 		little_endian_long_map[3] = 3;
+
+#if SIZEOF_LONG > 4
+		machine_endian_longlong_map[0] = 0;
+		machine_endian_longlong_map[1] = 1;
+		machine_endian_longlong_map[2] = 2;
+		machine_endian_longlong_map[3] = 3;
+		machine_endian_longlong_map[4] = 4;
+		machine_endian_longlong_map[5] = 5;
+		machine_endian_longlong_map[6] = 6;
+		machine_endian_longlong_map[7] = 7;
+		big_endian_longlong_map[0] = 7;
+		big_endian_longlong_map[1] = 6;
+		big_endian_longlong_map[2] = 5;
+		big_endian_longlong_map[3] = 4;
+		big_endian_longlong_map[4] = 3;
+		big_endian_longlong_map[5] = 2;
+		big_endian_longlong_map[6] = 1;
+		big_endian_longlong_map[7] = 0;
+		little_endian_longlong_map[0] = 0;
+		little_endian_longlong_map[1] = 1;
+		little_endian_longlong_map[2] = 2;
+		little_endian_longlong_map[3] = 3;
+		little_endian_longlong_map[4] = 4;
+		little_endian_longlong_map[5] = 5;
+		little_endian_longlong_map[6] = 6;
+		little_endian_longlong_map[7] = 7;
+#endif
 	}
 	else {
 		zval val;
@@ -1000,6 +1121,33 @@ PHP_MINIT_FUNCTION(pack)
 		little_endian_long_map[1] = size - 2;
 		little_endian_long_map[2] = size - 3;
 		little_endian_long_map[3] = size - 4;
+
+#if SIZEOF_LONG > 4
+		machine_endian_longlong_map[0] = size - 8;
+		machine_endian_longlong_map[1] = size - 7;
+		machine_endian_longlong_map[2] = size - 6;
+		machine_endian_longlong_map[3] = size - 5;
+		machine_endian_longlong_map[4] = size - 4;
+		machine_endian_longlong_map[5] = size - 3;
+		machine_endian_longlong_map[6] = size - 2;
+		machine_endian_longlong_map[7] = size - 1;
+		big_endian_longlong_map[0] = size - 8;
+		big_endian_longlong_map[1] = size - 7;
+		big_endian_longlong_map[2] = size - 6;
+		big_endian_longlong_map[3] = size - 5;
+		big_endian_longlong_map[4] = size - 4;
+		big_endian_longlong_map[5] = size - 3;
+		big_endian_longlong_map[6] = size - 2;
+		big_endian_longlong_map[7] = size - 1;
+		little_endian_longlong_map[0] = size - 1;
+		little_endian_longlong_map[1] = size - 2;
+		little_endian_longlong_map[2] = size - 3;
+		little_endian_longlong_map[3] = size - 4;
+		little_endian_longlong_map[4] = size - 5;
+		little_endian_longlong_map[5] = size - 6;
+		little_endian_longlong_map[6] = size - 7;
+		little_endian_longlong_map[7] = size - 8;
+#endif
 	}
 
 	return SUCCESS;

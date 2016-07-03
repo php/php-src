@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -242,6 +242,25 @@ static void _default_lookup_entry(zval *object, char *name, int name_len, zval *
 /* }}} */
 #endif
 
+static void reflection_zval_deep_copy(zval **p)
+{
+	zval *value;
+
+	ALLOC_ZVAL(value);
+	*value = **p;
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		HashTable *ht;
+
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, zend_hash_num_elements(Z_ARRVAL_P(value)), NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(ht, Z_ARRVAL_P(value), (copy_ctor_func_t) reflection_zval_deep_copy, NULL, sizeof(zval *));
+		Z_ARRVAL_P(value) = ht;
+	} else {
+		zval_copy_ctor(value);
+	}
+	INIT_PZVAL(value);
+	*p = value;
+}
 static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC) /* {{{ */
 {
 	zend_uint num_interfaces = ++class_entry->num_interfaces;
@@ -681,8 +700,8 @@ static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
 
 	++offset;
 	while (op < end) {
-		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
-			&& op->op1.num == (long)offset)
+		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT 
+		    || op->opcode == ZEND_RECV_VARIADIC) && op->op1.num == (long)offset)
 		{
 			return op;
 		}
@@ -715,6 +734,9 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	if (arg_info->pass_by_reference) {
 		string_write(str, "&", sizeof("&")-1);
 	}
+	if (arg_info->is_variadic) {
+		string_write(str, "...", sizeof("...")-1);
+	}
 	if (arg_info->name) {
 		string_printf(str, "$%s", arg_info->name);
 	} else {
@@ -725,12 +747,21 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval *zv, zv_copy;
 			int use_copy;
+			zend_class_entry *old_scope;
+
 			string_write(str, " = ", sizeof(" = ")-1);
-			ALLOC_ZVAL(zv);
-			*zv = *precv->op2.zv;
-			zval_copy_ctor(zv);
-			INIT_PZVAL(zv);
-			zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
+			if (IS_CONSTANT_TYPE(Z_TYPE_P(precv->op2.zv))) {
+				ALLOC_ZVAL(zv);
+				*zv = *precv->op2.zv;
+				zval_copy_ctor(zv);
+				INIT_PZVAL(zv);
+				old_scope = EG(scope);
+				EG(scope) = fptr->common.scope;
+				zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
+				EG(scope) = old_scope;
+			} else {
+				zv = precv->op2.zv;
+			}
 			if (Z_TYPE_P(zv) == IS_BOOL) {
 				if (Z_LVAL_P(zv)) {
 					string_write(str, "true", sizeof("true")-1);
@@ -755,7 +786,9 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 					zval_dtor(&zv_copy);
 				}
 			}
-			zval_ptr_dtor(&zv);
+			if (zv != precv->op2.zv) {
+				zval_ptr_dtor(&zv);
+			}
 		}
 	}
 	string_write(str, " ]", sizeof(" ]")-1);
@@ -2579,6 +2612,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 {
 	parameter_reference *param;
 	zend_op *precv;
+	zend_class_entry *old_scope;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2596,11 +2630,22 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
-	if ((Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT
-			&& (Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT_ARRAY) {
-		zval_copy_ctor(return_value);
+	if (!IS_CONSTANT_TYPE(Z_TYPE_P(return_value))) {
+		if (Z_TYPE_P(return_value) != IS_ARRAY) {
+			zval_copy_ctor(return_value);
+		} else {
+			HashTable *ht;
+
+			ALLOC_HASHTABLE(ht);
+			zend_hash_init(ht, zend_hash_num_elements(Z_ARRVAL_P(return_value)), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(ht, Z_ARRVAL_P(return_value), (copy_ctor_func_t) reflection_zval_deep_copy, NULL, sizeof(zval *));
+			Z_ARRVAL_P(return_value) = ht;
+		}
 	}
-	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
+	old_scope = EG(scope);
+	EG(scope) = param->fptr->common.scope;
+	zval_update_constant_ex(&return_value, 0, NULL TSRMLS_CC);
+	EG(scope) = old_scope;
 }
 /* }}} */
 
@@ -2649,6 +2694,22 @@ ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		RETURN_STRINGL(Z_STRVAL_P(precv->op2.zv), Z_STRLEN_P(precv->op2.zv), 1);
 	}
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isVariadic()
+   Returns whether this parameter is a variadic parameter */
+ZEND_METHOD(reflection_parameter, isVariadic)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->is_variadic);
 }
 /* }}} */
 
@@ -3095,6 +3156,14 @@ ZEND_METHOD(reflection_function, isGenerator)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::isVariadic()
+   Returns whether this function is variadic */
+ZEND_METHOD(reflection_function, isVariadic)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VARIADIC);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionFunction::inNamespace()
    Returns whether this function is defined in namespace */
 ZEND_METHOD(reflection_function, inNamespace)
@@ -3387,8 +3456,8 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
-		if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-			zval_update_constant(&prop_copy, (void *) 1 TSRMLS_CC);
+		if (IS_CONSTANT_TYPE(Z_TYPE_P(prop_copy))) {
+			zval_update_constant(&prop_copy, 1 TSRMLS_CC);
 		}
 
 		add_assoc_zval(return_value, key, prop_copy);
@@ -4276,8 +4345,8 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->create_object != NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class that cannot be instantiated without invoking its constructor", ce->name);
+	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ce->name);
 	}
 
 	object_init_ex(return_value, ce);
@@ -5721,6 +5790,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isGenerator, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, isVariadic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
@@ -6023,6 +6093,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isVariadic, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

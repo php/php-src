@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -250,6 +250,7 @@ PHP_FUNCTION(iptcembed)
 			case M_APP13:
 				/* we are going to write a new APP13 marker, so don't output the old one */
 				php_iptc_skip_variable(fp, 0, 0 TSRMLS_CC);    
+				fgetc(fp); /* skip already copied 0xFF byte */
 				php_iptc_read_remaining(fp, spool, poi?&poi:0 TSRMLS_CC);
 				done = 1;
 				break;

@@ -726,7 +726,7 @@
 	</element>
 	<element name="genres">
 		<annotation>
-			<documentation xml:lang="en">Containes genre information where available for the program records.  A program may have more than one genre with different relevence factors.</documentation>
+			<documentation xml:lang="en">Contains genre information where available for the program records.  A program may have more than one genre with different relevance factors.</documentation>
 		</annotation>
 		<complexType>
 			<sequence maxOccurs="unbounded">
@@ -749,7 +749,7 @@
 										</element>
 										<element name="relevance" type="xsd:int">
 											<annotation>
-												<documentation xml:lang="en">A relevence factor that applies to the genre classification for the program.  A relevence factor of 1 indicates that this is the top-level genre under which the program is classified.</documentation>
+												<documentation xml:lang="en">A relevance factor that applies to the genre classification for the program.  A relevance factor of 1 indicates that this is the top-level genre under which the program is classified.</documentation>
 											</annotation>
 										</element>
 									</sequence>

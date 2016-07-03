@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,9 @@
 #include <winbase.h>
 #include <process.h>
 #include <LMCONS.H>
+
+#include "main/php.h"
+#include "ext/standard/md5.h"
 
 #define ACCEL_FILEMAP_NAME "ZendOPcache.SharedMemoryArea"
 #define ACCEL_MUTEX_NAME "ZendOPcache.SharedMemoryMutex"
@@ -74,20 +77,59 @@ static void zend_win_error_message(int type, char *msg, int err)
 	zend_accel_error(type, msg);
 }
 
+/* Backported from 7.0, the way no globals are touched which means win32
+   only where it's essentially needed. */
+#define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_CHAR) ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
+static char *accel_gen_system_id(void)
+{
+	PHP_MD5_CTX context;
+	unsigned char digest[16], c;
+	int i;
+	static char md5str[32];
+	static zend_bool done = 0;
+
+	if (done) {
+		return md5str;
+	}
+
+	PHP_MD5Init(&context);
+	PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
+	PHP_MD5Update(&context, ZEND_EXTENSION_BUILD_ID, sizeof(ZEND_EXTENSION_BUILD_ID)-1);
+	PHP_MD5Update(&context, ZEND_BIN_ID, sizeof(ZEND_BIN_ID)-1);
+	if (strstr(PHP_VERSION, "-dev") != 0) {
+		/* Development versions may be changed from build to build */
+		PHP_MD5Update(&context, __DATE__, sizeof(__DATE__)-1);
+		PHP_MD5Update(&context, __TIME__, sizeof(__TIME__)-1);
+	}
+	PHP_MD5Final(digest, &context);
+	for (i = 0; i < 16; i++) {
+		c = digest[i] >> 4;
+		c = (c <= 9) ? c + '0' : c - 10 + 'a';
+		md5str[i * 2] = c;
+		c = digest[i] &  0x0f;
+		c = (c <= 9) ? c + '0' : c - 10 + 'a';
+		md5str[(i * 2) + 1] = c;
+	}
+
+	done = 1;
+
+	return md5str;
+}
+
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + UNLEN + 4];
+	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 
 	GetUserName(uname, &unsize);
-	snprintf(newname, sizeof(newname) - 1, "%s@%s", name, uname);
+	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, accel_gen_system_id());
 	return newname;
 }
 
 static char *get_mmap_base_file(void)
 {
-	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
+	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 	int l;
@@ -95,7 +137,7 @@ static char *get_mmap_base_file(void)
 	GetTempPath(MAXPATHLEN, windir);
 	GetUserName(uname, &unsize);
 	l = strlen(windir);
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname);
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, accel_gen_system_id());
 	return windir;
 }
 
@@ -205,14 +247,19 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		err = GetLastError();
 		if (ret == ALLOC_FAIL_MAPPING) {
 			/* Mapping failed, wait for mapping object to get freed and retry */
-            CloseHandle(memfile);
+			CloseHandle(memfile);
 			memfile = NULL;
+			if (++map_retries >= MAX_MAP_RETRIES) {
+				break;
+			}
+			zend_shared_alloc_unlock_win32();
 			Sleep(1000 * (map_retries + 1));
+			zend_shared_alloc_lock_win32();
 		} else {
 			zend_shared_alloc_unlock_win32();
 			return ret;
 		}
-	} while (++map_retries < MAX_MAP_RETRIES);
+	} while (1);
 
 	if (map_retries == MAX_MAP_RETRIES) {
 		zend_shared_alloc_unlock_win32();
@@ -266,7 +313,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			GetSystemInfo(&si);
 
 			/* Are we running Vista ? */
-			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
+			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion >= 6) {
 				wanted_mapping_base = vista_mapping_base_set;
 			}
 		} while (0);

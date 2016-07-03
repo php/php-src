@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -311,19 +311,21 @@ static int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MYSQL_RES *p;
 	ulong *ret;
+	uint field_count;
 
 	MAKE_STD_ZVAL(*retval);
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	if (!p || !p->field_count || !(ret = mysql_fetch_lengths(p))) {
+	field_count = mysql_num_fields(p);
+	if (!p || !field_count || !(ret = mysql_fetch_lengths(p))) {
 		ZVAL_NULL(*retval);
 	} else {
 		ulong i;
 
 		array_init(*retval);
 
-		for (i = 0; i < p->field_count; i++) {
+		for (i = 0; i < field_count; i++) {
 			add_index_long(*retval, i, ret[i]);
 		}
 	}

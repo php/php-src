@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,7 +56,7 @@ ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_pt
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 void shutdown_destructors(TSRMLS_D);
-zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC);
+ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC);
 ZEND_API void zend_execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
@@ -71,23 +71,33 @@ ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ulong fetch_type, const char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC);
 
-static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
+static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
 {
 	if (!Z_DELREF_P(zval_ptr)) {
-		TSRMLS_FETCH();
-
 		ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 		GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
 		zval_dtor(zval_ptr);
 		efree_rel(zval_ptr);
 	} else {
-		TSRMLS_FETCH();
-
 		if (Z_REFCOUNT_P(zval_ptr) == 1) {
 			Z_UNSET_ISREF_P(zval_ptr);
 		}
 
 		GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
+	}
+}
+
+static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
+{
+	if (!Z_DELREF_P(zval_ptr)) {
+		ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
+		GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
+		zval_dtor(zval_ptr);
+		efree_rel(zval_ptr);
+	} else {
+		if (Z_REFCOUNT_P(zval_ptr) == 1) {
+			Z_UNSET_ISREF_P(zval_ptr);
+		}
 	}
 }
 
@@ -148,10 +158,10 @@ static zend_always_inline int i_zend_is_true(zval *op)
 	return result;
 }
 
-ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_inline_change(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_no_inline_change(zval **pp, void *arg TSRMLS_DC);
-ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant(zval **pp, zend_bool inline_change TSRMLS_DC);
+ZEND_API int zval_update_constant_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant_no_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC);
+ZEND_API int zval_update_constant_ex(zval **pp, zend_bool inline_change, zend_class_entry *scope TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
 #define ZEND_VM_STACK_PAGE_SIZE ((16 * 1024) - 16)
@@ -295,7 +305,7 @@ static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC
 	while (p != end) {
 		zval *q = (zval *) *(--p);
 		*p = NULL;
-		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC);
+		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC TSRMLS_CC);
 	}
 	if (nested) {
 		EG(argument_stack)->top = p;
@@ -352,6 +362,8 @@ ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_n
 ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
+ZEND_API void zend_fetch_dimension_by_zval(zval **result, zval *container, zval *dim TSRMLS_DC);
+
 #define zendi_zval_copy_ctor(p) zval_copy_ctor(&(p))
 #define zendi_zval_dtor(p) zval_dtor(&(p))
 
@@ -387,7 +399,7 @@ ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const z
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 
 void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC);
-void zend_free_compiled_variables(zend_execute_data *execute_data);
+void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC);
 
 #define CACHED_PTR(num) \
 	EG(active_op_array)->run_time_cache[(num)]

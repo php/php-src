@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -361,14 +361,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	convert_to_string_copy(newval, value_copy);
 
 	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
 
@@ -428,12 +421,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_long(newval);
+	convert_to_long_copy(newval, value_copy);
 
 	standalone = Z_LVAL_P(newval);
     if (standalone > 0) {
@@ -500,14 +488,7 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 		xmlFree((xmlChar *) docp->version );
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	convert_to_string_copy(newval, value_copy);
 
 	docp->version = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
 
@@ -544,12 +525,7 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRML
 	zval value_copy;
 	dom_doc_propsptr doc_prop;
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
+	convert_to_boolean_copy(newval, value_copy);
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
@@ -587,12 +563,7 @@ int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC)
 	zval value_copy;
 	dom_doc_propsptr doc_prop;
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
+	convert_to_boolean_copy(newval, value_copy);
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
@@ -629,12 +600,7 @@ int dom_document_validate_on_parse_write(dom_object *obj, zval *newval TSRMLS_DC
 	zval value_copy;
 	dom_doc_propsptr doc_prop;
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
+	convert_to_boolean_copy(newval, value_copy);
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
@@ -671,12 +637,7 @@ int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC
 	zval value_copy;
 	dom_doc_propsptr doc_prop;
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
+	convert_to_boolean_copy(newval, value_copy);
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
@@ -713,12 +674,7 @@ int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_
 	zval value_copy;
 	dom_doc_propsptr doc_prop;
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
+	convert_to_boolean_copy(newval, value_copy);
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
@@ -755,12 +711,7 @@ int dom_document_recover_write(dom_object *obj, zval *newval TSRMLS_DC)
 	zval value_copy;
 	dom_doc_propsptr doc_prop;
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
+	convert_to_boolean_copy(newval, value_copy);
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
@@ -797,12 +748,7 @@ int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_D
 	zval value_copy;
 	dom_doc_propsptr doc_prop;
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
+	convert_to_boolean_copy(newval, value_copy);
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
@@ -861,14 +807,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 		xmlFree((xmlChar *) docp->URL);
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	convert_to_string_copy(newval, value_copy);
 
 	docp->URL = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
 

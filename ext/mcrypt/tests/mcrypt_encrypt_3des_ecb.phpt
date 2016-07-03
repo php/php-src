@@ -20,7 +20,7 @@ $cipher = MCRYPT_TRIPLEDES;
 $mode = MCRYPT_MODE_ECB;
 $data = b'This is the secret message which must be encrypted';
 
-// tripledes uses keys upto 192 bits (24 bytes)
+// tripledes uses keys up to 192 bits (24 bytes)
 $keys = array(
    b'12345678', 
    b'12345678901234567890', 
@@ -34,7 +34,7 @@ foreach ($keys as $key) {
    var_dump(bin2hex(mcrypt_encrypt($cipher, $key, $data, $mode)));
 }
 
-$key = b'12345678';  
+$key = b'123456789012345678901234';
 $ivs = array(
    b'1234', 
    b'12345678', 
@@ -56,27 +56,31 @@ foreach ($ivs as $iv) {
 --- testing different key lengths
 
 key length=8
-string(112) "05c9c4cafb9937d950bdae60ee3abcb8d9f3e1f1fac8acaaa5b11d70b7ca02f3b76d447ab3dd85a4b5df5dedb4b4654595ccdf6da97fa93f"
+
+Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
+string(0) ""
 
 key length=20
-string(112) "0fc7045c4fb4dbcf44baf9ed15ab40331a42ff0632318a16b12ed5873f02e7945e4f63f408d6849534cbb7419c22c8854aaa85e0e05a28e6"
+
+Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
+string(0) ""
 
 key length=24
 string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 
 key length=26
 
-Warning: mcrypt_encrypt(): Size of key is too large for this algorithm in %s on line %d
-string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
+Warning: mcrypt_encrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
+string(0) ""
 
 --- testing different iv lengths
 
 iv length=4
-string(112) "05c9c4cafb9937d950bdae60ee3abcb8d9f3e1f1fac8acaaa5b11d70b7ca02f3b76d447ab3dd85a4b5df5dedb4b4654595ccdf6da97fa93f"
+string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 
 iv length=8
-string(112) "05c9c4cafb9937d950bdae60ee3abcb8d9f3e1f1fac8acaaa5b11d70b7ca02f3b76d447ab3dd85a4b5df5dedb4b4654595ccdf6da97fa93f"
+string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 
 iv length=9
-string(112) "05c9c4cafb9937d950bdae60ee3abcb8d9f3e1f1fac8acaaa5b11d70b7ca02f3b76d447ab3dd85a4b5df5dedb4b4654595ccdf6da97fa93f"
+string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 ===DONE===

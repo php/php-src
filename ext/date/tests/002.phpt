@@ -3,7 +3,7 @@ strtotime() function
 --SKIPIF--
 <?php
 if (!@putenv("TZ=EST5") || getenv("TZ") != 'EST5') {
-	die("skip unable to change TZ enviroment variable\n");
+	die("skip unable to change TZ environment variable\n");
 }
 ?>
 --FILE--

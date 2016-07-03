@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,11 @@
 #include "main/php_open_temporary_file.h"
 #include "zend_API.h"
 #include "zend_ini.h"
-#include "TSRM/tsrm_virtual_cwd.h"
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+# include "zend_virtual_cwd.h"
+#else
+# include "TSRM/tsrm_virtual_cwd.h"
+#endif
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
@@ -388,6 +392,11 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 {
 	Bucket *p, *q;
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+	/* empty string */
+	CG(interned_empty_string) = accel_new_interned_string("", sizeof(""), 0 TSRMLS_CC);
+#endif
+
 	/* function table hash keys */
 	p = CG(function_table)->pListHead;
 	while (p) {
@@ -473,7 +482,11 @@ static inline void accel_restart_enter(TSRMLS_D)
 #ifdef ZEND_WIN32
 	INCREMENT(restart_in);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
+# else
 	static const FLOCK_STRUCTURE(restart_in_progress, F_WRLCK, SEEK_SET, 2, 1);
+#endif
 
 	if (fcntl(lock_file, F_SETLK, &restart_in_progress) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(+1):  %s (%d)", strerror(errno), errno);
@@ -488,7 +501,11 @@ static inline void accel_restart_leave(TSRMLS_D)
 	ZCSG(restart_in_progress) = 0;
 	DECREMENT(restart_in);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
+# else
 	static const FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
+# endif
 
 	ZCSG(restart_in_progress) = 0;
 	if (fcntl(lock_file, F_SETLK, &restart_finished) == -1) {
@@ -526,7 +543,11 @@ static inline void accel_activate_add(TSRMLS_D)
 #ifdef ZEND_WIN32
 	INCREMENT(mem_usage);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
+# else
 	static const FLOCK_STRUCTURE(mem_usage_lock, F_RDLCK, SEEK_SET, 1, 1);
+# endif
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_lock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
@@ -543,7 +564,11 @@ static inline void accel_deactivate_sub(TSRMLS_D)
 		ZCG(counted) = 0;
 	}
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
+# else
 	static const FLOCK_STRUCTURE(mem_usage_unlock, F_UNLCK, SEEK_SET, 1, 1);
+# endif
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(-1):  %s (%d)", strerror(errno), errno);
@@ -556,7 +581,11 @@ static inline void accel_unlock_all(TSRMLS_D)
 #ifdef ZEND_WIN32
 	accel_deactivate_sub(TSRMLS_C);
 #else
+# ifdef _AIX
+	static FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
+# else
 	static const FLOCK_STRUCTURE(mem_usage_unlock_all, F_UNLCK, SEEK_SET, 0, 0);
+# endif
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock_all) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
@@ -1133,6 +1162,10 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
+	if (!zend_accel_script_optimize(new_persistent_script TSRMLS_CC)) {
+		return new_persistent_script;
+	}
+
 	if (!compact_persistent_script(new_persistent_script)) {
 		return new_persistent_script;
 	}
@@ -1694,17 +1727,23 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 {
 	cwd_state new_state;
+#if ZEND_EXTENSION_API_NO < PHP_5_6_X_API_NO
 	char *real_path;
+#endif
 	char *cwd;
 	int cwd_len;
 
 	/* realpath("") returns CWD */
 	if (!*path) {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		new_state.cwd = (char*)emalloc(1);
+#else
 		new_state.cwd = (char*)malloc(1);
 		if (!new_state.cwd) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
 			return NULL;
 		}
+#endif
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	    if ((cwd = accel_getcwd(&cwd_len TSRMLS_CC)) != NULL) {
@@ -1712,18 +1751,26 @@ static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 		}
 	} else if (!IS_ABSOLUTE_PATH(path, path_len) &&
 	    (cwd = accel_getcwd(&cwd_len TSRMLS_CC)) != NULL) {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		new_state.cwd = estrndup(cwd, cwd_len);
+#else
 		new_state.cwd = zend_strndup(cwd, cwd_len);
 		if (!new_state.cwd) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
 			return NULL;
 		}
+#endif
 		new_state.cwd_length = cwd_len;
 	} else {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		new_state.cwd = (char*)emalloc(1);
+#else
 		new_state.cwd = (char*)malloc(1);
 		if (!new_state.cwd) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
 			return NULL;
 		}
+#endif
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
@@ -1732,14 +1779,22 @@ static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 # define CWD_REALPATH 2
 #endif
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		efree(new_state.cwd);
+#else
 		free(new_state.cwd);
+#endif
 		return NULL;
 	}
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+	return new_state.cwd;
+#else
 	real_path = emalloc(new_state.cwd_length + 1);
 	memcpy(real_path, new_state.cwd, new_state.cwd_length + 1);
 	free(new_state.cwd);
 	return real_path;
+#endif
 }
 
 static char *accel_php_resolve_path(const char *filename, int filename_length, const char *path TSRMLS_DC)
@@ -2172,8 +2227,10 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 #else
 		switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
 #endif
-			case IS_ARRAY:
-			case IS_CONSTANT_ARRAY: {
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
+			case IS_CONSTANT_ARRAY:
+#endif
+			case IS_ARRAY: {
 					TSRMLS_FETCH();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
@@ -2333,6 +2390,11 @@ static void accel_deactivate(void)
 	 */
 	TSRMLS_FETCH();
 
+	if (ZCG(cwd)) {
+		efree(ZCG(cwd));
+		ZCG(cwd) = NULL;
+	}
+
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
@@ -2346,12 +2408,6 @@ static void accel_deactivate(void)
 		zend_accel_fast_shutdown(TSRMLS_C);
 	}
 #endif
-
-	if (ZCG(cwd)) {
-		efree(ZCG(cwd));
-		ZCG(cwd) = NULL;
-	}
-
 }
 
 static int accelerator_remove_cb(zend_extension *element1, zend_extension *element2)
@@ -2397,6 +2453,7 @@ static inline int accel_find_sapi(TSRMLS_D)
 		"apache2filter",
 		"apache2handler",
 		"litespeed",
+		"uwsgi",
 		NULL
 	};
 	const char **sapi_name;
@@ -2771,31 +2828,18 @@ void accelerator_shm_read_unlock(TSRMLS_D)
 	}
 }
 
-static void accel_op_array_handler(zend_op_array *op_array)
-{
-	TSRMLS_FETCH();
-
-	if (ZCG(enabled) &&
-	    accel_startup_ok &&
-	    ZCSG(accelerator_enabled) &&
-	    !ZSMMG(memory_exhausted) &&
-	    !ZCSG(restart_pending)) {
-		zend_optimizer(op_array TSRMLS_CC);
-	}
-}
-
 ZEND_EXT_API zend_extension zend_extension_entry = {
 	ACCELERATOR_PRODUCT_NAME,               /* name */
 	ACCELERATOR_VERSION,					/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2015",				/* copyright */
+	"Copyright (c) 1999-2016",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */
 	accel_deactivate,						/* per-script deactivation */
 	NULL,									/* message handler */
-	accel_op_array_handler,					/* op_array handler */
+	NULL,									/* op_array handler */
 	NULL,									/* extended statement handler */
 	NULL,									/* extended fcall begin handler */
 	NULL,									/* extended fcall end handler */

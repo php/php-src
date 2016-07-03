@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,14 @@
 #include "JSON_parser.h"
 #include "php_json.h"
 #include <zend_exceptions.h>
+
+#include <float.h>
+#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
+#define NUM_BUF_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
+#else
+#define NUM_BUF_SIZE 1080
+#endif
+
 
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
@@ -103,6 +111,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_PRESERVE_ZERO_FRACTION", PHP_JSON_PRESERVE_ZERO_FRACTION, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
@@ -420,10 +429,17 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 				smart_str_append_long(buf, p);
 				return;
 			} else if (type == IS_DOUBLE && !zend_isinf(d) && !zend_isnan(d)) {
-				char *tmp;
-				int l = spprintf(&tmp, 0, "%.*k", (int) EG(precision), d);
-				smart_str_appendl(buf, tmp, l);
-				efree(tmp);
+				char num[NUM_BUF_SIZE];
+				int l;
+
+				php_gcvt(d, EG(precision), '.', 'e', (char *)num);
+				l = strlen(num);
+				if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && l < NUM_BUF_SIZE - 2) {
+					num[l++] = '.';
+					num[l++] = '0';
+					num[l] = '\0';
+				}
+				smart_str_appendl(buf, num, l);
 				return;
 			}
 		}
@@ -620,14 +636,19 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 
 		case IS_DOUBLE:
 			{
-				char *d = NULL;
+				char num[NUM_BUF_SIZE];
 				int len;
 				double dbl = Z_DVAL_P(val);
 
 				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-					len = spprintf(&d, 0, "%.*k", (int) EG(precision), dbl);
-					smart_str_appendl(buf, d, len);
-					efree(d);
+					php_gcvt(dbl, EG(precision), '.', 'e', (char *)num);
+					len = strlen(num);
+					if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < NUM_BUF_SIZE - 2) {
+						num[len++] = '.';
+						num[len++] = '0';
+						num[len] = '\0';
+					}
+					smart_str_appendl(buf, num, len);
 				} else {
 					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
 					smart_str_appendc(buf, '0');
@@ -710,14 +731,14 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 
 		RETVAL_NULL();
 		if (trim_len == 4) {
-			if (!strncasecmp(trim, "null", trim_len)) {
+			if (!strncmp(trim, "null", trim_len)) {
 				/* We need to explicitly clear the error because its an actual NULL and not an error */
 				jp->error_code = PHP_JSON_ERROR_NONE;
 				RETVAL_NULL();
-			} else if (!strncasecmp(trim, "true", trim_len)) {
+			} else if (!strncmp(trim, "true", trim_len)) {
 				RETVAL_BOOL(1);
 			}
-		} else if (trim_len == 5 && !strncasecmp(trim, "false", trim_len)) {
+		} else if (trim_len == 5 && !strncmp(trim, "false", trim_len)) {
 			RETVAL_BOOL(0);
 		}
 

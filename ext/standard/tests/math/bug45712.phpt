@@ -1,7 +1,5 @@
 --TEST--
 Bug #45712 (NaN/INF comparison)
---XFAIL--
-Bug 45712 not fixed yet.
 --FILE--
 <?php
 
@@ -66,7 +64,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
+bool(true)
 bool(false)
 bool(false)
 bool(false)

@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 
 try {
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar');
+	$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory3.phar');
 	$phar->buildFromDirectory('files', new stdClass);
 } catch (Exception $e) {
 	var_dump(get_class($e));
@@ -19,7 +19,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/buildfromiterator.phar');
+unlink(dirname(__FILE__) . '/buildfromdirectory3.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

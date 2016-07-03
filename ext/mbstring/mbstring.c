@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -402,10 +402,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_kana, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_variables, 1, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_variables, 0, 0, 3)
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, from)
-	ZEND_ARG_INFO(1, ...)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_numericentity, 0, 0, 2)
@@ -600,6 +600,34 @@ static sapi_post_entry php_post_entries[] = {
 #ifdef COMPILE_DL_MBSTRING
 ZEND_GET_MODULE(mbstring)
 #endif
+
+static char *get_internal_encoding(TSRMLS_D) {
+	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
+		return PG(internal_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+static char *get_input_encoding(TSRMLS_D) {
+	if (PG(input_encoding) && PG(input_encoding)[0]) {
+		return PG(input_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+static char *get_output_encoding(TSRMLS_D) {
+	if (PG(output_encoding) && PG(output_encoding)[0]) {
+		return PG(output_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
 
 /* {{{ allocators */
 static void *_php_mb_allocators_malloc(unsigned int sz)
@@ -1236,6 +1264,11 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 		if (MBSTRG(http_input_list)) {
 			pefree(MBSTRG(http_input_list), 1);
 		}
+		if (SUCCESS == php_mb_parse_encoding_list(get_input_encoding(TSRMLS_C), strlen(get_input_encoding(TSRMLS_C))+1, &list, &size, 1 TSRMLS_CC)) {
+			MBSTRG(http_input_list) = list;
+			MBSTRG(http_input_list_size) = size;
+			return SUCCESS;
+		}
 		MBSTRG(http_input_list) = NULL;
 		MBSTRG(http_input_list_size) = 0;
 		return SUCCESS;
@@ -1251,6 +1284,10 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 	MBSTRG(http_input_list) = list;
 	MBSTRG(http_input_list_size) = size;
 
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.http_input is deprecated");
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1261,20 +1298,27 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 	const mbfl_encoding *encoding;
 
 	if (new_value == NULL || new_value_length == 0) {
-		MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
-		MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
-		return SUCCESS;
+		encoding = mbfl_name2encoding(get_output_encoding(TSRMLS_C));
+		if (!encoding) {
+			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
+			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
+			return SUCCESS;
+		}
+	} else {
+		encoding = mbfl_name2encoding(new_value);
+		if (!encoding) {
+			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
+			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
+			return FAILURE;
+		}
 	}
-
-	encoding = mbfl_name2encoding(new_value);
-	if (!encoding) {
-		MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
-		MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
-		return FAILURE;
-	}
-
 	MBSTRG(http_output_encoding) = encoding;
 	MBSTRG(current_http_output_encoding) = encoding;
+
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.http_output is deprecated");
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1285,47 +1329,17 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 	const mbfl_encoding *encoding;
 
 	if (!new_value || new_value_length == 0 || !(encoding = mbfl_name2encoding(new_value))) {
-  		switch (MBSTRG(language)) {
-  			case mbfl_no_language_uni:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
-  				break;
-  			case mbfl_no_language_japanese:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_jp);
-  				break;
-  			case mbfl_no_language_korean:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_kr);
-  				break;
-  			case mbfl_no_language_simplified_chinese:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_cn);
-  				break;
-  			case mbfl_no_language_traditional_chinese:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_tw);
-  				break;
-  			case mbfl_no_language_russian:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_koi8r);
-  				break;
-  			case mbfl_no_language_german:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_15);
-  				break;
-  			case mbfl_no_language_armenian:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_armscii8);
-  				break;
-  			case mbfl_no_language_turkish:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_9);
-  				break;
-  			default:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_1);
-  				break;
-  		}
-  	}
+		/* falls back to UTF-8 if an unknown encoding name is given */
+		encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
+	}
 	MBSTRG(internal_encoding) = encoding;
 	MBSTRG(current_internal_encoding) = encoding;
 #if HAVE_MBREGEX
 	{
 		const char *enc_name = new_value;
 		if (FAILURE == php_mb_regex_set_default_mbctype(enc_name TSRMLS_CC)) {
-			/* falls back to EUC-JP if an unknown encoding name is given */
-			enc_name = "EUC-JP";
+			/* falls back to UTF-8 if an unknown encoding name is given */
+			enc_name = "UTF-8";
 			php_mb_regex_set_default_mbctype(enc_name TSRMLS_CC);
 		}
 		php_mb_regex_set_mbctype(new_value TSRMLS_CC);
@@ -1338,12 +1352,20 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.internal_encoding is deprecated");
+	}
+
 	if (OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
-	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN
-			|| stage == PHP_INI_STAGE_RUNTIME) {
-		return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
+
+	if (stage & (PHP_INI_STAGE_STARTUP | PHP_INI_STAGE_SHUTDOWN | PHP_INI_STAGE_RUNTIME)) {
+		if (new_value_length) {
+			return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
+		} else {
+			return _php_mb_ini_mbstring_internal_encoding_set(get_internal_encoding(TSRMLS_C), strlen(get_internal_encoding(TSRMLS_C))+1 TSRMLS_CC);
+		}
 	} else {
 		/* the corresponding mbstring globals needs to be set according to the
 		 * ini value in the later stage because it never falls back to the
@@ -1450,8 +1472,8 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("mbstring.language", "neutral", PHP_INI_ALL, OnUpdate_mbstring_language)
 	PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
-	PHP_INI_ENTRY("mbstring.http_input", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_input)
-	PHP_INI_ENTRY("mbstring.http_output", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_output)
+	PHP_INI_ENTRY("mbstring.http_input", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_input)
+	PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
 	STD_PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding, internal_encoding_name, zend_mbstring_globals, mbstring_globals)
 	PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
 	STD_PHP_INI_ENTRY("mbstring.func_overload", "0", 
@@ -2162,8 +2184,10 @@ PHP_FUNCTION(mb_output_handler)
  
  	/* feed the string */
  	mbfl_string_init(&string);
- 	string.no_language = MBSTRG(language);
- 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
+	/* these are not needed. convd has encoding info.
+	string.no_language = MBSTRG(language);
+	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
+	*/
  	string.val = (unsigned char *)arg_string;
  	string.len = arg_string_len;
  	mbfl_buffer_converter_feed(MBSTRG(outconv), &string);

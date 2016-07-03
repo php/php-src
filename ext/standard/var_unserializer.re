@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,6 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
-#include "Zend/zend_interfaces.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1024
@@ -413,12 +412,8 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	elements = parse_iv2((*p) + 2, p);
 
 	(*p) += 2;
-
-	/* The internal class check here is a BC fix only, userspace classes implementing the
-	Serializable interface have eventually an inconsistent behavior at this place when
-	unserialized from a manipulated string. Additionaly the interal classes can possibly
-	crash PHP so they're still disabled here. */
-	if (ce->serialize == NULL || ce->unserialize == zend_user_unserialize || (ZEND_INTERNAL_CLASS != ce->type && ce->create_object == NULL)) {
+	
+	if (ce->serialize == NULL) {
 		object_init_ex(*rval, ce);
 	} else {
 		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string
@@ -622,6 +617,11 @@ use_double:
 		return 0;
 	}
 
+	if (*(YYCURSOR + 1) != ';') {
+		*p = YYCURSOR + 1;
+		return 0;
+	}
+
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
@@ -648,6 +648,12 @@ use_double:
 	if (*(YYCURSOR) != '"') {
 		efree(str);
 		*p = YYCURSOR;
+		return 0;
+	}
+
+	if (*(YYCURSOR + 1) != ';') {
+		efree(str);
+		*p = YYCURSOR + 1;
 		return 0;
 	}
 

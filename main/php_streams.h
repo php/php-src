@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -131,31 +131,31 @@ typedef struct _php_stream_ops  {
 
 typedef struct _php_stream_wrapper_ops {
 	/* open/create a wrapped stream */
-	php_stream *(*stream_opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
+	php_stream *(*stream_opener)(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 	/* close/destroy a wrapped stream */
 	int (*stream_closer)(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC);
 	/* stat a wrapped stream */
 	int (*stream_stat)(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	/* stat a URL */
-	int (*url_stat)(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
+	int (*url_stat)(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
 	/* open a "directory" stream */
-	php_stream *(*dir_opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
+	php_stream *(*dir_opener)(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 	const char *label;
 
 	/* delete a file */
-	int (*unlink)(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
+	int (*unlink)(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC);
 
 	/* rename a file */
-	int (*rename)(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC);
+	int (*rename)(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context TSRMLS_DC);
 
 	/* Create/Remove directory */
-	int (*stream_mkdir)(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
-	int (*stream_rmdir)(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
+	int (*stream_mkdir)(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
+	int (*stream_rmdir)(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC);
 	/* Metadata handling */
-	int (*stream_metadata)(php_stream_wrapper *wrapper, char *url, int options, void *value, php_stream_context *context TSRMLS_DC);
+	int (*stream_metadata)(php_stream_wrapper *wrapper, const char *url, int options, void *value, php_stream_context *context TSRMLS_DC);
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
@@ -242,7 +242,7 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
-#define php_stream_get_resource_id(stream)		(stream)->rsrc_id
+#define php_stream_get_resource_id(stream)		((php_stream *)(stream))->rsrc_id
 #if ZEND_DEBUG
 /* use this to tell the stream that it is OK if we don't explicitly close it */
 # define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
@@ -325,26 +325,26 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, 
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL TSRMLS_CC)
 
 #define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen) TSRMLS_CC)
-PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC);
+PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, const char *delim, size_t delim_len TSRMLS_DC);
 
 /* CAREFUL! this is equivalent to puts NOT fputs! */
-PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
+PHPAPI int _php_stream_puts(php_stream *stream, const char *buf TSRMLS_DC);
 #define php_stream_puts(stream, buf)	_php_stream_puts((stream), (buf) TSRMLS_CC)
 
 PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 #define php_stream_stat(stream, ssb)	_php_stream_stat((stream), (ssb) TSRMLS_CC)
 
-PHPAPI int _php_stream_stat_path(char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
+PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
 #define php_stream_stat_path(path, ssb)	_php_stream_stat_path((path), 0, (ssb), NULL TSRMLS_CC)
 #define php_stream_stat_path_ex(path, flags, ssb, context)	_php_stream_stat_path((path), (flags), (ssb), (context) TSRMLS_CC)
 
-PHPAPI int _php_stream_mkdir(char *path, int mode, int options, php_stream_context *context TSRMLS_DC);
+PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context TSRMLS_DC);
 #define php_stream_mkdir(path, mode, options, context)	_php_stream_mkdir(path, mode, options, context TSRMLS_CC)
 
-PHPAPI int _php_stream_rmdir(char *path, int options, php_stream_context *context TSRMLS_DC);
+PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *context TSRMLS_DC);
 #define php_stream_rmdir(path, options, context)	_php_stream_rmdir(path, options, context TSRMLS_CC)
 
-PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHPAPI php_stream *_php_stream_opendir(const char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
 #define php_stream_opendir(path, options, context)	_php_stream_opendir((path), (options), (context) STREAMS_CC TSRMLS_CC)
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC);
 #define php_stream_readdir(dirstream, dirent)	_php_stream_readdir((dirstream), (dirent) TSRMLS_CC)
@@ -354,7 +354,7 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 PHPAPI int php_stream_dirent_alphasort(const char **a, const char **b);
 PHPAPI int php_stream_dirent_alphasortr(const char **a, const char **b);
 
-PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_stream_context *context,
+PHPAPI int _php_stream_scandir(const char *dirname, char **namelist[], int flags, php_stream_context *context,
 			int (*compare) (const char **a, const char **b) TSRMLS_DC);
 #define php_stream_scandir(dirname, namelist, context, compare) _php_stream_scandir((dirname), (namelist), 0, (context), (compare) TSRMLS_CC)
 
@@ -544,13 +544,13 @@ void php_shutdown_stream_hashes(TSRMLS_D);
 PHP_RSHUTDOWN_FUNCTION(streams);
 
 BEGIN_EXTERN_C()
-PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
-PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
-PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
-PHPAPI int php_unregister_url_stream_wrapper_volatile(char *protocol TSRMLS_DC);
-PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC);
-PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC);
+PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
+PHPAPI int php_unregister_url_stream_wrapper(const char *protocol TSRMLS_DC);
+PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
+PHPAPI int php_unregister_url_stream_wrapper_volatile(const char *protocol TSRMLS_DC);
+PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options TSRMLS_DC);
+PHPAPI const char *php_stream_locate_eol(php_stream *stream, const char *buf, size_t buf_len TSRMLS_DC);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)

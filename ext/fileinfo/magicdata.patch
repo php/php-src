@@ -1,33 +1,8 @@
-Patches applied to file 5.14 sources tree before generating magic.mgc
+Patches applied to file 5.17 sources tree before generating magic.mgc
 and before running create_data_file.php to create data_file.c.
 
 
 
-From ef2329cf71acb59204dd981e2c6cce6c81fe467c Mon Sep 17 00:00:00 2001
-From: Christos Zoulas <christos@zoulas.com>
-Date: Mon, 25 Mar 2013 14:06:55 +0000
-Subject: [PATCH] limit to 100 repetitions to avoid excessive backtracking
- Carsten Wolff
-
----
- magic/Magdir/commands | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/magic/Magdir/commands b/magic/Magdir/commands
-index 67c3eee..4a7d8dd 100644
---- a/magic/Magdir/commands
-+++ b/magic/Magdir/commands
-@@ -49,7 +49,7 @@
- !:mime	text/x-awk
- 0	string/wt	#!\ /usr/bin/awk	awk script text executable
- !:mime	text/x-awk
--0	regex		=^\\s*BEGIN\\s*[{]	awk script text
-+0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
- 
- # AT&T Bell Labs' Plan 9 shell
- 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
--- 
-1.8.5.5
 From 0b478f445b6b7540b58af5d1fe583fa9e48fd745 Mon Sep 17 00:00:00 2001
 From: Christos Zoulas <christos@zoulas.com>
 Date: Wed, 28 May 2014 19:52:36 +0000
@@ -81,3 +56,163 @@ index 26b2869..bcd0f43 100644
 -- 
 2.0.3
 
+From 71d04468a5777fe43064af02f06d74cb60feafab Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Andreas=20K=C3=B6hler?= <andi5.py@gmx.net>
+Date: Sat, 14 Jun 2014 03:04:28 +0200
+Subject: [PATCH] Fix regex in msooxml to avoid matching other archives.
+
+---
+ magic/Magdir/msooxml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/magic/Magdir/msooxml b/magic/Magdir/msooxml
+index c908b71..5ff3760 100644
+--- a/magic/Magdir/msooxml
++++ b/magic/Magdir/msooxml
+@@ -16,7 +16,7 @@
+ 0		string		PK\003\004
+ !:strength +10
+ # make sure the first file is correct
+->0x1E		regex		\[Content_Types\]\.xml|_rels/\.rels
++>0x1E		regex		\\[Content_Types\\]\\.xml|_rels/\\.rels
+ # skip to the second local file header
+ # since some documents include a 520-byte extra field following the file
+ # header, we need to scan for the next header
+-- 
+2.0.0
+
+From f2750e17d784dd6b21f7649965d2bd0605bfd471 Mon Sep 17 00:00:00 2001
+From: Christos Zoulas <christos@zoulas.com>
+Date: Tue, 25 Feb 2014 20:28:16 +0000
+Subject: [PATCH] comment out, too weak magic
+
+---
+ magic/Magdir/filesystems | 81 ++++++++++++++++++++++++------------------------
+ 1 file changed, 41 insertions(+), 40 deletions(-)
+
+diff --git a/magic/Magdir/filesystems b/magic/Magdir/filesystems
+index 5624de0..a25e16a 100644
+--- a/magic/Magdir/filesystems
++++ b/magic/Magdir/filesystems
+@@ -1,5 +1,5 @@
+ #------------------------------------------------------------------------------
+-# $File: filesystems,v 1.84 2013/10/24 15:51:07 christos Exp $
++# $File: filesystems,v 1.85 2013/11/19 23:54:05 christos Exp $
+ # filesystems:  file(1) magic for different filesystems
+ #
+ 0	name	partid  
+@@ -1870,9 +1870,10 @@
+ 
+ # all FAT12 (strength=70) floppies with sectorsize 512 added by Joerg Jenderek at Jun 2013
+ # http://en.wikipedia.org/wiki/File_Allocation_Table#Exceptions
+-512		ubelong&0xE0ffff00	0xE0ffff00		
++# Too Weak.
++#512		ubelong&0xE0ffff00	0xE0ffff00		
+ # without valid Media descriptor in place of BPB, cases with are done at other places
+->21		ubyte			<0xE5			floppy with old FAT filesystem
++#>21		ubyte			<0xE5			floppy with old FAT filesystem
+ # but valid Media descriptor at begin of FAT
+ #>>512		ubyte			=0xed			720k
+ #>>512		ubyte			=0xf0			1440k
+@@ -1880,64 +1881,64 @@
+ #>>512		ubyte			=0xf9			1220k
+ #>>512		ubyte			=0xfa			320k
+ #>>512		ubyte			=0xfb			640k
+->>512		ubyte			=0xfc			180k
++#>>512		ubyte			=0xfc			180k
+ # look like an an old DOS directory entry
+->>>0xA0E	ubequad			0			
+->>>>0xA00	ubequad			!0			
+-!:mime application/x-ima
+->>512		ubyte			=0xfd			
++#>>>0xA0E	ubequad			0			
++#>>>>0xA00	ubequad			!0			
++#!:mime application/x-ima
++#>>512		ubyte			=0xfd			
+ # look for 2nd FAT at different location to distinguish between 360k and 500k
+->>>0x600	ubelong&0xE0ffff00	0xE0ffff00		360k
++#>>>0x600	ubelong&0xE0ffff00	0xE0ffff00		360k
+ #>>>0x500	ubelong&0xE0ffff00	0xE0ffff00		500k
+->>>0xA0E	ubequad			0			
+-!:mime application/x-ima
+->>512		ubyte			=0xfe			
+->>>0x400	ubelong&0xE0ffff00	0xE0ffff00		160k
+->>>>0x60E	ubequad			0			
+->>>>>0x600	ubequad			!0			
+-!:mime application/x-ima
++#>>>0xA0E	ubequad			0			
++#!:mime application/x-ima
++#>>512		ubyte			=0xfe			
++#>>>0x400	ubelong&0xE0ffff00	0xE0ffff00		160k
++#>>>>0x60E	ubequad			0			
++#>>>>>0x600	ubequad			!0			
++#!:mime application/x-ima
+ #>>>0xC00	ubelong&0xE0ffff00	0xE0ffff00		1200k
+->>512		ubyte			=0xff			320k
+->>>0x60E	ubequad			0			
+->>>>0x600	ubequad			!0			
+-!:mime application/x-ima
+->>512		ubyte			x			\b, Media descriptor 0x%x
++#>>512		ubyte			=0xff			320k
++#>>>0x60E	ubequad			0			
++#>>>>0x600	ubequad			!0			
++#!:mime application/x-ima
++#>>512		ubyte			x			\b, Media descriptor 0x%x
+ # without x86 jump instruction
+->>0		ulelong&0x804000E9	!0x000000E9		
++#>>0		ulelong&0x804000E9	!0x000000E9		
+ # assembler instructions: CLI;MOV SP,1E7;MOV AX;07c0;MOV 	
+->>>0	ubequad				0xfabce701b8c0078e	\b, MS-DOS 1.12 bootloader
++#>>>0	ubequad				0xfabce701b8c0078e	\b, MS-DOS 1.12 bootloader
+ # IOSYS.COM+MSDOS.COM
+->>>>0xc4	use			2xDOS-filename
+->>0		ulelong&0x804000E9	=0x000000E9	
++#>>>>0xc4	use			2xDOS-filename
++#>>0		ulelong&0x804000E9	=0x000000E9	
+ # only x86 short jump instruction found
+->>>0		ubyte			=0xEB
+->>>>1		ubyte			x			\b, code offset 0x%x+2
++#>>>0		ubyte			=0xEB
++#>>>>1		ubyte			x			\b, code offset 0x%x+2
+ # http://thestarman.pcministry.com/DOS/ibm100/Boot.htm
+ # assembler instructions: CLI;MOV AX,CS;MOV DS,AX;MOV DX,0		
+->>>>(1.b+2)	ubequad			0xfa8cc88ed8ba0000	\b, PC-DOS 1.0 bootloader 
++#>>>>(1.b+2)	ubequad			0xfa8cc88ed8ba0000	\b, PC-DOS 1.0 bootloader 
+ # ibmbio.com+ibmdos.com
+->>>>>0x176	use			DOS-filename
+->>>>>0x181	ubyte			x			\b+
+->>>>>0x182	use			DOS-filename
++#>>>>>0x176	use			DOS-filename
++#>>>>>0x181	ubyte			x			\b+
++#>>>>>0x182	use			DOS-filename
+ # http://thestarman.pcministry.com/DOS/ibm110/Boot.htm
+ # assembler instructions: CLI;MOV AX,CS;MOV DS,AX;XOR DX,DX;MOV		
+->>>>(1.b+2)	ubequad			0xfa8cc88ed833d28e	\b, PC-DOS 1.1 bootloader 
++#>>>>(1.b+2)	ubequad			0xfa8cc88ed833d28e	\b, PC-DOS 1.1 bootloader 
+ # ibmbio.com+ibmdos.com
+->>>>>0x18b	use			DOS-filename
+->>>>>0x196	ubyte			x			\b+
+->>>>>0x197	use			DOS-filename
++#>>>>>0x18b	use			DOS-filename
++#>>>>>0x196	ubyte			x			\b+
++#>>>>>0x197	use			DOS-filename
+ # http://en.wikipedia.org/wiki/Zenith_Data_Systems
+ # assembler instructions: MOV BX,07c0;MOV SS,BX;MOV SP,01c6		
+->>>>(1.b+2)	ubequad			0xbbc0078ed3bcc601	\b, Zenith Data Systems MS-DOS 1.25 bootloader
++#>>>>(1.b+2)	ubequad			0xbbc0078ed3bcc601	\b, Zenith Data Systems MS-DOS 1.25 bootloader
+ # IO.SYS+MSDOS.SYS
+->>>>>0x20	use			2xDOS-filename
++#>>>>>0x20	use			2xDOS-filename
+ # http://en.wikipedia.org/wiki/Corona_Data_Systems
+ # assembler instructions: MOV AX,CS;MOV DS,AX;CLI;MOV SS,AX;		
+->>>>(1.b+2)	ubequad			0x8cc88ed8fa8ed0bc	\b, MS-DOS 1.25 bootloader
++#>>>>(1.b+2)	ubequad			0x8cc88ed8fa8ed0bc	\b, MS-DOS 1.25 bootloader
+ # IO.SYS+MSDOS.SYS
+->>>>>0x69	use			2xDOS-filename
++#>>>>>0x69	use			2xDOS-filename
+ # assembler instructions: CLI;PUSH CS;POP SS;MOV SP,7c00;		
+->>>>(1.b+2)	ubequad			0xfa0e17bc007cb860	\b, MS-DOS 2.11 bootloader
++#>>>>(1.b+2)	ubequad			0xfa0e17bc007cb860	\b, MS-DOS 2.11 bootloader
+ # defect IO.SYS+MSDOS.SYS ?
+ #>>>>>0x162	use			2xDOS-filename
+ 

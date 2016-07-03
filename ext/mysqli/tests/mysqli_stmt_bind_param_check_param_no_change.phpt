@@ -21,9 +21,9 @@ require_once('skipifconnectfailure.inc');
 
 	echo "Test 1:\n";
 	$stmt = $link->prepare("SELECT ? FOO");
-	var_dump($foo); // here you can see the bar member var beeing a string
+	var_dump($foo); // here you can see the bar member var being a string
 	$stmt->bind_param("s", $foo->bar);
-	var_dump($foo); // this will show $foo->bar beeing a reference string
+	var_dump($foo); // this will show $foo->bar being a reference string
 	$stmt->bind_result($one);
 	$stmt->execute();
 	$stmt->fetch();

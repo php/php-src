@@ -27,7 +27,7 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 $cipher = MCRYPT_TRIPLEDES;
-$key = b'string_val';
+$key = b"string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 $mode = MCRYPT_ENCRYPT;
 $iv = b'01234567';
 

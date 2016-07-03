@@ -37,14 +37,13 @@
 
 
 
-ZIP_EXTERN(struct zip_file *)
-zip_fopen_encrypted(struct zip *za, const char *fname, int flags,
-		    const char *password)
+ZIP_EXTERN struct zip_file *
+zip_fopen_encrypted(struct zip *za, const char *fname, zip_flags_t flags, const char *password)
 {
-    int idx;
+    zip_int64_t idx;
 
     if ((idx=zip_name_locate(za, fname, flags)) < 0)
 	return NULL;
 
-    return zip_fopen_index_encrypted(za, idx, flags, password);
+    return zip_fopen_index_encrypted(za, (zip_uint64_t)idx, flags, password);
 }

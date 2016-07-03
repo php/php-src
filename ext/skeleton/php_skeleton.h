@@ -20,15 +20,6 @@ extern zend_module_entry extname_module_entry;
 #include "TSRM.h"
 #endif
 
-PHP_MINIT_FUNCTION(extname);
-PHP_MSHUTDOWN_FUNCTION(extname);
-PHP_RINIT_FUNCTION(extname);
-PHP_RSHUTDOWN_FUNCTION(extname);
-PHP_MINFO_FUNCTION(extname);
-
-PHP_FUNCTION(confirm_extname_compiled);	/* For testing, remove later. */
-/* __function_declarations_here__ */
-
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     

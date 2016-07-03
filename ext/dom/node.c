@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -352,14 +352,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-			if (newval->type != IS_STRING) {
-				if(Z_REFCOUNT_P(newval) > 1) {
-					value_copy = *newval;
-					zval_copy_ctor(&value_copy);
-					newval = &value_copy;
-				}
-				convert_to_string(newval);
-			}
+			convert_to_string_copy(newval, value_copy);
 			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 			if (newval == &value_copy) {
 				zval_dtor(newval);
@@ -794,14 +787,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			if (newval->type != IS_STRING) {
-				if(Z_REFCOUNT_P(newval) > 1) {
-					value_copy = *newval;
-					zval_copy_ctor(&value_copy);
-					newval = &value_copy;
-				}
-				convert_to_string(newval);
-			}
+			convert_to_string_copy(newval, value_copy);
 			prefix = Z_STRVAL_P(newval);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
@@ -942,6 +928,22 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
+	xmlNode *nodep = dom_object_get_node(obj);
+	zval value_copy;
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
+	convert_to_string_copy(newval, value_copy);
+	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
+	xmlNodeSetContent(nodep, (xmlChar *) "");
+	xmlNodeAddContent(nodep, Z_STRVAL_P(newval));
+	if (newval == &value_copy) {
+		zval_dtor(newval);
+	}
+
 	return SUCCESS;
 }
 

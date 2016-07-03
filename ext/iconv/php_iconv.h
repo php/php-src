@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,15 +79,9 @@ ZEND_END_MODULE_GLOBALS(iconv)
 #endif
 
 #ifdef HAVE_IBM_ICONV
-# define ICONV_INPUT_ENCODING "ISO8859-1"
-# define ICONV_OUTPUT_ENCODING "ISO8859-1"
-# define ICONV_INTERNAL_ENCODING "ISO8859-1"
 # define ICONV_ASCII_ENCODING "IBM-850"
 # define ICONV_UCS4_ENCODING "UCS-4"
 #else
-# define ICONV_INPUT_ENCODING "ISO-8859-1"
-# define ICONV_OUTPUT_ENCODING "ISO-8859-1"
-# define ICONV_INTERNAL_ENCODING "ISO-8859-1"
 # define ICONV_ASCII_ENCODING "ASCII"
 # define ICONV_UCS4_ENCODING "UCS-4LE"
 #endif

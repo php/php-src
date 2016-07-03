@@ -201,12 +201,9 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		umask(saved_umask);
 
-		if (wp->socket_uid != -1 || wp->socket_gid != -1) {
-			if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
-				zlog(ZLOG_SYSERROR, "failed to chown() the socket '%s'", wp->config->listen_address);
-				close(sock);
-				return -1;
-			}
+		if (0 > fpm_unix_set_socket_premissions(wp, path)) {
+			close(sock);
+			return -1;
 		}
 	}
 
@@ -300,6 +297,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 
 	if ((status = getaddrinfo(addr, port_str, &hints, &servinfo)) != 0) {
 		zlog(ZLOG_ERROR, "getaddrinfo: %s\n", gai_strerror(status));
+		free(dup_address);
 		return -1;
 	}
 

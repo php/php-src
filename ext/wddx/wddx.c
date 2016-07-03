@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,8 +109,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_value, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_vars, 0, 0, 1)
-	ZEND_ARG_INFO(0, var_name)
-	ZEND_ARG_INFO(0, ...)
+	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_start, 0, 0, 0)
@@ -123,8 +122,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_add_vars, 0, 0, 2)
 	ZEND_ARG_INFO(0, packet_id)
-	ZEND_ARG_INFO(0, var_name)
-	ZEND_ARG_INFO(0, ...)
+	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_deserialize, 0, 0, 1)
@@ -414,7 +412,7 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var TSRMLS_DC)
 
 		php_wddx_add_chunk_ex(packet, buf, buf_len);
 
-		efree(buf);
+		str_efree(buf);
 	}
 	php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 }
@@ -640,7 +638,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name
 		snprintf(tmp_buf, name_esc_len + sizeof(WDDX_VAR_S), WDDX_VAR_S, name_esc);
 		php_wddx_add_chunk(packet, tmp_buf);
 		efree(tmp_buf);
-		efree(name_esc);
+		str_efree(name_esc);
 	}
 
 	switch(Z_TYPE_P(var)) {
@@ -836,6 +834,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 
 		if (atts) for (i = 0; atts[i]; i++) {
 			if (!strcmp(atts[i], EL_NAME) && atts[++i] && atts[i][0]) {
+				if (stack->varname) efree(stack->varname);
 				stack->varname = estrdup(atts[i]);
 				break;
 			}

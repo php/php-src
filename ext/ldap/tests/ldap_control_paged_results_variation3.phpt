@@ -12,10 +12,10 @@ require_once('skipifbindfailure.inc');
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
-$dn = "dc=my-domain,dc=com";
-$filter = "(cn=*)";
+$dn = "$base";
+$filter = "(cn=user*)";
 $cookie = '';
 var_dump(
 	ldap_control_paged_result($link, 2, true, $cookie),
@@ -33,7 +33,7 @@ var_dump(
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 bool(true)
@@ -55,7 +55,7 @@ array(3) {
     ["count"]=>
     int(1)
     ["dn"]=>
-    string(28) "cn=userA,dc=my-domain,dc=com"
+    string(%d) "cn=userA,%s"
   }
   [1]=>
   array(4) {
@@ -71,7 +71,7 @@ array(3) {
     ["count"]=>
     int(1)
     ["dn"]=>
-    string(28) "cn=userB,dc=my-domain,dc=com"
+    string(%d) "cn=userB,%s"
   }
 }
 bool(true)
@@ -94,7 +94,7 @@ array(2) {
     ["count"]=>
     int(1)
     ["dn"]=>
-    string(37) "cn=userC,cn=userB,dc=my-domain,dc=com"
+    string(%d) "cn=userC,cn=userB,%s"
   }
 }
 ===DONE===

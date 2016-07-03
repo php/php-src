@@ -1,6 +1,6 @@
 /*
   zip_error.c -- struct zip_error helper functions
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -42,6 +42,9 @@
 void
 _zip_error_clear(struct zip_error *err)
 {
+    if (err == NULL)
+	return;
+
     err->zip_err = ZIP_ER_OK;
     err->sys_err = 0;
 }
@@ -49,7 +52,7 @@ _zip_error_clear(struct zip_error *err)
 
 
 void
-_zip_error_copy(struct zip_error *dst, struct zip_error *src)
+_zip_error_copy(struct zip_error *dst, const struct zip_error *src)
 {
     dst->zip_err = src->zip_err;
     dst->sys_err = src->sys_err;
@@ -67,7 +70,7 @@ _zip_error_fini(struct zip_error *err)
 
 
 void
-_zip_error_get(struct zip_error *err, int *zep, int *sep)
+_zip_error_get(const struct zip_error *err, int *zep, int *sep)
 {
     if (zep)
 	*zep = err->zip_err;

@@ -12,7 +12,7 @@ include "connect.inc";
 
 $link = ldap_connect($host, $port);
 
-$dn = "dc=my-domain,dc=com";
+$dn = "dc=not-found,$base";
 $filter = "(dc=*)";
 
 $result = ldap_search();

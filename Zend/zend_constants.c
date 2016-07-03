@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -25,7 +25,7 @@
 #include "zend_variables.h"
 #include "zend_operators.h"
 #include "zend_globals.h"
-
+#include "zend_API.h"
 
 void free_zend_constant(zend_constant *c)
 {
@@ -38,9 +38,7 @@ void free_zend_constant(zend_constant *c)
 
 void copy_zend_constant(zend_constant *c)
 {
-	if (!IS_INTERNED(c->name)) {
-		c->name = zend_strndup(c->name, c->name_len - 1);
-	}
+	c->name = str_strndup(c->name, c->name_len - 1);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	}
@@ -119,42 +117,12 @@ void zend_register_standard_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_IGNORE_ARGS", DEBUG_BACKTRACE_IGNORE_ARGS, CONST_PERSISTENT | CONST_CS);
 	/* true/false constants */
 	{
-		zend_constant c;
-	
-		c.flags = CONST_PERSISTENT | CONST_CT_SUBST;
-		c.module_number = 0;
-
-		c.name = zend_strndup(ZEND_STRL("TRUE"));
-		c.name_len = sizeof("TRUE");
-		c.value.value.lval = 1;
-		c.value.type = IS_BOOL;
-		zend_register_constant(&c TSRMLS_CC);
-		
-		c.name = zend_strndup(ZEND_STRL("FALSE"));
-		c.name_len = sizeof("FALSE");
-		c.value.value.lval = 0;
-		c.value.type = IS_BOOL;
-		zend_register_constant(&c TSRMLS_CC);
-
-		c.name = zend_strndup(ZEND_STRL("NULL"));
-		c.name_len = sizeof("NULL");
-		c.value.type = IS_NULL;
-		zend_register_constant(&c TSRMLS_CC);
-
-		c.flags = CONST_PERSISTENT | CONST_CS;
-
-		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
-		c.name_len = sizeof("ZEND_THREAD_SAFE");
-		c.value.value.lval = ZTS_V;
-		c.value.type = IS_BOOL;
-		zend_register_constant(&c TSRMLS_CC);
-
-		c.name = zend_strndup(ZEND_STRL("ZEND_DEBUG_BUILD"));
-		c.name_len = sizeof("ZEND_DEBUG_BUILD");
-		c.value.value.lval = ZEND_DEBUG;
-		c.value.type = IS_BOOL;
-		zend_register_constant(&c TSRMLS_CC);
+		REGISTER_MAIN_BOOL_CONSTANT("TRUE", 1, CONST_PERSISTENT | CONST_CT_SUBST);
+		REGISTER_MAIN_BOOL_CONSTANT("FALSE", 0, CONST_PERSISTENT | CONST_CT_SUBST);
+		REGISTER_MAIN_BOOL_CONSTANT("ZEND_THREAD_SAFE", ZTS_V, CONST_PERSISTENT | CONST_CS);
+		REGISTER_MAIN_BOOL_CONSTANT("ZEND_DEBUG_BUILD", ZEND_DEBUG, CONST_PERSISTENT | CONST_CS);
 	}
+	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT | CONST_CT_SUBST);
 }
 
 
@@ -175,13 +143,35 @@ void clean_non_persistent_constants(TSRMLS_D)
 	}
 }
 
+ZEND_API void zend_register_null_constant(const char *name, uint name_len, int flags, int module_number TSRMLS_DC)
+{
+	zend_constant c;
+	
+	ZVAL_NULL(&c.value);
+	c.flags = flags;
+	c.name = zend_strndup(name, name_len-1);
+	c.name_len = name_len;
+	c.module_number = module_number;
+	zend_register_constant(&c TSRMLS_CC);
+}
+
+ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_bool bval, int flags, int module_number TSRMLS_DC)
+{
+	zend_constant c;
+	
+	ZVAL_BOOL(&c.value, bval);
+	c.flags = flags;
+	c.name = zend_strndup(name, name_len-1);
+	c.name_len = name_len;
+	c.module_number = module_number;
+	zend_register_constant(&c TSRMLS_CC);
+}
 
 ZEND_API void zend_register_long_constant(const char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
-	c.value.type = IS_LONG;
-	c.value.value.lval = lval;
+	ZVAL_LONG(&c.value, lval);
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -194,8 +184,7 @@ ZEND_API void zend_register_double_constant(const char *name, uint name_len, dou
 {
 	zend_constant c;
 	
-	c.value.type = IS_DOUBLE;
-	c.value.value.dval = dval;
+	ZVAL_DOUBLE(&c.value, dval);
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -208,9 +197,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 {
 	zend_constant c;
 	
-	c.value.type = IS_STRING;
-	c.value.value.str.val = strval;
-	c.value.value.str.len = strlen;
+	ZVAL_STRINGL(&c.value, strval, strlen, 0);
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -421,7 +408,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		efree(lcname);
 		if(found_const) {
 			*result = c->value;
-			zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
+			zval_update_constant_ex(&result, 1, NULL TSRMLS_CC);
 			zval_copy_ctor(result);
 			Z_SET_REFCOUNT_P(result, 1);
 			Z_UNSET_ISREF_P(result);
@@ -436,7 +423,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		retval = 0;
 finish:
 		if (retval) {
-			zval_update_constant_ex(ret_constant, (void*)1, ce TSRMLS_CC);
+			zval_update_constant_ex(ret_constant, 1, ce TSRMLS_CC);
 			*result = **ret_constant;
 			zval_copy_ctor(result);
 			INIT_PZVAL(result);
@@ -485,7 +472,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	char *lowercase_name = NULL;
 	char *name;
 	int ret = SUCCESS;
-	ulong chash = 0;
+	ulong chash;
 
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);
@@ -497,23 +484,18 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		zend_str_tolower(lowercase_name, c->name_len-1);
 		lowercase_name = (char*)zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 		name = lowercase_name;
-		chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;
 	} else {
 		char *slash = strrchr(c->name, '\\');
-		if(slash) {
+		if (slash) {
 			lowercase_name = estrndup(c->name, c->name_len-1);
 			zend_str_tolower(lowercase_name, slash-c->name);
 			lowercase_name = (char*)zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 			name = lowercase_name;
-			
-			chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;
 		} else {
 			name = c->name;
 		}
 	}
-	if (chash == 0) {
-		chash = zend_hash_func(name, c->name_len);
-	}
+	chash = str_hash(name, c->name_len-1);
 
 	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
 	if ((c->name_len == sizeof("__COMPILER_HALT_OFFSET__")
@@ -532,8 +514,8 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		}
 		ret = FAILURE;
 	}
-	if (lowercase_name && !IS_INTERNED(lowercase_name)) {
-		efree(lowercase_name);
+	if (lowercase_name) {
+		str_efree(lowercase_name);
 	}
 	return ret;
 }

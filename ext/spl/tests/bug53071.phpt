@@ -12,7 +12,7 @@ function LimitedScope()
 	$myA = new myClass();
 	$myB = new SplObjectStorage();
 	$myC = new myClass();
-	$myC->member = $myA; // myC has a referece to myA
+	$myC->member = $myA; // myC has a reference to myA
 	$myB->Attach($myC);  // myB attaches myC
 	$myA->member = $myB; // myA has myB, comleting the cycle
 }

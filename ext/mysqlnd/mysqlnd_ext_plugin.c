@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -66,6 +66,44 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result
 		return NULL;
 	}
 	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_plugin_get_plugin_result_unbuffered_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_unbuffered_data(const MYSQLND_RES_UNBUFFERED * result, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_result_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!result || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES_UNBUFFERED) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_plugin_get_plugin_result_buffered_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_zval(const MYSQLND_RES_BUFFERED_ZVAL * result, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_result_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!result || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES_BUFFERED_ZVAL) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
+/* {{{ _mysqlnd_plugin_get_plugin_result_buffered_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_c(const MYSQLND_RES_BUFFERED_C * result, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_result_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!result || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES_BUFFERED_C) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
@@ -157,6 +195,42 @@ PHPAPI void
 mysqlnd_result_set_methods(struct st_mysqlnd_res_methods * methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_res) = *methods;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_result_unbuffered_get_methods */
+PHPAPI struct st_mysqlnd_result_unbuffered_methods *
+mysqlnd_result_unbuffered_get_methods()
+{
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_unbuffered);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_result_unbuffered_set_methods */
+PHPAPI void
+mysqlnd_result_unbuffered_set_methods(struct st_mysqlnd_result_unbuffered_methods * methods)
+{
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_unbuffered) = *methods;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_result_buffered_get_methods */
+PHPAPI struct st_mysqlnd_result_buffered_methods *
+mysqlnd_result_buffered_get_methods()
+{
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_buffered);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_result_buffered_set_methods */
+PHPAPI void
+mysqlnd_result_buffered_set_methods(struct st_mysqlnd_result_buffered_methods * methods)
+{
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_buffered) = *methods;
 }
 /* }}} */
 

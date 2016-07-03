@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,7 +108,18 @@ static void zend_ini_init_string(zval *result)
 */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
-	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+	int length;
+
+	if (Z_TYPE_P(op1) != IS_STRING) {
+		zval copy;
+		MAKE_COPY_ZVAL(&op1, &copy);
+		convert_to_string(&copy);
+		Z_STRVAL_P(op1) = zend_strndup(Z_STRVAL(copy), Z_STRLEN(copy));
+		Z_STRLEN_P(op1) = Z_STRLEN(copy);
+		zval_dtor(&copy);
+	}
+
+	length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 
 	Z_STRVAL_P(result) = (char *) realloc(Z_STRVAL_P(op1), length+1);
 	memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
@@ -213,7 +224,7 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 	zend_file_handle_dtor(fh TSRMLS_CC);
 
 	shutdown_ini_scanner(TSRMLS_C);
-	
+
 	if (retval == 0) {
 		return SUCCESS;
 	} else {
@@ -268,6 +279,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %token TC_QUOTED_STRING
 %token BOOL_TRUE
 %token BOOL_FALSE
+%token NULL_NULL
 %token END_OF_LINE
 %token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
 %left '|' '&' '^'
@@ -294,7 +306,7 @@ statement:
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
 			free(Z_STRVAL($1));
-			free(Z_STRVAL($3));
+			zval_internal_dtor(&$3);
 		}
 	|	TC_OFFSET option_offset ']' '=' string_or_value {
 #if DEBUG_CFG_PARSER
@@ -302,8 +314,12 @@ statement:
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
 			free(Z_STRVAL($1));
-			free(Z_STRVAL($2));
-			free(Z_STRVAL($5));
+			if (Z_TYPE($2) == IS_STRING) {
+				free(Z_STRVAL($2));
+			} else {
+				zval_dtor(&$2);
+			}
+			zval_internal_dtor(&$5);
 		}
 	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); free(Z_STRVAL($1)); }
 	|	END_OF_LINE
@@ -318,6 +334,7 @@ string_or_value:
 		expr							{ $$ = $1; }
 	|	BOOL_TRUE						{ $$ = $1; }
 	|	BOOL_FALSE						{ $$ = $1; }
+	|	NULL_NULL						{ $$ = $1; }
 	|	END_OF_LINE						{ zend_ini_init_string(&$$); }
 ;
 

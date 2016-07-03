@@ -1,6 +1,6 @@
 /*
   zip_filerange_crc.c -- compute CRC32 for a range of a file
-  Copyright (C) 2008 Dieter Baron and Thomas Klausner
+  Copyright (C) 2008-2015 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -56,13 +56,13 @@ _zip_filerange_crc(FILE *fp, off_t start, off_t len, uLong *crcp,
     }
     
     while (len > 0) {
-	n = len > BUFSIZE ? BUFSIZE : len;
-	if ((n=fread(buf, 1, n, fp)) <= 0) {
+	n = len > BUFSIZE ? BUFSIZE : (size_t)len;
+	if ((n=fread(buf, 1, n, fp)) == 0) {
 	    _zip_error_set(errp, ZIP_ER_READ, errno);
 	    return -1;
 	}
 
-	*crcp = crc32(*crcp, buf, n);
+	*crcp = crc32(*crcp, buf, (uInt)n);
 
 	len-= n;
     }

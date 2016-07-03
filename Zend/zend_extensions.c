@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -99,6 +99,14 @@ int zend_load_extension(const char *path)
 	           (!new_extension->build_id_check || new_extension->build_id_check(ZEND_EXTENSION_BUILD_ID) != SUCCESS)) {
 		fprintf(stderr, "Cannot load %s - it was built with configuration %s, whereas running engine is %s\n",
 					new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+		DL_UNLOAD(handle);
+		return FAILURE;
+	} else if (zend_get_extension(new_extension->name)) {
+		fprintf(stderr, "Cannot load %s - extension already loaded\n", new_extension->name);
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef PHP_WIN32
 		fflush(stderr);

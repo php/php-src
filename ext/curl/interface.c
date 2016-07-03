@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -638,7 +638,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_BUFFERSIZE);
 	REGISTER_CURL_CONSTANT(CURLOPT_CAINFO);
 	REGISTER_CURL_CONSTANT(CURLOPT_CAPATH);
-	REGISTER_CURL_CONSTANT(CURLOPT_CLOSEPOLICY);
 	REGISTER_CURL_CONSTANT(CURLOPT_CONNECTTIMEOUT);
 	REGISTER_CURL_CONSTANT(CURLOPT_COOKIE);
 	REGISTER_CURL_CONSTANT(CURLOPT_COOKIEFILE);
@@ -727,13 +726,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_VERBOSE);
 	REGISTER_CURL_CONSTANT(CURLOPT_WRITEFUNCTION);
 	REGISTER_CURL_CONSTANT(CURLOPT_WRITEHEADER);
-
-	/* Constants effecting the way CURLOPT_CLOSEPOLICY works */
-	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_CALLBACK);
-	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_LEAST_RECENTLY_USED);
-	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_LEAST_TRAFFIC);
-	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_OLDEST);
-	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_SLOWEST);
 
 	/* */
 	REGISTER_CURL_CONSTANT(CURLE_ABORTED_BY_CALLBACK);
@@ -839,6 +831,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLM_INTERNAL_ERROR);
 	REGISTER_CURL_CONSTANT(CURLM_OK);
 	REGISTER_CURL_CONSTANT(CURLM_OUT_OF_MEMORY);
+#if LIBCURL_VERSION_NUM >= 0x072001 /* Available since 7.32.1 */
+	REGISTER_CURL_CONSTANT(CURLM_ADDED_ALREADY);
+#endif
 
 	/* Curl proxy constants */
 	REGISTER_CURL_CONSTANT(CURLPROXY_HTTP);
@@ -1830,7 +1825,7 @@ static void alloc_curl_handle(php_curl **ch)
 
 	zend_llist_init(&(*ch)->to_free->str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
 	zend_llist_init(&(*ch)->to_free->post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
-	(*ch)->safe_upload = 0; /* for now, for BC reason we allow unsafe API */
+	(*ch)->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
 
 	(*ch)->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init((*ch)->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -1934,7 +1929,10 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
 
-	cainfo = INI_STR("curl.cainfo");
+	cainfo = INI_STR("openssl.cafile");
+	if (!(cainfo && strlen(cainfo) > 0)) {
+		cainfo = INI_STR("curl.cainfo");
+	}
 	if (cainfo && strlen(cainfo) > 0) {
 		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);
 	}
@@ -2115,7 +2113,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 			}
 		case CURLOPT_AUTOREFERER:
 		case CURLOPT_BUFFERSIZE:
-		case CURLOPT_CLOSEPOLICY:
 		case CURLOPT_CONNECTTIMEOUT:
 		case CURLOPT_COOKIESESSION:
 		case CURLOPT_CRLF:
@@ -2226,7 +2223,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 		case CURLOPT_CERTINFO:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071304 /* Available since 7.19.4 */
-		case CURLOPT_NOPROXY:
 		case CURLOPT_PROTOCOLS:
 		case CURLOPT_REDIR_PROTOCOLS:
 		case CURLOPT_SOCKS5_GSSAPI_NEC:
@@ -2308,6 +2304,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 		case CURLOPT_USERNAME:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071304 /* Available since 7.19.4 */
+		case CURLOPT_NOPROXY:
 		case CURLOPT_SOCKS5_GSSAPI_SERVICE:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
@@ -2549,7 +2546,12 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 					return 1;
 				}
 			}
-			zend_hash_index_update(ch->to_free->slist, (ulong) option, &slist, sizeof(struct curl_slist *), NULL);
+
+			if (Z_REFCOUNT_P(ch->clone) <= 1) {
+				zend_hash_index_update(ch->to_free->slist, (ulong) option, &slist, sizeof(struct curl_slist *), NULL);
+			} else {
+				zend_hash_next_index_insert(ch->to_free->slist, &slist, sizeof(struct curl_slist *), NULL);
+			}
 
 			error = curl_easy_setopt(ch->cp, option, slist);
 
@@ -2562,12 +2564,14 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
+#if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
 					return FAILURE;
 				}
 			}
+#endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
 

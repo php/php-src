@@ -1,5 +1,5 @@
 --TEST--
-Test mcrypt_encrypt() function : TripleDES functionality 
+Test mcrypt_encrypt() function : AES functionality 
 --SKIPIF--
 <?php 
 if (!extension_loaded("mcrypt")) {
@@ -30,7 +30,7 @@ $cipher = MCRYPT_RIJNDAEL_128;
 $mode = MCRYPT_MODE_CBC;
 $data = b'This is the secret message which must be encrypted';
 
-// keys upto 128 bits (16 bytes)
+// keys up to 128 bits (16 bytes)
 $keys = array(
    null, 
    '', 
@@ -75,22 +75,34 @@ foreach ($ivs as $iv) {
 --- testing different key lengths
 
 key length=0
-string(128) "4fbf24aaa789f5194260ade1acd9499402c1845cc517e8fe43cfb5b90a0df294db33ecd1a836c47d6bf6d8600512ba415e17008a1e1991f81056258d82099397"
+
+Warning: mcrypt_encrypt(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+
+Warning: mcrypt_cbc(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 key length=0
-string(128) "4fbf24aaa789f5194260ade1acd9499402c1845cc517e8fe43cfb5b90a0df294db33ecd1a836c47d6bf6d8600512ba415e17008a1e1991f81056258d82099397"
+
+Warning: mcrypt_encrypt(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+
+Warning: mcrypt_cbc(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 key length=8
-string(128) "d6a3042b278fa5816dc6f46152acbe5fd7d1813c3808c27cd969d8e10a64d0238724edfda0322f4512308f22d142df0e92bed861c2b732f7650e234df59183dc"
+
+Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+
+Warning: mcrypt_cbc(): Key of size 8 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 key length=16
 string(128) "dc8f957ec530acf10cd95ba7da7b6405380fe19a2941e9a8de54680512f18491bc374e5464885ae6c2ae2aa7a6cdd2fbe12a06bbc4bd59dbbfaa15f09044f101"
@@ -104,31 +116,31 @@ iv length=0
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "c082b3fabaae4c8c410eb8dba64bae10e48d79b5241fb8f24462cad43bd0b35ad2746b00817e9dcbc636b44df0ec60b46a57e7a310a308a0947724e3817a13b4"
+Warning: mcrypt_cbc(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+Warning: mcrypt_decrypt(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 
 iv length=0
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "c082b3fabaae4c8c410eb8dba64bae10e48d79b5241fb8f24462cad43bd0b35ad2746b00817e9dcbc636b44df0ec60b46a57e7a310a308a0947724e3817a13b4"
+Warning: mcrypt_cbc(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+Warning: mcrypt_decrypt(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 
 iv length=8
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "c082b3fabaae4c8c410eb8dba64bae10e48d79b5241fb8f24462cad43bd0b35ad2746b00817e9dcbc636b44df0ec60b46a57e7a310a308a0947724e3817a13b4"
+Warning: mcrypt_cbc(): Received initialization vector of size 8, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+Warning: mcrypt_decrypt(): Received initialization vector of size 8, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 
 iv length=16
 
@@ -140,9 +152,9 @@ iv length=17
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "c082b3fabaae4c8c410eb8dba64bae10e48d79b5241fb8f24462cad43bd0b35ad2746b00817e9dcbc636b44df0ec60b46a57e7a310a308a0947724e3817a13b4"
+Warning: mcrypt_cbc(): Received initialization vector of size 17, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+Warning: mcrypt_decrypt(): Received initialization vector of size 17, but size 16 is required for this encryption mode in %s on line %d
+string(0) ""
 ===DONE===

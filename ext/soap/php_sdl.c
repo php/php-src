@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 #include "libxml/uri.h"
 
 #include "ext/standard/md5.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -111,7 +111,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
-	int ns_len = strlen(ns);
+	int ns_len = ns ? strlen(ns) : 0;
 	int type_len = strlen(type);
 	int len = ns_len + type_len + 1;
 
@@ -1157,7 +1157,9 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 					zend_hash_init(ctx.sdl->bindings, 0, NULL, delete_binding, 0);
 				}
 
-				zend_hash_add(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL);
+				if (zend_hash_add(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL) != SUCCESS) {
+					zend_hash_next_index_insert(ctx.sdl->bindings, &tmpbinding, sizeof(sdlBindingPtr), NULL);
+				}
 				trav= trav->next;
 			}
 

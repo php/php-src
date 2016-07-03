@@ -22,7 +22,7 @@ mkdir($base_dir);
 $sub_dir = $base_dir."/copy_variation16_sub";
 mkdir($sub_dir);
 
-$dirname_with_blank = $sub_dir."/copy variation6";
+$dirname_with_blank = $sub_dir."/copy variation16";
 mkdir($dirname_with_blank);
 
 $src_file_name = dirname(__FILE__)."/copy_variation16.tmp";
@@ -139,6 +139,6 @@ Existence of destination file => bool(false)
 Size of source file => int(3500)
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name is => %s/copy_variation16/copy_variation16_sub/copy variation6/copy_copy_variation16.tmp
+Destination file name is => %s/copy_variation16/copy_variation16_sub/copy variation16/copy_copy_variation16.tmp
 Size of destination file => int(3500)
 *** Done ***

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -107,17 +107,17 @@ static void
 mysqlnd_minfo_dump_api_plugins(smart_str * buffer TSRMLS_DC)
 {
 	HashTable *ht = mysqlnd_reverse_api_get_api_list(TSRMLS_C);
-	Bucket *p;
+	HashPosition pos;
+	MYSQLND_REVERSE_API **ext;
 
-	p = ht->pListHead;
-	while(p != NULL) {
-		MYSQLND_REVERSE_API * ext = *(MYSQLND_REVERSE_API **) p->pData;
+	for (zend_hash_internal_pointer_reset_ex(ht, &pos);
+	     zend_hash_get_current_data_ex(ht, (void **) &ext, &pos) == SUCCESS;
+	     zend_hash_move_forward_ex(ht, &pos)
+	) {
 		if (buffer->len) {
 			smart_str_appendc(buffer, ',');
 		}
-		smart_str_appends(buffer, ext->module->name);
-
-		p = p->pListNext;
+		smart_str_appends(buffer, (*ext)->module->name);
 	}
 }
 /* }}} */
@@ -209,6 +209,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 	mysqlnd_globals->debug_calloc_fail_threshold = -1;
 	mysqlnd_globals->debug_realloc_fail_threshold = -1;
 	mysqlnd_globals->sha256_server_public_key = NULL;
+	mysqlnd_globals->fetch_data_copy = FALSE;
 }
 /* }}} */
 
@@ -227,8 +228,8 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 /* {{{ PHP_INI_BEGIN
 */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("mysqlnd.collect_statistics",	"1", 	PHP_INI_ALL, OnUpdateBool,	collect_statistics, zend_mysqlnd_globals, mysqlnd_globals)
-	STD_PHP_INI_BOOLEAN("mysqlnd.collect_memory_statistics",	"0", 	PHP_INI_SYSTEM, OnUpdateBool,	collect_memory_statistics, zend_mysqlnd_globals, mysqlnd_globals)
+	STD_PHP_INI_BOOLEAN("mysqlnd.collect_statistics",	"1", 	PHP_INI_ALL,	OnUpdateBool,	collect_statistics, zend_mysqlnd_globals, mysqlnd_globals)
+	STD_PHP_INI_BOOLEAN("mysqlnd.collect_memory_statistics","0",PHP_INI_SYSTEM, OnUpdateBool,	collect_memory_statistics, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.debug",					NULL, 	PHP_INI_SYSTEM, OnUpdateString,	debug, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.trace_alloc",			NULL, 	PHP_INI_SYSTEM, OnUpdateString,	trace_alloc_settings, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.net_cmd_buffer_size",	MYSQLND_NET_CMD_BUFFER_MIN_SIZE_STR,	PHP_INI_ALL,	OnUpdateNetCmdBufferSize,	net_cmd_buffer_size,	zend_mysqlnd_globals,		mysqlnd_globals)
@@ -237,7 +238,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.mempool_default_size","16000",   PHP_INI_ALL,	OnUpdateLong,	mempool_default_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.sha256_server_public_key",NULL, 	PHP_INI_PERDIR, OnUpdateString,	sha256_server_public_key, zend_mysqlnd_globals, mysqlnd_globals)
-
+	STD_PHP_INI_BOOLEAN("mysqlnd.fetch_data_copy",	"0", 		PHP_INI_ALL,	OnUpdateBool,	fetch_data_copy, zend_mysqlnd_globals, mysqlnd_globals)
 #if PHP_DEBUG
 	STD_PHP_INI_ENTRY("mysqlnd.debug_emalloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_emalloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.debug_ecalloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_ecalloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)

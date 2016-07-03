@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,6 +72,7 @@ zend_class_entry *dom_namespace_node_class_entry;
 /* }}} */
 
 zend_object_handlers dom_object_handlers;
+zend_object_handlers dom_nnodemap_object_handlers;
 
 static HashTable classes;
 /* {{{ prop handler tables */
@@ -667,6 +668,10 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.has_property = dom_property_exists;
 	dom_object_handlers.get_debug_info = dom_get_debug_info;
+
+	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
+	dom_nnodemap_object_handlers.read_dimension = dom_nodelist_read_dimension;
+	dom_nnodemap_object_handlers.has_dimension = dom_nodelist_has_dimension;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
@@ -1297,7 +1302,7 @@ zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_D
 
 	retval.handle = zend_objects_store_put(intern, dom_nnodemap_object_dtor, (zend_objects_free_object_storage_t)dom_nnodemap_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
-	retval.handlers = dom_get_obj_handlers(TSRMLS_C);
+	retval.handlers = &dom_nnodemap_object_handlers;
 
 	return retval;
 }
@@ -1673,6 +1678,54 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	return ret;
 }
 /* }}} end dom_get_nsdecl */
+
+static inline long dom_get_long(zval *offset) /* {{{ */
+{
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		return Z_LVAL_P(offset);
+	} else {
+		zval tmp;
+
+		MAKE_COPY_ZVAL(&offset, &tmp);
+		convert_to_long(&tmp);
+
+		return Z_LVAL(tmp);
+    }
+}
+/* }}} */
+
+zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
+{
+	zval *rv, offset_copy = zval_used_for_init;
+
+	if (!offset) {
+		return NULL;
+	}
+
+	ZVAL_LONG(&offset_copy, dom_get_long(offset));
+
+	zend_call_method_with_1_params(&object, Z_OBJCE_P(object), NULL, "item", &rv, &offset_copy);
+
+	Z_DELREF_P(rv);
+
+	return rv;
+} /* }}} end dom_nodelist_read_dimension */
+
+int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	long offset = dom_get_long(member);
+
+	if (offset < 0) {
+		return 0;
+	} else {
+		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0 TSRMLS_CC);
+		int ret = length && offset < Z_LVAL_P(length);
+
+		FREE_ZVAL(length);
+
+		return ret;
+	}
+} /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
 

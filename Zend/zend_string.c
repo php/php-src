@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -61,6 +61,8 @@ void zend_interned_strings_init(TSRMLS_D)
 	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_READ);
 #endif
 
+    /* interned empty string */
+	CG(interned_empty_string) = zend_new_interned_string_int("", sizeof(""), 0 TSRMLS_CC);
 #endif
 
 	zend_new_interned_string = zend_new_interned_string_int;

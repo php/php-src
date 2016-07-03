@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2015 The PHP Group                                |
+  | Copyright (c) 2005-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1708,7 +1708,7 @@ after_open_fp:
 		data->internal_file->fp_type = PHAR_UFP;
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
 		data->fp = NULL;
-		phar_stream_copy_to_stream(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
+		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
 		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
 			php_stream_tell(p_obj->fp) - data->internal_file->offset;
 	}
@@ -1935,10 +1935,12 @@ PHP_METHOD(Phar, buildFromIterator)
  */
 PHP_METHOD(Phar, count)
 {
+	/* mode can be ignored, maximum depth is 1 */
+	long mode;
 	PHAR_ARCHIVE_OBJECT();
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mode) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	RETURN_LONG(zend_hash_num_elements(&phar_obj->arc.archive->manifest));
@@ -1998,7 +2000,7 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 		link = entry;
 	}
 
-	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, entry->filename);
 		return FAILURE;
@@ -3659,7 +3661,7 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", filename);
 					return;
 				}
-				phar_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
+				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
 
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
@@ -4130,7 +4132,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return SUCCESS;
 	}
 	/* strip .. from path and restrict it to be under dest directory */
-	new_state.cwd = (char*)malloc(2);
+	new_state.cwd = (char*)emalloc(2);
 	new_state.cwd[0] = DEFAULT_SLASH;
 	new_state.cwd[1] = '\0';
 	new_state.cwd_length = 1;
@@ -4143,7 +4145,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		} else {
 			spprintf(error, 4096, "Cannot extract \"%s\", internal error", entry->filename);
 		}
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 	filename = new_state.cwd + 1;
@@ -4175,21 +4177,21 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			spprintf(error, 4096, "Cannot extract \"%s\" to \"%s...\", extracted filename is too long for filesystem", entry->filename, fullpath);
 		}
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
 	if (!len) {
 		spprintf(error, 4096, "Cannot extract \"%s\", internal error", entry->filename);
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
 	if (PHAR_OPENBASEDIR_CHECKPATH(fullpath)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", openbasedir/safe mode restrictions in effect", entry->filename, fullpath);
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
@@ -4197,7 +4199,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	if (!overwrite && SUCCESS == php_stream_stat_path(fullpath, &ssb)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", path already exists", entry->filename, fullpath);
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
@@ -4215,14 +4217,14 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			if (!php_stream_mkdir(fullpath, entry->flags & PHAR_ENT_PERM_MASK,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
 				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
 				efree(fullpath);
-				free(new_state.cwd);
+				efree(new_state.cwd);
 				return FAILURE;
 			}
 		} else {
 			if (!php_stream_mkdir(fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
 				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
 				efree(fullpath);
-				free(new_state.cwd);
+				efree(new_state.cwd);
 				return FAILURE;
 			}
 		}
@@ -4235,7 +4237,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	}
 
 	filename = NULL;
-	free(new_state.cwd);
+	efree(new_state.cwd);
 	/* it is a standalone directory, job done */
 	if (entry->is_dir) {
 		efree(fullpath);
@@ -4274,7 +4276,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return FAILURE;
 	}
 
-	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize, NULL)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", copying contents failed", entry->filename, fullpath);
 		efree(fullpath);
 		php_stream_close(fp);

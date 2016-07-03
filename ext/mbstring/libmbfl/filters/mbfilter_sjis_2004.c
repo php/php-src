@@ -672,6 +672,8 @@ retry:
 			CK(mbfl_filt_conv_illegal_output(c, filter));
 		}
 	}
+
+	return c;
 }
 
 int

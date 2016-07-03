@@ -8,8 +8,8 @@ $p = new PharData(__DIR__."/bug71331.tar");
 ?>
 DONE
 --EXPECTF--
-Fatal error: Uncaught exception 'UnexpectedValueException' with message 'phar error: "%s/bug71331.tar" is a corrupted tar file (invalid entry size)' in %s/bug71331.php:2
+Fatal error: Uncaught exception 'UnexpectedValueException' with message 'phar error: "%s%ebug71331.tar" is a corrupted tar file (invalid entry size)' in %s%ebug71331.php:2
 Stack trace:
-#0 %s/bug71331.php(2): PharData->__construct('%s')
+#0 %s%ebug71331.php(2): PharData->__construct('%s')
 #1 {main}
-  thrown in %s/bug71331.php on line 2
+  thrown in %s%ebug71331.php on line 2

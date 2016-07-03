@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -151,6 +151,8 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	const char *output_start_filename;
 	int output_start_lineno;
 ZEND_END_MODULE_GLOBALS(output)
+
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output);
 
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS

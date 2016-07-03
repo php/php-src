@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,12 +29,12 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 	return &xport_hash;
 }
 
-PHPAPI int php_stream_xport_register(char *protocol, php_stream_transport_factory factory TSRMLS_DC)
+PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory TSRMLS_DC)
 {
 	return zend_hash_update(&xport_hash, protocol, strlen(protocol) + 1, &factory, sizeof(factory), NULL);
 }
 
-PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC)
+PHPAPI int php_stream_xport_unregister(const char *protocol TSRMLS_DC)
 {
 	return zend_hash_del(&xport_hash, protocol, strlen(protocol) + 1);
 }
@@ -49,7 +49,7 @@ PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC)
 		if (local_err) { efree(local_err); local_err = NULL; } \
 	}
 	
-PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int options,
+PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,
 		int flags, const char *persistent_id,
 		struct timeval *timeout,
 		php_stream_context *context,
@@ -194,7 +194,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 
 /* Bind the stream to a local address */
 PHPAPI int php_stream_xport_bind(php_stream *stream,
-		const char *name, long namelen,
+		const char *name, size_t namelen,
 		char **error_text
 		TSRMLS_DC)
 {
@@ -222,7 +222,7 @@ PHPAPI int php_stream_xport_bind(php_stream *stream,
 
 /* Connect to a remote address */
 PHPAPI int php_stream_xport_connect(php_stream *stream,
-		const char *name, long namelen,
+		const char *name, size_t namelen,
 		int asynchronous,
 		struct timeval *timeout,
 		char **error_text,

@@ -1,7 +1,7 @@
 Process Control Module for PHP (pcntl)
 
 This module will attempt to implement all features related to process spawning and
-control (fork(), waitpid(), signal(), WIF's, etc). This is extremly experimental, 
+control (fork(), waitpid(), signal(), WIF's, etc). This is extremely experimental, 
 with hope to become stable on most UNIX's. I greatly apreciate any feedback, fixes, 
 and or suggestions on how to improve/better implement
 this functionality.

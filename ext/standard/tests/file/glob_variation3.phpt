@@ -13,8 +13,7 @@ var_dump(glob("$path/*/nothere"));
 var_dump(glob("$path/[aoeu]*.none"));
 var_dump(glob("$path/directly_not_exists"));
 
-$b = ini_get('open_basedir');
-var_dump(empty($b));
+var_dump(empty(ini_get('open_basedir')));
 ?>
 ==DONE==
 --EXPECT--

@@ -1,0 +1,19 @@
+ARG_ENABLE('phpdbg', 'Build phpdbg', 'no');
+ARG_ENABLE('phpdbgs', 'Build phpdbg shared', 'no');
+
+PHPDBG_SOURCES='phpdbg.c phpdbg_prompt.c phpdbg_cmd.c phpdbg_info.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_win.c phpdbg_btree.c phpdbg_parser.c phpdbg_lexer.c';
+PHPDBG_DLL='php' + PHP_VERSION + 'phpdbg.dll';
+PHPDBG_EXE='phpdbg.exe';
+
+if (PHP_PHPDBG == "yes") {
+	SAPI('phpdbg', PHPDBG_SOURCES, PHPDBG_EXE);
+	ADD_FLAG("LIBS_PHPDBG", "ws2_32.lib user32.lib");
+	ADD_FLAG("CFLAGS_PHPDBG", "/D YY_NO_UNISTD_H");
+}
+
+if (PHP_PHPDBGS == "yes") {
+	SAPI('phpdbgs', PHPDBG_SOURCES, PHPDBG_DLL, '/D PHP_PHPDBG_EXPORTS /I win32');
+	ADD_FLAG("LIBS_PHPDBGS", "ws2_32.lib user32.lib");
+	ADD_FLAG("CFLAGS_PHPDBGS", "/D YY_NO_UNISTD_H");
+}
+

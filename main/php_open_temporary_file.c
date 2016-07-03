@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -124,11 +124,11 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		cwd[0] = '\0';
 	}
 
-	new_state.cwd = strdup(cwd);
+	new_state.cwd = estrdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return -1;
 	}
 
@@ -140,7 +140,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 
 	if (spprintf(&opened_path, 0, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(opened_path);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return -1;
 	}
 
@@ -151,7 +151,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		 * which means that opening it will fail... */
 		if (VCWD_CHMOD(opened_path, 0600)) {
 			efree(opened_path);
-			free(new_state.cwd);
+			efree(new_state.cwd);
 			return -1;
 		}
 		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
@@ -170,7 +170,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	} else {
 		*opened_path_p = opened_path;
 	}
-	free(new_state.cwd);
+	efree(new_state.cwd);
 	return fd;
 }
 /* }}} */

@@ -40,16 +40,26 @@ function b($b = "bad") {
 }
 var_dump(b());
 
-function c() {
+function c($b = "bad") {
+	switch (extension_loaded("standard")) {
+	case 0 : return "LALALAL";
+	case 1 : return "okey";
+	default : return "bad";
+	}
+}
+var_dump(c());
+
+function d() {
 	switch (PHP_OS) {
 		default: return "bad";
 		case PHP_OS: return "okey";
 	}
 }
 
-var_dump(c());
+var_dump(d());
 ?>
 --EXPECT--
+string(4) "okey"
 string(4) "okey"
 string(4) "okey"
 string(4) "okey"

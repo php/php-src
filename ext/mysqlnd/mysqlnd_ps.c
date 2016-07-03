@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -39,18 +39,8 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 /* Exported by mysqlnd_ps_codec.c */
 enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
 
-enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param,
-												unsigned int flags,
-												zend_bool *fetched_anything TSRMLS_DC);
-
-enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param,
-											   unsigned int flags,
-											   zend_bool *fetched_anything TSRMLS_DC);
-
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC);
 static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
-
-static void MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(MYSQLND_STMT * const s TSRMLS_DC);
 
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
@@ -96,15 +86,42 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 
 	result = stmt->result;
 	result->type			= MYSQLND_RES_PS_BUF;
-	result->m.fetch_row		= mysqlnd_stmt_fetch_row_buffered;
-	result->m.fetch_lengths	= NULL;/* makes no sense */
-	result->m.row_decoder = php_mysqlnd_rowp_read_binary_protocol;
+/*	result->m.row_decoder = php_mysqlnd_rowp_read_binary_protocol; */
 
-	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
+	result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, TRUE, result->persistent TSRMLS_CC);
+	if (!result->stored_data) {
+		SET_OOM_ERROR(*conn->error_info);
+		DBG_RETURN(NULL);
+	}
 
-	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE TSRMLS_CC);
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, &result->stored_data->row_buffers, TRUE TSRMLS_CC);
+
+	result->stored_data->m.fetch_row = mysqlnd_stmt_fetch_row_buffered;
 
 	if (PASS == ret) {
+		/* Overflow ? */
+		if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
+			MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result->stored_data;
+			if (result->stored_data->row_count) {
+				/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+				if (result->stored_data->row_count * result->meta->field_count * sizeof(zval *) > SIZE_MAX) {
+					SET_OOM_ERROR(*conn->error_info);
+					DBG_RETURN(NULL);
+				}
+				/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
+				set->data = mnd_emalloc((size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval *)));
+				if (!set->data) {
+					SET_OOM_ERROR(*conn->error_info);
+					DBG_RETURN(NULL);
+				}
+				memset(set->data, 0, (size_t)(result->stored_data->row_count * result->meta->field_count * sizeof(zval *)));
+			}
+			/* Position at the first row */
+			set->data_cursor = set->data;
+		} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
+			/*TODO*/
+		}
+
 		/* libmysql API docs say it should be so for SELECT statements */
 		stmt->upsert_status->affected_rows = stmt->result->stored_data->row_count;
 
@@ -172,7 +189,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s TSRMLS_DC)
 			break;
 		}
 
-		if ((result = result->m.store_result(result, conn, TRUE TSRMLS_CC))) {
+		if ((result = result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY TSRMLS_CC))) {
 			stmt->upsert_status->affected_rows = result->stored_data->row_count;
 			stmt->state = MYSQLND_STMT_PREPARED;
 			result->type = MYSQLND_RES_PS_BUF;
@@ -227,7 +244,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s TSRMLS_DC)
 	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status, stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
 
 	/* Free space for next result */
-	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(s TSRMLS_CC);
+	s->m->free_stmt_result(s TSRMLS_CC);
 	{
 		enum_func_status ret = s->m->parse_execute_response(s TSRMLS_CC);
 		DBG_RETURN(ret);
@@ -522,7 +539,11 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s TSRMLS_DC)
 
 		/* Update stmt->field_count as SHOW sets it to 0 at prepare */
 		stmt->field_count = stmt->result->field_count = conn->field_count;
-		stmt->result->lengths = NULL;
+		if (stmt->result->stored_data) {
+			stmt->result->stored_data->lengths = NULL;
+		} else if (stmt->result->unbuf) {
+			stmt->result->unbuf->lengths = NULL;
+		}
 		if (stmt->field_count) {
 			stmt->state = MYSQLND_STMT_WAITING_USE_OR_STORE;
 			/*
@@ -710,94 +731,98 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 
 /* {{{ mysqlnd_stmt_fetch_row_buffered */
 enum_func_status
-mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything TSRMLS_DC)
 {
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	MYSQLND_RES_BUFFERED *set = result->stored_data;
-	unsigned int field_count = result->meta->field_count;
+	const MYSQLND_RES_METADATA * const meta = result->meta;
+	unsigned int field_count = meta->field_count;
 
 	DBG_ENTER("mysqlnd_stmt_fetch_row_buffered");
 	*fetched_anything = FALSE;
 	DBG_INF_FMT("stmt=%lu", stmt != NULL ? stmt->stmt_id : 0L);
 
 	/* If we haven't read everything */
-	if (set->data_cursor &&
-		(set->data_cursor - set->data) < (set->row_count * field_count))
-	{
-		/* The user could have skipped binding - don't crash*/
-		if (stmt->result_bind) {
-			unsigned int i;
-			MYSQLND_RES_METADATA * meta = result->meta;
-			zval **current_row = set->data_cursor;
+	if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
+		MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result->stored_data;
+		if (set->data_cursor &&
+			(set->data_cursor - set->data) < (result->stored_data->row_count * field_count))
+		{
+			/* The user could have skipped binding - don't crash*/
+			if (stmt->result_bind) {
+				unsigned int i;
+				zval **current_row = set->data_cursor;
 
-			if (NULL == current_row[0]) {
-				uint64_t row_num = (set->data_cursor - set->data) / field_count;
-				enum_func_status rc = result->m.row_decoder(set->row_buffers[row_num],
-												current_row,
-												meta->field_count,
-												meta->fields,
-												result->conn->options->int_and_float_native,
-												result->conn->stats TSRMLS_CC);
-				if (PASS != rc) {
-					DBG_RETURN(FAIL);
-				}
-				set->initialized_rows++;
-				if (stmt->update_max_length) {
-					for (i = 0; i < result->field_count; i++) {
-						/*
-						  NULL fields are 0 length, 0 is not more than 0
-						  String of zero size, definitely can't be the next max_length.
-						  Thus for NULL and zero-length we are quite efficient.
-						*/
-						if (Z_TYPE_P(current_row[i]) >= IS_STRING) {
-							unsigned long len = Z_STRLEN_P(current_row[i]);
-							if (meta->fields[i].max_length < len) {
-								meta->fields[i].max_length = len;
+				if (NULL == current_row[0]) {
+					uint64_t row_num = (set->data_cursor - set->data) / field_count;
+					enum_func_status rc = result->stored_data->m.row_decoder(result->stored_data->row_buffers[row_num],
+													current_row,
+													meta->field_count,
+													meta->fields,
+													result->conn->options->int_and_float_native,
+													result->conn->stats TSRMLS_CC);
+					if (PASS != rc) {
+						DBG_RETURN(FAIL);
+					}
+					result->stored_data->initialized_rows++;
+					if (stmt->update_max_length) {
+						for (i = 0; i < result->field_count; i++) {
+							/*
+							  NULL fields are 0 length, 0 is not more than 0
+							  String of zero size, definitely can't be the next max_length.
+							  Thus for NULL and zero-length we are quite efficient.
+							*/
+							if (Z_TYPE_P(current_row[i]) >= IS_STRING) {
+								unsigned long len = Z_STRLEN_P(current_row[i]);
+								if (meta->fields[i].max_length < len) {
+									meta->fields[i].max_length = len;
+								}
 							}
 						}
 					}
 				}
-			}
 
-			for (i = 0; i < result->field_count; i++) {
-				/* Clean what we copied last time */
+				for (i = 0; i < result->field_count; i++) {
+					/* Clean what we copied last time */
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-				if (stmt->result_bind[i].zv) {
-					zval_dtor(stmt->result_bind[i].zv);
-				}
+					if (stmt->result_bind[i].zv) {
+						zval_dtor(stmt->result_bind[i].zv);
+					}
 #endif
-				/* copy the type */
-				if (stmt->result_bind[i].bound == TRUE) {
-					DBG_INF_FMT("i=%u type=%u", i, Z_TYPE_P(current_row[i]));
-					if (Z_TYPE_P(current_row[i]) != IS_NULL) {
-						/*
-						  Copy the value.
-						  Pre-condition is that the zvals in the result_bind buffer
-						  have been  ZVAL_NULL()-ed or to another simple type
-						  (int, double, bool but not string). Because of the reference
-						  counting the user can't delete the strings the variables point to.
-						*/
+					/* copy the type */
+					if (stmt->result_bind[i].bound == TRUE) {
+						DBG_INF_FMT("i=%u type=%u", i, Z_TYPE_P(current_row[i]));
+						if (Z_TYPE_P(current_row[i]) != IS_NULL) {
+							/*
+							  Copy the value.
+							  Pre-condition is that the zvals in the result_bind buffer
+							  have been  ZVAL_NULL()-ed or to another simple type
+							  (int, double, bool but not string). Because of the reference
+							  counting the user can't delete the strings the variables point to.
+							*/
 
-						Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(current_row[i]);
-						stmt->result_bind[i].zv->value = current_row[i]->value;
+							Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(current_row[i]);
+							stmt->result_bind[i].zv->value = current_row[i]->value;
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-						zval_copy_ctor(stmt->result_bind[i].zv);
+							zval_copy_ctor(stmt->result_bind[i].zv);
 #endif
-					} else {
-						ZVAL_NULL(stmt->result_bind[i].zv);
+						} else {
+							ZVAL_NULL(stmt->result_bind[i].zv);
+						}
 					}
 				}
 			}
+			set->data_cursor += field_count;
+			*fetched_anything = TRUE;
+			/* buffered result sets don't have a connection */
+			MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_PS_BUF);
+			DBG_INF("row fetched");
+		} else {
+			set->data_cursor = NULL;
+			DBG_INF("no more data");
 		}
-		set->data_cursor += field_count;
-		*fetched_anything = TRUE;
-		/* buffered result sets don't have a connection */
-		MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_PS_BUF);
-		DBG_INF("row fetched");
-	} else {
-		set->data_cursor = NULL;
-		DBG_INF("no more data");
+	} else if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_C) {
+		/*TODO*/
 	}
 	DBG_INF("PASS");
 	DBG_RETURN(PASS);
@@ -806,13 +831,14 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 
 
 /* {{{ mysqlnd_stmt_fetch_row_unbuffered */
-static enum_func_status
-mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+enum_func_status
+mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND_PACKET_ROW * row_packet;
+	const MYSQLND_RES_METADATA * const meta = result->meta;
 
 	DBG_ENTER("mysqlnd_stmt_fetch_row_unbuffered");
 
@@ -829,7 +855,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		DBG_ERR("command out of sync");
 		DBG_RETURN(FAIL);
 	}
-	if (!(row_packet = result->row_packet)) {
+	if (!(row_packet = result->unbuf->row_packet)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -838,20 +864,20 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 
 	/*
 	  If we skip rows (stmt == NULL || stmt->result_bind == NULL) we have to
-	  result->m.unbuffered_free_last_data() before it. The function returns always true.
+	  result->unbuf->m.free_last_data() before it. The function returns always true.
 	*/
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
 
 		if (!row_packet->skip_extraction) {
-			result->m.unbuffered_free_last_data(result TSRMLS_CC);
+			result->unbuf->m.free_last_data(result->unbuf, result->conn? result->conn->stats : NULL TSRMLS_CC);
 
 			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
 			row_packet->fields = NULL;
 			row_packet->row_buffer = NULL;
 
-			if (PASS != result->m.row_decoder(result->unbuf->last_row_buffer,
+			if (PASS != result->unbuf->m.row_decoder(result->unbuf->last_row_buffer,
 									result->unbuf->last_row_data,
 									row_packet->field_count,
 									row_packet->fields_metadata,
@@ -866,14 +892,14 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 					zval *data = result->unbuf->last_row_data[i];
 					/*
 					  stmt->result_bind[i].zv has been already destructed
-					  in result->m.unbuffered_free_last_data()
+					  in result->unbuf->m.free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 					zval_dtor(stmt->result_bind[i].zv);
 #endif
 					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data)) ) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
-							result->meta->fields[i].max_length = Z_STRLEN_P(data);
+						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
+							meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
 						/* copied data, thus also the ownership. Thus null data */
@@ -885,7 +911,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		} else {
 			DBG_INF("skipping extraction");
 			/*
-			  Data has been allocated and usually result->m.unbuffered_free_last_data()
+			  Data has been allocated and usually result->unbuf->m.free_last_data()
 			  frees it but we can't call this function as it will cause problems with
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
@@ -960,7 +986,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s TSRMLS_DC)
 	result = stmt->result;
 
 	result->m.use_result(stmt->result, TRUE TSRMLS_CC);
-	result->m.fetch_row	= stmt->cursor_exists? mysqlnd_fetch_stmt_row_cursor:
+	result->unbuf->m.fetch_row	= stmt->cursor_exists? mysqlnd_fetch_stmt_row_cursor:
 											   mysqlnd_stmt_fetch_row_unbuffered;
 	stmt->state = MYSQLND_STMT_USE_OR_STORE_CALLED;
 
@@ -974,7 +1000,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_cursor */
 enum_func_status
-mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
@@ -998,7 +1024,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 		DBG_ERR("command out of sync");
 		DBG_RETURN(FAIL);
 	}
-	if (!(row_packet = result->row_packet)) {
+	if (!(row_packet = result->unbuf->row_packet)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -1019,17 +1045,18 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
+		const MYSQLND_RES_METADATA * const meta = result->meta;
 		unsigned int i, field_count = result->field_count;
 
 		if (!row_packet->skip_extraction) {
-			result->m.unbuffered_free_last_data(result TSRMLS_CC);
+			result->unbuf->m.free_last_data(result->unbuf, result->conn? result->conn->stats : NULL TSRMLS_CC);
 
 			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
 			row_packet->fields = NULL;
 			row_packet->row_buffer = NULL;
 
-			if (PASS != result->m.row_decoder(result->unbuf->last_row_buffer,
+			if (PASS != result->unbuf->m.row_decoder(result->unbuf->last_row_buffer,
 									  result->unbuf->last_row_data,
 									  row_packet->field_count,
 									  row_packet->fields_metadata,
@@ -1045,7 +1072,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 					zval *data = result->unbuf->last_row_data[i];
 					/*
 					  stmt->result_bind[i].zv has been already destructed
-					  in result->m.unbuffered_free_last_data()
+					  in result->unbuf->m.free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 					zval_dtor(stmt->result_bind[i].zv);
@@ -1053,8 +1080,8 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNT_P(stmt->result_bind[i].zv));
 					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data))) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
-							result->meta->fields[i].max_length = Z_STRLEN_P(data);
+						if ((Z_TYPE_P(data) == IS_STRING) && (meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
+							meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
 						/* copied data, thus also the ownership. Thus null data */
@@ -1065,7 +1092,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 		} else {
 			DBG_INF("skipping extraction");
 			/*
-			  Data has been allocated and usually result->m.unbuffered_free_last_data()
+			  Data has been allocated and usually result->unbuf->m.free_last_data()
 			  frees it but we can't call this function as it will cause problems with
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
@@ -1773,7 +1800,8 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s TSRMLS_DC)
 
 	if (stmt->update_max_length && stmt->result->stored_data) {
 		/* stored result, we have to update the max_length before we clone the meta data :( */
-		stmt->result->m.initialize_result_set_rest(stmt->result TSRMLS_CC);
+		stmt->result->stored_data->m.initialize_result_set_rest(stmt->result->stored_data, stmt->result->meta, stmt->conn->stats,
+																stmt->conn->options->int_and_float_native TSRMLS_CC);
 	}
 	/*
 	  TODO: This implementation is kind of a hack,
@@ -1790,8 +1818,7 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s TSRMLS_DC)
 			break;
 		}
 		result->type = MYSQLND_RES_NORMAL;
-		result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
-		result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
+		result->unbuf = mysqlnd_result_unbuffered_init(stmt->field_count, TRUE, result->persistent TSRMLS_CC);
 		if (!result->unbuf) {
 			break;
 		}
@@ -2125,7 +2152,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC
 		stmt->param_bind = NULL;
 	}
 
-	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(s TSRMLS_CC);
+	s->m->free_stmt_result(s TSRMLS_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -2344,7 +2371,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	mysqlnd_stmt_execute_generate_request,
 	mysqlnd_stmt_execute_parse_response,
 	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content),
-	MYSQLND_METHOD(mysqlnd_stmt, flush)
+	MYSQLND_METHOD(mysqlnd_stmt, flush),
+	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)
 MYSQLND_CLASS_METHODS_END;
 
 

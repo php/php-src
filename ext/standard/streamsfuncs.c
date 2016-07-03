@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,8 @@ typedef unsigned long long php_timeout_ull;
 #include "win32/sockets.h"
 typedef unsigned __int64 php_timeout_ull;
 #endif
+
+#define GET_CTX_OPT(stream, wrapper, name, val) (stream->context && SUCCESS == php_stream_context_get_option(stream->context, wrapper, name, &val))
 
 static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC);
 
@@ -614,10 +616,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
 
-		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
-			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
-			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
-		int tmp_fd;
+		php_socket_t this_fd;
 
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
@@ -628,9 +627,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&tmp_fd, 1) && tmp_fd != -1) {
-
-			php_socket_t this_fd = (php_socket_t)tmp_fd;
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
 
@@ -664,10 +661,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		char *key;
 		uint key_len;
 		ulong num_ind;
-		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
-			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
-			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
-		int tmp_fd;
+		php_socket_t this_fd;
 
 
 		type = zend_hash_get_current_key_ex(Z_ARRVAL_P(stream_array),
@@ -686,10 +680,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&tmp_fd, 1) && tmp_fd != -1) {
-
-			php_socket_t this_fd = (php_socket_t)tmp_fd;
-
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (type == HASH_KEY_IS_LONG) {
 					zend_hash_index_update(new_hash, num_ind, (void *)elem, sizeof(zval *), (void **)&dest_elem);
@@ -1506,16 +1497,27 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 	long cryptokind = 0;
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
-	zend_bool enable;
+	zend_bool enable, cryptokindnull;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|lr", &zstream, &enable, &cryptokind, &zsessstream) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|l!r", &zstream, &enable, &cryptokind, &cryptokindnull, &zsessstream) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (ZEND_NUM_ARGS() >= 3) {
+	if (enable) {
+		if (ZEND_NUM_ARGS() < 3 || cryptokindnull) {
+			zval **val;
+
+			if (!GET_CTX_OPT(stream, "ssl", "crypto_method", val)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "When enabling encryption you must specify the crypto type");
+				RETURN_FALSE;
+			}
+
+			cryptokind = Z_LVAL_PP(val);
+		}
+
 		if (zsessstream) {
 			php_stream_from_zval(sessstream, &zsessstream);
 		}
@@ -1523,9 +1525,6 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		if (php_stream_xport_crypto_setup(stream, cryptokind, sessstream TSRMLS_CC) < 0) {
 			RETURN_FALSE;
 		}
-	} else if (enable) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "When enabling encryption you must specify the crypto type");
-		RETURN_FALSE;
 	}
 
 	ret = php_stream_xport_crypto_enable(stream, enable TSRMLS_CC);

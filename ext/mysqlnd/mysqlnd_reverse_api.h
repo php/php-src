@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -34,8 +34,7 @@ PHPAPI void mysqlnd_reverse_api_end(TSRMLS_D);
 PHPAPI HashTable * mysqlnd_reverse_api_get_api_list(TSRMLS_D);
 
 PHPAPI void mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext TSRMLS_DC);
-
-PHPAPI MYSQLND * zval_to_mysqlnd(zval * zv TSRMLS_DC);
+PHPAPI MYSQLND * zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities TSRMLS_DC);
 
 #endif	/* MYSQLND_REVERSE_API_H */
 

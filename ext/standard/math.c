@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,6 +145,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 	
+	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 	precision_places = 14 - php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));
@@ -153,8 +154,10 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	   the requested places BUT is small enough to make sure a non-zero value
 	   is returned, pre-round the result to the precision */
 	if (precision_places > places && precision_places - places < 15) {
-		f2 = php_intpow10(abs(precision_places));
-		if (precision_places >= 0) {
+		int64_t use_precision = precision_places < INT_MIN+1 ? INT_MIN+1 : precision_places;
+
+		f2 = php_intpow10(abs((int)use_precision));
+		if (use_precision >= 0) {
 			tmp_value = value * f2;
 		} else {
 			tmp_value = value / f2;
@@ -162,8 +165,11 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		/* preround the result (tmp_value will always be something * 1e14,
 		   thus never larger than 1e15 here) */
 		tmp_value = php_round_helper(tmp_value, mode);
+
+		use_precision = places - precision_places;
+		use_precision = use_precision < INT_MIN+1 ? INT_MIN+1 : use_precision;
 		/* now correctly move the decimal point */
-		f2 = php_intpow10(abs(places - precision_places));
+		f2 = php_intpow10(abs((int)use_precision));
 		/* because places < precision_places */
 		tmp_value = tmp_value / f2;
 	} else {
@@ -353,7 +359,15 @@ PHP_FUNCTION(round)
 	}
 
 	if (ZEND_NUM_ARGS() >= 2) {
-		places = (int) precision;
+#if SIZEOF_LONG > SIZEOF_INT
+		if (precision >= 0) {
+			places = precision > INT_MAX ? INT_MAX : (int)precision;
+		} else {
+			places = precision <= INT_MIN ? INT_MIN+1 : (int)precision;
+		}
+#else
+		places = precision;
+#endif
 	}
 	convert_scalar_to_number_ex(value);
 
@@ -604,43 +618,7 @@ PHP_FUNCTION(pow)
 		return;
 	}
 
-	/* make sure we're dealing with numbers */
-	convert_scalar_to_number(zbase TSRMLS_CC);
-	convert_scalar_to_number(zexp TSRMLS_CC);
-
-	/* if both base and exponent were longs, we'll try to get a long out */
-	if (Z_TYPE_P(zbase) == IS_LONG && Z_TYPE_P(zexp) == IS_LONG && Z_LVAL_P(zexp) >= 0) {
-		long l1 = 1, l2 = Z_LVAL_P(zbase), i = Z_LVAL_P(zexp);
-		
-		if (i == 0) {
-			RETURN_LONG(1L);
-		} else if (l2 == 0) {
-			RETURN_LONG(0);
-		}
-
-		/* calculate pow(long,long) in O(log exp) operations, bail if overflow */
-		while (i >= 1) {
-			long overflow;
-			double dval = 0.0;
-
-			if (i % 2) {
-				--i;
-				ZEND_SIGNED_MULTIPLY_LONG(l1,l2,l1,dval,overflow);
-				if (overflow) RETURN_DOUBLE(dval * pow(l2,i));
-			} else {
-				i /= 2;
-				ZEND_SIGNED_MULTIPLY_LONG(l2,l2,l2,dval,overflow);
-				if (overflow) RETURN_DOUBLE((double)l1 * pow(dval,i));
-			}
-			if (i == 0) {
-				RETURN_LONG(l1);
-			}
-		}
-	}
-	convert_to_double(zbase);
-	convert_to_double(zexp);
-	
-	RETURN_DOUBLE(pow(Z_DVAL_P(zbase), Z_DVAL_P(zexp)));
+	pow_function(return_value, zbase, zexp TSRMLS_CC);
 }
 /* }}} */
 

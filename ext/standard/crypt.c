@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -236,18 +236,23 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 #  elif defined(CRYPT_R_CRYPTD)
 		CRYPTD buffer;
 #  else
-#    error Data struct used by crypt_r() is unknown. Please report.
+#   error Data struct used by crypt_r() is unknown. Please report.
 #  endif
 		crypt_res = crypt_r(password, salt, &buffer);
-		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
-			return FAILURE;
-		} else {
-			*result = estrdup(crypt_res);
-			return SUCCESS;
-		}
 	}
+# elif defined(HAVE_CRYPT)
+	crypt_res = crypt(password, salt);
+# else
+#  error No crypt() implementation
 # endif
 #endif
+
+	if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
+		return FAILURE;
+	} else {
+		*result = estrdup(crypt_res);
+		return SUCCESS;
+	}
 }
 /* }}} */
 
@@ -271,6 +276,8 @@ PHP_FUNCTION(crypt)
 
 	if (salt_in) {
 		memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash.");
 	}
 
 	/* The automatic salt generation covers standard DES, md5-crypt and Blowfish (simple) */

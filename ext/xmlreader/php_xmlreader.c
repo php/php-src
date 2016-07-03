@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -588,9 +588,6 @@ PHP_METHOD(xmlreader, getAttributeNo)
 	if (retchar) {
 		RETVAL_STRING(retchar, 1);
 		xmlFree(retchar);
-		return;
-	} else {
-		RETURN_EMPTY_STRING();
 	}
 }
 /* }}} */
@@ -622,9 +619,6 @@ PHP_METHOD(xmlreader, getAttributeNs)
 	if (retchar) {
 		RETVAL_STRING(retchar, 1);
 		xmlFree(retchar);
-		return;
-	} else {
-		RETURN_EMPTY_STRING();
 	}
 }
 /* }}} */

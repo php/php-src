@@ -26,6 +26,8 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+var PROGRAM_FILESx86 = WshShell.Environment("Process").Item("ProgramFiles(x86)");
+var VCINSTALLDIR = WshShell.Environment("Process").Item("VCINSTALLDIR");
 var DSP_FLAGS = new Array();
 var PHP_SRC_DIR=FSO.GetParentFolderName(WScript.ScriptFullName);
 
@@ -1464,6 +1466,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
+
+			if (PHP_ANALYZER == "pvs") {
+				MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+					+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
+			}
 			MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + obj);
 		}
 	}
@@ -1624,6 +1631,20 @@ function write_summary()
 	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
 	ar[2] = ['Compiler', VC_VERSIONS[VCVERS]];
 	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
+	if (PHP_PGO == "yes") {
+		ar[4] = ['Optimization', "PGO"];
+	} else if (PHP_PGI == "yes") {
+		ar[4] = ['Optimization', "PGI"];
+	} else {
+		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+	}
+	if (PHP_ANALYZER == "vs") {
+		ar[5] = ['Static analyzer', 'Visual Studio'];
+	} else if (PHP_ANALYZER == "pvs") {
+		ar[5] = ['Static analyzer', 'PVS-Studio'];
+	} else {
+		ar[5] = ['Static analyzer', 'disabled'];
+	}
 
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);
@@ -1934,6 +1955,14 @@ function generate_phpize()
 	CJ.WriteLine("var PHP_ZTS =" + '"' + PHP_ZTS + '"');
 	CJ.WriteLine("var PHP_DLL_LIB =" + '"' + get_define('PHPLIB') + '"');
 	CJ.WriteLine("var PHP_DLL =" + '"' + get_define('PHPDLL') + '"');
+
+	/* The corresponding configure options aren't enabled through phpize,
+		thus these dummy declarations are required. */
+	CJ.WriteLine("var PHP_ANALYZER =" + '"no"');
+	CJ.WriteLine("var PHP_PGO =" + '"no"');
+	CJ.WriteLine("var PHP_PGI =" + '"no"');
+	CJ.WriteLine("var PHP_ALL_SHARED =" + '"no"');
+
 	CJ.WriteBlankLines(1);
 	CJ.Close();
 }
@@ -1987,7 +2016,8 @@ function generate_makefile()
 			var dll = "php_" + extensions_enabled[i][0] + ".dll";
 			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
 			MF.WriteLine("  @if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
-			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)");
+			MF.WriteLine("  @if not exist $(PHP_PREFIX)\\ext mkdir $(PHP_PREFIX)\\ext >nul");
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\ext");
 		}
 	} else {
 		MF.WriteBlankLines(1);

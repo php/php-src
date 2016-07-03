@@ -367,6 +367,10 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 		return;
 	}
 
+	if (from == to) {
+		return;
+	}
+
 	while (*cs) {
 		if ((*cs)->from == from) {
 		 	DEL_SOURCE(cs);
@@ -712,8 +716,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			if (src->opcode == ZEND_BOOL) {
 				if (ZEND_OP1_TYPE(src) == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(src));
+				} else if (ZEND_OP1_TYPE(src) == IS_TMP_VAR) {
+					src->opcode = ZEND_FREE;
+				} else {
+					MAKE_NOP(src);
 				}
-				MAKE_NOP(src);
 				MAKE_NOP(opline);
 			}
 		}
@@ -1578,7 +1585,7 @@ next_target:
 					}
 
 					/* next block is only NOP's */
-					if (target == target_end) {
+					if (target == target_end && ! block->follow_to->protected) {
 						del_source(block, block->follow_to);
 						block->follow_to = block->follow_to->follow_to;
 						ADD_SOURCE(block, block->follow_to);
@@ -1865,7 +1872,7 @@ next_target_znz:
 #endif
 
 /* Find a set of variables which are used outside of the block where they are
- * defined. We won't apply some optimization patterns for sush variables. */
+ * defined. We won't apply some optimization patterns for such variables. */
 static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *used_ext)
 {
 	zend_code_block *next_block = block->next;
@@ -1897,6 +1904,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 			if (RESULT_USED(opline)) {
 				if (!defined_here[VAR_NUM(ZEND_RESULT(opline).var)] && !used_ext[VAR_NUM(ZEND_RESULT(opline).var)] &&
 				    (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+				     opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
 					(opline->opcode == ZEND_OP_DATA && ZEND_RESULT_TYPE(opline) == IS_TMP_VAR) ||
 					opline->opcode == ZEND_ADD_ARRAY_ELEMENT)) {
 					/* these opcodes use the result as argument */
@@ -1981,6 +1991,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 
 			if (opline->opcode == ZEND_RECV ||
                 opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+                opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
                 opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
 				if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
 					usage[VAR_NUM(ZEND_RESULT(opline).var)] = 1;

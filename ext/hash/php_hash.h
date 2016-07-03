@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,13 +22,18 @@
 #define PHP_HASH_H
 
 #include "php.h"
-#include "php_hash_types.h"
 
 #define PHP_HASH_EXTNAME	"hash"
 #define PHP_HASH_EXTVER		"1.0"
 #define PHP_HASH_RESNAME	"Hash Context"
 
 #define PHP_HASH_HMAC		0x0001
+
+#define L64 INT64_C
+#define php_hash_int32  int32_t
+#define php_hash_uint32 uint32_t
+#define php_hash_int64  int64_t
+#define php_hash_uint64 uint64_t
 
 typedef void (*php_hash_init_func_t)(void *context);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
@@ -75,11 +80,14 @@ extern const php_hash_ops php_hash_4tiger160_ops;
 extern const php_hash_ops php_hash_4tiger192_ops;
 extern const php_hash_ops php_hash_snefru_ops;
 extern const php_hash_ops php_hash_gost_ops;
+extern const php_hash_ops php_hash_gost_crypto_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
 extern const php_hash_ops php_hash_fnv132_ops;
+extern const php_hash_ops php_hash_fnv1a32_ops;
 extern const php_hash_ops php_hash_fnv164_ops;
+extern const php_hash_ops php_hash_fnv1a64_ops;
 extern const php_hash_ops php_hash_joaat_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern const php_hash_ops php_hash_##p##haval##b##_ops;
@@ -128,6 +136,7 @@ PHP_FUNCTION(hash_update_file);
 PHP_FUNCTION(hash_final);
 PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
+PHP_FUNCTION(hash_equals);
 
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
