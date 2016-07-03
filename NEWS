@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed bug #72400 (Integer Overflow in addcslashes/addslashes). (Stas)
   . Fixed bug #72403 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
+- Date:
+  . Fixed bug #63740 (strtotime seems to use both sunday and monday as start of
+    week). (Derick)
+
 - GD:
   . Fixed bug #66387 (Stack overflow with imagefilltoborder). (CVE-2015-8874)
     (cmb)
@@ -127,8 +131,6 @@ PHP                                                                        NEWS
     (Michael Sierks)    
 
 - Date:
-  . Fixed bug #63740 (strtotime seems to use both sunday and monday as start of
-    week). (Derick)
   . Fixed bug #71889 (DateInterval::format Segmentation fault). (Thomas Punt)
 
 - EXIF:
