@@ -1656,7 +1656,7 @@ zend.assertions = 1
 ; a gd image. The warning will then be displayed as notices
 ; disabled by default
 ; http://php.net/gd.jpeg-ignore-warning
-;gd.jpeg_ignore_warning = 0
+;gd.jpeg_ignore_warning = 1
 
 [exif]
 ; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.

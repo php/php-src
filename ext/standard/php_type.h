@@ -40,5 +40,6 @@ PHP_FUNCTION(is_array);
 PHP_FUNCTION(is_object);
 PHP_FUNCTION(is_scalar);
 PHP_FUNCTION(is_callable);
+PHP_FUNCTION(is_iterable);
 
 #endif /* PHP_TYPE_H */

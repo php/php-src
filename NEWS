@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0beta1
 
 - Core:
+  . Implemented RFC: Iterable. (Aaron Piotrowski)
   . Fixed bug #72523 (dtrace issue with reflection (failed test)). (Laruence)
   . Fixed bug #72508 (strange references after recursive function call and
     "switch" statement). (Laruence)
@@ -15,18 +16,30 @@ PHP                                                                        NEWS
 	functions. (Pierrick)
   . Add support for HTTP/2 Server Push (davey)
 
+- GD:
+  . Fixed bug #72404 (imagecreatefromjpeg fails on selfie). (cmb)
+
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
+
+- Readline:
+  . Fixed bug #72538 (readline_redisplay crashes php). (Laruence)
 
 - SQLite3:
   . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
     (cmb)
 
+- Session:
+  . Fixed bug #72531 (ps_files_cleanup_dir Buffer overflow). (Laruence)
+
 - Standard:
   . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
   . Fixed bug #72505 (readfile() mangles files larger than 2G). (Cschneid)
+
+- Streams:
+  . Fixed bug #72534 (stream_socket_get_name crashes). (Anatol)
 
 - OpenSSL:
   . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
@@ -45,6 +58,10 @@ PHP                                                                        NEWS
   . Fixed bug #69489 (tempnam() should raise notice if falling back to temp dir).
     (Laruence, Anatol)
   . Fixed UTF-8 and long path support on Windows. (Anatol)
+
+- Date:
+  . Fixed bug #63740 (strtotime seems to use both sunday and monday as start of
+    week). (Derick)
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
@@ -72,6 +89,7 @@ PHP                                                                        NEWS
   . Implemented FR #72385 (Update SQLite bundle lib(3.13.0)). (Laruence)
 
 - Standard:
+  . Added is_iterable() function. (Aaron Piotrowski)
   . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
     (Laruence)
 

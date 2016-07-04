@@ -101,8 +101,8 @@ dnl configure options
 dnl
 
 PHP_ARG_WITH(odbcver,,
-[  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0300.
-                             Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0300)
+[  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0350.
+                             Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0350)
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(adabas,,
