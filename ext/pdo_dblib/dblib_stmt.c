@@ -284,6 +284,23 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					}
 					break;
 				}
+
+#ifdef SQLUNIQUE
+				case SQLUNIQUE: {
+#else
+				case 36: { /* FreeTDS hack */
+#endif
+					/* uniqueidentifier is a 16-byte binary number, convert to 36 char hex string */
+					tmp_data_len = 37;
+					tmp_data = emalloc(tmp_data_len);
+					data_len = dbconvert(NULL, SQLUNIQUE, data, data_len, SQLCHAR, tmp_data, tmp_data_len);
+					php_strtoupper(tmp_data, data_len);
+					tmp_data[36] = '\0';
+					zv = emalloc(sizeof(zval));
+					ZVAL_STRING(zv, tmp_data);
+					efree(tmp_data);
+					break;
+				}
 			}
 		}
 
