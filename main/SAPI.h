@@ -241,7 +241,7 @@ struct _sapi_module_struct {
 	char *(*read_cookies)(void);
 
 	void (*register_server_variables)(zval *track_vars_array);
-	void (*log_message)(char *message);
+	void (*log_message)(char *message, int syslog_type_int);
 	double (*get_request_time)(void);
 	void (*terminate_process)(void);
 
