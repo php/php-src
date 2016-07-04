@@ -59,6 +59,10 @@ PHP                                                                        NEWS
     (Laruence, Anatol)
   . Fixed UTF-8 and long path support on Windows. (Anatol)
 
+- Date:
+  . Fixed bug #63740 (strtotime seems to use both sunday and monday as start of
+    week). (Derick)
+
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
