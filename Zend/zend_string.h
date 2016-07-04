@@ -399,6 +399,7 @@ static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
 	_(ZEND_STR_INCLUDE,                "include") \
 	_(ZEND_STR_INCLUDE_ONCE,           "include_once") \
 	_(ZEND_STR_INT,                    TYPE_INT) \
+	_(ZEND_STR_ITERABLE,               TYPE_ITERABLE) \
 	_(ZEND_STR_KEY,                    "key") \
 	_(ZEND_STR_LINE,                   "line") \
 	_(ZEND_STR_MAGIC_AUTOLOAD,         "__autoload") \

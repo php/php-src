@@ -314,6 +314,7 @@ struct _zend_ast_ref {
 /* {{{ Pseudo data type names: */
 #define TYPE_BOOL                   "bool"
 #define TYPE_CALLABLE               "callable"
+#define TYPE_IS_ITERABLE            "iterable"
 #define TYPE_VOID                   "void"
 /* }}} */
 
