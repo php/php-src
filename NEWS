@@ -54,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed bug #72400 (Integer Overflow in addcslashes/addslashes). (Stas)
   . Fixed bug #72403 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
+- Date:
+  . Fixed bug #63740 (strtotime seems to use both sunday and monday as start of
+    week). (Derick)
+
 - FPM:
   . Fixed bug #72308 (fastcgi_finish_request and logging environment
     variables). (Laruence)
