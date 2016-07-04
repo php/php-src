@@ -767,7 +767,7 @@ ZEND_FUNCTION(each)
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
-	zval *err;
+	zval *err = NULL;
 	int old_error_reporting;
 
 #ifndef FAST_ZPP
@@ -2477,8 +2477,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 			if (object) {
 				if (func->common.scope) {
 					class_name = func->common.scope->name;
-				} else {
+				} else if (object->handlers->get_class_name == std_object_handlers.get_class_name) {
 					class_name = object->ce->name;
+				} else {
+					class_name = object->handlers->get_class_name(object);
 				}
 
 				call_type = "->";
@@ -2538,6 +2540,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 		if (class_name) {
 			ZEND_PUTS(ZSTR_VAL(class_name));
 			ZEND_PUTS(call_type);
+			if (object
+			  && !func->common.scope
+			  && object->handlers->get_class_name != std_object_handlers.get_class_name) {
+				zend_string_release(class_name);
+			}
 		}
 		zend_printf("%s(", function_name);
 		if (Z_TYPE(arg_array) != IS_UNDEF) {
@@ -2702,9 +2709,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			if (object) {
 				if (func->common.scope) {
 					ZVAL_STR_COPY(&tmp, func->common.scope->name);
-				} else {
+				} else if (object->handlers->get_class_name == std_object_handlers.get_class_name) {
 					ZVAL_STR_COPY(&tmp, object->ce->name);
-
+				} else {
+					ZVAL_STR(&tmp, object->handlers->get_class_name(object));
 				}
 				zend_hash_add_new(Z_ARRVAL(stack_frame), CG(known_strings)[ZEND_STR_CLASS], &tmp);
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {

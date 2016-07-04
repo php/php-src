@@ -47,6 +47,9 @@
 #include "zend_stream.h"
 #ifndef _WIN32
 #	include "zend_signal.h"
+# if !defined(ZEND_SIGNALS) && defined(HAVE_SIGNAL_H)
+#  include <signal.h>
+# endif
 #endif
 #include "SAPI.h"
 #include <fcntl.h>

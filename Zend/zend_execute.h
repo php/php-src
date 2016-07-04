@@ -54,7 +54,7 @@ extern ZEND_API const zend_internal_function zend_pass_function;
 
 ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
-ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
@@ -259,11 +259,10 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 	ZEND_ASSERT_VM_STACK_GLOBAL;
 
 	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
-		ZEND_ASSERT(call == (zend_execute_data*)ZEND_VM_STACK_ELEMENTS(EG(vm_stack)));
-
 		zend_vm_stack p = EG(vm_stack);
 		zend_vm_stack prev = p->prev;
 
+		ZEND_ASSERT(call == (zend_execute_data*)ZEND_VM_STACK_ELEMENTS(EG(vm_stack)));
 		EG(vm_stack_top) = prev->top;
 		EG(vm_stack_end) = prev->end;
 		EG(vm_stack) = prev;

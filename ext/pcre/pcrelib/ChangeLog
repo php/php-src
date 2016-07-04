@@ -4,12 +4,104 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
+Version 8.39 14-June-2016
+-------------------------
+
+1.  If PCRE_AUTO_CALLOUT was set on a pattern that had a (?# comment between
+    an item and its qualifier (for example, A(?#comment)?B) pcre_compile()
+    misbehaved. This bug was found by the LLVM fuzzer.
+
+2.  Similar to the above, if an isolated \E was present between an item and its
+    qualifier when PCRE_AUTO_CALLOUT was set, pcre_compile() misbehaved. This
+    bug was found by the LLVM fuzzer.
+
+3.  Further to 8.38/46, negated classes such as [^[:^ascii:]\d] were also not
+    working correctly in UCP mode.
+
+4.  The POSIX wrapper function regexec() crashed if the option REG_STARTEND
+    was set when the pmatch argument was NULL. It now returns REG_INVARG.
+
+5.  Allow for up to 32-bit numbers in the ordin() function in pcregrep.
+
+6.  An empty \Q\E sequence between an item and its qualifier caused
+    pcre_compile() to misbehave when auto callouts were enabled. This bug was
+    found by the LLVM fuzzer.
+
+7.  If a pattern that was compiled with PCRE_EXTENDED started with white
+    space or a #-type comment that was followed by (?-x), which turns off
+    PCRE_EXTENDED, and there was no subsequent (?x) to turn it on again,
+    pcre_compile() assumed that (?-x) applied to the whole pattern and
+    consequently mis-compiled it. This bug was found by the LLVM fuzzer.
+
+8.  A call of pcre_copy_named_substring() for a named substring whose number
+    was greater than the space in the ovector could cause a crash.
+
+9.  Yet another buffer overflow bug involved duplicate named groups with a
+    group that reset capture numbers (compare 8.38/7 below). Once again, I have
+    just allowed for more memory, even if not needed. (A proper fix is
+    implemented in PCRE2, but it involves a lot of refactoring.)
+
+10. pcre_get_substring_list() crashed if the use of \K in a match caused the
+    start of the match to be earlier than the end.
+
+11. Migrating appropriate PCRE2 JIT improvements to PCRE.
+
+12. A pattern such as /(?<=((?C)0))/, which has a callout inside a lookbehind
+    assertion, caused pcretest to generate incorrect output, and also to read
+    uninitialized memory (detected by ASAN or valgrind).
+
+13. A pattern that included (*ACCEPT) in the middle of a sufficiently deeply
+    nested set of parentheses of sufficient size caused an overflow of the
+    compiling workspace (which was diagnosed, but of course is not desirable).
+
+14. And yet another buffer overflow bug involving duplicate named groups, this
+    time nested, with a nested back reference. Yet again, I have just allowed
+    for more memory, because anything more needs all the refactoring that has
+    been done for PCRE2. An example pattern that provoked this bug is:
+    /((?J)(?'R'(?'R'(?'R'(?'R'(?'R'(?|(\k'R'))))))))/ and the bug was
+    registered as CVE-2016-1283.
+
+15. pcretest went into a loop if global matching was requested with an ovector
+    size less than 2. It now gives an error message. This bug was found by
+    afl-fuzz.
+
+16. An invalid pattern fragment such as (?(?C)0 was not diagnosing an error
+    ("assertion expected") when (?(?C) was not followed by an opening
+    parenthesis.
+
+17. Fixed typo ("&&" for "&") in pcre_study(). Fortunately, this could not
+    actually affect anything, by sheer luck.
+
+18. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC
+    static compilation.
+
+19. Modified the RunTest script to incorporate a valgrind suppressions file so
+    that certain errors, provoked by the SSE2 instruction set when JIT is used,
+    are ignored.
+
+20. A racing condition is fixed in JIT reported by Mozilla.
+
+21. Minor code refactor to avoid "array subscript is below array bounds"
+    compiler warning.
+
+22. Minor code refactor to avoid "left shift of negative number" warning.
+
+23. Fix typo causing compile error when 16- or 32-bit JIT is compiled without
+    UCP support.
+
+24. Refactor to avoid compiler warnings in pcrecpp.cc.
+
+25. Refactor to fix a typo in pcre_jit_test.c
+
+26. Patch to support compiling pcrecpp.cc with Intel compiler.
+
+
 Version 8.38 23-November-2015
 -----------------------------
 
 1.  If a group that contained a recursive back reference also contained a
     forward reference subroutine call followed by a non-forward-reference
-    subroutine call, for example /.((?2)(?R)\1)()/, pcre2_compile() failed to
+    subroutine call, for example /.((?2)(?R)\1)()/, pcre_compile() failed to
     compile correct code, leading to undefined behaviour or an internally
     detected error. This bug was discovered by the LLVM fuzzer.
 

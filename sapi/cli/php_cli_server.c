@@ -482,7 +482,7 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE(apache_request_headers, arginfo_no_args)
 	PHP_FE(apache_response_headers, arginfo_no_args)
 	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
@@ -670,10 +670,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 	if (SG(request_info).path_translated) {
 		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", SG(request_info).path_translated);
 	} else if (client->server->router) {
-		char *temp;
-		spprintf(&temp, 0, "%s/%s", client->server->document_root, client->server->router);
-		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", temp);
-		efree(temp);
+		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", client->server->router);
 	}
 	if (client->request.path_info) {
 		sapi_cli_server_register_variable(track_vars_array, "PATH_INFO", client->request.path_info);
@@ -1005,7 +1002,11 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			if (nbytes_sent < 0) {
 				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
+#ifdef PHP_WIN32
 			} else if (nbytes_sent == chunk->data.heap.len) {
+#else
+			} else if (nbytes_sent == (ssize_t)chunk->data.heap.len) {
+#endif
 				php_cli_server_chunk_dtor(chunk);
 				pefree(chunk, 1);
 				sender->buffer.first = next;
@@ -1028,7 +1029,11 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			if (nbytes_sent < 0) {
 				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
+#ifdef PHP_WIN32
 			} else if (nbytes_sent == chunk->data.immortal.len) {
+#else
+			} else if (nbytes_sent == (ssize_t)chunk->data.immortal.len) {
+#endif
 				php_cli_server_chunk_dtor(chunk);
 				pefree(chunk, 1);
 				sender->buffer.first = next;
@@ -1705,7 +1710,7 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	}
 	client->parser.data = client;
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
-	if (nbytes_consumed != nbytes_read) {
+	if (nbytes_consumed != (size_t)nbytes_read) {
 		if (buf[0] & 0x80 /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
 			*errstr = estrdup("Unsupported SSL request");
 		} else {
@@ -1857,7 +1862,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		if (!chunk) {
 			goto fail;
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string, ZSTR_VAL(escaped_request_uri));
+		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string);
 		chunk->data.heap.len = strlen(chunk->data.heap.p);
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
@@ -2548,6 +2553,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 
 #if defined(HAVE_SIGNAL_H) && defined(SIGINT)
 	signal(SIGINT, php_cli_server_sigint_handler);
+	zend_signal_init();
 #endif
 	php_cli_server_do_event_loop(&server);
 	php_cli_server_dtor(&server);

@@ -375,7 +375,7 @@ static inline unsigned int get_next_char(
  * defaults to UTF-8 */
 static enum entity_charset determine_charset(char *charset_hint)
 {
-	int i;
+	size_t i;
 	enum entity_charset charset = cs_utf_8;
 	size_t len = 0;
 	const zend_encoding *zenc;

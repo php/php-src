@@ -126,7 +126,7 @@ PHP_FUNCTION(grapheme_strpos)
 
 	/* we checked that it will fit: */
 	offset = (int32_t) loffset;
-	noffset = offset >= 0 ? offset : haystack_len + offset;
+	noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
@@ -200,7 +200,7 @@ PHP_FUNCTION(grapheme_stripos)
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
-		int32_t noffset = offset >= 0 ? offset : haystack_len + offset;
+		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
 		php_strtolower(needle_dup, needle_len);
 		haystack_dup = estrndup(haystack, haystack_len);
@@ -828,7 +828,7 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_FALSE;
 	}
 
-	if ( lstart > INT32_MAX || lstart < 0 || lstart >= str_len ) {
+	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: start not contained in string", 0 );
 		RETURN_FALSE;
 	}

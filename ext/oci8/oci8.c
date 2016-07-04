@@ -1231,9 +1231,9 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Statistics", "");
-	snprintf(buf, sizeof(buf), "%pd", OCI_G(num_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, OCI_G(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Connections", buf);
-	snprintf(buf, sizeof(buf), "%pd", OCI_G(num_links));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, OCI_G(num_links));
 	php_info_print_table_row(2, "Active Connections", buf);
 	php_info_print_table_end();
 }
@@ -1662,7 +1662,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	ub2 charsetid_nls_lang = 0;
 
 	if (session_mode & ~(OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) {
-		php_error_docref(NULL, E_WARNING, "Invalid session mode specified (%pd)", session_mode);
+		php_error_docref(NULL, E_WARNING, "Invalid session mode specified (" ZEND_LONG_FMT ")", session_mode);
 		return NULL;
 	}
 	if (session_mode & (OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) {
@@ -1930,7 +1930,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 			if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 				/* all persistent connactions are in use, fallback to non-persistent connection creation */
-				php_error_docref(NULL, E_NOTICE, "Too many open persistent connections (%pd)", OCI_G(num_persistent));
+				php_error_docref(NULL, E_NOTICE, "Too many open persistent connections (" ZEND_LONG_FMT ")", OCI_G(num_persistent));
 				alloc_non_persistent = 1;
 			}
 		}

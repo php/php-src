@@ -1249,11 +1249,11 @@ PHP_FUNCTION(base_convert)
 	convert_to_string_ex(number);
 
 	if (frombase < 2 || frombase > 36) {
-		php_error_docref(NULL, E_WARNING, "Invalid `from base' (%pd)", frombase);
+		php_error_docref(NULL, E_WARNING, "Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
 		RETURN_FALSE;
 	}
 	if (tobase < 2 || tobase > 36) {
-		php_error_docref(NULL, E_WARNING, "Invalid `to base' (%pd)", tobase);
+		php_error_docref(NULL, E_WARNING, "Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
 		RETURN_FALSE;
 	}
 

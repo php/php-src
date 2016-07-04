@@ -63,7 +63,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 			/* these three are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown descriptor type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unknown descriptor type " ZEND_LONG_FMT, type);
 			return NULL;
 			break;
 	}
@@ -630,7 +630,7 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, zend_long flush_flag)
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid flag value: %pd", flush_flag);
+			php_error_docref(NULL, E_WARNING, "Invalid flag value: " ZEND_LONG_FMT, flush_flag);
 			return 1;
 			break;
 	}
@@ -909,7 +909,7 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, zend_long type, char 
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid temporary lob type: %pd", type);
+			php_error_docref(NULL, E_WARNING, "Invalid temporary lob type: " ZEND_LONG_FMT, type);
 			return 1;
 			break;
 	}

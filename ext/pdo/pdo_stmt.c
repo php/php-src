@@ -551,7 +551,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 
 	col = &stmt->columns[colno];
 	type = PDO_PARAM_TYPE(col->param_type);
-	new_type =  type_override ? PDO_PARAM_TYPE(*type_override) : type;
+	new_type =  type_override ? (int)PDO_PARAM_TYPE(*type_override) : type;
 
 	value = NULL;
 	value_len = 0;
@@ -1537,10 +1537,11 @@ static PHP_METHOD(PDOStatement, fetchAll)
 
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
 {
-	struct pdo_bound_param_data param = {{{0}}};
+	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter, *driver_params = NULL;
 
+	memset(&param, 0, sizeof(param));
 	param.paramno = -1;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
@@ -1580,11 +1581,12 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
    bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
 static PHP_METHOD(PDOStatement, bindValue)
 {
-	struct pdo_bound_param_data param = {{{0}}};
+	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter;
 	PHP_STMT_GET_OBJ;
 
+	memset(&param, 0, sizeof(param));
 	param.paramno = -1;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
@@ -2123,10 +2125,10 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out, "Key: Name: [%zd] %.*s\n",
 					ZSTR_LEN(key), (int) ZSTR_LEN(key), ZSTR_VAL(key));
 			} else {
-				php_stream_printf(out, "Key: Position #%pd:\n", num);
+				php_stream_printf(out, "Key: Position #" ZEND_ULONG_FMT ":\n", num);
 			}
 
-			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+			php_stream_printf(out, "paramno=" ZEND_LONG_FMT "\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
 					param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
 					param->name ? ZSTR_VAL(param->name) : "",
 					param->is_param,
@@ -2177,7 +2179,7 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, debugDumpParams, arginfo_pdostatement__void,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, __wakeup,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDOStatement, __sleep,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
@@ -2448,6 +2450,7 @@ static zend_object_iterator_funcs pdo_stmt_iter_funcs = {
 	pdo_stmt_iter_get_data,
 	pdo_stmt_iter_get_key,
 	pdo_stmt_iter_move_forwards,
+	NULL,
 	NULL
 };
 
@@ -2480,7 +2483,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 /* {{{ overloaded handlers for PDORow class (used by PDO_FETCH_LAZY) */
 
 const zend_function_entry pdo_row_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static zval *row_prop_read(zval *object, zval *member, int type, void **cache_slot, zval *rv)
@@ -2679,6 +2682,11 @@ zend_object_handlers pdo_row_object_handlers = {
 	row_get_classname,
 	row_compare,
 	NULL, /* cast */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 	NULL
 };
 

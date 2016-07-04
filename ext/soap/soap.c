@@ -970,7 +970,7 @@ PHP_METHOD(SoapFault, __toString)
 	convert_to_long(line);
 	convert_to_string(&trace);
 
-	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:%pd\nStack trace:\n%s",
+	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:" ZEND_LONG_FMT "\nStack trace:\n%s",
 	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
 	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 
@@ -1273,7 +1273,7 @@ PHP_METHOD(SoapServer, setPersistence)
 				value == SOAP_PERSISTENCE_REQUEST) {
 				service->soap_class.persistence = value;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Tried to set persistence with bogus value (%pd)", value);
+				php_error_docref(NULL, E_WARNING, "Tried to set persistence with bogus value (" ZEND_LONG_FMT ")", value);
 				return;
 			}
 		} else {
@@ -2157,7 +2157,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			zval fault;
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
-			int buffer_len;
+			size_t buffer_len;
 #ifdef va_copy
 			va_list argcopy;
 #endif
@@ -2172,7 +2172,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
 #endif
 			buffer[sizeof(buffer)-1]=0;
-			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+			if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
 				buffer_len = sizeof(buffer) - 1;
 			}
 
@@ -2238,7 +2238,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				!service->send_errors) {
 				strcpy(buffer, "Internal Error");
 			} else {
-				int buffer_len;
+				size_t buffer_len;
 				zval outbuflen;
 
 #ifdef va_copy
@@ -2249,7 +2249,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
 #endif
 				buffer[sizeof(buffer)-1]=0;
-				if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+				if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
 					buffer_len = sizeof(buffer) - 1;
 				}
 

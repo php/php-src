@@ -133,6 +133,13 @@ PHP_FUNCTION(parse_ini_string);
 PHP_FUNCTION(config_get_hash);
 #endif
 
+#if defined(PHP_WIN32)
+PHP_FUNCTION(sapi_windows_cp_set);
+PHP_FUNCTION(sapi_windows_cp_get);
+PHP_FUNCTION(sapi_windows_cp_is_utf8);
+PHP_FUNCTION(sapi_windows_cp_conv);
+#endif
+
 PHP_FUNCTION(str_rot13);
 PHP_FUNCTION(stream_get_filters);
 PHP_FUNCTION(stream_filter_register);

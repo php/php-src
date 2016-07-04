@@ -82,7 +82,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	if (ctx->debug_level & ZEND_DUMP_DFA_PHI) {
 		build_flags |= ZEND_SSA_DEBUG_PHI_PLACEMENT;
 	}
-	if (zend_build_ssa(&ctx->arena, op_array, build_flags, ssa, flags) != SUCCESS) {
+	if (zend_build_ssa(&ctx->arena, ctx->script, op_array, build_flags, ssa, flags) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -142,6 +142,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 			i = b->start;
 			b->start = target;
 			while (i < end) {
+				shiftlist[i] = i - target;
 				if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
 				   /*keep NOP to support ZEND_VM_SMART_BRANCH */
 				   (i > 0 &&
@@ -165,7 +166,6 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					if (i != target) {
 						op_array->opcodes[target] = op_array->opcodes[i];
 						ssa->ops[target] = ssa->ops[i];
-						shiftlist[i] = i - target;
 					}
 					target++;
 				}
@@ -319,6 +319,48 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 	free_alloca(shiftlist, use_heap);
 }
 
+static inline zend_bool can_elide_return_type_check(
+		zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
+	zend_arg_info *info = &op_array->arg_info[-1];
+	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
+	zend_ssa_var_info *def_info = &ssa->var_info[ssa_op->op1_def];
+
+	/* A type is possible that is not in the allowed types */
+	if ((use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~(def_info->type & MAY_BE_ANY)) {
+		return 0;
+	}
+
+	if (info->type_hint == IS_CALLABLE) {
+		return 0;
+	}
+
+	if (info->class_name) {
+		if (!use_info->ce || !def_info->ce || !instanceof_function(use_info->ce, def_info->ce)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static zend_bool opline_supports_assign_contraction(zend_ssa *ssa, zend_op *opline, int src_var) {
+	if (opline->opcode == ZEND_NEW) {
+		/* see Zend/tests/generators/aborted_yield_during_new.phpt */
+		return 0;
+	}
+
+	if (opline->opcode == ZEND_DO_ICALL || opline->opcode == ZEND_DO_UCALL
+			|| opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+		/* Function calls may dtor the return value after it has already been written -- allow
+		 * direct assignment only for types where a double-dtor does not matter. */
+		uint32_t type = ssa->var_info[src_var].type;
+		uint32_t simple = MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE;
+		return !((type & MAY_BE_ANY) & ~simple);
+	}
+
+	return 1;
+}
+
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
@@ -433,8 +475,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && ssa->ops[op_1].op2_use_chain < 0
 					 && !ssa->vars[src_var].phi_use_chain
 					 && !ssa->vars[src_var].sym_use_chain
-					 /* see Zend/tests/generators/aborted_yield_during_new.phpt */
-					 && op_array->opcodes[ssa->vars[src_var].definition].opcode != ZEND_NEW
+					 && opline_supports_assign_contraction(
+						 ssa, &op_array->opcodes[ssa->vars[src_var].definition], src_var)
 					) {
 
 						int op_2 = ssa->vars[src_var].definition;
@@ -523,7 +565,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			 && ssa->ops[op_1].op1_use >= 0
 			 && ssa->ops[op_1].op1_use_chain == -1
 			 && ssa->vars[v].use_chain >= 0
-			 && (ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_ANY|MAY_BE_UNDEF)) == (ssa->var_info[ssa->ops[op_1].op1_def].type & MAY_BE_ANY)) {
+			 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
 
 // op_1: VERIFY_RETURN_TYPE #orig_var.CV [T] -> #v.CV [T] => NOP
 

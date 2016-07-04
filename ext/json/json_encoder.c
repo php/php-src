@@ -31,14 +31,6 @@
 #include "php_json.h"
 #include <zend_exceptions.h>
 
-/* double limits */
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define PHP_JSON_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define PHP_JSON_DOUBLE_MAX_LENGTH 1080
-#endif
-
 static const char digits[] = "0123456789abcdef";
 
 static void php_json_escape_string(smart_str *buf, char *s, size_t len, int options);
@@ -103,10 +95,11 @@ static inline int php_json_is_valid_double(double d) /* {{{ */
 static inline void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
 {
 	size_t len;
-	char num[PHP_JSON_DOUBLE_MAX_LENGTH];
-	php_gcvt(d, (int)EG(precision), '.', 'e', &num[0]);
+	char num[PHP_DOUBLE_MAX_LENGTH];
+
+	php_gcvt(d, (int)PG(serialize_precision), '.', 'e', num);
 	len = strlen(num);
-	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_JSON_DOUBLE_MAX_LENGTH - 2) {
+	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_DOUBLE_MAX_LENGTH - 2) {
 		num[len++] = '.';
 		num[len++] = '0';
 		num[len] = '\0';
@@ -169,7 +162,7 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 				php_json_encode(buf, data, options);
 			} else if (r == PHP_JSON_OUTPUT_OBJECT) {
 				if (key) {
-					if (ZSTR_VAL(key)[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
+					if (ZSTR_VAL(key)[0] == '\0' && ZSTR_LEN(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
 						if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
 							ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);

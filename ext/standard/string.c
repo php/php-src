@@ -978,7 +978,7 @@ PHP_FUNCTION(wordwrap)
 		newtext = zend_string_init(ZSTR_VAL(text), ZSTR_LEN(text), 0);
 
 		laststart = lastspace = 0;
-		for (current = 0; current < ZSTR_LEN(text); current++) {
+		for (current = 0; current < (zend_long)ZSTR_LEN(text); current++) {
 			if (ZSTR_VAL(text)[current] == breakchar[0]) {
 				laststart = lastspace = current + 1;
 			} else if (ZSTR_VAL(text)[current] == ' ') {
@@ -1010,7 +1010,7 @@ PHP_FUNCTION(wordwrap)
 		newtextlen = 0;
 
 		laststart = lastspace = 0;
-		for (current = 0; current < ZSTR_LEN(text); current++) {
+		for (current = 0; current < (zend_long)ZSTR_LEN(text); current++) {
 			if (chk <= 0) {
 				alloced += (size_t) (((ZSTR_LEN(text) - current + 1)/linelength + 1) * breakchar_len) + 1;
 				newtext = zend_string_extend(newtext, alloced, 0);
@@ -1670,7 +1670,11 @@ PHP_FUNCTION(dirname)
 
 	if (levels == 1) {
 		/* Defaut case */
+#ifdef PHP_WIN32
+		ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len);
+#else
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
+#endif
 	} else if (levels < 1) {
 		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
 		zend_string_free(ret);
@@ -1678,7 +1682,11 @@ PHP_FUNCTION(dirname)
 	} else {
 		/* Some levels up */
 		do {
+#ifdef PHP_WIN32
+			ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));
+#else
 			ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));
+#endif
 		} while (ZSTR_LEN(ret) < str_len && --levels);
 	}
 
@@ -1746,7 +1754,7 @@ PHP_FUNCTION(pathinfo)
 
 		p = zend_memrchr(ZSTR_VAL(ret), '.', ZSTR_LEN(ret));
 
-		idx = p ? (p - ZSTR_VAL(ret)) : ZSTR_LEN(ret);
+		idx = p ? (p - ZSTR_VAL(ret)) : (ptrdiff_t)ZSTR_LEN(ret);
 		add_assoc_stringl(&tmp, "filename", ZSTR_VAL(ret), idx);
 	}
 
@@ -2123,7 +2131,7 @@ PHP_FUNCTION(strrpos)
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack);
-		if (-offset < needle_len) {
+		if ((size_t)-offset < needle_len) {
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 		} else {
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + offset + needle_len;
@@ -2224,7 +2232,7 @@ PHP_FUNCTION(strripos)
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup);
-		if (-offset < ZSTR_LEN(needle)) {
+		if ((size_t)-offset < ZSTR_LEN(needle)) {
 			e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
 		} else {
 			e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack) + offset + ZSTR_LEN(needle);
@@ -2404,7 +2412,7 @@ PHP_FUNCTION(substr)
 
 	if (f > (zend_long)ZSTR_LEN(str)) {
 		RETURN_FALSE;
-	} else if (f < 0 && -f > ZSTR_LEN(str)) {
+	} else if (f < 0 && (size_t)-f > ZSTR_LEN(str)) {
 		f = 0;
 	}
 
@@ -2510,7 +2518,7 @@ PHP_FUNCTION(substr_replace)
 				if (f < 0) {
 					f = 0;
 				}
-			} else if (f > Z_STRLEN_P(str)) {
+			} else if ((size_t)f > Z_STRLEN_P(str)) {
 				f = Z_STRLEN_P(str);
 			}
 			/* if "length" position is negative, set it to the length
@@ -2523,7 +2531,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (l > Z_STRLEN_P(str) || (l < 0 && (size_t)(-l) > Z_STRLEN_P(str))) {
+			if ((size_t)l > Z_STRLEN_P(str) || (l < 0 && (size_t)(-l) > Z_STRLEN_P(str))) {
 				l = Z_STRLEN_P(str);
 			}
 
@@ -4204,8 +4212,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	char *str;
 	char *heb_str, *tmp, *target;
 	size_t block_start, block_end, block_type, block_length, i;
-	zend_long max_chars=0;
-	size_t begin, end, char_count, orig_begin;
+	zend_long max_chars=0, char_count;
+	size_t begin, end, orig_begin;
 	size_t str_len;
 	zend_string *broken_str;
 
@@ -4614,6 +4622,9 @@ PHP_FUNCTION(parse_str)
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
+		if (UNEXPECTED(zend_hash_del(symbol_table, CG(known_strings)[ZEND_STR_THIS]) == SUCCESS)) {
+			zend_throw_error(NULL, "Cannot re-assign $this");
+		}
 	} else 	{
 		zval ret;
 
@@ -5313,7 +5324,7 @@ PHP_FUNCTION(substr_count)
 		if (length <= 0) {
 			length += (haystack_len - offset);
 		}
-		if ((length <= 0) || (length > (haystack_len - offset))) {
+		if ((length <= 0) || ((size_t)length > (haystack_len - offset))) {
 			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
@@ -5735,7 +5746,7 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
-	cmp_len = (size_t) (len ? len : MAX(ZSTR_LEN(s2), (ZSTR_LEN(s1) - offset)));
+	cmp_len = len ? (size_t)len : MAX(ZSTR_LEN(s2), (ZSTR_LEN(s1) - offset));
 
 	if (!cs) {
 		RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));

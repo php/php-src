@@ -131,7 +131,7 @@ static PHP_INI_MH(OnSetPrecision)
 	zend_long i;
 
 	ZEND_ATOL(i, ZSTR_VAL(new_value));
-	if (i >= 0) {
+	if (i >= -1) {
 		EG(precision) = i;
 		return SUCCESS;
 	} else {
@@ -139,6 +139,23 @@ static PHP_INI_MH(OnSetPrecision)
 	}
 }
 /* }}} */
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnSetSerializePrecision)
+{
+	zend_long i;
+
+	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	if (i >= -1) {
+		PG(serialize_precision) = i;
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
 
 /* {{{ PHP_INI_MH
  */
@@ -386,10 +403,27 @@ static PHP_INI_DISP(display_errors_mode)
 
 /* {{{ PHP_INI_MH
  */
+static PHP_INI_MH(OnUpdateDefaultCharset)
+{
+	if (new_value) {
+		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+#ifdef PHP_WIN32
+		php_win32_cp_do_update(ZSTR_VAL(new_value));
+#endif
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+#ifdef PHP_WIN32
+		php_win32_cp_do_update(ZSTR_VAL(new_value));
+#endif
 	}
 	return SUCCESS;
 }
@@ -516,14 +550,14 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("serialize_precision",	"17",	PHP_INI_ALL,		OnUpdateLongGEZero,			serialize_precision,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator.output",	"&",		PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator.output,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator.input",	"&",		PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateStringUnempty,	arg_separator.input,	php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct, sapi_globals)
+	STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateDefaultCharset,			default_charset,		sapi_globals_struct, sapi_globals)
 	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct, sapi_globals)
 	STD_PHP_INI_ENTRY("internal_encoding",		NULL,			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("input_encoding",			NULL,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
@@ -1107,7 +1141,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 
 		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
-				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%pd</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
+				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
 			} else {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
@@ -1240,15 +1274,17 @@ PHPAPI char *php_get_current_user(void)
 		return "";
 	} else {
 #ifdef PHP_WIN32
-		char name[256];
-		DWORD len = sizeof(name)-1;
+		char *name = php_win32_get_username();
+		int len;
 
-		if (!GetUserName(name, &len)) {
+		if (!name) {
 			return "";
 		}
+		len = (int)strlen(name);
 		name[len] = '\0';
 		SG(request_info).current_user_length = len;
 		SG(request_info).current_user = estrndup(name, len);
+		free(name);
 		return SG(request_info).current_user;
 #else
 		struct passwd *pwd;
@@ -1449,7 +1485,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 				if (message==ZMSG_MEMORY_LEAK_DETECTED) {
 					zend_leak_info *t = (zend_leak_info *) data;
 
-					snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%.8lX (%zu bytes), script=%s\n", t->filename, t->lineno, (zend_uintptr_t)t->addr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
+					snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", t->filename, t->lineno, (size_t)t->addr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
 					if (t->orig_filename) {
 						char relay_buf[512];
 
@@ -1597,9 +1633,7 @@ int php_request_startup(void)
 		zend_activate();
 		sapi_activate();
 
-#ifdef ZEND_SIGNALS
 		zend_signal_activate();
-#endif
 
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);
@@ -2078,8 +2112,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.write_function = php_output_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
-	zuf.block_interruptions = sapi_module.block_interruptions;
-	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
 	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
 	zuf.ticks_function = php_run_ticks;
 	zuf.on_timeout = php_on_timeout;

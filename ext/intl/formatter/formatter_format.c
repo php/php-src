@@ -18,9 +18,10 @@
 #include "config.h"
 #endif
 
+#include "php_intl.h"
+
 #include <unicode/ustring.h>
 
-#include "php_intl.h"
 #include "formatter_class.h"
 #include "formatter_format.h"
 #include "intl_convert.h"
@@ -119,7 +120,7 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
 			RETURN_FALSE;
 			break;
 	}

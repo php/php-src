@@ -49,9 +49,9 @@ print "TZ=Asia/Baku - wrong day.\n";
 date_default_timezone_set("Asia/Baku");
 $tStamp = mktime (17, 17, 17, 1, 8299, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("next Sunday", $tStamp);
+$strtotime_tstamp = strtotime("second Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Sunday              00:00:00\n\n";
+print "wanted=Monday              00:00:00\n\n";
 
 print "TZ=America/Noronha - wrong day.\n";
 date_default_timezone_set("America/Noronha");
@@ -227,8 +227,8 @@ wanted=Thursday             00:00:00
 
 TZ=Asia/Baku - wrong day.
 tStamp=Sunday 1992-09-20 17:17:17 AZST 1
-result=Sunday 1992-09-27 00:00:00 AZT 0
-wanted=Sunday              00:00:00
+result=Monday 1992-09-28 00:00:00 AZT 0
+wanted=Monday              00:00:00
 
 TZ=America/Noronha - wrong day.
 tStamp=Friday 1999-10-01 17:17:17 FNT 0

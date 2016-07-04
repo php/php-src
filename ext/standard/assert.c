@@ -370,7 +370,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL, E_WARNING, "Unknown value %pd", what);
+		php_error_docref(NULL, E_WARNING, "Unknown value " ZEND_LONG_FMT, what);
 		break;
 	}
 

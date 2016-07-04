@@ -285,7 +285,10 @@ unserialize_callback_func =
 ; When floats & doubles are serialized store serialize_precision significant
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
-serialize_precision = 17
+; The value is also used for json_encode when encoding double values.
+; If -1 is used, then dtoa mode 0 is used which automatically select the best
+; precision.
+serialize_precision = -1
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
@@ -866,6 +869,7 @@ default_socket_timeout = 60
 ;extension=php_bz2.dll
 ;extension=php_curl.dll
 ;extension=php_fileinfo.dll
+;extension=php_ftp.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
 ;extension=php_gmp.dll
@@ -1652,7 +1656,7 @@ zend.assertions = 1
 ; a gd image. The warning will then be displayed as notices
 ; disabled by default
 ; http://php.net/gd.jpeg-ignore-warning
-;gd.jpeg_ignore_warning = 0
+;gd.jpeg_ignore_warning = 1
 
 [exif]
 ; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.

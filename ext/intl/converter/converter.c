@@ -152,7 +152,7 @@ static PHP_METHOD(UConverter, fromUCallback) {
 /* {{{ php_converter_check_limits */
 static inline zend_bool php_converter_check_limits(php_converter_object *objval, zend_long available, zend_long needed) {
 	if (available < needed) {
-		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR, "Buffer overrun %pd bytes needed, %pd available", needed, available);
+		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR, "Buffer overrun " ZEND_LONG_FMT " bytes needed, " ZEND_LONG_FMT " available", needed, available);
 		return 0;
 	}
 	return 1;
@@ -732,7 +732,7 @@ static PHP_METHOD(UConverter, reasonText) {
 		UCNV_REASON_CASE(CLOSE)
 		UCNV_REASON_CASE(CLONE)
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown UConverterCallbackReason: %pd", reason);
+			php_error_docref(NULL, E_WARNING, "Unknown UConverterCallbackReason: " ZEND_LONG_FMT, reason);
 			RETURN_FALSE;
 	}
 }
@@ -997,7 +997,7 @@ static zend_function_entry php_converter_methods[] = {
 	PHP_ME(UConverter, getAvailable,           php_converter_getavailable_arginfo,      ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(UConverter, getAliases,             php_converter_getaliases_arginfo,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(UConverter, getStandards,           php_converter_getstandards_arginfo,      ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 
 /* {{{ Converter create/clone/destroy */

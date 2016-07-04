@@ -332,14 +332,14 @@ static void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa
 	}
 }
 
-static void zend_dump_pi_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_pi_constraint *r, uint32_t dump_flags)
+static void zend_dump_type_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_type_constraint *constraint, uint32_t dump_flags)
 {
-	if (r->type_mask != (uint32_t) -1) {
-		fprintf(stderr, " TYPE");
-		zend_dump_type_info(r->type_mask, NULL, 0, dump_flags);
-		return;
-	}
+	fprintf(stderr, " TYPE");
+	zend_dump_type_info(constraint->type_mask, constraint->ce, 1, dump_flags);
+}
 
+static void zend_dump_range_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_range_constraint *r, uint32_t dump_flags)
+{
 	if (r->range.underflow && r->range.overflow) {
 		return;
 	}
@@ -773,7 +773,11 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 				fprintf(stderr, " = Pi<BB%d>(", p->pi);
 				zend_dump_ssa_var(op_array, ssa, p->sources[0], 0, p->var, dump_flags);
 				fprintf(stderr, " &");
-				zend_dump_pi_constraint(op_array, ssa, &p->constraint, dump_flags);
+				if (p->has_range_constraint) {
+					zend_dump_range_constraint(op_array, ssa, &p->constraint.range, dump_flags);
+				} else {
+					zend_dump_type_constraint(op_array, ssa, &p->constraint.type, dump_flags);
+				}
 				fprintf(stderr, ")\n");
 			}
 			p = p->next;
@@ -883,10 +887,12 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	fprintf(stderr, "    ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
 
 	if (func_info && func_info->num_args > 0) {
-		for (i = 0; i < MIN(op_array->num_args, func_info->num_args ); i++) {
-			fprintf(stderr, "    ; arg %d ", i);
-			zend_dump_type_info(func_info->arg_info[i].info.type, func_info->arg_info[i].info.ce, func_info->arg_info[i].info.is_instanceof, dump_flags);
-			zend_dump_range(&func_info->arg_info[i].info.range);
+		uint32_t j;
+
+		for (j = 0; j < MIN(op_array->num_args, func_info->num_args ); j++) {
+			fprintf(stderr, "    ; arg %d ", j);
+			zend_dump_type_info(func_info->arg_info[j].info.type, func_info->arg_info[j].info.ce, func_info->arg_info[j].info.is_instanceof, dump_flags);
+			zend_dump_range(&func_info->arg_info[j].info.range);
 			fprintf(stderr, "\n");
 		}
 	}

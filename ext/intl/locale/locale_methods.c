@@ -1429,7 +1429,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	char* cur_loc_range	= NULL;
 	zend_string* can_loc_range	= NULL;
-	int	saved_pos = 0;
+	size_t	saved_pos = 0;
 
 	zend_string* return_value = NULL;
 

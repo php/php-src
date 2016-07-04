@@ -1169,7 +1169,8 @@ static php_stream_ops php_stream_sqlite3_ops = {
 	"SQLite3",
 	php_sqlite3_stream_seek,
 	php_sqlite3_stream_cast,
-	php_sqlite3_stream_stat
+	php_sqlite3_stream_stat,
+	NULL
 };
 
 /* {{{ proto resource SQLite3::openBlob(string table, string column, int rowid [, string dbname])
@@ -1315,6 +1316,12 @@ PHP_METHOD(sqlite3stmt, clear)
 	if (sqlite3_clear_bindings(stmt_obj->stmt) != SQLITE_OK) {
 		php_sqlite3_error(stmt_obj->db_obj, "Unable to clear statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
 		RETURN_FALSE;
+	}
+
+	if (stmt_obj->bound_params) {
+		zend_hash_destroy(stmt_obj->bound_params);
+		FREE_HASHTABLE(stmt_obj->bound_params);
+		stmt_obj->bound_params = NULL;
 	}
 
 	RETURN_TRUE;

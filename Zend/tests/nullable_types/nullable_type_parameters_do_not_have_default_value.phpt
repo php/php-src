@@ -9,7 +9,7 @@ function f(?callable $p) {}
 f();
 
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to f() must be callable, none given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught Error: Too few arguments to function f(), 0 passed in %snullable_type_parameters_do_not_have_default_value.php on line %d and exactly 1 expected in %s:%d
 Stack trace:
 #%d %s
 #%d %s

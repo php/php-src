@@ -638,7 +638,7 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 			c = '?';
 		}
 
-		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder ? decoder(c) : c;
+		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder ? (unsigned int)decoder(c) : c;
 	}
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	if (ZSTR_LEN(str) < len) {
@@ -864,7 +864,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		} 
 
 		if (!Z_ISUNDEF(parser->data)) {
-			int i;
+			size_t i;
 			int doprint = 0;
 			zend_string *decoded_value;
 
@@ -918,7 +918,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						break;
 					} ZEND_HASH_FOREACH_END();
 
-					if (parser->level <= XML_MAXLEVEL) {
+					if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
 						array_init(&tag);
 
 						_xml_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);
@@ -1554,7 +1554,6 @@ PHP_FUNCTION(xml_parser_free)
 {
 	zval *pind;
 	xml_parser *parser;
-	zend_resource *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pind) == FAILURE) {
 		return;

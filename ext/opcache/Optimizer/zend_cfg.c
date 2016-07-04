@@ -21,6 +21,8 @@
 #include "zend_cfg.h"
 #include "zend_func_info.h"
 #include "zend_worklist.h"
+#include "zend_optimizer.h"
+#include "zend_optimizer_internal.h"
 
 static void zend_mark_reachable(zend_op *opcodes, zend_basic_block *blocks, zend_basic_block *b) /* {{{ */
 {
@@ -110,7 +112,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 						b->start++;
 						b->len--;
 					}
-					if (b->len == 0 && b->successors[0] == block_map[live_range->end]) {
+					if (b->len == 0 && (uint32_t)b->successors[0] == block_map[live_range->end]) {
 						/* mark as removed (empty live range) */
 						live_range->var = (uint32_t)-1;
 						continue;
@@ -319,27 +321,8 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				}
 				if ((fn = zend_hash_find_ptr(EG(function_table), Z_STR_P(zv))) != NULL) {
 					if (fn->type == ZEND_INTERNAL_FUNCTION) {
-						if (zend_string_equals_literal(Z_STR_P(zv), "extract")) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "compact")) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "parse_str") &&
-						           opline->extended_value == 1) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "mb_parse_str") &&
-						           opline->extended_value == 1) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "get_defined_vars")) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "assert")) {
-							flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_num_args")) {
-							flags |= ZEND_FUNC_VARARG;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_get_arg")) {
-							flags |= ZEND_FUNC_VARARG;
-						} else if (zend_string_equals_literal(Z_STR_P(zv), "func_get_args")) {
-							flags |= ZEND_FUNC_VARARG;
-						}
+						flags |= zend_optimizer_classify_function(
+							Z_STR_P(zv), opline->extended_value);
 					}
 				}
 				break;

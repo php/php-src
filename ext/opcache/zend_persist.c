@@ -89,21 +89,21 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *data = HT_GET_DATA_ADDR(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
-	} else if (ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
-		int32_t hash_size;
+		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
 			hash_size = HT_MIN_SIZE;
 		} else {
-			hash_size = -(int32_t)ht->nTableMask;
+			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
 			while (hash_size >> 1 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}
-		ht->nTableMask = -hash_size;
+		ht->nTableMask = (uint32_t)(-(int32_t)hash_size);
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
 		ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE((hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket))));
@@ -171,21 +171,21 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		HT_SET_DATA_ADDR(ht, zend_accel_memdup(HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht)));
-	} else if (ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
-		int32_t hash_size;
+		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
 			hash_size = HT_MIN_SIZE;
 		} else {
-			hash_size = -(int32_t)ht->nTableMask;
+			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
 			while (hash_size >> 1 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}
-		ht->nTableMask = -hash_size;
+		ht->nTableMask = (uint32_t)(-(int32_t)hash_size);
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
 		ZCG(mem) = (void*)((char*)ZCG(mem) + (hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket)));

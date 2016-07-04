@@ -222,7 +222,7 @@ static void ps_files_open(ps_files *data, const char *key)
 
 static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 {
-	zend_long n = 0;
+	size_t n = 0;
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
@@ -262,7 +262,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 #endif
 
 	if (n != ZSTR_LEN(val)) {
-		if (n == -1) {
+		if (n == (size_t)-1) {
 			php_error_docref(NULL, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
 		} else {
 			php_error_docref(NULL, E_WARNING, "write wrote less bytes than requested");
@@ -293,6 +293,11 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 	time(&now);
 
 	dirname_len = strlen(dirname);
+
+	if (dirname_len >= MAXPATHLEN) {
+		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", dirname);
+		return (0);
+	}
 
 	/* Prepare buffer (dirname never changes) */
 	memcpy(buf, dirname, dirname_len);
