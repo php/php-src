@@ -660,7 +660,7 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 
 /* {{{ sapi_cgi_log_message
  */
-static void sapi_cgi_log_message(char *message)
+static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
 	zlog(ZLOG_NOTICE, "PHP message: %s", message);
 }

@@ -398,7 +398,7 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 
 /* {{{ sapi_lsapi_send_headers
  */
-static void sapi_lsapi_log_message(char *message)
+static void sapi_lsapi_log_message(char *message, int syslog_type_int)
 {
     char buf[8192];
     int len = strlen( message );
