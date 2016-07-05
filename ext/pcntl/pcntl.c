@@ -72,6 +72,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
 	ZEND_ARG_INFO(0, restart_syscalls)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal_get_handler, 0, 0, 1)
+	ZEND_ARG_INFO(0, signo)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
 	ZEND_ARG_INFO(0, how)
 	ZEND_ARG_INFO(0, set)
@@ -155,6 +159,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
 	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)
 	PHP_FE(pcntl_signal,		arginfo_pcntl_signal)
+	PHP_FE(pcntl_signal_get_handler,		arginfo_pcntl_signal_get_handler)
 	PHP_FE(pcntl_signal_dispatch,	arginfo_pcntl_void)
 	PHP_FE(pcntl_wifexited,		arginfo_pcntl_wifexited)
 	PHP_FE(pcntl_wifstopped,	arginfo_pcntl_wifstopped)
@@ -949,6 +954,7 @@ PHP_FUNCTION(pcntl_exec)
 PHP_FUNCTION(pcntl_signal)
 {
 	zval *handle;
+	zval *prev_handle;
 	zend_string *func_name;
 	zend_long signo;
 	zend_bool restart_syscalls = 1;
@@ -975,6 +981,12 @@ PHP_FUNCTION(pcntl_signal)
 		}
 	}
 
+	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
+		RETVAL_ZVAL(prev_handle, 1, 0);
+	} else {
+		RETVAL_TRUE;
+	}
+
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
 		if (Z_LVAL_P(handle) != (zend_long) SIG_DFL && Z_LVAL_P(handle) != (zend_long) SIG_IGN) {
@@ -986,8 +998,8 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
 		}
-		zend_hash_index_del(&PCNTL_G(php_signal_table), signo);
-		RETURN_TRUE;
+		zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
+		return;
 	}
 
 	if (!zend_is_callable(handle, 0, &func_name)) {
@@ -1008,9 +1020,31 @@ PHP_FUNCTION(pcntl_signal)
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto bool pcntl_signal_get_handler(int signo)
+   Gets signal handler */
+PHP_FUNCTION(pcntl_signal_get_handler)
+{
+	zval *prev_handle;
+	zend_long signo;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &signo) == FAILURE) {
+		return;
+	}
+
+	if (signo < 1 || signo > 32) {
+		php_error_docref(NULL, E_WARNING, "Invalid signal");
+		RETURN_FALSE;
+	}
+
+	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
+		RETURN_ZVAL(prev_handle, 1, 0);
+	} else {
+		RETURN_LONG((long)SIG_DFL);
+	}
+}
 
 /* {{{ proto bool pcntl_signal_dispatch()
    Dispatch signals to signal handlers */

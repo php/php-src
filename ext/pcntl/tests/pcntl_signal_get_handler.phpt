@@ -1,0 +1,32 @@
+--TEST--
+pcntl_signal()
+--SKIPIF--
+<?php if (!extension_loaded("pcntl")) print "skip"; ?>
+<?php if (!extension_loaded("posix")) die("skip posix extension not available"); ?>
+--FILE--
+<?php
+var_dump(pcntl_signal_get_handler(SIGUSR1));
+
+function pcntl_test($signo) {}
+pcntl_signal(SIGUSR1, 'pcntl_test');
+var_dump(pcntl_signal_get_handler(SIGUSR1));
+
+pcntl_signal(SIGUSR1, SIG_IGN);
+var_dump(pcntl_signal_get_handler(SIGUSR1));
+
+pcntl_signal(SIGUSR1, SIG_DFL);
+var_dump(pcntl_signal_get_handler(SIGUSR1));
+
+posix_kill(posix_getpid(), SIGUSR1);
+pcntl_signal_dispatch();
+
+echo "ok\n";
+?>
+--EXPECTF--
+int(0)
+string(10) "pcntl_test"
+int(1)
+int(0)
+User defined signal 1
+
+Termsig=10
