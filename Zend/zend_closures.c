@@ -322,7 +322,7 @@ ZEND_METHOD(Closure, fromCallable)
 	success = zend_create_closure_from_callable(return_value, callable, &error);
 	EG(current_execute_data) = execute_data;
 
-	if (success == FAILURE) {
+	if (success == FAILURE || error) {
 		if (error) {
 			zend_throw_exception_ex(zend_ce_type_error, 0, "Failed to create closure from callable: %s", error);
 			efree(error);
