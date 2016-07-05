@@ -110,6 +110,7 @@ PHP                                                                        NEWS
     instead of resulting in a fatal error. (Aaron Piotrowski)
   . Calling ArrayIterator::append() when iterating over an object will throw an
     instance of Error instead of resulting in a fatal error. (Aaron Piotrowski)
+  . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
 
 - Standard:
   . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
