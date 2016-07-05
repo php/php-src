@@ -8,10 +8,17 @@
 
 static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	zend_long cp = -1;
+
+	if (ZEND_SIZE_T_INT_OVFL(Z_STRLEN_P(zcp))) {
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Input string is too long.", 0);
+		return FAILURE;
+	}
+
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
 	} else if (Z_TYPE_P(zcp) == IS_STRING) {
-		size_t i = 0;
+		int32_t i = 0;
 		U8_NEXT(Z_STRVAL_P(zcp), i, Z_STRLEN_P(zcp), cp);
 		if (i != Z_STRLEN_P(zcp)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
