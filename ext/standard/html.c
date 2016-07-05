@@ -1271,7 +1271,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 	} else {
 		maxlen = 2 * oldlen;
 		if (maxlen < oldlen) {
-			zend_error_noreturn(E_ERROR, "Input string is too long");
+			zend_throw_error(NULL, "Input string is too long");
 			return NULL;
 		}
 	}

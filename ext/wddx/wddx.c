@@ -626,7 +626,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name)
 		case IS_ARRAY:
 			ht = Z_ARRVAL_P(var);
 			if (ht->u.v.nApplyCount > 1) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "WDDX doesn't support circular references");
+				zend_throw_error(NULL, "WDDX doesn't support circular references");
 				return;
 			}
 			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
@@ -641,7 +641,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name)
 		case IS_OBJECT:
 			ht = Z_OBJPROP_P(var);
 			if (ht->u.v.nApplyCount > 1) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "WDDX doesn't support circular references");
+				zend_throw_error(NULL, "WDDX doesn't support circular references");
 				return;
 			}
 			ht->u.v.nApplyCount++;
