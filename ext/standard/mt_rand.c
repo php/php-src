@@ -91,7 +91,8 @@
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
-#define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
+#define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(v))) & 0x9908b0dfU))
+#define twist_php(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
 /* {{{ php_mt_initialize
  */
@@ -125,11 +126,20 @@ static inline void php_mt_reload(void)
 	register uint32_t *p = state;
 	register int i;
 
-	for (i = N - M; i--; ++p)
-		*p = twist(p[M], p[0], p[1]);
-	for (i = M; --i; ++p)
-		*p = twist(p[M-N], p[0], p[1]);
-	*p = twist(p[M-N], p[0], state[0]);
+	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
+		for (i = N - M; i--; ++p)
+			*p = twist(p[M], p[0], p[1]);
+		for (i = M; --i; ++p)
+			*p = twist(p[M-N], p[0], p[1]);
+		*p = twist(p[M-N], p[0], state[0]);
+	}
+	else {
+		for (i = N - M; i--; ++p)
+			*p = twist_php(p[M], p[0], p[1]);
+		for (i = M; --i; ++p)
+			*p = twist_php(p[M-N], p[0], p[1]);
+		*p = twist_php(p[M-N], p[0], state[0]);
+	}
 	BG(left) = N;
 	BG(next) = state;
 }
@@ -266,6 +276,33 @@ PHP_FUNCTION(mt_getrandmax)
   	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
 }
 /* }}} */
+
+/* {{{ proto int mt_rand_mode(int)
+   Switch mt_rand between standard and legacy modes */
+PHP_FUNCTION(mt_rand_mode)
+{
+	zend_long mode;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &mode) == FAILURE) {
+		return;
+	}
+
+	switch (mode) {
+		case MT_RAND_PHP:
+			BG(mt_rand_mode) = MT_RAND_PHP;
+			break;
+		default:
+			BG(mt_rand_mode) = MT_RAND_MT19937;
+	}
+}
+/* }}} */
+PHP_MINIT_FUNCTION(mt_rand)
+{
+	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MT_RAND_PHP",     MT_RAND_PHP, CONST_CS | CONST_PERSISTENT);
+
+	return SUCCESS;
+}
 
 /*
  * Local variables:

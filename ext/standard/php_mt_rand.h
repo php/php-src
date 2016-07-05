@@ -27,8 +27,13 @@
 
 #define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
 
+#define MT_RAND_MT19937 0
+#define MT_RAND_PHP 1
+
 PHPAPI void php_mt_srand(uint32_t seed);
 PHPAPI uint32_t php_mt_rand(void);
+
+PHP_MINIT_FUNCTION(mt_rand);
 
 #endif	/* PHP_MT_RAND_H */
 
