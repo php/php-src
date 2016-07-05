@@ -1,9 +1,9 @@
 --TEST--
-Testing closure() functionality
+Testing Closure::fromCallable() functionality: Basic
 --FILE--
 <?php
 
-include('cloure_from_callbable.inc');
+include('closure_from_callable.inc');
 
 echo 'Access public static function';
 $fn = Closure::fromCallable(['Foo', 'publicStaticFunction']);

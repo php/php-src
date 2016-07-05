@@ -1,7 +1,5 @@
 --TEST--
-Imagick::readImage test
---SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+Testing Closure::fromCallable() functionality: Reflection
 --FILE--
 <?php
 

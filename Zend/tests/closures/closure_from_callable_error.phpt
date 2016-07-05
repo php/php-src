@@ -1,9 +1,9 @@
 --TEST--
-Testing closure() functionality
+Testing Closure::fromCallable() functionality: Errors
 --FILE--
 <?php
 
-include('cloure_from_callbable.inc');
+include('closure_from_callable.inc');
 
 echo 'Cannot access privateInstance method statically'."\n";
 try {
