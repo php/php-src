@@ -5523,7 +5523,7 @@ PHP_FUNCTION(ignore_user_abort)
 		return;
 	}
 
-	old_setting = PG(ignore_user_abort);
+	old_setting = (unsigned short)PG(ignore_user_abort);
 
 	if (ZEND_NUM_ARGS()) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
