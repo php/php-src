@@ -269,6 +269,7 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 	zend_fcall_info_cache fcc;
 	zend_function *mptr;
 	zval instance;
+	zend_internal_function call;
 
 	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, error)) {
 		return FAILURE;
@@ -280,7 +281,6 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 	}
 
 	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-		zend_internal_function call;
 		memset(&call, 0, sizeof(zend_internal_function));
 
 		call.type = ZEND_INTERNAL_FUNCTION;
