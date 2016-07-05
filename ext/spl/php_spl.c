@@ -40,7 +40,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "ext/standard/php_rand.h"
-#include "ext/standard/php_lcg.h"
+#include "ext/standard/php_mt_rand.h"
 #include "main/snprintf.h"
 
 #ifdef COMPILE_DL_SPL
