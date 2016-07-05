@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0beta1
+07 Jul 2016, PHP 7.1.0alpha3
 
 - Core:
   . Implemented RFC: Iterable. (Aaron Piotrowski)
