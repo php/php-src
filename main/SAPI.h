@@ -31,7 +31,6 @@
 #include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
-#include "php.h"
 
 #define SAPI_OPTION_NO_CHDIR 1
 #define SAPI_POST_BLOCK_SIZE 0x4000

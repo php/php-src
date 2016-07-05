@@ -2378,6 +2378,8 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 			tmp |= MAY_BE_NULL;
 		} else if (arg_info->type_hint == IS_CALLABLE) {
 			tmp |= MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		} else if (arg_info->type_hint == IS_ITERABLE) {
+			tmp |= MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 		} else if (arg_info->type_hint == IS_ARRAY) {
 			tmp |= MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 		} else if (arg_info->type_hint == _IS_BOOL) {

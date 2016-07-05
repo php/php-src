@@ -160,6 +160,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("string")},
 	{ZEND_STRL("true")},
 	{ZEND_STRL("void")},
+	{ZEND_STRL("iterable")},
 	{NULL, 0}
 };
 
@@ -204,6 +205,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("string"), IS_STRING},
 	{ZEND_STRL("bool"), _IS_BOOL},
 	{ZEND_STRL("void"), IS_VOID},
+	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -1254,17 +1256,20 @@ static void zend_mark_function_as_generator() /* {{{ */
 	}
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		const char *msg = "Generators may only declare a return type of Generator, Iterator or Traversable, %s is not permitted";
 		zend_arg_info return_info = CG(active_op_array)->arg_info[-1];
 
-		if (!return_info.class_name) {
-			zend_error_noreturn(E_COMPILE_ERROR, msg, zend_get_type_by_const(return_info.type_hint));
-		}
+		if (return_info.type_hint != IS_ITERABLE) {
+			const char *msg = "Generators may only declare a return type of Generator, Iterator, Traversable, or iterable, %s is not permitted";
+			
+			if (!return_info.class_name) {
+				zend_error_noreturn(E_COMPILE_ERROR, msg, zend_get_type_by_const(return_info.type_hint));
+			}
 
-		if (!zend_string_equals_literal_ci(return_info.class_name, "Traversable")
-			&& !zend_string_equals_literal_ci(return_info.class_name, "Iterator")
-			&& !zend_string_equals_literal_ci(return_info.class_name, "Generator")) {
-			zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(return_info.class_name));
+			if (!zend_string_equals_literal_ci(return_info.class_name, "Traversable")
+				&& !zend_string_equals_literal_ci(return_info.class_name, "Iterator")
+				&& !zend_string_equals_literal_ci(return_info.class_name, "Generator")) {
+				zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(return_info.class_name));
+			}
 		}
 	}
 
@@ -5115,6 +5120,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 							if (Z_TYPE(default_node.u.constant) != IS_DOUBLE && Z_TYPE(default_node.u.constant) != IS_LONG) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 									"with a float type can only be float, integer, or NULL");
+							}
+							break;
+						
+						case IS_ITERABLE:
+							if (Z_TYPE(default_node.u.constant) != IS_ARRAY) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with iterable type can only be an array or NULL");
 							}
 							break;
 							

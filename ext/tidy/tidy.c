@@ -1849,7 +1849,7 @@ static TIDY_NODE_METHOD(getParent)
          __constructor for tidyNode. */
 static TIDY_NODE_METHOD(__construct)
 {
-	php_error_docref(NULL, E_ERROR, "You should not create a tidyNode manually");
+	zend_throw_error(NULL, "You should not create a tidyNode manually");
 }
 /* }}} */
 

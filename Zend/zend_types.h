@@ -314,6 +314,7 @@ struct _zend_ast_ref {
 /* {{{ Pseudo data type names: */
 #define TYPE_BOOL                   "bool"
 #define TYPE_CALLABLE               "callable"
+#define TYPE_ITERABLE               "iterable"
 #define TYPE_VOID                   "void"
 /* }}} */
 
@@ -337,12 +338,13 @@ struct _zend_ast_ref {
 /* fake types */
 #define _IS_BOOL                    13
 #define IS_CALLABLE                 14
+#define IS_ITERABLE                 19
 #define IS_VOID                     18
 
 /* internal types */
 #define IS_INDIRECT                 15
 #define IS_PTR                      17
-#define _IS_ERROR                   19
+#define _IS_ERROR                   20
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;

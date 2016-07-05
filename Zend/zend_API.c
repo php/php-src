@@ -27,6 +27,7 @@
 #include "zend_modules.h"
 #include "zend_extensions.h"
 #include "zend_constants.h"
+#include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_inheritance.h"
@@ -182,6 +183,8 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "null";
 		case IS_CALLABLE:
 			return "callable";
+		case IS_ITERABLE:
+			return "iterable";
 		case IS_ARRAY:
 			return "array";
 		case IS_VOID:
@@ -4199,6 +4202,19 @@ ZEND_API const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
 		return "interface";
 	} else {
 		return "class";
+	}
+}
+/* }}} */
+
+ZEND_API zend_bool zend_is_iterable(zval *iterable) /* {{{ */
+{
+	switch (Z_TYPE_P(iterable)) {
+		case IS_ARRAY:
+			return 1;
+		case IS_OBJECT:
+			return instanceof_function(Z_OBJCE_P(iterable), zend_ce_traversable);
+		default:
+			return 0;
 	}
 }
 /* }}} */
