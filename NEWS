@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.9
+07 Jul 2016 PHP 7.0.9RC1
 
 - Core:
   . Fixed bug #72508 (strange references after recursive function call and
