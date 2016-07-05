@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #72523 (dtrace issue with reflection (failed test)). (Laruence)
   . Fixed bug #72508 (strange references after recursive function call and
     "switch" statement). (Laruence)
+  . Implemented RFC: Closure::fromCallable (Danack)
 
 - COM:
   . Fixed bug #72498 (variant_date_from_timestamp null dereference). (Anatol)
