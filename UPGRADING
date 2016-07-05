@@ -83,6 +83,7 @@ PHP 7.1 UPGRADE NOTES
     handle numeric strings, nor to the increment and decrement operators
     ++ and --, which have a unique approach to handling numeric strings.
     (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
+  . Closure::fromCallable (RFC: https://wiki.php.net/rfc/closurefromcallable)
 
 ========================================
 3. Changes in SAPI modules
