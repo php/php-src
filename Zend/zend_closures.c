@@ -295,9 +295,9 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 
 	if (fcc.object) {
 		ZVAL_OBJ(&instance, fcc.object);
-		zend_create_closure(return_value, mptr, mptr->common.scope, fcc.object->ce, &instance);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.object->ce, &instance);
 	} else {
-		zend_create_closure(return_value, mptr, mptr->common.scope, NULL, NULL);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, NULL, NULL);
 	}
 
 	return SUCCESS;
