@@ -28,6 +28,11 @@ PHP                                                                        NEWS
     a fatal error. (Aaron Piotrowski)
   . Export date_get_interface_ce() for extension use. (Jeremy Mikola)
 
+- DBA:
+  . Data modification functions (e.g.: dba_insert()) now throw an instance of
+    Error instead of triggering a catchable fatal error if the key is does not
+    contain exactly two elements. (Aaron Piotrowski)
+
 - DOM:
   . Invalid schema or RelaxNG validation contexts will throw an instance of
     Error instead of resulting in a fatal error. (Aaron Piotrowski)
