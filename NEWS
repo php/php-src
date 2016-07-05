@@ -17,8 +17,62 @@ PHP                                                                        NEWS
 	functions. (Pierrick)
   . Add support for HTTP/2 Server Push (davey)
 
+- Date:
+  . Invalid serialization data for a DateTime or DatePeriod object will now
+    throw an instance of Error from __wakeup() or __set_state() instead of
+    resulting in a fatal error. (Aaron Piotrowski)
+  . Timezone initialization failure from serialized data will now throw an
+    instance of Error from __wakeup() or __set_state() instead of resulting in
+    a fatal error. (Aaron Piotrowski)
+
+- DOM:
+  . Invalid schema or RelaxNG validation contexts will throw an instance of
+    Error instead of resulting in a fatal error. (Aaron Piotrowski)
+  . Attempting to register a node class that does not extend the appropriate
+    base class will now throw an instance of Error instead of resulting in a
+    fatal error. (Aaron Piotrowski)
+  . Attempting to read an invalid or write to a readonly property will throw
+    an instance of Error instead of resulting in a fatal error. (Aaron
+    Piotrowski)
+
 - GD:
   . Fixed bug #72404 (imagecreatefromjpeg fails on selfie). (cmb)
+
+- IMAP:
+  . An email address longer than 16385 bytes will throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+    
+- Intl:
+  . Failure to call the parent constructor in a class extending Collator
+    before invoking the parent methods will throw an instance of Error
+    instead of resulting in a recoverable fatal error. (Aaron Piotrowski)
+  . Cloning a Transliterator object may will now throw an instance of Error
+    instead of resulting in a fatal error if cloning the internal
+    transliterator fails. (Aaron Piotrowski)
+
+- LDAP:
+  . Providing an unknown modification type to ldap_batch_modify() will now
+    throw an instance of Error instead of resulting in a fatal error.
+    (Aaron Piotrowski)
+
+- Mbstring:
+  . mb_ereg() and mb_eregi() will now throw an instance of ParseError if an
+    invalid PHP expression is provided and the 'e' option is used. (Aaron
+    Piotrowski)
+
+- Mcrypt:
+  . mcrypt_encrypt() and mcrypt_decrypt() will throw an instance of Error
+    instead of resulting in a fatal error if mcrypt cannot be initialized.
+    (Aaron Piotrowski)
+
+- Mysqli:
+  . Attempting to read an invalid or write to a readonly property will throw
+    an instance of Error instead of resulting in a fatal error. (Aaron
+    Piotrowski)
+
+- OpenSSL:
+  . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
+    (Dominic Luechinger)
 
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
@@ -27,24 +81,63 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed bug #72538 (readline_redisplay crashes php). (Laruence)
 
+- Reflection:
+  . Failure to retrieve a reflection object or retrieve an object property
+    will now throw an instance of Error instead of resulting in a fatal error.
+    (Aaron Piotrowski)
+
 - SQLite3:
   . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
     (cmb)
 
 - Session:
   . Fixed bug #72531 (ps_files_cleanup_dir Buffer overflow). (Laruence)
+  . Custom session handlers that do not return strings for session IDs will 
+    now throw an instance of Error instead of resulting in a fatal error
+    when a function is called that must generate a session ID.
+    (Aaron Piotrowski)
+  . An invalid setting for session.hash_function will throw an instance of
+    Error instead of resulting in a fatal error when a session ID is created.
+    (Aaron Piotrowski)
+
+- SimpleXML:
+  . Creating an unnamed or duplicate attribute will throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+
+- SPL:
+  . Attempting to clone an SplDirectory object will throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+  . Calling ArrayIterator::append() when iterating over an object will throw an
+    instance of Error instead of resulting in a fatal error. (Aaron Piotrowski)
 
 - Standard:
   . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
   . Fixed bug #72505 (readfile() mangles files larger than 2G). (Cschneid)
+  . assert() will throw a ParseError when evaluating a string given as the first
+    argument if the PHP code is invalid instead of resulting in a catchable
+    fatal error. (Aaron Piotrowski)
+  . Calling forward_static_call() outside of a class scope will now throw an
+    instance of Error instead of resulting in a fatal error. (Aaron Piotrowski)
 
 - Streams:
   . Fixed bug #72534 (stream_socket_get_name crashes). (Anatol)
+    
+- Tidy:
+  . Creating a tidyNode manually will now throw an instance of Error instead of
+    resulting in a fatal error. (Aaron Piotrowski)
 
-- OpenSSL:
-  . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
-    (Dominic Luechinger)
+- WDDX:
+  . A circular reference when serializing will now throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+
+- XML-RPC:
+  . A circular reference when serializing will now throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+
+- Zip:
+  . ZipArchive::addGlob() will throw an instance of Error instead of resulting
+    in a fatal error if glob support is not available. (Aaron Piotrowski)
 
 23 Jun 2016, PHP 7.1.0alpha2
 

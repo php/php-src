@@ -148,11 +148,100 @@ PHP 7.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Date:
+  . Invalid serialization data for a DateTime or DatePeriod object will now
+    throw an instance of Error from __wakeup() or __set_state() instead of
+    resulting in a fatal error.
+  . Timezone initialization failure from serialized data will now throw an
+    instance of Error from __wakeup() or __set_state() instead of resulting in
+    a fatal error.
+
+- DOM:
+  . Invalid schema or RelaxNG validation contexts will throw an instance of
+    Error instead of resulting in a fatal error.
+  . Attempting to register a node class that does not extend the appropriate
+    base class will now throw an instance of Error instead of resulting in a
+    fatal error.
+  . Attempting to read an invalid or write to a readonly property will throw
+    an instance of Error instead of resulting in a fatal error.
+
 - GD:
   . Changed the default of the ini setting gd.jpeg_ignore_warning to 1.
 
+- IMAP:
+  . An email address longer than 16385 bytes will throw an instance of Error
+    instead of resulting in a fatal error.
+    
+- Intl:
+  . Failure to call the parent constructor in a class extending Collator
+    before invoking the parent methods will throw an instance of Error
+    instead of resulting in a recoverable fatal error.
+  . Cloning a Transliterator object may will now throw an instance of Error
+    instead of resulting in a fatal error if cloning the internal
+    transliterator fails.
+
+- LDAP:
+  . Providing an unknown modification type to ldap_batch_modify() will now
+    throw an instance of Error instead of resulting in a fatal error.
+
+- Mbstring:
+  . mb_ereg() and mb_eregi() will now throw an instance of ParseError if an
+    invalid PHP expression is provided and the 'e' option is used.
+
+- Mcrypt:
+  . mcrypt_encrypt() and mcrypt_decrypt() will throw an instance of Error
+    instead of resulting in a fatal error if mcrypt cannot be initialized.
+
+- Mysqli:
+  . Attempting to read an invalid or write to a readonly property will throw
+    an instance of Error instead of resulting in a fatal error.
+
+- Reflection:
+  . Failure to retrieve a reflection object or retrieve an object property
+    will now throw an instance of Error instead of resulting in a fatal error.
+
+- Session:
+  . Custom session handlers that do not return strings for session IDs will 
+    now throw an instance of Error instead of resulting in a fatal error
+    when a function is called that must generate a session ID.
+  . An invalid setting for session.hash_function will throw an instance of
+    Error instead of resulting in a fatal error when a session ID is created.
+
+- SimpleXML:
+  . Creating an unnamed or duplicate attribute will throw an instance of Error
+    instead of resulting in a fatal error.
+
+- SPL:
+  . Attempting to clone an SplDirectory object will throw an instance of Error
+    instead of resulting in a fatal error.
+  . Calling ArrayIterator::append() when iterating over an object will throw an
+    instance of Error instead of resulting in a fatal error.
+
 - SQLite3:
   . Upgraded bundled SQLite lib to 3.13.0
+
+- Standard:
+  . assert() will throw a ParseError when evaluating a string given as the first
+    argument if the PHP code is invalid instead of resulting in a catchable
+    fatal error.
+  . Calling forward_static_call() outside of a class scope will now throw an
+    instance of Error instead of resulting in a fatal error.
+
+- Tidy:
+  . Creating a tidyNode manually will now throw an instance of Error instead of
+    resulting in a fatal error.
+
+- WDDX:
+  . A circular reference when serializing will now throw an instance of Error
+    instead of resulting in a fatal error.
+
+- XML-RPC:
+  . A circular reference when serializing will now throw an instance of Error
+    instead of resulting in a fatal error.
+
+- Zip:
+  . ZipArchive::addGlob() will throw an instance of Error instead of resulting
+    in a fatal error if glob support is not available.
 
 ========================================
 10. New Global Constants
