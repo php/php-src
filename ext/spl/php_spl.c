@@ -39,7 +39,6 @@
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "ext/standard/php_rand.h"
 #include "ext/standard/php_mt_rand.h"
 #include "main/snprintf.h"
 
@@ -747,10 +746,6 @@ PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
 	intptr_t hash_handle, hash_handlers;
 
 	if (!SPL_G(hash_mask_init)) {
-		if (!BG(mt_rand_is_seeded)) {
-			php_mt_srand((uint32_t)GENERATE_SEED());
-		}
-
 		SPL_G(hash_mask_handle)   = (intptr_t)(php_mt_rand() >> 1);
 		SPL_G(hash_mask_handlers) = (intptr_t)(php_mt_rand() >> 1);
 		SPL_G(hash_mask_init) = 1;

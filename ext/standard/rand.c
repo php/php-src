@@ -27,27 +27,13 @@
 
 #include "php.h"
 #include "php_rand.h"
-
-/* SYSTEM RAND FUNCTIONS */
+#include "php_mt_rand.h"
 
 /* {{{ php_srand
  */
 PHPAPI void php_srand(zend_long seed)
 {
-#ifdef ZTS
-	BG(rand_seed) = (unsigned int) seed;
-#else
-# if defined(HAVE_SRANDOM)
-	srandom((unsigned int) seed);
-# elif defined(HAVE_SRAND48)
-	srand48(seed);
-# else
-	srand((unsigned int) seed);
-# endif
-#endif
-
-	/* Seed only once */
-	BG(rand_is_seeded) = 1;
+	php_mt_srand(seed);
 }
 /* }}} */
 
@@ -55,74 +41,7 @@ PHPAPI void php_srand(zend_long seed)
  */
 PHPAPI zend_long php_rand(void)
 {
-	zend_long ret;
-
-	if (!BG(rand_is_seeded)) {
-		php_srand(GENERATE_SEED());
-	}
-
-#ifdef ZTS
-	ret = php_rand_r(&BG(rand_seed));
-#else
-# if defined(HAVE_RANDOM)
-	ret = random();
-# elif defined(HAVE_LRAND48)
-	ret = lrand48();
-# else
-	ret = rand();
-# endif
-#endif
-
-	return ret;
-}
-/* }}} */
-
-/* {{{ proto void srand([int seed])
-   Seeds random number generator */
-PHP_FUNCTION(srand)
-{
-	zend_long seed = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
-		return;
-
-	if (ZEND_NUM_ARGS() == 0)
-		seed = GENERATE_SEED();
-
-	php_srand(seed);
-}
-/* }}} */
-
-/* {{{ proto int rand([int min, int max])
-   Returns a random number */
-PHP_FUNCTION(rand)
-{
-	zend_long min;
-	zend_long max;
-	zend_long number;
-	int  argc = ZEND_NUM_ARGS();
-
-	if (argc != 0 && zend_parse_parameters(argc, "ll", &min, &max) == FAILURE)
-		return;
-
-	number = php_rand();
-	if (argc == 2) {
-		RAND_RANGE(number, min, max, PHP_RAND_MAX);
-	}
-
-	RETURN_LONG(number);
-}
-/* }}} */
-
-/* {{{ proto int getrandmax(void)
-   Returns the maximum value a random number can have */
-PHP_FUNCTION(getrandmax)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	RETURN_LONG(PHP_RAND_MAX);
+	return php_mt_rand();
 }
 /* }}} */
 

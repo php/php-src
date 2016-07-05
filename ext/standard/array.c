@@ -5063,7 +5063,7 @@ PHP_FUNCTION(array_rand)
 
 		randval = php_rand();
 
-		if ((double) (randval / (PHP_RAND_MAX + 1.0)) < (double) num_req / (double) num_avail) {
+		if ((double) (randval / PHP_RAND_MAX) <= (double) num_req / (double) num_avail) {
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
 				if (string_key) {

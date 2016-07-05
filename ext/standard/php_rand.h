@@ -26,18 +26,14 @@
 #define	PHP_RAND_H
 
 #include "php_lcg.h"
+#include "php_mt_rand.h"
 
 /* System Rand functions */
 #ifndef RAND_MAX
-#define RAND_MAX (1<<15)
+#define RAND_MAX PHP_MT_RAND_MAX
 #endif
 
-/* In ZTS mode we rely on rand_r() so we must use RAND_MAX. */
-#if !defined(ZTS) && (defined(HAVE_LRAND48) || defined(HAVE_RANDOM))
-#define PHP_RAND_MAX 2147483647
-#else
-#define PHP_RAND_MAX RAND_MAX
-#endif
+#define PHP_RAND_MAX PHP_MT_RAND_MAX
 
 /*
  * A bit of tricky math here.  We want to avoid using a modulus because
@@ -65,7 +61,7 @@
  * -RL
  */
 #define RAND_RANGE(__n, __min, __max, __tmax) \
-    (__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
+	(__n) = php_mt_rand_range((__min), (__max))
 
 #ifdef PHP_WIN32
 #define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))

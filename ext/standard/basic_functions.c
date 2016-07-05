@@ -1883,19 +1883,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_quoted_printable_encode, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ rand.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_srand, 0, 0, 0)
-	ZEND_ARG_INFO(0, seed)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_rand, 0, 0, 0)
-	ZEND_ARG_INFO(0, min)
-	ZEND_ARG_INFO(0, max)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getrandmax, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ mt_rand.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_srand, 0, 0, 0)
 	ZEND_ARG_INFO(0, seed)
@@ -2865,10 +2852,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(proc_nice,														arginfo_proc_nice)
 #endif
 
-	PHP_FE(rand,															arginfo_rand)
-	PHP_FE(srand,															arginfo_srand)
-	PHP_FE(getrandmax,													arginfo_getrandmax)
-	PHP_FE(mt_rand,														arginfo_mt_rand)
+	PHP_FALIAS(rand, mt_rand,												arginfo_mt_rand)
+	PHP_FALIAS(srand, mt_srand,												arginfo_mt_srand)
+	PHP_FALIAS(getrandmax, mt_getrandmax,									arginfo_mt_getrandmax)
+	PHP_FE(mt_rand,															arginfo_mt_rand)
 	PHP_FE(mt_srand,														arginfo_mt_srand)
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
 	PHP_FE(mt_rand_mode,													arginfo_mt_rand_mode)
@@ -3484,7 +3471,6 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(rand_is_seeded) = 0;
 	BG(mt_rand_is_seeded) = 0;
 	BG(mt_rand_mode) = MT_RAND_MT19937;
 	BG(umask) = -1;
