@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #72496 (Cannot declare public method with signature incompatible
     with parent private method). (Pedro Magalhães)
 
+- SPL:
+  . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
 
 21 Jul 2016 PHP 7.0.9
 
