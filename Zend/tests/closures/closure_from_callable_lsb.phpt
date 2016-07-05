@@ -3,14 +3,19 @@ Testing Closure::fromCallable() functionality: Late static binding
 --FILE--
 <?php
 
-class Foo {
-    const BAR = 1;
-    public static function method() {
-        return static::BAR;
+class A {
+    public static function test() {
+        var_dump(static::class);
     }
 }
-var_dump(Closure::fromCallable(['Foo', 'method'])());
+
+class B extends A {
+}
+
+Closure::fromCallable(['A', 'test'])();
+Closure::fromCallable(['B', 'test'])();
 
 ?>
 --EXPECT--
-int(1)
+string(1) "A"
+string(1) "B"

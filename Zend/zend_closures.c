@@ -238,6 +238,7 @@ ZEND_METHOD(Closure, bind)
 static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
+	zval params[2];
 
 	memset(&fci, 0, sizeof(zend_fcall_info));
 	memset(&fci, 0, sizeof(zend_fcall_info_cache));
@@ -247,7 +248,7 @@ static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
 
 	fcc.initialized = 1;
 	fcc.function_handler = (zend_function *) EX(func)->common.arg_info;
-	fci.params = (zval*) emalloc(sizeof(zval) * 2);
+	fci.params = params;
 	fci.param_count = 2;
 	ZVAL_STR(&fci.params[0], EX(func)->common.function_name);
 	array_init(&fci.params[1]);
@@ -261,7 +262,6 @@ static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
 
 	zval_ptr_dtor(&fci.params[0]);
 	zval_ptr_dtor(&fci.params[1]);
-	efree(fci.params);
 }
 /* }}} */
 
@@ -276,10 +276,6 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 	}
 
 	mptr = fcc.function_handler;
-	if (mptr == NULL) {
-		return FAILURE;
-	}
-
 	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 		memset(&call, 0, sizeof(zend_internal_function));
 
@@ -295,9 +291,9 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 
 	if (fcc.object) {
 		ZVAL_OBJ(&instance, fcc.object);
-		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.object->ce, &instance);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.called_scope, &instance);
 	} else {
-		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.called_scope, NULL);
 	}
 
 	return SUCCESS;
