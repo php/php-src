@@ -235,7 +235,7 @@ ZEND_METHOD(Closure, bind)
 }
 /* }}} */
 
-static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) {
+static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 
@@ -263,9 +263,9 @@ static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) {
 	zval_ptr_dtor(&fci.params[1]);
 	efree(fci.params);
 }
+/* }}} */
 
-
-static int zend_create_closure_from_callable(zval *return_value, zval *callable, char **error) {
+static int zend_create_closure_from_callable(zval *return_value, zval *callable, char **error) /* {{{ */ {
 	zend_fcall_info_cache fcc;
 	zend_function *mptr;
 	zval instance;
@@ -293,12 +293,16 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 		mptr = (zend_function *) &call;
 	}
 
-	ZVAL_OBJ(&instance, fcc.object);
-	zend_create_closure(return_value, mptr, mptr->common.scope, fcc.object ? fcc.object->ce : NULL, fcc.object ? &instance : NULL);
+	if (fcc.object) {
+		ZVAL_OBJ(&instance, fcc.object);
+		zend_create_closure(return_value, mptr, mptr->common.scope, fcc.object->ce, &instance);
+	} else {
+		zend_create_closure(return_value, mptr, mptr->common.scope, NULL, NULL);
+	}
 
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ proto Closure Closure::fromCallable(callable callable)
    Create a closure from a callable using the current scope. */
@@ -313,17 +317,16 @@ ZEND_METHOD(Closure, fromCallable)
 	}
 
 	if (Z_TYPE_P(callable) == IS_OBJECT && instanceof_function(Z_OBJCE_P(callable), zend_ce_closure)) {
-		// It's already a closure
+		/* It's already a closure */
 		RETURN_ZVAL(callable, 1, 0);
 	}
 
-	// create closure as if it were called from parent scope
+	/* create closure as if it were called from parent scope */
 	EG(current_execute_data) = EX(prev_execute_data);
 	success = zend_create_closure_from_callable(return_value, callable, &error);
 	EG(current_execute_data) = execute_data;
 
 	if (success == FAILURE) {
-		zend_clear_exception();
 		if (error) {
 			zend_throw_exception_ex(zend_ce_type_error, 0, "Failed to create closure from callable: %s", error);
 			efree(error);
