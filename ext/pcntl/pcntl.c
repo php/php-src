@@ -1392,14 +1392,16 @@ void pcntl_signal_dispatch()
 
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
-			ZVAL_NULL(&retval);
-			ZVAL_LONG(&param, queue->signo);
+			if (Z_TYPE_P(handle) != IS_LONG) {
+				ZVAL_NULL(&retval);
+				ZVAL_LONG(&param, queue->signo);
 
-			/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
-			/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
-			call_user_function(EG(function_table), NULL, handle, &retval, 1, &param);
-			zval_ptr_dtor(&param);
-			zval_ptr_dtor(&retval);
+				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
+				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
+				call_user_function(EG(function_table), NULL, handle, &retval, 1, &param);
+				zval_ptr_dtor(&param);
+				zval_ptr_dtor(&retval);
+			}
 		}
 
 		next = queue->next;
