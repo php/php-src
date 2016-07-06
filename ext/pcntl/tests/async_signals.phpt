@@ -9,7 +9,7 @@ Asynchronous signal handling through VM interrupts
 ?>
 --FILE--
 <?php
-ini_set("pcntl.async_signals", "1");
+pcntl_async_signals(1);
 
 pcntl_signal(SIGTERM, function ($signo) { echo "Signal handler called!\n"; });
 

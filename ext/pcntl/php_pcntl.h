@@ -68,6 +68,7 @@ PHP_FUNCTION(pcntl_getpriority);
 #ifdef HAVE_SETPRIORITY
 PHP_FUNCTION(pcntl_setpriority);
 #endif
+PHP_FUNCTION(pcntl_async_signals);
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
