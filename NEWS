@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #72543 (Different references behavior comparing to PHP 5)
     (Laruence, Dmitry, Nikita)
+  . Fixed bug #71539 (Memory error on $arr[$a] =& $arr[$b] if RHS rehashes)
+    (Dmitry, Nikita)
 
 - pcntl
   . Implemented asynchronous signal handling without TICKS. (Dmitry)

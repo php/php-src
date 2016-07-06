@@ -3029,7 +3029,20 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	offset = zend_delayed_compile_begin();
 	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W);
-	zend_delayed_compile_var(&source_node, source_ast, BP_VAR_W);
+	zend_compile_var(&source_node, source_ast, BP_VAR_W);
+
+	if ((target_ast->kind != ZEND_AST_VAR
+	  || target_ast->child[0]->kind != ZEND_AST_ZVAL)
+	 && source_node.op_type != IS_CV) {
+		/* Both LHS and RHS expressions may modify the same data structure,
+		 * and the modification during RHS evaluation may dangle the pointer
+		 * to the result of the LHS evaluation.
+		 * Use MAKE_REF instruction to replace direct pointer with REFERENCE.
+		 * See: Bug #71539
+		 */
+		zend_emit_op(&source_node, ZEND_MAKE_REF, &source_node, NULL);
+	}
+
 	zend_delayed_compile_end(offset);
 
 	if (source_node.op_type != IS_VAR && zend_is_call(source_ast)) {
