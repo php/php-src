@@ -18,9 +18,11 @@ echo "Done\n";
 --EXPECTF--	
 Warning: array_rand() expects at least 1 parameter, 0 given in %s on line %d
 NULL
+
+Warning: array_rand(): Array is empty in %s on line %d
 NULL
 
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
+Warning: array_rand(): Array is empty in %s on line %d
 NULL
 
 Warning: array_rand() expects parameter 1 to be array, integer given in %s on line %d
