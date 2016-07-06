@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0beta1
 
+- Core:
+  . Fixed bug #72543 (Different references behavior comparing to PHP 5)
+    (Laruence, Dmitry, Nikita)
+
 - pcntl
   . Implemented asynchronous signal handling without TICKS. (Dmitry)
 
