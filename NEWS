@@ -9,6 +9,14 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
 
+- Standard:
+  . Fixed bug #72152 (base64_decode $strict fails to detect null byte).
+    (Lauri Kenttä)
+  . Fixed bug #72263 (base64_decode skips a character after padding in strict
+    mode). (Lauri Kenttä)
+  . Fixed bug #72264 (base64_decode $strict fails with whitespace between
+    padding). (Lauri Kenttä)
+
 21 Jul 2016 PHP 7.0.9
 
 - Core:
