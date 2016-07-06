@@ -2757,11 +2757,14 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, int d
 
 static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_style) /* {{{ */ {
 	if (var_ast->kind == ZEND_AST_ARRAY) {
+		if (var_ast->attr == ZEND_ARRAY_SYNTAX_LONG) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot assign to array(), use [] instead");
+		}
 		if (old_style != var_ast->attr) {
-			zend_error(E_COMPILE_ERROR, "Cannot mix [] and list()");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix [] and list()");
 		}
 	} else if (!zend_can_write_to_variable(var_ast)) {
-		zend_error(E_COMPILE_ERROR, "Assignments can only happen to writable values");
+		zend_error_noreturn(E_COMPILE_ERROR, "Assignments can only happen to writable values");
 	}
 }
 /* }}} */
@@ -6480,7 +6483,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 	uint32_t i;
 	zend_bool is_constant = 1;
 
-	if (ast->attr) {
+	if (ast->attr == ZEND_ARRAY_SYNTAX_LIST) {
 		zend_error(E_COMPILE_ERROR, "Cannot use list() as standalone expression");
 	}
 
