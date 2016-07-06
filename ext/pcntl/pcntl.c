@@ -1047,7 +1047,7 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
 		RETURN_ZVAL(prev_handle, 1, 0);
 	} else {
-		RETURN_LONG((long)SIG_DFL);
+		RETURN_LONG((zend_long)SIG_DFL);
 	}
 }
 
