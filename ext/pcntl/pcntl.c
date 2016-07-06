@@ -148,6 +148,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_strerror, 0, 0, 1)
         ZEND_ARG_INFO(0, errno)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_async_signals, 0, 0, 1)
+        ZEND_ARG_INFO(0, on)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry pcntl_functions[] = {
@@ -183,6 +187,7 @@ const zend_function_entry pcntl_functions[] = {
 #ifdef HAVE_WCONTINUED
 	PHP_FE(pcntl_wifcontinued,	arginfo_pcntl_wifcontinued)
 #endif
+	PHP_FE(pcntl_async_signals,	arginfo_pcntl_async_signals)
 	PHP_FE_END
 };
 
@@ -207,8 +212,11 @@ zend_module_entry pcntl_module_entry = {
 ZEND_GET_MODULE(pcntl)
 #endif
 
+static void (*orig_interrupt_function)(zend_execute_data *execute_data);
+
 static void pcntl_signal_handler(int);
 static void pcntl_signal_dispatch();
+static void pcntl_interrupt_function(zend_execute_data *execute_data);
 
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
@@ -506,6 +514,7 @@ PHP_RINIT_FUNCTION(pcntl)
 {
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
+	PCNTL_G(async_signals) = 0;
 	return SUCCESS;
 }
 
@@ -514,6 +523,8 @@ PHP_MINIT_FUNCTION(pcntl)
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_add_tick_function(pcntl_signal_dispatch, NULL);
+	orig_interrupt_function = zend_interrupt_function;
+	zend_interrupt_function = pcntl_interrupt_function;
 
 	return SUCCESS;
 }
@@ -1317,6 +1328,9 @@ static void pcntl_signal_handler(int signo)
 	}
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = 1;
+	if (PCNTL_G(async_signals)) {
+		EG(vm_interrupt) = 1;
+	}
 }
 
 void pcntl_signal_dispatch()
@@ -1375,7 +1389,30 @@ void pcntl_signal_dispatch()
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
+/* {{{ proto bool pcntl_async_signals([bool on[)
+   Enable/disable asynchronous signal handling and return the old setting. */
+PHP_FUNCTION(pcntl_async_signals)
+{
+	zend_bool on;
 
+	if (ZEND_NUM_ARGS() == 0) {
+		RETURN_BOOL(PCNTL_G(async_signals));
+	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &on) == FAILURE) {
+		return;
+	}
+	RETVAL_BOOL(PCNTL_G(async_signals));
+	PCNTL_G(async_signals) = on;
+}
+/* }}} */
+
+static void pcntl_interrupt_function(zend_execute_data *execute_data)
+{
+	pcntl_signal_dispatch();
+	if (orig_interrupt_function) {
+		orig_interrupt_function(execute_data);
+	}
+}
 
 /*
  * Local variables:

@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0beta1
 
+- pcntl
+  . Implemented asynchronous signal handling without TICKS. (Dmitry)
+
 07 Jul 2016, PHP 7.1.0alpha3
 
 - Core:
