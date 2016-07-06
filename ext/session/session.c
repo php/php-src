@@ -305,13 +305,15 @@ static size_t bin_to_readable(unsigned char *in, size_t inlen, char *out, char n
 }
 /* }}} */
 
+#define PS_EXTRA_RAND_BYTES 60
+
 PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 {
-	unsigned char rbuf[PS_MAX_SID_LENGTH];
+	unsigned char rbuf[PS_MAX_SID_LENGTH + PS_EXTRA_RAND_BYTES];
 	zend_string *outid;
 
-	/* Read additiona 60 bytes just in case CSPRNG is not safe enough */
-	if (php_random_bytes_throw(rbuf, PS(sid_length) + 60) == FAILURE) {
+	/* Read additiona PS_EXTRA_RAND_BYTES just in case CSPRNG is not safe enough */
+	if (php_random_bytes_throw(rbuf, PS(sid_length) + PS_EXTRA_RAND_BYTES) == FAILURE) {
 		return NULL;
 	}
 
