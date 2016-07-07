@@ -69,6 +69,9 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #endif
 
 #include <gd.h>
+#ifndef HAVE_GD_BUNDLED
+# include <gd_errors.h>
+#endif
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */
 #include <gdfontmb.h> /* 3 Medium bold font */
@@ -1099,6 +1102,18 @@ void php_gd_error_method(int type, const char *format, va_list args)
 {
 	TSRMLS_FETCH();
 
+	switch (type) {
+		case GD_DEBUG:
+		case GD_INFO:
+		case GD_NOTICE:
+			type = E_NOTICE;
+			break;
+		case GD_WARNING:
+			type = E_WARNING;
+			break;
+		default:
+			type = E_ERROR;
+	}
 	php_verror(NULL, "", type, format, args TSRMLS_CC);
 }
 /* }}} */
