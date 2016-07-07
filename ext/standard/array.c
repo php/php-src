@@ -46,6 +46,7 @@
 #include "php_string.h"
 #include "php_rand.h"
 #include "zend_smart_str.h"
+#include "zend_bitset.h"
 #include "ext/spl/spl_array.h"
 
 /* {{{ defines */
@@ -79,12 +80,6 @@
 #define INTERSECT_COMP_DATA_USER     1
 #define INTERSECT_COMP_KEY_INTERNAL  0
 #define INTERSECT_COMP_KEY_USER      1
-
-// For array_rand even distribution
-#define BITFIELD_BYTES(bits) ((bits + 7) >> 3)
-#define BITFIELD_SETBIT(field, bit) field[bit >> 3] |= 1 << (bit & 7)
-#define BITFIELD_BITSET(field, bit) ((field[bit >> 3] & (1 << (bit & 7))) != 0)
-
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
@@ -5043,8 +5038,9 @@ PHP_FUNCTION(array_rand)
 	zend_ulong num_key;
 	int i;
 	int num_avail;
-	char *bitfield;
-	int negative_bitfield = 0;
+	zend_bitset bitset;
+	int negative_bitset = 0;
+	uint32_t bitset_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|l", &input, &num_req) == FAILURE) {
 		return;
@@ -5079,18 +5075,20 @@ PHP_FUNCTION(array_rand)
 	/* Make the return value an array only if we need to pass back more than one result. */
 	array_init_size(return_value, (uint32_t)num_req);
 	if (num_req > (num_avail >> 1)) {
-		negative_bitfield = 1;
+		negative_bitset = 1;
 		num_req = num_avail - num_req;
 	}
 
-	bitfield = emalloc(BITFIELD_BYTES(num_avail));
-	memset(bitfield, 0, BITFIELD_BYTES(num_avail));
+	ALLOCA_FLAG(use_heap);
+	bitset_len = zend_bitset_len(num_avail);
+	bitset = ZEND_BITSET_ALLOCA(bitset_len, use_heap);
+	zend_bitset_clear(bitset, bitset_len);
 
 	i = num_req;
 	while (i) {
 		randval = php_mt_rand_range(0, num_avail - 1);
-		if (!BITFIELD_BITSET(bitfield, randval)) {
-			BITFIELD_SETBIT(bitfield, randval);
+		if (!zend_bitset_in(bitset, randval)) {
+			zend_bitset_incl(bitset, randval);
 			i--;
 		}
 	}
@@ -5098,7 +5096,7 @@ PHP_FUNCTION(array_rand)
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
 	i = 0;
 	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
-		if (BITFIELD_BITSET(bitfield, i) ^ negative_bitfield) {
+		if (zend_bitset_in(bitset, i) ^ negative_bitset) {
 			if (string_key) {
 				add_next_index_str(return_value, zend_string_copy(string_key));
 			} else {
@@ -5108,7 +5106,7 @@ PHP_FUNCTION(array_rand)
 		i++;
 	} ZEND_HASH_FOREACH_END();
 
-	efree(bitfield);
+	free_alloca(bitset, use_heap);
 }
 /* }}} */
 
