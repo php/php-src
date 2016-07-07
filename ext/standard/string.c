@@ -195,7 +195,6 @@ static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *
  * glibc's localeconv is not reentrant, so lets make it so ... sorta */
 PHPAPI struct lconv *localeconv_r(struct lconv *out)
 {
-	struct lconv *res;
 
 # ifdef ZTS
 	tsrm_mutex_lock( locale_mutex );
@@ -206,15 +205,13 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 		/* Even with the enabled per thread locale, localeconv
 			won't check any locale change in the master thread. */
 		_locale_t cur = _get_current_locale();
-
-		res = cur->locinfo->lconv;
+		*out = *cur->locinfo->lconv;
+		_free_locale(cur);
 	}
 #else
 	/* localeconv doesn't return an error condition */
-	res = localeconv();
+	*out = *localeconv();
 #endif
-
-	*out = *res;
 
 # ifdef ZTS
 	tsrm_mutex_unlock( locale_mutex );
