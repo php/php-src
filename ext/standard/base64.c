@@ -164,10 +164,14 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 			if (ch == -1) {
 				continue;
 			}
-			/* fail on bad characters or if any data follows padding */
-			if (ch == -2 || padding) {
+			/* fail on bad characters */
+			if (ch == -2) {
 				goto fail;
 			}
+		}
+		/* fail on bad characters or if any data follows padding */
+		if (padding) {
+			goto fail;
 		}
 
 		switch(i % 4) {
