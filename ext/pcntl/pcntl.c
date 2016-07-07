@@ -560,6 +560,11 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	while (PCNTL_G(head)) {
 		sig = PCNTL_G(head);
 		PCNTL_G(head) = sig->next;
+#ifdef HAVE_STRUCT_SIGINFO_T
+		if (sig->siginfo) {
+			zend_array_destroy(sig->siginfo);
+		}
+#endif
 		efree(sig);
 	}
 	while (PCNTL_G(spares)) {
@@ -1375,10 +1380,10 @@ static void pcntl_signal_handler(int signo)
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 	zval user_siginfo;
-	ZVAL_NEW_ARR(&user_siginfo);
 	array_init(&user_siginfo);
 	pcntl_siginfo_to_zval(signo, siginfo, &user_siginfo);
-	psig->siginfo = Z_ARRVAL(user_siginfo);
+	psig->siginfo = zend_array_dup(Z_ARRVAL(user_siginfo));
+	zval_ptr_dtor(&user_siginfo);
 #endif
 
 	/* the head check is important, as the tick handler cannot atomically clear both
