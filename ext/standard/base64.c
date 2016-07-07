@@ -154,20 +154,13 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 		}
 
 		ch = base64_reverse_table[ch];
-		if (!strict) {
-			/* skip unknown characters and whitespace */
-			if (ch < 0) {
-				continue;
-			}
-		} else {
-			/* skip whitespace */
-			if (ch == -1) {
-				continue;
-			}
-			/* fail on bad characters */
-			if (ch == -2) {
+		/* handle unknown characters and whitespace */
+		if (ch < 0) {
+			/* strict: fail on bad characters */
+			if (strict && ch == -2) {
 				goto fail;
 			}
+			continue;
 		}
 		/* fail on bad characters or if any data follows padding */
 		if (padding) {
