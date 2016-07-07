@@ -8,5 +8,5 @@ var_dump(
 );
 ?>
 --EXPECT--
-string(51) "The '=' symbols aren't allowed where i put them o.O"
+bool(false)
 bool(false)

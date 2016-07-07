@@ -15,4 +15,4 @@ var_dump($in, base64_decode($in));
 --EXPECT--
 Invalid Signature
 string(10) "Zm9v==YmFy"
-string(6) "foobar"
+bool(false)
