@@ -4528,22 +4528,6 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
-	if (cases->children == 1 && cases->child[0]->child[0] == NULL) {
-		/* we have to take care about the case that only have one default branch,
-		 * expr result will not be unrefed in this case, but it should be like in ZEND_CASE */
-		zend_ast *stmt_ast = cases->child[0]->child[1];
-		if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
-			zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
-		} else if (expr_node.op_type == IS_CONST) {
-			zval_dtor(&expr_node.u.constant);
-		}
-
-		zend_begin_loop(ZEND_NOP, NULL);
-		zend_compile_stmt(stmt_ast);
-		zend_end_loop(get_next_op_number(CG(active_op_array)), NULL);
-		return;
-	}
-
 	zend_begin_loop(ZEND_FREE, &expr_node);
 
 	case_node.op_type = IS_TMP_VAR;
