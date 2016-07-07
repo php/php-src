@@ -7,7 +7,7 @@ openssl_decrypt() error tests
 $data = "openssl_decrypt() tests";
 $method = "AES-128-CBC";
 $password = "openssl";
-$wrong = "wrong";
+$wrong = base64_encode("wrong");
 $iv = str_repeat("\0", openssl_cipher_iv_length($method));
 
 $encrypted = openssl_encrypt($data, $method, $password);
