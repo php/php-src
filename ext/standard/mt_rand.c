@@ -189,13 +189,22 @@ PHPAPI uint32_t php_mt_rand(void)
 PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
+	zend_long mode = MT_RAND_MT19937;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &seed, &mode) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
 
+	switch (mode) {
+		case MT_RAND_PHP:
+			BG(mt_rand_mode) = MT_RAND_PHP;
+			break;
+		default:
+			BG(mt_rand_mode) = MT_RAND_MT19937;
+	}
+	
 	php_mt_srand(seed);
 }
 /* }}} */
@@ -283,25 +292,6 @@ PHP_FUNCTION(mt_getrandmax)
 }
 /* }}} */
 
-/* {{{ proto int mt_rand_mode(int)
-   Switch mt_rand between standard and legacy modes */
-PHP_FUNCTION(mt_rand_mode)
-{
-	zend_long mode;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &mode) == FAILURE) {
-		return;
-	}
-
-	switch (mode) {
-		case MT_RAND_PHP:
-			BG(mt_rand_mode) = MT_RAND_PHP;
-			break;
-		default:
-			BG(mt_rand_mode) = MT_RAND_MT19937;
-	}
-}
-/* }}} */
 PHP_MINIT_FUNCTION(mt_rand)
 {
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);

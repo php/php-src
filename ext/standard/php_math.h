@@ -51,7 +51,6 @@ PHP_FUNCTION(getrandmax);
 PHP_FUNCTION(mt_srand);
 PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);
-PHP_FUNCTION(mt_rand_mode);
 PHP_FUNCTION(abs);
 PHP_FUNCTION(ceil);
 PHP_FUNCTION(floor);

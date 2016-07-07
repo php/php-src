@@ -3,8 +3,7 @@ Test mt_rand() output
 --FILE--
 <?php
 
-mt_rand_mode(MT_RAND_PHP);
-mt_srand(12345678);
+mt_srand(12345678, MT_RAND_PHP);
 
 for ($i=0; $i<16; $i++) {
     echo mt_rand().PHP_EOL;
@@ -18,8 +17,7 @@ for ($i=0; $i<1024; $i++) {
 echo $x.PHP_EOL;
 echo PHP_EOL;
 
-mt_rand_mode(MT_RAND_MT19937);
-mt_srand(12345678);
+mt_srand(12345678 /*, MT_RAND_MT19937 */);
 
 for ($i=0; $i<16; $i++) {
     echo mt_rand().PHP_EOL;

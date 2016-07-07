@@ -1886,6 +1886,7 @@ ZEND_END_ARG_INFO()
 /* {{{ mt_rand.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_srand, 0, 0, 0)
 	ZEND_ARG_INFO(0, seed)
+	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_rand, 0, 0, 0)
@@ -1894,10 +1895,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_rand, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_mt_getrandmax, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_rand_mode, 0, 0, 1)
-	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ random.c */
@@ -2858,7 +2855,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(mt_rand,															arginfo_mt_rand)
 	PHP_FE(mt_srand,														arginfo_mt_srand)
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
-	PHP_FE(mt_rand_mode,													arginfo_mt_rand_mode)
 
 	PHP_FE(random_bytes,													arginfo_random_bytes)
 	PHP_FE(random_int,													arginfo_random_int)
