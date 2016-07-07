@@ -189,6 +189,10 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	if (i % 4 == 1) {
 		goto fail;
 	}
+	/* fail if there are more than 2 padding characters */
+	if (padding > 2) {
+		goto fail;
+	}
 
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
