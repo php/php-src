@@ -1,18 +1,25 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 5.6.24
+?? ??? 2016, PHP 5.6.25
+
+- Core:
+  . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
+
+- Curl:
+  . Fixed bug #71144 (Segmentation fault when using cURL with ZTS).
+    (maroszek at gmx dot net)
 
 21 Jul 2016, PHP 5.6.24
 
 - Core:
-  . Fix bug #71936 (Segmentation fault destroying HTTP_RAW_POST_DATA).
+  . Fixed bug #71936 (Segmentation fault destroying HTTP_RAW_POST_DATA).
     (mike dot laspina at gmail dot com, Remi)
-  . Fix bug #72496 (Cannot declare public method with signature incompatible
+  . Fixed bug #72496 (Cannot declare public method with signature incompatible
     with parent private method). (Pedro Magalhães)
-  . Fix bug #72138 (Integer Overflow in Length of String-typed ZVAL). (Stas)
+  . Fixed bug #72138 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
 - bz2:
-  . Fix bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at 
+  . Fixed bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at 
     stealien dot com).
 
 - EXIF:
