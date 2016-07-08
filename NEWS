@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #72496 (Cannot declare public method with signature incompatible
     with parent private method). (Pedro Magalhães)
+  . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
 
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
