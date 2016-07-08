@@ -799,7 +799,7 @@ if test "$PHP_GCOV" = "yes"; then
   dnl min: 1.5 (i.e. 105, major * 100 + minor for easier comparison)
   ltp_version_min="105"
   dnl non-working versions, e.g. "1.8 1.18";
-  dnl remove "none" when introducing the first incompatible LTP version an 
+  dnl remove "none" when introducing the first incompatible LTP version and
   dnl separate any following additions by spaces
   ltp_version_exclude="1.8"
 
