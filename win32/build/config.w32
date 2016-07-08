@@ -1,6 +1,6 @@
 // vim:ft=javascript
 // $Id$
-// "Master" config file; think of it as a configure.in
+// "Master" config file; think of it as a configure.ac
 // equivalent.
 
 ARG_WITH("toolset", "Toolset to use for the compilation, give: vs, clang, icc. " +
