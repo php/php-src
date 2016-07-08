@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     (Dmitry, Nikita)
   . Added new constant PHP_FD_SETSIZE. (cmb)
 
+- Filter
+  . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
+    range). (bugs dot php dot net at majkl578 dot cz)
+
 - pcntl
   . Implemented asynchronous signal handling without TICKS. (Dmitry)
   . Added pcntl_signal_get_handler() that returns the current signal handler
