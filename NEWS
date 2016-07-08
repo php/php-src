@@ -5,7 +5,10 @@ PHP                                                                        NEWS
 ?? ?? 2016, PHP 5.5.38
 
 Core:
-   . Fix bug #70480 (php_url_parse_ex() buffer overflow read). (Stas)
+   . Fixed bug #70480 (php_url_parse_ex() buffer overflow read). (Stas)
+
+ODBC:
+   . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined columns)
 
 23 Jun 2016, PHP 5.5.37
 
