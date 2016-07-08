@@ -1009,9 +1009,9 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 
 			case ST_BOOLEAN:
 				if (!strcmp((char *)s, "true")) {
-					Z_LVAL(ent->data) = 1;
+					ZVAL_TRUE(&ent->data);
 				} else if (!strcmp((char *)s, "false")) {
-					Z_LVAL(ent->data) = 0;
+					ZVAL_FALSE(&ent->data);
 				} else {
 					zval_ptr_dtor(&ent->data);
 					if (ent->varname) {
