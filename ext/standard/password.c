@@ -44,6 +44,10 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_MEMORY_COST", PHP_PASSWORD_ARGON2_MEMORY_COST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_TIME_COST", PHP_PASSWORD_ARGON2_TIME_COST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_LANES", PHP_PASSWORD_ARGON2_LANES, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -180,9 +184,9 @@ PHP_FUNCTION(password_get_info)
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
-				zend_long m_cost = PHP_ARGON2_M_COST;
-				zend_long t_cost = PHP_ARGON2_T_COST;
-				zend_long lanes = PHP_ARGON2_LANES;
+				zend_long m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
+				zend_long t_cost = PHP_PASSWORD_ARGON2_TIME_COST;
+				zend_long lanes = PHP_PASSWORD_ARGON2_LANES;
 
 				sscanf(hash, "$%*[argon2id]$v=%*ld$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &m_cost, &t_cost, &lanes);
 				add_assoc_long(&options, "m_cost", m_cost);
@@ -239,9 +243,9 @@ PHP_FUNCTION(password_needs_rehash)
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
-				zend_long new_m_cost = PHP_ARGON2_M_COST, m_cost = 0;
-				zend_long new_t_cost = PHP_ARGON2_T_COST, t_cost = 0;
-				zend_long new_lanes = PHP_ARGON2_LANES, lanes = 0;
+				zend_long new_m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, m_cost = 0;
+				zend_long new_t_cost = PHP_PASSWORD_ARGON2_TIME_COST, t_cost = 0;
+				zend_long new_lanes = PHP_PASSWORD_ARGON2_LANES, lanes = 0;
 
 				if (options && (option_buffer = zend_hash_str_find(options, "m_cost", sizeof("m_cost")-1)) != NULL) {
 					new_m_cost = zval_get_long(option_buffer);
