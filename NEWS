@@ -4,7 +4,8 @@ PHP                                                                        NEWS
 
 ?? ?? 2016, PHP 5.5.38
 
-
+Core:
+   . Fix bug #70480 (php_url_parse_ex() buffer overflow read). (Stas)
 
 23 Jun 2016, PHP 5.5.37
 
