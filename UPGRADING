@@ -124,6 +124,7 @@ PHP 7.1 UPGRADE NOTES
 - substr_count() and mb_strimwidth() additionally also accept negative length.
 - file_get_contents() accepts a negative seek offset if the stream is seekable.
 - tempnam() throws a notice when failing back to the system temp dir.
+- getopt() has an extra by-ref parameter : optind
 
 ========================================
 6. New Functions

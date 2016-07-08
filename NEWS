@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #71539 (Memory error on $arr[$a] =& $arr[$b] if RHS rehashes)
     (Dmitry, Nikita)
   . Added new constant PHP_FD_SETSIZE. (cmb)
+  . Added optind parameter to getopt(). (as)
 
 - Filter
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
