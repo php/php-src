@@ -39,6 +39,8 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2I", PHP_PASSWORD_ARGON2I, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2D", PHP_PASSWORD_ARGON2D, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
 
@@ -51,6 +53,10 @@ static char* php_password_get_algo_name(const php_password_algo algo)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			return "bcrypt";
+		case PHP_PASSWORD_ARGON2I:
+			return "argon2i";
+		case PHP_PASSWORD_ARGON2D:
+			return "argon2d";	
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			return "unknown";
@@ -59,7 +65,11 @@ static char* php_password_get_algo_name(const php_password_algo algo)
 
 static php_password_algo php_password_determine_algo(const char *hash, const size_t len)
 {
-	if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
+	if (hash[0] == '$' && strstr(hash, "argon2i")) {
+		return PHP_PASSWORD_ARGON2I;
+	} else if (hash[0] == '$' && strstr(hash, "argon2d")) {
+		return PHP_PASSWORD_ARGON2D;
+	} else if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
 		return PHP_PASSWORD_BCRYPT;
 	}
 
@@ -167,6 +177,19 @@ PHP_FUNCTION(password_get_info)
 				add_assoc_long(&options, "cost", cost);
 			}
 			break;
+		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2D:
+			{
+				zend_long m_cost = PHP_ARGON2_M_COST;
+				zend_long t_cost = PHP_ARGON2_T_COST;
+				zend_long lanes = PHP_ARGON2_LANES;
+
+				sscanf(hash, "$%*[argon2id]$v=%*ld$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &m_cost, &t_cost, &lanes);
+				add_assoc_long(&options, "m_cost", m_cost);
+				add_assoc_long(&options, "t_cost", t_cost);
+				add_assoc_long(&options, "lanes", lanes);
+			}
+			break;
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			break;
@@ -213,6 +236,32 @@ PHP_FUNCTION(password_needs_rehash)
 				}
 			}
 			break;
+		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2D:
+			{
+				zend_long new_m_cost = PHP_ARGON2_M_COST, m_cost = 0;
+				zend_long new_t_cost = PHP_ARGON2_T_COST, t_cost = 0;
+				zend_long new_lanes = PHP_ARGON2_LANES, lanes = 0;
+
+				if (options && (option_buffer = zend_hash_str_find(options, "m_cost", sizeof("m_cost")-1)) != NULL) {
+					new_m_cost = zval_get_long(option_buffer);
+				}
+
+				if (options && (option_buffer = zend_hash_str_find(options, "t_cost", sizeof("t_cost")-1)) != NULL) {
+					new_t_cost = zval_get_long(option_buffer);
+				}
+
+				if (options && (option_buffer = zend_hash_str_find(options, "lanes", sizeof("lanes")-1)) != NULL) {
+					new_lanes = zval_get_long(option_buffer);
+				}
+
+				sscanf(hash, "$%*[argon2id]$v=%*ld$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &m_cost, &t_cost, &lanes);
+
+				if (new_t_cost != t_cost || new_m_cost != m_cost || new_lanes != lanes) {
+					RETURN_TRUE;
+				}
+			}
+			break;
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			break;
@@ -228,17 +277,34 @@ PHP_FUNCTION(password_verify)
 	size_t i, password_len, hash_len;
 	char *password, *hash;
 	zend_string *ret;
+	php_password_algo algo;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if ((ret = php_crypt(password, (int)password_len, hash, (int)hash_len, 1)) == NULL) {
-		RETURN_FALSE;
-	}
 
-	if (ZSTR_LEN(ret) != hash_len || hash_len < 13) {
-		zend_string_free(ret);
-		RETURN_FALSE;
+	algo = php_password_determine_algo(hash, (size_t) hash_len);
+
+	switch(algo) {
+		case PHP_PASSWORD_BCRYPT:
+			{
+				if ((ret = php_crypt(password, (int)password_len, hash, (int)hash_len, 1)) == NULL) {
+					RETURN_FALSE;
+				}
+
+				if (ZSTR_LEN(ret) != hash_len || hash_len < 13) {
+					zend_string_free(ret);
+					RETURN_FALSE;
+				}
+			}
+		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2D:
+			{
+				// @todo: Implement argon2_verify via import
+			}
+		case PHP_PASSWORD_UNKNOWN:
+		default:
+			RETURN_FALSE;
 	}
 
 	/* We're using this method instead of == in order to provide
@@ -275,23 +341,29 @@ PHP_FUNCTION(password_hash)
 
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
-		{
-			zend_long cost = PHP_PASSWORD_BCRYPT_COST;
+			{
+				zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
-			if (options && (option_buffer = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
-				cost = zval_get_long(option_buffer);
+				if (options && (option_buffer = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
+					cost = zval_get_long(option_buffer);
+				}
+
+				if (cost < 4 || cost > 31) {
+					php_error_docref(NULL, E_WARNING, "Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
+					RETURN_NULL();
+				}
+
+				required_salt_len = 22;
+				sprintf(hash_format, "$2y$%02ld$", (long) cost);
+				hash_format_len = 7;
 			}
-
-			if (cost < 4 || cost > 31) {
-				php_error_docref(NULL, E_WARNING, "Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
-				RETURN_NULL();
+			break;
+		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2D:
+			{
+				// @todo: Implement Argon2_hash with options
 			}
-
-			required_salt_len = 22;
-			sprintf(hash_format, "$2y$%02ld$", (long) cost);
-			hash_format_len = 7;
-		}
-		break;
+			break;
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: " ZEND_LONG_FMT, algo);
@@ -356,30 +428,42 @@ PHP_FUNCTION(password_hash)
 		salt_len = required_salt_len;
 	}
 
-	salt[salt_len] = 0;
+	switch (algo) {
+		case PHP_PASSWORD_BCRYPT:
+			{
+				salt[salt_len] = 0;
 
-	hash = safe_emalloc(salt_len + hash_format_len, 1, 1);
-	sprintf(hash, "%s%s", hash_format, salt);
-	hash[hash_format_len + salt_len] = 0;
+				hash = safe_emalloc(salt_len + hash_format_len, 1, 1);
+				sprintf(hash, "%s%s", hash_format, salt);
+				hash[hash_format_len + salt_len] = 0;
 
-	efree(salt);
+				efree(salt);
 
-	/* This cast is safe, since both values are defined here in code and cannot overflow */
-	hash_len = (int) (hash_format_len + salt_len);
+				/* This cast is safe, since both values are defined here in code and cannot overflow */
+				hash_len = (int) (hash_format_len + salt_len);
 
-	if ((result = php_crypt(password, (int)password_len, hash, hash_len, 1)) == NULL) {
-		efree(hash);
-		RETURN_FALSE;
+				if ((result = php_crypt(password, (int)password_len, hash, hash_len, 1)) == NULL) {
+					efree(hash);
+					RETURN_FALSE;
+				}
+
+				efree(hash);
+
+				if (ZSTR_LEN(result) < 13) {
+					zend_string_free(result);
+					RETURN_FALSE;
+				}
+
+				RETURN_STR(result);
+			}
+		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2D:
+			{
+				// @todo: Implement Argon2_hash with options
+			}
+		default:
+			RETURN_FALSE;
 	}
-
-	efree(hash);
-
-	if (ZSTR_LEN(result) < 13) {
-		zend_string_free(result);
-		RETURN_FALSE;
-	}
-
-	RETURN_STR(result);
 }
 /* }}} */
 
