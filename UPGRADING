@@ -256,6 +256,9 @@ PHP 7.1 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Core:
+  . PHP_FD_SETSIZE
+
 - JSON:
   . JSON_UNESCAPED_LINE_TERMINATORS
 

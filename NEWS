@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (Laruence, Dmitry, Nikita)
   . Fixed bug #71539 (Memory error on $arr[$a] =& $arr[$b] if RHS rehashes)
     (Dmitry, Nikita)
+  . Added new constant PHP_FD_SETSIZE. (cmb)
 
 - pcntl
   . Implemented asynchronous signal handling without TICKS. (Dmitry)
