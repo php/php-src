@@ -16,45 +16,51 @@ PHP                                                                        NEWS
   . Fixed bug #72403 (Integer Overflow in Length of String-typed ZVAL). (Stas)
 
 - GD:
-  . Fixed bug #66387 (Stack overflow with imagefilltoborder) (CVE-2015-8874).
+  . Fixed bug #66387 (Stack overflow with imagefilltoborder). (CVE-2015-8874)
     (cmb)
   . Fixed bug #72298 (pass2_no_dither out-of-bounds access). (Stas)
-  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in 
-    heap overflow). (Pierre)
+  . Fixed bug #72339 (Integer Overflow in _gd2GetHeader() resulting in heap
+    overflow). (CVE-2016-5766) (Pierre)
   . Fixed bug #72407 (NULL Pointer Dereference at _gdScaleVert). (Stas)
   . Fixed bug #72446 (Integer Overflow in gdImagePaletteToTrueColor() resulting
-    in heap overflow). (Pierre)
+    in heap overflow). (CVE-2016-5767) (Pierre)
 
 - mbstring:
-   . Fixed bug #72402 (_php_mb_regex_ereg_replace_exec - double free). (Stas)
+  . Fixed bug #72402 (_php_mb_regex_ereg_replace_exec - double free).
+    (CVE-2016-5768) (Stas)
 
 - mcrypt:
-   . Fixed bug #72455 (Heap Overflow due to integer overflows). (Stas)
+  . Fixed bug #72455 (Heap Overflow due to integer overflows). (CVE-2016-5769)
+    (Stas)
 
 - SPL:
-  . Fixed bug #72262 (int/size_t confusion in SplFileObject::fread). (Stas)
+  . Fixed bug #72262 (int/size_t confusion in SplFileObject::fread).
+    (CVE-2016-5770) (Stas)
   . Fixed bug #72433 (Use After Free Vulnerability in PHP's GC algorithm and
-    unserialize). (Dmitry)
+    unserialize). (CVE-2016-5771) (Dmitry)
 
 - WDDX:
-  . Fixed bug #72340 (Double Free Courruption in wddx_deserialize). (Stas)
+  . Fixed bug #72340 (Double Free Courruption in wddx_deserialize).
+    (CVE-2016-5772) (Stas)
 
 - zip:
   . Fixed bug #72434 (ZipArchive class Use After Free Vulnerability in PHP's GC
-    algorithm and unserialize). (Dmitry)
+    algorithm and unserialize). (CVE-2016-5773) (Dmitry)
 
 26 May 2016, PHP 5.5.36
 
 - Core:
   . Fixed bug #72114 (Integer underflow / arbitrary null write in
-    fread/gzread). (Stas)
-  . Fixed bug #72135 (Integer Overflow in php_html_entities). (Stas)
+    fread/gzread). (CVE-2016-5096) (Stas)
+  . Fixed bug #72135 (Integer Overflow in php_html_entities). (CVE-2016-5094)
+    (Stas)
 
 - GD:
-   . Fixed bug #72227 (imagescale out-of-bounds read). (Stas)
+   . Fixed bug #72227 (imagescale out-of-bounds read). (CVE-2013-7456) (Stas)
 
 - Intl:
-   . Fixed bug #72241 (get_icu_value_internal out-of-bounds read). (Stas)
+   . Fixed bug #72241 (get_icu_value_internal out-of-bounds read).
+     (CVE-2016-5093) (Stas)
 
 - Phar:
   . Fixed bug #71331 (Uninitialized pointer in phar_make_dirstream()).
@@ -71,7 +77,7 @@ PHP                                                                        NEWS
     processing). (Stas)
 
 - GD:
-  . Fixed bug #71912 (libgd: signedness vulnerability) (CVE-2016-3074). (Stas)
+  . Fixed bug #71912 (libgd: signedness vulnerability). (CVE-2016-3074) (Stas)
 
 - Intl:
   . Fixed bug #72061 (Out-of-bounds reads in zif_grapheme_stripos with negative
@@ -136,11 +142,12 @@ PHP                                                                        NEWS
 
 - WDDX:
   . Fixed bug #71335 (Type Confusion in WDDX Packet Deserialization). (Stas)
-  
+
 07 Jan 2015, PHP 5.5.31
 
 - FPM:
-  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
+  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow).
+    (CVE-2016-5114) (Stas)
 
 - GD:
   . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
