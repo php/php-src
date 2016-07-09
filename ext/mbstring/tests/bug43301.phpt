@@ -15,6 +15,8 @@ echo mb_ereg_replace($ptr,'$1',$txt,'e');
 
 ?>
 --EXPECTF--
+Deprecated: mb_ereg_replace(): The 'e' option is deprecated, use mb_ereg_replace_callback instead in %s%ebug43301.php on line %d
+
 Fatal error: Uncaught ParseError: syntax error, unexpected '1' (T_LNUMBER), expecting variable (T_VARIABLE) or '{' or '$' in %sbug43301.php(%d) : mbregex replace:1
 Stack trace:
 #0 %sbug43301.php(%d): mb_ereg_replace('hello', '$1', 'hello, I have g...', 'e')
