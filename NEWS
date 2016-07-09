@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
     range). (bugs dot php dot net at majkl578 dot cz)
 
+- Mbstring:
+  . Deprecated mb_ereg_replace() eval option. (Rouven Weßling, cmb)
+
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query

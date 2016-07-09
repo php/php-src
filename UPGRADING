@@ -100,6 +100,8 @@ PHP 7.1 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- 'e' option of mb_ereg_replace() and mb_eregi_replace().
+
 ========================================
 5. Changed Functions
 ========================================

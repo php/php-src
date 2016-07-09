@@ -855,6 +855,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			syntax = MBREX(regex_default_syntax);
 		}
 	}
+	if (eval && !is_callable) {
+		php_error_docref(NULL, E_DEPRECATED, "The 'e' option is deprecated, use mb_ereg_replace_callback instead");
+	}
 	if (Z_TYPE_P(arg_pattern_zval) == IS_STRING) {
 		arg_pattern = Z_STRVAL_P(arg_pattern_zval);
 		arg_pattern_len = Z_STRLEN_P(arg_pattern_zval);
