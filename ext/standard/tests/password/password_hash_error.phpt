@@ -21,6 +21,12 @@ var_dump(password_hash("123", PASSWORD_BCRYPT, array("salt" => array())));
 /* Non-string salt, checking for memory leaks */
 var_dump(password_hash('123', PASSWORD_BCRYPT, array('salt' => 1234)));
 
+var_dump(password_hash('test', PASSWORD_ARGON2, ['m_cost' => 0]));
+
+var_dump(password_hash('test', PASSWORD_ARGON2, ['t_cost' => 0]));
+
+var_dump(password_hash('test', PASSWORD_ARGON2, ['threads' => 0]));
+
 ?>
 --EXPECTF--
 Warning: password_hash() expects at least 2 parameters, 0 given in %s on line %d
@@ -50,3 +56,13 @@ Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprec
 
 Warning: password_hash(): Provided salt is too short: 4 expecting 22 in %s on line %d
 NULL
+
+Warning: password_hash(): Memory cost is outside of allowed memory range in %s on line %d
+NULL
+
+Warning: password_hash(): Time cost is outside of allowed time range in %s on line %d
+NULL
+
+Warning: password_hash(): Invalid number of threads in %s on line %d
+NULL
+

@@ -71,12 +71,12 @@ static char* php_password_get_algo_name(const php_password_algo algo)
 
 static php_password_algo php_password_determine_algo(const char *hash, const size_t len)
 {
-	if (hash[0] == '$' && strstr(hash, "argon2i")) {
+	if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
+		return PHP_PASSWORD_BCRYPT;
+	} else if (hash[0] == '$' && strstr(hash, "argon2i")) {
 		return PHP_PASSWORD_ARGON2I;
 	} else if (hash[0] == '$' && strstr(hash, "argon2d")) {
 		return PHP_PASSWORD_ARGON2D;
-	} else if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
-		return PHP_PASSWORD_BCRYPT;
 	}
 
 	return PHP_PASSWORD_UNKNOWN;
@@ -300,7 +300,29 @@ PHP_FUNCTION(password_verify)
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
 
 	switch(algo) {
+		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2D:
+			{
+				argon2_type type = Argon2_i;
+
+				if (strstr(hash, "argon2d")) {
+					type = Argon2_d;
+				} else if (strstr(hash, "argon2i")) {
+					type = Argon2_i;
+				}
+
+				status = argon2_verify(hash, password, password_len, type);
+				
+				if (status == ARGON2_OK) {
+					RETURN_TRUE;
+				}
+
+				RETURN_FALSE;
+			}
+			break;
 		case PHP_PASSWORD_BCRYPT:
+		case PHP_PASSWORD_UNKNOWN:
+		default:
 			{
 				if ((ret = php_crypt(password, (int)password_len, hash, (int)hash_len, 1)) == NULL) {
 					RETURN_FALSE;
@@ -323,28 +345,6 @@ PHP_FUNCTION(password_verify)
 
 				RETURN_BOOL(status == 0);
 			}
-		case PHP_PASSWORD_ARGON2I:
-		case PHP_PASSWORD_ARGON2D:
-			{
-				argon2_type type = Argon2_i;
-
-				if (strstr(hash, "argon2d")) {
-					type = Argon2_d;
-				} else if (strstr(hash, "argon2i")) {
-					type = Argon2_i;
-				}
-
-				status = argon2_verify(hash, password, password_len, type);
-				
-				if (status == ARGON2_OK) {
-					RETURN_TRUE;
-				}
-
-				RETURN_FALSE;
-			}
-		case PHP_PASSWORD_UNKNOWN:
-		default:
-			RETURN_FALSE;
 	}
 
 	RETURN_FALSE;
@@ -362,7 +362,6 @@ PHP_FUNCTION(password_hash)
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval *option_buffer;
-	zend_string *result;
 
 	// Argon2 Options
 	size_t t_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
@@ -419,7 +418,7 @@ PHP_FUNCTION(password_hash)
 				}
 
 				if (threads > ARGON2_MAX_LANES || threads == 0) {
-					php_error_docref(NULL, E_WARNING, "Invalid numeric input for threads", threads);
+					php_error_docref(NULL, E_WARNING, "Invalid number of threads", threads);
 					RETURN_NULL();
 				}
 
@@ -499,6 +498,7 @@ PHP_FUNCTION(password_hash)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
+				zend_string *result;
 				salt[salt_len] = 0;
 
 				hash = safe_emalloc(salt_len + hash_format_len, 1, 1);
@@ -532,7 +532,7 @@ PHP_FUNCTION(password_hash)
 
 				size_t out_len = 32;
 				size_t encoded_len;
-				int result = 0;
+				int status = 0;
 
 				encoded_len = argon2_encodedlen(
 					t_cost,
@@ -545,7 +545,7 @@ PHP_FUNCTION(password_hash)
 				encoded = emalloc(encoded_len + 1);
 				out = emalloc(out_len + 1);
 
-				result = argon2_hash(
+				status = argon2_hash(
 					t_cost,
 					m_cost,
 					threads,
@@ -567,8 +567,8 @@ PHP_FUNCTION(password_hash)
 				efree(salt);
 				efree(encoded);
 
-				if (result != ARGON2_OK) {
-					php_error_docref(NULL, E_WARNING, argon2_error_message(result));
+				if (status != ARGON2_OK) {
+					php_error_docref(NULL, E_WARNING, argon2_error_message(status));
 					RETURN_FALSE;
 				}
 					
