@@ -551,6 +551,13 @@ dnl
 AC_CHECK_DECLS([getrandom])
 
 dnl
+dnl Check for argon2
+dnl
+AC_MSG_RESULT([Using bundled Argon2 library])
+
+LIBS="$LIBS -lpthread"
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
@@ -564,8 +571,10 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
                             filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            random.c,,,
+                            random.c argon2lib/argon2.c argon2lib/core.c argon2lib/blake2/blake2b.c \
+                            argon2lib/thread.c argon2lib/encoding.c argon2lib/ref.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])
+PHP_INSTALL_HEADERS([ext/standard/argon2lib])

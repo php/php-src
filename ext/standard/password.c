@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Anthony Ferrara <ircmaxell@php.net>                         |
+   |          Charles R. Portwood II <charlesportwoodii@erianna.com>      |
    +----------------------------------------------------------------------+
 */
 
@@ -30,6 +31,7 @@
 #include "zend_interfaces.h"
 #include "info.h"
 #include "php_random.h"
+#include "argon2lib/argon2.h"
 
 #if PHP_WIN32
 #include "win32/winutil.h"
@@ -41,12 +43,12 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2I", PHP_PASSWORD_ARGON2I, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2D", PHP_PASSWORD_ARGON2D, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2", PHP_PASSWORD_ARGON2, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
-
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_MEMORY_COST", PHP_PASSWORD_ARGON2_MEMORY_COST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_TIME_COST", PHP_PASSWORD_ARGON2_TIME_COST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_LANES", PHP_PASSWORD_ARGON2_LANES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_THREADS", PHP_PASSWORD_ARGON2_THREADS, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -157,6 +159,8 @@ static int php_password_make_salt(size_t length, char *ret) /* {{{ */
 }
 /* }}} */
 
+/* {{{ proto array password_get_info(string $hash)
+Retrieves information about a given hash */
 PHP_FUNCTION(password_get_info)
 {
 	php_password_algo algo;
@@ -184,14 +188,15 @@ PHP_FUNCTION(password_get_info)
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
+				zend_long v = 0;
 				zend_long m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				zend_long t_cost = PHP_PASSWORD_ARGON2_TIME_COST;
-				zend_long lanes = PHP_PASSWORD_ARGON2_LANES;
+				zend_long threads = PHP_PASSWORD_ARGON2_THREADS;
 
-				sscanf(hash, "$%*[argon2id]$v=%*ld$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &m_cost, &t_cost, &lanes);
+				sscanf(hash, "$%*[argon2id]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
 				add_assoc_long(&options, "m_cost", m_cost);
 				add_assoc_long(&options, "t_cost", t_cost);
-				add_assoc_long(&options, "lanes", lanes);
+				add_assoc_long(&options, "threads", threads);
 			}
 			break;
 		case PHP_PASSWORD_UNKNOWN:
@@ -205,7 +210,10 @@ PHP_FUNCTION(password_get_info)
 	add_assoc_string(return_value, "algoName", algo_name);
 	add_assoc_zval(return_value, "options", &options);
 }
+/** }}} */
 
+/* {{{ proto boolean password_needs_rehash(string $hash, integer $algo, array $options)
+Determines if a given hash requires re-hashing based upon parameters */
 PHP_FUNCTION(password_needs_rehash)
 {
 	zend_long new_algo = 0;
@@ -243,9 +251,10 @@ PHP_FUNCTION(password_needs_rehash)
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
+				zend_long v = 0;
 				zend_long new_m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, m_cost = 0;
 				zend_long new_t_cost = PHP_PASSWORD_ARGON2_TIME_COST, t_cost = 0;
-				zend_long new_lanes = PHP_PASSWORD_ARGON2_LANES, lanes = 0;
+				zend_long new_threads = PHP_PASSWORD_ARGON2_THREADS, threads = 0;
 
 				if (options && (option_buffer = zend_hash_str_find(options, "m_cost", sizeof("m_cost")-1)) != NULL) {
 					new_m_cost = zval_get_long(option_buffer);
@@ -255,13 +264,13 @@ PHP_FUNCTION(password_needs_rehash)
 					new_t_cost = zval_get_long(option_buffer);
 				}
 
-				if (options && (option_buffer = zend_hash_str_find(options, "lanes", sizeof("lanes")-1)) != NULL) {
-					new_lanes = zval_get_long(option_buffer);
+				if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
+					new_threads = zval_get_long(option_buffer);
 				}
 
-				sscanf(hash, "$%*[argon2id]$v=%*ld$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &m_cost, &t_cost, &lanes);
+				sscanf(hash, "$%*[argon2id]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
 
-				if (new_t_cost != t_cost || new_m_cost != m_cost || new_lanes != lanes) {
+				if (new_t_cost != t_cost || new_m_cost != m_cost || new_threads != threads) {
 					RETURN_TRUE;
 				}
 			}
@@ -272,8 +281,9 @@ PHP_FUNCTION(password_needs_rehash)
 	}
 	RETURN_FALSE;
 }
+/* }}} */
 
-/* {{{ proto boolean password_make_salt(string password, string hash)
+/* {{{ proto boolean password_verify(string password, string hash)
 Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
@@ -300,29 +310,44 @@ PHP_FUNCTION(password_verify)
 					zend_string_free(ret);
 					RETURN_FALSE;
 				}
+
+				/* We're using this method instead of == in order to provide
+				* resistance towards timing attacks. This is a constant time
+				* equality check that will always check every byte of both
+				* values. */
+				for (i = 0; i < hash_len; i++) {
+					status |= (ZSTR_VAL(ret)[i] ^ hash[i]);
+				}
+
+				zend_string_free(ret);
+
+				RETURN_BOOL(status == 0);
 			}
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
-				// @todo: Implement argon2_verify via import
+				argon2_type type = Argon2_i;
+
+				if (strstr(hash, "argon2d")) {
+					type = Argon2_d;
+				} else if (strstr(hash, "argon2i")) {
+					type = Argon2_i;
+				}
+
+				status = argon2_verify(hash, password, password_len, type);
+				
+				if (status == ARGON2_OK) {
+					RETURN_TRUE;
+				}
+
+				RETURN_FALSE;
 			}
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			RETURN_FALSE;
 	}
 
-	/* We're using this method instead of == in order to provide
-	 * resistance towards timing attacks. This is a constant time
-	 * equality check that will always check every byte of both
-	 * values. */
-	for (i = 0; i < hash_len; i++) {
-		status |= (ZSTR_VAL(ret)[i] ^ hash[i]);
-	}
-
-	zend_string_free(ret);
-
-	RETURN_BOOL(status == 0);
-
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -338,6 +363,12 @@ PHP_FUNCTION(password_hash)
 	HashTable *options = 0;
 	zval *option_buffer;
 	zend_string *result;
+
+	// Argon2 Options
+	size_t t_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
+	size_t m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
+	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
+	argon2_type type = Argon2_i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
 		return;
@@ -365,7 +396,40 @@ PHP_FUNCTION(password_hash)
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
-				// @todo: Implement Argon2_hash with options
+				if (options && (option_buffer = zend_hash_str_find(options, "m_cost", sizeof("m_cost")-1)) != NULL) {
+					m_cost = zval_get_long(option_buffer);
+				}
+
+				if (m_cost > ARGON2_MAX_MEMORY || m_cost < ARGON2_MIN_MEMORY) {
+					php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range", m_cost);
+					RETURN_NULL();
+				}
+
+				if (options && (option_buffer = zend_hash_str_find(options, "t_cost", sizeof("t_cost")-1)) != NULL) {
+					t_cost = zval_get_long(option_buffer);
+				}
+
+				if (t_cost > ARGON2_MAX_TIME || t_cost < ARGON2_MIN_TIME) {
+					php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range", t_cost);
+					RETURN_NULL();
+				}
+				
+				if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
+					threads = zval_get_long(option_buffer);
+				}
+
+				if (threads > ARGON2_MAX_LANES || threads == 0) {
+					php_error_docref(NULL, E_WARNING, "Invalid numeric input for threads", threads);
+					RETURN_NULL();
+				}
+
+				if (algo == PHP_PASSWORD_ARGON2D) {
+					type = Argon2_d;
+				} else if (algo == PHP_PASSWORD_ARGON2I) {
+					type = Argon2_i;
+				}
+
+				required_salt_len = 16;
 			}
 			break;
 		case PHP_PASSWORD_UNKNOWN:
@@ -463,7 +527,52 @@ PHP_FUNCTION(password_hash)
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
-				// @todo: Implement Argon2_hash with options
+				char *out;
+				char *encoded;
+
+				size_t out_len = 32;
+				size_t encoded_len;
+				int result = 0;
+
+				encoded_len = argon2_encodedlen(
+					t_cost,
+					m_cost,
+					threads,
+					(uint32_t)salt_len,
+					out_len
+				);
+
+				encoded = emalloc(encoded_len + 1);
+				out = emalloc(out_len + 1);
+
+				result = argon2_hash(
+					t_cost,
+					m_cost,
+					threads,
+					password,
+					password_len,
+					salt,
+					salt_len,
+					out,
+					out_len,
+					encoded,
+					encoded_len,
+					type,
+					ARGON2_VERSION_NUMBER
+				);
+
+				zend_string *ret = zend_string_init(encoded, encoded_len, 0);
+
+				efree(out);
+				efree(salt);
+				efree(encoded);
+
+				if (result != ARGON2_OK) {
+					php_error_docref(NULL, E_WARNING, argon2_error_message(result));
+					RETURN_FALSE;
+				}
+					
+				RETURN_STR(ret);
 			}
 		default:
 			RETURN_FALSE;
