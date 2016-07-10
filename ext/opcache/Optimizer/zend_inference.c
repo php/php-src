@@ -3229,6 +3229,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_ADD_ARRAY_ELEMENT:
 						case ZEND_RETURN_BY_REF:
 						case ZEND_VERIFY_RETURN_TYPE:
+						case ZEND_MAKE_REF:
 							tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 							break;
 						case ZEND_PRE_INC:

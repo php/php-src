@@ -1262,9 +1262,11 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 						case ZEND_ASSIGN_REF:
 						case ZEND_ADD_ARRAY_ELEMENT:
 						case ZEND_INIT_ARRAY:
+						case ZEND_MAKE_REF:
 							msg = "Cannot create references to/from string offsets";
 							break;
 						case ZEND_RETURN_BY_REF:
+						case ZEND_VERIFY_RETURN_TYPE:
 							msg = "Cannot return string offsets by reference";
 							break;
 						case ZEND_UNSET_DIM:
