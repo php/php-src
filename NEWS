@@ -7,9 +7,12 @@ PHP                                                                        NEWS
     with parent private method). (Pedro Magalhães)
   . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
 
-- Filter
+- Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
     range). (bugs dot php dot net at majkl578 dot cz)
+
+- PDO_pgsql:
+  . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
 
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
