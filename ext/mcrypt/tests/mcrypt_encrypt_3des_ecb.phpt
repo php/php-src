@@ -57,18 +57,26 @@ foreach ($ivs as $iv) {
 
 key length=8
 
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_encrypt_3des_ecb.php on line 25
+
 Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=20
 
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_encrypt_3des_ecb.php on line 25
+
 Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=24
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_encrypt_3des_ecb.php on line 25
 string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 
 key length=26
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_encrypt_3des_ecb.php on line 25
 
 Warning: mcrypt_encrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
@@ -76,11 +84,17 @@ string(0) ""
 --- testing different iv lengths
 
 iv length=4
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_encrypt_3des_ecb.php on line 39
 string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 
 iv length=8
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_encrypt_3des_ecb.php on line 39
 string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 
 iv length=9
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_encrypt_3des_ecb.php on line 39
 string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 ===DONE===

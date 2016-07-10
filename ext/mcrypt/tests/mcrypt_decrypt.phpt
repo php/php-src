@@ -20,10 +20,21 @@ var_dump(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CBC));
 
 var_dump(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE_CBC, $iv));
 --EXPECTF--
+Deprecated: mcrypt_get_iv_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt.php on line 7
+
+Deprecated: mcrypt_create_iv(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt.php on line 7
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt.php on line 8
+
+Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt.php on line 11
 PHP Testfest 2008
+
+Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt.php on line 14
 
 Warning: mcrypt_decrypt(): Encryption mode requires an initialization vector of size 16 in %s on line %d
 bool(false)
+
+Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt.php on line 16
 
 Warning: mcrypt_decrypt(): Received initialization vector of size 16, but size 8 is required for this encryption mode in %s on line %d
 bool(false)

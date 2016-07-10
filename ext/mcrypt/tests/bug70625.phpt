@@ -12,6 +12,9 @@ $plaintext = mcrypt_decrypt(MCRYPT_ARCFOUR, $key, $ciphertext, MCRYPT_MODE_STREA
 var_dump($plaintext);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%ebug70625.php on line 4
 string(14) "d5c9a57023d0f1"
+
+Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%ebug70625.php on line 6
 string(7) "payload"

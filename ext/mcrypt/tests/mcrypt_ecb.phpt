@@ -18,4 +18,13 @@ echo trim(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_ECB, $iv)) . "\n"
 mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_ECB);
 
 --EXPECTF--
+Deprecated: mcrypt_get_iv_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_ecb.php on line 6
+
+Deprecated: mcrypt_create_iv(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_ecb.php on line 6
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_ecb.php on line 7
+
+Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_ecb.php on line 10
 PHP Testfest 2008
+
+Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_ecb.php on line 13
