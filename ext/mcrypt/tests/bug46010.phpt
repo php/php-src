@@ -12,6 +12,11 @@ var_dump(bin2hex(mcrypt_encrypt(MCRYPT_TRIPLEDES, $key, "data", MCRYPT_MODE_ECB,
 
 ?>
 --EXPECTF--
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%ebug46010.php on line 4
 string(16) "f7a2ce11d4002294"
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%ebug46010.php on line 5
 string(16) "f7a2ce11d4002294"
+
+Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%ebug46010.php on line 6
 string(16) "f7a2ce11d4002294"

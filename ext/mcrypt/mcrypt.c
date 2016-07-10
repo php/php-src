@@ -334,6 +334,9 @@ typedef enum {
 		RETURN_FALSE;	\
 	}	\
 
+#define PHP_MCRYPT_DEPRECATED_WARNING php_error_docref(NULL, E_DEPRECATED, \
+	"The mcrypt extension is deprecated and will be removed in the future: use openssl instead");
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mcrypt.algorithms_dir", NULL, PHP_INI_ALL, OnUpdateString, algorithms_dir, zend_mcrypt_globals, mcrypt_globals)
 	STD_PHP_INI_ENTRY("mcrypt.modes_dir",      NULL, PHP_INI_ALL, OnUpdateString, modes_dir, zend_mcrypt_globals, mcrypt_globals)
@@ -505,6 +508,8 @@ PHP_FUNCTION(mcrypt_module_open)
 	MCRYPT td;
 	php_mcrypt *pm;
 
+	PHP_MCRYPT_DEPRECATED_WARNING
+
 	if (zend_parse_parameters (ZEND_NUM_ARGS(), "ssss",
 		&cipher, &cipher_len, &cipher_dir, &cipher_dir_len,
 		&mode,   &mode_len,   &mode_dir,   &mode_dir_len)) {
@@ -541,6 +546,8 @@ PHP_FUNCTION(mcrypt_generic_init)
 	int max_key_size, key_size, iv_size;
 	php_mcrypt *pm;
 	int result = 0;
+
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rss", &mcryptind, &key, &key_len, &iv, &iv_len) == FAILURE) {
 		return;
@@ -619,6 +626,8 @@ PHP_FUNCTION(mcrypt_generic)
 	zend_string* data_str;
 	int block_size, data_size;
 
+	PHP_MCRYPT_DEPRECATED_WARNING
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &mcryptind, &data, &data_len) == FAILURE) {
 		return;
 	}
@@ -669,6 +678,8 @@ PHP_FUNCTION(mdecrypt_generic)
 	char* data_s;
 	int block_size, data_size;
 
+	PHP_MCRYPT_DEPRECATED_WARNING
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &mcryptind, &data, &data_len) == FAILURE) {
 		return;
 	}
@@ -716,6 +727,7 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	int *key_sizes;
 
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 	array_init(return_value);
 
 	key_sizes = mcrypt_enc_get_supported_key_sizes(pm->td, &count);
@@ -733,6 +745,7 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 PHP_FUNCTION(mcrypt_enc_self_test)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 	RETURN_LONG(mcrypt_enc_self_test(pm->td));
 }
 /* }}} */
@@ -742,6 +755,7 @@ PHP_FUNCTION(mcrypt_enc_self_test)
 PHP_FUNCTION(mcrypt_module_close)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 	zend_list_close(Z_RES_P(mcryptind));
 	RETURN_TRUE;
 }
@@ -752,6 +766,7 @@ PHP_FUNCTION(mcrypt_module_close)
 PHP_FUNCTION(mcrypt_generic_deinit)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_generic_deinit(pm->td) < 0) {
 		php_error_docref(NULL, E_WARNING, "Could not terminate encryption specifier");
@@ -767,6 +782,7 @@ PHP_FUNCTION(mcrypt_generic_deinit)
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_enc_is_block_algorithm_mode(pm->td) == 1) {
 		RETURN_TRUE
@@ -781,6 +797,7 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode)
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_enc_is_block_algorithm(pm->td) == 1) {
 		RETURN_TRUE
@@ -795,6 +812,7 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm)
 PHP_FUNCTION(mcrypt_enc_is_block_mode)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) {
 		RETURN_TRUE
@@ -809,6 +827,7 @@ PHP_FUNCTION(mcrypt_enc_is_block_mode)
 PHP_FUNCTION(mcrypt_enc_get_block_size)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 	RETURN_LONG(mcrypt_enc_get_block_size(pm->td));
 }
 /* }}} */
@@ -818,6 +837,7 @@ PHP_FUNCTION(mcrypt_enc_get_block_size)
 PHP_FUNCTION(mcrypt_enc_get_key_size)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 	RETURN_LONG(mcrypt_enc_get_key_size(pm->td));
 }
 /* }}} */
@@ -827,6 +847,7 @@ PHP_FUNCTION(mcrypt_enc_get_key_size)
 PHP_FUNCTION(mcrypt_enc_get_iv_size)
 {
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 	RETURN_LONG(mcrypt_enc_get_iv_size(pm->td));
 }
 /* }}} */
@@ -837,6 +858,7 @@ PHP_FUNCTION(mcrypt_enc_get_algorithms_name)
 {
 	char *name;
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	name = mcrypt_enc_get_algorithms_name(pm->td);
 	RETVAL_STRING(name);
@@ -850,6 +872,7 @@ PHP_FUNCTION(mcrypt_enc_get_modes_name)
 {
 	char *name;
 	MCRYPT_GET_TD_ARG
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	name = mcrypt_enc_get_modes_name(pm->td);
 	RETVAL_STRING(name);
@@ -862,6 +885,7 @@ PHP_FUNCTION(mcrypt_enc_get_modes_name)
 PHP_FUNCTION(mcrypt_module_self_test)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_module_self_test(module, dir) == 0) {
 		RETURN_TRUE;
@@ -876,6 +900,7 @@ PHP_FUNCTION(mcrypt_module_self_test)
 PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_module_is_block_algorithm_mode(module, dir) == 1) {
 		RETURN_TRUE;
@@ -890,6 +915,7 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_module_is_block_algorithm(module, dir) == 1) {
 		RETURN_TRUE;
@@ -904,6 +930,7 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 PHP_FUNCTION(mcrypt_module_is_block_mode)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (mcrypt_module_is_block_mode(module, dir) == 1) {
 		RETURN_TRUE;
@@ -918,6 +945,7 @@ PHP_FUNCTION(mcrypt_module_is_block_mode)
 PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	RETURN_LONG(mcrypt_module_get_algo_block_size(module, dir));
 }
@@ -928,6 +956,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	RETURN_LONG(mcrypt_module_get_algo_key_size(module, dir));
 }
@@ -941,6 +970,7 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	int *key_sizes;
 
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
+	PHP_MCRYPT_DEPRECATED_WARNING
 	array_init(return_value);
 
 	key_sizes = mcrypt_module_get_algo_supported_key_sizes(module, dir, &count);
@@ -960,6 +990,8 @@ PHP_FUNCTION(mcrypt_list_algorithms)
 	char *lib_dir = MCG(algorithms_dir);
 	size_t   lib_dir_len;
 	int   i, count;
+
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s",
 		&lib_dir, &lib_dir_len) == FAILURE) {
@@ -987,6 +1019,8 @@ PHP_FUNCTION(mcrypt_list_modes)
 	char *lib_dir = MCG(modes_dir);
 	size_t   lib_dir_len;
 	int   i, count;
+
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s",
 		&lib_dir, &lib_dir_len) == FAILURE) {
@@ -1017,6 +1051,8 @@ PHP_FUNCTION(mcrypt_get_key_size)
 	char *module_dir_string;
 	MCRYPT td;
 
+	PHP_MCRYPT_DEPRECATED_WARNING
+
 	MCRYPT_GET_INI
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
@@ -1045,6 +1081,8 @@ PHP_FUNCTION(mcrypt_get_block_size)
 	char *cipher_dir_string;
 	char *module_dir_string;
 	MCRYPT td;
+
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	MCRYPT_GET_INI
 
@@ -1075,6 +1113,8 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 	char *module_dir_string;
 	MCRYPT td;
 
+	PHP_MCRYPT_DEPRECATED_WARNING
+
 	MCRYPT_GET_INI
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
@@ -1103,6 +1143,8 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 	char *cipher;
 	size_t   cipher_len;
 	MCRYPT td;
+
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	MCRYPT_GET_INI
 
@@ -1319,6 +1361,8 @@ PHP_FUNCTION(mcrypt_encrypt)
 	char *cipher, *key, *data, *mode, *iv = NULL;
 	size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
 
+	PHP_MCRYPT_DEPRECATED_WARNING
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss|s", &cipher, &cipher_len,
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
 		return;
@@ -1334,6 +1378,8 @@ PHP_FUNCTION(mcrypt_decrypt)
 {
 	char *cipher, *key, *data, *mode, *iv = NULL;
 	size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
+
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss|s", &cipher, &cipher_len,
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
@@ -1352,6 +1398,8 @@ PHP_FUNCTION(mcrypt_create_iv)
 	zend_long source = URANDOM;
 	zend_long size;
 	int n = 0;
+
+	PHP_MCRYPT_DEPRECATED_WARNING
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &size, &source) == FAILURE) {
 		return;
