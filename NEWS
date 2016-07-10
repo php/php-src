@@ -9,9 +9,12 @@ PHP                                                                        NEWS
   . Fixed bug #71144 (Segmentation fault when using cURL with ZTS).
     (maroszek at gmx dot net)
 
-- Filter
+- Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
     range). (bugs dot php dot net at majkl578 dot cz)
+
+- PDO_pgsql:
+  . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
 
 21 Jul 2016, PHP 5.6.24
 

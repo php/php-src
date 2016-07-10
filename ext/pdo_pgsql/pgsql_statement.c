@@ -280,7 +280,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 
 			case PDO_PARAM_EVT_EXEC_PRE:
 				if (!stmt->bound_param_map) {
-					return 0;
+					return 1;
 				}
 				if (!S->param_values) {
 					S->param_values = ecalloc(
