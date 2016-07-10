@@ -10,9 +10,14 @@ PHP                                                                        NEWS
   . Added new constant PHP_FD_SETSIZE. (cmb)
   . Added optind parameter to getopt(). (as)
 
-- Filter
+- Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
     range). (bugs dot php dot net at majkl578 dot cz)
+
+- PDO_pgsql:
+  . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
+  . Fixed bug #72570 (Segmentation fault when binding parameters on a query
+    without placeholders). (Matteo)
 
 - pcntl
   . Implemented asynchronous signal handling without TICKS. (Dmitry)
