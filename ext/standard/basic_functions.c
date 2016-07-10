@@ -3544,7 +3544,7 @@ PHPAPI double php_get_inf(void) /* {{{ */
 
 #define BASIC_ADD_SUBMODULE(module) \
 	zend_hash_add_empty_element(&basic_submodules, #module, strlen(#module));
-	
+
 #define BASIC_RINIT_SUBMODULE(module) \
 	if (zend_hash_exists(&basic_submodules, #module, strlen(#module))) { \
 		PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
@@ -4013,21 +4013,24 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv(string varname)
+/* {{{ proto string getenv(string varname[, bool local_only])
    Get the value of an environment variable */
 PHP_FUNCTION(getenv)
 {
 	char *ptr, *str;
 	int str_len;
+	zend_bool local_only = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &local_only) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	/* SAPI method returns an emalloc()'d string */
-	ptr = sapi_getenv(str, str_len TSRMLS_CC);
-	if (ptr) {
-		RETURN_STRING(ptr, 0);
+	if (!local_only) {
+		/* SAPI method returns an emalloc()'d string */
+		ptr = sapi_getenv(str, str_len TSRMLS_CC);
+		if (ptr) {
+			RETURN_STRING(ptr, 0);
+		}
 	}
 #ifdef PHP_WIN32
 	{

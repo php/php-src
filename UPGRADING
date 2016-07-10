@@ -194,6 +194,9 @@ PHP 5.5 UPGRADE NOTES
 - Since 5.5.4, fputcsv() has fifth parameter escape_char, allowing to
   specify escape char.
 
+- Since 5.5.38, getenv() has optional second parameter, making it only
+  consider local environment and not SAPI environment if true.
+
 4a. unserialize() change
 ------------------------
 
