@@ -46,9 +46,9 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2", PHP_PASSWORD_ARGON2, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_MEMORY_COST", PHP_PASSWORD_ARGON2_MEMORY_COST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_TIME_COST", PHP_PASSWORD_ARGON2_TIME_COST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_THREADS", PHP_PASSWORD_ARGON2_THREADS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_MEMORY_COST", PHP_PASSWORD_ARGON2_MEMORY_COST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_TIME_COST", PHP_PASSWORD_ARGON2_TIME_COST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_THREADS", PHP_PASSWORD_ARGON2_THREADS, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -212,7 +212,7 @@ PHP_FUNCTION(password_get_info)
 }
 /** }}} */
 
-/* {{{ proto boolean password_needs_rehash(string $hash, integer $algo, array $options)
+/* {{{ proto boolean password_needs_rehash(string $hash, integer $algo[, array $options])
 Determines if a given hash requires re-hashing based upon parameters */
 PHP_FUNCTION(password_needs_rehash)
 {
@@ -351,7 +351,7 @@ PHP_FUNCTION(password_verify)
 }
 /* }}} */
 
-/* {{{ proto string password_hash(string password, int algo, array options = array())
+/* {{{ proto string password_hash(string password, int algo[, array options = array()])
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
