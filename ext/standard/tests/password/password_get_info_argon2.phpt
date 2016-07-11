@@ -2,7 +2,8 @@
 Test normal operation of password_get_info() with Argon2
 --SKIPIF--
 <?php
-if (!defined(PASSWORD_ARGON2)) die('password_get_info not built with Argon2');
+if (!defined('PASSWORD_ARGON2')) die('Skipped: password_get_info not built with Argon2');
+?>
 --FILE--
 <?php
 // Test Argon2i

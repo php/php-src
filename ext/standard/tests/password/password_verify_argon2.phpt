@@ -2,10 +2,10 @@
 Test normal operation of password_verify() with argon2
 --SKIPIF--
 <?php
-if (!defined(PASSWORD_ARGON2)) die('password_get_info not built with Argon2');
+if (!defined('PASSWORD_ARGON2')) die('Skipped: password_get_info not built with Argon2');
+?>
 --FILE--
 <?php
-
 
 var_dump(password_verify('test', '$argon2d$v=19$m=32768,t=2,p=1$YWpxd0VYRW9MLmp6VjFPZw$pWV5IsbBfjEK5c0bHzvAo0FsDNHUyM4p6j8vf2cxzb8'));
 

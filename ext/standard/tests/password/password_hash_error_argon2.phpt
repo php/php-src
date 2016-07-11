@@ -2,7 +2,8 @@
 Test error operation of password_hash() with argon2
 --SKIPIF--
 <?php
-if (!defined(PASSWORD_ARGON2)) die('password_get_info not built with Argon2');
+if (!defined('PASSWORD_ARGON2')) die('Skipped: password_get_info not built with Argon2');
+?>
 --FILE--
 <?php
 var_dump(password_hash('test', PASSWORD_ARGON2, ['m_cost' => 0]));
