@@ -386,6 +386,32 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 # endif /* HAVE_HASH_EXT */
 			}
 		}
+#elif HAVE_DECL_ARC4RANDOM_BUF && (defined(__OpenBSD__) && OpenBSD >= 201405)
+		unsigned char rbuf[2048];
+		int n;
+		int to_read = PS(entropy_length);
+		unsigned char *outmsg;
+
+		while (to_read > 0) {
+			n = MIN(to_read, sizeof(rbuf));
+			arc4random_buf(rbuf, n);
+
+			switch (PS(hash_func)) {
+				case PS_HASH_FUNC_MD5:
+					PHP_MD5Update(&md5_context, rbuf, n);
+					break;
+				case PS_HASH_FUNC_SHA1:
+					PHP_SHA1Update(&sha1_context, rbuf, n);
+					break;
+# if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
+				case PS_HASH_FUNC_OTHER:
+					PS(hash_ops)->hash_update(hash_context, rbuf, n);
+					break;
+# endif /* HAVE_HASH_EXT */
+			}
+
+			to_read -= n;
+		}
 #else
 		int fd;
 
