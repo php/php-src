@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
 
+- SQLite3:
+  . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
+
 - Standard:
   . Fixed bug #72152 (base64_decode $strict fails to detect null byte).
     (Lauri Kenttä)
