@@ -31,7 +31,9 @@
 #include "zend_interfaces.h"
 #include "info.h"
 #include "php_random.h"
-#include "argon2lib/argon2.h"
+#if HAVE_ARGON2LIB
+#include "argon2.h"
+#endif
 
 #if PHP_WIN32
 #include "win32/winutil.h"
@@ -41,14 +43,18 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
+#if HAVE_ARGON2LIB
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2I", PHP_PASSWORD_ARGON2I, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2D", PHP_PASSWORD_ARGON2D, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2", PHP_PASSWORD_ARGON2, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
+#if HAVE_ARGON2LIB
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_MEMORY_COST", PHP_PASSWORD_ARGON2_MEMORY_COST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_TIME_COST", PHP_PASSWORD_ARGON2_TIME_COST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_THREADS", PHP_PASSWORD_ARGON2_THREADS, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	return SUCCESS;
 }
@@ -59,10 +65,12 @@ static char* php_password_get_algo_name(const php_password_algo algo)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			return "bcrypt";
+#if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 			return "argon2i";
 		case PHP_PASSWORD_ARGON2D:
 			return "argon2d";	
+#endif
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			return "unknown";
@@ -73,11 +81,14 @@ static php_password_algo php_password_determine_algo(const char *hash, const siz
 {
 	if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
 		return PHP_PASSWORD_BCRYPT;
-	} else if (hash[0] == '$' && strstr(hash, "argon2i")) {
+	} 
+#if HAVE_ARGON2LIB
+	if (hash[0] == '$' && strstr(hash, "argon2i")) {
 		return PHP_PASSWORD_ARGON2I;
 	} else if (hash[0] == '$' && strstr(hash, "argon2d")) {
 		return PHP_PASSWORD_ARGON2D;
 	}
+#endif
 
 	return PHP_PASSWORD_UNKNOWN;
 }
@@ -185,6 +196,7 @@ PHP_FUNCTION(password_get_info)
 				add_assoc_long(&options, "cost", cost);
 			}
 			break;
+#if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
@@ -199,6 +211,7 @@ PHP_FUNCTION(password_get_info)
 				add_assoc_long(&options, "threads", threads);
 			}
 			break;
+#endif
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			break;
@@ -248,6 +261,7 @@ PHP_FUNCTION(password_needs_rehash)
 				}
 			}
 			break;
+#if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
@@ -275,6 +289,7 @@ PHP_FUNCTION(password_needs_rehash)
 				}
 			}
 			break;
+#endif
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			break;
@@ -300,15 +315,16 @@ PHP_FUNCTION(password_verify)
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
 
 	switch(algo) {
+#if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
 				argon2_type type = Argon2_i;
 
-				if (strstr(hash, "argon2d")) {
-					type = Argon2_d;
-				} else if (strstr(hash, "argon2i")) {
+				if (algo == PHP_PASSWORD_ARGON2I) {
 					type = Argon2_i;
+				} else if (algo == PHP_PASSWORD_ARGON2D) {
+					type = Argon2_d;
 				}
 
 				status = argon2_verify(hash, password, password_len, type);
@@ -320,6 +336,7 @@ PHP_FUNCTION(password_verify)
 				RETURN_FALSE;
 			}
 			break;
+#endif
 		case PHP_PASSWORD_BCRYPT:
 		case PHP_PASSWORD_UNKNOWN:
 		default:
@@ -363,11 +380,12 @@ PHP_FUNCTION(password_hash)
 	HashTable *options = 0;
 	zval *option_buffer;
 
-	// Argon2 Options
+#if HAVE_ARGON2LIB
 	size_t t_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
 	size_t m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 	argon2_type type = Argon2_i;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
 		return;
@@ -392,6 +410,7 @@ PHP_FUNCTION(password_hash)
 				hash_format_len = 7;
 			}
 			break;
+#if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
@@ -431,6 +450,7 @@ PHP_FUNCTION(password_hash)
 				required_salt_len = 16;
 			}
 			break;
+#endif
 		case PHP_PASSWORD_UNKNOWN:
 		default:
 			php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: " ZEND_LONG_FMT, algo);
@@ -524,6 +544,8 @@ PHP_FUNCTION(password_hash)
 
 				RETURN_STR(result);
 			}
+			break;
+#if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
@@ -574,6 +596,8 @@ PHP_FUNCTION(password_hash)
 					
 				RETURN_STR(ret);
 			}
+			break;
+#endif
 		default:
 			RETURN_FALSE;
 	}

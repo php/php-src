@@ -28,10 +28,6 @@ var_dump(password_needs_rehash('$2y$'.$cost.'$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.o
 
 // Should Issue Needs Rehash, Since Foo is cast to 0...
 var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT, array('cost' => 'foo')));
-
-var_dump(password_needs_rehash('$argon2i$v=19$m=65536,t=3,p=1$YkprUktYN0lHQTd2bWRFeA$79aA+6IvgclpDAJVoezProlqzIPy7do/P0sBDXS9Nn0', PASSWORD_ARGON2, ['m_cost' => 1<<17]));
-var_dump(password_needs_rehash('$argon2i$v=19$m=65536,t=3,p=1$YkprUktYN0lHQTd2bWRFeA$79aA+6IvgclpDAJVoezProlqzIPy7do/P0sBDXS9Nn0', PASSWORD_ARGON2, ['t_cost' => 2]));
-var_dump(password_needs_rehash('$argon2i$v=19$m=65536,t=3,p=1$YkprUktYN0lHQTd2bWRFeA$79aA+6IvgclpDAJVoezProlqzIPy7do/P0sBDXS9Nn0', PASSWORD_ARGON2, ['threads' => 2]));
 echo "OK!";
 ?>
 --EXPECT--
@@ -42,8 +38,5 @@ bool(false)
 bool(true)
 bool(true)
 bool(false)
-bool(true)
-bool(true)
-bool(true)
 bool(true)
 OK!
