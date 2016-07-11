@@ -6,7 +6,7 @@ mcrypt_list_modes
 <?php
 var_dump(mcrypt_list_modes());
 --EXPECTF--
-Deprecated: mcrypt_list_modes(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_list_modes.php on line 2
+Deprecated: Function mcrypt_list_modes() is deprecated in %s%emcrypt_list_modes.php on line 2
 array(8) {
   [0]=>
   string(3) "cbc"

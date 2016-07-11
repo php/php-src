@@ -41,14 +41,14 @@ var_dump( mcrypt_decrypt($cipher, $key, $data) );
 
 -- Testing mcrypt_decrypt() function with more than expected no. of arguments --
 
-Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt_error.php on line 19
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_error.php on line 19
 
 Warning: mcrypt_decrypt() expects at most 5 parameters, 6 given in %s on line %d
 NULL
 
 -- Testing mcrypt_decrypt() function with less than expected no. of arguments --
 
-Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_decrypt_error.php on line 26
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_error.php on line 26
 
 Warning: mcrypt_decrypt() expects at least 4 parameters, 3 given in %s on line %d
 NULL

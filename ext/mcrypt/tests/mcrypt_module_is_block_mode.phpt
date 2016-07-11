@@ -10,17 +10,17 @@ var_dump(mcrypt_module_is_block_mode(MCRYPT_MODE_STREAM));
 var_dump(mcrypt_module_is_block_mode(MCRYPT_MODE_NOFB));
 var_dump(mcrypt_module_is_block_mode(MCRYPT_MODE_OFB));
 --EXPECTF--
-Deprecated: mcrypt_module_is_block_mode(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_is_block_mode.php on line 2
+Deprecated: Function mcrypt_module_is_block_mode() is deprecated in %s%emcrypt_module_is_block_mode.php on line 2
 bool(true)
 
-Deprecated: mcrypt_module_is_block_mode(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_is_block_mode.php on line 3
+Deprecated: Function mcrypt_module_is_block_mode() is deprecated in %s%emcrypt_module_is_block_mode.php on line 3
 bool(true)
 
-Deprecated: mcrypt_module_is_block_mode(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_is_block_mode.php on line 4
+Deprecated: Function mcrypt_module_is_block_mode() is deprecated in %s%emcrypt_module_is_block_mode.php on line 4
 bool(false)
 
-Deprecated: mcrypt_module_is_block_mode(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_is_block_mode.php on line 5
+Deprecated: Function mcrypt_module_is_block_mode() is deprecated in %s%emcrypt_module_is_block_mode.php on line 5
 bool(false)
 
-Deprecated: mcrypt_module_is_block_mode(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_is_block_mode.php on line 6
+Deprecated: Function mcrypt_module_is_block_mode() is deprecated in %s%emcrypt_module_is_block_mode.php on line 6
 bool(false)

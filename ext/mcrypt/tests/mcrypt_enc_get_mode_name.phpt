@@ -17,32 +17,32 @@ echo mcrypt_enc_get_modes_name($td) . "\n";
 $td  = mcrypt_module_open('des', '', 'cbc', '');
 echo mcrypt_enc_get_modes_name($td) . "\n";
 --EXPECTF--
-Deprecated: mcrypt_module_open(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 2
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 2
 
-Deprecated: mcrypt_enc_get_modes_name(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 3
+Deprecated: Function mcrypt_enc_get_modes_name() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 3
 ECB
 
-Deprecated: mcrypt_module_open(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 4
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 4
 
-Deprecated: mcrypt_enc_get_modes_name(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 5
+Deprecated: Function mcrypt_enc_get_modes_name() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 5
 CBC
 
-Deprecated: mcrypt_module_open(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 6
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 6
 
-Deprecated: mcrypt_enc_get_modes_name(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 7
+Deprecated: Function mcrypt_enc_get_modes_name() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 7
 STREAM
 
-Deprecated: mcrypt_module_open(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 8
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 8
 
-Deprecated: mcrypt_enc_get_modes_name(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 9
+Deprecated: Function mcrypt_enc_get_modes_name() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 9
 OFB
 
-Deprecated: mcrypt_module_open(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 10
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 10
 
-Deprecated: mcrypt_enc_get_modes_name(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 11
+Deprecated: Function mcrypt_enc_get_modes_name() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 11
 ECB
 
-Deprecated: mcrypt_module_open(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 12
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 12
 
-Deprecated: mcrypt_enc_get_modes_name(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_enc_get_mode_name.php on line 13
+Deprecated: Function mcrypt_enc_get_modes_name() is deprecated in %s%emcrypt_enc_get_mode_name.php on line 13
 CBC
