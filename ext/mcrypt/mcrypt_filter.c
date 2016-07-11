@@ -161,6 +161,8 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	char *mode = "cbc";
 	php_mcrypt_filter_data *data;
 
+	php_error_docref(NULL, E_DEPRECATED, "mcrypt and mdecrypt stream filters have been deprecated");
+
 	if (strncasecmp(filtername, "mdecrypt.", sizeof("mdecrypt.") - 1) == 0) {
 		encrypt = 0;
 		cipher += sizeof("de") - 1;
