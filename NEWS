@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Deprecated mb_ereg_replace() eval option. (Rouven Weßling, cmb)
 
 - MCrypt:
-  . Deprecated ext/mcrypt. (cmb)
+  . Deprecated ext/mcrypt. (Scott Arciszewski, cmb)
 
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
