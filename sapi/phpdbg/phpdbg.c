@@ -75,6 +75,7 @@ PHP_INI_END()
 
 static zend_bool phpdbg_booted = 0;
 static zend_bool phpdbg_fully_started = 0;
+zend_bool use_mm_wrappers = 0;
 
 static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 {
@@ -189,79 +190,27 @@ static void php_phpdbg_destroy_registered(zval *data) /* {{{ */
 	destroy_zend_function(function);
 } /* }}} */
 
+static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
+{
+	phpdbg_file_source *source = (phpdbg_file_source *) Z_PTR_P(data);
+	destroy_op_array(&source->op_array);
+	if (source->buf) {
+		efree(source->buf);
+	}
+	efree(source);
+} /* }}} */
+
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], 8, NULL, php_phpdbg_destroy_bp_file, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, php_phpdbg_destroy_bp_opline, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], 8, NULL, php_phpdbg_destroy_bp_opcode, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
-
-	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
-	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
+	/* deactivate symbol table caching to have these properly destroyed upon stack leaving (especially important for watchpoints) */
+	EG(symtable_cache_limit) = EG(symtable_cache) - 1;
 
 	return SUCCESS;
 } /* }}} */
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
-	zend_hash_destroy(&PHPDBG_G(file_sources));
-	zend_hash_destroy(&PHPDBG_G(seek));
-	zend_hash_destroy(&PHPDBG_G(registered));
-	zend_hash_destroy(&PHPDBG_G(watchpoints));
-	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
-
-	if (PHPDBG_G(buffer)) {
-		free(PHPDBG_G(buffer));
-		PHPDBG_G(buffer) = NULL;
-	}
-
-	if (PHPDBG_G(exec)) {
-		efree(PHPDBG_G(exec));
-		PHPDBG_G(exec) = NULL;
-	}
-
-	if (PHPDBG_G(oplog)) {
-		fclose(PHPDBG_G(oplog));
-		PHPDBG_G(oplog) = NULL;
-	}
-
-	if (PHPDBG_G(ops)) {
-		destroy_op_array(PHPDBG_G(ops));
-		efree(PHPDBG_G(ops));
-		PHPDBG_G(ops) = NULL;
-	}
-
-	if (PHPDBG_G(oplog_list)) {
-		phpdbg_oplog_list *cur = PHPDBG_G(oplog_list);
-		do {
-			phpdbg_oplog_list *prev = cur->prev;
-			efree(cur);
-			cur = prev;
-		} while (cur != NULL);
-
-		zend_arena_destroy(PHPDBG_G(oplog_arena));
-		PHPDBG_G(oplog_list) = NULL;
-	}
-
 	return SUCCESS;
 } /* }}} */
 
@@ -845,8 +794,86 @@ static void php_sapi_phpdbg_log_message(char *message, int syslog_type_int) /* {
 }
 /* }}} */
 
+static int php_sapi_phpdbg_activate(void) /* {{{ */
+{
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], 8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, php_phpdbg_destroy_bp_opline, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], 8, NULL, php_phpdbg_destroy_bp_opcode, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
+
+	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
+	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
+
+	zend_hash_init(&PHPDBG_G(file_sources), 0, NULL, php_phpdbg_destroy_file_source, 0);
+	phpdbg_setup_watchpoints();
+
+	return SUCCESS;
+}
+
 static int php_sapi_phpdbg_deactivate(void) /* {{{ */
 {
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
+	zend_hash_destroy(&PHPDBG_G(file_sources));
+	zend_hash_destroy(&PHPDBG_G(seek));
+	zend_hash_destroy(&PHPDBG_G(registered));
+	phpdbg_destroy_watchpoints();
+
+	/* hack to restore mm_heap->use_custom_heap in order to receive memory leak info */
+	if (use_mm_wrappers) {
+		/* ASSUMING that mm_heap->use_custom_heap is the first element of the struct ... */
+		*(int *) zend_mm_get_heap() = 0;
+	}
+
+	if (PHPDBG_G(buffer)) {
+		free(PHPDBG_G(buffer));
+		PHPDBG_G(buffer) = NULL;
+	}
+
+	if (PHPDBG_G(exec)) {
+		efree(PHPDBG_G(exec));
+		PHPDBG_G(exec) = NULL;
+	}
+
+	if (PHPDBG_G(oplog)) {
+		fclose(PHPDBG_G(oplog));
+		PHPDBG_G(oplog) = NULL;
+	}
+
+	if (PHPDBG_G(ops)) {
+		destroy_op_array(PHPDBG_G(ops));
+		efree(PHPDBG_G(ops));
+		PHPDBG_G(ops) = NULL;
+	}
+
+	if (PHPDBG_G(oplog_list)) {
+		phpdbg_oplog_list *cur = PHPDBG_G(oplog_list);
+		do {
+			phpdbg_oplog_list *prev = cur->prev;
+			efree(cur);
+			cur = prev;
+		} while (cur != NULL);
+
+		zend_arena_destroy(PHPDBG_G(oplog_arena));
+		PHPDBG_G(oplog_list) = NULL;
+	}
+
 	fflush(stdout);
 	if (SG(request_info).argv0) {
 		free(SG(request_info).argv0);
@@ -994,7 +1021,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 	php_sapi_phpdbg_module_startup, /* startup */
 	php_module_shutdown_wrapper,    /* shutdown */
 
-	NULL,                           /* activate */
+	php_sapi_phpdbg_activate,       /* activate */
 	php_sapi_phpdbg_deactivate,     /* deactivate */
 
 	php_sapi_phpdbg_ub_write,       /* unbuffered write */
@@ -1236,11 +1263,11 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 	switch (sig) {
 		case SIGBUS:
 		case SIGSEGV:
-			if (PHPDBG_G(sigsegv_bailout)) {
-				LONGJMP(*PHPDBG_G(sigsegv_bailout), FAILURE);
-			}
 			is_handled = phpdbg_watchpoint_segfault_handler(info, context);
 			if (is_handled == FAILURE) {
+				if (PHPDBG_G(sigsegv_bailout)) {
+					LONGJMP(*PHPDBG_G(sigsegv_bailout), FAILURE);
+				}
 				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
 			}
 			break;
@@ -1308,7 +1335,6 @@ int main(int argc, char **argv) /* {{{ */
 	FILE* stream = NULL;
 	char *print_opline_func;
 	zend_bool ext_stmt = 0;
-	zend_bool use_mm_wrappers = 0;
 	zend_bool is_exit;
 	int exit_status;
 
@@ -1635,8 +1661,6 @@ phpdbg_main:
 
 		use_mm_wrappers = !_malloc && !_realloc && !_free;
 
-		phpdbg_init_list();
-
 		PHPDBG_G(original_free_function) = _free;
 		_free = phpdbg_watch_efree;
 
@@ -1650,13 +1674,13 @@ phpdbg_main:
 			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
 		}
 
-		phpdbg_setup_watchpoints();
-
 #if defined(ZEND_SIGNALS) && !defined(_WIN32)
 		zend_try {
 			zend_signal_activate();
 		} zend_end_try();
 #endif
+
+		phpdbg_init_list();
 
 		PHPDBG_G(sapi_name_ptr) = sapi_name;
 
@@ -1976,11 +2000,6 @@ phpdbg_out:
 			}
 		}
 
-		/* hack to restore mm_heap->use_custom_heap in order to receive memory leak info */
-		if (use_mm_wrappers) {
-			/* ASSUMING that mm_heap->use_custom_heap is the first element of the struct ... */
-			*(int *) mm_heap = 0;
-		}
 		zend_try {
 			php_request_shutdown(NULL);
 		} zend_end_try();
