@@ -193,6 +193,10 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 		}
 		i++;
 	}
+	/* fail if the input is truncated (only one char in last group) */
+	if (strict && i % 4 == 1) {
+		goto fail;
+	}
 
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
