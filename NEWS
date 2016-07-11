@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Added pcntl_signal_get_handler() that returns the current signal handler
     for a particular signal. Addresses FR #72409. (David Walker)
 
+- Tidy:
+  . Implemented support for libtidy 5.0.0 and above. (Michael Orlitzky, Anatol)
+
 - Wddx:
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
 
