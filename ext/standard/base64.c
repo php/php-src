@@ -197,6 +197,11 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	if (strict && i % 4 == 1) {
 		goto fail;
 	}
+	/* fail if the padding length is wrong (not VV==, VVV=), but accept zero padding
+	 * RFC 4648: "In some circumstances, the use of padding [--] is not required" */
+	if (strict && padding && (padding > 2 || (i + padding) % 4 != 0)) {
+		goto fail;
+	}
 
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
