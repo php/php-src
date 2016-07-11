@@ -322,12 +322,16 @@ static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
 	ctx = SG(server_context);
 
 	switch (syslog_type_int) {
+#if LOG_EMERG != LOG_CRIT
 		case LOG_EMERG:
 			aplog_type = APLOG_EMERG;
 			break;
+#endif
+#if LOG_ALERT != LOG_CRIT
 		case LOG_ALERT:
 			aplog_type = APLOG_ALERT;
 			break;
+#endif
 		case LOG_CRIT:
 			aplog_type = APLOG_CRIT;
 			break;
@@ -340,12 +344,16 @@ static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
 		case LOG_NOTICE:
 			aplog_type = APLOG_NOTICE;
 			break;
+#if LOG_INFO != LOG_NOTICE
 		case LOG_INFO:
 			aplog_type = APLOG_INFO;
 			break;
+#endif
+#if LOG_NOTICE != LOG_DEBUG
 		case LOG_DEBUG:
 			aplog_type = APLOG_DEBUG;
 			break;
+#endif
 	}
 
 	if (ctx == NULL) { /* we haven't initialized our ctx yet, oh well */
