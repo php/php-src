@@ -11,10 +11,10 @@ function pcntl_test($signo) {}
 pcntl_signal(SIGUSR1, 'pcntl_test');
 var_dump(pcntl_signal_get_handler(SIGUSR1));
 
-pcntl_signal(SIGUSR1, SIG_IGN);
+pcntl_signal(SIGUSR1, SIG_DFL);
 var_dump(pcntl_signal_get_handler(SIGUSR1));
 
-pcntl_signal(SIGUSR1, SIG_DFL);
+pcntl_signal(SIGUSR1, SIG_IGN);
 var_dump(pcntl_signal_get_handler(SIGUSR1));
 
 posix_kill(posix_getpid(), SIGUSR1);
@@ -25,8 +25,6 @@ echo "ok\n";
 --EXPECTF--
 int(0)
 string(10) "pcntl_test"
-int(1)
 int(0)
-User defined signal 1
-
-Termsig=10
+int(1)
+ok
