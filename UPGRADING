@@ -88,6 +88,13 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 3. Changes in SAPI modules
 ========================================
+  . The log_message callback in the SAPI struct was extended with the severity
+    argument. This allows SAPI modules to implement mapping between PHP and
+    corresponding server error levels.
+
+- apache2handler:
+  . Implemented per module logging
+  . Implemented error level mapping between PHP and Apache for the error logs
 
 ========================================
 4. Deprecated Functionality

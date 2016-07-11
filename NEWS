@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     (Dmitry, Nikita)
   . Added new constant PHP_FD_SETSIZE. (cmb)
   . Added optind parameter to getopt(). (as)
+  . Added PHP to SAPI error severity mapping for logs. (Martin Voruba)
 
 - Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
