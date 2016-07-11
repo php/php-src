@@ -18,16 +18,16 @@ echo trim(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CFB, $iv)) . "\n"
 var_dump(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CFB));
 
 --EXPECTF--
-Deprecated: mcrypt_get_iv_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_cfb.php on line 6
+Deprecated: Function mcrypt_get_iv_size() is deprecated in %s%emcrypt_cfb.php on line 6
 
-Deprecated: mcrypt_create_iv(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_cfb.php on line 6
+Deprecated: Function mcrypt_create_iv() is deprecated in %s%emcrypt_cfb.php on line 6
 
-Deprecated: mcrypt_encrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_cfb.php on line 7
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_cfb.php on line 7
 
-Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_cfb.php on line 10
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_cfb.php on line 10
 PHP Testfest 2008
 
-Deprecated: mcrypt_decrypt(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_cfb.php on line 13
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_cfb.php on line 13
 
 Warning: mcrypt_decrypt(): Encryption mode requires an initialization vector of size 16 in %s on line %d
 bool(false)

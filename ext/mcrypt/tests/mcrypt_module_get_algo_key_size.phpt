@@ -12,20 +12,20 @@ var_dump(mcrypt_module_get_algo_key_size(MCRYPT_CAST_256));
 var_dump(mcrypt_module_get_algo_key_size(MCRYPT_BLOWFISH));
 ?>
 --EXPECTF--
-Deprecated: mcrypt_module_get_algo_key_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_get_algo_key_size.php on line 2
+Deprecated: Function mcrypt_module_get_algo_key_size() is deprecated in %s%emcrypt_module_get_algo_key_size.php on line 2
 int(32)
 
-Deprecated: mcrypt_module_get_algo_key_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_get_algo_key_size.php on line 3
+Deprecated: Function mcrypt_module_get_algo_key_size() is deprecated in %s%emcrypt_module_get_algo_key_size.php on line 3
 int(32)
 
-Deprecated: mcrypt_module_get_algo_key_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_get_algo_key_size.php on line 4
+Deprecated: Function mcrypt_module_get_algo_key_size() is deprecated in %s%emcrypt_module_get_algo_key_size.php on line 4
 int(128)
 
-Deprecated: mcrypt_module_get_algo_key_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_get_algo_key_size.php on line 5
+Deprecated: Function mcrypt_module_get_algo_key_size() is deprecated in %s%emcrypt_module_get_algo_key_size.php on line 5
 int(16)
 
-Deprecated: mcrypt_module_get_algo_key_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_get_algo_key_size.php on line 6
+Deprecated: Function mcrypt_module_get_algo_key_size() is deprecated in %s%emcrypt_module_get_algo_key_size.php on line 6
 int(32)
 
-Deprecated: mcrypt_module_get_algo_key_size(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_module_get_algo_key_size.php on line 7
+Deprecated: Function mcrypt_module_get_algo_key_size() is deprecated in %s%emcrypt_module_get_algo_key_size.php on line 7
 int(56)

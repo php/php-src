@@ -10,7 +10,7 @@ foreach (mcrypt_list_algorithms() as $algo) {
 	}
 }
 --EXPECTF--
-Deprecated: mcrypt_list_algorithms(): The mcrypt extension is deprecated and will be removed in the future: use openssl instead in %s%emcrypt_list_algorithms.php on line 2
+Deprecated: Function mcrypt_list_algorithms() is deprecated in %s%emcrypt_list_algorithms.php on line 2
 FOUND
 FOUND
 FOUND
