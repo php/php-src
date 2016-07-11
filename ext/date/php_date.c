@@ -1973,7 +1973,9 @@ static int implement_date_interface_handler(zend_class_entry *interface, zend_cl
 static int date_interval_has_property(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
 {
 	php_interval_obj *obj;
-	zval tmp_member, *prop;
+	zval tmp_member;
+	zval rv;
+	zval *prop;
 	int retval = 0;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
@@ -1993,7 +1995,6 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		return retval;
 	}
 
-	zval rv;
 	prop = date_interval_read_property(object, member, type, cache_slot, &rv);
 
 	if (prop != NULL) {
