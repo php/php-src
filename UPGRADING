@@ -93,8 +93,8 @@ PHP 7.1 UPGRADE NOTES
     corresponding server error levels.
 
 - apache2handler:
-  . Implemented per module logging
-  . Implemented error level mapping between PHP and Apache for the error logs
+  . Implemented per module logging.
+  . Implemented error level mapping between PHP and Apache for the error logs.
 
 ========================================
 4. Deprecated Functionality
@@ -320,6 +320,8 @@ PHP 7.1 UPGRADE NOTES
     particular console program used. PHP automatically sets the console codepage
     according to the encoding rules from php.ini. Using alternative consoles
     instead of cmd.exe directly might bring better experience in some cases.
+    Nevertheless be aware, runtime codepage switch after the request start
+    might bring unexpected side effects on CLI. The preferrable way is php.ini.
 
     As a result of UTF-8 support in the streams, PHP scripts are not limited
     to ASCII or ANSI filenames anymore. This is supported out of the box on
