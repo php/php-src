@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     with parent private method). (Pedro Magalhães)
   . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
 
+- Date:
+  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
+    parsing). (derick)
+
 - Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
     range). (bugs dot php dot net at majkl578 dot cz)
