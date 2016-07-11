@@ -97,6 +97,7 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 
 - 'e' option of mb_ereg_replace() and mb_eregi_replace().
+- ext/mcrypt is now fully deprecated.
 
 ========================================
 5. Changed Functions
