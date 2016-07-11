@@ -149,11 +149,6 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 			break;
 		}
 		if (ch == base64_pad) {
-			/* fail if the padding character is second in a group (like V===) */
-			/* FIXME: why do we still allow invalid padding in other places in the middle of the string? */
-			if (i % 4 == 1) {
-				goto fail;
-			}
 			padding++;
 			continue;
 		}
