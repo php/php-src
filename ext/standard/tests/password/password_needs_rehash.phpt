@@ -28,6 +28,9 @@ var_dump(password_needs_rehash('$2y$'.$cost.'$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.o
 
 // Should Issue Needs Rehash, Since Foo is cast to 0...
 var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT, array('cost' => 'foo')));
+
+
+
 echo "OK!";
 ?>
 --EXPECT--
