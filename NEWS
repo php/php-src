@@ -27,10 +27,6 @@ PHP                                                                        NEWS
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
     names). (cmb)
 
-- PDO:
-  . Fixed bug #52384 (Adds bound parameter value to PDOStatement::debugDumpParams).
-    (bishopb)
-
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
