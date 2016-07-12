@@ -230,7 +230,7 @@ ZEND_METHOD(exception, __construct)
    Exception unserialize checks */
 #define CHECK_EXC_TYPE(name, type) \
 	value = zend_read_property(default_exception_ce, object, name, sizeof(name)-1, 0 TSRMLS_CC); \
-	if(value && Z_TYPE_P(value) != type) { \
+	if (value && Z_TYPE_P(value) != IS_NULL && Z_TYPE_P(value) != type) { \
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
 		ZVAL_STRINGL(tmp, name, sizeof(name)-1, 1); \
