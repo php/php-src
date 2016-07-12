@@ -2120,7 +2120,6 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 	if (stmt->bound_params) {
 		zend_ulong num;
 		zend_string *key = NULL;
-		zval parameter;
 		ZEND_HASH_FOREACH_KEY_PTR(stmt->bound_params, num, key, param) {
 			if (key) {
 				php_stream_printf(out, "Key: Name: [%zd] %.*s\n",
@@ -2129,45 +2128,11 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out, "Key: Position #%pd:\n", num);
 			}
 
-			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\nis_input_output=%d\n",
-					param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
-					param->name ? ZSTR_VAL(param->name) : "",
-					param->is_param,
-					PDO_PARAM_TYPE(param->param_type),
-					(param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT);
-
-			/*
-			 * Check the type of the parameter and print out the value.
-			 *
-			 * Most are self explanatory with the following exceptions:
-			 * PDO::PARAM_INT evaluates to a long
-			 * PDO::PARAM_LOB evaluates to a string
-			 */
-			parameter = param->parameter;
-again:
-			switch (Z_TYPE(parameter)) {
-				case IS_REFERENCE:
-					parameter = *Z_REFVAL(parameter);
-					goto again;
-				case IS_TRUE:
-					php_stream_printf(out, "param_value=true\n");
-					break;
-				case IS_FALSE:
-					php_stream_printf(out, "param_value=false\n");
-					break;
-				case IS_NULL:
-					php_stream_printf(out, "param_value=null\n");
-					break;
-				case IS_LONG:
-					php_stream_printf(out, "param_value=%ld\n", Z_LVAL(parameter));
-					break;
-				case IS_STRING:
-					php_stream_printf(out, "param_value=%s\n", Z_STRVAL(parameter));
-					break;
-				default:
-					php_stream_printf(out, "param_value=unknown\n");
-					break;
-			}
+			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+							param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
+							param->name ? ZSTR_VAL(param->name) : "",
+							param->is_param,
+							param->param_type);
 
 		} ZEND_HASH_FOREACH_END();
 	}
