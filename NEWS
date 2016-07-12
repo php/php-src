@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #71911 (Unable to set --enable-debug on building extensions by
     phpize on Windows). (Yuji Uchiyama)
 
+- COM:
+  Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
+
 - Date:
   . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
     parsing). (derick)
