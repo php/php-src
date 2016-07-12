@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include <errno.h>
 #include <stdio.h>
 
 #include "zipint.h"

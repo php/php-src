@@ -8,7 +8,7 @@ if (!extension_loaded('pdo_pgsql')) print 'skip'; ?>
 # Also update config.inc if you make changes here... 
 
 $config = array(
-	'TESTS' => 'ext/pdo/tests'
+	'TESTS' => __DIR__ . '/ext/pdo/tests'
 );
 
 if (false !== getenv('PDO_PGSQL_TEST_DSN')) {

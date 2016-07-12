@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,12 @@
 
 #if PHP_WIN32
 # include "win32/winutil.h"
+#endif
+#ifdef __linux__
+# include <sys/syscall.h>
+#endif
+#if defined(__OpenBSD__) || defined(__NetBSD__)
+# include <sys/param.h>
 #endif
 
 #ifdef ZTS
@@ -75,36 +81,92 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* }}} */
 
 /* {{{ */
-static int php_random_bytes(void *bytes, size_t size)
+
+PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
 #if PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
-		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		if (should_throw) {
+			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		}
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001))
 	arc4random_buf(bytes, size);
-#else
-	int    fd = RANDOM_G(fd);
+#elif HAVE_DECL_GETRANDOM
+	/* Linux getrandom(2) syscall */
 	size_t read_bytes = 0;
+	size_t amount_to_read = 0;
+	ssize_t n;
 
-	if (fd < 0) {
-#if HAVE_DEV_ARANDOM
-		fd = open("/dev/arandom", O_RDONLY);
-#elif HAVE_DEV_URANDOM
-		fd = open("/dev/urandom", O_RDONLY);
-#endif
-		if (fd < 0) {
-			zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
+	/* Keep reading until we get enough entropy */
+	do {
+		/* Below, (bytes + read_bytes)  is pointer arithmetic.
+
+		   bytes   read_bytes  size
+		     |      |           |
+		    [#######=============] (we're going to write over the = region)
+		             \\\\\\\\\\\\\
+		              amount_to_read
+
+		*/
+		amount_to_read = size - read_bytes;
+		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
+
+		if (n == -1) {
+			if (errno == EINTR || errno == EAGAIN) {
+				/* Try again */
+				continue;
+			}
+			/*
+				If the syscall fails, we are doomed. The loop that calls
+				php_random_bytes should be terminated by the exception instead
+				of proceeding to demand more entropy.
+			*/
+			if (should_throw) {
+				zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", errno);
+			}
 			return FAILURE;
 		}
 
+		read_bytes += (size_t) n;
+	} while (read_bytes < size);
+#else
+	int    fd = RANDOM_G(fd);
+	struct stat st;
+	size_t read_bytes = 0;
+	ssize_t n;
+
+	if (fd < 0) {
+#if HAVE_DEV_URANDOM
+		fd = open("/dev/urandom", O_RDONLY);
+#endif
+		if (fd < 0) {
+			if (should_throw) {
+				zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
+			}
+			return FAILURE;
+		}
+		/* Does the file exist and is it a character device? */
+		if (fstat(fd, &st) != 0 || 
+# ifdef S_ISNAM
+                !(S_ISNAM(st.st_mode) || S_ISCHR(st.st_mode))
+# else
+                !S_ISCHR(st.st_mode)
+# endif
+		) {
+			close(fd);
+			if (should_throw) {
+				zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+			}
+			return FAILURE;
+		}
 		RANDOM_G(fd) = fd;
 	}
 
 	while (read_bytes < size) {
-		ssize_t n = read(fd, bytes + read_bytes, size - read_bytes);
+		n = read(fd, bytes + read_bytes, size - read_bytes);
 		if (n <= 0) {
 			break;
 		}
@@ -112,7 +174,9 @@ static int php_random_bytes(void *bytes, size_t size)
 	}
 
 	if (read_bytes < size) {
-		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		if (should_throw) {
+			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		}
 		return FAILURE;
 	}
 #endif
@@ -139,7 +203,7 @@ PHP_FUNCTION(random_bytes)
 
 	bytes = zend_string_alloc(size, 0);
 
-	if (php_random_bytes(ZSTR_VAL(bytes), size) == FAILURE) {
+	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
 		zend_string_release(bytes);
 		return;
 	}
@@ -174,7 +238,7 @@ PHP_FUNCTION(random_int)
 
 	umax = max - min;
 
-	if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
+	if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
 		return;
 	}
 
@@ -193,7 +257,7 @@ PHP_FUNCTION(random_int)
 
 		/* Discard numbers over the limit to avoid modulo bias */
 		while (result > limit) {
-			if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
+			if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
 				return;
 			}
 		}

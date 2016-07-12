@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,8 +28,7 @@
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
 	struct sigaction act,oact;
-#ifdef ZEND_SIGNALS
-#endif
+
 	act.sa_handler = func;
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
@@ -46,12 +45,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 		act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
 #endif
 	}
-#ifdef ZEND_SIGNALS
-	if (zend_sigaction(signo, &act, &oact) < 0)
-#else
-	if (sigaction(signo, &act, &oact) < 0)
-#endif
-	{
+	if (zend_sigaction(signo, &act, &oact) < 0) {
 		return SIG_ERR;
 	}
 

@@ -27,8 +27,6 @@ $c10 = new C10;
 var_dump($c10[] += 5);
 --EXPECTF--
 Inside C10::offsetGet
-
-Notice: Undefined variable: offset in %sbug69955.php on line 10
 NULL
 
 Inside C10::offsetSet

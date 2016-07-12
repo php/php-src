@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,12 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #ifndef MYSQLND_ENUM_N_DEF_H
 #define MYSQLND_ENUM_N_DEF_H
 
@@ -48,6 +47,9 @@
 
 #define MYSQLND_NET_CMD_BUFFER_MIN_SIZE			4096
 #define MYSQLND_NET_CMD_BUFFER_MIN_SIZE_STR		"4096"
+
+#define MYSQLND_STMT_ID_LENGTH 4
+
 
 #define SERVER_STATUS_IN_TRANS					1	/* Transaction has started */
 #define SERVER_STATUS_AUTOCOMMIT				2	/* Server in auto_commit mode */
@@ -101,6 +103,10 @@
 #define CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA	(1UL << 21) /* Enable authentication response packet to be larger than 255 bytes. */
 #define CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS		(1UL << 22) /* Don't close the connection for a connection with expired password. */
 #define CLIENT_SESSION_TRACK					(1UL << 23) /* Extended OK */
+/*
+  This is a mysqlnd extension. CLIENT_ODBC is not used anyway. We will reuse it for our case and translate it to not using SSL peer verification
+*/
+#define CLIENT_SSL_DONT_VERIFY_SERVER_CERT	CLIENT_ODBC
 #define CLIENT_SSL_VERIFY_SERVER_CERT	(1UL << 30)
 #define CLIENT_REMEMBER_OPTIONS			(1UL << 31)
 
@@ -108,7 +114,29 @@
 				CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION | \
 				CLIENT_MULTI_RESULTS  | CLIENT_LOCAL_FILES | CLIENT_PLUGIN_AUTH)
 
-#define MYSQLND_NET_FLAG_USE_COMPRESSION 1
+#define MYSQLND_PROTOCOL_FLAG_USE_COMPRESSION 1
+
+
+/* Client Error codes */
+#define CR_UNKNOWN_ERROR		2000
+#define CR_CONNECTION_ERROR		2002
+#define CR_SERVER_GONE_ERROR	2006
+#define CR_OUT_OF_MEMORY		2008
+#define CR_SERVER_LOST			2013
+#define CR_COMMANDS_OUT_OF_SYNC	2014
+#define CR_CANT_FIND_CHARSET	2019
+#define CR_MALFORMED_PACKET		2027
+#define CR_NOT_IMPLEMENTED		2054
+#define CR_NO_PREPARE_STMT		2030
+#define CR_PARAMS_NOT_BOUND		2031
+#define CR_INVALID_PARAMETER_NO	2034
+#define CR_INVALID_BUFFER_USE	2035
+
+#define MYSQLND_EE_FILENOTFOUND	 7890
+
+#define UNKNOWN_SQLSTATE		"HY000"
+
+#define MAX_CHARSET_LEN			32
 
 
 #define TRANS_START_NO_OPT						0
@@ -182,7 +210,7 @@ typedef enum mysqlnd_parse_exec_response_type
 	MYSQLND_PARSE_EXEC_RESPONSE_EXPLICIT,
 } enum_mysqlnd_parse_exec_response_type;
 
-typedef enum mysqlnd_option
+typedef enum mysqlnd_client_option
 {
 	MYSQL_OPT_CONNECT_TIMEOUT,
 	MYSQL_OPT_COMPRESS,
@@ -228,9 +256,9 @@ typedef enum mysqlnd_option
 	MYSQLND_OPT_SSL_PASSPHRASE = 209,
 	MYSQLND_OPT_MAX_ALLOWED_PACKET = 210,
 	MYSQLND_OPT_AUTH_PROTOCOL = 211
-} enum_mysqlnd_option;
+} enum_mysqlnd_client_option;
 
-typedef enum mysqlnd_protocol_type
+typedef enum mysqlnd_session_protocol_type
 {
 	MYSQL_PROTOCOL_DEFAULT = 0,
 	MYSQL_PROTOCOL_TCP,		/* all, supported */
@@ -238,7 +266,7 @@ typedef enum mysqlnd_protocol_type
 	MYSQL_PROTOCOL_PIPE,	/* win32, not-supported */
 	MYSQL_PROTOCOL_MEMORY,	/* win32, not-supported */
 	MYSQL_PROTOCOL_LAST
-} enum_mysqlnd_protocol_type;
+} enum_mysqlnd_session_protocol_type;
 
 typedef enum mysqlnd_field_types
 {
@@ -259,6 +287,7 @@ typedef enum mysqlnd_field_types
 	MYSQL_TYPE_NEWDATE	= 14,
 	MYSQL_TYPE_VARCHAR	= 15,
 	MYSQL_TYPE_BIT		= 16,
+	MYSQL_TYPE_JSON=245,
 	MYSQL_TYPE_NEWDECIMAL=246,
 	MYSQL_TYPE_ENUM=247,
 	MYSQL_TYPE_SET=248,
@@ -300,6 +329,7 @@ typedef enum mysqlnd_server_option
 #define FIELD_TYPE_NEWDATE		MYSQL_TYPE_NEWDATE
 #define FIELD_TYPE_ENUM			MYSQL_TYPE_ENUM
 #define FIELD_TYPE_SET			MYSQL_TYPE_SET
+#define FIELD_TYPE_JSON 		MYSQL_TYPE_JSON
 #define FIELD_TYPE_TINY_BLOB	MYSQL_TYPE_TINY_BLOB
 #define FIELD_TYPE_MEDIUM_BLOB	MYSQL_TYPE_MEDIUM_BLOB
 #define FIELD_TYPE_LONG_BLOB	MYSQL_TYPE_LONG_BLOB
@@ -488,6 +518,8 @@ typedef enum mysqlnd_collected_stats
 	STAT_MEM_STRNDUP_COUNT,
 	STAT_MEM_ESTRDUP_COUNT,
 	STAT_MEM_STRDUP_COUNT,
+	STAT_MEM_EDUP_COUNT,
+	STAT_MEM_DUP_COUNT,
 	STAT_TEXT_TYPE_FETCHED_NULL,
 	STAT_TEXT_TYPE_FETCHED_BIT,
 	STAT_TEXT_TYPE_FETCHED_INT8,
@@ -504,6 +536,7 @@ typedef enum mysqlnd_collected_stats
 	STAT_TEXT_TYPE_FETCHED_DATETIME,
 	STAT_TEXT_TYPE_FETCHED_TIMESTAMP,
 	STAT_TEXT_TYPE_FETCHED_STRING,
+	STAT_TEXT_TYPE_FETCHED_JSON,
 	STAT_TEXT_TYPE_FETCHED_BLOB,
 	STAT_TEXT_TYPE_FETCHED_ENUM,
 	STAT_TEXT_TYPE_FETCHED_SET,
@@ -628,7 +661,11 @@ enum php_mysqlnd_server_command
 	COM_BINLOG_DUMP_GTID = 30,
 	COM_RESET_CONNECTION = 31,
 	COM_STMT_EXECUTE_BATCH = 32,
-	COM_END
+	COM_END,
+	/* Here follow own, non-protocol, commands */
+	COM_REAP_RESULT=240,	/* own command */
+	COM_ENABLE_SSL,			/* own command */
+	COM_HANDSHAKE,			/* own command */
 };
 
 

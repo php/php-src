@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,7 +80,7 @@
 # include <sys/mman.h>
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 const phpdbg_command_t phpdbg_watch_commands[] = {
 	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     &phpdbg_prompt_commands[24], "s", 0),
@@ -680,7 +680,9 @@ static int phpdbg_watchpoint_parse_step(char *name, size_t namelen, char *key, s
 }
 
 static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*callback)(phpdbg_watchpoint_t *)) {
-	if (EG(scope) && len >= 5 && !memcmp("$this", input, 5)) {
+	zend_class_entry *scope = zend_get_executed_scope();
+
+	if (scope && len >= 5 && !memcmp("$this", input, 5)) {
 		zend_hash_str_add(EG(current_execute_data)->symbol_table, ZEND_STRL("this"), &EG(current_execute_data)->This);
 	}
 
@@ -964,7 +966,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 
 			switch (watch->type) {
 				case WATCH_ON_ZVAL:
-					do_break = memcmp(oldPtr, watch->addr.zv, sizeof(zend_value) + sizeof(uint32_t) /* value + typeinfo */);
+					do_break = memcmp(oldPtr, watch->addr.zv, sizeof(zend_value) + sizeof(uint32_t) /* value + typeinfo */) != 0;
 					if (!do_break) {
 						goto end;
 					}
@@ -976,7 +978,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 					}
 					break;
 				case WATCH_ON_REFCOUNTED:
-					do_break = memcmp(oldPtr, watch->addr.ref, sizeof(uint32_t) /* no zend_refcounted metadata info */);
+					do_break = memcmp(oldPtr, watch->addr.ref, sizeof(uint32_t) /* no zend_refcounted metadata info */) != 0;
 					if (!do_break) {
 						goto end;
 					}
@@ -999,7 +1001,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 
 			switch (watch->type) {
 				case WATCH_ON_ZVAL: {
-					int show_value = memcmp(oldPtr, watch->addr.zv, sizeof(zend_value) + sizeof(uint32_t) /* no metadata info */);
+					zend_bool show_value = memcmp(oldPtr, watch->addr.zv, sizeof(zend_value) + sizeof(uint32_t) /* no metadata info */) != 0;
 
 					if ((watch->flags & PHPDBG_WATCH_NORMAL) && (removed || show_value)) {
 /* TODO: Merge with refcounting watches, store if watched ref value is to be dropped etc. [for example: manually increment refcount transparently for displaying and drop it if it decrements to 1] */

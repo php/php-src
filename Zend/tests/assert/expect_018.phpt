@@ -25,9 +25,9 @@ bool(true)
 bool(true)
 
 Warning: assert(): assert(false) failed in %sexpect_018.php on line 10
-NULL
+bool(false)
 bool(true)
 
 Warning: assert(): assert(false) failed in %sexpect_018.php on line 12
-NULL
+bool(false)
 bool(true)

@@ -146,7 +146,9 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	}
 
 	//there's no support for relative time in ICU yet
-	timeStyle = (DateFormat::EStyle)(timeStyle & ~DateFormat::kRelative);
+	if (timeStyle != DateFormat::NONE) {
+		timeStyle = (DateFormat::EStyle)(timeStyle & ~DateFormat::kRelative);
+	}
 
 	zend_class_entry *instance_ce = Z_OBJCE_P(object);
 	if (instanceof_function(instance_ce, Calendar_ce_ptr)) {
@@ -188,11 +190,11 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	}
 
 	if (pattern) {
-		 df = new SimpleDateFormat(
-				UnicodeString(Z_STRVAL_P(format), Z_STRLEN_P(format),
-						UnicodeString::kInvariant),
-				Locale::createFromName(locale_str),
-				status);
+		StringPiece sp(Z_STRVAL_P(format));
+		df = new SimpleDateFormat(
+			UnicodeString::fromUTF8(sp),
+			Locale::createFromName(locale_str),
+			status);
 
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,

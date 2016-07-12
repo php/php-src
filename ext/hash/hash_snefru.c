@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 #endif
 
 #if DBG_SNEFRU
-void ph(php_hash_uint32 h[16])
+void ph(uint32_t h[16])
 {
 	int i;
 	for (i = 0; i < 16; i++)
@@ -41,12 +41,12 @@ void ph(php_hash_uint32 h[16])
 }
 #endif
 
-static inline void Snefru(php_hash_uint32 input[16])
+static inline void Snefru(uint32_t input[16])
 {
 	static int shifts[4] = {16, 8, 16, 24};
 	int b, index, rshift, lshift;
-	const php_hash_uint32 *t0,*t1;
-	php_hash_uint32 SBE,B00,B01,B02,B03,B04,B05,B06,B07,B08,B09,B10,B11,B12,B13,B14,B15;
+	const uint32_t *t0,*t1;
+	uint32_t SBE,B00,B01,B02,B03,B04,B05,B06,B07,B08,B09,B10,B11,B12,B13,B14,B15;
 
 	B00 = input[0];
 	B01 = input[1];
@@ -129,7 +129,7 @@ static inline void SnefruTransform(PHP_SNEFRU_CTX *context, const unsigned char 
 								((input[i+2] & 0xff) << 8) | (input[i+3] & 0xff);
 	}
 	Snefru(context->state);
-	memset(&context->state[8], 0, sizeof(php_hash_uint32) * 8);
+	memset(&context->state[8], 0, sizeof(uint32_t) * 8);
 }
 
 PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context)
@@ -137,7 +137,7 @@ PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context)
 	memset(context, 0, sizeof(*context));
 }
 
-static const php_hash_uint32 MAX32 = 0xffffffffLU;
+static const uint32_t MAX32 = 0xffffffffLU;
 
 PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char *input, size_t len)
 {
@@ -173,7 +173,7 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 
 PHP_HASH_API void PHP_SNEFRUFinal(unsigned char digest[32], PHP_SNEFRU_CTX *context)
 {
-	php_hash_uint32 i, j;
+	uint32_t i, j;
 
 	if (context->length) {
 		SnefruTransform(context, context->buffer);

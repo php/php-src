@@ -1,4 +1,4 @@
-.TH PHAR 1 "2013" "The PHP Group" "User Commands"
+.TH PHAR 1 "2016" "The PHP Group" "User Commands"
 .SH NAME
 phar, phar.phar \- PHAR (PHP archive) command line tool
 .SH SYNOPSIS
@@ -507,7 +507,7 @@ contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphar\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2014 The PHP Group
+Copyright \(co 1997\-2016 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is

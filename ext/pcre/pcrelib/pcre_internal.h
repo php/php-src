@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2014 University of Cambridge
+           Copyright (c) 1997-2016 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -275,7 +275,7 @@ pcre.h(.in) and disable (comment out) this message. */
 
 typedef pcre_uint16 pcre_uchar;
 #define UCHAR_SHIFT (1)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 2)
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
@@ -283,7 +283,7 @@ typedef pcre_uint16 pcre_uchar;
 
 typedef pcre_uint32 pcre_uchar;
 #define UCHAR_SHIFT (2)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 4)
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
@@ -984,7 +984,7 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
 #ifndef EBCDIC
 
 #define HSPACE_LIST \
-  CHAR_HT, CHAR_SPACE, 0xa0, \
+  CHAR_HT, CHAR_SPACE, CHAR_NBSP, \
   0x1680, 0x180e, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, \
   0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202f, 0x205f, 0x3000, \
   NOTACHAR
@@ -1010,7 +1010,7 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
 #define HSPACE_BYTE_CASES \
   case CHAR_HT: \
   case CHAR_SPACE: \
-  case 0xa0     /* NBSP */
+  case CHAR_NBSP
 
 #define HSPACE_CASES \
   HSPACE_BYTE_CASES: \
@@ -1037,11 +1037,12 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
 /* ------ EBCDIC environments ------ */
 
 #else
-#define HSPACE_LIST CHAR_HT, CHAR_SPACE
+#define HSPACE_LIST CHAR_HT, CHAR_SPACE, CHAR_NBSP, NOTACHAR
 
 #define HSPACE_BYTE_CASES \
   case CHAR_HT: \
-  case CHAR_SPACE
+  case CHAR_SPACE: \
+  case CHAR_NBSP
 
 #define HSPACE_CASES HSPACE_BYTE_CASES
 
@@ -1215,6 +1216,7 @@ same code point. */
 
 #define CHAR_ESC                    '\047'
 #define CHAR_DEL                    '\007'
+#define CHAR_NBSP                   '\x41'
 #define STR_ESC                     "\047"
 #define STR_DEL                     "\007"
 
@@ -1229,6 +1231,7 @@ a positive value. */
 #define CHAR_NEL                    ((unsigned char)'\x85')
 #define CHAR_ESC                    '\033'
 #define CHAR_DEL                    '\177'
+#define CHAR_NBSP                   ((unsigned char)'\xa0')
 
 #define STR_LF                      "\n"
 #define STR_NL                      STR_LF
@@ -1606,6 +1609,7 @@ only. */
 #define CHAR_VERTICAL_LINE          '\174'
 #define CHAR_RIGHT_CURLY_BRACKET    '\175'
 #define CHAR_TILDE                  '\176'
+#define CHAR_NBSP                   ((unsigned char)'\xa0')
 
 #define STR_HT                      "\011"
 #define STR_VT                      "\013"
@@ -1761,6 +1765,10 @@ only. */
 #endif  /* SUPPORT_UTF */
 
 /* Escape items that are just an encoding of a particular data value. */
+
+#ifndef ESC_a
+#define ESC_a CHAR_BEL
+#endif
 
 #ifndef ESC_e
 #define ESC_e CHAR_ESC
@@ -2281,7 +2289,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
        ERR70, ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79,
-       ERR80, ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERRCOUNT };
+       ERR80, ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERRCOUNT };
 
 /* JIT compiling modes. The function list is indexed by them. */
 
@@ -2446,6 +2454,7 @@ typedef struct compile_data {
   BOOL had_pruneorskip;             /* (*PRUNE) or (*SKIP) encountered */
   BOOL check_lookbehind;            /* Lookbehinds need later checking */
   BOOL dupnames;                    /* Duplicate names exist */
+  BOOL dupgroups;                   /* Duplicate groups exist: (?| found */
   BOOL iscondassert;                /* Next assert is a condition */
   int  nltype;                      /* Newline type */
   int  nllen;                       /* Newline string length */

@@ -6,6 +6,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
+/* CAUTION: this test will most likely fail with valgrind until --smc-check=all is used. */
+
 const PREG_CACHE_SIZE = 4096; // this has to be >= the resp. constant in php_pcre.c
 
 var_dump(preg_replace_callback('/a/', function($m) {

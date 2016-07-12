@@ -133,11 +133,6 @@ ZEND_BEGIN_ARG_INFO_EX(collator_static_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(collator_static_2_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(collator_0_args, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 ZEND_END_ARG_INFO()
@@ -378,13 +373,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
 	ZEND_ARG_INFO(1, idn_info)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_utf8, 0, 0, 1)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, variant)
-	ZEND_ARG_INFO(1, idn_info)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_create_proc, 0, 0, 2 )
 	ZEND_ARG_INFO( 0, locale )
 	ZEND_ARG_INFO( 0, bundlename )
@@ -451,10 +439,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_enumeration, 0, 0, 0 )
 	ZEND_ARG_INFO( 0, countryOrRawOffset )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_count_equivalent_ids, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, zoneId )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_time_zone_id_enumeration, 0, 0, 1 )
@@ -892,7 +876,7 @@ zend_module_entry intl_module_entry = {
 
 #ifdef COMPILE_DL_INTL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE( intl )
 #endif

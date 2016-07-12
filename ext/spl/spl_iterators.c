@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -466,7 +466,8 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_get_current_data,
 	spl_recursive_it_get_current_key,
 	spl_recursive_it_move_forward,
-	spl_recursive_it_rewind
+	spl_recursive_it_rewind,
+	NULL
 };
 
 static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, recursive_it_it_type rit_type)
@@ -1550,7 +1551,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			if (mode < 0 || mode >= REGIT_MODE_MAX) {
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode %pd", mode);
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
 				return NULL;
 			}
 			intern->u.regex.mode = mode;
@@ -1998,7 +1999,6 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	zend_fcall_info        *fci = &intern->u.cbfilter->fci;
 	zend_fcall_info_cache  *fcc = &intern->u.cbfilter->fcc;
 	zval                    params[3];
-	zval                    result;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2012,19 +2012,22 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	ZVAL_COPY_VALUE(&params[1], &intern->current.key);
 	ZVAL_COPY_VALUE(&params[2], &intern->inner.zobject);
 
-	fci->retval = &result;
+	fci->retval = return_value;
 	fci->param_count = 3;
 	fci->params = params;
 	fci->no_separation = 0;
 
-	if (zend_call_function(fci, fcc) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
+	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
 	}
+
 	if (EG(exception)) {
-		return;
+		RETURN_NULL();
 	}
 
-	RETURN_ZVAL(&result, 1, 1);
+	/* zend_call_function may change args to IS_REF */
+	ZVAL_COPY_VALUE(&intern->current.data, &params[0]);
+	ZVAL_COPY_VALUE(&intern->current.key, &params[1]);
 }
 /* }}} */
 
@@ -2059,16 +2062,17 @@ SPL_METHOD(RegexIterator, accept)
 	{
 		case REGIT_MODE_MAX: /* won't happen but makes compiler happy */
 		case REGIT_MODE_MATCH:
+#ifdef PCRE_EXTRA_MARK
+			if (intern->u.regex.pce->extra) {
+				intern->u.regex.pce->extra->flags &= ~PCRE_EXTRA_MARK;
+			}
+#endif
 			count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, NULL, 0);
 			RETVAL_BOOL(count >= 0);
 			break;
 
 		case REGIT_MODE_ALL_MATCHES:
 		case REGIT_MODE_GET_MATCH:
-//???			if (!use_copy) {
-//???				subject = estrndup(subject, subject_len);
-//???				use_copy = 1;
-//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
 			php_pcre_match_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &zcount,
@@ -2077,10 +2081,6 @@ SPL_METHOD(RegexIterator, accept)
 			break;
 
 		case REGIT_MODE_SPLIT:
-//???			if (!use_copy) {
-//???				subject = estrndup(subject, subject_len);
-//???				use_copy = 1;
-//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
 			php_pcre_split_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &intern->current.data, -1, intern->u.regex.preg_flags);
@@ -2157,7 +2157,7 @@ SPL_METHOD(RegexIterator, setMode)
 	}
 
 	if (mode < 0 || mode >= REGIT_MODE_MAX) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode %pd", mode);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
 		return;/* NULL */
 	}
 
@@ -2326,10 +2326,7 @@ static void spl_dual_it_free_storage(zend_object *_object)
 	}
 
 	if (object->dit_type == DIT_CachingIterator || object->dit_type == DIT_RecursiveCachingIterator) {
-		if (Z_TYPE(object->u.caching.zcache) != IS_UNDEF) {
-			zval_ptr_dtor(&object->u.caching.zcache);
-			//ZVAL_UNDEF(&object->u.caching.zcache);
-		}
+		zval_ptr_dtor(&object->u.caching.zcache);
 	}
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
@@ -2498,11 +2495,11 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 
 	spl_dual_it_free(intern);
 	if (pos < intern->u.limit.offset) {
-		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to %pd which is below the offset %pd", pos, intern->u.limit.offset);
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is below the offset " ZEND_LONG_FMT, pos, intern->u.limit.offset);
 		return;
 	}
 	if (pos >= intern->u.limit.offset + intern->u.limit.count && intern->u.limit.count != -1) {
-		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to %pd which is behind offset %pd plus count %pd", pos, intern->u.limit.offset, intern->u.limit.count);
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is behind offset " ZEND_LONG_FMT " plus count " ZEND_LONG_FMT, pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}
 	if (pos != intern->current.pos && instanceof_function(intern->inner.ce, spl_ce_SeekableIterator)) {
@@ -2653,7 +2650,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 
 			ZVAL_DEREF(data);
 			Z_TRY_ADDREF_P(data);
-			array_set_zval_key(HASH_OF(&intern->u.caching.zcache), key, data);
+			array_set_zval_key(Z_ARRVAL(intern->u.caching.zcache), key, data);
 			zval_ptr_dtor(data);
 		}
 		/* Recursion ? */
@@ -2718,7 +2715,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 static inline void spl_caching_it_rewind(spl_dual_it_object *intern)
 {
 	spl_dual_it_rewind(intern);
-	zend_hash_clean(HASH_OF(&intern->u.caching.zcache));
+	zend_hash_clean(Z_ARRVAL(intern->u.caching.zcache));
 	spl_caching_it_next(intern);
 }
 
@@ -2839,7 +2836,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 	if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
-	zend_symtable_update(HASH_OF(&intern->u.caching.zcache), key, value);
+	zend_symtable_update(Z_ARRVAL(intern->u.caching.zcache), key, value);
 }
 /* }}} */
 
@@ -2862,7 +2859,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 		return;
 	}
 
-	if ((value = zend_symtable_find(HASH_OF(&intern->u.caching.zcache), key)) == NULL) {
+	if ((value = zend_symtable_find(Z_ARRVAL(intern->u.caching.zcache), key)) == NULL) {
 		zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(key));
 		return;
 	}
@@ -2890,7 +2887,7 @@ SPL_METHOD(CachingIterator, offsetUnset)
 		return;
 	}
 
-	zend_symtable_del(HASH_OF(&intern->u.caching.zcache), key);
+	zend_symtable_del(Z_ARRVAL(intern->u.caching.zcache), key);
 }
 /* }}} */
 
@@ -2912,7 +2909,7 @@ SPL_METHOD(CachingIterator, offsetExists)
 		return;
 	}
 
-	RETURN_BOOL(zend_symtable_exists(HASH_OF(&intern->u.caching.zcache), key));
+	RETURN_BOOL(zend_symtable_exists(Z_ARRVAL(intern->u.caching.zcache), key));
 }
 /* }}} */
 
@@ -2921,7 +2918,6 @@ SPL_METHOD(CachingIterator, offsetExists)
 SPL_METHOD(CachingIterator, getCache)
 {
 	spl_dual_it_object   *intern;
-	zval *value;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2930,13 +2926,11 @@ SPL_METHOD(CachingIterator, getCache)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%v does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
-	value = &intern->u.caching.zcache;
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY(return_value, &intern->u.caching.zcache);
 }
 /* }}} */
 
@@ -2983,7 +2977,7 @@ SPL_METHOD(CachingIterator, setFlags)
 	}
 	if ((flags & CIT_FULL_CACHE) != 0 && (intern->u.caching.flags & CIT_FULL_CACHE) == 0) {
 		/* clear on (re)enable */
-		zend_hash_clean(HASH_OF(&intern->u.caching.zcache));
+		zend_hash_clean(Z_ARRVAL(intern->u.caching.zcache));
 	}
 	intern->u.caching.flags = (intern->u.caching.flags & ~CIT_PUBLIC) | (flags & CIT_PUBLIC);
 }
@@ -3002,11 +2996,11 @@ SPL_METHOD(CachingIterator, count)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%v does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
-	RETURN_LONG(zend_hash_num_elements(HASH_OF(&intern->u.caching.zcache)));
+	RETURN_LONG(zend_hash_num_elements(Z_ARRVAL(intern->u.caching.zcache)));
 }
 /* }}} */
 

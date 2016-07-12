@@ -14,6 +14,8 @@ gdImagePtr gdImageCreateFromWebp (FILE * inFile)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewFileCtx(inFile);
+	if (!in)
+		return 0;
 	im = gdImageCreateFromWebpCtx(in);
 	in->gd_free(in);
 
@@ -37,13 +39,14 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	int    width, height;
 	uint8_t   *filedata = NULL;
 	uint8_t    *argb = NULL;
-	unsigned char   *read, *temp;
 	size_t size = 0, n;
 	gdImagePtr im;
 	int x, y;
 	uint8_t *p;
 
 	do {
+		unsigned char *read, *temp;
+
 		temp = gdRealloc(filedata, size+GD_WEBP_ALLOC_STEP);
 		if (temp) {
 			filedata = temp;
@@ -64,19 +67,19 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 
 	if (WebPGetInfo(filedata,size, &width, &height) == 0) {
 		zend_error(E_ERROR, "gd-webp cannot get webp info");
-		gdFree(temp);
+		gdFree(filedata);
 		return NULL;
 	}
 
 	im = gdImageCreateTrueColor(width, height);
 	if (!im) {
-		gdFree(temp);
+		gdFree(filedata);
 		return NULL;
 	}
 	argb = WebPDecodeARGB(filedata, size, &width, &height);
 	if (!argb) {
 		zend_error(E_ERROR, "gd-webp cannot allocate temporary buffer");
-		gdFree(temp);
+		gdFree(filedata);
 		gdImageDestroy(im);
 		return NULL;
 	}
@@ -92,7 +95,6 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	gdFree(filedata);
 	/* do not use gdFree here, in case gdFree/alloc is mapped to something else than libc */
 	free(argb);
-	gdFree(temp);
 	im->saveAlphaFlag = 1;
 	return im;
 }

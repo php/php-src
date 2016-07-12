@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2015 The PHP Group                                |
+  | Copyright (c) 2005-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -45,6 +45,7 @@ php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_rename,   /* rename */
 	phar_wrapper_mkdir,    /* create directory */
 	phar_wrapper_rmdir,    /* remove directory */
+	NULL
 };
 
 php_stream_wrapper php_stream_phar_wrapper = {

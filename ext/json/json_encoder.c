@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,14 +30,6 @@
 #include "zend_smart_str.h"
 #include "php_json.h"
 #include <zend_exceptions.h>
-
-/* double limits */
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define PHP_JSON_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define PHP_JSON_DOUBLE_MAX_LENGTH 1080
-#endif
 
 static const char digits[] = "0123456789abcdef";
 
@@ -103,10 +95,11 @@ static inline int php_json_is_valid_double(double d) /* {{{ */
 static inline void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
 {
 	size_t len;
-	char num[PHP_JSON_DOUBLE_MAX_LENGTH];
-	php_gcvt(d, (int)EG(precision), '.', 'e', &num[0]);
+	char num[PHP_DOUBLE_MAX_LENGTH];
+
+	php_gcvt(d, (int)PG(serialize_precision), '.', 'e', num);
 	len = strlen(num);
-	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_JSON_DOUBLE_MAX_LENGTH - 2) {
+	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_DOUBLE_MAX_LENGTH - 2) {
 		num[len++] = '.';
 		num[len++] = '0';
 		num[len] = '\0';
@@ -169,7 +162,7 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 				php_json_encode(buf, data, options);
 			} else if (r == PHP_JSON_OUTPUT_OBJECT) {
 				if (key) {
-					if (ZSTR_VAL(key)[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
+					if (ZSTR_VAL(key)[0] == '\0' && ZSTR_LEN(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
 						if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
 							ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
@@ -321,7 +314,7 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 
 	do {
 		us = (unsigned char)s[pos];
-		if (us >= 0x80 && !(options & PHP_JSON_UNESCAPED_UNICODE)) {
+		if (us >= 0x80 && (!(options & PHP_JSON_UNESCAPED_UNICODE) || us == 0xE2)) {
 			/* UTF-8 character */
 			us = php_next_utf8_char((const unsigned char *)s, len, &pos, &status);
 			if (status != SUCCESS) {
@@ -331,6 +324,15 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 				JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 				smart_str_appendl(buf, "null", 4);
 				return;
+			}
+			/* Escape U+2028/U+2029 line terminators, UNLESS both
+			   JSON_UNESCAPED_UNICODE and
+			   JSON_UNESCAPED_LINE_TERMINATORS were provided */
+			if ((options & PHP_JSON_UNESCAPED_UNICODE)
+				&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+					|| us < 0x2028 || us > 0x2029)) {
+				smart_str_appendl(buf, &s[pos - 3], 3);
+				continue;
 			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
 			if (us >= 0x10000) {
@@ -448,6 +450,7 @@ static void php_json_encode_serializable_object(smart_str *buf, zval *val, int o
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	zval retval, fname;
 	HashTable* myht;
+	int origin_error_code;
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		myht = Z_ARRVAL_P(val);
@@ -461,8 +464,10 @@ static void php_json_encode_serializable_object(smart_str *buf, zval *val, int o
 		return;
 	}
 
+
 	ZVAL_STRING(&fname, "jsonSerialize");
 
+	origin_error_code = JSON_G(error_code);
 	if (FAILURE == call_user_function_ex(EG(function_table), val, &fname, &retval, 0, NULL, 1, NULL) || Z_TYPE(retval) == IS_UNDEF) {
 		zend_throw_exception_ex(NULL, 0, "Failed calling %s::jsonSerialize()", ZSTR_VAL(ce->name));
 		smart_str_appendl(buf, "null", sizeof("null") - 1);
@@ -470,6 +475,7 @@ static void php_json_encode_serializable_object(smart_str *buf, zval *val, int o
 		return;
 	}
 
+	JSON_G(error_code) = origin_error_code;
 	if (EG(exception)) {
 		/* Error already raised */
 		zval_ptr_dtor(&retval);

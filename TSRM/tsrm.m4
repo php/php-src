@@ -1,3 +1,4 @@
+m4_include([TSRM/m4/gethostbyname.m4])
 
 dnl TSRM_CHECK_GCC_ARG(ARG, ACTION-IF-FOUND, ACTION-IF-NOT_FOUND)	
 AC_DEFUN([TSRM_CHECK_GCC_ARG],[
@@ -31,6 +32,8 @@ AC_REQUIRE([AC_PROG_RANLIB])dnl
 AC_CHECK_HEADERS(stdarg.h)
 
 AC_CHECK_FUNCS(sigprocmask)
+
+AX_FUNC_WHICH_GETHOSTBYNAME_R()
 
 ])
 
@@ -88,7 +91,6 @@ else
   AC_MSG_RESULT(yes)
 fi
 ])
-
 
 AC_DEFUN([TSRM_THREADS_CHECKS],[
 

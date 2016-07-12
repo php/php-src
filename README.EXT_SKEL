@@ -172,7 +172,7 @@ PHP_FUNCTION(module_name_drawtext)
     zval *image = NULL;
     zval *font = NULL;
 
-    if (zend_parse_parameters(argc TSRMLS_CC, "rsrll|l", &image, &text, &text_len, &font, &x, &y, &color) == FAILURE)
+    if (zend_parse_parameters(argc, "rsrll|l", &image, &text, &text_len, &font, &x, &y, &color) == FAILURE)
         return;
 
     if (image) {

@@ -7,10 +7,10 @@
    This file was generated automatically by CMake
    based on ../cmake-zipconf.h.in.
  */
-#define LIBZIP_VERSION "1.0.1"
+#define LIBZIP_VERSION "1.1.2"
 #define LIBZIP_VERSION_MAJOR 1
-#define LIBZIP_VERSION_MINOR 0
-#define LIBZIP_VERSION_MICRO 1
+#define LIBZIP_VERSION_MINOR 1
+#define LIBZIP_VERSION_MICRO 2
 
 /* #undef HAVE_INTTYPES_H_LIBZIP */
 

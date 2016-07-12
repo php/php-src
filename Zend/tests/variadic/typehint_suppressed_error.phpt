@@ -1,5 +1,5 @@
 --TEST--
-Error suppression for typehints on variadic arguments works
+Error suppression for types on variadic arguments works
 --FILE--
 <?php
 

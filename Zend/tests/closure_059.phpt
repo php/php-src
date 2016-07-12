@@ -1,5 +1,5 @@
 --TEST--
-Closure 059: Closure type hinting
+Closure 059: Closure type declaration
 --FILE--
 <?php
 class A {

@@ -2461,4 +2461,116 @@ No match
     scat
  0: sc
 
+/[A-`]/i8
+    abcdefghijklmno
+ 0: a
+
+/\C\X*QT/8
+    Ӆ\x0aT
+No match
+
+/[\pS#moq]/
+    =
+ 0: =
+
+/[[:punct:]]/8W
+    \xc2\xb4
+No match
+    \x{b4} 
+No match
+
+/[[:^ascii:]]/8W
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{300}
+ 0: \x{300}
+    \x{37e}
+ 0: \x{37e}
+    a
+No match
+    9
+No match
+    g
+No match
+
+/[[:^ascii:]\w]/8W
+    a
+ 0: a
+    9
+ 0: 9
+    g
+ 0: g
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{300}
+ 0: \x{300}
+    \x{37e}
+ 0: \x{37e}
+
+/[\w[:^ascii:]]/8W
+    a
+ 0: a
+    9
+ 0: 9
+    g
+ 0: g
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{300}
+ 0: \x{300}
+    \x{37e}
+ 0: \x{37e}
+
+/[^[:ascii:]\W]/8W
+    a
+No match
+    9
+No match
+    g
+No match
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{300}
+No match
+    \x{37e}
+No match
+
+/[[:^ascii:]a]/8W
+    a
+ 0: a
+    9
+No match
+    g
+No match
+    \x{100}
+ 0: \x{100}
+    \x{200}
+ 0: \x{200}
+    \x{37e}
+ 0: \x{37e}
+
+/[^[:^ascii:]\d]/8W
+    a
+ 0: a
+    ~
+ 0: ~
+    0
+No match
+    \a
+ 0: \x{07}
+    \x{7f}
+ 0: \x{7f}
+    \x{389}
+No match
+    \x{20ac}
+No match
+
 /-- End of testinput6 --/

@@ -208,9 +208,9 @@ Exception: Modulo by zero
 --- testing: '123abc' % '123abc' ---
 int(0)
 --- testing: '123abc' % '123e5' ---
-int(0)
+int(123)
 --- testing: '123abc' % '123e5xyz' ---
-int(0)
+int(123)
 --- testing: '123abc' % ' 123abc' ---
 int(0)
 --- testing: '123abc' % '123 abc' ---
@@ -224,13 +224,13 @@ Exception: Modulo by zero
 --- testing: '123e5' % '0' ---
 Exception: Modulo by zero
 --- testing: '123e5' % '65' ---
-int(58)
+int(50)
 --- testing: '123e5' % '-44' ---
-int(35)
+int(20)
 --- testing: '123e5' % '1.2' ---
 int(0)
 --- testing: '123e5' % '-7.7' ---
-int(4)
+int(6)
 --- testing: '123e5' % 'abc' ---
 Exception: Modulo by zero
 --- testing: '123e5' % '123abc' ---
@@ -252,13 +252,13 @@ Exception: Modulo by zero
 --- testing: '123e5xyz' % '0' ---
 Exception: Modulo by zero
 --- testing: '123e5xyz' % '65' ---
-int(58)
+int(50)
 --- testing: '123e5xyz' % '-44' ---
-int(35)
+int(20)
 --- testing: '123e5xyz' % '1.2' ---
 int(0)
 --- testing: '123e5xyz' % '-7.7' ---
-int(4)
+int(6)
 --- testing: '123e5xyz' % 'abc' ---
 Exception: Modulo by zero
 --- testing: '123e5xyz' % '123abc' ---
@@ -292,9 +292,9 @@ Exception: Modulo by zero
 --- testing: ' 123abc' % '123abc' ---
 int(0)
 --- testing: ' 123abc' % '123e5' ---
-int(0)
+int(123)
 --- testing: ' 123abc' % '123e5xyz' ---
-int(0)
+int(123)
 --- testing: ' 123abc' % ' 123abc' ---
 int(0)
 --- testing: ' 123abc' % '123 abc' ---
@@ -320,9 +320,9 @@ Exception: Modulo by zero
 --- testing: '123 abc' % '123abc' ---
 int(0)
 --- testing: '123 abc' % '123e5' ---
-int(0)
+int(123)
 --- testing: '123 abc' % '123e5xyz' ---
-int(0)
+int(123)
 --- testing: '123 abc' % ' 123abc' ---
 int(0)
 --- testing: '123 abc' % '123 abc' ---
@@ -348,9 +348,9 @@ Exception: Modulo by zero
 --- testing: '123abc ' % '123abc' ---
 int(0)
 --- testing: '123abc ' % '123e5' ---
-int(0)
+int(123)
 --- testing: '123abc ' % '123e5xyz' ---
-int(0)
+int(123)
 --- testing: '123abc ' % ' 123abc' ---
 int(0)
 --- testing: '123abc ' % '123 abc' ---

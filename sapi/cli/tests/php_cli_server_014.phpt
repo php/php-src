@@ -65,6 +65,7 @@ fclose($fp);
 
 HTTP/1.1 200 OK
 Host: %s
+Date: %s
 Connection: close
 X-Powered-By: %s
 Content-type: %s
@@ -72,6 +73,7 @@ Content-type: %s
 done
 HTTP/1.1 404 Not Found
 Host: %s
+Date: %s
 Connection: close
 Content-Type: %s
 Content-Length: %d

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -250,8 +250,8 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 				case dtype_int64:
 					l = *(ISC_INT64*)argv[i]->dsc_address;
 
-					if (argv[i]->dsc_scale == 0 && l <= LONG_MAX && l >= LONG_MIN) {
-						ZVAL_LONG(&args[i], (long)l);
+					if (argv[i]->dsc_scale == 0 && l <= ZEND_LONG_MAX && l >= ZEND_LONG_MIN) {
+						ZVAL_LONG(&args[i], (zend_long)l);
 					} else {
 						ZVAL_DOUBLE(&args[i], ((double)l)/scales[-argv[i]->dsc_scale]);
 					}
@@ -309,8 +309,8 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 
 			case IS_LONG:
 				r->dsc_dtype = dtype_long;
-				*(long*)r->dsc_address = Z_LVAL(return_value);
-				r->dsc_length = sizeof(long);
+				*(zend_long*)r->dsc_address = Z_LVAL(return_value);
+				r->dsc_length = sizeof(zend_long);
 				break;
 
 			case IS_DOUBLE:

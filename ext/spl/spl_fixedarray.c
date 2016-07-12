@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -410,11 +410,11 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 static void spl_fixedarray_object_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_fixedarray_object *intern;
+	zval tmp;
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->fptr_offset_set) {
-		zval tmp;
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
@@ -1018,7 +1018,8 @@ zend_object_iterator_funcs spl_fixedarray_it_funcs = {
 	spl_fixedarray_it_get_current_data,
 	spl_fixedarray_it_get_current_key,
 	spl_fixedarray_it_move_forward,
-	spl_fixedarray_it_rewind
+	spl_fixedarray_it_rewind,
+	NULL
 };
 
 zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

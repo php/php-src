@@ -1,4 +1,22 @@
 language: c
+sudo: false
+addons:
+  apt:
+    packages:
+      - locales
+      - language-pack-de
+      - re2c
+      - libgmp-dev
+      - libicu-dev
+      - libmcrypt-dev
+      - libtidy-dev
+      - libenchant-dev
+      - libaspell-dev
+      - libpspell-dev
+      - librecode-dev
+      - libsasl2-dev
+      - libxpm-dev
+      - libt1-dev
 
 notifications:
     email: 
@@ -27,13 +45,6 @@ env:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
-before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -y libenchant-dev libaspell-dev libpspell-dev librecode-dev libsasl2-dev libxpm-dev libt1-dev libc-client2007e-dev
-    - sudo cp ./travis/de /var/lib/locales/supported.d/de
-    - sudo dpkg-reconfigure locales
-    - ./travis/install.sh
-
 before_script:
     # Compile PHP
     - ./travis/compile.sh
@@ -43,7 +54,6 @@ before_script:
     - . ./travis/ext/pdo_mysql/setup.sh
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
-    - . ./travis/ext/imap/setup.sh
 
 # Run PHPs run-tests.php 
 script:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,7 +85,16 @@ PS_OPEN_FUNC(user)
 	ZVAL_STRING(&args[0], (char*)save_path);
 	ZVAL_STRING(&args[1], (char*)session_name);
 
-	ps_call_handler(&PSF(open), 2, args, &retval);
+	zend_try {
+		ps_call_handler(&PSF(open), 2, args, &retval);
+	} zend_catch {
+		PS(session_status) = php_session_none;
+		if (!Z_ISUNDEF(retval)) {
+			zval_ptr_dtor(&retval);
+		}
+		zend_bailout();
+	} zend_end_try();
+
 	PS(mod_user_implemented) = 1;
 
 	FINISH;

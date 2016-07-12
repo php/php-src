@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -164,7 +164,10 @@ PHP_FUNCTION(assert)
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
-		zend_class_entry *orig_scope = EG(scope);
+
+		if (zend_forbid_dynamic_call("assert() with string argument") == FAILURE) {
+			RETURN_FALSE;
+		}
 
 		myeval = Z_STRVAL_P(assertion);
 
@@ -193,8 +196,6 @@ PHP_FUNCTION(assert)
 		if (ASSERTG(quiet_eval)) {
 			EG(error_reporting) = old_error_reporting;
 		}
-
-		EG(scope) = orig_scope;
 
 		convert_to_boolean(&retval);
 		val = Z_TYPE(retval) == IS_TRUE;
@@ -245,7 +246,7 @@ PHP_FUNCTION(assert)
 		if (!description) {
 			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
 		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), assertion_error_ce)) {
+			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
 			Z_ADDREF_P(description);
 			zend_throw_exception_object(description);
 		} else {
@@ -274,6 +275,8 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
+	
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -367,7 +370,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL, E_WARNING, "Unknown value %pd", what);
+		php_error_docref(NULL, E_WARNING, "Unknown value " ZEND_LONG_FMT, what);
 		break;
 	}
 

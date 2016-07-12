@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -375,7 +375,7 @@ static inline unsigned int get_next_char(
  * defaults to UTF-8 */
 static enum entity_charset determine_charset(char *charset_hint)
 {
-	int i;
+	size_t i;
 	enum entity_charset charset = cs_utf_8;
 	size_t len = 0;
 	const zend_encoding *zenc;

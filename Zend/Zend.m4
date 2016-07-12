@@ -370,10 +370,10 @@ AC_CHECK_FUNCS(mremap)
 
 
 AC_ARG_ENABLE(zend-signals,
-[  --enable-zend-signals   Use zend signal handling],[
+[  --disable-zend-signals  whether to enable zend signal handling],[
   ZEND_SIGNALS=$enableval
 ],[
-  ZEND_SIGNALS=no
+  ZEND_SIGNALS=yes
 ])  
 
 AC_CHECK_FUNC(sigaction, [

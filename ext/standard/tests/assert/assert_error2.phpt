@@ -22,8 +22,11 @@ echo "If this is printed BAIL hasn't worked";
 --EXPECTF--
 int(0)
 
-Warning: Missing argument 4 for f1() in %s on line 2
-f1 called
-
 Warning: assert(): Assertion "0 != 0" failed in %s on line 9
 
+Fatal error: Uncaught Error: Too few arguments to function f1(), 3 passed and exactly 4 expected in %sassert_error2.php:2
+Stack trace:
+#0 [internal function]: f1('%s', 9, '0 != 0')
+#1 %sassert_error2.php(9): assert('0 != 0')
+#2 {main}
+  thrown in %sassert_error2.php on line 2

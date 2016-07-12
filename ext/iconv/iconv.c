@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -165,7 +165,7 @@ zend_module_entry iconv_module_entry = {
 
 #ifdef COMPILE_DL_ICONV
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(iconv)
 #endif
@@ -424,9 +424,9 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			char *p = strstr(get_output_encoding(), "//");
 
 			if (p) {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (size_t) strlen(mimetype), mimetype, (size_t)(p - get_output_encoding()), get_output_encoding());
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, (int) (p - get_output_encoding()), get_output_encoding());
 			} else {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (size_t) strlen(mimetype), mimetype, get_output_encoding());
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, get_output_encoding());
 			}
 			if (content_type && SUCCESS == sapi_add_header(content_type, (uint)len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
@@ -2121,7 +2121,7 @@ PHP_FUNCTION(iconv_substr)
 PHP_FUNCTION(iconv_strpos)
 {
 	char *charset = get_internal_encoding();
-	size_t charset_len = 0;
+	size_t charset_len = 0, haystk_len;
 	zend_string *haystk;
 	zend_string *ndl;
 	zend_long offset = 0;
@@ -2142,8 +2142,17 @@ PHP_FUNCTION(iconv_strpos)
 	}
 
 	if (offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset not contained in string.");
-		RETURN_FALSE;
+		/* Convert negative offset (counted from the end of string) */
+		err = _php_iconv_strlen(&haystk_len, ZSTR_VAL(haystk), ZSTR_LEN(haystk), charset);
+		if (err != PHP_ICONV_ERR_SUCCESS) {
+			_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
+			RETURN_FALSE;
+		}
+		offset += haystk_len;
+		if (offset < 0) { /* If offset before start */
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string.");
+			RETURN_FALSE;
+		}
 	}
 
 	if (ZSTR_LEN(ndl) < 1) {

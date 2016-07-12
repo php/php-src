@@ -5,17 +5,16 @@
 5. ext/standard crypt
 6. ext/standard crypt's blowfish implementation
 7. Sqlite/Sqlite3 ext/sqlite3 ext/sqlite
-8. ext/json/json_parser
-9. ext/standard/rand
-10. ext/standard/scanf
-11. ext/standard/strnatcmp.c
-12. ext/standard/uuencode
-13. libxmlrpc ext/xmlrpc
-14. libzip ext/zip
-15. main/snprintf.c
-16. main/strlcat
-17. main/strlcpy
-18. libgd see ext/gd/libgd/COPYING
+8. ext/standard/rand
+9. ext/standard/scanf
+10. ext/standard/strnatcmp.c
+11. ext/standard/uuencode
+12. libxmlrpc ext/xmlrpc
+13. libzip ext/zip
+14. main/snprintf.c
+15. main/strlcat
+16. main/strlcpy
+17. libgd see ext/gd/libgd/COPYING
 
 5. ext/standard crypt
 
@@ -104,31 +103,7 @@ a legal notice, here is a blessing:
   May you share freely, never taking more than you give.
 
 
-8. ext/json/json_parser
-Copyright (c) 2005 JSON.org
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-The Software shall be used for Good, not Evil.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
-9. ext/standard/rand
+8. ext/standard/rand
 The following php_mt_...() functions are based on a C++ class MTRand by
 Richard J. Wagner. For more information see the web page at
 http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
@@ -181,7 +156,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-10. ext/standard/scanf
+9. ext/standard/scanf
 scanf.c --
 
 This file contains the base code which implements sscanf and by extension
@@ -227,7 +202,7 @@ authors grant the U.S. Government and others acting in its behalf
 permission to use and distribute the software in accordance with the
 terms specified in this license.
 
-11. ext/standard/strnatcmp.c
+10. ext/standard/strnatcmp.c
 
 strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
 Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
@@ -248,7 +223,7 @@ freely, subject to the following restrictions:
 	 misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
-12. ext/standard/uuencode
+11. ext/standard/uuencode
 Portions of this code are based on Berkeley's uuencode/uudecode
 implementation.
 
@@ -284,7 +259,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 
-13. libxmlrpc ext/xmlrpc
+12. libxmlrpc ext/xmlrpc
 
 Copyright 2000 Epinions, Inc. 
 
@@ -308,7 +283,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
 NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
 DAMAGES.
 
-14. libzip ext/zip
+13. libzip ext/zip
 zip.h -- exported declarations.
 Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
 
@@ -340,7 +315,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-15. main/snprintf.c
+14. main/snprintf.c
 Copyright (c) 2002, 2006 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
@@ -413,8 +388,8 @@ This code is based on, and used with the permission of, the
 SIO stdio-replacement strx_* functions by Panos Tsirigotis
 <panos@alumni.cs.colorado.edu> for xinetd.
 
-16. main/strlcat
-17. main/strlcpy
+15. main/strlcat
+16. main/strlcpy
 Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
 All rights reserved.
 

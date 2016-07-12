@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -223,7 +223,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
-	isc_blob_handle blobh = NULL;
+	isc_blob_handle blobh = PDO_FIREBIRD_HANDLE_INITIALIZER;
 	char const bl_item = isc_info_blob_total_length;
 	char bl_info[20];
 	unsigned short i;
@@ -367,7 +367,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					break;
 				case SQL_LONG:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = slprintf(*ptr, CHAR_BUF_LEN, "%ld", *(ISC_LONG*)var->sqldata);
+					*len = slprintf(*ptr, CHAR_BUF_LEN, "%d", *(ISC_LONG*)var->sqldata);
 					break;
 				case SQL_INT64:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
@@ -412,7 +412,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
-	isc_blob_handle h = NULL;
+	isc_blob_handle h = PDO_FIREBIRD_HANDLE_INITIALIZER;
 	zend_ulong put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 	int result = 1;
@@ -523,12 +523,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			}
 
 			if (Z_TYPE_P(parameter) == IS_RESOURCE) {
-				php_stream *stm;
+				php_stream *stm = NULL;
 
 				php_stream_from_zval_no_verify(stm, parameter);
 				if (stm) {
+					zend_string *mem =  php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
 					zval_ptr_dtor(parameter);
-					ZVAL_STR(parameter, php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0));
+					ZVAL_STR(parameter, mem ? mem : ZSTR_EMPTY_ALLOC());
 				} else {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 					return 0;

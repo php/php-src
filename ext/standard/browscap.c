@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,7 +73,7 @@ static void browscap_entry_dtor_persistent(zval *zvalue) /* {{{ */ {
 
 static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 {
-	int i, j=0;
+	size_t i, j=0;
 	char *t;
 	zend_string *res;
 	char *lc_pattern;
@@ -216,7 +216,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 
 static int browscap_read_file(char *filename, browser_data *browdata, int persistent) /* {{{ */
 {
-	zend_file_handle fh = {{0}};
+	zend_file_handle fh;
 
 	if (filename == NULL || filename[0] == '\0') {
 		return FAILURE;
@@ -232,6 +232,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 									 :browscap_entry_dtor_request),
 			persistent, 0);
 
+	memset(&fh, 0, sizeof(fh));
 	fh.handle.fp = VCWD_FOPEN(filename, "r");
 	fh.opened_path = NULL;
 	fh.free_filename = 0;

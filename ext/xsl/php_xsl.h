@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -113,16 +113,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xsl)
 	long  global_value;
 	char *global_string;
 ZEND_END_MODULE_GLOBALS(xsl)
-*/
-
-/* In every utility function you add that needs to use variables
-   in php_xsl_globals, call TSRM_FETCH(); after declaring other
-   variables used by that function, or better yet, pass in
-   after the last function argument and declare your utility function
-   with after the last declared argument.  Always refer to
-   the globals in your function as XSL_G(variable).  You are
-   encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
 */
 
 #ifdef ZTS

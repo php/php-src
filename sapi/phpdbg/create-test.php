@@ -5,7 +5,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,11 +98,11 @@ stream_set_blocking(STDIN, true);
 
 print "\n";
 if (!isset($name)) {
-	print "Specifiy the test description: ";
+	print "Specify the test description: ";
 	$desc = trim(fgets(STDIN));
 }
 while (!isset($testfile)) {
-	print "Specifiy the test file name (leave empty to write to stderr): ";
+	print "Specify the test file name (leave empty to write to stderr): ";
 	$testfile = trim(fgets(STDIN));
 	if ($testfile != "" && file_exists($testfile)) {
 		print "That file already exists. Type y or yes to overwrite: ";

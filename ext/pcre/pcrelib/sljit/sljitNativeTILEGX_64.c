@@ -35,21 +35,21 @@
 #define SIMM_16BIT_MIN (-0x8000)
 #define SIMM_17BIT_MAX (0xffff)
 #define SIMM_17BIT_MIN (-0x10000)
-#define SIMM_32BIT_MIN (-0x80000000)
 #define SIMM_32BIT_MAX (0x7fffffff)
-#define SIMM_48BIT_MIN (0x800000000000L)
+#define SIMM_32BIT_MIN (-0x7fffffff - 1)
 #define SIMM_48BIT_MAX (0x7fffffff0000L)
+#define SIMM_48BIT_MIN (-0x800000000000L)
 #define IMM16(imm) ((imm) & 0xffff)
 
 #define UIMM_16BIT_MAX (0xffff)
 
-#define TMP_REG1 (SLJIT_NO_REGISTERS + 1)
-#define TMP_REG2 (SLJIT_NO_REGISTERS + 2)
-#define TMP_REG3 (SLJIT_NO_REGISTERS + 3)
-#define ADDR_TMP (SLJIT_NO_REGISTERS + 4)
+#define TMP_REG1 (SLJIT_NUMBER_OF_REGISTERS + 2)
+#define TMP_REG2 (SLJIT_NUMBER_OF_REGISTERS + 3)
+#define TMP_REG3 (SLJIT_NUMBER_OF_REGISTERS + 4)
+#define ADDR_TMP (SLJIT_NUMBER_OF_REGISTERS + 5)
 #define PIC_ADDR_REG TMP_REG2
 
-static SLJIT_CONST sljit_ub reg_map[SLJIT_NO_REGISTERS + 5] = {
+static const sljit_u8 reg_map[SLJIT_NUMBER_OF_REGISTERS + 6] = {
 	63, 0, 1, 2, 3, 4, 30, 31, 32, 33, 34, 54, 5, 16, 6, 7
 };
 
@@ -58,11 +58,6 @@ static SLJIT_CONST sljit_ub reg_map[SLJIT_NO_REGISTERS + 5] = {
 #define TMP_REG2_mapped 16
 #define TMP_REG3_mapped 6
 #define ADDR_TMP_mapped 7
-#define SLJIT_SAVED_REG1_mapped 30
-#define SLJIT_SAVED_REG2_mapped 31
-#define SLJIT_SAVED_REG3_mapped 32
-#define SLJIT_SAVED_EREG1_mapped 33
-#define SLJIT_SAVED_EREG2_mapped 34
 
 /* Flags are keept in volatile registers. */
 #define EQUAL_FLAG 8
@@ -111,7 +106,7 @@ static SLJIT_CONST sljit_ub reg_map[SLJIT_NO_REGISTERS + 5] = {
  */
 #define CHECK_FLAGS(list) (!(flags & UNUSED_DEST) || (op & GET_FLAGS(~(list))))
 
-SLJIT_API_FUNC_ATTRIBUTE SLJIT_CONST char *sljit_get_platform_name(void)
+SLJIT_API_FUNC_ATTRIBUTE const char *sljit_get_platform_name(void)
 {
 	return "TileGX" SLJIT_CPUINFO;
 }
@@ -312,7 +307,7 @@ struct jit_instr {
 #define JOFF_X1(x) create_JumpOff_X1(x)
 #define BOFF_X1(x) create_BrOff_X1(x)
 
-static SLJIT_CONST tilegx_mnemonic data_transfer_insts[16] = {
+static const tilegx_mnemonic data_transfer_insts[16] = {
 	/* u w s */ TILEGX_OPC_ST   /* st */,
 	/* u w l */ TILEGX_OPC_LD   /* ld */,
 	/* u b s */ TILEGX_OPC_ST1  /* st1 */,
@@ -332,7 +327,7 @@ static SLJIT_CONST tilegx_mnemonic data_transfer_insts[16] = {
 };
 
 #ifdef TILEGX_JIT_DEBUG
-static sljit_si push_inst_debug(struct sljit_compiler *compiler, sljit_ins ins, int line)
+static sljit_s32 push_inst_debug(struct sljit_compiler *compiler, sljit_ins ins, int line)
 {
 	sljit_ins *ptr = (sljit_ins *)ensure_buf(compiler, sizeof(sljit_ins));
 	FAIL_IF(!ptr);
@@ -343,7 +338,7 @@ static sljit_si push_inst_debug(struct sljit_compiler *compiler, sljit_ins ins, 
 	return SLJIT_SUCCESS;
 }
 
-static sljit_si push_inst_nodebug(struct sljit_compiler *compiler, sljit_ins ins)
+static sljit_s32 push_inst_nodebug(struct sljit_compiler *compiler, sljit_ins ins)
 {
 	sljit_ins *ptr = (sljit_ins *)ensure_buf(compiler, sizeof(sljit_ins));
 	FAIL_IF(!ptr);
@@ -354,7 +349,7 @@ static sljit_si push_inst_nodebug(struct sljit_compiler *compiler, sljit_ins ins
 
 #define push_inst(a, b) push_inst_debug(a, b, __LINE__)
 #else
-static sljit_si push_inst(struct sljit_compiler *compiler, sljit_ins ins)
+static sljit_s32 push_inst(struct sljit_compiler *compiler, sljit_ins ins)
 {
 	sljit_ins *ptr = (sljit_ins *)ensure_buf(compiler, sizeof(sljit_ins));
 	FAIL_IF(!ptr);
@@ -398,6 +393,9 @@ static sljit_si push_inst(struct sljit_compiler *compiler, sljit_ins ins)
 
 #define SUB(dst, srca, srcb) \
 	push_3_buffer(compiler, TILEGX_OPC_SUB, dst, srca, srcb, __LINE__)
+
+#define MUL(dst, srca, srcb) \
+	push_3_buffer(compiler, TILEGX_OPC_MULX, dst, srca, srcb, __LINE__)
 
 #define NOR(dst, srca, srcb) \
 	push_3_buffer(compiler, TILEGX_OPC_NOR, dst, srca, srcb, __LINE__)
@@ -547,8 +545,8 @@ const struct Format* compute_format()
 
 	const struct Format* match = NULL;
 	const struct Format *b = NULL;
-	unsigned int i = 0;
-	for (i; i < sizeof formats / sizeof formats[0]; i++) {
+	unsigned int i;
+	for (i = 0; i < sizeof formats / sizeof formats[0]; i++) {
 		b = &formats[i];
 		if ((b->pipe_mask & compatible_pipes) == b->pipe_mask) {
 			match = b;
@@ -559,7 +557,7 @@ const struct Format* compute_format()
 	return match;
 }
 
-sljit_si assign_pipes()
+sljit_s32 assign_pipes()
 {
 	unsigned long output_registers = 0;
 	unsigned int i = 0;
@@ -623,9 +621,8 @@ tilegx_bundle_bits get_bundle_bit(struct jit_instr *inst)
 	return bits;
 }
 
-static sljit_si update_buffer(struct sljit_compiler *compiler)
+static sljit_s32 update_buffer(struct sljit_compiler *compiler)
 {
-	int count;
 	int i;
 	int orig_index = inst_buf_index;
 	struct jit_instr inst0 = inst_buf[0];
@@ -736,13 +733,15 @@ static sljit_si update_buffer(struct sljit_compiler *compiler)
 	SLJIT_ASSERT_STOP();
 }
 
-static sljit_si flush_buffer(struct sljit_compiler *compiler)
+static sljit_s32 flush_buffer(struct sljit_compiler *compiler)
 {
-	while (inst_buf_index != 0)
-		update_buffer(compiler);
+	while (inst_buf_index != 0) {
+		FAIL_IF(update_buffer(compiler));
+	}
+	return SLJIT_SUCCESS;
 }
 
-static sljit_si push_4_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int op1, int op2, int op3, int line)
+static sljit_s32 push_4_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int op1, int op2, int op3, int line)
 {
 	if (inst_buf_index == TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE)
 		FAIL_IF(update_buffer(compiler));
@@ -762,7 +761,7 @@ static sljit_si push_4_buffer(struct sljit_compiler *compiler, tilegx_mnemonic o
 	return SLJIT_SUCCESS;
 }
 
-static sljit_si push_3_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int op1, int op2, int line)
+static sljit_s32 push_3_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int op1, int op2, int line)
 {
 	if (inst_buf_index == TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE)
 		FAIL_IF(update_buffer(compiler));
@@ -787,6 +786,7 @@ static sljit_si push_3_buffer(struct sljit_compiler *compiler, tilegx_mnemonic o
 	case TILEGX_OPC_ADD:
 	case TILEGX_OPC_AND:
 	case TILEGX_OPC_SUB:
+	case TILEGX_OPC_MULX:
 	case TILEGX_OPC_OR:
 	case TILEGX_OPC_XOR:
 	case TILEGX_OPC_NOR:
@@ -822,7 +822,7 @@ static sljit_si push_3_buffer(struct sljit_compiler *compiler, tilegx_mnemonic o
 	return SLJIT_SUCCESS;
 }
 
-static sljit_si push_2_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int op1, int line)
+static sljit_s32 push_2_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int op1, int line)
 {
 	if (inst_buf_index == TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE)
 		FAIL_IF(update_buffer(compiler));
@@ -867,7 +867,7 @@ static sljit_si push_2_buffer(struct sljit_compiler *compiler, tilegx_mnemonic o
 	return SLJIT_SUCCESS;
 }
 
-static sljit_si push_0_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int line)
+static sljit_s32 push_0_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int line)
 {
 	if (inst_buf_index == TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE)
 		FAIL_IF(update_buffer(compiler));
@@ -883,7 +883,7 @@ static sljit_si push_0_buffer(struct sljit_compiler *compiler, tilegx_mnemonic o
 	return SLJIT_SUCCESS;
 }
 
-static sljit_si push_jr_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int line)
+static sljit_s32 push_jr_buffer(struct sljit_compiler *compiler, tilegx_mnemonic opc, int op0, int line)
 {
 	if (inst_buf_index == TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE)
 		FAIL_IF(update_buffer(compiler));
@@ -905,7 +905,6 @@ static SLJIT_INLINE sljit_ins * detect_jump_type(struct sljit_jump *jump, sljit_
 	sljit_sw diff;
 	sljit_uw target_addr;
 	sljit_ins *inst;
-	sljit_ins saved_inst;
 
 	if (jump->flags & SLJIT_REWRITABLE_JUMP)
 		return code_ptr;
@@ -1009,7 +1008,7 @@ SLJIT_API_FUNC_ATTRIBUTE void * sljit_generate_code(struct sljit_compiler *compi
 	struct sljit_const *const_;
 
 	CHECK_ERROR_PTR();
-	check_sljit_generate_code(compiler);
+	CHECK_PTR(check_sljit_generate_code(compiler));
 	reverse_buf(compiler);
 
 	code = (sljit_ins *)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_ins));
@@ -1118,7 +1117,7 @@ SLJIT_API_FUNC_ATTRIBUTE void * sljit_generate_code(struct sljit_compiler *compi
 	return code;
 }
 
-static sljit_si load_immediate(struct sljit_compiler *compiler, sljit_si dst_ar, sljit_sw imm)
+static sljit_s32 load_immediate(struct sljit_compiler *compiler, sljit_s32 dst_ar, sljit_sw imm)
 {
 
 	if (imm <= SIMM_16BIT_MAX && imm >= SIMM_16BIT_MIN)
@@ -1141,7 +1140,7 @@ static sljit_si load_immediate(struct sljit_compiler *compiler, sljit_si dst_ar,
 	return SHL16INSLI(dst_ar, dst_ar, imm);
 }
 
-static sljit_si emit_const(struct sljit_compiler *compiler, sljit_si dst_ar, sljit_sw imm, int flush)
+static sljit_s32 emit_const(struct sljit_compiler *compiler, sljit_s32 dst_ar, sljit_sw imm, int flush)
 {
 	/* Should *not* be optimized as load_immediate, as pcre relocation
 	   mechanism will match this fixed 4-instruction pattern. */
@@ -1156,7 +1155,7 @@ static sljit_si emit_const(struct sljit_compiler *compiler, sljit_si dst_ar, slj
 	return SHL16INSLI(dst_ar, dst_ar, imm);
 }
 
-static sljit_si emit_const_64(struct sljit_compiler *compiler, sljit_si dst_ar, sljit_sw imm, int flush)
+static sljit_s32 emit_const_64(struct sljit_compiler *compiler, sljit_s32 dst_ar, sljit_sw imm, int flush)
 {
 	/* Should *not* be optimized as load_immediate, as pcre relocation
 	   mechanism will match this fixed 4-instruction pattern. */
@@ -1173,18 +1172,18 @@ static sljit_si emit_const_64(struct sljit_compiler *compiler, sljit_si dst_ar, 
 	return SHL16INSLI(reg_map[dst_ar], reg_map[dst_ar], imm);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compiler,
-	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
-	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compiler,
+	sljit_s32 options, sljit_s32 args, sljit_s32 scratches, sljit_s32 saveds,
+	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
 {
 	sljit_ins base;
-	sljit_ins bundle = 0;
-
+	sljit_s32 i, tmp;
+ 
 	CHECK_ERROR();
-	check_sljit_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
+	CHECK(check_sljit_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size));
 	set_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
 
-	local_size += (saveds + 1) * sizeof(sljit_sw);
+	local_size += GET_SAVED_REGISTERS_SIZE(scratches, saveds, 1);
 	local_size = (local_size + 7) & ~7;
 	compiler->local_size = local_size;
 
@@ -1200,56 +1199,52 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compil
 		local_size = 0;
 	}
 
+	/* Save the return address. */
 	FAIL_IF(ADDLI(ADDR_TMP_mapped, base, local_size - 8));
 	FAIL_IF(ST_ADD(ADDR_TMP_mapped, RA, -8));
 
-	if (saveds >= 1)
-		FAIL_IF(ST_ADD(ADDR_TMP_mapped, SLJIT_SAVED_REG1_mapped, -8));
+	/* Save the S registers. */
+	tmp = saveds < SLJIT_NUMBER_OF_SAVED_REGISTERS ? (SLJIT_S0 + 1 - saveds) : SLJIT_FIRST_SAVED_REG;
+	for (i = SLJIT_S0; i >= tmp; i--) {
+		FAIL_IF(ST_ADD(ADDR_TMP_mapped, reg_map[i], -8));
+	}
 
-	if (saveds >= 2)
-		FAIL_IF(ST_ADD(ADDR_TMP_mapped, SLJIT_SAVED_REG2_mapped, -8));
+	/* Save the R registers that need to be reserved. */
+	for (i = scratches; i >= SLJIT_FIRST_SAVED_REG; i--) {
+		FAIL_IF(ST_ADD(ADDR_TMP_mapped, reg_map[i], -8));
+	}
 
-	if (saveds >= 3)
-		FAIL_IF(ST_ADD(ADDR_TMP_mapped, SLJIT_SAVED_REG3_mapped, -8));
-
-	if (saveds >= 4)
-		FAIL_IF(ST_ADD(ADDR_TMP_mapped, SLJIT_SAVED_EREG1_mapped, -8));
-
-	if (saveds >= 5)
-		FAIL_IF(ST_ADD(ADDR_TMP_mapped, SLJIT_SAVED_EREG2_mapped, -8));
-
-	if (args >= 1)
-		FAIL_IF(ADD(SLJIT_SAVED_REG1_mapped, 0, ZERO));
-
-	if (args >= 2)
-		FAIL_IF(ADD(SLJIT_SAVED_REG2_mapped, 1, ZERO));
-
-	if (args >= 3)
-		FAIL_IF(ADD(SLJIT_SAVED_REG3_mapped, 2, ZERO));
+	/* Move the arguments to S registers. */
+	for (i = 0; i < args; i++) {
+		FAIL_IF(ADD(reg_map[SLJIT_S0 - i], i, ZERO));
+	}
 
 	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_set_context(struct sljit_compiler *compiler,
-	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
-	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_set_context(struct sljit_compiler *compiler,
+	sljit_s32 options, sljit_s32 args, sljit_s32 scratches, sljit_s32 saveds,
+	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
 {
-	CHECK_ERROR_VOID();
-	check_sljit_set_context(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
+	CHECK_ERROR();
+	CHECK(check_sljit_set_context(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size));
 	set_set_context(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
 
-	local_size += (saveds + 1) * sizeof(sljit_sw);
+	local_size += GET_SAVED_REGISTERS_SIZE(scratches, saveds, 1);
 	compiler->local_size = (local_size + 7) & ~7;
+
+	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_return(struct sljit_compiler *compiler, sljit_si op, sljit_si src, sljit_sw srcw)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 src, sljit_sw srcw)
 {
-	sljit_si local_size;
+	sljit_s32 local_size;
 	sljit_ins base;
-	int addr_initialized = 0;
+	sljit_s32 i, tmp;
+	sljit_s32 saveds;
 
 	CHECK_ERROR();
-	check_sljit_emit_return(compiler, op, src, srcw);
+	CHECK(check_sljit_emit_return(compiler, op, src, srcw));
 
 	FAIL_IF(emit_mov_before_return(compiler, op, src, srcw));
 
@@ -1263,50 +1258,20 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_return(struct sljit_compiler *compi
 		local_size = 0;
 	}
 
+	/* Restore the return address. */
 	FAIL_IF(ADDLI(ADDR_TMP_mapped, base, local_size - 8));
-	FAIL_IF(LD(RA, ADDR_TMP_mapped));
+	FAIL_IF(LD_ADD(RA, ADDR_TMP_mapped, -8));
 
-	if (compiler->saveds >= 5) {
-		FAIL_IF(ADDLI(ADDR_TMP_mapped, base, local_size - 48));
-		addr_initialized = 1;
-
-		FAIL_IF(LD_ADD(SLJIT_SAVED_EREG2_mapped, ADDR_TMP_mapped, 8));
+	/* Restore the S registers. */
+	saveds = compiler->saveds;
+	tmp = saveds < SLJIT_NUMBER_OF_SAVED_REGISTERS ? (SLJIT_S0 + 1 - saveds) : SLJIT_FIRST_SAVED_REG;
+	for (i = SLJIT_S0; i >= tmp; i--) {
+		FAIL_IF(LD_ADD(reg_map[i], ADDR_TMP_mapped, -8));
 	}
 
-	if (compiler->saveds >= 4) {
-		if (addr_initialized == 0) {
-			FAIL_IF(ADDLI(ADDR_TMP_mapped, base, local_size - 40));
-			addr_initialized = 1;
-		}
-
-		FAIL_IF(LD_ADD(SLJIT_SAVED_EREG1_mapped, ADDR_TMP_mapped, 8));
-	}
-
-	if (compiler->saveds >= 3) {
-		if (addr_initialized == 0) {
-			FAIL_IF(ADDLI(ADDR_TMP_mapped, base, local_size - 32));
-			addr_initialized = 1;
-		}
-
-		FAIL_IF(LD_ADD(SLJIT_SAVED_REG3_mapped, ADDR_TMP_mapped, 8));
-	}
-
-	if (compiler->saveds >= 2) {
-		if (addr_initialized == 0) {
-			FAIL_IF(ADDLI(ADDR_TMP_mapped, base, local_size - 24));
-			addr_initialized = 1;
-		}
-
-		FAIL_IF(LD_ADD(SLJIT_SAVED_REG2_mapped, ADDR_TMP_mapped, 8));
-	}
-
-	if (compiler->saveds >= 1) {
-		if (addr_initialized == 0) {
-			FAIL_IF(ADDLI(ADDR_TMP_mapped, base, local_size - 16));
-			/* addr_initialized = 1; no need to initialize as it's the last one. */
-		}
-
-		FAIL_IF(LD_ADD(SLJIT_SAVED_REG1_mapped, ADDR_TMP_mapped, 8));
+	/* Restore the R registers that need to be reserved. */
+	for (i = compiler->scratches; i >= SLJIT_FIRST_SAVED_REG; i--) {
+		FAIL_IF(LD_ADD(reg_map[i], ADDR_TMP_mapped, -8));
 	}
 
 	if (compiler->local_size <= SIMM_16BIT_MAX)
@@ -1320,7 +1285,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_return(struct sljit_compiler *compi
 /* reg_ar is an absoulute register! */
 
 /* Can perform an operation using at most 1 instruction. */
-static sljit_si getput_arg_fast(struct sljit_compiler *compiler, sljit_si flags, sljit_si reg_ar, sljit_si arg, sljit_sw argw)
+static sljit_s32 getput_arg_fast(struct sljit_compiler *compiler, sljit_s32 flags, sljit_s32 reg_ar, sljit_s32 arg, sljit_sw argw)
 {
 	SLJIT_ASSERT(arg & SLJIT_MEM);
 
@@ -1346,7 +1311,7 @@ static sljit_si getput_arg_fast(struct sljit_compiler *compiler, sljit_si flags,
 /* See getput_arg below.
    Note: can_cache is called only for binary operators. Those
    operators always uses word arguments without write back. */
-static sljit_si can_cache(sljit_si arg, sljit_sw argw, sljit_si next_arg, sljit_sw next_argw)
+static sljit_s32 can_cache(sljit_s32 arg, sljit_sw argw, sljit_s32 next_arg, sljit_sw next_argw)
 {
 	SLJIT_ASSERT((arg & SLJIT_MEM) && (next_arg & SLJIT_MEM));
 
@@ -1372,9 +1337,9 @@ static sljit_si can_cache(sljit_si arg, sljit_sw argw, sljit_si next_arg, sljit_
 }
 
 /* Emit the necessary instructions. See can_cache above. */
-static sljit_si getput_arg(struct sljit_compiler *compiler, sljit_si flags, sljit_si reg_ar, sljit_si arg, sljit_sw argw, sljit_si next_arg, sljit_sw next_argw)
+static sljit_s32 getput_arg(struct sljit_compiler *compiler, sljit_s32 flags, sljit_s32 reg_ar, sljit_s32 arg, sljit_sw argw, sljit_s32 next_arg, sljit_sw next_argw)
 {
-	sljit_si tmp_ar, base;
+	sljit_s32 tmp_ar, base;
 
 	SLJIT_ASSERT(arg & SLJIT_MEM);
 	if (!(next_arg & SLJIT_MEM)) {
@@ -1565,7 +1530,7 @@ static sljit_si getput_arg(struct sljit_compiler *compiler, sljit_si flags, slji
 		return PB2(data_transfer_insts[flags & MEM_MASK], tmp_ar, reg_ar);
 }
 
-static SLJIT_INLINE sljit_si emit_op_mem(struct sljit_compiler *compiler, sljit_si flags, sljit_si reg_ar, sljit_si arg, sljit_sw argw)
+static SLJIT_INLINE sljit_s32 emit_op_mem(struct sljit_compiler *compiler, sljit_s32 flags, sljit_s32 reg_ar, sljit_s32 arg, sljit_sw argw)
 {
 	if (getput_arg_fast(compiler, flags, reg_ar, arg, argw))
 		return compiler->error;
@@ -1575,17 +1540,17 @@ static SLJIT_INLINE sljit_si emit_op_mem(struct sljit_compiler *compiler, sljit_
 	return getput_arg(compiler, flags, reg_ar, arg, argw, 0, 0);
 }
 
-static SLJIT_INLINE sljit_si emit_op_mem2(struct sljit_compiler *compiler, sljit_si flags, sljit_si reg, sljit_si arg1, sljit_sw arg1w, sljit_si arg2, sljit_sw arg2w)
+static SLJIT_INLINE sljit_s32 emit_op_mem2(struct sljit_compiler *compiler, sljit_s32 flags, sljit_s32 reg, sljit_s32 arg1, sljit_sw arg1w, sljit_s32 arg2, sljit_sw arg2w)
 {
 	if (getput_arg_fast(compiler, flags, reg, arg1, arg1w))
 		return compiler->error;
 	return getput_arg(compiler, flags, reg, arg1, arg1w, arg2, arg2w);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_enter(struct sljit_compiler *compiler, sljit_si dst, sljit_sw dstw)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw)
 {
 	CHECK_ERROR();
-	check_sljit_emit_fast_enter(compiler, dst, dstw);
+	CHECK(check_sljit_emit_fast_enter(compiler, dst, dstw));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
 
 	/* For UNUSED dst. Uncommon, but possible. */
@@ -1599,10 +1564,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_enter(struct sljit_compiler *c
 	return emit_op_mem(compiler, WORD_DATA, RA, dst, dstw);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_return(struct sljit_compiler *compiler, sljit_si src, sljit_sw srcw)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_return(struct sljit_compiler *compiler, sljit_s32 src, sljit_sw srcw)
 {
 	CHECK_ERROR();
-	check_sljit_emit_fast_return(compiler, src, srcw);
+	CHECK(check_sljit_emit_fast_return(compiler, src, srcw));
 	ADJUST_LOCAL_OFFSET(src, srcw);
 
 	if (FAST_IS_REG(src))
@@ -1617,9 +1582,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_return(struct sljit_compiler *
 	return JR(RA);
 }
 
-static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, sljit_si op, sljit_si flags, sljit_si dst, sljit_si src1, sljit_sw src2)
+static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 flags, sljit_s32 dst, sljit_s32 src1, sljit_sw src2)
 {
-	sljit_si overflow_ra = 0;
+	sljit_s32 overflow_ra = 0;
 
 	switch (GET_OPCODE(op)) {
 	case SLJIT_MOV:
@@ -1629,42 +1594,48 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 			return ADD(reg_map[dst], reg_map[src2], ZERO);
 		return SLJIT_SUCCESS;
 
-	case SLJIT_MOV_UI:
-	case SLJIT_MOV_SI:
+	case SLJIT_MOV_U32:
+	case SLJIT_MOV_S32:
 		SLJIT_ASSERT(src1 == TMP_REG1 && !(flags & SRC2_IMM));
 		if ((flags & (REG_DEST | REG2_SOURCE)) == (REG_DEST | REG2_SOURCE)) {
-			if (op == SLJIT_MOV_SI)
+			if (op == SLJIT_MOV_S32)
 				return BFEXTS(reg_map[dst], reg_map[src2], 0, 31);
 
-		return BFEXTU(reg_map[dst], reg_map[src2], 0, 31);
-		} else if (dst != src2)
-			SLJIT_ASSERT_STOP();
+			return BFEXTU(reg_map[dst], reg_map[src2], 0, 31);
+		} else if (dst != src2) {
+			SLJIT_ASSERT(src2 == 0);
+			return ADD(reg_map[dst], reg_map[src2], ZERO);
+		}
 
 		return SLJIT_SUCCESS;
 
-	case SLJIT_MOV_UB:
-	case SLJIT_MOV_SB:
+	case SLJIT_MOV_U8:
+	case SLJIT_MOV_S8:
 		SLJIT_ASSERT(src1 == TMP_REG1 && !(flags & SRC2_IMM));
 		if ((flags & (REG_DEST | REG2_SOURCE)) == (REG_DEST | REG2_SOURCE)) {
-			if (op == SLJIT_MOV_SB)
+			if (op == SLJIT_MOV_S8)
 				return BFEXTS(reg_map[dst], reg_map[src2], 0, 7);
 
 			return BFEXTU(reg_map[dst], reg_map[src2], 0, 7);
-		} else if (dst != src2)
-			SLJIT_ASSERT_STOP();
+		} else if (dst != src2) {
+			SLJIT_ASSERT(src2 == 0);
+			return ADD(reg_map[dst], reg_map[src2], ZERO);
+		}
 
 		return SLJIT_SUCCESS;
 
-	case SLJIT_MOV_UH:
-	case SLJIT_MOV_SH:
+	case SLJIT_MOV_U16:
+	case SLJIT_MOV_S16:
 		SLJIT_ASSERT(src1 == TMP_REG1 && !(flags & SRC2_IMM));
 		if ((flags & (REG_DEST | REG2_SOURCE)) == (REG_DEST | REG2_SOURCE)) {
-			if (op == SLJIT_MOV_SH)
+			if (op == SLJIT_MOV_S16)
 				return BFEXTS(reg_map[dst], reg_map[src2], 0, 15);
 
 			return BFEXTU(reg_map[dst], reg_map[src2], 0, 15);
-		} else if (dst != src2)
-			SLJIT_ASSERT_STOP();
+		} else if (dst != src2) {
+			SLJIT_ASSERT(src2 == 0);
+			return ADD(reg_map[dst], reg_map[src2], ZERO);
+		}
 
 		return SLJIT_SUCCESS;
 
@@ -1811,7 +1782,6 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 				else {
 					/* Rare ocasion. */
 					FAIL_IF(ADD(TMP_EREG2, reg_map[src1], ZERO));
-	
 					overflow_ra = TMP_EREG2;
 				}
 			}
@@ -1903,6 +1873,17 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 
 		return SLJIT_SUCCESS;
 
+	case SLJIT_MUL:
+		if (flags & SRC2_IMM) {
+			FAIL_IF(load_immediate(compiler, TMP_REG2_mapped, src2));
+			src2 = TMP_REG2;
+			flags &= ~SRC2_IMM;
+		}
+
+		FAIL_IF(MUL(reg_map[dst], reg_map[src1], reg_map[src2]));
+
+		return SLJIT_SUCCESS;
+
 #define EMIT_LOGICAL(op_imm, op_norm) \
 	if (flags & SRC2_IMM) { \
 		FAIL_IF(load_immediate(compiler, ADDR_TMP_mapped, src2)); \
@@ -1950,8 +1931,8 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 	} else { \
 		if (op & SLJIT_SET_E) \
 			FAIL_IF(push_3_buffer( \
-				compiler, op_imm, reg_map[dst], reg_map[src1], \
-				src2 & 0x3F, __LINE__)); \
+				compiler, op_norm, EQUAL_FLAG, reg_map[src1], \
+				reg_map[src2], __LINE__)); \
 		if (CHECK_FLAGS(SLJIT_SET_E)) \
 			FAIL_IF(push_3_buffer( \
 				compiler, op_norm, reg_map[dst], reg_map[src1], \
@@ -1975,16 +1956,16 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 	return SLJIT_SUCCESS;
 }
 
-static sljit_si emit_op(struct sljit_compiler *compiler, sljit_si op, sljit_si flags, sljit_si dst, sljit_sw dstw, sljit_si src1, sljit_sw src1w, sljit_si src2, sljit_sw src2w)
+static sljit_s32 emit_op(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 flags, sljit_s32 dst, sljit_sw dstw, sljit_s32 src1, sljit_sw src1w, sljit_s32 src2, sljit_sw src2w)
 {
 	/* arg1 goes to TMP_REG1 or src reg.
 	   arg2 goes to TMP_REG2, imm or src reg.
 	   TMP_REG3 can be used for caching.
 	   result goes to TMP_REG2, so put result can use TMP_REG1 and TMP_REG3. */
-	sljit_si dst_r = TMP_REG2;
-	sljit_si src1_r;
+	sljit_s32 dst_r = TMP_REG2;
+	sljit_s32 src1_r;
 	sljit_sw src2_r = 0;
-	sljit_si sugg_src2_r = TMP_REG2;
+	sljit_s32 sugg_src2_r = TMP_REG2;
 
 	if (!(flags & ALT_KEEP_CACHE)) {
 		compiler->cache_arg = 0;
@@ -1992,14 +1973,14 @@ static sljit_si emit_op(struct sljit_compiler *compiler, sljit_si op, sljit_si f
 	}
 
 	if (SLJIT_UNLIKELY(dst == SLJIT_UNUSED)) {
-		if (op >= SLJIT_MOV && op <= SLJIT_MOVU_SI && !(src2 & SLJIT_MEM))
+		if (op >= SLJIT_MOV && op <= SLJIT_MOVU_S32 && !(src2 & SLJIT_MEM))
 			return SLJIT_SUCCESS;
 		if (GET_FLAGS(op))
 			flags |= UNUSED_DEST;
 	} else if (FAST_IS_REG(dst)) {
 		dst_r = dst;
 		flags |= REG_DEST;
-		if (op >= SLJIT_MOV && op <= SLJIT_MOVU_SI)
+		if (op >= SLJIT_MOV && op <= SLJIT_MOVU_S32)
 			sugg_src2_r = dst_r;
 	} else if ((dst & SLJIT_MEM) && !getput_arg_fast(compiler, flags | ARG_TEST, TMP_REG1_mapped, dst, dstw))
 		flags |= SLOW_DEST;
@@ -2052,7 +2033,7 @@ static sljit_si emit_op(struct sljit_compiler *compiler, sljit_si op, sljit_si f
 	if (FAST_IS_REG(src2)) {
 		src2_r = src2;
 		flags |= REG2_SOURCE;
-		if (!(flags & REG_DEST) && op >= SLJIT_MOV && op <= SLJIT_MOVU_SI)
+		if (!(flags & REG_DEST) && op >= SLJIT_MOV && op <= SLJIT_MOVU_S32)
 			dst_r = src2_r;
 	} else if (src2 & SLJIT_IMM) {
 		if (!(flags & SRC2_IMM)) {
@@ -2061,7 +2042,7 @@ static sljit_si emit_op(struct sljit_compiler *compiler, sljit_si op, sljit_si f
 				src2_r = sugg_src2_r;
 			} else {
 				src2_r = 0;
-				if ((op >= SLJIT_MOV && op <= SLJIT_MOVU_SI) && (dst & SLJIT_MEM))
+				if ((op >= SLJIT_MOV && op <= SLJIT_MOVU_S32) && (dst & SLJIT_MEM))
 					dst_r = 0;
 			}
 		}
@@ -2101,69 +2082,64 @@ static sljit_si emit_op(struct sljit_compiler *compiler, sljit_si op, sljit_si f
 	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op_flags(struct sljit_compiler *compiler, sljit_si op, sljit_si dst, sljit_sw dstw, sljit_si src, sljit_sw srcw, sljit_si type)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 dst, sljit_sw dstw, sljit_s32 src, sljit_sw srcw, sljit_s32 type)
 {
-	sljit_si sugg_dst_ar, dst_ar;
-	sljit_si flags = GET_ALL_FLAGS(op);
+	sljit_s32 sugg_dst_ar, dst_ar;
+	sljit_s32 flags = GET_ALL_FLAGS(op);
+	sljit_s32 mem_type = (op & SLJIT_I32_OP) ? (INT_DATA | SIGNED_DATA) : WORD_DATA;
 
 	CHECK_ERROR();
-	check_sljit_emit_op_flags(compiler, op, dst, dstw, src, srcw, type);
+	CHECK(check_sljit_emit_op_flags(compiler, op, dst, dstw, src, srcw, type));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
 
 	if (dst == SLJIT_UNUSED)
 		return SLJIT_SUCCESS;
 
 	op = GET_OPCODE(op);
+	if (op == SLJIT_MOV_S32 || op == SLJIT_MOV_U32)
+		mem_type = INT_DATA | SIGNED_DATA;
 	sugg_dst_ar = reg_map[(op < SLJIT_ADD && FAST_IS_REG(dst)) ? dst : TMP_REG2];
 
 	compiler->cache_arg = 0;
 	compiler->cache_argw = 0;
 	if (op >= SLJIT_ADD && (src & SLJIT_MEM)) {
 		ADJUST_LOCAL_OFFSET(src, srcw);
-		FAIL_IF(emit_op_mem2(compiler, WORD_DATA | LOAD_DATA, TMP_REG1_mapped, src, srcw, dst, dstw));
+		FAIL_IF(emit_op_mem2(compiler, mem_type | LOAD_DATA, TMP_REG1_mapped, src, srcw, dst, dstw));
 		src = TMP_REG1;
 		srcw = 0;
 	}
 
-	switch (type) {
-	case SLJIT_C_EQUAL:
-	case SLJIT_C_NOT_EQUAL:
+	switch (type & 0xff) {
+	case SLJIT_EQUAL:
+	case SLJIT_NOT_EQUAL:
 		FAIL_IF(CMPLTUI(sugg_dst_ar, EQUAL_FLAG, 1));
 		dst_ar = sugg_dst_ar;
 		break;
-	case SLJIT_C_LESS:
-	case SLJIT_C_GREATER_EQUAL:
-	case SLJIT_C_FLOAT_LESS:
-	case SLJIT_C_FLOAT_GREATER_EQUAL:
+	case SLJIT_LESS:
+	case SLJIT_GREATER_EQUAL:
 		dst_ar = ULESS_FLAG;
 		break;
-	case SLJIT_C_GREATER:
-	case SLJIT_C_LESS_EQUAL:
-	case SLJIT_C_FLOAT_GREATER:
-	case SLJIT_C_FLOAT_LESS_EQUAL:
+	case SLJIT_GREATER:
+	case SLJIT_LESS_EQUAL:
 		dst_ar = UGREATER_FLAG;
 		break;
-	case SLJIT_C_SIG_LESS:
-	case SLJIT_C_SIG_GREATER_EQUAL:
+	case SLJIT_SIG_LESS:
+	case SLJIT_SIG_GREATER_EQUAL:
 		dst_ar = LESS_FLAG;
 		break;
-	case SLJIT_C_SIG_GREATER:
-	case SLJIT_C_SIG_LESS_EQUAL:
+	case SLJIT_SIG_GREATER:
+	case SLJIT_SIG_LESS_EQUAL:
 		dst_ar = GREATER_FLAG;
 		break;
-	case SLJIT_C_OVERFLOW:
-	case SLJIT_C_NOT_OVERFLOW:
+	case SLJIT_OVERFLOW:
+	case SLJIT_NOT_OVERFLOW:
 		dst_ar = OVERFLOW_FLAG;
 		break;
-	case SLJIT_C_MUL_OVERFLOW:
-	case SLJIT_C_MUL_NOT_OVERFLOW:
+	case SLJIT_MUL_OVERFLOW:
+	case SLJIT_MUL_NOT_OVERFLOW:
 		FAIL_IF(CMPLTUI(sugg_dst_ar, OVERFLOW_FLAG, 1));
 		dst_ar = sugg_dst_ar;
 		type ^= 0x1; /* Flip type bit for the XORI below. */
-		break;
-	case SLJIT_C_FLOAT_EQUAL:
-	case SLJIT_C_FLOAT_NOT_EQUAL:
-		dst_ar = EQUAL_FLAG;
 		break;
 
 	default:
@@ -2180,11 +2156,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op_flags(struct sljit_compiler *com
 	if (op >= SLJIT_ADD) {
 		if (TMP_REG2_mapped != dst_ar)
 			FAIL_IF(ADD(TMP_REG2_mapped, dst_ar, ZERO));
-		return emit_op(compiler, op | flags, CUMULATIVE_OP | LOGICAL_OP | IMM_OP | ALT_KEEP_CACHE, dst, dstw, src, srcw, TMP_REG2, 0);
+		return emit_op(compiler, op | flags, mem_type | CUMULATIVE_OP | LOGICAL_OP | IMM_OP | ALT_KEEP_CACHE, dst, dstw, src, srcw, TMP_REG2, 0);
 	}
 
 	if (dst & SLJIT_MEM)
-		return emit_op_mem(compiler, WORD_DATA, dst_ar, dst, dstw);
+		return emit_op_mem(compiler, mem_type, dst_ar, dst, dstw);
 
 	if (sugg_dst_ar != dst_ar)
 		return ADD(sugg_dst_ar, dst_ar, ZERO);
@@ -2192,9 +2168,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op_flags(struct sljit_compiler *com
 	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler, sljit_si op) {
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compiler, sljit_s32 op) {
 	CHECK_ERROR();
-	check_sljit_emit_op0(compiler, op);
+	CHECK(check_sljit_emit_op0(compiler, op));
 
 	op = GET_OPCODE(op);
 	switch (op) {
@@ -2204,20 +2180,22 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler
 	case SLJIT_BREAKPOINT:
 		return PI(BPT);
 
-	case SLJIT_UMUL:
-	case SLJIT_SMUL:
-	case SLJIT_UDIV:
-	case SLJIT_SDIV:
+	case SLJIT_LMUL_UW:
+	case SLJIT_LMUL_SW:
+	case SLJIT_DIVMOD_UW:
+	case SLJIT_DIVMOD_SW:
+	case SLJIT_DIV_UW:
+	case SLJIT_DIV_SW:
 		SLJIT_ASSERT_STOP();
 	}
 
 	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op1(struct sljit_compiler *compiler, sljit_si op, sljit_si dst, sljit_sw dstw, sljit_si src, sljit_sw srcw)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 dst, sljit_sw dstw, sljit_s32 src, sljit_sw srcw)
 {
 	CHECK_ERROR();
-	check_sljit_emit_op1(compiler, op, dst, dstw, src, srcw);
+	CHECK(check_sljit_emit_op1(compiler, op, dst, dstw, src, srcw));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
 	ADJUST_LOCAL_OFFSET(src, srcw);
 
@@ -2226,45 +2204,45 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op1(struct sljit_compiler *compiler
 	case SLJIT_MOV_P:
 		return emit_op(compiler, SLJIT_MOV, WORD_DATA, dst, dstw, TMP_REG1, 0, src, srcw);
 
-	case SLJIT_MOV_UI:
-		return emit_op(compiler, SLJIT_MOV_UI, INT_DATA, dst, dstw, TMP_REG1, 0, src, srcw);
+	case SLJIT_MOV_U32:
+		return emit_op(compiler, SLJIT_MOV_U32, INT_DATA, dst, dstw, TMP_REG1, 0, src, srcw);
 
-	case SLJIT_MOV_SI:
-		return emit_op(compiler, SLJIT_MOV_SI, INT_DATA | SIGNED_DATA, dst, dstw, TMP_REG1, 0, src, srcw);
+	case SLJIT_MOV_S32:
+		return emit_op(compiler, SLJIT_MOV_S32, INT_DATA | SIGNED_DATA, dst, dstw, TMP_REG1, 0, src, srcw);
 
-	case SLJIT_MOV_UB:
-		return emit_op(compiler, SLJIT_MOV_UB, BYTE_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_ub) srcw : srcw);
+	case SLJIT_MOV_U8:
+		return emit_op(compiler, SLJIT_MOV_U8, BYTE_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_u8) srcw : srcw);
 
-	case SLJIT_MOV_SB:
-		return emit_op(compiler, SLJIT_MOV_SB, BYTE_DATA | SIGNED_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_sb) srcw : srcw);
+	case SLJIT_MOV_S8:
+		return emit_op(compiler, SLJIT_MOV_S8, BYTE_DATA | SIGNED_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_s8) srcw : srcw);
 
-	case SLJIT_MOV_UH:
-		return emit_op(compiler, SLJIT_MOV_UH, HALF_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_uh) srcw : srcw);
+	case SLJIT_MOV_U16:
+		return emit_op(compiler, SLJIT_MOV_U16, HALF_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_u16) srcw : srcw);
 
-	case SLJIT_MOV_SH:
-		return emit_op(compiler, SLJIT_MOV_SH, HALF_DATA | SIGNED_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_sh) srcw : srcw);
+	case SLJIT_MOV_S16:
+		return emit_op(compiler, SLJIT_MOV_S16, HALF_DATA | SIGNED_DATA, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_s16) srcw : srcw);
 
 	case SLJIT_MOVU:
 	case SLJIT_MOVU_P:
 		return emit_op(compiler, SLJIT_MOV, WORD_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, srcw);
 
-	case SLJIT_MOVU_UI:
-		return emit_op(compiler, SLJIT_MOV_UI, INT_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, srcw);
+	case SLJIT_MOVU_U32:
+		return emit_op(compiler, SLJIT_MOV_U32, INT_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, srcw);
 
-	case SLJIT_MOVU_SI:
-		return emit_op(compiler, SLJIT_MOV_SI, INT_DATA | SIGNED_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, srcw);
+	case SLJIT_MOVU_S32:
+		return emit_op(compiler, SLJIT_MOV_S32, INT_DATA | SIGNED_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, srcw);
 
-	case SLJIT_MOVU_UB:
-		return emit_op(compiler, SLJIT_MOV_UB, BYTE_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_ub) srcw : srcw);
+	case SLJIT_MOVU_U8:
+		return emit_op(compiler, SLJIT_MOV_U8, BYTE_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_u8) srcw : srcw);
 
-	case SLJIT_MOVU_SB:
-		return emit_op(compiler, SLJIT_MOV_SB, BYTE_DATA | SIGNED_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_sb) srcw : srcw);
+	case SLJIT_MOVU_S8:
+		return emit_op(compiler, SLJIT_MOV_S8, BYTE_DATA | SIGNED_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_s8) srcw : srcw);
 
-	case SLJIT_MOVU_UH:
-		return emit_op(compiler, SLJIT_MOV_UH, HALF_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_uh) srcw : srcw);
+	case SLJIT_MOVU_U16:
+		return emit_op(compiler, SLJIT_MOV_U16, HALF_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_u16) srcw : srcw);
 
-	case SLJIT_MOVU_SH:
-		return emit_op(compiler, SLJIT_MOV_SH, HALF_DATA | SIGNED_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_sh) srcw : srcw);
+	case SLJIT_MOVU_S16:
+		return emit_op(compiler, SLJIT_MOV_S16, HALF_DATA | SIGNED_DATA | WRITE_BACK, dst, dstw, TMP_REG1, 0, src, (src & SLJIT_IMM) ? (sljit_s16) srcw : srcw);
 
 	case SLJIT_NOT:
 		return emit_op(compiler, op, 0, dst, dstw, TMP_REG1, 0, src, srcw);
@@ -2273,16 +2251,16 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op1(struct sljit_compiler *compiler
 		return emit_op(compiler, SLJIT_SUB | GET_ALL_FLAGS(op), IMM_OP, dst, dstw, SLJIT_IMM, 0, src, srcw);
 
 	case SLJIT_CLZ:
-		return emit_op(compiler, op, 0, dst, dstw, TMP_REG1, 0, src, srcw);
+		return emit_op(compiler, op, (op & SLJIT_I32_OP) ? INT_DATA : WORD_DATA, dst, dstw, TMP_REG1, 0, src, srcw);
 	}
 
 	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op2(struct sljit_compiler *compiler, sljit_si op, sljit_si dst, sljit_sw dstw, sljit_si src1, sljit_sw src1w, sljit_si src2, sljit_sw src2w)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 dst, sljit_sw dstw, sljit_s32 src1, sljit_sw src1w, sljit_s32 src2, sljit_sw src2w)
 {
 	CHECK_ERROR();
-	check_sljit_emit_op2(compiler, op, dst, dstw, src1, src1w, src2, src2w);
+	CHECK(check_sljit_emit_op2(compiler, op, dst, dstw, src1, src1w, src2, src2w));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
 	ADJUST_LOCAL_OFFSET(src1, src1w);
 	ADJUST_LOCAL_OFFSET(src2, src2w);
@@ -2309,7 +2287,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op2(struct sljit_compiler *compiler
 	case SLJIT_ASHR:
 		if (src2 & SLJIT_IMM)
 			src2w &= 0x3f;
-		if (op & SLJIT_INT_OP)
+		if (op & SLJIT_I32_OP)
 			src2w &= 0x1f;
 
 		return emit_op(compiler, op, IMM_OP, dst, dstw, src1, src1w, src2, src2w);
@@ -2325,7 +2303,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label * sljit_emit_label(struct sljit_comp
 	flush_buffer(compiler);
 
 	CHECK_ERROR_PTR();
-	check_sljit_emit_label(compiler);
+	CHECK_PTR(check_sljit_emit_label(compiler));
 
 	if (compiler->last_label && compiler->last_label->size == compiler->size)
 		return compiler->last_label;
@@ -2336,15 +2314,15 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label * sljit_emit_label(struct sljit_comp
 	return label;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_ijump(struct sljit_compiler *compiler, sljit_si type, sljit_si src, sljit_sw srcw)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_ijump(struct sljit_compiler *compiler, sljit_s32 type, sljit_s32 src, sljit_sw srcw)
 {
-	sljit_si src_r = TMP_REG2;
+	sljit_s32 src_r = TMP_REG2;
 	struct sljit_jump *jump = NULL;
 
 	flush_buffer(compiler);
 
 	CHECK_ERROR();
-	check_sljit_emit_ijump(compiler, type, src, srcw);
+	CHECK(check_sljit_emit_ijump(compiler, type, src, srcw));
 	ADJUST_LOCAL_OFFSET(src, srcw);
 
 	if (FAST_IS_REG(src)) {
@@ -2404,8 +2382,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_ijump(struct sljit_compiler *compil
 
 		return SLJIT_SUCCESS;
 
-	} else if (src & SLJIT_MEM)
+	} else if (src & SLJIT_MEM) {
 		FAIL_IF(emit_op(compiler, SLJIT_MOV, WORD_DATA, TMP_REG2, 0, TMP_REG1, 0, src, srcw));
+		flush_buffer(compiler);
+	}
 
 	FAIL_IF(JR_SOLO(reg_map[src_r]));
 
@@ -2423,16 +2403,16 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_ijump(struct sljit_compiler *compil
 	inst = BNEZ_X1 | SRCA_X1(src); \
 	flags = IS_COND;
 
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump * sljit_emit_jump(struct sljit_compiler *compiler, sljit_si type)
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump * sljit_emit_jump(struct sljit_compiler *compiler, sljit_s32 type)
 {
 	struct sljit_jump *jump;
 	sljit_ins inst;
-	sljit_si flags = 0;
+	sljit_s32 flags = 0;
 
 	flush_buffer(compiler);
 
 	CHECK_ERROR_PTR();
-	check_sljit_emit_jump(compiler, type);
+	CHECK_PTR(check_sljit_emit_jump(compiler, type));
 
 	jump = (struct sljit_jump *)ensure_abuf(compiler, sizeof(struct sljit_jump));
 	PTR_FAIL_IF(!jump);
@@ -2440,48 +2420,42 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump * sljit_emit_jump(struct sljit_compil
 	type &= 0xff;
 
 	switch (type) {
-	case SLJIT_C_EQUAL:
-	case SLJIT_C_FLOAT_NOT_EQUAL:
+	case SLJIT_EQUAL:
 		BR_NZ(EQUAL_FLAG);
 		break;
-	case SLJIT_C_NOT_EQUAL:
-	case SLJIT_C_FLOAT_EQUAL:
+	case SLJIT_NOT_EQUAL:
 		BR_Z(EQUAL_FLAG);
 		break;
-	case SLJIT_C_LESS:
-	case SLJIT_C_FLOAT_LESS:
+	case SLJIT_LESS:
 		BR_Z(ULESS_FLAG);
 		break;
-	case SLJIT_C_GREATER_EQUAL:
-	case SLJIT_C_FLOAT_GREATER_EQUAL:
+	case SLJIT_GREATER_EQUAL:
 		BR_NZ(ULESS_FLAG);
 		break;
-	case SLJIT_C_GREATER:
-	case SLJIT_C_FLOAT_GREATER:
+	case SLJIT_GREATER:
 		BR_Z(UGREATER_FLAG);
 		break;
-	case SLJIT_C_LESS_EQUAL:
-	case SLJIT_C_FLOAT_LESS_EQUAL:
+	case SLJIT_LESS_EQUAL:
 		BR_NZ(UGREATER_FLAG);
 		break;
-	case SLJIT_C_SIG_LESS:
+	case SLJIT_SIG_LESS:
 		BR_Z(LESS_FLAG);
 		break;
-	case SLJIT_C_SIG_GREATER_EQUAL:
+	case SLJIT_SIG_GREATER_EQUAL:
 		BR_NZ(LESS_FLAG);
 		break;
-	case SLJIT_C_SIG_GREATER:
+	case SLJIT_SIG_GREATER:
 		BR_Z(GREATER_FLAG);
 		break;
-	case SLJIT_C_SIG_LESS_EQUAL:
+	case SLJIT_SIG_LESS_EQUAL:
 		BR_NZ(GREATER_FLAG);
 		break;
-	case SLJIT_C_OVERFLOW:
-	case SLJIT_C_MUL_OVERFLOW:
+	case SLJIT_OVERFLOW:
+	case SLJIT_MUL_OVERFLOW:
 		BR_Z(OVERFLOW_FLAG);
 		break;
-	case SLJIT_C_NOT_OVERFLOW:
-	case SLJIT_C_MUL_NOT_OVERFLOW:
+	case SLJIT_NOT_OVERFLOW:
+	case SLJIT_MUL_NOT_OVERFLOW:
 		BR_NZ(OVERFLOW_FLAG);
 		break;
 	default:
@@ -2513,30 +2487,30 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump * sljit_emit_jump(struct sljit_compil
 	return jump;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_is_fpu_available(void)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_is_fpu_available(void)
 {
 	return 0;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop1(struct sljit_compiler *compiler, sljit_si op, sljit_si dst, sljit_sw dstw, sljit_si src, sljit_sw srcw)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop1(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 dst, sljit_sw dstw, sljit_s32 src, sljit_sw srcw)
 {
 	SLJIT_ASSERT_STOP();
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compiler, sljit_si op, sljit_si dst, sljit_sw dstw, sljit_si src1, sljit_sw src1w, sljit_si src2, sljit_sw src2w)
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop2(struct sljit_compiler *compiler, sljit_s32 op, sljit_s32 dst, sljit_sw dstw, sljit_s32 src1, sljit_sw src1w, sljit_s32 src2, sljit_sw src2w)
 {
 	SLJIT_ASSERT_STOP();
 }
 
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_const * sljit_emit_const(struct sljit_compiler *compiler, sljit_si dst, sljit_sw dstw, sljit_sw init_value)
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_const * sljit_emit_const(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw init_value)
 {
 	struct sljit_const *const_;
-	sljit_si reg;
+	sljit_s32 reg;
 
 	flush_buffer(compiler);
 
 	CHECK_ERROR_PTR();
-	check_sljit_emit_const(compiler, dst, dstw, init_value);
+	CHECK_PTR(check_sljit_emit_const(compiler, dst, dstw, init_value));
 	ADJUST_LOCAL_OFFSET(dst, dstw);
 
 	const_ = (struct sljit_const *)ensure_abuf(compiler, sizeof(struct sljit_const));
@@ -2572,3 +2546,18 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_consta
 	inst[3] = (inst[3] & ~(0xFFFFL << 43)) | ((new_constant & 0xFFFFL) << 43);
 	SLJIT_CACHE_FLUSH(inst, inst + 4);
 }
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_get_register_index(sljit_s32 reg)
+{
+	CHECK_REG_INDEX(check_sljit_get_register_index(reg));
+	return reg_map[reg];
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *compiler,
+	void *instruction, sljit_s32 size)
+{
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_op_custom(compiler, instruction, size));
+	return SLJIT_ERR_UNSUPPORTED;
+}
+

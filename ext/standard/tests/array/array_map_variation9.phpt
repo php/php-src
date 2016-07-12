@@ -29,7 +29,11 @@ echo "-- checking binary safe array with one parameter callback function --\n";
 var_dump( array_map('callback1', $arr1) );
 
 echo "-- checking binary safe array with two parameter callback function --\n";
-var_dump( array_map(b"callback2", $arr1) );
+try {
+	var_dump( array_map(b"callback2", $arr1) );
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 echo "Done";
 ?>
@@ -47,42 +51,5 @@ array(4) {
   string(5) "22.22"
 }
 -- checking binary safe array with two parameter callback function --
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-array(4) {
-  [0]=>
-  array(1) {
-    ["hello"]=>
-    NULL
-  }
-  [1]=>
-  array(1) {
-    ["world"]=>
-    NULL
-  }
-  [2]=>
-  array(1) {
-    [1]=>
-    NULL
-  }
-  [3]=>
-  array(1) {
-    ["22.22"]=>
-    NULL
-  }
-}
+Exception: Too few arguments to function callback2(), 1 passed and exactly 2 expected
 Done

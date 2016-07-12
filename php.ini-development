@@ -285,7 +285,10 @@ unserialize_callback_func =
 ; When floats & doubles are serialized store serialize_precision significant
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
-serialize_precision = 17
+; The value is also used for json_encode when encoding double values.
+; If -1 is used, then dtoa mode 0 is used which automatically select the best
+; precision.
+serialize_precision = -1
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
@@ -663,11 +666,10 @@ auto_prepend_file =
 ; http://php.net/auto-append-file
 auto_append_file =
 
-; By default, PHP will output a character encoding using
-; the Content-type: header.  To disable sending of the charset, simply
-; set it to be empty.
+; By default, PHP will output a media type using the Content-Type header. To
+; disable this, simply set it to be empty.
 ;
-; PHP's built-in default is text/html
+; PHP's built-in default media type is set to text/html.
 ; http://php.net/default-mimetype
 default_mimetype = "text/html"
 
@@ -867,6 +869,7 @@ default_socket_timeout = 60
 ;extension=php_bz2.dll
 ;extension=php_curl.dll
 ;extension=php_fileinfo.dll
+;extension=php_ftp.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
 ;extension=php_gmp.dll
@@ -955,10 +958,7 @@ cli_server.color = On
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
 ;intl.error_level = E_WARNING
-
-[sqlite]
-; http://php.net/sqlite.assoc-case
-;sqlite.assoc_case = 0
+;intl.use_exceptions = 0
 
 [sqlite3]
 ;sqlite3.extension_dir =
@@ -1516,6 +1516,10 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ; http://php.net/session.upload-progress.min-freq
 ;session.upload_progress.min_freq = "1"
 
+; Only write session data when session data is changed. Enabled by default.
+; http://php.net/session.lazy-write
+;session.lazy_write = On
+
 [Assertion]
 ; Switch whether to compile assertions at all (to have no overhead at run-time)
 ; -1: Do not compile at all
@@ -1828,6 +1832,21 @@ ldap.max_links = -1
 ; directive allows to manually fix the "Unable to reattach to base address"
 ; errors.
 ;opcache.mmap_base=
+
+; Enables and sets the second level cache directory.
+; It should improve performance when SHM memory is full, at server restart or
+; SHM reset. The default "" disables file based caching.
+;opcache.file_cache=
+
+; Enables or disables opcode caching in shared memory.
+;opcache.file_cache_only=0
+
+; Enables or disables checksum validation when script loaded from file cache.
+;opcache.file_cache_consistency_checks=1
+
+; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
+; This should improve performance, but requires appropriate OS configuration.
+;opcache.huge_code_pages=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

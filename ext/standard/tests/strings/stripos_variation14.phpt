@@ -1,7 +1,5 @@
 --TEST--
 Test stripos() function : usage variations - unexpected inputs for 'offset' argument
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
@@ -37,7 +35,7 @@ $offsets =  array (
   // float values
   1.5,
   -1.5,
-  1.5e10,
+  1.5e6,
   1.6E-10,
   .5,
 
@@ -91,8 +89,6 @@ echo "*** Done ***";
 -- Iteration 1 --
 int(6)
 -- Iteration 2 --
-
-Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 3 --
 

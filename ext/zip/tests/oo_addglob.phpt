@@ -8,6 +8,7 @@ w/Kenzo over the shoulder
 <?php
 /* $Id$ */
 if(!extension_loaded('zip')) die('skip');
+if(!defined("GLOB_BRACE")) die ('skip');
 ?>
 --FILE--
 <?php

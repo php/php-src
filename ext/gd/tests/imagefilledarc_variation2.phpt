@@ -25,4 +25,4 @@ ob_end_clean();
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-b8b572812b3c85678f6c38c4ecca7619
+cfad369fc6d863785d3c95b4b4788225

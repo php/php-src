@@ -16,7 +16,7 @@ prompt> handle first
 prompt> frame #0: {closure}() at %s:16
 frame #1: {main} at %s:20
 prompt> 3
-prompt> Uncaught Error in %s on line 16
+prompt> [Uncaught Error in %s on line 16]
 Error: Call to undefined function foo() in %s:16
 Stack trace:
 #0 %s(20): {closure}()

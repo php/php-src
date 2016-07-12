@@ -79,7 +79,7 @@ The next few rules are more of a technical nature::
       should be noted in both PHP-5.4/NEWS and PHP-5.5/NEWS but
       not master, which is not a public released version yet.
 
-   3. Do not commit multiple file and dump all messages in one commit. If you
+   3. Do not commit multiple files and dump all messages in one commit. If you
       modified several unrelated files, commit each group separately and
       provide a nice commit message for each one. See example below.
 

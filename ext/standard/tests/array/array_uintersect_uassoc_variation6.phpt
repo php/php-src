@@ -23,7 +23,11 @@ echo "\n-- comparison function taking too many parameters --\n";
 function too_many_parameters ($val1, $val2, $val3) {
   return 1;
 }
-var_dump(array_uintersect_uassoc($arr1, $arr2, 'too_many_parameters', 'too_many_parameters'));
+try {
+	var_dump(array_uintersect_uassoc($arr1, $arr2, 'too_many_parameters', 'too_many_parameters'));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 echo "\n-- comparison function taking too few parameters --\n";
 function too_few_parameters ($val1) {
@@ -41,14 +45,7 @@ array(0) {
 }
 
 -- comparison function taking too many parameters --
-
-Warning: Missing argument 3 for too_many_parameters() in %sarray_uintersect_uassoc_variation6.php on line %d
-
-Warning: Missing argument 3 for too_many_parameters() in %sarray_uintersect_uassoc_variation6.php on line %d
-
-Warning: Missing argument 3 for too_many_parameters() in %sarray_uintersect_uassoc_variation6.php on line %d
-array(0) {
-}
+Exception: Too few arguments to function too_many_parameters(), 2 passed and exactly 3 expected
 
 -- comparison function taking too few parameters --
 array(0) {

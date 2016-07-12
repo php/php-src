@@ -43,6 +43,12 @@ unlink($filename);
 --EXPECTF--
 Write some data to the file:
 array(9) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
@@ -55,12 +61,6 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%i) "%s.tmp"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
 }
 
 
@@ -68,6 +68,12 @@ Read a line of the file, causing data to be buffered:
 string(15) "a line of data
 "
 array(9) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
@@ -80,17 +86,17 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%i) "%s.tmp"
+}
+
+
+Read 20 bytes from the file:
+array(9) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
   bool(true)
   ["eof"]=>
   bool(false)
-}
-
-
-Read 20 bytes from the file:
-array(9) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
@@ -103,17 +109,17 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%i) "%s.tmp"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
 }
 
 
 Read entire file:
 array(9) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(true)
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
@@ -126,10 +132,4 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%i) "%s.tmp"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(true)
 }

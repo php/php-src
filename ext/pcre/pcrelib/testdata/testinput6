@@ -1496,4 +1496,70 @@
 /^s?c/mi8
     scat
 
+/[A-`]/i8
+    abcdefghijklmno
+
+/\C\X*QT/8
+    Ӆ\x0aT
+
+/[\pS#moq]/
+    =
+
+/[[:punct:]]/8W
+    \xc2\xb4
+    \x{b4} 
+
+/[[:^ascii:]]/8W
+    \x{100}
+    \x{200}
+    \x{300}
+    \x{37e}
+    a
+    9
+    g
+
+/[[:^ascii:]\w]/8W
+    a
+    9
+    g
+    \x{100}
+    \x{200}
+    \x{300}
+    \x{37e}
+
+/[\w[:^ascii:]]/8W
+    a
+    9
+    g
+    \x{100}
+    \x{200}
+    \x{300}
+    \x{37e}
+
+/[^[:ascii:]\W]/8W
+    a
+    9
+    g
+    \x{100}
+    \x{200}
+    \x{300}
+    \x{37e}
+
+/[[:^ascii:]a]/8W
+    a
+    9
+    g
+    \x{100}
+    \x{200}
+    \x{37e}
+
+/[^[:^ascii:]\d]/8W
+    a
+    ~
+    0
+    \a
+    \x{7f}
+    \x{389}
+    \x{20ac}
+
 /-- End of testinput6 --/

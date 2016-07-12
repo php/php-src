@@ -112,5 +112,6 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *ret
 }
 
 /* }}} */
+
 #endif /* HAVE_DTRACE */
 

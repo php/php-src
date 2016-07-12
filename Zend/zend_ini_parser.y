@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -106,16 +106,19 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		zend_string *str = zval_get_string(op1);
-		ZVAL_PSTRINGL(op1, str->val, str->len);
+		/* ZEND_ASSERT(!Z_REFCOUNTED_P(op1)); */
+		ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
 		zend_string_release(str);
 	}
-
 	op1_len = (int)Z_STRLEN_P(op1);
+	
+	if (Z_TYPE_P(op2) != IS_STRING) {
+		convert_to_string(op2);
+	}
 	length = op1_len + (int)Z_STRLEN_P(op2);
 
 	ZVAL_NEW_STR(result, zend_string_extend(Z_STR_P(op1), length, 1));
-	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-	Z_STRVAL_P(result)[length] = 0;
+	memcpy(Z_STRVAL_P(result) + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2) + 1);
 }
 /* }}} */
 
@@ -129,11 +132,10 @@ static void zend_ini_get_constant(zval *result, zval *name)
 	if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
 		   	&& (c = zend_get_constant(Z_STR_P(name))) != 0) {
 		if (Z_TYPE_P(c) != IS_STRING) {
-			ZVAL_COPY_VALUE(&tmp, c);
+			ZVAL_DUP(&tmp, c);
 			if (Z_OPT_CONSTANT(tmp)) {
-				zval_update_constant_ex(&tmp, 1, NULL);
+				zval_update_constant_ex(&tmp, NULL);
 			}
-			zval_opt_copy_ctor(&tmp);
 			convert_to_string(&tmp);
 			c = &tmp;
 		}

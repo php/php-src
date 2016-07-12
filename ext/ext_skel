@@ -299,12 +299,12 @@ if test -n "$proto"; then
     warning="
 NOTE! Because some arguments to functions were resources, the code generated
 cannot yet be compiled without editing. Please consider this to be step 4.5
-in the instructions above. 
+in the instructions above.
 "
   fi
 fi
 
-find . -type f | xargs chmod 644 
+find . -type f | xargs chmod 644
 find . -type d | xargs chmod 755
 fi
 

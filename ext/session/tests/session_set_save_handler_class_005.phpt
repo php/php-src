@@ -33,7 +33,7 @@ class MySession6 extends SessionHandler {
 
 $handler = new MySession6;
 session_set_save_handler($handler);
-session_start();
+var_dump(session_start());
 
 var_dump(session_id(), ini_get('session.save_handler'), $_SESSION);
 
@@ -45,13 +45,12 @@ session_unset();
 *** Testing session_set_save_handler() : incomplete implementation ***
 
 Warning: SessionHandler::read(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
+
+Warning: SessionHandler::close(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
+
+Warning: session_start(): Failed to read session data: user (%s) in %ssession_set_save_handler_class_005.php on line %d
+bool(false)
 string(%d) "%s"
 string(4) "user"
 array(0) {
 }
-
-Warning: SessionHandler::write(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
-
-Warning: session_write_close(): Failed to write session data %s in %ssession_set_save_handler_class_005.php on line %d
-
-Warning: SessionHandler::close(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d

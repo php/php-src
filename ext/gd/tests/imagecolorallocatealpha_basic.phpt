@@ -26,5 +26,5 @@ var_dump(md5(base64_encode($imgsrc)));
 var_dump($corA);
 ?>
 --EXPECT--
-string(32) "b856a0b1a15efe0f79551ebbb5651fe8"
+string(32) "2a6424e4cb4e1b7391dfff74bf136bde"
 int(842163455)

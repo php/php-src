@@ -1,5 +1,11 @@
 --TEST--
 Bug #70219 Use after free vulnerability in session deserializer
+--SKIPIF--
+<?php
+if (!extension_loaded("session")) {
+    die("skip Session module not loaded");
+}
+?>
 --FILE--
 <?php
 ini_set('session.serialize_handler', 'php_serialize');

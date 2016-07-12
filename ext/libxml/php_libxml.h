@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,7 @@ typedef struct _php_libxml_node_object {
 
 
 static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *obj) {
-	return (php_libxml_node_object *)((char*)(obj) - XtOffsetOf(php_libxml_node_object, std));
+	return (php_libxml_node_object *)((char*)(obj) - obj->handlers->offset);
 }
 
 #define Z_LIBXML_NODE_P(zv) php_libxml_node_fetch_object(Z_OBJ_P((zv)))
@@ -118,7 +118,7 @@ PHP_LIBXML_API void php_libxml_shutdown(void);
 #define LIBXML(v) ZEND_MODULE_GLOBALS_ACCESSOR(libxml, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_LIBXML)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #else /* HAVE_LIBXML */

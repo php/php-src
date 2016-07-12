@@ -25,7 +25,7 @@ static float fpm_scoreboard_tick;
 int fpm_scoreboard_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
-	int i;
+	unsigned int i;
 
 #ifdef HAVE_TIMES
 #if (defined(HAVE_SYSCONF) && defined(_SC_CLK_TCK))
@@ -173,7 +173,7 @@ struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get(struct fpm_scoreboard_s *s
 		child_index = fpm_scoreboard_i;
 	}
 
-	if (child_index < 0 || child_index >= scoreboard->nprocs) {
+	if (child_index < 0 || (unsigned int)child_index >= scoreboard->nprocs) {
 		return NULL;
 	}
 
@@ -233,7 +233,7 @@ void fpm_scoreboard_proc_release(struct fpm_scoreboard_proc_s *proc) /* {{{ */
 
 void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 {
-	int i;
+	unsigned int i;
 
 	if (!scoreboard) {
 		zlog(ZLOG_ERROR, "**scoreboard is NULL");
@@ -270,7 +270,7 @@ void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_ind
 		return;
 	}
 
-	if (child_index < 0 || child_index >= scoreboard->nprocs) {
+	if (child_index < 0 || (unsigned int)child_index >= scoreboard->nprocs) {
 		return;
 	}
 
@@ -292,7 +292,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 	}
 
 	/* first try the slot which is supposed to be free */
-	if (scoreboard->free_proc >= 0 && scoreboard->free_proc < scoreboard->nprocs) {
+	if (scoreboard->free_proc >= 0 && (unsigned int)scoreboard->free_proc < scoreboard->nprocs) {
 		if (scoreboard->procs[scoreboard->free_proc] && !scoreboard->procs[scoreboard->free_proc]->used) {
 			i = scoreboard->free_proc;
 		}
@@ -300,7 +300,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 
 	if (i < 0) { /* the supposed free slot is not, let's search for a free slot */
 		zlog(ZLOG_DEBUG, "[pool %s] the proc->free_slot was not free. Let's search", scoreboard->pool);
-		for (i = 0; i < scoreboard->nprocs; i++) {
+		for (i = 0; i < (int)scoreboard->nprocs; i++) {
 			if (scoreboard->procs[i] && !scoreboard->procs[i]->used) { /* found */
 				break;
 			}
@@ -308,7 +308,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 	}
 
 	/* no free slot */
-	if (i < 0 || i >= scoreboard->nprocs) {
+	if (i < 0 || i >= (int)scoreboard->nprocs) {
 		zlog(ZLOG_ERROR, "[pool %s] no free scoreboard slot", scoreboard->pool);
 		return -1;
 	}
@@ -317,7 +317,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 	*child_index = i;
 
 	/* supposed next slot is free */
-	if (i + 1 >= scoreboard->nprocs) {
+	if (i + 1 >= (int)scoreboard->nprocs) {
 		scoreboard->free_proc = 0;
 	} else {
 		scoreboard->free_proc = i + 1;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2008-2009 The PHP Group                                |
+   | Copyright (c) 2008-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,6 +145,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 	type = pRec->wType;
 	ttl = pRec->dwTtl;
+
+	ZVAL_UNDEF(subarray);
 
 	if (type_to_fetch != DNS_TYPE_ANY && type != type_to_fetch) {
 		return;

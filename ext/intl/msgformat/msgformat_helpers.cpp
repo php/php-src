@@ -264,6 +264,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 				type = Formattable::kDouble;
 			} else if (argType == UMSGPAT_ARG_TYPE_SELECT) {
 				type = Formattable::kString;
+#if U_ICU_VERSION_MAJOR_NUM >= 50
+			} else if (argType == UMSGPAT_ARG_TYPE_SELECTORDINAL) {
+				type = Formattable::kDouble;
+#endif
 			} else {
 				type = Formattable::kString;
 			}

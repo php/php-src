@@ -118,7 +118,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 ])
 
 PHP_MAJOR_VERSION=7
-PHP_MINOR_VERSION=0
+PHP_MINOR_VERSION=1
 PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
@@ -577,6 +577,12 @@ PHP_CHECK_STDINT_TYPES
 
 dnl Check __builtin_expect
 PHP_CHECK_BUILTIN_EXPECT
+dnl Check __builtin_clz
+PHP_CHECK_BUILTIN_CLZ
+dnl Check __builtin_ctzl
+PHP_CHECK_BUILTIN_CTZL
+dnl Check __builtin_ctzll
+PHP_CHECK_BUILTIN_CTZLL
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
