@@ -259,12 +259,6 @@ static int php_session_decode(zend_string *data) /* {{{ */
 
 static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
-enum {
-	PS_HASH_FUNC_MD5,
-	PS_HASH_FUNC_SHA1,
-	PS_HASH_FUNC_OTHER
-};
-
 /* returns a pointer to the byte after the last valid character in out */
 static size_t bin_to_readable(unsigned char *in, size_t inlen, char *out, char nbits) /* {{{ */
 {
