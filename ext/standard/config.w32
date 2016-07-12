@@ -1,6 +1,18 @@
 // vim:ft=javascript
 // $Id$
 
+ARG_WITH("argon2", "Argon2 support", "no");
+
+if (PHP_ARGON2 != "no") {
+	if (CHECK_LIB("Argon2Ref.lib", "argon2", PHP_ARGON2)
+	&& CHECK_HEADER_ADD_INCLUDE("argon2.h", "CFLAGS_ARGON2")) {
+		AC_DEFINE('HAVE_ARGON2LIB', 1);
+		EXTENSION("argon2", null, false);
+	} else {
+		WARNING("Argon2 not enabled; libaries and headers not found");
+	}
+}
+
 ARG_WITH("config-file-scan-dir", "Dir to check for additional php ini files", "");
 
 AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
