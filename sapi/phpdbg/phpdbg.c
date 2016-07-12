@@ -1738,7 +1738,7 @@ phpdbg_main:
 		/* setup io here */
 		if (remote) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
-			signal(SIGPIPE, SIG_IGN);
+			zend_signal(SIGPIPE, SIG_IGN);
 		}
 		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
@@ -1968,6 +1968,10 @@ phpdbg_out:
 			zend_objects_store_mark_destructed(&EG(objects_store));
 		}
 
+		zend_try {
+			php_request_shutdown(NULL);
+		} zend_end_try();
+
 		/* backup globals when cleaning */
 		if ((cleaning > 0 || remote) && !quit_immediately) {
 			settings = calloc(1, sizeof(zend_phpdbg_globals));
@@ -1995,10 +1999,6 @@ phpdbg_out:
 			}
 		}
 
-		zend_try {
-			php_request_shutdown(NULL);
-		} zend_end_try();
-
 		if (exit_status == 0) {
 			exit_status = EG(exit_status);
 		}
@@ -2020,6 +2020,7 @@ phpdbg_out:
 		} zend_end_try();
 
 #ifndef _WIN32
+		/* force override (no zend_signals) to prevent crashes due to signal recursion in SIGSEGV/SIGBUS handlers */
 		signal(SIGSEGV, SIG_DFL);
 		signal(SIGBUS, SIG_DFL);
 
@@ -2037,8 +2038,6 @@ phpdbg_out:
 	if (sapi_name) {
 		free(sapi_name);
 	}
-
-	zend_signal_shutdown();
 
 #ifdef ZTS
 	tsrm_shutdown();
