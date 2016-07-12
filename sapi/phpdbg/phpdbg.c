@@ -18,10 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-#if !defined(ZEND_SIGNALS) || defined(_WIN32)
-# include <signal.h>
-#endif
-
 #include "phpdbg.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_bp.h"
@@ -1644,6 +1640,10 @@ phpdbg_main:
 		void (*_free)(void*);
 		void* (*_realloc)(void*, size_t);
 
+		zend_try {
+			zend_signal_activate();
+		} zend_end_try();
+
 		/* setup remote server if necessary */
 		if (cleaning <= 0 && listen > 0) {
 			server = phpdbg_open_socket(address, listen);
@@ -1652,7 +1652,7 @@ phpdbg_main:
 			}
 
 #ifndef _WIN32
-			sigaction(SIGIO, &sigio_struct, NULL);
+			zend_sigaction(SIGIO, &sigio_struct, NULL);
 #endif
 
 			/* set remote flag to stop service shutting down upon quit */
@@ -1660,7 +1660,7 @@ phpdbg_main:
 #ifndef _WIN32
 		} else {
 
-			signal(SIGHUP, phpdbg_sighup_handler);
+			zend_signal(SIGHUP, phpdbg_sighup_handler);
 #endif
 		}
 
@@ -1682,11 +1682,6 @@ phpdbg_main:
 			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
 		}
 
-#if defined(ZEND_SIGNALS) && !defined(_WIN32)
-		zend_try {
-			zend_signal_activate();
-		} zend_end_try();
-#endif
 
 		phpdbg_init_list();
 
@@ -1726,12 +1721,9 @@ phpdbg_main:
 			return 1;
 		}
 
-#if defined(ZEND_SIGNALS) && !defined(_WIN32)
+#ifndef _WIN32
 		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
 		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
-#elif !defined(_WIN32)
-		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
-		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
 		/* do not install sigint handlers for remote consoles */
@@ -1739,18 +1731,13 @@ phpdbg_main:
 #ifndef _WIN32
 		if (listen < 0) {
 #endif
-#if defined(ZEND_SIGNALS) && !defined(_WIN32)
 			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler); } zend_end_try();
-#else
-			signal(SIGINT, phpdbg_sigint_handler);
-#endif
 #ifndef _WIN32
 		}
 
 		/* setup io here */
 		if (remote) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
-
 			signal(SIGPIPE, SIG_IGN);
 		}
 		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
