@@ -12,7 +12,7 @@ PHP                                                                        NEWS
     phpize on Windows). (Yuji Uchiyama)
 
 - COM:
-  Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
+  . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
 
 - Date:
   . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
