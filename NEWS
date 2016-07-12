@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0beta1
 
 - Core:
+  . Fixed bug #72581 (previous property undefined in Exception after
+    deserialization). (Laruence)
   . Fixed bug #72543 (Different references behavior comparing to PHP 5)
     (Laruence, Dmitry, Nikita)
   . Fixed bug #71539 (Memory error on $arr[$a] =& $arr[$b] if RHS rehashes)
