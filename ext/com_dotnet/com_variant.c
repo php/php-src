@@ -100,7 +100,12 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 {
 	OLECHAR *olestring;
 	php_com_dotnet_object *obj;
-	zend_uchar ztype = (z == NULL ? IS_NULL : Z_TYPE_P(z));
+	zend_uchar ztype = IS_NULL;
+
+	if (z) {
+		ZVAL_DEREF(z);
+		ztype = Z_TYPE_P(z);
+	}
 
 	switch (ztype) {
 		case IS_NULL:
