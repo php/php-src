@@ -158,14 +158,11 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		len = uidna_nameToUnicodeUTF8(uts46, domain, (int32_t)domain_len,
 				buffer, buffer_capac, &info, &status);
 	}
-	if (php_intl_idn_check_status(status, "failed to convert name",
+	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name",
 			mode TSRMLS_CC) == FAILURE) {
 		uidna_close(uts46);
 		efree(buffer);
 		RETURN_FALSE;
-	}
-	if (len >= 255) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "ICU returned an unexpected length");
 	}
 
 	buffer[len] = '\0';
