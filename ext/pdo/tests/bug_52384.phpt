@@ -22,13 +22,7 @@ $n = null;
 $lob = str_repeat('a',1000);
 $dob = '1978-10-17';
 
-$errmode = $db->getAttribute(PDO::ATTR_ERRMODE);
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-$db->exec("DROP table bug_52384");
-$db->setAttribute(PDO::ATTR_ERRMODE, $errmode);
-$db->exec("CREATE table bug_52384 (calories int, colour varchar(64), tf int, n int, lob varchar(255), dob varchar(255))");
-
-$sth = $db->prepare('SELECT 1 FROM bug_52384 WHERE calories=:calories AND colour=:colour AND tf=:tf AND n=:n AND lob=:lob AND dob=:dob');
+$sth = $db->prepare('SELECT 1 WHERE 1');
 $sth->bindParam(':calories', $calories, PDO::PARAM_INT);
 $sth->bindValue(':colour', $colour, PDO::PARAM_STR);
 $sth->bindValue(':tf', $tf, PDO::PARAM_BOOL);
@@ -40,7 +34,7 @@ $sth->debugDumpParams();
 unset($dbh);
 ?>
 --EXPECT--
-SQL: [113] SELECT 1 FROM bug_52384 WHERE calories=:calories AND colour=:colour AND tf=:tf AND n=:n AND lob=:lob AND dob=:dob
+SQL: [16] SELECT 1 WHERE 1
 Params:  6
 Key: Name: [9] :calories
 paramno=-1
