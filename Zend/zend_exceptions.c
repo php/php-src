@@ -291,9 +291,8 @@ ZEND_METHOD(exception, __construct)
 /* {{{ proto Exception::__wakeup()
    Exception unserialize checks */
 #define CHECK_EXC_TYPE(name, type) \
-	ZVAL_UNDEF(&value); \
 	pvalue = zend_read_property(i_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &value); \
-	if(Z_TYPE_P(pvalue) != IS_UNDEF && Z_TYPE_P(pvalue) != type) { \
+	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
 		zval tmp; \
 		ZVAL_STRINGL(&tmp, name, sizeof(name) - 1); \
 		Z_OBJ_HANDLER_P(object, unset_property)(object, &tmp, NULL); \
