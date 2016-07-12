@@ -571,7 +571,7 @@ if test "$PHP_ARGON2" != "no"; then
     AC_MSG_ERROR([Please ensure the argon2 header and library are installed])
   fi
 
-  PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR)
+  PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
   PHP_ADD_INCLUDE($ARGON2_DIR/include)
 
   AC_CHECK_LIB(argon2, argon2_hash, [
