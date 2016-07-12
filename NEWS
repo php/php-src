@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug #72575 (using --allow-to-run-as-root should ignore missing user).
     (gooh)
 
+- Intl:
+  . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
+    names). (cmb)
+
 - Mbstring:
   . Deprecated mb_ereg_replace() eval option. (Rouven Weßling, cmb)
 
