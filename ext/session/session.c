@@ -312,7 +312,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	unsigned char rbuf[PS_MAX_SID_LENGTH + PS_EXTRA_RAND_BYTES];
 	zend_string *outid;
 
-	/* Read additiona PS_EXTRA_RAND_BYTES just in case CSPRNG is not safe enough */
+	/* Read additional PS_EXTRA_RAND_BYTES just in case CSPRNG is not safe enough */
 	if (php_random_bytes_throw(rbuf, PS(sid_length) + PS_EXTRA_RAND_BYTES) == FAILURE) {
 		return NULL;
 	}
@@ -660,7 +660,7 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 		return SUCCESS;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_length' must between 32 and 256.");
+	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_length' must between 22 and 256.");
 	return FAILURE;
 }
 /* }}} */
