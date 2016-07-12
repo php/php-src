@@ -1570,7 +1570,7 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 			   session is stop/start/regenerated. However,
 			   php_url_scanner_reset_vars() resets all vars
 			   including other URL rewrites set by elsewhere. */
-			/* php_url_scanner_reset_vars(); */
+			php_url_scanner_reset_vars(); /* To merge official repo, this line should be commented out */
 			php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
 		}
 	}

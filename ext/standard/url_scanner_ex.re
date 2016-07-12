@@ -133,7 +133,11 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		return;
 	}
 
-	if (!url_parts->path) {
+	/*
+	 * When URL does not have path and query string add "/?".
+	 * i.e. If URL is only "?foo=bar", should not add "/?".
+	 */
+	if (!url_parts->path && !url_parts->query) {
 		/* URL is http://php.net or like */
 		smart_str_append_smart_str(dest, url);
 		smart_str_appendc(dest, '/');
