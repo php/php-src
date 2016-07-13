@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     deserialization). (Laruence)
   . Fixed bug #72543 (Different references behavior comparing to PHP 5)
     (Laruence, Dmitry, Nikita)
+  . Fixed bug #72347 (VERIFY_RETURN type casts visible in finally). (Dmitry)
+  . Fixed bug #72216 (Return by reference with finally is not memory safe).
+    (Dmitry)
+  . Fixed bug #72215 (Wrong return value if var modified in finally). (Dmitry)
   . Fixed bug #71539 (Memory error on $arr[$a] =& $arr[$b] if RHS rehashes)
     (Dmitry, Nikita)
   . Added new constant PHP_FD_SETSIZE. (cmb)

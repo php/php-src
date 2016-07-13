@@ -4085,6 +4085,38 @@ static int zend_handle_loops_and_finally(znode *return_value) /* {{{ */
 }
 /* }}} */
 
+static int zend_has_finally_ex(zend_long depth) /* {{{ */
+{
+	zend_loop_var *base;
+	zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
+
+	if (!loop_var) {
+		return 0;
+	}
+	base = zend_stack_base(&CG(loop_var_stack));
+	for (; loop_var >= base; loop_var--) {
+		if (loop_var->opcode == ZEND_FAST_CALL) {
+			return 1;
+		} else if (loop_var->opcode == ZEND_DISCARD_EXCEPTION) {
+		} else if (loop_var->opcode == ZEND_RETURN) {
+			/* Stack separator */
+			return 0;
+		} else if (depth <= 1) {
+			return 0;
+		} else {
+			depth--;
+	    }
+	}
+	return 0;
+}
+/* }}} */
+
+static int zend_has_finally(void) /* {{{ */
+{
+	return zend_has_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
+}
+/* }}} */
+
 void zend_compile_return(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -4100,6 +4132,17 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
+	}
+
+	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)
+	 && (expr_node.op_type == IS_CV || (by_ref && expr_node.op_type == IS_VAR))
+	 && zend_has_finally()) {
+		/* Copy return value into temporary VAR to avoid modification in finally code */
+		if (by_ref) {
+			zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
+		} else {
+			zend_emit_op_tmp(&expr_node, ZEND_QM_ASSIGN, &expr_node, NULL);
+		}
 	}
 
 	/* Generator return types are handled separately */
