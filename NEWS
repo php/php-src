@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
     without placeholders). (Matteo)
 
+- SimpleXML:
+  . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
+    element). (Laruence)
+
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
 
