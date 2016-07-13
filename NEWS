@@ -60,6 +60,10 @@ PHP                                                                        NEWS
   . Added pcntl_signal_get_handler() that returns the current signal handler
     for a particular signal. Addresses FR #72409. (David Walker)
 
+- Reflection:
+  . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
+    (Nikita Nefedov)
+
 - SimpleXML:
   . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
     element). (Laruence)
