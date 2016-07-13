@@ -49,10 +49,14 @@ PHP                                                                        NEWS
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
     without placeholders). (Matteo)
 
-- pcntl
+- Pcntl
   . Implemented asynchronous signal handling without TICKS. (Dmitry)
   . Added pcntl_signal_get_handler() that returns the current signal handler
     for a particular signal. Addresses FR #72409. (David Walker)
+
+- SimpleXML:
+  . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
+    element). (Laruence)
 
 - Tidy:
   . Implemented support for libtidy 5.0.0 and above. (Michael Orlitzky, Anatol)
