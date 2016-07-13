@@ -8103,7 +8103,10 @@ ZEND_VM_HANDLER(51, ZEND_MAKE_REF, VAR|CV, UNUSED)
 
 	if (OP1_TYPE == IS_CV) {
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+			ZVAL_NEW_EMPTY_REF(op1);
+			Z_SET_REFCOUNT_P(op1, 2);
+			ZVAL_NULL(Z_REFVAL_P(op1));
+			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 		} else {
 			ZVAL_MAKE_REF(op1);
 			ZVAL_COPY(EX_VAR(opline->result.var), op1);

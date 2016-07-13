@@ -4,7 +4,7 @@ Bug #72215.3 (Wrong return value if var modified in finally)
 <?php
 function &test() {
     try {
-	    return $a;
+        return $a;
     } finally {
         $a = 2;
     }
@@ -12,5 +12,4 @@ function &test() {
 var_dump(test());
 ?>
 --EXPECT--
-NULL
-
+int(2)

@@ -21820,7 +21820,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 
 	if (IS_VAR == IS_CV) {
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+			ZVAL_NEW_EMPTY_REF(op1);
+			Z_SET_REFCOUNT_P(op1, 2);
+			ZVAL_NULL(Z_REFVAL_P(op1));
+			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 		} else {
 			ZVAL_MAKE_REF(op1);
 			ZVAL_COPY(EX_VAR(opline->result.var), op1);
@@ -42815,7 +42818,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLE
 
 	if (IS_CV == IS_CV) {
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+			ZVAL_NEW_EMPTY_REF(op1);
+			Z_SET_REFCOUNT_P(op1, 2);
+			ZVAL_NULL(Z_REFVAL_P(op1));
+			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 		} else {
 			ZVAL_MAKE_REF(op1);
 			ZVAL_COPY(EX_VAR(opline->result.var), op1);
