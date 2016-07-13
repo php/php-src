@@ -1,5 +1,7 @@
 --TEST--
 Test detection of inline string manipulations on zval watch
+--INI--
+opcache.optimization_level=0
 --PHPDBG--
 b 3
 r

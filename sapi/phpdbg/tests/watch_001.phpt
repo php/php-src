@@ -1,5 +1,7 @@
 --TEST--
 Test simple recursive watchpoint
+--INI--
+opcache.optimization_level=0
 --PHPDBG--
 b 3
 r
