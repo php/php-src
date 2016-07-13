@@ -602,7 +602,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 	ZCSG(force_restart_time) = 0;
 	while (mem_usage_check->l_pid > 0) {
 		while (tries--) {
-			zend_accel_error(ACCEL_LOG_ERROR, "Killed locker %d", mem_usage_check->l_pid);
+			zend_accel_error(ACCEL_LOG_WARNING, "Killed locker %d", mem_usage_check->l_pid);
 			if (kill(mem_usage_check->l_pid, SIGKILL)) {
 				break;
 			}
@@ -615,7 +615,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 			usleep(10000);
 		}
 		if (!tries) {
-			zend_accel_error(ACCEL_LOG_ERROR, "Can't kill %d after 20 tries!", mem_usage_check->l_pid);
+			zend_accel_error(ACCEL_LOG_WARNING, "Can't kill %d after 10 tries!", mem_usage_check->l_pid);
 			ZCSG(force_restart_time) = time(NULL); /* restore forced restart request */
 		}
 
