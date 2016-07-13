@@ -457,7 +457,6 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		zend_class_constant *c;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-			zval_update_constant_ex(&c->value, c->ce);
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent.buf));
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -622,12 +621,16 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 static void _const_string(string *str, char *name, zval *value, char *indent)
 {
 	char *type = zend_zval_type_name(value);
-	zend_string *value_str = zval_get_string(value);
 
-	string_printf(str, "%s    Constant [ %s %s ] { %s }\n",
-					indent, type, name, ZSTR_VAL(value_str));
-
-	zend_string_release(value_str);
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		string_printf(str, "%s    Constant [ %s %s ] { Array }\n",
+						indent, type, name);
+	} else {
+		zend_string *value_str = zval_get_string(value);
+		string_printf(str, "%s    Constant [ %s %s ] { %s }\n",
+						indent, type, name, ZSTR_VAL(value_str));
+		zend_string_release(value_str);
+	}
 }
 /* }}} */
 
@@ -635,17 +638,22 @@ static void _const_string(string *str, char *name, zval *value, char *indent)
 static void _class_const_string(string *str, char *name, zend_class_constant *c, char *indent)
 {
 	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
-	zend_string *value_str;
 	char *type;
 
 	zval_update_constant_ex(&c->value, c->ce);
-	value_str = zval_get_string(&c->value);
 	type = zend_zval_type_name(&c->value);
 
-	string_printf(str, "%sConstant [ %s %s %s ] { %s }\n",
-					indent, visibility, type, name, ZSTR_VAL(value_str));
+	if (Z_TYPE(c->value) == IS_ARRAY) {
+		string_printf(str, "%sConstant [ %s %s %s ] { Array }\n",
+						indent, visibility, type, name);
+	} else {
+		zend_string *value_str = zval_get_string(&c->value);
 
-	zend_string_release(value_str);
+		string_printf(str, "%sConstant [ %s %s %s ] { %s }\n",
+						indent, visibility, type, name, ZSTR_VAL(value_str));
+
+		zend_string_release(value_str);
+	}
 }
 /* }}} */
 
