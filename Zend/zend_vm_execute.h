@@ -21820,13 +21820,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 
 	if (IS_VAR == IS_CV) {
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-			SAVE_OPLINE();
-			GET_OP1_UNDEF_CV(op1, BP_VAR_R);
 			ZVAL_NULL(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		} else {
+			ZVAL_MAKE_REF(op1);
+			ZVAL_COPY(EX_VAR(opline->result.var), op1);
 		}
-		ZVAL_MAKE_REF(op1);
-		ZVAL_COPY(EX_VAR(opline->result.var), op1);
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_INDIRECT)) {
 		op1 = Z_INDIRECT_P(op1);
 		if (EXPECTED(!Z_ISREF_P(op1))) {
@@ -42817,13 +42815,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLE
 
 	if (IS_CV == IS_CV) {
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-			SAVE_OPLINE();
-			GET_OP1_UNDEF_CV(op1, BP_VAR_R);
 			ZVAL_NULL(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		} else {
+			ZVAL_MAKE_REF(op1);
+			ZVAL_COPY(EX_VAR(opline->result.var), op1);
 		}
-		ZVAL_MAKE_REF(op1);
-		ZVAL_COPY(EX_VAR(opline->result.var), op1);
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_INDIRECT)) {
 		op1 = Z_INDIRECT_P(op1);
 		if (EXPECTED(!Z_ISREF_P(op1))) {
