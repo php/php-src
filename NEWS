@@ -11,7 +11,7 @@ PHP                                                                        NEWS
     (Dmitry, Nikita)
   . Added new constant PHP_FD_SETSIZE. (cmb)
   . Added optind parameter to getopt(). (as)
-  . Added PHP to SAPI error severity mapping for logs. (Martin Voruba)
+  . Added PHP to SAPI error severity mapping for logs. (Martin Vobruba)
   . Fixed bug #71911 (Unable to set --enable-debug on building extensions by
     phpize on Windows). (Yuji Uchiyama)
 
