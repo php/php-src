@@ -722,8 +722,9 @@ static zend_bool php_auto_globals_create_files(const char *name, uint name_len T
 	return 0; /* don't rearm */
 }
 
-/* Upgly hack to fix HTTP_PROXY issue */
-static void check_http_proxy(HashTable *var_table) {
+/* Upgly hack to fix HTTP_PROXY issue, see bug #72573 */
+static void check_http_proxy(HashTable *var_table)
+{
 	if (zend_hash_exists(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY"))) {
 		char *local_proxy = getenv("HTTP_PROXY");
 

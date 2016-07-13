@@ -1012,7 +1012,7 @@ SAPI_API struct stat *sapi_get_stat(TSRMLS_D)
 SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 {
 	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
-		/* Ugly fix for HTTP_PROXY issue */
+		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
 		return NULL;
 	}
 	if (sapi_module.getenv) {
