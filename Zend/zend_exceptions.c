@@ -1070,6 +1070,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 
 	if (!exception_ce || !instanceof_function(exception_ce, zend_ce_throwable)) {
 		zend_throw_error(NULL, "Cannot throw objects that do not implement Throwable");
+		zval_ptr_dtor(exception);
 		return;
 	}
 	zend_throw_exception_internal(exception);
