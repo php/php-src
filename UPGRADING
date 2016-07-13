@@ -47,6 +47,8 @@ PHP 7.1 UPGRADE NOTES
     syslog error levels. This brings finer differentiation in the error logs
     in contrary to the previous approach where all the errors are loggged with
     the notice level only.
+  . Don't call destructors of incompletely constructed objects, even if they
+    are kept referenced. See bug #29368 and Zend/tests/bug29368_1.phpt.
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double

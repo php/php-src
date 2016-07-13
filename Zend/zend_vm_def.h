@@ -2500,9 +2500,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
 #endif
 				GC_REFCOUNT(object)--;
-				if (GC_REFCOUNT(object) == 1) {
-					zend_object_store_ctor_failed(object);
-				}
+				zend_object_store_ctor_failed(object);
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -2537,9 +2535,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
 #endif
 				GC_REFCOUNT(object)--;
-				if (GC_REFCOUNT(object) == 1) {
-					zend_object_store_ctor_failed(object);
-				}
+				zend_object_store_ctor_failed(object);
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -3803,9 +3799,7 @@ ZEND_VM_C_LABEL(fcall_end):
 		if (UNEXPECTED(EG(exception) != NULL) && (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR)) {
 #endif
 			GC_REFCOUNT(object)--;
-			if (GC_REFCOUNT(object) == 1) {
-				zend_object_store_ctor_failed(object);
-			}
+			zend_object_store_ctor_failed(object);
 		}
 		OBJ_RELEASE(object);
 	}

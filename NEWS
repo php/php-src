@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   . Added PHP to SAPI error severity mapping for logs. (Martin Vobruba)
   . Fixed bug #71911 (Unable to set --enable-debug on building extensions by
     phpize on Windows). (Yuji Uchiyama)
+  . Fixed bug #29368 (The destructor is called when an exception is thrown from
+    the constructor). (Dmitry)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
