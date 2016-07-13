@@ -3595,6 +3595,10 @@ PHP_FUNCTION(curl_unescape)
 		RETURN_FALSE;
 	}
 
+	if (str_len > INT_MAX) {
+		RETURN_FALSE;
+	}
+
 	if ((out = curl_easy_unescape(ch->cp, str, str_len, &out_len))) {
 		RETVAL_STRINGL(out, out_len);
 		curl_free(out);
