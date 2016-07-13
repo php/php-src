@@ -40,6 +40,10 @@ PHP                                                                        NEWS
 - MCrypt:
   . Deprecated ext/mcrypt. (Scott Arciszewski, cmb)
 
+- Opcache:
+  . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
+    (Keyur)
+
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
