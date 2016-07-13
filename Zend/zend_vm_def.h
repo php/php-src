@@ -4736,6 +4736,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, NUM, CONST)
 		if (Z_OPT_CONSTANT_P(param)) {
 			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(param, EX(func)->op_array.scope) != SUCCESS)) {
+				zval_ptr_dtor(param);
 				ZVAL_UNDEF(param);
 				HANDLE_EXCEPTION();
 			}
@@ -7258,6 +7259,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	ZVAL_COPY(&c.value, val);
 	if (Z_OPT_CONSTANT(c.value)) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
+			zval_ptr_dtor(&c.value);
 			FREE_OP1();
 			FREE_OP2();
 			HANDLE_EXCEPTION();
