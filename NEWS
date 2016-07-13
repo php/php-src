@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
     without placeholders). (Matteo)
 
+- Reflection:
+  . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
+    (Nikita Nefedov)
+
 - SimpleXML:
   . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
     element). (Laruence)
