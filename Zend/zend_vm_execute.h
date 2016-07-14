@@ -3511,6 +3511,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 
+				if (iter) {
+					OBJ_RELEASE(&iter->std);
+				}
 				if (!EG(exception)) {
 					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
@@ -12571,6 +12574,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				zval_ptr_dtor_nogc(free_op1);
+				if (iter) {
+					OBJ_RELEASE(&iter->std);
+				}
 				if (!EG(exception)) {
 					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
@@ -16157,6 +16163,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				zval_ptr_dtor_nogc(free_op1);
+				if (iter) {
+					OBJ_RELEASE(&iter->std);
+				}
 				if (!EG(exception)) {
 					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
@@ -35267,6 +35276,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 
+				if (iter) {
+					OBJ_RELEASE(&iter->std);
+				}
 				if (!EG(exception)) {
 					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}

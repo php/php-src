@@ -5754,6 +5754,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				FREE_OP1();
+				if (iter) {
+					OBJ_RELEASE(&iter->std);
+				}
 				if (!EG(exception)) {
 					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
