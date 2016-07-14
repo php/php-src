@@ -1566,11 +1566,10 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 		if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), strlen(PS(session_name))))) {
 			ZVAL_DEREF(ppid);
 		} else {
-			/* FIXME: Resetting vars are required when
-			   session is stop/start/regenerated. However,
-			   php_url_scanner_reset_vars() resets all vars
-			   including other URL rewrites set by elsewhere. */
-			php_url_scanner_reset_vars(); /* To merge official repo, this line should be commented out */
+			zend_string *sname;
+			sname = zend_string_init(PS(session_name), strlen(PS(session_name)), 0);
+			php_url_scanner_reset_var(sname, PS(id), 1); /* FIXME: This may fail when session name and/or ID has changed */
+			zend_string_release(sname);
 			php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
 		}
 	}
