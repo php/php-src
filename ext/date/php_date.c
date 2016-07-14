@@ -3617,6 +3617,7 @@ static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz, size
 
 	if (strlen(tz) != tz_len) {
 		php_error_docref(NULL, E_WARNING, "Timezone must not contain null bytes");
+		efree(dummy_t);
 		return FAILURE;
 	}
 
