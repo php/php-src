@@ -123,7 +123,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	}
 
 	if (url_parts->scheme ||
-		*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
+		(*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/')) {
 		/* Current URL scanner works only with relative local path */
 		smart_str_append_smart_str(dest, url);
 		php_url_free(url_parts);
