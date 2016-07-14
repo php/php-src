@@ -18504,7 +18504,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 		HANDLE_EXCEPTION();
 	}
@@ -20791,7 +20791,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		HANDLE_EXCEPTION();
 	}
