@@ -740,6 +740,8 @@ out, that the corresponding SDK isn't available anymore.
   . ZLIB_FINISH
 
 - GD
+  . IMG_WEBP (>= 7.0.10)
+
   . T1Lib support removed, thus lifting the optional dependency on T1Lib, the
     following is therefore not available anymore:
 

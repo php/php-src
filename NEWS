@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug #72575 (using --allow-to-run-as-root should ignore missing user).
     (gooh)
 
+- GD:
+  . Fixed bug #72596 (imagetypes function won't advertise WEBP support). (cmb)
+
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
     names). (cmb)
