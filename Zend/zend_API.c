@@ -3106,7 +3106,7 @@ get_function_via_handler:
 					retval = 0;
 				} else {
 					zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
-					return 0;
+					retval = 0;
 				}
 			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				int severity;
