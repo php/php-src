@@ -3098,7 +3098,7 @@ get_function_via_handler:
 
 	if (retval) {
 		if (fcc->calling_scope && !call_via_handler) {
-			if (!fcc->object && (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			if (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				if (error) {
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 					retval = 0;
