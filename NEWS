@@ -23,6 +23,10 @@ PHP                                                                        NEWS
     oob read access). (Laruence)
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
 
+- PDO_pgsql:
+  . Fixed bug #72570 (Segmentation fault when binding parameters on a query
+    without placeholders). (Matteo)
+
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
