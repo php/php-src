@@ -650,6 +650,7 @@ tail_call:
 
 					if (!props) {
 						/* restore refcount and put into list to free */
+						obj->refcount = 1;
 						pz->refcount__gc++;
 						((zval_gc_info*)pz)->u.next = GC_G(zval_to_free);
 						GC_G(zval_to_free) = (zval_gc_info*)pz;
@@ -756,6 +757,7 @@ static void gc_collect_roots(TSRMLS_D)
 				struct _store_object *obj = &EG(objects_store).object_buckets[current->handle].bucket.obj;
 				zval z;
 
+				obj->refcount = 1;
 				GC_SET_ADDRESS(obj->buffered, NULL);
 				INIT_PZVAL(&z);
 				Z_OBJ_HANDLE(z) = current->handle;
@@ -802,7 +804,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 			if (Z_TYPE(p->z) == IS_OBJECT) {
 				if (EG(objects_store).object_buckets &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].valid &&
-					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0 &&
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 1 &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.dtor &&
 					!EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].destructor_called) {
 
@@ -823,7 +825,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 			if (Z_TYPE(p->z) == IS_OBJECT) {
 				if (EG(objects_store).object_buckets &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].valid &&
-					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0) {
+					--EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0) {
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount = 1;
 					Z_TYPE(p->z) = IS_NULL;
 					zend_objects_store_del_ref_by_handle_ex(Z_OBJ_HANDLE(p->z), Z_OBJ_HT(p->z) TSRMLS_CC);
