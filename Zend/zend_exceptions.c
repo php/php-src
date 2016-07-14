@@ -531,6 +531,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_appends(str, "Object(");
 			smart_str_appends(str, ZSTR_VAL(class_name));
 			smart_str_appends(str, "), ");
+			zend_string_release(class_name);
 			break;
 		}
 	}
@@ -1039,6 +1040,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 
 	if (!exception_ce || !instanceof_function(exception_ce, zend_ce_throwable)) {
 		zend_throw_error(NULL, "Cannot throw objects that do not implement Throwable");
+		zval_ptr_dtor(exception);
 		return;
 	}
 	zend_throw_exception_internal(exception);

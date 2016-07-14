@@ -2380,9 +2380,12 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 		
 		if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
 			opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
+			opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
 			opline->opcode == ZEND_INIT_DYNAMIC_CALL ||
+			opline->opcode == ZEND_INIT_USER_CALL ||
 			opline->opcode == ZEND_INIT_METHOD_CALL ||
-			opline->opcode == ZEND_INIT_STATIC_METHOD_CALL)) {
+			opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
+			opline->opcode == ZEND_NEW)) {
 			ZEND_ASSERT(op_num);
 			opline--;
 		}
