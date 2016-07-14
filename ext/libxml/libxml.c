@@ -1278,8 +1278,8 @@ PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object)
 				efree(object->document->doc_props);
 			}
 			efree(object->document);
-			object->document = NULL;
 		}
+		object->document = NULL;
 	}
 
 	return ret_refcount;
