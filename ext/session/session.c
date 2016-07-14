@@ -1568,7 +1568,7 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 		} else {
 			zend_string *sname;
 			sname = zend_string_init(PS(session_name), strlen(PS(session_name)), 0);
-			php_url_scanner_reset_var(sname, PS(id), 1); /* FIXME: This may fail when session name and/or ID has changed */
+			php_url_scanner_reset_var(sname, 1); /* This may fail when session name has changed */
 			zend_string_release(sname);
 			php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
 		}

@@ -591,15 +591,18 @@ PHPAPI int php_url_scanner_reset_vars(void)
 	return SUCCESS;
 }
 
-PHPAPI int php_url_scanner_reset_var(zend_string *name, zend_string *value, int urlencode)
+PHPAPI int php_url_scanner_reset_var(zend_string *name, int urlencode)
 {
-	char *found;
+	char *start;
+	char *end;
+	size_t separator_len;
 	smart_str sname = {0};
 	smart_str svalue = {0};
 	smart_str url_app = {0};
 	smart_str form_app = {0};
 	zend_string *encoded;
 	int ret = SUCCESS;
+	zend_bool sep_removed = 0;
 
 	/* Short circuit check. Only check url_app. */
 	if (!BG(url_adapt_state_ex).url_app.s || !ZSTR_LEN(BG(url_adapt_state_ex).url_app.s)) {
@@ -610,55 +613,89 @@ PHPAPI int php_url_scanner_reset_var(zend_string *name, zend_string *value, int 
 		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
 		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
 		zend_string_free(encoded);
-		encoded = php_raw_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
-		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
-		zend_string_free(encoded);
 	} else {
 		smart_str_appendl(&sname, ZSTR_VAL(name), ZSTR_LEN(name));
-		smart_str_appendl(&svalue, ZSTR_VAL(value), ZSTR_LEN(value));
 	}
+	smart_str_0(&sname);
 
 	smart_str_append_smart_str(&url_app, &sname);
 	smart_str_appendc(&url_app, '=');
-	smart_str_append_smart_str(&url_app, &svalue);
+	smart_str_0(&url_app);
 
 	smart_str_appends(&form_app, "<input type=\"hidden\" name=\"");
 	smart_str_append_smart_str(&form_app, &sname);
 	smart_str_appends(&form_app, "\" value=\"");
-	smart_str_append_smart_str(&form_app, &svalue);
-	smart_str_appends(&form_app, "\" />");
+	smart_str_0(&form_app);
 
 	/* Short circuit check. Only check url_app. */
-	found = (char *)php_memnstr(ZSTR_VAL(BG(url_adapt_state_ex).url_app.s),
-								ZSTR_VAL(url_app.s), 1,
-								ZSTR_VAL(BG(url_adapt_state_ex).url_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).url_app.s));
-	if (!found) {
+	start = (char *) php_memnstr(ZSTR_VAL(BG(url_adapt_state_ex).url_app.s),
+						ZSTR_VAL(url_app.s), ZSTR_LEN(url_app.s),
+						ZSTR_VAL(BG(url_adapt_state_ex).url_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).url_app.s));
+	if (!start) {
 		ret = FAILURE;
 		goto finish;
 	}
-	if (ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) == ZSTR_LEN(url_app.s)) {
+
+	/* Get end of url var */
+	end = start + ZSTR_LEN(url_app.s);
+	separator_len = strlen(PG(arg_separator).output);
+	ZEND_ASSERT(!ZSTR_VAL(BG(url_adapt_state_ex).url_app.s)[ZSTR_LEN(BG(url_adapt_state_ex).url_app.s)]);
+	while (1) {
+		if (!*end) {
+			break;
+		}
+		if (!memcmp(end, PG(arg_separator).output, separator_len)) {
+			end += separator_len;
+			sep_removed = 1;
+			break;
+		}
+		end++;
+	}
+	/* Remove all when this is the only rewrite var */
+	if (ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) == end - start) {
 		php_url_scanner_clear();
 		goto finish;
 	}
-
+    /* Check preceeding separator */
+    if (!sep_removed
+		&& start - PG(arg_separator).output >= separator_len
+		&& !memcmp(start - separator_len, PG(arg_separator).output, separator_len)) {
+		start -= separator_len;
+	}
 	/* Remove partially */
-	memmove(found,
-			found + ZSTR_LEN(url_app.s),
-			found - ZSTR_VAL(BG(url_adapt_state_ex).url_app.s) - ZSTR_LEN(url_app.s));
-	ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) = ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) - ZSTR_LEN(url_app.s);
+	memmove(start, end,
+			ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) - (end - ZSTR_VAL(BG(url_adapt_state_ex).url_app.s)));
+	ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) -= end - start;
+	ZSTR_VAL(BG(url_adapt_state_ex).url_app.s)[ZSTR_LEN(BG(url_adapt_state_ex).url_app.s)] = '\0';
 
-	found= (char *)php_memnstr(ZSTR_VAL(BG(url_adapt_state_ex).form_app.s),
-							   ZSTR_VAL(form_app.s), 1,
-							   ZSTR_VAL(BG(url_adapt_state_ex).form_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).form_app.s));
-	if (!found) {
+	/* Remove form var */
+	start = (char *) php_memnstr(ZSTR_VAL(BG(url_adapt_state_ex).form_app.s),
+						ZSTR_VAL(form_app.s), ZSTR_LEN(form_app.s),
+						ZSTR_VAL(BG(url_adapt_state_ex).form_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).form_app.s));
+	if (!start) {
 		/* Should not happen */
 		ret = FAILURE;
+		php_url_scanner_clear();
 		goto finish;
 	}
-	memmove(found,
-			found + ZSTR_LEN(form_app.s),
-			found - ZSTR_VAL(BG(url_adapt_state_ex).form_app.s) - ZSTR_LEN(form_app.s));
-	ZSTR_LEN(BG(url_adapt_state_ex).form_app.s) = ZSTR_LEN(BG(url_adapt_state_ex).form_app.s) - ZSTR_LEN(form_app.s);
+	/* Get end of form var */
+	end = start + ZSTR_LEN(form_app.s);
+	ZEND_ASSERT(!ZSTR_VAL(BG(url_adapt_state_ex).form_app.s)[ZSTR_LEN(BG(url_adapt_state_ex).form_app.s)]);
+	while (1) {
+		if (!*end) {
+			break;
+		}
+		if (*end == '>') {
+			end += 1;
+			break;
+		}
+		end++;
+	}
+	/* Remove partially */
+	memmove(start, end,
+			ZSTR_LEN(BG(url_adapt_state_ex).form_app.s) - (end - ZSTR_VAL(BG(url_adapt_state_ex).form_app.s)));
+	ZSTR_LEN(BG(url_adapt_state_ex).form_app.s) -= end - start;
+	ZSTR_VAL(BG(url_adapt_state_ex).form_app.s)[ZSTR_LEN(BG(url_adapt_state_ex).form_app.s)] = '\0';
 
 finish:
 	smart_str_free(&url_app);
