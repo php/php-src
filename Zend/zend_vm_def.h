@@ -5383,6 +5383,10 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
 	FREE_OP1();
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
+			destroy_op_array(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		HANDLE_EXCEPTION();
 	} else if (new_op_array == ZEND_FAKE_OP_ARRAY) {
 		if (RETURN_VALUE_USED(opline)) {

@@ -3387,6 +3387,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
+			destroy_op_array(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		HANDLE_EXCEPTION();
 	} else if (new_op_array == ZEND_FAKE_OP_ARRAY) {
 		if (RETURN_VALUE_USED(opline)) {
@@ -35120,6 +35124,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
+			destroy_op_array(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		HANDLE_EXCEPTION();
 	} else if (new_op_array == ZEND_FAKE_OP_ARRAY) {
 		if (RETURN_VALUE_USED(opline)) {
@@ -51046,6 +51054,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 	new_op_array = zend_include_or_eval(inc_filename, opline->extended_value);
 	zval_ptr_dtor_nogc(free_op1);
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (new_op_array != ZEND_FAKE_OP_ARRAY && new_op_array != NULL) {
+			destroy_op_array(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		HANDLE_EXCEPTION();
 	} else if (new_op_array == ZEND_FAKE_OP_ARRAY) {
 		if (RETURN_VALUE_USED(opline)) {
