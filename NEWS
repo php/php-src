@@ -38,8 +38,6 @@ PHP                                                                        NEWS
 
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
-  . Fixed bug #72570 (Segmentation fault when binding parameters on a query
-    without placeholders). (Matteo)
 
 - Reflection:
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
@@ -88,6 +86,10 @@ PHP                                                                        NEWS
   . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
     oob read access). (Laruence)
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
+
+- PDO_pgsql:
+  . Fixed bug #72570 (Segmentation fault when binding parameters on a query
+    without placeholders). (Matteo)
 
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
