@@ -5931,7 +5931,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			opline->opcode = ZEND_DECLARE_ANON_CLASS;
 		}
 
-		zend_hash_update_ptr(CG(class_table), lcname, ce);
+		if (!zend_hash_exists(CG(class_table), lcname)) {
+			zend_hash_add_ptr(CG(class_table), lcname, ce);
+		} else {
+			/* this anonymous class has been included */
+			zval zv;
+			ZVAL_PTR(&zv, ce);
+			destroy_zend_class(&zv);
+			return;
+		}
 	} else {
 		zend_string *key;
 
@@ -6217,7 +6225,6 @@ void zend_compile_group_use(zend_ast *ast) /* {{{ */
 	}
 }
 /* }}} */
-
 
 void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 {
