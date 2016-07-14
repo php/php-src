@@ -19,7 +19,7 @@ $sql = "
 		CAST(10.5 AS MONEY) AS [money],
 		CAST('1950-01-18 23:00:00' AS SMALLDATETIME) as [smalldatetime],
 		CAST(1 AS BIT) AS [true],
-		CAST('82A88958-672B-4C22-842F-216E2B88E72A' as uniqueidentifier) as [uuid]
+		CAST('82A88958-672B-4C22-842F-216E2B88E72A' as uniqueidentifier) as [guid]
 ";
 
 $stmt = $db->query($sql);
@@ -35,7 +35,7 @@ var_dump($row['smalldatetime'] === '1950-01-18 23:00:00');
 var_dump($row['true'] === 1);
 
 // `82A88958-672B-4C22-842F-216E2B88E72A` binary representation
-var_dump($row['uuid'] === base64_decode('gqiJWGcrTCKELyFuK4jnKg=='));
+var_dump($row['guid'] === base64_decode('WImogitnIkyELyFuK4jnKg=='));
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 $stmt = $db->query($sql);
@@ -49,7 +49,7 @@ var_dump($row['int'] === '1000');
 var_dump($row['money'] === '10.5');
 var_dump($row['smalldatetime'] === '1950-01-18 23:00:00');
 var_dump($row['true'] === '1');
-var_dump($row['uuid'] === '82A88958-672B-4C22-842F-216E2B88E72A');
+var_dump($row['guid'] === '82A88958-672B-4C22-842F-216E2B88E72A');
 
 ?>
 --EXPECT--
