@@ -3,11 +3,57 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.10
 
 - Core:
+  . Fixed bug #72594 (Calling an earlier instance of an included anonymous
+    class fatals). (Laruence)
+  . Fixed bug #72581 (previous property undefined in Exception after
+    deserialization). (Laruence)
   . Fixed bug #72496 (Cannot declare public method with signature incompatible
     with parent private method). (Pedro Magalhães)
+  . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
+  . Fixed bug #71911 (Unable to set --enable-debug on building extensions by
+    phpize on Windows). (Yuji Uchiyama)
+
+- COM:
+  . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
+
+- Date:
+  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
+    parsing). (derick)
+
+- Filter:
+  . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
+    range). (bugs dot php dot net at majkl578 dot cz)
+
+- FPM:
+  . Fixed bug #72575 (using --allow-to-run-as-root should ignore missing user).
+    (gooh)
+
+- Intl:
+  . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
+    names). (cmb)
+
+- Opcache:
+  . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
+    (Keyur)
+
+- PDO_pgsql:
+  . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
+  . Fixed bug #72570 (Segmentation fault when binding parameters on a query
+    without placeholders). (Matteo)
+
+- Reflection:
+  . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
+    (Nikita Nefedov)
+
+- SimpleXML:
+  . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
+    element). (Laruence)
 
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
+
+- SQLite3:
+  . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
 
 - Standard:
   . Fixed bug #72152 (base64_decode $strict fails to detect null byte).
@@ -16,6 +62,9 @@ PHP                                                                        NEWS
     mode). (Lauri Kenttä)
   . Fixed bug #72264 (base64_decode $strict fails with whitespace between
     padding). (Lauri Kenttä)
+
+- Wddx:
+  . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
 
 21 Jul 2016 PHP 7.0.9
 
