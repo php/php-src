@@ -5444,6 +5444,10 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 	}
 	FREE_OP1();
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (new_op_array != NULL) {
+			destroy_op_array(new_op_array);
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		HANDLE_EXCEPTION();
 	} else if (EXPECTED(new_op_array != NULL)) {
 		zval *return_value = NULL;
