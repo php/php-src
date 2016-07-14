@@ -4120,10 +4120,16 @@ static int zend_has_finally(void) /* {{{ */
 void zend_compile_return(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
+	zend_bool is_generator = (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0;
 	zend_bool by_ref = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
 	znode expr_node;
 	zend_op *opline;
+
+	if (is_generator) {
+		/* For generators the by-ref flag refers to yields, not returns */
+		by_ref = 0;
+	}
 
 	if (!expr_ast) {
 		expr_node.op_type = IS_CONST;
@@ -4146,7 +4152,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	}
 
 	/* Generator return types are handled separately */
-	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+	if (!is_generator && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_emit_return_type_check(
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
 	}
@@ -4156,10 +4162,10 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
 
-	if (expr_ast) {
+	if (by_ref && expr_ast) {
 		if (zend_is_call(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_FUNCTION;
-		} else if (by_ref && !zend_is_variable(expr_ast)) {
+		} else if (!zend_is_variable(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_VALUE;
 		}
 	}
