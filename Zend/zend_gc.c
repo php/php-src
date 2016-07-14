@@ -735,7 +735,6 @@ static void gc_add_garbage(zend_refcounted *ref, gc_additional_buffer **addition
 		GC_TYPE(ref) |= GC_FAKE_BUFFER_FLAG;
 	}
 	if (buf) {
-		GC_REFCOUNT(ref)++;
 		buf->ref = ref;
 		buf->next = GC_G(roots).next;
 		buf->prev = &GC_G(roots);
@@ -898,7 +897,6 @@ static int gc_collect_roots(uint32_t *flags, gc_additional_buffer **additional_b
 
 	current = GC_G(roots).next;
 	while (current != &GC_G(roots)) {
-		GC_REFCOUNT(current->ref)++;
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
 			count += gc_collect_white(current->ref, flags, additional_buffer);
 		}
@@ -939,7 +937,6 @@ tail_call:
 	     GC_REF_GET_COLOR(ref) == GC_BLACK &&
 	     GC_ADDRESS(GC_INFO(ref)) != GC_ROOT_BUFFER_MAX_ENTRIES)) {
 		GC_TRACE_REF(ref, "removing from buffer");
-		GC_REFCOUNT(ref)--;
 		if (root) {
 			GC_INFO(ref) = 0;
 			GC_REMOVE_FROM_ROOTS(root);
