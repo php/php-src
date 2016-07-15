@@ -690,7 +690,6 @@ default_charset = "UTF-8"
 
 ; PHP output character encoding is set to empty.
 ; If empty, default_charset is used.
-; mbstring or iconv output handler is used.
 ; See also output_buffer.
 ; http://php.net/output-encoding
 ;output_encoding =
