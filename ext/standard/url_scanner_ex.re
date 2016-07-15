@@ -33,6 +33,7 @@
 
 #include "php_ini.h"
 #include "php_globals.h"
+#include "php_string.h"
 #define STATE_TAG SOME_OTHER_STATE_TAG
 #include "basic_functions.h"
 #include "url.h"
@@ -70,8 +71,8 @@ static PHP_INI_MH(OnUpdateTags)
 	zend_hash_init(ctx->tags, 0, NULL, tag_dtor, 1);
 
 	for (key = php_strtok_r(tmp, ",", &lasts);
-			key;
-			key = php_strtok_r(NULL, ",", &lasts)) {
+		 key;
+		 key = php_strtok_r(NULL, ",", &lasts)) {
 		char *val;
 
 		val = strchr(key, '=');
@@ -80,11 +81,10 @@ static PHP_INI_MH(OnUpdateTags)
 			size_t keylen;
 
 			*val++ = '\0';
-			for (q = key; *q; q++)
+			for (q = key; *q; q++) {
 				*q = tolower(*q);
+			}
 			keylen = q - key;
-			/* key is stored withOUT NUL
-			   val is stored WITH    NUL */
 			zend_hash_str_add_mem(ctx->tags, key, keylen, val, strlen(val)+1);
 		}
 	}
@@ -94,8 +94,59 @@ static PHP_INI_MH(OnUpdateTags)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateHosts)
+{
+	HashTable *dom;
+	char *key;
+	char *tmp;
+	char *lasts = NULL;
+
+	dom = &BG(url_adapt_hosts_ht);
+	zend_hash_clean(dom);
+
+#if 0
+	/* Default to HTTP_HOST */
+	if (!ZSTR_LEN(new_value)) {
+		zval *host;
+		zend_string *host_tmp;
+
+		if (zend_is_auto_global_str("_SERVER", sizeof("_SERVER") - 1) == SUCCESS &&
+			(host = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_HOST", sizeof("HTTP_HOST") - 1)) &&
+			Z_TYPE_P(host) == IS_STRING) {
+			host_tmp = php_string_tolower(Z_STR_P(host));
+			zend_hash_add_empty_element(dom, host_tmp);
+			zend_string_release(host_tmp);
+			return SUCCESS;
+		}
+	}
+#endif
+
+	/* Use user supplied host whitelist */
+	tmp = estrndup(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	for (key = php_strtok_r(tmp, ",", &lasts);
+		 key;
+		 key = php_strtok_r(NULL, ",", &lasts)) {
+		char *val;
+		size_t keylen;
+		zend_string *tmp_key;
+		char *q;
+
+		for (q = key; *q; q++) {
+			*q = tolower(*q);
+		}
+		keylen = q - key;
+		tmp_key = zend_string_init(key, keylen, 0);
+		zend_hash_add_empty_element(dom, tmp_key);
+		zend_string_release(tmp_key);
+	}
+	efree(tmp);
+
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("url_rewriter.hosts", "", PHP_INI_ALL, OnUpdateHosts, url_adapt_hosts_ht, php_basic_globals, basic_globals)
 PHP_INI_END()
 
 /*!re2c
@@ -115,19 +166,34 @@ alphadash = ([a-zA-Z] | "-");
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator)
 {
 	php_url *url_parts;
+	char *tmp;
+	size_t tmp_len;
 
-	smart_str_0(url); /* FIXME: Bug #70480 php_url_prase_ex() crashes by processing chars exceed len */
+	smart_str_0(url); /* FIXME: Bug #70480 php_url_parse_ex() crashes by processing chars exceed len */
 	url_parts = php_url_parse_ex(ZSTR_VAL(url->s), ZSTR_LEN(url->s));
 
+	/* Ignore malformed URLs */
 	if (!url_parts) {
-		/* Ignore malformed URLs */
 		smart_str_append_smart_str(dest, url);
 		return;
 	}
 
+#if 0
+	/* Do not make work with "//example.com/foo/bar" */
 	if (url_parts->scheme ||
 		(*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/')) {
 		/* Current URL scanner works only with relative local path */
+		smart_str_append_smart_str(dest, url);
+		php_url_free(url_parts);
+		return;
+	}
+#endif
+
+	/* Check host whitelist. If it's not listed, do nothing. */
+	if (url_parts->host
+		&& (tmp_len = strlen(url_parts->host))
+		&& (tmp = php_strtolower(url_parts->host, tmp_len))
+		&& !zend_hash_str_find(&BG(url_adapt_hosts_ht), tmp, tmp_len)) {
 		smart_str_append_smart_str(dest, url);
 		php_url_free(url_parts);
 		return;
@@ -148,9 +214,9 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		return;
 	}
 
-	/* Schema/host/etc are handled for full path support in the future  */
 	if (url_parts->scheme) {
 		smart_str_appends(dest, url_parts->scheme);
+		smart_str_appends(dest, "://");
 	} else if (*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
 		smart_str_appends(dest, "//");
 	}
@@ -243,44 +309,58 @@ static inline void passthru(STD_PARA)
 	smart_str_appendl(&ctx->result, start, YYCURSOR - start);
 }
 
+
+static int check_host_whitelist(url_adapt_state_ex_t *ctx)
+{
+	php_url *url_parts;
+
+	if (ctx->val.s) {
+		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->val.s), ZSTR_LEN(ctx->val.s));
+	}
+	if (!url_parts) {
+		return FAILURE;
+	} else if (!url_parts->host) {
+		php_url_free(url_parts);
+		return SUCCESS;
+	}
+	if (!zend_hash_str_find(&BG(url_adapt_hosts_ht),
+							url_parts->host,
+							strlen(url_parts->host))) {
+		php_url_free(url_parts);
+		return FAILURE;
+	}
+	php_url_free(url_parts);
+	return SUCCESS;
+}
+
 /*
  * This function appends a hidden input field after a <form> or
  * <fieldset>.  The latter is important for XHTML.
  */
-
 static void handle_form(STD_PARA)
 {
 	int doit = 0;
 
-	if (ZSTR_LEN(ctx->form_app.s) > 0) {
+	if (ZSTR_LEN(ctx->form_app.s) > 0 ) {
 		switch (ZSTR_LEN(ctx->tag.s)) {
 			case sizeof("form") - 1:
-				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "form", sizeof("form") - 1)) {
+				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "form", sizeof("form") - 1)
+					&& check_host_whitelist(ctx) == SUCCESS) {
 					doit = 1;
-				}
-				if (doit && ctx->val.s && ctx->lookup_data && *ctx->lookup_data) {
-					char *e, *p = (char *)zend_memnstr(ZSTR_VAL(ctx->val.s), "://", sizeof("://") - 1, ZSTR_VAL(ctx->val.s) + ZSTR_LEN(ctx->val.s));
-					if (p) {
-						e = memchr(p, '/', (ZSTR_VAL(ctx->val.s) + ZSTR_LEN(ctx->val.s)) - p);
-						if (!e) {
-							e = ZSTR_VAL(ctx->val.s) + ZSTR_LEN(ctx->val.s);
-						}
-						if ((e - p) && strncasecmp(p, ctx->lookup_data, (e - p))) {
-							doit = 0;
-						}
-					}
 				}
 				break;
 
 			case sizeof("fieldset") - 1:
-				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "fieldset", sizeof("fieldset") - 1)) {
+				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "fieldset", sizeof("fieldset") - 1)
+					&& check_host_whitelist(ctx) == SUCCESS) {
 					doit = 1;
 				}
 				break;
 		}
+	}
 
-		if (doit)
-			smart_str_append_smart_str(&ctx->result, &ctx->form_app);
+	if (doit) {
+		smart_str_append_smart_str(&ctx->result, &ctx->form_app);
 	}
 }
 
@@ -705,6 +785,8 @@ PHP_MINIT_FUNCTION(url_scanner)
 
 	BG(url_adapt_state_ex).form_app.s = BG(url_adapt_state_ex).url_app.s = NULL;
 
+	zend_hash_init(&BG(url_adapt_hosts_ht), 2, NULL, NULL, 1);
+
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -732,6 +814,8 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 
 	smart_str_free(&BG(url_adapt_state_ex).form_app);
 	smart_str_free(&BG(url_adapt_state_ex).url_app);
+
+	zend_hash_clean(&BG(url_adapt_hosts_ht));
 
 	return SUCCESS;
 }

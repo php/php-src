@@ -204,15 +204,15 @@ echo '
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="http://php.net/script.php" method="post">
+<form method="post" action="http://php.net/script.php">
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="https://php.net/script.php" method="post">
+<form method="post" action="https://php.net/script.php">
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="//php.net/script.php" method="post">
+<form method="post" action="//php.net/script.php">
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
@@ -331,15 +331,15 @@ ob_end_flush();
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="http://php.net/script.php" method="post"><input type="hidden" name="PHPSESSID" value="testid" />
+<form method="post" action="http://php.net/script.php">
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="https://php.net/script.php" method="post"><input type="hidden" name="PHPSESSID" value="testid" />
+<form method="post" action="https://php.net/script.php">
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="//php.net/script.php" method="post"><input type="hidden" name="PHPSESSID" value="testid" />
+<form method="post" action="//php.net/script.php">
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
