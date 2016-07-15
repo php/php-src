@@ -1984,12 +1984,8 @@ static int sxe_count_elements(zval *object, zend_long *count) /* {{{ */
 		zval rv;
 		zend_call_method_with_0_params(object, intern->zo.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			if (!Z_ISUNDEF(intern->tmp)) {
-				zval_ptr_dtor(&intern->tmp);
-			}
-			ZVAL_LONG(&intern->tmp, zval_get_long(&rv));
+			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);
-			*count = Z_LVAL(intern->tmp);
 			return SUCCESS;
 		}
 		return FAILURE;
