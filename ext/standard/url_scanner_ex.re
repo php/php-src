@@ -350,8 +350,7 @@ static void handle_form(STD_PARA)
 				break;
 
 			case sizeof("fieldset") - 1:
-				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "fieldset", sizeof("fieldset") - 1)
-					&& check_host_whitelist(ctx) == SUCCESS) {
+				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "fieldset", sizeof("fieldset") - 1)) {
 					doit = 1;
 				}
 				break;
