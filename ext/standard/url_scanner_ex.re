@@ -126,7 +126,6 @@ static PHP_INI_MH(OnUpdateHosts)
 	for (key = php_strtok_r(tmp, ",", &lasts);
 		 key;
 		 key = php_strtok_r(NULL, ",", &lasts)) {
-		char *val;
 		size_t keylen;
 		zend_string *tmp_key;
 		char *q;
@@ -312,7 +311,7 @@ static inline void passthru(STD_PARA)
 
 static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
-	php_url *url_parts;
+	php_url *url_parts = NULL;
 
 	if (ctx->val.s) {
 		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->val.s), ZSTR_LEN(ctx->val.s));
