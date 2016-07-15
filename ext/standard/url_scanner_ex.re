@@ -593,8 +593,7 @@ PHPAPI int php_url_scanner_reset_vars(void)
 
 PHPAPI int php_url_scanner_reset_var(zend_string *name, int urlencode)
 {
-	char *start;
-	char *end;
+	char *start, *end, *limit;
 	size_t separator_len;
 	smart_str sname = {0};
 	smart_str svalue = {0};
@@ -637,13 +636,10 @@ PHPAPI int php_url_scanner_reset_var(zend_string *name, int urlencode)
 	}
 
 	/* Get end of url var */
+	limit = ZSTR_VAL(BG(url_adapt_state_ex).url_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).url_app.s);
 	end = start + ZSTR_LEN(url_app.s);
 	separator_len = strlen(PG(arg_separator).output);
-	ZEND_ASSERT(!ZSTR_VAL(BG(url_adapt_state_ex).url_app.s)[ZSTR_LEN(BG(url_adapt_state_ex).url_app.s)]);
-	while (1) {
-		if (!*end) {
-			break;
-		}
+	while (end < limit) {
 		if (!memcmp(end, PG(arg_separator).output, separator_len)) {
 			end += separator_len;
 			sep_removed = 1;
@@ -679,12 +675,9 @@ PHPAPI int php_url_scanner_reset_var(zend_string *name, int urlencode)
 		goto finish;
 	}
 	/* Get end of form var */
+	limit = ZSTR_VAL(BG(url_adapt_state_ex).form_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).form_app.s);
 	end = start + ZSTR_LEN(form_app.s);
-	ZEND_ASSERT(!ZSTR_VAL(BG(url_adapt_state_ex).form_app.s)[ZSTR_LEN(BG(url_adapt_state_ex).form_app.s)]);
-	while (1) {
-		if (!*end) {
-			break;
-		}
+	while (end < limit) {
 		if (*end == '>') {
 			end += 1;
 			break;
