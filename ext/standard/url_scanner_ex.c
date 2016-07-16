@@ -249,6 +249,15 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	php_url_free(url_parts);
 }
 
+enum {
+	TAG_NORMAL = 0,
+	TAG_FORM
+};
+
+enum {
+	ATTR_NORMAL = 0,
+	ATTR_ACTION
+};
 
 #undef YYFILL
 #undef YYCTYPE
@@ -310,9 +319,14 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
 	php_url *url_parts = NULL;
 
-	if (ctx->val.s) {
-		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->val.s), ZSTR_LEN(ctx->val.s));
+	ZEND_ASSERT(ctx->tag_type == TAG_FORM);
+
+	if (ZSTR_LEN(ctx->attr_val.s)) {
+		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->attr_val.s), ZSTR_LEN(ctx->attr_val.s));
+	} else {
+		return SUCCESS; /* empty URL is valid */
 	}
+
 	if (!url_parts) {
 		return FAILURE;
 	} else if (!url_parts->host) {
@@ -371,8 +385,14 @@ static inline void handle_tag(STD_PARA)
 	for (i = 0; i < ZSTR_LEN(ctx->tag.s); i++)
 		ZSTR_VAL(ctx->tag.s)[i] = tolower((int)(unsigned char)ZSTR_VAL(ctx->tag.s)[i]);
     /* intentionally using str_find here, in case the hash value is set, but the string val is changed later */
-	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL)
+	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL) {
 		ok = 1;
+		if (strncasecmp(ZSTR_VAL(ctx->tag.s), "form", ZSTR_LEN(ctx->tag.s)) == 0) {
+			ctx->tag_type = TAG_FORM;
+		} else {
+			ctx->tag_type = TAG_NORMAL;
+		}
+	}
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN;
 }
 
@@ -382,11 +402,19 @@ static inline void handle_arg(STD_PARA)
 		ZSTR_LEN(ctx->arg.s) = 0;
 	}
 	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
+	if (ctx->tag_type == TAG_FORM && strncasecmp(ZSTR_VAL(ctx->arg.s), "action", sizeof("action")-1) == 0) {
+		ctx->attr_type = ATTR_ACTION;
+	} else {
+		ctx->attr_type = ATTR_NORMAL;
+	}
 }
 
 static inline void handle_val(STD_PARA, char quotes, char type)
 {
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2);
+	if (ctx->tag_type == TAG_FORM && ctx->attr_type == ATTR_ACTION) {
+		smart_str_setl(&ctx->attr_val, start + quotes, YYCURSOR - start - quotes * 2);
+	}
 	tag_arg(ctx, quotes, type);
 }
 
@@ -418,7 +446,7 @@ state_plain_begin:
 state_plain:
 	start = YYCURSOR;
 
-#line 422 "ext/standard/url_scanner_ex.c"
+#line 450 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -462,9 +490,9 @@ state_plain:
 		goto yy4;
 	}
 	++YYCURSOR;
-#line 424 "ext/standard/url_scanner_ex.re"
+#line 452 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_TAG; goto state_tag; }
-#line 468 "ext/standard/url_scanner_ex.c"
+#line 496 "ext/standard/url_scanner_ex.c"
 yy4:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -472,17 +500,17 @@ yy4:
 	if (yybm[0+yych] & 128) {
 		goto yy4;
 	}
-#line 425 "ext/standard/url_scanner_ex.re"
+#line 453 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain; }
-#line 478 "ext/standard/url_scanner_ex.c"
+#line 506 "ext/standard/url_scanner_ex.c"
 }
-#line 426 "ext/standard/url_scanner_ex.re"
+#line 454 "ext/standard/url_scanner_ex.re"
 
 
 state_tag:
 	start = YYCURSOR;
 
-#line 486 "ext/standard/url_scanner_ex.c"
+#line 514 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -533,14 +561,14 @@ yy9:
 	yych = *YYCURSOR;
 	goto yy14;
 yy10:
-#line 431 "ext/standard/url_scanner_ex.re"
+#line 459 "ext/standard/url_scanner_ex.re"
 	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); if (STATE == STATE_PLAIN) goto state_plain; else goto state_next_arg; }
-#line 539 "ext/standard/url_scanner_ex.c"
+#line 567 "ext/standard/url_scanner_ex.c"
 yy11:
 	++YYCURSOR;
-#line 432 "ext/standard/url_scanner_ex.re"
+#line 460 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain_begin; }
-#line 544 "ext/standard/url_scanner_ex.c"
+#line 572 "ext/standard/url_scanner_ex.c"
 yy13:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -551,7 +579,7 @@ yy14:
 	}
 	goto yy10;
 }
-#line 433 "ext/standard/url_scanner_ex.re"
+#line 461 "ext/standard/url_scanner_ex.re"
 
 
 state_next_arg_begin:
@@ -560,7 +588,7 @@ state_next_arg_begin:
 state_next_arg:
 	start = YYCURSOR;
 
-#line 564 "ext/standard/url_scanner_ex.c"
+#line 592 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -625,28 +653,28 @@ yy17:
 	++YYCURSOR;
 	if ((yych = *YYCURSOR) == '>') goto yy28;
 yy18:
-#line 444 "ext/standard/url_scanner_ex.re"
+#line 472 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain_begin; }
-#line 631 "ext/standard/url_scanner_ex.c"
+#line 659 "ext/standard/url_scanner_ex.c"
 yy19:
 	++YYCURSOR;
 yy20:
-#line 441 "ext/standard/url_scanner_ex.re"
+#line 469 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); handle_form(STD_ARGS); goto state_plain_begin; }
-#line 637 "ext/standard/url_scanner_ex.c"
+#line 665 "ext/standard/url_scanner_ex.c"
 yy21:
 	++YYCURSOR;
 	yych = *YYCURSOR;
 	goto yy27;
 yy22:
-#line 442 "ext/standard/url_scanner_ex.re"
+#line 470 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_next_arg; }
-#line 645 "ext/standard/url_scanner_ex.c"
+#line 673 "ext/standard/url_scanner_ex.c"
 yy23:
 	++YYCURSOR;
-#line 443 "ext/standard/url_scanner_ex.re"
+#line 471 "ext/standard/url_scanner_ex.re"
 	{ --YYCURSOR; STATE = STATE_ARG; goto state_arg; }
-#line 650 "ext/standard/url_scanner_ex.c"
+#line 678 "ext/standard/url_scanner_ex.c"
 yy25:
 	yych = *++YYCURSOR;
 	goto yy18;
@@ -664,13 +692,13 @@ yy28:
 	yych = *YYCURSOR;
 	goto yy20;
 }
-#line 445 "ext/standard/url_scanner_ex.re"
+#line 473 "ext/standard/url_scanner_ex.re"
 
 
 state_arg:
 	start = YYCURSOR;
 
-#line 674 "ext/standard/url_scanner_ex.c"
+#line 702 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -718,14 +746,14 @@ yy31:
 	yych = *YYCURSOR;
 	goto yy36;
 yy32:
-#line 450 "ext/standard/url_scanner_ex.re"
+#line 478 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); handle_arg(STD_ARGS); STATE = STATE_BEFORE_VAL; goto state_before_val; }
-#line 724 "ext/standard/url_scanner_ex.c"
+#line 752 "ext/standard/url_scanner_ex.c"
 yy33:
 	++YYCURSOR;
-#line 451 "ext/standard/url_scanner_ex.re"
+#line 479 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_NEXT_ARG; goto state_next_arg; }
-#line 729 "ext/standard/url_scanner_ex.c"
+#line 757 "ext/standard/url_scanner_ex.c"
 yy35:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -736,13 +764,13 @@ yy36:
 	}
 	goto yy32;
 }
-#line 452 "ext/standard/url_scanner_ex.re"
+#line 480 "ext/standard/url_scanner_ex.re"
 
 
 state_before_val:
 	start = YYCURSOR;
 
-#line 746 "ext/standard/url_scanner_ex.c"
+#line 774 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -789,17 +817,17 @@ yy39:
 	if (yych == ' ') goto yy46;
 	if (yych == '=') goto yy44;
 yy40:
-#line 458 "ext/standard/url_scanner_ex.re"
+#line 486 "ext/standard/url_scanner_ex.re"
 	{ --YYCURSOR; goto state_next_arg_begin; }
-#line 795 "ext/standard/url_scanner_ex.c"
+#line 823 "ext/standard/url_scanner_ex.c"
 yy41:
 	++YYCURSOR;
 	yych = *YYCURSOR;
 	goto yy45;
 yy42:
-#line 457 "ext/standard/url_scanner_ex.re"
+#line 485 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_VAL; goto state_val; }
-#line 803 "ext/standard/url_scanner_ex.c"
+#line 831 "ext/standard/url_scanner_ex.c"
 yy43:
 	yych = *++YYCURSOR;
 	goto yy40;
@@ -821,14 +849,14 @@ yy46:
 	YYCURSOR = YYMARKER;
 	goto yy40;
 }
-#line 459 "ext/standard/url_scanner_ex.re"
+#line 487 "ext/standard/url_scanner_ex.re"
 
 
 
 state_val:
 	start = YYCURSOR;
 
-#line 832 "ext/standard/url_scanner_ex.c"
+#line 860 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
@@ -889,9 +917,9 @@ state_val:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych != '>') goto yy65;
 yy52:
-#line 468 "ext/standard/url_scanner_ex.re"
+#line 496 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_next_arg_begin; }
-#line 895 "ext/standard/url_scanner_ex.c"
+#line 923 "ext/standard/url_scanner_ex.c"
 yy53:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == '>') goto yy52;
@@ -901,9 +929,9 @@ yy54:
 	yych = *YYCURSOR;
 	goto yy58;
 yy55:
-#line 467 "ext/standard/url_scanner_ex.re"
+#line 495 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 0, ' '); goto state_next_arg_begin; }
-#line 907 "ext/standard/url_scanner_ex.c"
+#line 935 "ext/standard/url_scanner_ex.c"
 yy56:
 	yych = *++YYCURSOR;
 	goto yy52;
@@ -930,9 +958,9 @@ yy61:
 	goto yy52;
 yy62:
 	++YYCURSOR;
-#line 466 "ext/standard/url_scanner_ex.re"
+#line 494 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 1, '\''); goto state_next_arg_begin; }
-#line 936 "ext/standard/url_scanner_ex.c"
+#line 964 "ext/standard/url_scanner_ex.c"
 yy64:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -943,11 +971,11 @@ yy65:
 	}
 	if (yych >= '#') goto yy61;
 	++YYCURSOR;
-#line 465 "ext/standard/url_scanner_ex.re"
+#line 493 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 1, '"'); goto state_next_arg_begin; }
-#line 949 "ext/standard/url_scanner_ex.c"
+#line 977 "ext/standard/url_scanner_ex.c"
 }
-#line 469 "ext/standard/url_scanner_ex.re"
+#line 497 "ext/standard/url_scanner_ex.re"
 
 
 stop:
@@ -1024,6 +1052,7 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 		*newlen += ZSTR_LEN(ctx->buf.s);
 		smart_str_free(&ctx->buf);
 		smart_str_free(&ctx->val);
+		smart_str_free(&ctx->attr_val);
 	}
 	retval = estrndup(ZSTR_VAL(ctx->result.s), ZSTR_LEN(ctx->result.s));
 	smart_str_free(&ctx->result);
@@ -1051,6 +1080,7 @@ static int php_url_scanner_ex_deactivate(void)
 	smart_str_free(&ctx->buf);
 	smart_str_free(&ctx->tag);
 	smart_str_free(&ctx->arg);
+	smart_str_free(&ctx->attr_val);
 
 	return SUCCESS;
 }
@@ -1268,13 +1298,16 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
 {
 	UNREGISTER_INI_ENTRIES();
 
+	zend_hash_clean(&BG(url_adapt_hosts_ht));
+
 	return SUCCESS;
 }
 
 PHP_RINIT_FUNCTION(url_scanner)
 {
-	BG(url_adapt_state_ex).active = 0;
-
+	BG(url_adapt_state_ex).active    = 0;
+	BG(url_adapt_state_ex).tag_type  = 0;
+	BG(url_adapt_state_ex).attr_type = 0;
 	return SUCCESS;
 }
 
@@ -1282,13 +1315,13 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
 	if (BG(url_adapt_state_ex).active) {
 		php_url_scanner_ex_deactivate();
-		BG(url_adapt_state_ex).active = 0;
+		BG(url_adapt_state_ex).active    = 0;
+		BG(url_adapt_state_ex).tag_type  = 0;
+		BG(url_adapt_state_ex).attr_type = 0;
 	}
 
 	smart_str_free(&BG(url_adapt_state_ex).form_app);
 	smart_str_free(&BG(url_adapt_state_ex).url_app);
-
-	zend_hash_clean(&BG(url_adapt_hosts_ht));
 
 	return SUCCESS;
 }
