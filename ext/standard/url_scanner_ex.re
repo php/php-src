@@ -134,9 +134,11 @@ static PHP_INI_MH(OnUpdateHosts)
 			*q = tolower(*q);
 		}
 		keylen = q - key;
-		tmp_key = zend_string_init(key, keylen, 0);
-		zend_hash_add_empty_element(hosts, tmp_key);
-		zend_string_release(tmp_key);
+		if (keylen > 0) {
+			tmp_key = zend_string_init(key, keylen, 0);
+			zend_hash_add_empty_element(hosts, tmp_key);
+			zend_string_release(tmp_key);
+		}
 	}
 	efree(tmp);
 
@@ -803,10 +805,8 @@ finish:
 PHP_MINIT_FUNCTION(url_scanner)
 {
 	BG(url_adapt_state_ex).tags = NULL;
-
 	BG(url_adapt_state_ex).form_app.s = BG(url_adapt_state_ex).url_app.s = NULL;
-
-	zend_hash_init(&BG(url_adapt_hosts_ht), 2, NULL, NULL, 1);
+	zend_hash_init(&BG(url_adapt_hosts_ht), 0, NULL, NULL, 1);
 
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
