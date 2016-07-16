@@ -144,7 +144,7 @@ static PHP_INI_MH(OnUpdateHosts)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
 	STD_PHP_INI_ENTRY("url_rewriter.hosts", "", PHP_INI_ALL, OnUpdateHosts, url_adapt_hosts_ht, php_basic_globals, basic_globals)
 PHP_INI_END()
 
@@ -333,8 +333,7 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 }
 
 /*
- * This function appends a hidden input field after a <form> or
- * <fieldset>.  The latter is important for XHTML.
+ * This function appends a hidden input field after a <form>.
  */
 static void handle_form(STD_PARA)
 {
@@ -345,12 +344,6 @@ static void handle_form(STD_PARA)
 			case sizeof("form") - 1:
 				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "form", sizeof("form") - 1)
 					&& check_host_whitelist(ctx) == SUCCESS) {
-					doit = 1;
-				}
-				break;
-
-			case sizeof("fieldset") - 1:
-				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "fieldset", sizeof("fieldset") - 1)) {
 					doit = 1;
 				}
 				break;

@@ -57,10 +57,10 @@ session_destroy();
 ?>
 --EXPECT--
 <form action="//php.net/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
-<fieldset><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset>
 <form action="../do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
 <fieldset>
 <form action="/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
 <fieldset>
 <form action="/foo/do.php">
-<fieldset><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset>
