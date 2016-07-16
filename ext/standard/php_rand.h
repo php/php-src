@@ -60,6 +60,9 @@
  *
  * -RL
  */
+#define RAND_RANGE_BADSCALING(__n, __min, __max, __tmax) \
+	(__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
+
 #define RAND_RANGE(__n, __min, __max, __tmax) \
 	(__n) = php_mt_rand_range((__min), (__max))
 

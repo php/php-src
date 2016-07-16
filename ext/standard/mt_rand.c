@@ -217,11 +217,10 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 	zend_ulong limit;
 	zend_ulong result;
 
-#if ZEND_ULONG_MAX > UINT32_MAX
-	result = ((zend_ulong)php_mt_rand() << 32) | php_mt_rand();
-#else
 	result = php_mt_rand();
-#endif
+	if (umax > UINT32_MAX) {
+		result = (result << 32) | php_mt_rand();
+	}
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == ZEND_ULONG_MAX)) {
@@ -238,11 +237,7 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 
 		/* Discard numbers over the limit to avoid modulo bias */
 		while (UNEXPECTED(result > limit)) {
-#if ZEND_ULONG_MAX > UINT32_MAX
 			result = (result << 32) | php_mt_rand();
-#else
-			result = php_mt_rand();
-#endif
 		}
 	}
 
@@ -256,6 +251,7 @@ PHP_FUNCTION(mt_rand)
 {
 	zend_long min;
 	zend_long max;
+	zend_long n;
 	int argc = ZEND_NUM_ARGS();
 
 	if (argc == 0) {
@@ -272,7 +268,15 @@ PHP_FUNCTION(mt_rand)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(php_mt_rand_range(min, max));
+	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
+		RETURN_LONG(php_mt_rand_range(min, max));
+	}
+
+	/* Legacy mode deliberately not inside php_mt_rand_range()
+	 * to prevent other functions being affected */
+	n = (zend_long)php_mt_rand() >> 1;
+	RAND_RANGE_BADSCALING(n, min, max, PHP_MT_RAND_MAX);
+	RETURN_LONG(n);
 }
 /* }}} */
 
