@@ -1,7 +1,5 @@
 --TEST--
 Test basic function : variation5 use_trans_sid
---XFAIL--
-URL parser must be improved
 --INI--
 session.use_strict_mode=0
 session.use_only_cookies=0
@@ -203,7 +201,6 @@ echo '
 <a href="//bad.com/some/path/file.php?foo=var">test</a>
 <a href="//bad.com/some/path/file.php?foo=var#bar">test</a>
 
-FIXME: Current URL scanner cannot handle tag attribute well and "action" MUST be the end of attribute to work correctly.
 <form action="//bad.com/script.php" method="post">
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />

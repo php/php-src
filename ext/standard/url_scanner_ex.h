@@ -52,6 +52,10 @@ typedef struct {
 	char *lookup_data;
 	int state;
 
+	smart_str attr_val;
+	int tag_type;
+	int attr_type;
+
 	/* Everything above is zeroed in RINIT */
 	HashTable *tags;
 } url_adapt_state_ex_t;

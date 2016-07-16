@@ -252,6 +252,15 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	php_url_free(url_parts);
 }
 
+enum {
+	TAG_NORMAL = 0,
+	TAG_FORM
+};
+
+enum {
+	ATTR_NORMAL = 0,
+	ATTR_ACTION
+};
 
 #undef YYFILL
 #undef YYCTYPE
@@ -313,9 +322,14 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
 	php_url *url_parts = NULL;
 
-	if (ctx->val.s) {
-		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->val.s), ZSTR_LEN(ctx->val.s));
+	ZEND_ASSERT(ctx->tag_type == TAG_FORM);
+
+	if (ZSTR_LEN(ctx->attr_val.s)) {
+		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->attr_val.s), ZSTR_LEN(ctx->attr_val.s));
+	} else {
+		return SUCCESS; /* empty URL is valid */
 	}
+
 	if (!url_parts) {
 		return FAILURE;
 	} else if (!url_parts->host) {
@@ -374,8 +388,14 @@ static inline void handle_tag(STD_PARA)
 	for (i = 0; i < ZSTR_LEN(ctx->tag.s); i++)
 		ZSTR_VAL(ctx->tag.s)[i] = tolower((int)(unsigned char)ZSTR_VAL(ctx->tag.s)[i]);
     /* intentionally using str_find here, in case the hash value is set, but the string val is changed later */
-	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL)
+	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL) {
 		ok = 1;
+		if (strncasecmp(ZSTR_VAL(ctx->tag.s), "form", ZSTR_LEN(ctx->tag.s)) == 0) {
+			ctx->tag_type = TAG_FORM;
+		} else {
+			ctx->tag_type = TAG_NORMAL;
+		}
+	}
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN;
 }
 
@@ -385,11 +405,19 @@ static inline void handle_arg(STD_PARA)
 		ZSTR_LEN(ctx->arg.s) = 0;
 	}
 	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
+	if (ctx->tag_type == TAG_FORM && strncasecmp(ZSTR_VAL(ctx->arg.s), "action", sizeof("action")-1) == 0) {
+		ctx->attr_type = ATTR_ACTION;
+	} else {
+		ctx->attr_type = ATTR_NORMAL;
+	}
 }
 
 static inline void handle_val(STD_PARA, char quotes, char type)
 {
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2);
+	if (ctx->tag_type == TAG_FORM && ctx->attr_type == ATTR_ACTION) {
+		smart_str_setl(&ctx->attr_val, start + quotes, YYCURSOR - start - quotes * 2);
+	}
 	tag_arg(ctx, quotes, type);
 }
 
@@ -542,6 +570,7 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 		*newlen += ZSTR_LEN(ctx->buf.s);
 		smart_str_free(&ctx->buf);
 		smart_str_free(&ctx->val);
+		smart_str_free(&ctx->attr_val);
 	}
 	retval = estrndup(ZSTR_VAL(ctx->result.s), ZSTR_LEN(ctx->result.s));
 	smart_str_free(&ctx->result);
@@ -569,6 +598,7 @@ static int php_url_scanner_ex_deactivate(void)
 	smart_str_free(&ctx->buf);
 	smart_str_free(&ctx->tag);
 	smart_str_free(&ctx->arg);
+	smart_str_free(&ctx->attr_val);
 
 	return SUCCESS;
 }
@@ -786,13 +816,16 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
 {
 	UNREGISTER_INI_ENTRIES();
 
+	zend_hash_clean(&BG(url_adapt_hosts_ht));
+
 	return SUCCESS;
 }
 
 PHP_RINIT_FUNCTION(url_scanner)
 {
-	BG(url_adapt_state_ex).active = 0;
-
+	BG(url_adapt_state_ex).active    = 0;
+	BG(url_adapt_state_ex).tag_type  = 0;
+	BG(url_adapt_state_ex).attr_type = 0;
 	return SUCCESS;
 }
 
@@ -800,13 +833,13 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
 	if (BG(url_adapt_state_ex).active) {
 		php_url_scanner_ex_deactivate();
-		BG(url_adapt_state_ex).active = 0;
+		BG(url_adapt_state_ex).active    = 0;
+		BG(url_adapt_state_ex).tag_type  = 0;
+		BG(url_adapt_state_ex).attr_type = 0;
 	}
 
 	smart_str_free(&BG(url_adapt_state_ex).form_app);
 	smart_str_free(&BG(url_adapt_state_ex).url_app);
-
-	zend_hash_clean(&BG(url_adapt_hosts_ht));
 
 	return SUCCESS;
 }
