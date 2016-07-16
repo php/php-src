@@ -96,13 +96,13 @@ static PHP_INI_MH(OnUpdateTags)
 
 static PHP_INI_MH(OnUpdateHosts)
 {
-	HashTable *dom;
+	HashTable *hosts;
 	char *key;
 	char *tmp;
 	char *lasts = NULL;
 
-	dom = &BG(url_adapt_hosts_ht);
-	zend_hash_clean(dom);
+	hosts = &BG(url_adapt_hosts_ht);
+	zend_hash_clean(hosts);
 
 #if 0
 	/* Default to HTTP_HOST */
@@ -114,7 +114,7 @@ static PHP_INI_MH(OnUpdateHosts)
 			(host = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_HOST", sizeof("HTTP_HOST") - 1)) &&
 			Z_TYPE_P(host) == IS_STRING) {
 			host_tmp = php_string_tolower(Z_STR_P(host));
-			zend_hash_add_empty_element(dom, host_tmp);
+			zend_hash_add_empty_element(hosts, host_tmp);
 			zend_string_release(host_tmp);
 			return SUCCESS;
 		}
@@ -135,7 +135,7 @@ static PHP_INI_MH(OnUpdateHosts)
 		}
 		keylen = q - key;
 		tmp_key = zend_string_init(key, keylen, 0);
-		zend_hash_add_empty_element(dom, tmp_key);
+		zend_hash_add_empty_element(hosts, tmp_key);
 		zend_string_release(tmp_key);
 	}
 	efree(tmp);
