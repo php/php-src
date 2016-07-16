@@ -713,7 +713,6 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 
 	_node_as_zval(sxe, node, &ret, type, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 
-	sxe = Z_SXEOBJ_P(&ret);
 	if (!Z_ISUNDEF(sxe->tmp)) {
 		zval_ptr_dtor(&sxe->tmp);
 	}
