@@ -646,6 +646,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_getopt, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, opts) /* ARRAY_INFO(0, opts, 1) */
+	ZEND_ARG_INFO(1, optind)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_flush, 0)
@@ -2563,6 +2564,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
 	ZEND_ARG_INFO(0, syntax_only)
 	ZEND_ARG_INFO(1, callable_name)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_is_iterable, 0, 0, 1)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ uniqid.c */
 #ifdef HAVE_GETTIMEOFDAY
@@ -2676,6 +2681,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_version_compare, 0, 0, 2)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ win32/codepage.c */
+#ifdef PHP_WIN32
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_set, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -2691,6 +2697,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
 	ZEND_ARG_INFO(0, out_codepage)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 /* }}} */
 
@@ -3077,6 +3084,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_object,														arginfo_is_object)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
+	PHP_FE(is_iterable,														arginfo_is_iterable)
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)
@@ -4262,7 +4270,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 }
 /* }}} */
 
-/* {{{ proto array getopt(string options [, array longopts])
+/* {{{ proto array getopt(string options [, array longopts [, int &optind]])
    Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
@@ -4274,11 +4282,18 @@ PHP_FUNCTION(getopt)
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	zval val, *args = NULL, *p_longopts = NULL;
+	zval *zoptind = NULL;
 	int optname_len = 0;
 	opt_struct *opts, *orig_opts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &options, &options_len, &p_longopts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|az/", &options, &options_len, &p_longopts, &zoptind) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	/* Init zoptind to 1 */
+	if (zoptind) {
+		zval_dtor(zoptind);
+		ZVAL_LONG(zoptind, 1);
 	}
 
 	/* Get argv from the global symbol table. We calculate argc ourselves
@@ -4420,6 +4435,11 @@ PHP_FUNCTION(getopt)
 		}
 
 		php_optarg = NULL;
+	}
+
+	/* Set zoptind to php_optind */
+	if (zoptind) {
+		ZVAL_LONG(zoptind, php_optind);
 	}
 
 	free_longopts(orig_opts);
@@ -4720,7 +4740,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
 
 		case 4: /* send to SAPI */
 			if (sapi_module.log_message) {
-				sapi_module.log_message(message);
+				sapi_module.log_message(message, -1);
 			} else {
 				return FAILURE;
 			}
@@ -4848,7 +4868,8 @@ PHP_FUNCTION(forward_static_call)
 	}
 
 	if (!EX(prev_execute_data)->func->common.scope) {
-		zend_error(E_ERROR, "Cannot call forward_static_call() when no class scope is active");
+		zend_throw_error(NULL, "Cannot call forward_static_call() when no class scope is active");
+		return;
 	}
 
 	fci.retval = &retval;
@@ -5537,7 +5558,7 @@ PHP_FUNCTION(ignore_user_abort)
 		return;
 	}
 
-	old_setting = PG(ignore_user_abort);
+	old_setting = (unsigned short)PG(ignore_user_abort);
 
 	if (ZEND_NUM_ARGS()) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);

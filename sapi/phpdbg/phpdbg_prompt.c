@@ -1325,9 +1325,7 @@ PHPDBG_COMMAND(watch) /* {{{ */
 		phpdbg_list_watchpoints();
 	} else switch (param->type) {
 		case STR_PARAM:
-			if (phpdbg_create_var_watchpoint(param->str, param->len) != FAILURE) {
-				phpdbg_notice("watch", "variable=\"%.*s\"", "Set watchpoint on %.*s", (int) param->len, param->str);
-			}
+			phpdbg_create_var_watchpoint(param->str, param->len);
 			break;
 
 		phpdbg_default_switch_case();

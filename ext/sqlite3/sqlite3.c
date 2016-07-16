@@ -1379,7 +1379,9 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 	}
 
 	if (param->param_number < 1) {
-		zend_string_release(param->name);
+		if (param->name) {
+			zend_string_release(param->name);
+		}
 		return 0;
 	}
 

@@ -2,27 +2,233 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0beta1
 
+- Core:
+  . Fixed bug #72594 (Calling an earlier instance of an included anonymous
+    class fatals). (Laruence)
+  . Fixed bug #72581 (previous property undefined in Exception after
+    deserialization). (Laruence)
+  . Fixed bug #72543 (Different references behavior comparing to PHP 5)
+    (Laruence, Dmitry, Nikita)
+  . Fixed bug #72347 (VERIFY_RETURN type casts visible in finally). (Dmitry)
+  . Fixed bug #72216 (Return by reference with finally is not memory safe).
+    (Dmitry)
+  . Fixed bug #72215 (Wrong return value if var modified in finally). (Dmitry)
+  . Fixed bug #71818 (Memory leak when array altered in destructor). (Dmitry)
+  . Fixed bug #71539 (Memory error on $arr[$a] =& $arr[$b] if RHS rehashes)
+    (Dmitry, Nikita)
+  . Added new constant PHP_FD_SETSIZE. (cmb)
+  . Added optind parameter to getopt(). (as)
+  . Added PHP to SAPI error severity mapping for logs. (Martin Vobruba)
+  . Fixed bug #71911 (Unable to set --enable-debug on building extensions by
+    phpize on Windows). (Yuji Uchiyama)
+  . Fixed bug #29368 (The destructor is called when an exception is thrown from
+    the constructor). (Dmitry)
+
+- COM:
+  . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
+
+- Date:
+  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
+    parsing). (derick)
+
+- DOM:
+  . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
+
+- Filter:
+  . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
+    range). (bugs dot php dot net at majkl578 dot cz)
+
+- FPM:
+  . Fixed bug #72575 (using --allow-to-run-as-root should ignore missing user).
+    (gooh)
+
+- GD:
+  . Fixed bug #72596 (imagetypes function won't advertise WEBP support). (cmb)
+  . Fixed bug #72604 (imagearc() ignores thickness for full arcs). (cmb)
+
+- Intl:
+  . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
+    names). (cmb)
+
+- Mbstring:
+  . Deprecated mb_ereg_replace() eval option. (Rouven Weßling, cmb)
+
+- MCrypt:
+  . Deprecated ext/mcrypt. (Scott Arciszewski, cmb)
+
+- Opcache:
+  . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
+    (Keyur)
+
+- PDO_pgsql:
+  . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
+  . Fixed bug #72570 (Segmentation fault when binding parameters on a query
+    without placeholders). (Matteo)
+
+- Pcntl
+  . Implemented asynchronous signal handling without TICKS. (Dmitry)
+  . Added pcntl_signal_get_handler() that returns the current signal handler
+    for a particular signal. Addresses FR #72409. (David Walker)
+
+- Reflection:
+  . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
+    (Nikita Nefedov)
+
+- SimpleXML:
+  . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
+    element). (Laruence)
+
+- Tidy:
+  . Implemented support for libtidy 5.0.0 and above. (Michael Orlitzky, Anatol)
+
+- Wddx:
+  . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
+
+07 Jul 2016, PHP 7.1.0alpha3
+
+- Core:
+  . Implemented RFC: Iterable. (Aaron Piotrowski)
+  . Fixed bug #72523 (dtrace issue with reflection (failed test)). (Laruence)
+  . Fixed bug #72508 (strange references after recursive function call and
+    "switch" statement). (Laruence)
+  . Implemented RFC: Closure::fromCallable (Danack)
+
+- COM:
+  . Fixed bug #72498 (variant_date_from_timestamp null dereference). (Anatol)
+
 - CURL:
   . Add curl_multi_errno(), curl_share_errno() and curl_share_strerror()
 	functions. (Pierrick)
   . Add support for HTTP/2 Server Push (davey)
 
+- Date:
+  . Invalid serialization data for a DateTime or DatePeriod object will now
+    throw an instance of Error from __wakeup() or __set_state() instead of
+    resulting in a fatal error. (Aaron Piotrowski)
+  . Timezone initialization failure from serialized data will now throw an
+    instance of Error from __wakeup() or __set_state() instead of resulting in
+    a fatal error. (Aaron Piotrowski)
+  . Export date_get_interface_ce() for extension use. (Jeremy Mikola)
+
+- DBA:
+  . Data modification functions (e.g.: dba_insert()) now throw an instance of
+    Error instead of triggering a catchable fatal error if the key is does not
+    contain exactly two elements. (Aaron Piotrowski)
+
+- DOM:
+  . Invalid schema or RelaxNG validation contexts will throw an instance of
+    Error instead of resulting in a fatal error. (Aaron Piotrowski)
+  . Attempting to register a node class that does not extend the appropriate
+    base class will now throw an instance of Error instead of resulting in a
+    fatal error. (Aaron Piotrowski)
+  . Attempting to read an invalid or write to a readonly property will throw
+    an instance of Error instead of resulting in a fatal error. (Aaron
+    Piotrowski)
+
+- GD:
+  . Fixed bug #72404 (imagecreatefromjpeg fails on selfie). (cmb)
+
+- IMAP:
+  . An email address longer than 16385 bytes will throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+    
+- Intl:
+  . Failure to call the parent constructor in a class extending Collator
+    before invoking the parent methods will throw an instance of Error
+    instead of resulting in a recoverable fatal error. (Aaron Piotrowski)
+  . Cloning a Transliterator object may will now throw an instance of Error
+    instead of resulting in a fatal error if cloning the internal
+    transliterator fails. (Aaron Piotrowski)
+
+- LDAP:
+  . Providing an unknown modification type to ldap_batch_modify() will now
+    throw an instance of Error instead of resulting in a fatal error.
+    (Aaron Piotrowski)
+
+- Mbstring:
+  . mb_ereg() and mb_eregi() will now throw an instance of ParseError if an
+    invalid PHP expression is provided and the 'e' option is used. (Aaron
+    Piotrowski)
+
+- Mcrypt:
+  . mcrypt_encrypt() and mcrypt_decrypt() will throw an instance of Error
+    instead of resulting in a fatal error if mcrypt cannot be initialized.
+    (Aaron Piotrowski)
+
+- Mysqli:
+  . Attempting to read an invalid or write to a readonly property will throw
+    an instance of Error instead of resulting in a fatal error. (Aaron
+    Piotrowski)
+
+- OpenSSL:
+  . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
+    (Dominic Luechinger)
+
 - PCRE:
   . Fixed bug #72476 (Memleak in jit_stack). (Laruence)
   . Fixed bug #72463 (mail fails with invalid argument). (Anatol)
+
+- Readline:
+  . Fixed bug #72538 (readline_redisplay crashes php). (Laruence)
+
+- Reflection:
+  . Failure to retrieve a reflection object or retrieve an object property
+    will now throw an instance of Error instead of resulting in a fatal error.
+    (Aaron Piotrowski)
 
 - SQLite3:
   . Fixed bug #70628 (Clearing bindings on an SQLite3 statement doesn't work).
     (cmb)
 
+- Session:
+  . Fixed bug #72531 (ps_files_cleanup_dir Buffer overflow). (Laruence)
+  . Custom session handlers that do not return strings for session IDs will 
+    now throw an instance of Error instead of resulting in a fatal error
+    when a function is called that must generate a session ID.
+    (Aaron Piotrowski)
+  . An invalid setting for session.hash_function will throw an instance of
+    Error instead of resulting in a fatal error when a session ID is created.
+    (Aaron Piotrowski)
+
+- SimpleXML:
+  . Creating an unnamed or duplicate attribute will throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+
+- SPL:
+  . Attempting to clone an SplDirectory object will throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+  . Calling ArrayIterator::append() when iterating over an object will throw an
+    instance of Error instead of resulting in a fatal error. (Aaron Piotrowski)
+  . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
+
 - Standard:
   . Implemented RFC: More precise float values. (Jakub Zelenka, Yasuo)
   . array_multisort now uses zend_sort instead zend_qsort. (Laruence)
   . Fixed bug #72505 (readfile() mangles files larger than 2G). (Cschneid)
+  . assert() will throw a ParseError when evaluating a string given as the first
+    argument if the PHP code is invalid instead of resulting in a catchable
+    fatal error. (Aaron Piotrowski)
+  . Calling forward_static_call() outside of a class scope will now throw an
+    instance of Error instead of resulting in a fatal error. (Aaron Piotrowski)
 
-- OpenSSL:
-  . Implemented FR #61204 (Add elliptic curve support for OpenSSL).
-    (Dominic Luechinger)
+- Streams:
+  . Fixed bug #72534 (stream_socket_get_name crashes). (Anatol)
+    
+- Tidy:
+  . Creating a tidyNode manually will now throw an instance of Error instead of
+    resulting in a fatal error. (Aaron Piotrowski)
+
+- WDDX:
+  . A circular reference when serializing will now throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+
+- XML-RPC:
+  . A circular reference when serializing will now throw an instance of Error
+    instead of resulting in a fatal error. (Aaron Piotrowski)
+
+- Zip:
+  . ZipArchive::addGlob() will throw an instance of Error instead of resulting
+    in a fatal error if glob support is not available. (Aaron Piotrowski)
 
 23 Jun 2016, PHP 7.1.0alpha2
 
@@ -37,6 +243,10 @@ PHP                                                                        NEWS
   . Fixed bug #69489 (tempnam() should raise notice if falling back to temp dir).
     (Laruence, Anatol)
   . Fixed UTF-8 and long path support on Windows. (Anatol)
+
+- Date:
+  . Fixed bug #63740 (strtotime seems to use both sunday and monday as start of
+    week). (Derick)
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
@@ -64,6 +274,7 @@ PHP                                                                        NEWS
   . Implemented FR #72385 (Update SQLite bundle lib(3.13.0)). (Laruence)
 
 - Standard:
+  . Added is_iterable() function. (Aaron Piotrowski)
   . Fixed bug #72306 (Heap overflow through proc_open and $env parameter).
     (Laruence)
 

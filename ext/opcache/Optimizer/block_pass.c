@@ -733,10 +733,26 @@ optimize_const_unary_op:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					src = VAR_SOURCE(opline->op1);
 					if (src && src->opcode == ZEND_QM_ASSIGN) {
-						/* T = QM_ASSIGN(X), RETURN(T) to NOP, RETURN(X) */
-						VAR_SOURCE(opline->op1) = NULL;
-						COPY_NODE(opline->op1, src->op1);
-						MAKE_NOP(src);
+						zend_op *op = src + 1;
+						zend_bool optimize = 1;
+
+						while (op < opline) {
+							if ((op->op1_type == opline->op1_type
+							  && op->op1.var == opline->op1.var)
+							 || (op->op2_type == opline->op1_type
+							  && op->op2.var == opline->op1.var)) {
+								optimize = 0;
+								break;
+							}
+							op++;
+						}
+
+						if (optimize) {
+							/* T = QM_ASSIGN(X), RETURN(T) to NOP, RETURN(X) */
+							VAR_SOURCE(opline->op1) = NULL;
+							COPY_NODE(opline->op1, src->op1);
+							MAKE_NOP(src);
+						}
 					}
 				}
 				break;

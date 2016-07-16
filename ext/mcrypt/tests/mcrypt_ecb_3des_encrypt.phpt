@@ -53,18 +53,26 @@ foreach ($ivs as $iv) {
 
 key length=8
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_ecb_3des_encrypt.php on line 31
+
 Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=20
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_ecb_3des_encrypt.php on line 31
+
 Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=24
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_ecb_3des_encrypt.php on line 31
 string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6ad42e7d18312ae8a57ab927e1dc892e5ff56c061864f27"
 
 key length=26
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_ecb_3des_encrypt.php on line 31
 
 Warning: mcrypt_encrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
@@ -72,11 +80,17 @@ string(0) ""
 --- testing different iv lengths
 
 iv length=4
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_ecb_3des_encrypt.php on line 38
 string(112) "440a6f54601969b15e81df09cd381ef585fede5f3620587fd1a949c520aed9f6d10ebbabf2cea3e1f04c9251c2878c0ca37d51c80d490165"
 
 iv length=8
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_ecb_3des_encrypt.php on line 38
 string(112) "440a6f54601969b15e81df09cd381ef585fede5f3620587fd1a949c520aed9f6d10ebbabf2cea3e1f04c9251c2878c0ca37d51c80d490165"
 
 iv length=9
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_ecb_3des_encrypt.php on line 38
 string(112) "440a6f54601969b15e81df09cd381ef585fede5f3620587fd1a949c520aed9f6d10ebbabf2cea3e1f04c9251c2878c0ca37d51c80d490165"
 ===DONE===

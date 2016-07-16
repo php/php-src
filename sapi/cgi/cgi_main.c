@@ -276,8 +276,9 @@ static int print_extension_info(zend_extension *ext, void *arg)
 
 static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s)
 {
-	return strcmp(	((zend_extension *)(*f)->data)->name,
-					((zend_extension *)(*s)->data)->name);
+	zend_extension *fe = (zend_extension*)(*f)->data;
+	zend_extension *se = (zend_extension*)(*s)->data;
+	return strcmp(fe->name, se->name);
 }
 
 static void print_extensions(void)
@@ -710,7 +711,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array)
 	}
 }
 
-static void sapi_cgi_log_message(char *message)
+static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;

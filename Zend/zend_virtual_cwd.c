@@ -311,7 +311,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 #if ZEND_ENABLE_ZVAL_LONG64
 		ret = _wstat64(pathw, buf);
 #else
-		ret = _wstat(pathw, buf);
+		ret = _wstat(pathw, (struct _stat32 *)buf);
 #endif
 		free(pathw);
 

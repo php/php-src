@@ -4,8 +4,6 @@ Bug #66339 (PHP segfaults in imagexbm)
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
 ?>
---XFAIL--
-libxpbm works different way linux an dwindows, to investigate
 --FILE--
 <?php
 $im = imagecreate(8, 8);
@@ -21,13 +19,13 @@ echo file_get_contents('./bug66339私はガラスを食べられます.xbm');
 <?php
 unlink('./bug66339私はガラスを食べられます.xbm');
 ?>
---EXPECT--
+--EXPECTF--
 #define image_width 8
 #define image_height 8
 static unsigned char image_bits[] = {
   0xFF, 0xFF, 0x83, 0x83, 0x83, 0x83, 0x83, 0xFF};
 ------------
-#define bug66339_width 8
-#define bug66339_height 8
-static unsigned char bug66339_bits[] = {
+#define bug66339%swidth 8
+#define bug66339%sheight 8
+static unsigned char bug66339%sbits[] = {
   0xFF, 0xFF, 0x83, 0x83, 0x83, 0x83, 0x83, 0xFF};

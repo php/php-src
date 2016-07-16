@@ -19,7 +19,7 @@
 	 $Id$
 */
 
-$header_text = <<< DATA
+const HEADER_TEXT = <<< DATA
 /*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
@@ -50,9 +50,9 @@ DATA;
 
 error_reporting(E_ALL);
 
-define("ZEND_VM_KIND_CALL",   1);
-define("ZEND_VM_KIND_SWITCH", 2);
-define("ZEND_VM_KIND_GOTO",   3);
+const ZEND_VM_KIND_CALL   = 1;
+const ZEND_VM_KIND_SWITCH = 2;
+const ZEND_VM_KIND_GOTO   = 3;
 
 $vm_op_flags = array(
 	"ZEND_VM_OP_SPEC"         => 1<<0,
@@ -2144,7 +2144,7 @@ function gen_vm($def, $skel) {
 	$f = fopen(__DIR__ . "/zend_vm_opcodes.h", "w+") or die("ERROR: Cannot create zend_vm_opcodes.h\n");
 
 	// Insert header
-	out($f, $GLOBALS['header_text']);
+	out($f, HEADER_TEXT);
 	fputs($f, "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n");
 	fputs($f, "#define ZEND_VM_SPEC\t\t" . ZEND_VM_SPEC . "\n");
 	fputs($f, "#define ZEND_VM_LINES\t\t" . ZEND_VM_LINES . "\n");
@@ -2184,7 +2184,7 @@ function gen_vm($def, $skel) {
 	$f = fopen(__DIR__ . "/zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
 
 	// Insert header
-	out($f, $GLOBALS['header_text']);
+	out($f, HEADER_TEXT);
 	fputs($f,"#include <stdio.h>\n");
 	fputs($f,"#include <zend.h>\n\n");
 	
@@ -2216,7 +2216,7 @@ function gen_vm($def, $skel) {
 	$executor_file = realpath(__DIR__ . "/zend_vm_execute.h");
 
 	// Insert header
-	out($f, $GLOBALS['header_text']);
+	out($f, HEADER_TEXT);
 
 	out($f, "#ifdef ZEND_WIN32\n");
 	// Suppress free_op1 warnings on Windows
@@ -2506,7 +2506,7 @@ function usage() {
 }
 
 // Parse arguments
-for ($i = 1;  $i < $argc; $i++) {
+for ($i = 1; $i < $argc; $i++) {
 	if (strpos($argv[$i],"--with-vm-kind=") === 0) {
 		$kind = substr($argv[$i], strlen("--with-vm-kind="));
 		switch ($kind) {
@@ -2525,7 +2525,7 @@ for ($i = 1;  $i < $argc; $i++) {
 				die();
 		}
 	} else if ($argv[$i] == "--without-specializer") {
-	  // Disabling specialization
+		// Disabling specialization
 		define("ZEND_VM_SPEC", 0);
 	} else if ($argv[$i] == "--with-lines") {
 		// Enabling debugging using original zend_vm_def.h
@@ -2542,18 +2542,16 @@ for ($i = 1;  $i < $argc; $i++) {
 
 // Using defaults
 if (!defined("ZEND_VM_KIND")) {
-  // Using CALL threading by default
+	// Using CALL threading by default
 	define("ZEND_VM_KIND", ZEND_VM_KIND_CALL);
 }
 if (!defined("ZEND_VM_SPEC")) {
-  // Using specialized executor by default
+	// Using specialized executor by default
 	define("ZEND_VM_SPEC", 1);
 }
 if (!defined("ZEND_VM_LINES")) {
-  // Disabling #line directives
+	// Disabling #line directives
 	define("ZEND_VM_LINES", 0);
 }
 
 gen_vm(__DIR__ . "/zend_vm_def.h", __DIR__ . "/zend_vm_execute.skl");
-
-?>
