@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Sascha Schumann <sascha@schumann.cx>                         |
+  |         Yasuo Ohgaki <yohgaki@ohgaki.net>                            |
   +----------------------------------------------------------------------+
 */
 
@@ -197,17 +198,6 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		return;
 	}
 
-#if 0
-	/* Do not make work with "//example.com/foo/bar" */
-	if (url_parts->scheme ||
-		(*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/')) {
-		/* Current URL scanner works only with relative local path */
-		smart_str_append_smart_str(dest, url);
-		php_url_free(url_parts);
-		return;
-	}
-#endif
-
 	/* Check host whitelist. If it's not listed, do nothing. */
 	if (url_parts->host
 		&& (tmp_len = strlen(url_parts->host))
@@ -373,10 +363,10 @@ static void handle_form(STD_PARA)
 {
 	int doit = 0;
 
-	if (ZSTR_LEN(ctx->form_app.s) > 0 ) {
+	if (ZSTR_LEN(ctx->form_app.s) > 0) {
 		switch (ZSTR_LEN(ctx->tag.s)) {
 			case sizeof("form") - 1:
-				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "form", sizeof("form") - 1)
+				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), ZEND_STRL("form"))
 					&& check_host_whitelist(ctx) == SUCCESS) {
 					doit = 1;
 				}
@@ -425,7 +415,7 @@ static inline void handle_arg(STD_PARA)
 		ZSTR_LEN(ctx->arg.s) = 0;
 	}
 	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
-	if (ctx->tag_type == TAG_FORM && strncasecmp(ZSTR_VAL(ctx->arg.s), "action", sizeof("action")-1) == 0) {
+	if (ctx->tag_type == TAG_FORM && strncasecmp(ZSTR_VAL(ctx->arg.s), ZEND_STRL("action")) == 0) {
 		ctx->attr_type = ATTR_ACTION;
 	} else {
 		ctx->attr_type = ATTR_NORMAL;
