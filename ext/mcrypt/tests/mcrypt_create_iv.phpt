@@ -11,7 +11,18 @@ $iv3 = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB)
 echo strlen($iv1) . "\n";
 echo strlen($iv2) . "\n";
 echo strlen($iv3) . "\n";
---EXPECT--
+--EXPECTF--
+Deprecated: Function mcrypt_get_iv_size() is deprecated in %s%emcrypt_create_iv.php on line 2
+
+Deprecated: Function mcrypt_create_iv() is deprecated in %s%emcrypt_create_iv.php on line 2
+
+Deprecated: Function mcrypt_get_iv_size() is deprecated in %s%emcrypt_create_iv.php on line 3
+
+Deprecated: Function mcrypt_create_iv() is deprecated in %s%emcrypt_create_iv.php on line 3
+
+Deprecated: Function mcrypt_get_iv_size() is deprecated in %s%emcrypt_create_iv.php on line 4
+
+Deprecated: Function mcrypt_create_iv() is deprecated in %s%emcrypt_create_iv.php on line 4
 16
 16
 16

@@ -118,6 +118,7 @@ END_EXTERN_C()
 #define ZEND_CASE                             48
 #define ZEND_CHECK_VAR                        49
 #define ZEND_SEND_VAR_NO_REF_EX               50
+#define ZEND_MAKE_REF                         51
 #define ZEND_BOOL                             52
 #define ZEND_FAST_CONCAT                      53
 #define ZEND_ROPE_INIT                        54

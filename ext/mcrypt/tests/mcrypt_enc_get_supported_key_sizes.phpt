@@ -7,7 +7,10 @@ mcrypt_enc_get_supported_key_sizes
 $td  = mcrypt_module_open('rijndael-256', '', 'ecb', '');
 $var = mcrypt_enc_get_supported_key_sizes($td);
 var_dump($var);
---EXPECT--
+--EXPECTF--
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_get_supported_key_sizes.php on line 2
+
+Deprecated: Function mcrypt_enc_get_supported_key_sizes() is deprecated in %s%emcrypt_enc_get_supported_key_sizes.php on line 3
 array(3) {
   [0]=>
   int(16)

@@ -4672,6 +4672,58 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
+MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const char *enc)
+{
+	const mbfl_encoding *encoding = MBSTRG(current_internal_encoding);
+	mbfl_buffer_converter *convd;
+	mbfl_string string, result, *ret = NULL;
+	long illegalchars = 0;
+
+	if (input == NULL) {
+		return MBSTRG(illegalchars) == 0;
+	}
+
+	if (enc != NULL) {
+		encoding = mbfl_name2encoding(enc);
+		if (!encoding || encoding == &mbfl_encoding_pass) {
+			php_error_docref(NULL, E_WARNING, "Invalid encoding \"%s\"", enc);
+			return 0;
+		}
+	}
+
+	convd = mbfl_buffer_converter_new2(encoding, encoding, 0);
+
+	if (convd == NULL) {
+		php_error_docref(NULL, E_WARNING, "Unable to create converter");
+		return 0;
+	}
+
+	mbfl_buffer_converter_illegal_mode(convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
+	mbfl_buffer_converter_illegal_substchar(convd, 0);
+
+	/* initialize string */
+	mbfl_string_init_set(&string, mbfl_no_language_neutral, encoding->no_encoding);
+	mbfl_string_init(&result);
+
+	string.val = (unsigned char *) input;
+	string.len = length;
+
+	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
+	illegalchars = mbfl_buffer_illegalchars(convd);
+	mbfl_buffer_converter_delete(convd);
+
+	if (ret != NULL) {
+		if (illegalchars == 0 && string.len == result.len && memcmp(string.val, result.val, string.len) == 0) {
+			mbfl_string_clear(&result);
+			return 1;
+		}
+
+		mbfl_string_clear(&result);
+	}
+
+	return 0;
+}
+
 /* {{{ proto bool mb_check_encoding([string var[, string encoding]])
    Check if the string is valid for the specified encoding */
 PHP_FUNCTION(mb_check_encoding)
@@ -4680,51 +4732,15 @@ PHP_FUNCTION(mb_check_encoding)
 	size_t var_len;
 	char *enc = NULL;
 	size_t enc_len;
-	mbfl_buffer_converter *convd;
-	const mbfl_encoding *encoding = MBSTRG(current_internal_encoding);
-	mbfl_string string, result, *ret = NULL;
-	long illegalchars = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &var, &var_len, &enc, &enc_len) == FAILURE) {
 		return;
-	}
-
-	if (var == NULL) {
-		RETURN_BOOL(MBSTRG(illegalchars) == 0);
-	}
-
-	if (enc != NULL) {
-		encoding = mbfl_name2encoding(enc);
-		if (!encoding || encoding == &mbfl_encoding_pass) {
-			php_error_docref(NULL, E_WARNING, "Invalid encoding \"%s\"", enc);
-			RETURN_FALSE;
-		}
-	}
-
-	convd = mbfl_buffer_converter_new2(encoding, encoding, 0);
-	if (convd == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to create converter");
-		RETURN_FALSE;
-	}
-	mbfl_buffer_converter_illegal_mode(convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
-	mbfl_buffer_converter_illegal_substchar(convd, 0);
-
-	/* initialize string */
-	mbfl_string_init_set(&string, mbfl_no_language_neutral, encoding->no_encoding);
-	mbfl_string_init(&result);
-
-	string.val = (unsigned char *)var;
-	string.len = var_len;
-	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-	illegalchars = mbfl_buffer_illegalchars(convd);
-	mbfl_buffer_converter_delete(convd);
+    }
 
 	RETVAL_FALSE;
-	if (ret != NULL) {
-		if (illegalchars == 0 && string.len == result.len && memcmp(string.val, result.val, string.len) == 0) {
-			RETVAL_TRUE;
-		}
-		mbfl_string_clear(&result);
+
+	if (php_mb_check_encoding(var, var_len, enc)) {
+		RETVAL_TRUE;
 	}
 }
 /* }}} */

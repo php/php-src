@@ -544,8 +544,8 @@ implements_list:
 foreach_variable:
 		variable			{ $$ = $1; }
 	|	'&' variable		{ $$ = zend_ast_create(ZEND_AST_REF, $2); }
-	|	T_LIST '(' array_pair_list ')' { $3->attr = 1; $$ = $3; }
-	|	'[' array_pair_list ']' { $$ = $2; }
+	|	T_LIST '(' array_pair_list ')' { $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_LIST; }
+	|	'[' array_pair_list ']' { $$ = $2; $$->attr = ZEND_ARRAY_SYNTAX_SHORT; }
 ;
 
 for_statement:
@@ -866,9 +866,9 @@ new_expr:
 
 expr_without_variable:
 		T_LIST '(' array_pair_list ')' '=' expr
-			{ $3->attr = 1; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
+			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
 	|	'[' array_pair_list ']' '=' expr
-			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $2, $5); }
+			{ $2->attr = ZEND_ARRAY_SYNTAX_SHORT; $$ = zend_ast_create(ZEND_AST_ASSIGN, $2, $5); }
 	|	variable '=' expr
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' '&' variable
@@ -1060,8 +1060,8 @@ ctor_arguments:
 
 
 dereferencable_scalar:
-		T_ARRAY '(' array_pair_list ')'	{ $$ = $3; }
-	|	'[' array_pair_list ']'			{ $$ = $2; }
+		T_ARRAY '(' array_pair_list ')'	{ $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_LONG; }
+	|	'[' array_pair_list ']'			{ $$ = $2; $$->attr = ZEND_ARRAY_SYNTAX_SHORT; }
 	|	T_CONSTANT_ENCAPSED_STRING		{ $$ = $1; }
 ;
 
@@ -1209,9 +1209,11 @@ array_pair:
 	|	'&' variable
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
 	|	expr T_DOUBLE_ARROW T_LIST '(' array_pair_list ')'
-			{ $5->attr = 1; $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
+			{ $5->attr = ZEND_ARRAY_SYNTAX_LIST;
+			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
 	|	T_LIST '(' array_pair_list ')'
-			{ $3->attr = 1; $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, NULL); }
+			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST;
+			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, NULL); }
 ;
 
 encaps_list:

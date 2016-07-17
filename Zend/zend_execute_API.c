@@ -1188,7 +1188,8 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
 		uint error_lineno = 0;
-		char *log_buffer = NULL;
+		char log_buffer[2048];
+		int output_len = 0;
 
 		if (zend_is_compiling()) {
 			error_filename = ZSTR_VAL(zend_get_compiled_filename());
@@ -1206,8 +1207,10 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 			error_filename = "Unknown";
 		}
 
-		zend_spprintf(&log_buffer, 0, "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
-		write(2, log_buffer, strlen(log_buffer));
+		output_len = snprintf(log_buffer, sizeof(log_buffer), "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
+		if (output_len > 0) {
+			write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
+		}
 		_exit(1);
     }
 #endif
