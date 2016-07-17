@@ -334,7 +334,7 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 
 	ZEND_ASSERT(ctx->tag_type == TAG_FORM);
 
-	if (ZSTR_LEN(ctx->attr_val.s)) {
+	if (ctx->attr_val.s && ZSTR_LEN(ctx->attr_val.s)) {
 		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->attr_val.s), ZSTR_LEN(ctx->attr_val.s));
 	} else {
 		return SUCCESS; /* empty URL is valid */
