@@ -17,6 +17,7 @@
    |          Sascha Kettler <kettler@gmx.net>                            |
    |          Pierre-Alain Joye <pierre@php.net>                          |
    |          Marc Delling <delling@silpion.de> (PKCS12 functions)        |
+   |          Jakub Zelenka <bukka@php.net>                               |
    +----------------------------------------------------------------------+
  */
 
