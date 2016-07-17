@@ -4693,7 +4693,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 					php_openssl_store_errors();
 				}
 
-				if ((d = EC_KEY_get0_private_key(pkey->pkey.ec)) != NULL) {
+				if ((d = EC_KEY_get0_private_key(EVP_PKEY_get0_EC_KEY(pkey))) != NULL) {
 					OPENSSL_GET_BN(ec, d, d);
 				}
 
