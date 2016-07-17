@@ -555,6 +555,122 @@ zend_module_entry openssl_module_entry = {
 ZEND_GET_MODULE(openssl)
 #endif
 
+/* {{{ OpenSSL compatibility functions and macros */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_PKEY_get0_RSA(_pkey) _pkey->pkey.rsa
+#define EVP_PKEY_get0_DH(_pkey) _pkey->pkey.dh
+#define EVP_PKEY_get0_DSA(_pkey) _pkey->pkey.dsa
+#define EVP_PKEY_get0_EC_KEY(_pkey) _pkey->pkey.ec
+
+static int RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d)
+{
+	r->n = n;
+	r->e = e;
+	r->d = d;
+
+	return 1;
+}
+
+static int RSA_set0_factors(RSA *r, BIGNUM *p, BIGNUM *q)
+{
+	r->p = p;
+	r->q = q;
+
+	return 1;
+}
+
+static int RSA_set0_crt_params(RSA *r, BIGNUM *dmp1, BIGNUM *dmq1, BIGNUM *iqmp)
+{
+	r->dmp1 = dmp1;
+	r->dmq1 = dmq1;
+	r->iqmp = iqmp;
+
+	return 1;
+}
+
+static void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const BIGNUM **d)
+{
+	*n = r->n;
+	*e = r->e;
+	*d = r->d;
+}
+
+static void RSA_get0_factors(const RSA *r, const BIGNUM **p, const BIGNUM **q)
+{
+	*p = r->p;
+	*q = r->q;
+}
+
+static void RSA_get0_crt_params(const RSA *r, const BIGNUM **dmp1, const BIGNUM **dmq1, const BIGNUM **iqmp)
+{
+	*dmp1 = r->dmp1;
+	*dmq1 = r->dmq1;
+	*iqmp = r->iqmp;
+}
+
+static void DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+	*p = dh->p;
+	*q = dh->q;
+	*g = dh->g;
+}
+
+static int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
+{
+	dh->p = p;
+	dh->q = q;
+	dh->g = g;
+
+	return 1;
+}
+
+static void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+	*pub_key = dh->pub_key;
+	*priv_key = dh->priv_key;
+}
+
+static int DH_set0_key(DH *dh, BIGNUM *pub_key, BIGNUM *priv_key)
+{
+	dh->pub_key = pub_key;
+	dh->priv_key = priv_key;
+
+	return 1;
+}
+
+static void DSA_get0_pqg(const DSA *d, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+	*p = d->p;
+	*q = d->q;
+	*g = d->g;
+}
+
+int DSA_set0_pqg(DSA *d, BIGNUM *p, BIGNUM *q, BIGNUM *g)
+{
+	d->p = p;
+	d->q = q;
+	d->g = g;
+
+	return 1;
+}
+
+static void DSA_get0_key(const DSA *d, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+	*pub_key = d->pub_key;
+	*priv_key = d->priv_key;
+}
+
+int DSA_set0_key(DSA *d, BIGNUM *pub_key, BIGNUM *priv_key)
+{
+	d->pub_key = pub_key;
+	d->priv_key = priv_key;
+
+	return 1;
+}
+
+#endif
+/* }}} */
+
 /* number conversion flags checks */
 #define PHP_OPENSSL_CHECK_NUMBER_CONVERSION(_cond, _name) \
 	do { \
@@ -3788,8 +3904,13 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 		case EVP_PKEY_RSA2:
 			{
 				RSA *rsa = EVP_PKEY_get0_RSA(pkey);
-				if (rsa != NULL && (rsa->p == NULL || rsa->q == NULL)) {
-					return 0;
+				if (rsa != NULL) {
+					const BIGNUM *p, *q;
+
+					RSA_get0_factors(rsa, &p, &q);
+					 if (p == NULL || q == NULL) {
+						return 0;
+					 }
 				}
 			}
 			break;
@@ -3802,8 +3923,18 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 		case EVP_PKEY_DSA4:
 			{
 				DSA *dsa = EVP_PKEY_get0_DSA(pkey);
-				if (dsa != NULL && (dsa->p == NULL || dsa->q == NULL || dsa->priv_key == NULL)) {
-					return 0;
+				if (dsa != NULL) {
+					const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+
+					DSA_get0_pqg(dsa, &p, &q, &g);
+					if (p == NULL || q == NULL) {
+						return 0;
+					}
+
+					DSA_get0_key(dsa, &pub_key, &priv_key);
+					if (priv_key == NULL) {
+						return 0;
+					}
 				}
 			}
 			break;
@@ -3812,8 +3943,18 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 		case EVP_PKEY_DH:
 			{
 				DH *dh = EVP_PKEY_get0_DH(pkey);
-				if (dh != NULL && (NULL == dh->p || dh->priv_key == NULL)) {
-					return 0;
+				if (dh != NULL) {
+					const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+
+					DH_get0_pqg(dh, &p, &q, &g);
+					if (p == NULL) {
+						return 0;
+					}
+
+					DH_get0_key(dh, &pub_key, &priv_key);
+					if (priv_key == NULL) {
+						return 0;
+					}
 				}
 			}
 			break;
@@ -3846,39 +3987,86 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 		} \
 	} while (0);
 
-#define OPENSSL_PKEY_GET_BN(_type, _key, _name) do { \
-		if (_key->_name != NULL) { \
-			OPENSSL_GET_BN(_type, _key->_name, _name); \
-		} \
-	} while (0);
+#define OPENSSL_PKEY_GET_BN(_type, _name) OPENSSL_GET_BN(_type, _name, _name)
 
-#define OPENSSL_PKEY_SET_BN(_ht, _type, _name) do { \
+#define OPENSSL_PKEY_SET_BN(_data, _name) do { \
 		zval *bn; \
-		if ((bn = zend_hash_str_find(_ht, #_name, sizeof(#_name)-1)) != NULL && \
+		if ((bn = zend_hash_str_find(Z_ARRVAL_P(_data), #_name, sizeof(#_name)-1)) != NULL && \
 				Z_TYPE_P(bn) == IS_STRING) { \
-			_type->_name = BN_bin2bn( \
+			_name = BN_bin2bn( \
 				(unsigned char*)Z_STRVAL_P(bn), \
 				(int)Z_STRLEN_P(bn), NULL); \
+		} else { \
+			_name = NULL; \
 		} \
 	} while (0);
 
-/* {{{ php_openssl_pkey_init_dsa */
-zend_bool php_openssl_pkey_init_dsa(DSA *dsa)
+/* {{{ php_openssl_pkey_init_rsa */
+zend_bool php_openssl_pkey_init_and_assign_rsa(EVP_PKEY *pkey, RSA *rsa, zval *data)
 {
-	if (!dsa->p || !dsa->q || !dsa->g) {
+	BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
+
+	OPENSSL_PKEY_SET_BN(data, n);
+	OPENSSL_PKEY_SET_BN(data, e);
+	OPENSSL_PKEY_SET_BN(data, d);
+	if (!n || !d || !RSA_set0_key(rsa, n, e, d)) {
 		return 0;
 	}
-	if (dsa->priv_key || dsa->pub_key) {
+
+	OPENSSL_PKEY_SET_BN(data, p);
+	OPENSSL_PKEY_SET_BN(data, q);
+	if ((p || q) && !RSA_set0_factors(rsa, p, q)) {
+		return 0;
+	}
+
+	OPENSSL_PKEY_SET_BN(data, dmp1);
+	OPENSSL_PKEY_SET_BN(data, dmq1);
+	OPENSSL_PKEY_SET_BN(data, iqmp);
+	if ((dmp1 || dmq1 || iqmp) && !RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp)) {
+		return 0;
+	}
+
+	if (!EVP_PKEY_assign_RSA(pkey, rsa)) {
+		php_openssl_store_errors();
+		return 0;
+	}
+
+	return 1;
+}
+
+/* {{{ php_openssl_pkey_init_dsa */
+zend_bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
+{
+	BIGNUM *p, *q, *g, *priv_key, *pub_key;
+	const BIGNUM *priv_key_const, *pub_key_const;
+
+	OPENSSL_PKEY_SET_BN(data, p);
+	OPENSSL_PKEY_SET_BN(data, q);
+	OPENSSL_PKEY_SET_BN(data, g);
+	if (!p || !q || !g || !DSA_set0_pqg(dsa, p, q, g)) {
+		return 0;
+	}
+
+	OPENSSL_PKEY_SET_BN(data, pub_key);
+	OPENSSL_PKEY_SET_BN(data, priv_key);
+	if (priv_key || pub_key) {
 		return 1;
 	}
+	if (!DSA_set0_key(dsa, pub_key, priv_key)) {
+		return 0;
+	}
+
+	/* generate key */
 	PHP_OPENSSL_RAND_ADD_TIME();
 	if (!DSA_generate_key(dsa)) {
 		php_openssl_store_errors();
 		return 0;
 	}
+
 	/* if BN_mod_exp return -1, then DSA_generate_key succeed for failed key
 	 * so we need to double check that public key is created */
-	if (!dsa->pub_key || BN_is_zero(dsa->pub_key)) {
+	DSA_get0_key(dsa, &pub_key_const, &priv_key_const);
+	if (!pub_key_const || BN_is_zero(pub_key_const)) {
 		return 0;
 	}
 	/* all good */
@@ -3887,14 +4075,27 @@ zend_bool php_openssl_pkey_init_dsa(DSA *dsa)
 /* }}} */
 
 /* {{{ php_openssl_pkey_init_dh */
-zend_bool php_openssl_pkey_init_dh(DH *dh)
+zend_bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 {
-	if (!dh->p || !dh->g) {
+	BIGNUM *p, *q, *g, *priv_key, *pub_key;
+
+	OPENSSL_PKEY_SET_BN(data, p);
+	OPENSSL_PKEY_SET_BN(data, q);
+	OPENSSL_PKEY_SET_BN(data, g);
+	if (!p || !g || !DH_set0_pqg(dh, p, q, g)) {
 		return 0;
 	}
-	if (dh->pub_key) {
+
+	OPENSSL_PKEY_SET_BN(data, priv_key);
+	OPENSSL_PKEY_SET_BN(data, pub_key);
+	if (priv_key || pub_key) {
 		return 1;
 	}
+	if (!DH_set0_key(dh, pub_key, priv_key)) {
+		return 0;
+	}
+
+	/* generate key */
 	PHP_OPENSSL_RAND_ADD_TIME();
 	if (!DH_generate_key(dh)) {
 		php_openssl_store_errors();
@@ -3927,20 +4128,8 @@ PHP_FUNCTION(openssl_pkey_new)
 			if (pkey) {
 				RSA *rsa = RSA_new();
 				if (rsa) {
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, n);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, e);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, d);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, p);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, q);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, dmp1);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, dmq1);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), rsa, iqmp);
-					if (rsa->n && rsa->d) {
-						if (EVP_PKEY_assign_RSA(pkey, rsa)) {
-							RETURN_RES(zend_register_resource(pkey, le_key));
-						} else {
-							php_openssl_store_errors();
-						}
+					if (php_openssl_pkey_init_and_assign_rsa(pkey, rsa, data)) {
+						RETURN_RES(zend_register_resource(pkey, le_key));
 					}
 					RSA_free(rsa);
 				} else {
@@ -3957,12 +4146,7 @@ PHP_FUNCTION(openssl_pkey_new)
 			if (pkey) {
 				DSA *dsa = DSA_new();
 				if (dsa) {
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, p);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, q);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, g);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, priv_key);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dsa, pub_key);
-					if (php_openssl_pkey_init_dsa(dsa)) {
+					if (php_openssl_pkey_init_dsa(dsa, data)) {
 						if (EVP_PKEY_assign_DSA(pkey, dsa)) {
 							RETURN_RES(zend_register_resource(pkey, le_key));
 						} else {
@@ -3984,11 +4168,7 @@ PHP_FUNCTION(openssl_pkey_new)
 			if (pkey) {
 				DH *dh = DH_new();
 				if (dh) {
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, p);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, g);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, priv_key);
-					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, pub_key);php_openssl_store_errors();
-					if (php_openssl_pkey_init_dh(dh)) {
+					if (php_openssl_pkey_init_dh(dh, data)) {
 						if (EVP_PKEY_assign_DH(pkey, dh)) {
 							ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
 							return;
@@ -4400,16 +4580,21 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 				if (rsa != NULL) {
 					zval z_rsa;
+					const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
+
+					RSA_get0_key(rsa, &n, &e, &d);
+					RSA_get0_factors(rsa, &p, &q);
+					RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
 
 					array_init(&z_rsa);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, n);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, e);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, d);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, p);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, q);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, dmp1);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, dmq1);
-					OPENSSL_PKEY_GET_BN(z_rsa, rsa, iqmp);
+					OPENSSL_PKEY_GET_BN(z_rsa, n);
+					OPENSSL_PKEY_GET_BN(z_rsa, e);
+					OPENSSL_PKEY_GET_BN(z_rsa, d);
+					OPENSSL_PKEY_GET_BN(z_rsa, p);
+					OPENSSL_PKEY_GET_BN(z_rsa, q);
+					OPENSSL_PKEY_GET_BN(z_rsa, dmp1);
+					OPENSSL_PKEY_GET_BN(z_rsa, dmq1);
+					OPENSSL_PKEY_GET_BN(z_rsa, iqmp);
 					add_assoc_zval(return_value, "rsa", &z_rsa);
 				}
 			}
@@ -4424,13 +4609,17 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 				if (dsa != NULL) {
 					zval z_dsa;
+					const BIGNUM *p, *q, *g, *priv_key, *pub_key;
+
+					DSA_get0_pqg(dsa, &p, &q, &g);
+					DSA_get0_key(dsa, &pub_key, &priv_key);
 
 					array_init(&z_dsa);
-					OPENSSL_PKEY_GET_BN(z_dsa, dsa, p);
-					OPENSSL_PKEY_GET_BN(z_dsa, dsa, q);
-					OPENSSL_PKEY_GET_BN(z_dsa, dsa, g);
-					OPENSSL_PKEY_GET_BN(z_dsa, dsa, priv_key);
-					OPENSSL_PKEY_GET_BN(z_dsa, dsa, pub_key);
+					OPENSSL_PKEY_GET_BN(z_dsa, p);
+					OPENSSL_PKEY_GET_BN(z_dsa, q);
+					OPENSSL_PKEY_GET_BN(z_dsa, g);
+					OPENSSL_PKEY_GET_BN(z_dsa, priv_key);
+					OPENSSL_PKEY_GET_BN(z_dsa, pub_key);
 					add_assoc_zval(return_value, "dsa", &z_dsa);
 				}
 			}
@@ -4442,12 +4631,16 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 				if (dh != NULL) {
 					zval z_dh;
+					const BIGNUM *p, *q, *g, *priv_key, *pub_key;
+
+					DH_get0_pqg(dh, &p, &q, &g);
+					DH_get0_key(dh, &pub_key, &priv_key);
 
 					array_init(&z_dh);
-					OPENSSL_PKEY_GET_BN(z_dh, dh, p);
-					OPENSSL_PKEY_GET_BN(z_dh, dh, g);
-					OPENSSL_PKEY_GET_BN(z_dh, dh, priv_key);
-					OPENSSL_PKEY_GET_BN(z_dh, dh, pub_key);
+					OPENSSL_PKEY_GET_BN(z_dh, p);
+					OPENSSL_PKEY_GET_BN(z_dh, g);
+					OPENSSL_PKEY_GET_BN(z_dh, priv_key);
+					OPENSSL_PKEY_GET_BN(z_dh, pub_key);
 					add_assoc_zval(return_value, "dh", &z_dh);
 				}
 			}
