@@ -292,6 +292,9 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				break;
 
 			case PDO_PARAM_EVT_ALLOC:
+				if (!stmt->bound_param_map) {
+					return 1;
+				}
 				if (!zend_hash_index_exists(stmt->bound_param_map, param->paramno)) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 					return 0;
