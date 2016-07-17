@@ -1306,8 +1306,6 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
 {
 	UNREGISTER_INI_ENTRIES();
 
-	zend_hash_clean(&BG(url_adapt_hosts_ht));
-
 	return SUCCESS;
 }
 
