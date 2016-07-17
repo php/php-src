@@ -16,7 +16,7 @@ session_id('testid');
 
 output_add_rewrite_var('<name>', '<value>');
 ?>
-
+FIXME: Output
 Without session
 <a href=""> </a>
 <a href="./foo.php"> </a>

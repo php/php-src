@@ -8,7 +8,7 @@ Behavior is subject to be changed
 <?php
 	ob_start();
 // Common setting
-ini_set('url_rewriter.hosts', 'php.net,www.php.net');
+ini_set('url_rewriter.hosts', 'example.com');
 ini_set('session.use_only_cookies', 1);
 ini_set('session.use_cookies', 1);
 ini_set('session.use_strict_mode', 0);
@@ -78,44 +78,44 @@ Test use_trans_sid=1
 Without session
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="//php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="http://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="bad://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="//www.php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="//php.net/foo.php"> </a>
+<a href="http://php.net/foo.php"> </a>
+<a href="bad://php.net/foo.php"> </a>
+<a href="//www.php.net/foo.php"> </a>
 
 <form method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </form>
 <form action="./foo.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="//php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="http://php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="bad://php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
+<form action="//php.net/bar.php" method="get"> </a>
+<form action="http://php.net/bar.php" method="get"> </a>
+<form action="bad://php.net/bar.php" method="get"> </a>
+<form action="//www.php.net/bar.php" method="get"> </a>
 
 Test use_trans_sid=0
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="//php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="http://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="bad://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="//www.php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="//php.net/foo.php"> </a>
+<a href="http://php.net/foo.php"> </a>
+<a href="bad://php.net/foo.php"> </a>
+<a href="//www.php.net/foo.php"> </a>
 
-<form method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </form>
+<form method="get"> </form>
 <form action="./foo.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="//php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="http://php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="bad://php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
+<form action="//php.net/bar.php" method="get"> </a>
+<form action="http://php.net/bar.php" method="get"> </a>
+<form action="bad://php.net/bar.php" method="get"> </a>
+<form action="//www.php.net/bar.php" method="get"> </a>
 
 Test use_trans_sid=1
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="//php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="http://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="bad://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="//www.php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="//php.net/foo.php"> </a>
+<a href="http://php.net/foo.php"> </a>
+<a href="bad://php.net/foo.php"> </a>
+<a href="//www.php.net/foo.php"> </a>
 
-<form method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </form>
+<form method="get"> </form>
 <form action="./foo.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="//php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="http://php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="bad://php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
-<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
+<form action="//php.net/bar.php" method="get"> </a>
+<form action="http://php.net/bar.php" method="get"> </a>
+<form action="bad://php.net/bar.php" method="get"> </a>
+<form action="//www.php.net/bar.php" method="get"> </a>
