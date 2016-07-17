@@ -23,6 +23,7 @@ PHP                                                                        NEWS
     phpize on Windows). (Yuji Uchiyama)
   . Fixed bug #29368 (The destructor is called when an exception is thrown from
     the constructor). (Dmitry)
+  . Implemented RFC: RNG Fixes. (Leigh)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)

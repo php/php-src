@@ -49,6 +49,16 @@ PHP 7.1 UPGRADE NOTES
     the notice level only.
   . Don't call destructors of incompletely constructed objects, even if they
     are kept referenced. See bug #29368 and Zend/tests/bug29368_1.phpt.
+  . rand() and srand() are now aliases of mt_rand() and mt_srand().
+    Consequently the output of the following functions has changed:
+     . rand()
+     . shuffle()
+     . str_shuffle()
+     . array_rand()
+  . Fixes to random number generators mean that mt_rand() now produces a
+    different sequence of outputs to previous versions. If you relied on
+    mt_srand() to produce a deterministic sequence, it can be called using
+    mt_srand($seed, MT_RAND_PHP) to produce old the sequences.
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
