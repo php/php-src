@@ -61,6 +61,9 @@ PHP                                                                        NEWS
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur)
 
+- OpenSSL:
+  . Dropped support for SSL2. (Remi)
+
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
