@@ -62,6 +62,7 @@ PHP                                                                        NEWS
     (Keyur)
 
 - OpenSSL:
+  . Bumped a minimal version to 1.0.1. (Jakub Zelenka)
   . Dropped support for SSL2. (Remi)
 
 - PDO_pgsql:
