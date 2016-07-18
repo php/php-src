@@ -190,7 +190,7 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 		return NULL;
 	}
 
-	if (overflow2(sizeof(int), sx)) {
+	if (overflow2(sizeof(int *), sx)) {
 		return NULL;
 	}
 
