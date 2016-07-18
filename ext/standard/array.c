@@ -5056,8 +5056,8 @@ PHP_FUNCTION(array_rand)
 	if (num_req == 1) {
 		HashTable *ht = Z_ARRVAL_P(input);
 
-		/* Compact the hashtable if less than 3/8 of elements are used */
-		if (num_avail < ht->nNumUsed - (ht->nNumUsed>>1) - (ht->nNumUsed>>2)) {
+		/* Compact the hashtable if less than 3/4 of elements are used */
+		if (num_avail < ht->nNumUsed - (ht->nNumUsed>>2)) {
 			if (ht->u.flags & HASH_FLAG_PACKED) {
 				zend_hash_packed_to_hash(ht);
 			} else {
@@ -5066,9 +5066,9 @@ PHP_FUNCTION(array_rand)
 		}
 
 		/* Sample random buckets until we hit one that is not empty.
-		 * The worst case probability of hitting an empty element is 1-3/8. The worst case
-		 * probability of hitting N empty elements in a row is (1-3/8)**N.
-		 * For N=10 this becomes smaller than 1%. */
+		 * The worst case probability of hitting an empty element is 1-3/4. The worst case
+		 * probability of hitting N empty elements in a row is (1-3/4)**N.
+		 * For N=5 this becomes smaller than 0.1%. */
 		do {
 			zend_long randval = php_mt_rand_range(0, ht->nNumUsed - 1);
 			Bucket *bucket = &ht->arData[randval];
