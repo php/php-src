@@ -125,7 +125,7 @@ __forceinline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, size_t 
 }/*}}}*/
 #define php_win32_cp_w_to_any(in) php_win32_cp_conv_w_to_any(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
-#define PHP_WIN32_CP_W_TO_A_ARRAY(aw, aw_len, aa, aa_len) do { \
+#define PHP_WIN32_CP_W_TO_ANY_ARRAY(aw, aw_len, aa, aa_len) do { \
 	int i; \
 	aa_len = aw_len; \
 	aa = (char **) malloc(aw_len * sizeof(char *)); \
@@ -138,7 +138,7 @@ __forceinline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, size_t 
 } while (0);
 
 
-#define PHP_WIN32_FREE_ARRAY(a, a_len) do { \
+#define PHP_WIN32_CP_FREE_ARRAY(a, a_len) do { \
 	int i; \
 	for (i = 0; i < a_len; i++) { \
 		free(a[i]); \

@@ -113,12 +113,6 @@ ZEND_END_ARG_INFO()
 	  RETURN_FALSE;	\
   }	\
 
-static PHP_FUNCTION(dbrow_constructor) /* {{{ */
-{
-	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
-}
-/* }}} */
-
 static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
 {
 	if (stmt->bound_param_map) {
@@ -2128,11 +2122,11 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out, "Key: Position #" ZEND_ULONG_FMT ":\n", num);
 			}
 
-			php_stream_printf(out, "paramno=" ZEND_LONG_FMT "\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-					param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
-					param->name ? ZSTR_VAL(param->name) : "",
-					param->is_param,
-					param->param_type);
+			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+							param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
+							param->name ? ZSTR_VAL(param->name) : "",
+							param->is_param,
+							param->param_type);
 
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -2638,15 +2632,8 @@ static int row_call_method(zend_string *method, zend_object *object, INTERNAL_FU
 
 static union _zend_function *row_get_ctor(zend_object *object)
 {
-	static zend_internal_function ctor = {0};
-
-	ctor.type = ZEND_INTERNAL_FUNCTION;
-	ctor.function_name = zend_string_init("__construct", sizeof("__construct") - 1, 0);
-	ctor.scope = pdo_row_ce;
-	ctor.handler = ZEND_FN(dbrow_constructor);
-	ctor.fn_flags = ZEND_ACC_PUBLIC;
-
-	return (union _zend_function*)&ctor;
+	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
+	return NULL;
 }
 
 static zend_string *row_get_classname(const zend_object *object)

@@ -206,7 +206,7 @@ static void dom_copy_doc_props(php_libxml_ref_obj *source_doc, php_libxml_ref_ob
 	}
 }
 
-int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce)
+void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce)
 {
 	dom_doc_propsptr doc_props;
 
@@ -214,7 +214,7 @@ int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece,
 		doc_props = dom_get_doc_props(document);
 		if (doc_props->classmap == NULL) {
 			if (ce == NULL) {
-				return SUCCESS;
+				return;
 			}
 			ALLOC_HASHTABLE(doc_props->classmap);
 			zend_hash_init(doc_props->classmap, 0, NULL, NULL, 0);
@@ -225,7 +225,6 @@ int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece,
 			zend_hash_del(doc_props->classmap, basece->name);
 		}
 	}
-	return SUCCESS;
 }
 
 zend_class_entry *dom_get_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece)
@@ -286,7 +285,7 @@ PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj)
 /* {{{ dom_read_na */
 static int dom_read_na(dom_object *obj, zval *retval)
 {
-	php_error_docref(NULL, E_ERROR, "Cannot read property");
+	zend_throw_error(NULL, "Cannot read property");
 	return FAILURE;
 }
 /* }}} */
@@ -294,7 +293,7 @@ static int dom_read_na(dom_object *obj, zval *retval)
 /* {{{ dom_write_na */
 static int dom_write_na(dom_object *obj, zval *newval)
 {
-	php_error_docref(NULL, E_ERROR, "Cannot write property");
+	zend_throw_error(NULL, "Cannot write property");
 	return FAILURE;
 }
 /* }}} */

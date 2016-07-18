@@ -72,6 +72,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
 	ZEND_ARG_INFO(0, restart_syscalls)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal_get_handler, 0, 0, 1)
+	ZEND_ARG_INFO(0, signo)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
 	ZEND_ARG_INFO(0, how)
 	ZEND_ARG_INFO(0, set)
@@ -148,6 +152,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_strerror, 0, 0, 1)
         ZEND_ARG_INFO(0, errno)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_async_signals, 0, 0, 1)
+        ZEND_ARG_INFO(0, on)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry pcntl_functions[] = {
@@ -155,6 +163,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
 	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)
 	PHP_FE(pcntl_signal,		arginfo_pcntl_signal)
+	PHP_FE(pcntl_signal_get_handler,		arginfo_pcntl_signal_get_handler)
 	PHP_FE(pcntl_signal_dispatch,	arginfo_pcntl_void)
 	PHP_FE(pcntl_wifexited,		arginfo_pcntl_wifexited)
 	PHP_FE(pcntl_wifstopped,	arginfo_pcntl_wifstopped)
@@ -183,6 +192,7 @@ const zend_function_entry pcntl_functions[] = {
 #ifdef HAVE_WCONTINUED
 	PHP_FE(pcntl_wifcontinued,	arginfo_pcntl_wifcontinued)
 #endif
+	PHP_FE(pcntl_async_signals,	arginfo_pcntl_async_signals)
 	PHP_FE_END
 };
 
@@ -207,8 +217,11 @@ zend_module_entry pcntl_module_entry = {
 ZEND_GET_MODULE(pcntl)
 #endif
 
+static void (*orig_interrupt_function)(zend_execute_data *execute_data);
+
 static void pcntl_signal_handler(int);
 static void pcntl_signal_dispatch();
+static void pcntl_interrupt_function(zend_execute_data *execute_data);
 
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
@@ -506,6 +519,7 @@ PHP_RINIT_FUNCTION(pcntl)
 {
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
+	PCNTL_G(async_signals) = 0;
 	return SUCCESS;
 }
 
@@ -514,6 +528,8 @@ PHP_MINIT_FUNCTION(pcntl)
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_add_tick_function(pcntl_signal_dispatch, NULL);
+	orig_interrupt_function = zend_interrupt_function;
+	zend_interrupt_function = pcntl_interrupt_function;
 
 	return SUCCESS;
 }
@@ -986,7 +1002,7 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
 		}
-		zend_hash_index_del(&PCNTL_G(php_signal_table), signo);
+		zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
 		RETURN_TRUE;
 	}
 
@@ -1011,6 +1027,29 @@ PHP_FUNCTION(pcntl_signal)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto bool pcntl_signal_get_handler(int signo)
+   Gets signal handler */
+PHP_FUNCTION(pcntl_signal_get_handler)
+{
+	zval *prev_handle;
+	zend_long signo;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &signo) == FAILURE) {
+		return;
+	}
+
+	if (signo < 1 || signo > 32) {
+		php_error_docref(NULL, E_WARNING, "Invalid signal");
+		RETURN_FALSE;
+	}
+
+	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
+		RETURN_ZVAL(prev_handle, 1, 0);
+	} else {
+		RETURN_LONG((zend_long)SIG_DFL);
+	}
+}
 
 /* {{{ proto bool pcntl_signal_dispatch()
    Dispatch signals to signal handlers */
@@ -1317,6 +1356,9 @@ static void pcntl_signal_handler(int signo)
 	}
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = 1;
+	if (PCNTL_G(async_signals)) {
+		EG(vm_interrupt) = 1;
+	}
 }
 
 void pcntl_signal_dispatch()
@@ -1350,14 +1392,16 @@ void pcntl_signal_dispatch()
 
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
-			ZVAL_NULL(&retval);
-			ZVAL_LONG(&param, queue->signo);
+			if (Z_TYPE_P(handle) != IS_LONG) {
+				ZVAL_NULL(&retval);
+				ZVAL_LONG(&param, queue->signo);
 
-			/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
-			/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
-			call_user_function(EG(function_table), NULL, handle, &retval, 1, &param);
-			zval_ptr_dtor(&param);
-			zval_ptr_dtor(&retval);
+				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
+				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
+				call_user_function(EG(function_table), NULL, handle, &retval, 1, &param);
+				zval_ptr_dtor(&param);
+				zval_ptr_dtor(&retval);
+			}
 		}
 
 		next = queue->next;
@@ -1375,7 +1419,30 @@ void pcntl_signal_dispatch()
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
+/* {{{ proto bool pcntl_async_signals([bool on[)
+   Enable/disable asynchronous signal handling and return the old setting. */
+PHP_FUNCTION(pcntl_async_signals)
+{
+	zend_bool on;
 
+	if (ZEND_NUM_ARGS() == 0) {
+		RETURN_BOOL(PCNTL_G(async_signals));
+	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &on) == FAILURE) {
+		return;
+	}
+	RETVAL_BOOL(PCNTL_G(async_signals));
+	PCNTL_G(async_signals) = on;
+}
+/* }}} */
+
+static void pcntl_interrupt_function(zend_execute_data *execute_data)
+{
+	pcntl_signal_dispatch();
+	if (orig_interrupt_function) {
+		orig_interrupt_function(execute_data);
+	}
+}
 
 /*
  * Local variables:

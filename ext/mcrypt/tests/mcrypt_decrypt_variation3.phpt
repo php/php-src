@@ -124,87 +124,112 @@ fclose($fp);
 *** Testing mcrypt_decrypt() : usage variation ***
 
 --int 0--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "52833a00168e547f"
 
 --int 1--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "82011a0a93098a13"
 
 --int 12345--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "e8b71c21b6acc162"
 
 --int -12345--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "db3c458e975563a8"
 
 --float 10.5--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "6ee8764562f25913"
 
 --float -10.5--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d63b39fd5f65678e"
 
 --float 12.3456789000e10--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(32) "7712cc4828221be40672239d9c32e742"
 
 --float -12.3456789000e10--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(32) "caa892cb5d28b53c2b75b1e0799427c3"
 
 --float .5--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "99880c86884385d9"
 
 --empty array--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --int indexed array--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --associative array--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --nested arrays--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --uppercase NULL--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --lowercase null--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --lowercase true--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "82011a0a93098a13"
 
 --lowercase false--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --uppercase TRUE--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "82011a0a93098a13"
 
 --uppercase FALSE--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --empty string DQ--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --empty string SQ--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --instance of classWithToString--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(32) "46677e368bc07ef375bd580e0c4b2594"
 
 --instance of classWithoutToString--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, object given, %s(%d)
 string(0) ""
 
 --undefined var--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --unset var--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 string(16) "d27689f6fd9700f4"
 
 --resource--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation3.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, resource given, %s(%d)
 string(0) ""
 ===DONE===
-

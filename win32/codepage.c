@@ -387,7 +387,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *enc)
 	cur_cp = php_win32_cp_get_by_enc(enc);
 
 	if (!strcmp(sapi_module.name, "cli")) {
-		php_win32_cp_cli_update();
+		php_win32_cp_cli_do_setup(cur_cp->id);
 	}
 
 	return cur_cp;

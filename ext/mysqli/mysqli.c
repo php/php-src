@@ -283,7 +283,7 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* {{{ mysqli_read_na */
 static zval *mysqli_read_na(mysqli_object *obj, zval *retval)
 {
-	php_error_docref(NULL, E_ERROR, "Cannot read property");
+	zend_throw_error(NULL, "Cannot read property");
 	return NULL;
 }
 /* }}} */
@@ -291,7 +291,7 @@ static zval *mysqli_read_na(mysqli_object *obj, zval *retval)
 /* {{{ mysqli_write_na */
 static int mysqli_write_na(mysqli_object *obj, zval *newval)
 {
-	php_error_docref(NULL, E_ERROR, "Cannot write property");
+	zend_throw_error(NULL, "Cannot write property");
 	return FAILURE;
 }
 /* }}} */

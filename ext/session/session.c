@@ -305,6 +305,109 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 {
 	unsigned char rbuf[PS_MAX_SID_LENGTH + PS_EXTRA_RAND_BYTES];
 	zend_string *outid;
+<<<<<<< HEAD
+=======
+	char *remote_addr = NULL;
+
+	gettimeofday(&tv, NULL);
+
+	if ((array = zend_hash_str_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER") - 1)) &&
+		Z_TYPE_P(array) == IS_ARRAY &&
+		(token = zend_hash_str_find(Z_ARRVAL_P(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR") - 1)) &&
+		Z_TYPE_P(token) == IS_STRING
+	) {
+		remote_addr = Z_STRVAL_P(token);
+	}
+
+	/* maximum 15+19+19+10 bytes */
+	spprintf(&buf, 0, "%.15s%ld" ZEND_LONG_FMT "%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (zend_long)tv.tv_usec, php_combined_lcg() * 10);
+
+	switch (PS(hash_func)) {
+		case PS_HASH_FUNC_MD5:
+			PHP_MD5Init(&md5_context);
+			PHP_MD5Update(&md5_context, (unsigned char *) buf, strlen(buf));
+			digest_len = 16;
+			break;
+		case PS_HASH_FUNC_SHA1:
+			PHP_SHA1Init(&sha1_context);
+			PHP_SHA1Update(&sha1_context, (unsigned char *) buf, strlen(buf));
+			digest_len = 20;
+			break;
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
+		case PS_HASH_FUNC_OTHER:
+			if (!PS(hash_ops)) {
+				efree(buf);
+				zend_throw_error(NULL, "Invalid session hash function");
+				return NULL;
+			}
+
+			hash_context = emalloc(PS(hash_ops)->context_size);
+			PS(hash_ops)->hash_init(hash_context);
+			PS(hash_ops)->hash_update(hash_context, (unsigned char *) buf, strlen(buf));
+			digest_len = PS(hash_ops)->digest_size;
+			break;
+#endif /* HAVE_HASH_EXT */
+		default:
+			efree(buf);
+			zend_throw_error(NULL, "Invalid session hash function");
+			return NULL;
+	}
+	efree(buf);
+
+	if (PS(entropy_length) > 0) {
+#ifdef PHP_WIN32
+		unsigned char rbuf[2048];
+		size_t toread = PS(entropy_length);
+
+		if (php_win32_get_random_bytes(rbuf, MIN(toread, sizeof(rbuf))) == SUCCESS){
+
+			switch (PS(hash_func)) {
+				case PS_HASH_FUNC_MD5:
+					PHP_MD5Update(&md5_context, rbuf, toread);
+					break;
+				case PS_HASH_FUNC_SHA1:
+					PHP_SHA1Update(&sha1_context, rbuf, toread);
+					break;
+# if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
+				case PS_HASH_FUNC_OTHER:
+					PS(hash_ops)->hash_update(hash_context, rbuf, toread);
+					break;
+# endif /* HAVE_HASH_EXT */
+			}
+		}
+#else
+		int fd;
+
+		fd = VCWD_OPEN(PS(entropy_file), O_RDONLY);
+		if (fd >= 0) {
+			unsigned char rbuf[2048];
+			int n;
+			int to_read = PS(entropy_length);
+
+			while (to_read > 0) {
+				n = read(fd, rbuf, MIN(to_read, sizeof(rbuf)));
+				if (n <= 0) break;
+
+				switch (PS(hash_func)) {
+					case PS_HASH_FUNC_MD5:
+						PHP_MD5Update(&md5_context, rbuf, n);
+						break;
+					case PS_HASH_FUNC_SHA1:
+						PHP_SHA1Update(&sha1_context, rbuf, n);
+						break;
+#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
+					case PS_HASH_FUNC_OTHER:
+						PS(hash_ops)->hash_update(hash_context, rbuf, n);
+						break;
+#endif /* HAVE_HASH_EXT */
+				}
+				to_read -= n;
+			}
+			close(fd);
+		}
+#endif
+	}
+>>>>>>> master
 
 	/* Read additional PS_EXTRA_RAND_BYTES just in case CSPRNG is not safe enough */
 	if (php_random_bytes_throw(rbuf, PS(sid_length) + PS_EXTRA_RAND_BYTES) == FAILURE) {
@@ -397,7 +500,7 @@ static void php_session_initialize(void) /* {{{ */
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
 			php_session_abort();
-			php_error_docref(NULL, E_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			return;
 		}
 		if (PS(use_cookies)) {
@@ -1976,14 +2079,14 @@ static PHP_FUNCTION(session_regenerate_id)
 
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		PS(session_status) = php_session_none;
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		RETURN_FALSE;
 	}
 
 	PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 	if (!PS(id)) {
 		PS(session_status) = php_session_none;
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		RETURN_FALSE;
 	}
 	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
@@ -1993,7 +2096,7 @@ static PHP_FUNCTION(session_regenerate_id)
 		if (!PS(id)) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
-			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			RETURN_FALSE;
 		}
 	}
@@ -2001,7 +2104,7 @@ static PHP_FUNCTION(session_regenerate_id)
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		RETURN_FALSE;
 	}
 	if (data) {

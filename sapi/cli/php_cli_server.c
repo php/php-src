@@ -689,7 +689,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 	zend_hash_apply_with_arguments(&client->request.headers, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
 } /* }}} */
 
-static void sapi_cli_server_log_message(char *msg) /* {{{ */
+static void sapi_cli_server_log_message(char *msg, int syslog_type_int) /* {{{ */
 {
 	char buf[52];
 
@@ -1184,7 +1184,7 @@ static void php_cli_server_logf(const char *format, ...) /* {{{ */
 	}
 
 	if (sapi_module.log_message) {
-		sapi_module.log_message(buf);
+		sapi_module.log_message(buf, -1);
 	}
 
 	efree(buf);

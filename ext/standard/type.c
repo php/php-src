@@ -434,6 +434,20 @@ PHP_FUNCTION(is_callable)
 }
 /* }}} */
 
+/* {{{ proto bool is_iterable(mixed var)
+   Returns true if var is iterable (array or instance of Traversable). */
+PHP_FUNCTION(is_iterable)
+{
+	zval *var;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &var) == FAILURE) {
+		return;
+	}
+	
+	RETURN_BOOL(zend_is_iterable(var));
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

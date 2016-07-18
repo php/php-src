@@ -479,10 +479,9 @@ SAPI_API void sapi_activate(void)
 
 		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies();
-
-		if (sapi_module.activate) {
-			sapi_module.activate();
-		}
+	}
+	if (sapi_module.activate) {
+		sapi_module.activate();
 	}
 	if (sapi_module.input_filter_init) {
 		sapi_module.input_filter_init();

@@ -51,6 +51,7 @@ PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
+PHP_FUNCTION(pcntl_signal_get_handler);
 PHP_FUNCTION(pcntl_signal_dispatch);
 PHP_FUNCTION(pcntl_get_last_error);
 PHP_FUNCTION(pcntl_strerror);
@@ -68,6 +69,7 @@ PHP_FUNCTION(pcntl_getpriority);
 #ifdef HAVE_SETPRIORITY
 PHP_FUNCTION(pcntl_setpriority);
 #endif
+PHP_FUNCTION(pcntl_async_signals);
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
@@ -80,6 +82,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	struct php_pcntl_pending_signal *head, *tail, *spares;
 	int last_error;
 	volatile char pending_signals;
+	zend_bool async_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #ifdef ZTS

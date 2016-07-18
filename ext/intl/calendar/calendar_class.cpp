@@ -231,13 +231,6 @@ static void calendar_object_init(Calendar_object *co)
 }
 /* }}} */
 
-/* {{{ Calendar_objects_dtor */
-static void Calendar_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
-}
-/* }}} */
-
 /* {{{ Calendar_objects_free */
 static void Calendar_objects_free(zend_object *object)
 {
@@ -474,7 +467,6 @@ void calendar_register_IntlCalendar_class(void)
 	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
-	Calendar_handlers.dtor_obj = Calendar_objects_dtor;
 	Calendar_handlers.free_obj = Calendar_objects_free;
 
 	/* Create and register 'IntlGregorianCalendar' class. */
