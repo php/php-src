@@ -28,7 +28,7 @@ $values = Array(
 'ǅǼ੧ఘⅧ⒇৪@example.com',
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
+	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL|FILTER_FLAG_EMAIL_RFC6531));
 }
 echo "Done\n";
 ?>
