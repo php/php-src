@@ -146,6 +146,8 @@ PHP 7.1 UPGRADE NOTES
 - file_get_contents() accepts a negative seek offset if the stream is seekable.
 - tempnam() throws a notice when failing back to the system temp dir.
 - getopt() has an extra by-ref parameter : optind
+- mb_ereg() and mb_ereg_replace() reject illegal byte sequences
+- FILTER_FLAG_EMAIL_RFC6531 can be used with filter_var() for email validation
 
 ========================================
 6. New Functions

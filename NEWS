@@ -24,6 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #29368 (The destructor is called when an exception is thrown from
     the constructor). (Dmitry)
   . Implemented RFC: RNG Fixes. (Leigh)
+  . Implemented email validation as per RFC 6531. (Leo Feyer, Anatol)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
@@ -53,6 +54,8 @@ PHP                                                                        NEWS
 
 - Mbstring:
   . Deprecated mb_ereg_replace() eval option. (Rouven Weßling, cmb)
+  . Fixed bug #69151 (mb_ereg should reject ill-formed byte sequence).
+    (Masaki Kagaya)
 
 - MCrypt:
   . Deprecated ext/mcrypt. (Scott Arciszewski, cmb)
