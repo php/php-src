@@ -58,6 +58,24 @@ PHP 7.1 UPGRADE NOTES
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
     U+2029 are escaped.
 
+- Session:
+  . Session ID is generated from CSPNG directly. As a result, Session ID length
+    could be any length between 22 and 256.
+  . New default has much larger bits for session ID (240 bits vs. 128 bits), less
+    likely to have collisions. (Note: Session module has collision detection)
+  . Following INIs are removed
+     . session.hash_function
+     . session.hash_bits_per_charactor
+     . session.entropy_file
+     . session.entropy_length
+  . New INIs and defaults
+     . session.sid_length (Number of session ID characters - 22 to 256. Default: 48)
+     . session.sid_bits_per_character (Bits used per byte. 4 to 6. Default: 5)
+  . If you need old INI compatibility, use following settings.
+     . session.sid_length=32
+     . session.sid_bits_per_character=4
+
+
 ========================================
 2. New Features
 ========================================
@@ -222,8 +240,7 @@ PHP 7.1 UPGRADE NOTES
   . Custom session handlers that do not return strings for session IDs will 
     now throw an instance of Error instead of resulting in a fatal error
     when a function is called that must generate a session ID.
-  . An invalid setting for session.hash_function will throw an instance of
-    Error instead of resulting in a fatal error when a session ID is created.
+  . Only CSPRNG is used to generate session ID.
 
 - SimpleXML:
   . Creating an unnamed or duplicate attribute will throw an instance of Error
