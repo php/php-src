@@ -609,7 +609,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	const char *regexp;
 	size_t regexp_len;
 
-	if (flags & FILTER_FLAG_EMAIL_RFC6531) {
+	if (flags & FILTER_FLAG_EMAIL_UNICODE) {
 		regexp = regexp0;
 		regexp_len = sizeof(regexp0) - 1;
 	} else {
