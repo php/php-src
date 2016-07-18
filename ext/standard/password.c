@@ -83,9 +83,9 @@ static php_password_algo php_password_determine_algo(const char *hash, const siz
 		return PHP_PASSWORD_BCRYPT;
 	} 
 #if HAVE_ARGON2LIB
-	if (hash[0] == '$' && strstr(hash, "argon2i")) {
-		return PHP_PASSWORD_ARGON2I;
-	} else if (hash[0] == '$' && strstr(hash, "argon2d")) {
+	if (len >= sizeof("$argon2i$")-1 && !memcmp(hash, "$argon2i$", sizeof("$argon2i$")-1)) {
+    	return PHP_PASSWORD_ARGON2I;
+	} else if (len >= sizeof("$argon2d$")-1 && !memcmp(hash, "$argon2d$", sizeof("$argon2d$")-1)) {
 		return PHP_PASSWORD_ARGON2D;
 	}
 #endif
@@ -549,9 +549,6 @@ PHP_FUNCTION(password_hash)
 		case PHP_PASSWORD_ARGON2I:
 		case PHP_PASSWORD_ARGON2D:
 			{
-				char *out;
-				char *encoded;
-
 				size_t out_len = 32;
 				size_t encoded_len;
 				int status = 0;
@@ -564,8 +561,8 @@ PHP_FUNCTION(password_hash)
 					out_len
 				);
 
-				encoded = emalloc(encoded_len + 1);
-				out = emalloc(out_len + 1);
+				zend_string *out = zend_string_alloc(out_len, 0);
+				zend_string *encoded = zend_string_alloc(encoded_len, 0);
 
 				status = argon2_hash(
 					t_cost,
@@ -575,26 +572,24 @@ PHP_FUNCTION(password_hash)
 					password_len,
 					salt,
 					salt_len,
-					out,
+					out->val,
 					out_len,
-					encoded,
+					encoded->val,
 					encoded_len,
 					type,
 					ARGON2_VERSION_NUMBER
 				);
 
-				zend_string *ret = zend_string_init(encoded, encoded_len, 0);
-
 				efree(out);
 				efree(salt);
-				efree(encoded);
 
 				if (status != ARGON2_OK) {
+					efree(encoded);
 					php_error_docref(NULL, E_WARNING, argon2_error_message(status));
 					RETURN_FALSE;
 				}
 					
-				RETURN_STR(ret);
+				RETURN_STR(encoded);
 			}
 			break;
 #endif
