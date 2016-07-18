@@ -38,6 +38,12 @@ typedef struct {
 	void *next;
 } var_dtor_entries;
 
+typedef struct {
+	zval data[VAR_ENTRIES_MAX];
+	zend_long used_slots;
+	void *next;
+} var_wakeup_entries;
+
 static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
@@ -71,6 +77,17 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 	ZVAL_COPY(tmp_var, rval);
 }
 
+/* Create a copy of rval (of type IS_OBJECT, with method "__wakeup" defined). Defer the call to __wakeup. */
+PHPAPI void var_push_wakeup(php_unserialize_data_t *var_hashx, zval *rval)
+{
+	/* TODO: This could be refactored into a common macro/data structures with var_tmp_var once the implementation is certain. */
+	zval *tmp_var = var_tmp_wakeup_var(var_hashx);
+    if (!tmp_var) {
+        return;
+    }
+	ZVAL_COPY(tmp_var, rval);
+}
+
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
 {
     var_dtor_entries *var_hash;
@@ -92,6 +109,34 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
         }
 
         (*var_hashx)->last_dtor = var_hash;
+    }
+    ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
+    return &var_hash->data[var_hash->used_slots++];
+}
+
+/* Create a temporary variable, for calling __wakeup() when unserialization is finished */
+PHPAPI zval *var_tmp_wakeup_var(php_unserialize_data_t *var_hashx)
+{
+	/* TODO: This could be refactored into a common macro/data structures with var_tmp_var once the implementation is certain. */
+    var_wakeup_entries *var_hash;
+
+    if (!var_hashx || !*var_hashx) {
+        return NULL;
+    }
+
+    var_hash = (*var_hashx)->last_wakeup;
+    if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
+        var_hash = emalloc(sizeof(var_wakeup_entries));
+        var_hash->used_slots = 0;
+        var_hash->next = 0;
+
+        if (!(*var_hashx)->first_wakeup) {
+            (*var_hashx)->first_wakeup = var_hash;
+        } else {
+            ((var_wakeup_entries *) (*var_hashx)->last_wakeup)->next = var_hash;
+        }
+
+        (*var_hashx)->last_wakeup = var_hash;
     }
     ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
     return &var_hash->data[var_hash->used_slots++];
@@ -135,6 +180,57 @@ static zval *var_access(php_unserialize_data_t *var_hashx, zend_long id)
 	return var_hash->data[id];
 }
 
+static int var_wakeup_all(php_unserialize_data_t *var_hashx, const zend_bool is_cleanup)
+{
+	void *next;
+	zend_long i;
+	zval fname;
+	var_wakeup_entries *wakeup_hash = (*var_hashx)->first_wakeup;
+	zend_bool should_wakeup = !is_cleanup;
+	int ret = 1;
+
+#if VAR_ENTRIES_DBG
+	fprintf(stderr, "var_wakeup_all(%ld)\n", wakeup_hash?wakeup_hash->used_slots:-1L);
+#endif
+	if (!wakeup_hash) {
+		return 1;
+	}
+
+	if (!is_cleanup) {
+		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1);
+	}
+
+
+	while (wakeup_hash) {
+		for (i = 0; i < wakeup_hash->used_slots; i++) {
+#if VAR_ENTRIES_DBG
+			fprintf(stderr, "var_wakeup_all __wakeup and dtor of copy(%p, %ld)\n", &wakeup_hash->data[i], (long) Z_REFCOUNT_P(&wakeup_hash->data[i]));
+#endif
+
+			if (should_wakeup) {
+				zval retval;
+				BG(serialize_lock)++;
+				call_user_function_ex(CG(function_table), &wakeup_hash->data[i], &fname, &retval, 0, 0, 1, NULL);
+				BG(serialize_lock)--;
+				zval_dtor(&retval);
+				if (EG(exception)) {
+					ret = 0; /* If there is an exception, don't call __wakeup() on the rest of the objects, but continue freeing the memory. */
+				}
+			}
+			zval_ptr_dtor(&wakeup_hash->data[i]);
+		}
+		next = wakeup_hash->next;
+		efree_size(wakeup_hash, sizeof(var_wakeup_entries));
+		wakeup_hash = next;
+	}
+	if (!is_cleanup) {
+		zval_dtor(&fname);
+	}
+	(*var_hashx)->first_wakeup = NULL;
+	return ret;
+}
+
+
 PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
@@ -162,6 +258,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
+	var_wakeup_all(var_hashx, 1); /* Free the copies of objects (which would call __wakeup) if we haven't already. */
 }
 
 /* }}} */
@@ -305,6 +402,8 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes
 
+static int php_var_unserialize_ex_inner(UNSERIALIZE_PARAMETER);
+
 static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
 {
 	while (elements-- > 0) {
@@ -313,7 +412,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 
 		ZVAL_UNDEF(&key);
 
-		if (!php_var_unserialize_ex(&key, p, max, NULL, classes)) {
+		if (!php_var_unserialize_ex_inner(&key, p, max, NULL, classes)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -369,7 +468,7 @@ string_key:
 			}
 		}
 
-		if (!php_var_unserialize_ex(data, p, max, var_hash, classes)) {
+		if (!php_var_unserialize_ex_inner(data, p, max, var_hash, classes)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -456,8 +555,6 @@ static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *
 #endif
 static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 {
-	zval retval;
-	zval fname;
 	HashTable *ht;
 
 	if (Z_TYPE_P(rval) != IS_OBJECT) {
@@ -473,12 +570,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 	ZVAL_DEREF(rval);
 	if (Z_OBJCE_P(rval) != PHP_IC_ENTRY &&
 		zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1)) {
-		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1);
-		BG(serialize_lock)++;
-		call_user_function_ex(CG(function_table), rval, &fname, &retval, 0, 0, 1, NULL);
-		BG(serialize_lock)--;
-		zval_dtor(&fname);
-		zval_dtor(&retval);
+		var_push_wakeup(var_hash, rval); /* __wakeup will be called in post-order of the graph of zvals (child nodes first), after everything is initialized */
 	}
 
 	if (EG(exception)) {
@@ -501,6 +593,18 @@ PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsign
 
 PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 {
+	if (php_var_unserialize_ex_inner(UNSERIALIZE_PASSTHRU) == 0) {
+		return 0;
+	}
+	if (var_wakeup_all(var_hash, 0) == 0) {
+		return 0;
+	}
+	return 1;
+}
+
+/* Unserialize a zval, deferring calls to __wakeup(). This was split out because many extensions call php_var_unserialize/php_var_unserialize_ex directly. */
+/* We ensure __wakeup is called at the very end, so that it doesn't modify/invalidate/delete the arrays/objects/references we are unserializing.. */
+static int php_var_unserialize_ex_inner(UNSERIALIZE_PARAMETER) {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
 
