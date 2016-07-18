@@ -654,7 +654,7 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 		return SUCCESS;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_length' must between 22 and 256.");
+	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_length' must be between 22 and 256.");
 	return FAILURE;
 }
 /* }}} */
@@ -672,7 +672,7 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 		return SUCCESS;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_bits' must between 4 and 6.");
+	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_bits' must be between 4 and 6.");
 	return FAILURE;
 }
 /* }}} */
