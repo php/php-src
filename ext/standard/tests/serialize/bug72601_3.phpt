@@ -12,14 +12,15 @@ class Obj {
 	}
 
 	public function __wakeup() {
-		echo "Calling __wakeup\n";
+		echo "Calling __wakeup " . json_encode($this->a) . "\n";
 		$this->a = "roh";
 	}
 }
 
 function main() {
-	$obj = (object)["test" => 'foo'];  // array (not a reference, but should be copied on write)
-    $variable = [new Obj($obj), new Obj($obj)];
+	$obj = new stdClass();
+	$obj->c = null;
+    $variable = [new Obj($obj), new Obj($obj), $obj];
 	$serialized = serialize($variable);
 	printf("%s\n", $serialized);
 	$unserialized = unserialize($serialized);
@@ -27,10 +28,10 @@ function main() {
 }
 main();
 --EXPECTF--
-a:2:{i:0;O:3:"Obj":1:{s:1:"a";O:8:"stdClass":1:{s:4:"test";s:3:"foo";}}i:1;O:3:"Obj":1:{s:1:"a";r:3;}}
-Calling __wakeup
-Calling __wakeup
-array(2) {
+a:3:{i:0;O:3:"Obj":1:{s:1:"a";O:8:"stdClass":1:{s:1:"c";N;}}i:1;O:3:"Obj":1:{s:1:"a";r:3;}i:2;r:3;}
+Calling __wakeup {"c":null}
+Calling __wakeup {"c":null}
+array(3) {
   [0]=>
   object(Obj)#%d (1) {
     ["a"]=>
@@ -40,5 +41,10 @@ array(2) {
   object(Obj)#%d (1) {
     ["a"]=>
     string(3) "roh"
+  }
+  [2]=>
+  object(stdClass)#%d (1) {
+    ["c"]=>
+    NULL
   }
 }
