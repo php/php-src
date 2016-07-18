@@ -5033,7 +5033,7 @@ PHP_FUNCTION(array_multisort)
 PHP_FUNCTION(array_rand)
 {
 	zval *input;
-	zend_long randval, num_req = 1;
+	zend_long num_req = 1;
 	zend_string *string_key;
 	zend_ulong num_key;
 	int i;
@@ -5054,17 +5054,32 @@ PHP_FUNCTION(array_rand)
 	}
 
 	if (num_req == 1) {
-		randval = php_mt_rand_range(0, num_avail - 1);
+		HashTable *ht = Z_ARRVAL_P(input);
 
-		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
-			if (randval-- == 0) {
-				if (string_key) {
-					RETURN_STR_COPY(string_key);
+		/* Compact the hashtable if less than 3/8 of elements are used */
+		if (num_avail < ht->nNumUsed - (ht->nNumUsed>>1) - (ht->nNumUsed>>2)) {
+			if (ht->u.flags & HASH_FLAG_PACKED) {
+				zend_hash_packed_to_hash(ht);
+			} else {
+				zend_hash_rehash(ht);
+			}
+		}
+
+		/* Sample random buckets until we hit one that is not empty.
+		 * The worst case probability of hitting an empty element is 1-3/8. The worst case
+		 * probability of hitting N empty elements in a row is (1-3/8)**N.
+		 * For N=10 this becomes smaller than 1%. */
+		do {
+			zend_long randval = php_mt_rand_range(0, ht->nNumUsed - 1);
+			Bucket *bucket = &ht->arData[randval];
+			if (!Z_ISUNDEF(bucket->val)) {
+				if (bucket->key) {
+					RETURN_STR_COPY(bucket->key);
 				} else {
-					RETURN_LONG(num_key);
+					RETURN_LONG(bucket->h);
 				}
 			}
-		} ZEND_HASH_FOREACH_END();
+		} while (1);
 	}
 
 	if (num_req <= 0 || num_req > num_avail) {
@@ -5086,7 +5101,7 @@ PHP_FUNCTION(array_rand)
 
 	i = num_req;
 	while (i) {
-		randval = php_mt_rand_range(0, num_avail - 1);
+		zend_long randval = php_mt_rand_range(0, num_avail - 1);
 		if (!zend_bitset_in(bitset, randval)) {
 			zend_bitset_incl(bitset, randval);
 			i--;
