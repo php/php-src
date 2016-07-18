@@ -14,7 +14,7 @@ EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	cyr_convert.c datetime.c dir.c dl.c dns.c dns_win32.c exec.c \
 	file.c filestat.c formatted_print.c fsock.c head.c html.c image.c \
 	info.c iptc.c lcg.c link_win32.c mail.c math.c md5.c metaphone.c microtime.c \
-	pack.c pageinfo.c quot_print.c rand.c soundex.c \
+	pack.c pageinfo.c quot_print.c rand.c mt_rand.c soundex.c \
 	string.c scanf.c syslog.c type.c uniqid.c url.c var.c \
 	versioning.c assert.c strnatcmp.c levenshtein.c incomplete_class.c \
 	url_scanner_ex.c ftp_fopen_wrapper.c http_fopen_wrapper.c \

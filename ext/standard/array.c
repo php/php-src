@@ -46,6 +46,7 @@
 #include "php_string.h"
 #include "php_rand.h"
 #include "zend_smart_str.h"
+#include "zend_bitset.h"
 #include "ext/spl/spl_array.h"
 
 /* {{{ defines */
@@ -5033,9 +5034,13 @@ PHP_FUNCTION(array_rand)
 {
 	zval *input;
 	zend_long randval, num_req = 1;
-	int num_avail;
 	zend_string *string_key;
 	zend_ulong num_key;
+	int i;
+	int num_avail;
+	zend_bitset bitset;
+	int negative_bitset = 0;
+	uint32_t bitset_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|l", &input, &num_req) == FAILURE) {
 		return;
@@ -5043,46 +5048,65 @@ PHP_FUNCTION(array_rand)
 
 	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
 
-	if (ZEND_NUM_ARGS() > 1) {
-		if (num_req <= 0 || num_req > num_avail) {
-			php_error_docref(NULL, E_WARNING, "Second argument has to be between 1 and the number of elements in the array");
-			return;
-		}
+	if (num_avail == 0) {
+		php_error_docref(NULL, E_WARNING, "Array is empty");
+		return;
 	}
 
-	/* Make the return value an array only if we need to pass back more than one result. */
-	if (num_req > 1) {
-		array_init_size(return_value, (uint32_t)num_req);
-	}
+	if (num_req == 1) {
+		randval = php_mt_rand_range(0, num_avail - 1);
 
-	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
-	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
-		if (!num_req) {
-			break;
-		}
-
-		randval = php_rand();
-
-		if ((double) (randval / (PHP_RAND_MAX + 1.0)) < (double) num_req / (double) num_avail) {
-			/* If we are returning a single result, just do it. */
-			if (Z_TYPE_P(return_value) != IS_ARRAY) {
+		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
+			if (randval-- == 0) {
 				if (string_key) {
 					RETURN_STR_COPY(string_key);
 				} else {
 					RETURN_LONG(num_key);
 				}
-			} else {
-				/* Append the result to the return value. */
-				if (string_key) {
-					add_next_index_str(return_value, zend_string_copy(string_key));
-				} else {
-					add_next_index_long(return_value, num_key);
-				}
 			}
-			num_req--;
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (num_req <= 0 || num_req > num_avail) {
+		php_error_docref(NULL, E_WARNING, "Second argument has to be between 1 and the number of elements in the array");
+		return;
+	}
+
+	/* Make the return value an array only if we need to pass back more than one result. */
+	array_init_size(return_value, (uint32_t)num_req);
+	if (num_req > (num_avail >> 1)) {
+		negative_bitset = 1;
+		num_req = num_avail - num_req;
+	}
+
+	ALLOCA_FLAG(use_heap);
+	bitset_len = zend_bitset_len(num_avail);
+	bitset = ZEND_BITSET_ALLOCA(bitset_len, use_heap);
+	zend_bitset_clear(bitset, bitset_len);
+
+	i = num_req;
+	while (i) {
+		randval = php_mt_rand_range(0, num_avail - 1);
+		if (!zend_bitset_in(bitset, randval)) {
+			zend_bitset_incl(bitset, randval);
+			i--;
 		}
-		num_avail--;
+	}
+
+	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
+	i = 0;
+	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
+		if (zend_bitset_in(bitset, i) ^ negative_bitset) {
+			if (string_key) {
+				add_next_index_str(return_value, zend_string_copy(string_key));
+			} else {
+				add_next_index_long(return_value, num_key);
+			}
+		}
+		i++;
 	} ZEND_HASH_FOREACH_END();
+
+	free_alloca(bitset, use_heap);
 }
 /* }}} */
 
