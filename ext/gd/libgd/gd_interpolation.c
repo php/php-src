@@ -1225,7 +1225,13 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
 	if (new_img == NULL) {
 		return NULL;
 	}
-	new_img->transparent = gdTrueColorAlpha(im->red[transparent], im->green[transparent], im->blue[transparent], im->alpha[transparent]);
+
+	if (transparent < 0) {
+		/* uninitialized */
+		new_img->transparent = -1;
+	} else {
+		new_img->transparent = gdTrueColorAlpha(im->red[transparent], im->green[transparent], im->blue[transparent], im->alpha[transparent]);
+	}
 
 	for (i=0; i < _height; i++) {
 		long j;
