@@ -909,6 +909,7 @@ static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, 
 			for (i=0;i<=u;i++) {
 				gdFree(res->ContribRow[i].Weights);
 			}
+			gdFree(res->ContribRow);
 			gdFree(res);
 			return NULL;
 		}
