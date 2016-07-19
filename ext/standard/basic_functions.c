@@ -4009,24 +4009,27 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv(string varname)
+/* {{{ proto string getenv(string varname[, bool local_only])
    Get the value of an environment variable */
 PHP_FUNCTION(getenv)
 {
 	char *ptr, *str;
 	size_t str_len;
+	zend_bool local_only = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &str, &str_len, &local_only) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	/* SAPI method returns an emalloc()'d string */
-	ptr = sapi_getenv(str, str_len);
-	if (ptr) {
-		// TODO: avoid realocation ???
-		RETVAL_STRING(ptr);
-		efree(ptr);
-		return;
+	if (!local_only) {
+		/* SAPI method returns an emalloc()'d string */
+		ptr = sapi_getenv(str, str_len);
+		if (ptr) {
+			// TODO: avoid realocation ???
+			RETVAL_STRING(ptr);
+			efree(ptr);
+			return;
+		}
 	}
 #ifdef PHP_WIN32
 	{
