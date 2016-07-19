@@ -25,4 +25,4 @@ try {
 
 ?>
 --EXPECT--
-bool(false)
+string(5) "08P01"
