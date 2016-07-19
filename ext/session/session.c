@@ -867,7 +867,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	if (php_var_unserialize(&session_vars, &val, endptr, &var_hash TSRMLS_CC)) {
 		var_push_dtor(&var_hash, &session_vars);
 	}
-	
+
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	if (PS(http_session_vars)) {
 		zval_ptr_dtor(&PS(http_session_vars));
@@ -932,6 +932,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 		namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
 		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
+			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			return FAILURE;
 		}
 
