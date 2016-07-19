@@ -906,11 +906,12 @@ static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, 
 			res->ContribRow[u].Weights = (double *) gdMalloc(windows_size * sizeof(double));
 		}
 		if (overflow_error == 1 || res->ContribRow[u].Weights == NULL) {
+			unsigned int i;
 			u--;
-			while (u >= 0) {
-				gdFree(res->ContribRow[u].Weights);
-				u--;
+			for (i=0;i<=u;i++) {
+				gdFree(res->ContribRow[i].Weights);
 			}
+			gdFree(res);
 			return NULL;
 		}
 	}
