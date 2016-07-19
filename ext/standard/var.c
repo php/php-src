@@ -22,15 +22,17 @@
 
 /* {{{ includes
 */
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
+
 #include "php.h"
 #include "php_string.h"
 #include "php_var.h"
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
+#include "zend_types.h"
 /* }}} */
 
 #define COMMON (is_ref ? "&" : "")
@@ -580,6 +582,54 @@ PHP_FUNCTION(var_export)
 		PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 		smart_str_free(&buf);
 	}
+}
+/* }}} */
+
+#define RETURN_VAR_TYPE(key) \
+	RETURN_INTERNED_STR(CG(known_strings)[key]);
+
+/* {{{ proto string var_type(mixed var)
+   Get the type of a variable's current value. */
+PHP_FUNCTION(var_type)
+{
+	zval *var;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &var) == FAILURE) {
+		return;
+	}
+
+	switch (Z_TYPE_P(var)) {
+		case IS_ARRAY:
+			RETURN_VAR_TYPE(ZEND_STR_ARRAY);
+
+		case IS_FALSE:
+		case IS_TRUE:
+			RETURN_VAR_TYPE(ZEND_STR_BOOL);
+
+		/* case IS_FLOAT: */
+		case IS_DOUBLE:
+			RETURN_VAR_TYPE(ZEND_STR_FLOAT);
+
+		/* case IS_INT: */
+		case IS_LONG:
+			RETURN_VAR_TYPE(ZEND_STR_INT);
+
+		case IS_NULL:
+		case IS_UNDEF:
+			RETURN_VAR_TYPE(ZEND_STR_NULL);
+
+		case IS_OBJECT:
+			RETURN_VAR_TYPE(ZEND_STR_OBJECT);
+
+		case IS_RESOURCE:
+			RETURN_VAR_TYPE(ZEND_STR_RESOURCE);
+
+		case IS_STRING:
+			RETURN_VAR_TYPE(ZEND_STR_STRING);
+	}
+
+	/* (Should be) unreachable in userland. */
+	RETURN_VAR_TYPE(ZEND_STR_UNKNOWN);
 }
 /* }}} */
 

@@ -2646,6 +2646,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_var_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_var_type, 0, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_serialize, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
@@ -2988,6 +2992,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(var_dump,														arginfo_var_dump)
 	PHP_FE(var_export,														arginfo_var_export)
+	PHP_FE(var_type,                                                        arginfo_var_type)
 	PHP_FE(debug_zval_dump,													arginfo_debug_zval_dump)
 	PHP_FE(print_r,															arginfo_print_r)
 	PHP_FE(memory_get_usage,												arginfo_memory_get_usage)
@@ -3641,6 +3646,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
+	register_type_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	BASIC_ADD_SUBMODULE(dl)
 	BASIC_ADD_SUBMODULE(mail)
@@ -4020,7 +4026,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv([string varname])
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
