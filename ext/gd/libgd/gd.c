@@ -597,15 +597,18 @@ void gdImageColorDeallocate (gdImagePtr im, int color)
 
 void gdImageColorTransparent (gdImagePtr im, int color)
 {
+	if (color < 0) {
+		return;
+	}
 	if (!im->trueColor) {
+		if((color >= im->colorsTotal)) {
+			return;
+		}
+		/* Make the old transparent color opaque again */
 		if (im->transparent != -1) {
 			im->alpha[im->transparent] = gdAlphaOpaque;
 		}
-		if (color > -1 && color < im->colorsTotal && color < gdMaxColors) {
-			im->alpha[color] = gdAlphaTransparent;
-		} else {
-			return;
-		}
+		im->alpha[color] = gdAlphaTransparent;
 	}
 	im->transparent = color;
 }
