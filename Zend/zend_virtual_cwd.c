@@ -1251,7 +1251,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	int add_slash;
 	void *tmp;
 
-	if (path_length == 0 || path_length >= MAXPATHLEN-1) {
+	if (path_length <= 0 || path_length >= MAXPATHLEN-1) {
 #ifdef ZEND_WIN32
 		_set_errno(EINVAL);
 #else
