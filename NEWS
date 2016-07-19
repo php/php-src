@@ -79,6 +79,13 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #72508 (strange references after recursive function call and
     "switch" statement). (Laruence)
+  . Fixed bug #72513 (Stack-based buffer overflow vulnerability in
+    virtual_file_ex). (Stas)
+  . Fixed bug #72573 (HTTP_PROXY is improperly trusted by some PHP libraries
+    and applications). (Stas)
+
+- bz2:
+  . Fixed bug #72613 (Inadequate error handling in bzread()). (Stas)
 
 - CLI:
   . Fixed bug #72484 (SCRIPT_FILENAME shows wrong path if the user specify
@@ -87,15 +94,39 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #72498 (variant_date_from_timestamp null dereference). (Anatol)
 
+- Curl:
+  . Fixed bug #72541 (size_t overflow lead to heap corruption). (Stas)
+
+- Exif:
+  . Fixed bug #72603 (Out of bound read in exif_process_IFD_in_MAKERNOTE).
+    (Stas)
+  . Fixed bug #72618 (NULL Pointer Dereference in exif_process_user_comment).
+    (Stas)
+
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
   . Fixed bug #64641 (imagefilledpolygon doesn't draw horizontal line). (cmb)
+  . Fixed bug #72512 (gdImageTrueColorToPaletteBody allows arbitrary write/read
+    access). (Pierre)
+  . Fixed bug #72519 (imagegif/output out-of-bounds access). (Pierre)
+  . Fixed bug #72558 (Integer overflow error within _gdContributionsAlloc()).
+    (Pierre)
+  . Fixed bug #72482 (Ilegal write/read access caused by gdImageAALine
+    overflow). (Pierre)
+  . Fixed bug #72494 (imagecropauto out-of-bounds access). (Pierre)
+
+- Intl:
+  . Fixed bug #72533 (locale_accept_from_http out-of-bounds access). (Stas)
 
 - Mbstring:
   . Fixed bug #72405 (mb_ereg_replace - mbc_to_code (oniguruma) -
     oob read access). (Laruence)
   . Fixed bug #72399 (Use-After-Free in MBString (search_re)). (Laruence)
+
+- mcrypt:
+  . Fixed bug #72551, bug #72552 (In correct casting from size_t to int lead to
+    heap overflow in mdecrypt_generic). (Stas)
 
 - PDO_pgsql:
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
@@ -115,10 +146,24 @@ PHP                                                                        NEWS
 
 - Session:
   . Fixed bug #72531 (ps_files_cleanup_dir Buffer overflow). (Laruence)
+  . Fixed bug #72562 (Use After Free in unserialize() with Unexpected Session
+    Deserialization). (Stas)
+
+- SNMP:
+  . Fixed bug #72479 (Use After Free Vulnerability in SNMP with GC and
+    unserialize()). (Stas)
 
 - Streams:
   . Fixed bug #72439 (Stream socket with remote address leads to a segmentation
     fault). (Laruence)
+
+- XMLRPC:
+  . Fixed bug #72606 (heap-buffer-overflow (write) simplestring_addn
+    simplestring.c). (Stas)
+
+- Zip:
+  . Fixed bug #72520 (Stack-based buffer overflow vulnerability in
+    php_stream_zip_opener). (Stas)
 
 23 Jun 2016 PHP 7.0.8
 
