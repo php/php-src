@@ -13,6 +13,6 @@ Done
 --EXPECTF--
 Test
 
-Warning: exif_read_data(bug62523_2.jpg): IFD data bad offset: 0xADB23672 length 0x0D94 in %s/bug62523_2.php on line %d
+Warning: exif_read_data(bug62523_2.jpg): IFD data bad offset: 0xADB23672 length 0x0D94 in %s%ebug62523_2.php on line %d
 int(30)
 Done
