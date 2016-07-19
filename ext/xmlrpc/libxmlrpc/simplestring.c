@@ -172,6 +172,9 @@ void simplestring_free(simplestring* string) {
 }
 /******/
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
 /****f* FUNC/simplestring_addn
  * NAME
  *   simplestring_addn
