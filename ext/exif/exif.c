@@ -2623,6 +2623,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 	*pszEncoding = NULL;
 	/* Copy the comment */
 	if (ByteCount>=8) {
+		const zend_encoding *from, *to;
 		if (!memcmp(szValuePtr, "UNICODE\0", 8)) {
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
@@ -2643,14 +2644,16 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			} else {
 				decode = ImageInfo->decode_unicode_le;
 			}
+			to = zend_multibyte_fetch_encoding(ImageInfo->encode_unicode TSRMLS_CC);
+			from = zend_multibyte_fetch_encoding(decode TSRMLS_CC);
 			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
-			if (zend_multibyte_encoding_converter(
+			if (!to || !from || zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr,
 					&len,
 					(unsigned char*)szValuePtr,
 					ByteCount,
-					zend_multibyte_fetch_encoding(ImageInfo->encode_unicode TSRMLS_CC),
-					zend_multibyte_fetch_encoding(decode TSRMLS_CC)
+					to,
+					from
 					TSRMLS_CC) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
@@ -2665,13 +2668,15 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
-			if (zend_multibyte_encoding_converter(
+			to = zend_multibyte_fetch_encoding(ImageInfo->encode_jis TSRMLS_CC);
+			from = zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le TSRMLS_CC);
+			if (!to || !from || zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr,
 					&len,
 					(unsigned char*)szValuePtr,
 					ByteCount,
-					zend_multibyte_fetch_encoding(ImageInfo->encode_jis TSRMLS_CC),
-					zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le TSRMLS_CC)
+					to,
+					from
 					TSRMLS_CC) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
