@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
@@ -128,7 +128,7 @@ PHP_FUNCTION(header_register_callback)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &callback_func) == FAILURE) {
 		return;
 	}
-	
+
 	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
 		efree(callback_name);
 		RETURN_FALSE;
@@ -156,10 +156,10 @@ static void sapi_run_header_callback(TSRMLS_D)
 	char *callback_name = NULL;
 	char *callback_error = NULL;
 	zval *retval_ptr = NULL;
-	
+
 	if (zend_fcall_info_init(SG(callback_func), 0, &fci, &SG(fci_cache), &callback_name, &callback_error TSRMLS_CC) == SUCCESS) {
 		fci.retval_ptr_ptr = &retval_ptr;
-		
+
 		error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
 		if (error == FAILURE) {
 			goto callback_failed;
@@ -170,13 +170,13 @@ static void sapi_run_header_callback(TSRMLS_D)
 callback_failed:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the sapi_header_callback");
 	}
-	
+
 	if (callback_name) {
 		efree(callback_name);
 	}
 	if (callback_error) {
 		efree(callback_error);
-	}	
+	}
 }
 
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
@@ -407,11 +407,11 @@ SAPI_API void sapi_activate_headers_only(TSRMLS_D)
 	if (SG(request_info).headers_read == 1)
 		return;
 	SG(request_info).headers_read = 1;
-	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), 
+	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct),
 			(void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 
-	/* SG(sapi_headers).http_response_code = 200; */ 
+	/* SG(sapi_headers).http_response_code = 200; */
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(read_post_bytes) = 0;
@@ -423,7 +423,7 @@ SAPI_API void sapi_activate_headers_only(TSRMLS_D)
 	SG(global_request_time) = 0;
 
 	/*
-	 * It's possible to override this general case in the activate() callback, 
+	 * It's possible to override this general case in the activate() callback,
 	 * if necessary.
 	 */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
@@ -509,7 +509,7 @@ static void sapi_send_headers_free(TSRMLS_D)
 		SG(sapi_headers).http_status_line = NULL;
 	}
 }
-	
+
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
@@ -583,7 +583,7 @@ static int sapi_extract_response_code(const char *header_line)
 			break;
 		}
 	}
-	
+
 	return code;
 }
 
@@ -603,7 +603,7 @@ static void sapi_update_response_code(int ncode TSRMLS_DC)
 	SG(sapi_headers).http_response_code = ncode;
 }
 
-/* 
+/*
  * since zend_llist_del_element only remove one matched item once,
  * we should remove them by ourself
  */
@@ -639,7 +639,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 {
 	sapi_header_line ctr = {0};
 	int r;
-	
+
 	ctr.line = header_line;
 	ctr.line_len = header_line_len;
 
@@ -733,7 +733,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		} while(header_line_len && isspace(header_line[header_line_len-1]));
 		header_line[header_line_len]='\0';
 	}
-	
+
 	if (op == SAPI_HEADER_DELETE) {
 		if (strchr(header_line, ':')) {
 			efree(header_line);
@@ -771,7 +771,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	sapi_header.header_len = header_line_len;
 
 	/* Check the header for a few cases that we have special support for in SAPI */
-	if (header_line_len>=5 
+	if (header_line_len>=5
 		&& !strncasecmp(header_line, "HTTP/", 5)) {
 		/* filter out the response code */
 		sapi_update_response_code(sapi_extract_response_code(header_line) TSRMLS_CC);
@@ -830,8 +830,8 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					/* Return a Found Redirect if one is not already specified */
 					if (http_response_code) { /* user specified redirect code */
 						sapi_update_response_code(http_response_code TSRMLS_CC);
-					} else if (SG(request_info).proto_num > 1000 && 
-					   SG(request_info).request_method && 
+					} else if (SG(request_info).proto_num > 1000 &&
+					   SG(request_info).request_method &&
 					   strcmp(SG(request_info).request_method, "HEAD") &&
 					   strcmp(SG(request_info).request_method, "GET")) {
 						sapi_update_response_code(303 TSRMLS_CC);
@@ -1020,7 +1020,11 @@ SAPI_API struct stat *sapi_get_stat(TSRMLS_D)
 
 SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 {
-	if (sapi_module.getenv) { 
+	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
+		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
+		return NULL;
+	}
+	if (sapi_module.getenv) {
 		char *value, *tmp = sapi_module.getenv(name, name_len TSRMLS_CC);
 		if (tmp) {
 			value = estrdup(tmp);

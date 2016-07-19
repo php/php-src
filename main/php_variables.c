@@ -47,7 +47,7 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zva
 {
 	zval new_entry;
 	assert(strval != NULL);
-	
+
 	/* Prepare value */
 	Z_STRLEN(new_entry) = str_len;
 	Z_STRVAL(new_entry) = estrndup(strval, Z_STRLEN(new_entry));
@@ -85,7 +85,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	while (*var_name && *var_name==' ') {
 		var_name++;
 	}
-	
+
 	/*
 	 * Prepare variable name
 	 */
@@ -171,7 +171,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 					return;
 				}
 				*ip = 0;
-				new_idx_len = strlen(index_s);	
+				new_idx_len = strlen(index_s);
 			}
 
 			if (!index) {
@@ -214,7 +214,7 @@ plain_var:
 				zval_ptr_dtor(&gpc_element);
 			}
 		} else {
-			/* 
+			/*
 			 * According to rfc2965, more specific paths are listed above the less specific ones.
 			 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
 			 * to have the same (plain text) cookie name for the same path and we should not overwrite
@@ -367,7 +367,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	int free_buffer = 0;
 	char *strtok_buf = NULL;
 	long count = 0;
-	
+
 	switch (arg) {
 		case PARSE_POST:
 		case PARSE_GET:
@@ -440,9 +440,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			separator = ";\0";
 			break;
 	}
-	
+
 	var = php_strtok_r(res, separator, &strtok_buf);
-	
+
 	while (var) {
 		val = strchr(var, '=');
 
@@ -537,11 +537,11 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	zval *arr, *argc, *tmp;
 	int count = 0;
 	char *ss, *space;
-	
+
 	if (!(SG(request_info).argc || track_vars_array)) {
 		return;
 	}
-	
+
 	ALLOC_INIT_ZVAL(arr);
 	array_init(arr);
 
@@ -602,7 +602,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		Z_ADDREF_P(argc);
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
 		zend_hash_update(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
-	} 
+	}
 	if (track_vars_array) {
 		Z_ADDREF_P(arr);
 		Z_ADDREF_P(argc);
@@ -732,7 +732,7 @@ static zend_bool php_auto_globals_create_get(const char *name, uint name_len TSR
 
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &vars, sizeof(zval *), NULL);
 	Z_ADDREF_P(vars);
-	
+
 	return 0; /* don't rearm */
 }
 
@@ -758,7 +758,7 @@ static zend_bool php_auto_globals_create_post(const char *name, uint name_len TS
 
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &vars, sizeof(zval *), NULL);
 	Z_ADDREF_P(vars);
-	
+
 	return 0; /* don't rearm */
 }
 
@@ -781,7 +781,7 @@ static zend_bool php_auto_globals_create_cookie(const char *name, uint name_len 
 
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &vars, sizeof(zval *), NULL);
 	Z_ADDREF_P(vars);
-	
+
 	return 0; /* don't rearm */
 }
 
@@ -800,8 +800,25 @@ static zend_bool php_auto_globals_create_files(const char *name, uint name_len T
 
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &vars, sizeof(zval *), NULL);
 	Z_ADDREF_P(vars);
-	
+
 	return 0; /* don't rearm */
+}
+
+/* Upgly hack to fix HTTP_PROXY issue, see bug #72573 */
+static void check_http_proxy(HashTable *var_table)
+{
+	if (zend_hash_exists(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY"))) {
+		char *local_proxy = getenv("HTTP_PROXY");
+
+		if (!local_proxy) {
+			zend_hash_del(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY"));
+		} else {
+			zval *local_zval;
+			ALLOC_INIT_ZVAL(local_zval);
+			ZVAL_STRING(local_zval, local_proxy, 1);
+			zend_hash_update(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY"), &local_zval, sizeof(zval **), NULL);
+		}
+	}
 }
 
 static zend_bool php_auto_globals_create_server(const char *name, uint name_len TSRMLS_DC)
@@ -812,7 +829,7 @@ static zend_bool php_auto_globals_create_server(const char *name, uint name_len 
 		if (PG(register_argc_argv)) {
 			if (SG(request_info).argc) {
 				zval **argc, **argv;
-	
+
 				if (zend_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
 					zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
 					Z_ADDREF_PP(argc);
@@ -824,7 +841,7 @@ static zend_bool php_auto_globals_create_server(const char *name, uint name_len 
 				php_build_argv(SG(request_info).query_string, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
 			}
 		}
-	
+
 	} else {
 		zval *server_vars=NULL;
 		ALLOC_ZVAL(server_vars);
@@ -836,9 +853,10 @@ static zend_bool php_auto_globals_create_server(const char *name, uint name_len 
 		PG(http_globals)[TRACK_VARS_SERVER] = server_vars;
 	}
 
+	check_http_proxy(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]));
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
 	Z_ADDREF_P(PG(http_globals)[TRACK_VARS_SERVER]);
-	
+
 	return 0; /* don't rearm */
 }
 
@@ -852,11 +870,12 @@ static zend_bool php_auto_globals_create_env(const char *name, uint name_len TSR
 		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_ENV]);
 	}
 	PG(http_globals)[TRACK_VARS_ENV] = env_vars;
-	
+
 	if (PG(variables_order) && (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e'))) {
 		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 	}
 
+	check_http_proxy(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]));
 	zend_hash_update(&EG(symbol_table), name, name_len + 1, &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
 	Z_ADDREF_P(PG(http_globals)[TRACK_VARS_ENV]);
 
