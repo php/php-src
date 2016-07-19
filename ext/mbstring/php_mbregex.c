@@ -703,6 +703,16 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		RETURN_FALSE;
 	}
 
+	if (!php_mb_check_encoding(
+	string,
+	string_len,
+	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+	)) {
+		zval_dtor(array);
+		array_init(array);
+		RETURN_FALSE;
+	}
+
 	options = MBREX(regex_default_options);
 	if (icase) {
 		options |= ONIG_OPTION_IGNORECASE;
@@ -846,6 +856,14 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						&option_str, &option_str_len) == FAILURE) {
 				RETURN_FALSE;
 			}
+		}
+
+		if (!php_mb_check_encoding(
+		string,
+		string_len,
+		_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+		)) {
+			RETURN_NULL();
 		}
 
 		if (option_str != NULL) {
@@ -1361,14 +1379,22 @@ PHP_FUNCTION(mb_ereg_search_init)
 
 	ZVAL_DUP(&MBREX(search_str), arg_str);
 
-	MBREX(search_pos) = 0;
+	if (php_mb_check_encoding(
+	Z_STRVAL_P(arg_str),
+	Z_STRLEN_P(arg_str),
+	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+	)) {
+		MBREX(search_pos) = 0;
+		RETVAL_TRUE;
+	} else {
+		MBREX(search_pos) = Z_STRLEN_P(arg_str);
+		RETVAL_FALSE;
+	}
 
 	if (MBREX(search_regs) != NULL) {
 		onig_region_free(MBREX(search_regs), 1);
 		MBREX(search_regs) = NULL;
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 

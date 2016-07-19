@@ -148,7 +148,11 @@ static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 		just_read = BZ2_bzread(self->bz_file, buf, to_read);
 
 		if (just_read < 1) {
-			stream->eof = 0 == just_read;
+			/* it is not safe to keep reading after an error, see #72613 */
+			stream->eof = 1;
+			if (just_read < 0) {
+				return -1;
+			}
 			break;
 		}
 

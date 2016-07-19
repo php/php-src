@@ -343,7 +343,8 @@ static inline zend_bool can_elide_return_type_check(
 	return 1;
 }
 
-static zend_bool opline_supports_assign_contraction(zend_ssa *ssa, zend_op *opline, int src_var) {
+static zend_bool opline_supports_assign_contraction(
+		zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
 	if (opline->opcode == ZEND_NEW) {
 		/* see Zend/tests/generators/aborted_yield_during_new.phpt */
 		return 0;
@@ -356,6 +357,12 @@ static zend_bool opline_supports_assign_contraction(zend_ssa *ssa, zend_op *opli
 		uint32_t type = ssa->var_info[src_var].type;
 		uint32_t simple = MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE;
 		return !((type & MAY_BE_ANY) & ~simple);
+	}
+
+	if (opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC) {
+		/* POST_INC/DEC write the result variable before performing the inc/dec. For $i = $i++
+		 * eliding the temporary variable would thus yield an incorrect result. */
+		return opline->op1_type != IS_CV || opline->op1.var != cv_var;
 	}
 
 	return 1;
@@ -476,7 +483,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && !ssa->vars[src_var].phi_use_chain
 					 && !ssa->vars[src_var].sym_use_chain
 					 && opline_supports_assign_contraction(
-						 ssa, &op_array->opcodes[ssa->vars[src_var].definition], src_var)
+						 ssa, &op_array->opcodes[ssa->vars[src_var].definition],
+						 src_var, opline->op1.var)
 					) {
 
 						int op_2 = ssa->vars[src_var].definition;

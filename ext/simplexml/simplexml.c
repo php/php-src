@@ -713,7 +713,6 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 
 	_node_as_zval(sxe, node, &ret, type, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 
-	sxe = Z_SXEOBJ_P(&ret);
 	if (!Z_ISUNDEF(sxe->tmp)) {
 		zval_ptr_dtor(&sxe->tmp);
 	}
@@ -1984,12 +1983,8 @@ static int sxe_count_elements(zval *object, zend_long *count) /* {{{ */
 		zval rv;
 		zend_call_method_with_0_params(object, intern->zo.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			if (!Z_ISUNDEF(intern->tmp)) {
-				zval_ptr_dtor(&intern->tmp);
-			}
-			ZVAL_LONG(&intern->tmp, zval_get_long(&rv));
+			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);
-			*count = Z_LVAL(intern->tmp);
 			return SUCCESS;
 		}
 		return FAILURE;

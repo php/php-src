@@ -1360,7 +1360,7 @@ exit_loop:
 		might be too late though, but this is the earliest place ATW
 		we can access the internal charset information from PHP. */
 	argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
-	PHP_WIN32_CP_W_TO_A_ARRAY(argv_wide, num_args, argv, argc)
+	PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
 	using_wide_argv = 1;
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
@@ -1403,7 +1403,7 @@ out:
 	(void)php_win32_cp_cli_restore();
 
 	if (using_wide_argv) {
-		PHP_WIN32_FREE_ARRAY(argv, argc);
+		PHP_WIN32_CP_FREE_ARRAY(argv, argc);
 		LocalFree(argv_wide);
 	}
 	argv = argv_save;

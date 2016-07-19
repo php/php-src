@@ -152,6 +152,7 @@ MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_len
 MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to,
 											  const char *encoding_from);
 MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding);
+MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const char *enc);
 
 /* internal use only */
 int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length);

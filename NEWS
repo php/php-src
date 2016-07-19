@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     phpize on Windows). (Yuji Uchiyama)
   . Fixed bug #29368 (The destructor is called when an exception is thrown from
     the constructor). (Dmitry)
+  . Implemented RFC: RNG Fixes. (Leigh)
+  . Implemented email validation as per RFC 6531. (Leo Feyer, Anatol)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
@@ -45,6 +47,7 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #72596 (imagetypes function won't advertise WEBP support). (cmb)
   . Fixed bug #72604 (imagearc() ignores thickness for full arcs). (cmb)
+  . Fixed bug #70315 (500 Server Error but page is fully rendered). (cmb)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
@@ -52,6 +55,8 @@ PHP                                                                        NEWS
 
 - Mbstring:
   . Deprecated mb_ereg_replace() eval option. (Rouven Weßling, cmb)
+  . Fixed bug #69151 (mb_ereg should reject ill-formed byte sequence).
+    (Masaki Kagaya)
 
 - MCrypt:
   . Deprecated ext/mcrypt. (Scott Arciszewski, cmb)
@@ -59,6 +64,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur)
+
+- OpenSSL:
+  . Bumped a minimal version to 1.0.1. (Jakub Zelenka)
+  . Dropped support for SSL2. (Remi)
 
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
