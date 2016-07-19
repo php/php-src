@@ -5116,7 +5116,7 @@ PHP_FUNCTION(imagecropauto)
 			break;
 
 		case GD_CROP_THRESHOLD:
-			if (color < 0) {
+			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color argument missing with threshold mode");
 				RETURN_FALSE;
 			}
