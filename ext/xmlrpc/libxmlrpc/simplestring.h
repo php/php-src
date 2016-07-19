@@ -63,7 +63,7 @@ void simplestring_init(simplestring* string);
 void simplestring_clear(simplestring* string);
 void simplestring_free(simplestring* string);
 void simplestring_add(simplestring* string, const char* add);
-void simplestring_addn(simplestring* string, const char* add, int add_len);
+void simplestring_addn(simplestring* string, const char* add, size_t add_len);
 
 #ifdef __cplusplus
 }
