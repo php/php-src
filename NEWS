@@ -48,6 +48,8 @@ PHP                                                                        NEWS
   . Fixed bug #72596 (imagetypes function won't advertise WEBP support). (cmb)
   . Fixed bug #72604 (imagearc() ignores thickness for full arcs). (cmb)
   . Fixed bug #70315 (500 Server Error but page is fully rendered). (cmb)
+  . Fixed bug #43828 (broken transparency of imagearc for truecolor in
+    blendingmode). (cmb)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
