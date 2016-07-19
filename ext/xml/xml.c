@@ -918,7 +918,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						break;
 					} ZEND_HASH_FOREACH_END();
 
-					if (parser->level <= XML_MAXLEVEL) {
+					if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
 						array_init(&tag);
 
 						_xml_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);

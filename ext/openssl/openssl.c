@@ -5733,7 +5733,7 @@ PHP_FUNCTION(openssl_get_curve_names)
 {
 	EC_builtin_curve *curves = NULL;
 	const char *sname;
-	int i;
+	size_t i;
 	size_t len = EC_get_builtin_curves(NULL, 0);
 
 	curves = emalloc(sizeof(EC_builtin_curve) * len);

@@ -1366,6 +1366,7 @@ TEST $file
 				return 'SKIPPED';
 			}
 		}
+		$uses_cgi = true;
 	}
 
 	/* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
@@ -1916,7 +1917,7 @@ COMMAND $cmd
 	/* when using CGI, strip the headers from the output */
 	$headers = "";
 
-	if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
+	if (!empty($uses_cgi) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
 		$output = trim($match[2]);
 		$rh = preg_split("/[\n\r]+/", $match[1]);
 		$headers = array();

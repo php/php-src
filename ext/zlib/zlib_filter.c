@@ -174,7 +174,7 @@ static php_stream_filter_ops php_zlib_inflate_ops = {
 };
 /* }}} */
 
-/* {{{ zlib.inflate filter implementation */
+/* {{{ zlib.deflate filter implementation */
 
 static php_stream_filter_status_t php_zlib_deflate_filter(
 	php_stream *stream,

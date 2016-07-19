@@ -2128,11 +2128,11 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out, "Key: Position #" ZEND_ULONG_FMT ":\n", num);
 			}
 
-			php_stream_printf(out, "paramno=" ZEND_LONG_FMT "\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-					param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
-					param->name ? ZSTR_VAL(param->name) : "",
-					param->is_param,
-					param->param_type);
+			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+							param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
+							param->name ? ZSTR_VAL(param->name) : "",
+							param->is_param,
+							param->param_type);
 
 		} ZEND_HASH_FOREACH_END();
 	}

@@ -10,8 +10,8 @@ tidy_clean_repair()
 	echo tidy_get_output($a);
 
 ?>
---EXPECT--
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+--EXPECTF--
+<!DOCTYPE html%S>
 <html>
 <head>
 <title></title>
