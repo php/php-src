@@ -891,6 +891,7 @@ static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, 
 	res->WindowSize = windows_size;
 	res->LineLength = line_length;
 	if (overflow2(line_length, sizeof(ContributionType))) {
+		gdFree(res);
 		return NULL;
 	}
 	res->ContribRow = (ContributionType *) gdMalloc(line_length * sizeof(ContributionType));
