@@ -16,8 +16,11 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->query('CREATE TABLE test_last_id (id SERIAL NOT NULL, blob1 VARCHAR(10))');
+$db->query('CREATE TABLE test_last_id (id SERIAL NOT NULL, field1 VARCHAR(10))');
 
-$stmt = $db->prepare("INSERT INTO test_last_id (blob1) VALUES (:foo)");
+$stmt = $db->prepare("INSERT INTO test_last_id (field1) VALUES ('test')");
 
-$db->lastInsertId();
+var_dump($db->lastInsertId());
+?>
+--EXPECT--
+int(1)
