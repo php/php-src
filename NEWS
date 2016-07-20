@@ -64,6 +64,8 @@ PHP                                                                        NEWS
   . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
 
 - Standard:
+  . Fixed bug #72622 (array_walk + array_replace_recursive create references
+    from nothing). (Laruence)
   . Fixed bug #72152 (base64_decode $strict fails to detect null byte).
     (Lauri Kenttä)
   . Fixed bug #72263 (base64_decode skips a character after padding in strict
