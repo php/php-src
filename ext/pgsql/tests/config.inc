@@ -5,7 +5,7 @@
 // environment var PGSQL_TEST_CONNSTR
 
 // "test" database must exist. i.e. "createdb test" before testing
-$conn_str = getenv('PGSQL_TEST_CONNSTR') ?: "host=localhost dbname=test port=5432";    // connection string
+$conn_str = getenv('PGSQL_TEST_CONNSTR') ?: "host=localhost dbname=test port=5432 user=postgres password=postgres";    // connection string
 
 $table_name      = "php_pgsql_test";          // test table that will be created
 $table_name_92   = "php_pgsql_test_92";       // test table that will be created

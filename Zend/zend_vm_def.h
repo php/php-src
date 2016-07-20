@@ -4154,6 +4154,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	USE_OPLINE
 	zend_class_entry *ce, *catch_ce;
 	zend_object *exception;
+	zval *ex;
 
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
@@ -4188,8 +4189,11 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	}
 
 	exception = EG(exception);
-	zval_ptr_dtor(EX_VAR(opline->op2.var));
-	ZVAL_OBJ(EX_VAR(opline->op2.var), EG(exception));
+	ex = EX_VAR(opline->op2.var);
+	if (UNEXPECTED(Z_ISREF_P(ex))) {
+		ex = Z_REFVAL_P(ex);
+	}
+	ZVAL_OBJ(ex, EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
 		GC_REFCOUNT(EG(exception))++;
 		HANDLE_EXCEPTION();
