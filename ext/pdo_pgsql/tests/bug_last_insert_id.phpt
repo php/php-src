@@ -26,19 +26,17 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
 $stmt = $db->prepare("INSERT INTO test_last_id (field1) VALUES ('test')");
 
-var_dump($db->lastInsertId());
-var_dump($db->lastInsertId('test_last_id_id_seq'));
-
 $stmt->execute();
 
+/**
+ * No sequence name informed
+ */
 var_dump($db->lastInsertId());
+/**
+ * Sequence name informed
+ */
 var_dump($db->lastInsertId('test_last_id_id_seq'));
 ?>
 --EXPECTREGEX--
-Warning: PDO::lastInsertId\(\): SQLSTATE\[55000\]: Object not in prerequisite state: 7 ERROR:  lastval is not yet defined in this session in \/var\/www\/html\/php-src\/ext\/pdo_pgsql\/tests\/bug_last_insert_id\.php on line 17
-bool\(false\)
-
-Warning: PDO::lastInsertId\(\): SQLSTATE\[55000\]: Object not in prerequisite state: 7 ERROR:  currval of sequence "test_last_id_id_seq" is not yet defined in this session in \/var\/www\/html\/php-src\/ext\/pdo_pgsql\/tests\/bug_last_insert_id\.php on line 18
-bool\(false\)
 string\([0-9]*\)\ \"[0-9]*\"
 string\([0-9]*\)\ \"[0-9]*\"
