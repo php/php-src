@@ -2082,7 +2082,8 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 		intern->u.file.current_line = estrdup("");
 		intern->u.file.current_line_len = 0;
 	} else {
-		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
+		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE) && !SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
+			/* when SPL_FILE_OBJECT_READ_CSV is set, a newline does not necessarily mean the end of the row, so don't drop. CSV rows can contain multiple quoted newlines. */
 			line_len = strcspn(buf, "\r\n");
 			buf[line_len] = '\0';
 		}

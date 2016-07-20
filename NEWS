@@ -769,6 +769,7 @@ PHP 5.5 is EOL.
     statements option). (peter dot wolanin at acquia dot com)
 
 - SPL:
+  . Fixed bug #69181 (csv parsing drops newlines within fields with SplFileObject::DROP_NEW_LINE). (greg dot bowler at g105b dot com)
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
   . Fixed bug #65213 (cannot cast SplFileInfo to boolean) (Tjerk)
