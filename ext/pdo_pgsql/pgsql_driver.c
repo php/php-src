@@ -392,6 +392,9 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		PQclear(res);
 	}
 
+	free(version);
+	free(res);
+
 	return id;
 }
 
