@@ -1476,7 +1476,9 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive)
 				if (!was_ref && Z_ISREF(args[0])) {
 					/* copy reference back */
 					zval garbage;
-
+					if (Z_REFCOUNT(args[0]) == 1) {
+						ZVAL_UNREF(&args[0]);
+					}
 					ZVAL_COPY_VALUE(&garbage, zv);
 					ZVAL_COPY_VALUE(zv, &args[0]);
 					zval_ptr_dtor(&garbage);
