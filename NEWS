@@ -70,6 +70,8 @@ PHP                                                                        NEWS
     (Keyur)
 
 - OpenSSL:
+  . Fixed bug #72360 (ext/openssl build failure with OpenSSL 1.1.0).
+    (Jakub Zelenka)
   . Bumped a minimal version to 1.0.1. (Jakub Zelenka)
   . Dropped support for SSL2. (Remi)
 
