@@ -13,7 +13,12 @@ PDOTest::skip();
 <?php
 
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+
+$config['ENV']['PDOTEST_DSN'] = 'pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres';
+$config['ENV']['PDOTEST_USER'] = 'postgres';
+$config['ENV']['PDOTEST_PASS'] = 'postgres';
+
+$db = PDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
@@ -21,7 +26,6 @@ $db->query('CREATE TABLE test_last_id (id SERIAL NOT NULL, field1 VARCHAR(10))')
 
 $stmt = $db->prepare("INSERT INTO test_last_id (field1) VALUES ('test')");
 
-var_dump($db->lastInsertId());
+$db->lastInsertId();
 ?>
---EXPECTREGEX--
-int(1)
+--EXPECT--
