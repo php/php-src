@@ -365,16 +365,14 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	char *version = NULL;
 
 	PGresult *res;
-	int int_version;
 	ExecStatusType status;
 	const char *q[1];
 	q[0] = name;
 
 	res = PQexec(H->server, "SHOW server_version_num");
 	version = estrdup((char *)PQgetvalue(res, 0, 0));
-	int_version = atoi(version);
 
-	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= int_version && name == NULL) {
+	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= atoi(version) && name == NULL) {
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
 		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
@@ -386,14 +384,14 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		*len = PQgetlength(res, 0, 0);
 	} else {
 		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
+        *len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
 	}
 
 	if (res) {
 		PQclear(res);
 	}
 
-	free(version);
-	free(res);
+    efree(version);
 
 	return id;
 }
