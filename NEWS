@@ -4,11 +4,48 @@ PHP                                                                        NEWS
 
 ?? ?? 2016, PHP 5.5.38
 
-Core:
-   . Fixed bug #70480 (php_url_parse_ex() buffer overflow read). (Stas)
+- BZip2:
+   . Fixed bug #72613 (Inadequate error handling in bzread()). (Stas)
 
-ODBC:
+- Core:
+   . Fixed bug #70480 (php_url_parse_ex() buffer overflow read). (Stas)
+   . Fixed bug #72513 (Stack-based buffer overflow vulnerability in
+     virtual_file_ex). (loianhtuan at gmail dot com)
+   . Fixed bug #72562 (Use After Free in unserialize() with Unexpected Session
+     Deserialization). (taoguangchen at icloud dot com)
+   . Fixed bug #72573 (HTTP_PROXY is improperly trusted by some PHP libraries and
+     applications). (CVE-2016-5385) (Stas)
+
+- EXIF:
+   . Fixed bug #72603 (Out of bound read in exif_process_IFD_in_MAKERNOTE).
+     (Stas)
+   . Fixed bug #72618 (NULL Pointer Dereference in exif_process_user_comment).
+     (Stas)
+
+- GD:
+   . Fixed bug #72512 (gdImageTrueColorToPaletteBody allows arbitrary write/read
+     access). (Pierre)
+   . Fixed bug #72519 (imagegif/output out-of-bounds access). (Pierre)
+   . Fixed bug #72558 (Integer overflow error within _gdContributionsAlloc()).
+     (CVE-2016-6207) (Pierre)
+
+- Intl:
+   . Fixed bug #72533 (locale_accept_from_http out-of-bounds access). (Stas)
+
+- ODBC:
    . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined columns)
+
+- SNMP:
+   . Fixed bug #72479 (Use After Free Vulnerability in SNMP with GC and
+     unserialize()). (taoguangchen at icloud dot com)
+
+- Xmlrpc:
+   . Fixed bug #72606 (heap-buffer-overflow (write) simplestring_addn simplestring.c).
+     (Stas)
+
+- Zip:
+   . Fixed bug #72520 (Stack-based buffer overflow vulnerability in
+     php_stream_zip_opener). (loianhtuan at gmail dot com)
 
 23 Jun 2016, PHP 5.5.37
 
