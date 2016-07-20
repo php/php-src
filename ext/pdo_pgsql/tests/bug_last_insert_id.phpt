@@ -23,4 +23,5 @@ $stmt = $db->prepare("INSERT INTO test_last_id (field1) VALUES ('test')");
 var_dump($db->lastInsertId());
 ?>
 --EXPECT--
+bool(false)
 int(1)
