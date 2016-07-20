@@ -1,8 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-** PHP 5.5 is in security-only mode , please do not commit to this branch **
+PHP 5.5 is EOL.
 
-?? ?? 2016, PHP 5.5.38
+21 Jul 2016, PHP 5.5.38
 
 - BZip2:
    . Fixed bug #72613 (Inadequate error handling in bzread()). (Stas)
