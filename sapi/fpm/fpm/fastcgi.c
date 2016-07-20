@@ -472,7 +472,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			break;
 		}
 		if (eff_name_len >= buf_size-1) {
-			if (eff_name_len > ((uint)-1)-64) { 
+			if (eff_name_len > ((uint)-1)-64) {
 				ret = 0;
 				break;
 			}
@@ -803,7 +803,35 @@ static int fcgi_is_allowed() {
 	return 0;
 }
 
-int fcgi_accept_request(fcgi_request *req)
+/**
+ * Set a file descriptor to be blocking or non-blocking.
+ *
+ * @param fd: the file descriptor
+ * @param nonblocking: zero to set blocking, non-zero to set nonblocking
+ * @returns 0 on success, <0 on error
+ */
+int fcgi_set_nonblocking(int fd, int nonblocking)
+{
+  int flags = fcntl(fd, F_GETFL, 0);
+  if (flags < 0) {
+    return flags;
+  }
+  flags = nonblocking ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK);
+  return fcntl(fd, F_SETFL, flags);
+}
+
+/**
+* Accept a connect and parse a FastCGI request.
+*
+* @param req: the request structure to fill in
+* @param nonblock_once: if non-zero, the listening socket is set nonblocking
+*   for one call to accept(); if accept() fails with EAGAIN/EWOULDBLOCK, it is
+*   called a second time in blocking mode.
+* @param accept_pipe: if non-negative, write the pid to this fd every time
+*   accept() returns, regardless of its return value.
+* @returns the accepted fd, or -1 on error.
+*/
+int fcgi_accept_request(fcgi_request *req, int nonblock_once, int accept_pipe)
 {
 #ifdef _WIN32
 	HANDLE pipe;
@@ -843,22 +871,47 @@ int fcgi_accept_request(fcgi_request *req)
 				{
 					int listen_socket = req->listen_socket;
 #endif
-					sa_t sa;
-					socklen_t len = sizeof(sa);
+          sa_t sa;
+          socklen_t len = sizeof(sa);
+          int accept_errno;
+          do {
+            fpm_request_accepting();
 
-					fpm_request_accepting();
+            FCGI_LOCK(req->listen_socket);
+            if (nonblock_once) {
+              fcgi_set_nonblocking(req->listen_socket, 1);
+            }
+            req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
+            accept_errno = errno;
+            if (nonblock_once) {
+              fcgi_set_nonblocking(req->listen_socket, 0);
+              nonblock_once = 0;
+            }
+            // Mark ourselves as no longer ACCEPTING before telling
+            // the parent to restore our listening
+            // socket. Otherwise, the parent can decide we are
+            // still idle and about to grab a new request when we
+            // are not.
+            fpm_request_accepted();
+            if (accept_pipe >= 0) {
+              pid_t pid = getpid();
+              if (write(accept_pipe, &pid, sizeof(pid)) != sizeof(pid)) {
+                zlog(ZLOG_ERROR, "Failed writing to accept_pipe; something bad is going to happen.");
+              }
+            }
+            if (req->fd < 0 && (accept_errno == EAGAIN || accept_errno == EWOULDBLOCK)) {
+              zlog(ZLOG_DEBUG, "Child pid %d lost the accept() race, retrying", getpid());
+            }
+            FCGI_UNLOCK(req->listen_socket);
+          } while (req->fd < 0 && (accept_errno == EAGAIN || accept_errno == EWOULDBLOCK));
 
-					FCGI_LOCK(req->listen_socket);
-					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
-					FCGI_UNLOCK(req->listen_socket);
-
-					client_sa = sa;
-					if (req->fd >= 0 && !fcgi_is_allowed()) {
-						closesocket(req->fd);
-						req->fd = -1;
-						continue;
-					}
-				}
+          client_sa = sa;
+          if (req->fd >= 0 && !fcgi_is_allowed()) {
+            closesocket(req->fd);
+            req->fd = -1;
+            continue;
+          }
+        }
 
 #ifdef _WIN32
 				if (req->fd < 0 && (in_shutdown || errno != EINTR)) {
@@ -1041,8 +1094,8 @@ ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, i
 				return -1;
 			}
 			pos += 0xfff8;
-		}		
-		
+		}
+
 		pad = (((len - pos) + 7) & ~7) - (len - pos);
 		rest = pad ? 8 - pad : 0;
 

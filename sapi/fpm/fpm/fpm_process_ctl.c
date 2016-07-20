@@ -507,6 +507,10 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 
 	wp->socket_event_set = 0;
 
+	// Remove the listening socket from the epoll set. We'll add it back
+	// when we read from wp->child_accept_pipe.
+	fpm_event_del(wp->ondemand_event);
+
 /*	zlog(ZLOG_DEBUG, "[pool %s] heartbeat running_children=%d", wp->config->name, wp->running_children);*/
 
 	if (wp->running_children >= wp->config->pm_max_children) {
@@ -520,7 +524,7 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 	}
 
 	for (child = wp->children; child; child = child->next) {
-		/* if there is at least on idle child, it will handle the connection, stop here */
+		/* if there is at least one idle child, it will handle the connection, stop here */
 		if (fpm_request_is_idle(child)) {
 			return;
 		}
@@ -537,3 +541,52 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 }
 /* }}} */
 
+void fpm_pctl_on_child_accept(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+{
+	struct fpm_worker_pool_s *wp = (struct fpm_worker_pool_s *)arg;
+	pid_t pid;
+
+	if (fpm_globals.parent_pid != getpid()) {
+		/* prevent a event race condition when child process
+		 * have not set up its own event loop */
+		return;
+	}
+
+	// TODO: Isn't this redundant with the check above?
+	if (fpm_globals.is_child) {
+		return;
+	}
+
+	if (read(wp->child_accept_pipe[0], &pid, sizeof(pid)) != sizeof(pid)) {
+	  zlog(ZLOG_ERROR, "[pool %s] error %d reading child accept pipe", wp->config->name, errno);
+	}
+
+	// Add the listening socket back to the epoll set.
+	fpm_event_add(wp->ondemand_event, 0);
+
+	zlog(ZLOG_DEBUG, "[pool %s] listening on pool after child %d signaled", wp->config->name, pid);
+}
+/* }}} */
+
+// TODO: There has to be a better way to pass this info from the parent
+// to the child. I should be able to access the fpm_worker_pool_s.
+int fpm_pctl_child_pm, fpm_pctl_child_accept_pipe[2];
+int fpm_pctl_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
+{
+  fpm_pctl_child_pm = wp->config->pm;
+  memcpy(fpm_pctl_child_accept_pipe, wp->child_accept_pipe, sizeof(fpm_pctl_child_accept_pipe));
+  return 0;
+}
+/* }}} */
+
+void fpm_pctl_child_info(int *pm, int *pipe)  /* {{{ */
+{
+  *pm = fpm_pctl_child_pm;
+  memcpy(pipe, fpm_pctl_child_accept_pipe, sizeof(fpm_pctl_child_accept_pipe));
+}
+/* }}} */
+  
+  
+
+
+	 

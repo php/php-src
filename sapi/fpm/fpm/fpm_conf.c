@@ -822,11 +822,6 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		} else if (wp->config->pm == PM_STYLE_ONDEMAND) {
 			struct fpm_worker_pool_config_s *config = wp->config;
 
-			if (!fpm_event_support_edge_trigger()) {
-				zlog(ZLOG_ALERT, "[pool %s] ondemand process manager can ONLY be used when events.mechanisme is either epoll (Linux) or kqueue (*BSD).", wp->config->name);
-				return -1;
-			}
-
 			if (config->pm_process_idle_timeout < 1) {
 				zlog(ZLOG_ALERT, "[pool %s] pm.process_idle_timeout(%ds) must be greater than 0s", wp->config->name, config->pm_process_idle_timeout);
 				return -1;

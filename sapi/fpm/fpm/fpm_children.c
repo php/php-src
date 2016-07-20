@@ -146,8 +146,9 @@ static struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	fpm_globals.max_requests = wp->config->pm_max_requests;
-
-	if (0 > fpm_stdio_init_child(wp)  ||
+	
+	if (0 > fpm_pctl_init_child(wp)   ||
+	    0 > fpm_stdio_init_child(wp)  ||
 	    0 > fpm_log_init_child(wp)    ||
 	    0 > fpm_status_init_child(wp) ||
 	    0 > fpm_unix_init_child(wp)   ||
@@ -186,6 +187,13 @@ void fpm_children_bury() /* {{{ */
 		int restart_child = 1;
 
 		child = fpm_child_find(pid);
+
+		if (child->wp->config->pm == PM_STYLE_ONDEMAND) {
+		  pid_t pid = getpid();
+		  if (write(child->wp->child_accept_pipe[1], &pid, sizeof(pid)) != sizeof(pid)) {
+		    zlog(ZLOG_ERROR, "Failed writing to accept_pipe; something bad is going to happen.");
+		  }
+		}
 
 		if (WIFEXITED(status)) {
 
@@ -444,10 +452,26 @@ int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 		}
 
 		memset(wp->ondemand_event, 0, sizeof(struct fpm_event_s));
-		fpm_event_set(wp->ondemand_event, wp->listening_socket, FPM_EV_READ | FPM_EV_EDGE, fpm_pctl_on_socket_accept, wp);
+		fpm_event_set(wp->ondemand_event, wp->listening_socket, FPM_EV_READ, fpm_pctl_on_socket_accept, wp);
 		wp->socket_event_set = 1;
 		fpm_event_add(wp->ondemand_event, 0);
 
+		if (pipe(wp->child_accept_pipe) < 0) {
+		  zlog(ZLOG_ERROR, "[pool %s] unable to create child_accept_pipe", wp->config->name);
+		  // FIXME handle crash
+		  return 1;
+		}
+		
+		wp->child_accept_event = (struct fpm_event_s *)malloc(sizeof(struct fpm_event_s));
+		if (!wp->child_accept_event) {
+			zlog(ZLOG_ERROR, "[pool %s] unable to malloc the child_accept socket event", wp->config->name);
+			// FIXME handle crash
+			return 1;
+		}
+		memset(wp->child_accept_event, 0, sizeof(struct fpm_event_s));
+		fpm_event_set(wp->child_accept_event, wp->child_accept_pipe[0], FPM_EV_READ, fpm_pctl_on_child_accept, wp);
+		fpm_event_add(wp->child_accept_event, 0);
+		
 		return 1;
 	}
 	return fpm_children_make(wp, 0 /* not in event loop yet */, 0, 1);
