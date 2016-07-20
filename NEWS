@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0beta1
 
 - Core:
+  . Fixed bug #72629 (Caught exception assignment to variables ignores
+    references). (Laruence)
   . Fixed bug #72594 (Calling an earlier instance of an included anonymous
     class fatals). (Laruence)
   . Fixed bug #72581 (previous property undefined in Exception after
