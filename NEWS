@@ -89,6 +89,10 @@ PHP                                                                        NEWS
   . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
     element). (Laruence)
 
+- Standard:
+  . Fixed bug #72622 (array_walk + array_replace_recursive create references
+    from nothing). (Laruence)
+
 - Tidy:
   . Implemented support for libtidy 5.0.0 and above. (Michael Orlitzky, Anatol)
 
