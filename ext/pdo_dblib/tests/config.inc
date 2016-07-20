@@ -1,9 +1,12 @@
 <?php
 
+if (false === getenv('TDSVER'))
+	putenv('TDSVER=auto');
+
 if (false !== getenv('PDO_DBLIB_TEST_DSN')) 
 	$dsn = getenv('PDO_DBLIB_TEST_DSN');
 else
-	$dsn = 'dblib:host=localhost;dbname=test';
+	$dsn = 'dblib:host=127.0.0.1:1433;dbname=test';
 
 if (false !== getenv('PDO_DBLIB_TEST_USER')) 	
 	$user = getenv('PDO_DBLIB_TEST_USER');
