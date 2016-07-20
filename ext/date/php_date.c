@@ -3061,6 +3061,7 @@ static int php_date_modify(zval *object, char *modify, int modify_len TSRMLS_DC)
 {
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
+	timelib_rel_time tmp_rel_time;
 	timelib_error_container *err = NULL;
 
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -3082,6 +3083,7 @@ static int php_date_modify(zval *object, char *modify, int modify_len TSRMLS_DC)
 		return 0;
 	}
 
+	memcpy(&tmp_rel_time, &dateobj->time->relative, sizeof(struct timelib_rel_time));
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
 	dateobj->time->sse_uptodate = 0;
@@ -3115,6 +3117,7 @@ static int php_date_modify(zval *object, char *modify, int modify_len TSRMLS_DC)
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 	dateobj->time->have_relative = 0;
+	memcpy(&dateobj->time->relative, &tmp_rel_time, sizeof(struct timelib_rel_time));
 	
 	return 1;
 }
