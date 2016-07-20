@@ -84,6 +84,7 @@ PHP                                                                        NEWS
   . Implemented asynchronous signal handling without TICKS. (Dmitry)
   . Added pcntl_signal_get_handler() that returns the current signal handler
     for a particular signal. Addresses FR #72409. (David Walker)
+  . Add signinfo to pcntl_signal() handler args (Bishop Bettini, David Walker)
 
 - Reflection:
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
