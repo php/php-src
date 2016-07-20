@@ -381,7 +381,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		 * When PostgreSQL version is higher than 8.1, fixes the message
 		 * "Object not in prerequisite state: 7 ERROR:  currval of sequence sequence_name is not yet defined in this session"
 		 */
-		vres = PQexec(H->server, "SELECT VERSION()");
+		vres = PQexec(H->server, "SHOW server_version_num");
 		version = estrdup((char *)PQgetvalue(vres, 0, 0));
 		int_version = atoi(version);
 
