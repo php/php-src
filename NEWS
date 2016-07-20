@@ -55,25 +55,52 @@ PHP                                                                        NEWS
   . Fixed bug #72496 (Cannot declare public method with signature incompatible
     with parent private method). (Pedro Magalhães)
   . Fixed bug #72138 (Integer Overflow in Length of String-typed ZVAL). (Stas)
+  . Fixed bug #72513 (Stack-based buffer overflow vulnerability in
+    virtual_file_ex). (loianhtuan at gmail dot com)
+  . Fixed bug #72562 (Use After Free in unserialize() with Unexpected Session
+    Deserialization). (taoguangchen at icloud dot com)
+  . Fixed bug #72573 (HTTP_PROXY is improperly trusted by some PHP libraries and
+    applications). (CVE-2016-5385) (Stas)
 
 - bz2:
   . Fixed bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at 
     stealien dot com).
+  . Fixed bug #72613 (Inadequate error handling in bzread()). (Stas)
 
 - EXIF:
   . Fixed bug #50845 (exif_read_data() returns corrupted exif headers).
     (Bartosz Dziewoński)
+- EXIF:
+  . Fixed bug #72603 (Out of bound read in exif_process_IFD_in_MAKERNOTE).
+    (Stas)
+  . Fixed bug #72618 (NULL Pointer Dereference in exif_process_user_comment).
+    (Stas)
 
 - GD:
   . Fixed bug #43475 (Thick styled lines have scrambled patterns). (cmb)
   . Fixed bug #53640 (XBM images require width to be multiple of 8). (cmb)
   . Fixed bug #64641 (imagefilledpolygon doesn't draw horizontal line). (cmb)
+  . Fixed bug #72512 (gdImageTrueColorToPaletteBody allows arbitrary write/read
+    access). (Pierre)
+  . Fixed bug #72519 (imagegif/output out-of-bounds access). (Pierre)
+  . Fixed bug #72558 (Integer overflow error within _gdContributionsAlloc()).
+    (CVE-2016-6207) (Pierre)
+
+- Intl:
+  . Fixed bug #72533 (locale_accept_from_http out-of-bounds access). (Stas)
+
+- ODBC:
+  . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined columns)
 
 - OpenSSL:
   . Fixed bug #71915 (openssl_random_pseudo_bytes is not fork-safe).
     (Jakub Zelenka)
   . Fixed bug #72336 (openssl_pkey_new does not fail for invalid DSA params).
     (Jakub Zelenka)
+
+- SNMP:
+  . Fixed bug #72479 (Use After Free Vulnerability in SNMP with GC and
+    unserialize()). (taoguangchen at icloud dot com)
 
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
@@ -85,6 +112,14 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #72439 (Stream socket with remote address leads to a segmentation
     fault). (Laruence)
+
+- Xmlrpc:
+  . Fixed bug #72606 (heap-buffer-overflow (write) simplestring_addn simplestring.c).
+    (Stas)
+
+- Zip:
+  . Fixed bug #72520 (Stack-based buffer overflow vulnerability in
+    php_stream_zip_opener). (loianhtuan at gmail dot com)
 
 23 Jun 2016, PHP 5.6.23
 
