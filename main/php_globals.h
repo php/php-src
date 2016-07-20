@@ -68,6 +68,8 @@ struct _php_core_globals {
 
 	long memory_limit;
 	long max_input_time;
+	long lingering_timeout_ms;
+	long lingering_time_s;
 
 	zend_bool track_errors;
 	zend_bool display_errors;

@@ -746,18 +746,56 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 		} else {
 			if (!force) {
 				char buf[8];
+                               time_t start, end;
+                               int sec;
 
 				shutdown(req->fd, 1);
-				while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
+                               if (PG(lingering_timeout_ms) > 0) {
+                                        int ltimeout = PG(lingering_timeout_ms);
+                                        setsockopt(req->fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ltimeout, sizeof(ltimeout));
+                               } else if (PG(lingering_time_s) > 0) {
+                                        int ltimeout = PG(lingering_time_s) * 1000;
+                                        setsockopt(req->fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ltimeout, sizeof(ltimeout));
+                               }
+
+                               time(&start);
+				while (recv(req->fd, buf, sizeof(buf), 0) > 0) {
+                                        if (PG(lingering_time_s) > 0) {
+                                                time(&end);
+                                                sec = (int)(end-start);
+                                                if (sec > PG(lingering_time_s)) {
+                                                        break;
+                                                }
+                                        }
+                                }
 			}
 			closesocket(req->fd);
 		}
 #else
 		if (!force) {
 			char buf[8];
+                       time_t start, end;
+                       int sec;
 
 			shutdown(req->fd, 1);
-			while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
+                       if (PG(lingering_timeout_ms) > 0) {
+                               struct timeval ltimeout = {PG(lingering_timeout_ms)/1000, 1000 * (PG(lingering_timeout_ms) % 1000)};
+                               setsockopt(req->fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ltimeout, sizeof(ltimeout));
+                       } else if (PG(lingering_time_s) > 0) {
+                               struct timeval ltimeout = {PG(lingering_time_s), 0};
+                               setsockopt(req->fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ltimeout, sizeof(ltimeout));
+                       }
+
+                       time(&start);
+                       while (recv(req->fd, buf, sizeof(buf), 0) > 0) {
+                                if (PG(lingering_time_s) > 0) {
+                                        time(&end);
+                                        sec = (int)(end-start);
+                                        if (sec > PG(lingering_time_s)) {
+                                                break;
+                                        }
+                                }
+                        }
 		}
 		close(req->fd);
 #endif

@@ -381,6 +381,18 @@ max_execution_time = 30
 ; http://php.net/max-input-time
 max_input_time = 60
 
+; Maximum time during which script will process (read and ignore) additional data coming from a client
+; Default Value: -1 (Unlimited)
+; Development Value: 30 (30 seconds)
+; Production Value: 30 (30 seconds)
+lingering_time_s = 30
+
+; Maximum waiting time for more client data to arrive. If data are not received during this time, the connection is closed. 
+; Default Value: -1 (Unlimited)
+; Development Value: 5000 (5000 millisecond)
+; Production Value: 5000 (5000 millisecond)
+lingering_timeout_ms = 5000
+
 ; Maximum input variable nesting level
 ; http://php.net/max-input-nesting-level
 ;max_input_nesting_level = 64
