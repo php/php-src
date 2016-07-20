@@ -4196,6 +4196,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ADDR)
 	if (UNEXPECTED(Z_ISREF_P(ex))) {
 		ex = Z_REFVAL_P(ex);
 	}
+	zval_ptr_dtor(ex);
 	ZVAL_OBJ(ex, EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
 		GC_REFCOUNT(EG(exception))++;
