@@ -636,8 +636,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_long2ip, 0)
 	ZEND_ARG_INFO(0, proper_address)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_getenv, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 1)
 	ZEND_ARG_INFO(0, varname)
+	ZEND_ARG_INFO(0, local_only)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_PUTENV
