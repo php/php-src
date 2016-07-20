@@ -364,12 +364,10 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	char *id = NULL;
 	char *version = NULL;
 
-	if (name == NULL) {
-		if (H->pgoid == InvalidOid) {
-			return NULL;
-		}
-		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
-	} else {
+		// if (H->pgoid == InvalidOid) {
+		// 	return NULL;
+		// }
+		// *len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
 		PGresult *res;
 		PGresult *vres;
 		int int_version;
@@ -384,8 +382,9 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		vres = PQexec(H->server, "SHOW server_version_num");
 		version = estrdup((char *)PQgetvalue(vres, 0, 0));
 		int_version = atoi(version);
+        // return version;
 
-		if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= int_version) {
+		if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= int_version && name == NULL) {
 			res = PQexec(H->server, "SELECT LASTVAL()");
 		} else {
 			res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
@@ -402,8 +401,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		if (res) {
 			PQclear(res);
 		}
-	}
-	return id;
+    	return id;
 }
 
 static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
