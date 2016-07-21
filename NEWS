@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0beta1
+?? ??? 2016, PHP 7.1.0beta2
+
+21 Jul 2016, PHP 7.1.0beta1
 
 - Core:
   . Fixed bug #72629 (Caught exception assignment to variables ignores
