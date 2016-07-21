@@ -33,9 +33,19 @@ PHP                                                                        NEWS
     the constructor). (Dmitry)
   . Implemented RFC: RNG Fixes. (Leigh)
   . Implemented email validation as per RFC 6531. (Leo Feyer, Anatol)
+  . Fixed bug #72513 (Stack-based buffer overflow vulnerability in
+    virtual_file_ex). (Stas)
+  . Fixed bug #72573 (HTTP_PROXY is improperly trusted by some PHP libraries
+    and applications). (Stas)
+
+- bz2:
+  . Fixed bug #72613 (Inadequate error handling in bzread()). (Stas)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
+
+- Curl:
+  . Fixed bug #72541 (size_t overflow lead to heap corruption). (Stas)
 
 - Date:
   . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
@@ -43,6 +53,12 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
+
+- Exif:
+  . Fixed bug #72603 (Out of bound read in exif_process_IFD_in_MAKERNOTE).
+    (Stas)
+  . Fixed bug #72618 (NULL Pointer Dereference in exif_process_user_comment).
+    (Stas)
 
 - Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
@@ -58,10 +74,19 @@ PHP                                                                        NEWS
   . Fixed bug #70315 (500 Server Error but page is fully rendered). (cmb)
   . Fixed bug #43828 (broken transparency of imagearc for truecolor in
     blendingmode). (cmb)
+  . Fixed bug #72512 (gdImageTrueColorToPaletteBody allows arbitrary write/read
+    access). (Pierre)
+  . Fixed bug #72519 (imagegif/output out-of-bounds access). (Pierre)
+  . Fixed bug #72558 (Integer overflow error within _gdContributionsAlloc()).
+    (Pierre)
+  . Fixed bug #72482 (Ilegal write/read access caused by gdImageAALine
+    overflow). (Pierre)
+  . Fixed bug #72494 (imagecropauto out-of-bounds access). (Pierre)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
     names). (cmb)
+  . Fixed bug #72533 (locale_accept_from_http out-of-bounds access). (Stas)
 
 - Mbstring:
   . Deprecated mb_ereg_replace() eval option. (Rouven Weßling, cmb)
@@ -70,6 +95,8 @@ PHP                                                                        NEWS
 
 - MCrypt:
   . Deprecated ext/mcrypt. (Scott Arciszewski, cmb)
+  . Fixed bug #72551, bug #72552 (In correct casting from size_t to int lead to
+    heap overflow in mdecrypt_generic). (Stas)
 
 - Opcache:
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
@@ -109,6 +136,14 @@ PHP                                                                        NEWS
 
 - Wddx:
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
+
+- XMLRPC:
+  . Fixed bug #72606 (heap-buffer-overflow (write) simplestring_addn
+    simplestring.c). (Stas)
+
+- Zip:
+  . Fixed bug #72520 (Stack-based buffer overflow vulnerability in
+    php_stream_zip_opener). (Stas)
 
 07 Jul 2016, PHP 7.1.0alpha3
 
@@ -215,10 +250,16 @@ PHP                                                                        NEWS
   . An invalid setting for session.hash_function will throw an instance of
     Error instead of resulting in a fatal error when a session ID is created.
     (Aaron Piotrowski)
+  . Fixed bug #72562 (Use After Free in unserialize() with Unexpected Session
+    Deserialization). (Stas)
 
 - SimpleXML:
   . Creating an unnamed or duplicate attribute will throw an instance of Error
     instead of resulting in a fatal error. (Aaron Piotrowski)
+
+- SNMP:
+  . Fixed bug #72479 (Use After Free Vulnerability in SNMP with GC and
+    unserialize()). (Stas)
 
 - SPL:
   . Attempting to clone an SplDirectory object will throw an instance of Error
