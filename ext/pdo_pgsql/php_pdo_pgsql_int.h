@@ -15,7 +15,6 @@
   | Authors: Edin Kadribasic <edink@emini.dk>                            |
   |          Ilia Alshanestsky <ilia@prohost.org>                        |
   |          Wez Furlong <wez@php.net>                                   |
-  |          Pablo Santiago Sánchez <phackwer@gmail.com>                 |
   +----------------------------------------------------------------------+
 */
 
