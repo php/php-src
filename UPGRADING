@@ -641,6 +641,10 @@ Other
 - debug_zval_dump
   It prints now "int" instead of "long", and "float" instead of "double".
 
+- getenv()
+  Since 7.0.9, getenv() has optional second parameter, making it only
+  consider local environment and not SAPI environment if true.
+
 ========================================
 6. New Functions
 ========================================
