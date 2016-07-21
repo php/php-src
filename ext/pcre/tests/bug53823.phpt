@@ -7,7 +7,11 @@ var_dump(preg_replace('/[^\pL\pM]*/iu', '', 'áéíóú'));
 var_dump(preg_replace('/[^\pL\pM]*/iu', '', "\xFCáéíóú"));
 var_dump(preg_replace('/[^\pL\pM]*/iu', '', "áéíóú\xFC"));
 ?>
---EXPECT--
+--EXPECTF--
 string(10) "áéíóú"
+
+Notice: preg_replace(): PCRE error 4 in %s%ebug53823.php on line %d
 NULL
+
+Notice: preg_replace(): PCRE error 4 in %s%ebug53823.php on line %d
 NULL

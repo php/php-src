@@ -21,7 +21,8 @@ var_dump(preg_last_error() == PREG_NO_ERROR);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Notice: preg_match(): PCRE error 5 in %s%einvalid_utf8_offset.php on line %d
 bool(false)
 array(0) {
 }

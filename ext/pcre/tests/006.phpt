@@ -18,8 +18,11 @@ var_dump($result);
 echo "Done\n";
 ?>
 --EXPECTF--	
+Notice: preg_replace(): PCRE error 2 in %s%e006.php on line %d
 string(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"
 NULL
+
+Notice: preg_replace(): PCRE error 2 in %s%e006.php on line %d
 string(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"
 NULL
 Done

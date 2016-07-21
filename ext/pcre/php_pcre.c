@@ -100,6 +100,7 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 			break;
 	}
 
+	php_error_docref(NULL, E_NOTICE, "PCRE error %d", preg_code);
 	PCRE_G(error_code) = preg_code;
 }
 /* }}} */

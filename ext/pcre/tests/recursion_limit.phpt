@@ -19,7 +19,8 @@ var_dump(preg_match_all('/\p{Ll}\p{L}\p{Ll}\p{Ll}/', 'aeiou', $dummy));
 var_dump(preg_last_error() === PREG_NO_ERROR);
 
 ?>
---EXPECT--
+--EXPECTF--
+Notice: preg_match_all(): PCRE error 3 in %s%erecursion_limit.php on line %d
 bool(false)
 bool(true)
 int(1)

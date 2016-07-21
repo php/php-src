@@ -19,7 +19,8 @@ var_dump(preg_match_all('/\p{Nd}/', '0123456789', $dummy));
 var_dump(preg_last_error() === PREG_NO_ERROR);
 
 ?>
---EXPECT--
+--EXPECTF--
+Notice: preg_match_all(): PCRE error 2 in %s%ebacktrack_limit.php on line %d
 bool(false)
 bool(true)
 int(10)
