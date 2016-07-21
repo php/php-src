@@ -737,9 +737,9 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 
 	php_stream_context_set(datastream, context);
 
-	if (use_ssl_on_data && (php_stream_xport_crypto_setup(stream,
+	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
-			php_stream_xport_crypto_enable(stream, 1) < 0)) {
+			php_stream_xport_crypto_enable(datastream, 1) < 0)) {
 
 		php_stream_wrapper_log_error(wrapper, options, "Unable to activate SSL mode");
 		php_stream_close(datastream);
