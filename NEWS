@@ -130,6 +130,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #72622 (array_walk + array_replace_recursive create references
     from nothing). (Laruence)
+  . Fixed bug #72330 (CSV fields incorrectly split if escape char followed by
+    UTF chars). (cmb)
 
 - Tidy:
   . Implemented support for libtidy 5.0.0 and above. (Michael Orlitzky, Anatol)
