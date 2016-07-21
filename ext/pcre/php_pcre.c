@@ -431,6 +431,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 						coptions |= PCRE_UCP;
 #endif
 				break;
+			case 'J':	coptions |= PCRE_DUPNAMES;		break;
 
 			/* Custom preg options */
 			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
