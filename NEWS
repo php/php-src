@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0beta2
 
+- Intl:
+  . Fixed bug #72639 (Segfault when instantiating class that extends
+    IntlCalendar and adds a property). (Laruence)
+
 21 Jul 2016, PHP 7.1.0beta1
 
 - Core:
