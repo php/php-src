@@ -143,60 +143,92 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 	return DBCOUNT(H->link);
 }
 
-static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
+static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquoted_len, char **quoted, size_t *quoted_len, enum pdo_param_type param_type)
 {
+	const char *hex = "0123456789abcdef";
+	char *q;
+	*quoted_len = 0;
+	char is_ascii = 1;
+	char is_int = 1;
 
-	int useBinaryEncoding = 0;
-	const char * hex = "0123456789abcdef";
-	size_t i;
-	char * q;
-	*quotedlen = 0;
+	switch (PDO_PARAM_TYPE(param_type)) {
+		case PDO_PARAM_LOB:
+			/*
+			 * Binary safe quoting
+			 */
+			*quoted_len += (unquoted_len * 2) + 2; // 2 chars per byte +2 for "0x" prefix
+			q = *quoted = safe_emalloc(2, *quoted_len, 3);
 
-	/*
-	 * Detect quoted length and if we should use binary encoding
-	 */
-	for(i=0;i<unquotedlen;i++) {
-		if( 32 > unquoted[i] || 127 < unquoted[i] ) {
-			useBinaryEncoding = 1;
-			break;
-		}
-		if(unquoted[i] == '\'') ++*quotedlen;
-		++*quotedlen;
-	}
-
-	if(useBinaryEncoding) {
-		/*
-		 * Binary safe quoting
-		 * Will implicitly convert for all data types except Text, DateTime & SmallDateTime
-		 *
-		 */
-		*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
-		q = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
-
-		*q++ = '0';
-		*q++ = 'x';
-		for (i=0;i<unquotedlen;i++) {
-			*q++ = hex[ (*unquoted>>4)&0xF];
-			*q++ = hex[ (*unquoted++)&0xF];
-		}
-	} else {
-		/* Alpha/Numeric Quoting */
-		*quotedlen += 2; /* +2 for opening, closing quotes */
-		q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
-		*q++ = '\'';
-
-		for (i=0;i<unquotedlen;i++) {
-			if (unquoted[i] == '\'') {
-				*q++ = '\'';
-				*q++ = '\'';
-			} else {
-				*q++ = unquoted[i];
+			*q++ = '0';
+			*q++ = 'x';
+			for (size_t i = 0; i < unquoted_len; i++) {
+				*q++ = hex[(*unquoted >> 4) & 0xF];
+				*q++ = hex[(*unquoted++) & 0xF];
 			}
-		}
-		*q++ = '\'';
-	}
+			break;
 
-	*q = 0;
+
+		case PDO_PARAM_BOOL:
+			*quoted_len = 3;
+			if (!unquoted_len // empty strings treated as FALSE anyway
+				|| (unquoted_len == 1 && (*unquoted == '0' || *unquoted == ' ')) // one-char strings depends on a value
+			) {
+				*quoted = estrndup("'0'", 3);
+
+			} else { // strings with length > 1 and one-char strings with a `non-zero` value treated as TRUE
+				*quoted = estrndup("'1'", 3);
+			}
+			break;
+
+
+		case PDO_PARAM_INT:
+			for (size_t i = 0; i < unquoted_len; i++) { // check if it contains only digits
+				if (unquoted[i] < '0' || unquoted[i] > '9') {
+					is_int = 0;
+					break;
+				}
+			}
+
+			if (is_int) { // no quoting needed, just copy unquoted string
+				*quoted_len = unquoted_len;
+				*quoted = estrndup(unquoted, *quoted_len);
+				break;
+			}
+			// continue as if it's a string
+
+
+		default:
+			// count quoted length
+			for (size_t i = 0; i < unquoted_len; i++) {
+				++*quoted_len;
+				if (unquoted[i] == '\'') {
+					++*quoted_len;
+				};
+
+				if (is_ascii && (unquoted[i] < 32 || unquoted[i] > 126)) {
+					is_ascii = 0;
+				}
+			}
+
+			// +2 for opening, closing quotes and +1 for `N` in case of non-ascii string
+			*quoted_len += (is_ascii ? 2 : 3);
+			q = *quoted = safe_emalloc(2, *quoted_len, 3);
+			if (!is_ascii) {
+				*q++ = 'N';
+			}
+			*q++ = '\'';
+
+			for (size_t i = 0; i < unquoted_len; i++) {
+				if (unquoted[i] == '\'') {
+					*q++ = '\'';
+					*q++ = '\'';
+				} else {
+					*q++ = unquoted[i];
+				}
+			}
+			*q = '\'';
+			break;
+	}
 
 	return 1;
 }
