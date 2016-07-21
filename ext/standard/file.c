@@ -2219,6 +2219,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 								memcpy(tptr, hunk_begin, bptr - hunk_begin);
 								tptr += (bptr - hunk_begin);
 								hunk_begin = bptr;
+								state = 0;
 								break;
 							default:
 								bptr += inc_len;
