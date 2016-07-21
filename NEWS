@@ -41,6 +41,8 @@ PHP                                                                        NEWS
     blendingmode). (cmb)
 
 - Intl:
+  . Fixed bug #72639 (Segfault when instantiating class that extends
+    IntlCalendar and adds a property). (Laruence)
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
     names). (cmb)
 
