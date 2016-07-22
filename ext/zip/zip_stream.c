@@ -123,11 +123,11 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 {
 	struct zip_stat sb;
 	const char *path = stream->orig_path;
-	int path_len = strlen(stream->orig_path);
+	size_t path_len = strlen(stream->orig_path);
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
 	char *fragment;
-	int fragment_len;
+	size_t fragment_len;
 	int err;
 	zend_string *file_basename;
 
