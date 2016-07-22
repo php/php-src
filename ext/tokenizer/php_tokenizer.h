@@ -41,6 +41,8 @@ PHP_MINFO_FUNCTION(tokenizer);
 PHP_FUNCTION(token_get_all);
 PHP_FUNCTION(token_name);
 
+PHPAPI zend_class_entry *tokenizer_ce_token;
+
 #ifdef ZTS
 #define TOKENIZER_G(v) TSRMG(tokenizer_globals_id, zend_tokenizer_globals *, v)
 #else
