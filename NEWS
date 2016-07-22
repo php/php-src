@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #72639 (Segfault when instantiating class that extends
     IntlCalendar and adds a property). (Laruence)
 
+- Mysqlnd:
+  . Fixed bug #71863 (Segfault when EXPLAIN with "Unknown column" error when
+    using MariaDB). (Andrey)
+
 - OpenSSL:
   . Use strict mode when decoding base64 in openssl_decrypt(). (Lauri Kenttä)
 
