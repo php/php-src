@@ -22,6 +22,8 @@ PHP 7.1 UPGRADE NOTES
 - Core:
   . gettype() will now return "resource (closed)" instead of "unknown type" for
     closed resources.
+  . is_object() will now return true for objects of class
+    __PHP_Incomplete_Class.
 
 ========================================
 2. New Features
