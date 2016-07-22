@@ -63,6 +63,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
+  . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
+    character). (cmb)
 
 - SQLite3:
   . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
