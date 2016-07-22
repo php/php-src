@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #72658 (Locale::lookup() / locale_lookup() hangs if no match
     found). (Anatol)
 
+- Mysqlnd:
+  . Fixed bug #71863 (Segfault when EXPLAIN with "Unknown column" error when
+    using MariaDB). (Andrey)
+
 - Reflection:
   . Fixed bug #72661 (ReflectionType::__toString crashes with iterable).
     (Laruence)

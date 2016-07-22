@@ -215,11 +215,11 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_connection_state)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_upsert_status_init */
+/* {{{ mysqlnd_connection_state_init */
 PHPAPI void
 mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 {
-	DBG_ENTER("mysqlnd_error_info_init");
+	DBG_ENTER("mysqlnd_connection_state_init");
 	state->m = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_connection_state);
 	state->state = CONN_ALLOCED;
 	DBG_VOID_RETURN;
