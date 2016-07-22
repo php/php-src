@@ -7,17 +7,18 @@ PHP                                                                        NEWS
     IntlCalendar and adds a property). (Laruence)
 
 - OpenSSL:
-  . Use strict mode when decoding base64 in openssl_decrypt().
+  . Use strict mode when decoding base64 in openssl_decrypt(). (Lauri Kenttä)
 
 - SPL:
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
 
 - Standard:
-  . Made padding checks in base64_decode() strict mode stricter.
+  . Made base64_decode() padding checks in strict mode stricter. (Lauri Kenttä)
+  . Made base64_decode() in non-strict mode binary safe. (Lauri Kenttä)
 
 - Streams:
-  . Use strict mode when decoding base64 in data URIs.
+  . Use strict mode when decoding base64 in data URIs. (Lauri Kenttä)
 
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
