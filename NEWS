@@ -6,9 +6,18 @@ PHP                                                                        NEWS
   . Fixed bug #72639 (Segfault when instantiating class that extends
     IntlCalendar and adds a property). (Laruence)
 
+- OpenSSL:
+  . Use strict mode when decoding base64 in openssl_decrypt().
+
 - SPL:
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
+
+- Standard:
+  . Made padding checks in base64_decode() strict mode stricter.
+
+- Streams:
+  . Use strict mode when decoding base64 in data URIs.
 
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
