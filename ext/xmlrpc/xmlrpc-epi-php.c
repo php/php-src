@@ -568,6 +568,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						xReturn = XMLRPC_CreateVector(key, vtype);
 
 						ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(val_arr), num_index, my_key, pIter) {
+							ZVAL_DEREF(pIter);
 							ht = HASH_OF(pIter);
 							if (ht) {
 								ht->u.v.nApplyCount++;
