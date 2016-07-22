@@ -488,7 +488,11 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	*(endw+1) = L'\0';
 
 	ret_len = (endw + 1 - startw);
-	ret = php_win32_ioutil_conv_w_to_any(startw, ret_len, &ret_len);
+	if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(startw, ret_len)) {
+		ret = php_win32_ioutil_conv_w_to_any(startw + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, ret_len - PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, &ret_len);
+	} else {
+		ret = php_win32_ioutil_conv_w_to_any(startw, ret_len, &ret_len);
+	}
 	memmove(start, ret, ret_len+1);
 	assert(start[ret_len] == '\0');
 	free(ret);
