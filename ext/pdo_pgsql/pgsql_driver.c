@@ -361,17 +361,13 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
-	char *version = NULL;
 
 	PGresult *res;
 	ExecStatusType status;
 	const char *q[1];
 	q[0] = name;
 
-	res = PQexec(H->server, "SHOW server_version_num");
-	version = estrdup((char *)PQgetvalue(res, 0, 0));
-
-	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= atoi(version) && name == NULL) {
+	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= PQserverVersion && name == NULL) {
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
 		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
@@ -389,8 +385,6 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	if (res) {
 		PQclear(res);
 	}
-
-    efree(version);
 
 	return id;
 }
