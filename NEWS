@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
 
+- XMLRPC:
+  . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
+    array elements). (Laruence)
+
 21 Jul 2016, PHP 7.1.0beta1
 
 - Core:
