@@ -424,8 +424,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	return (wchar_t *)buf;
 }/*}}}*/
 
-/* based on zend_dirname().
- 	TODO support long path if needed. */
+/* based on zend_dirname(). */
 PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 {/*{{{*/
 	char *ret = NULL, *start;
