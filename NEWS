@@ -81,6 +81,10 @@ PHP                                                                        NEWS
   . Fixed bug #72330 (CSV fields incorrectly split if escape char followed by
     UTF chars). (cmb)
 
+- XMLRPC:
+  . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
+    array elements). (Laruence)
+
 - Wddx:
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
 
