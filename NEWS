@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #72122 (IteratorIterator breaks '@' error suppression). (kinglozzer)
+  . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
+    character). (cmb)
 
 21 Jul 2016, PHP 5.6.24
 
