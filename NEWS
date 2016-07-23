@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0beta2
 
+-GD:
+  . Fixed bug #66555 (Always false condition in ext/gd/libgd/gdkanji.c). (cmb)
+
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
     IntlCalendar and adds a property). (Laruence)
