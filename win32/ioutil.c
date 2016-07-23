@@ -66,7 +66,7 @@
 #include <winnls.h>
 */
 
-typedef HRESULT (WINAPI *MyPathCchCanonicalizeEx)(_Out_ PWSTR pszPathOut, _In_  size_t cchPathOut, _In_  PCWSTR pszPathIn, _In_  unsigned long dwFlags);
+typedef HRESULT (WINAPI *MyPathCchCanonicalizeEx)(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags);
 
 static MyPathCchCanonicalizeEx canonicalize_path_w = NULL;
 
@@ -539,10 +539,10 @@ PW32IO BOOL php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t 
 	return TRUE;
 }/*}}}*/
 
-static HRESULT MyPathCchCanonicalizeExFallback(_Out_ PWSTR pszPathOut, _In_  size_t cchPathOut, _In_  PCWSTR pszPathIn, _In_  unsigned long dwFlags)
+static HRESULT MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
 {
-	pszPathOut = pszPathIn;
-	cchPathOut = wcslen(pszPathOut);
+	cchPathOut = wcslen(pszPathIn);
+	memmove(pszPathOut, pszPathIn, (cchPathOut + 1) * sizeof(wchar_t));
 
 	return S_OK;
 }
