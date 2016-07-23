@@ -182,6 +182,8 @@ PHP_FUNCTION(imagestring);
 PHP_FUNCTION(imagestringup);
 PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
+PHP_FUNCTION(imagesetclip);
+PHP_FUNCTION(imagegetclip);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
