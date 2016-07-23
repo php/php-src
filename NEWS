@@ -42,6 +42,7 @@ PHP                                                                        NEWS
   . Fixed bug #43828 (broken transparency of imagearc for truecolor in
     blendingmode). (cmb)
   . Fixed bug #66555 (Always false condition in ext/gd/libgd/gdkanji.c). (cmb)
+  . Fixed bug #68712 (suspicious if-else statements). (cmb)
 
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
