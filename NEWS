@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 
 - Streams:
   . Use strict mode when decoding base64 in data URIs. (Lauri Kenttä)
+  . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
+  . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
+
 
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
