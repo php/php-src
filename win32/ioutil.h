@@ -88,11 +88,15 @@ typedef enum {
 } php_win32_ioutil_encoding;
 
 
-#define PHP_WIN32_IOUTIL_DEFAULT_SLASHW L'\\'
-#define PHP_WIN32_IOUTIL_DEFAULT_SLASH '\\'
+#define PHP_WIN32_IOUTIL_FW_SLASHW L'/'
+#define PHP_WIN32_IOUTIL_FW_SLASH '/'
+#define PHP_WIN32_IOUTIL_BW_SLASHW L'\\'
+#define PHP_WIN32_IOUTIL_BW_SLASH '\\'
+#define PHP_WIN32_IOUTIL_DEFAULT_SLASHW PHP_WIN32_IOUTIL_BW_SLASHW
+#define PHP_WIN32_IOUTIL_DEFAULT_SLASH PHP_WIN32_IOUTIL_BW_SLASH
 
 #define PHP_WIN32_IOUTIL_DEFAULT_DIR_SEPARATORW	L';'
-#define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == L'\\' || (c) == L'/')
+#define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == PHP_WIN32_IOUTIL_BW_SLASHW || (c) == PHP_WIN32_IOUTIL_FW_SLASHW)
 #define PHP_WIN32_IOUTIL_IS_LETTERW(c) (((c) >= L'a' && (c) <= L'z') || ((c) >= L'A' && (c) <= L'Z'))
 #define PHP_WIN32_IOUTIL_JUNCTION_PREFIXW L"\\??\\"
 #define PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW 4
@@ -129,6 +133,13 @@ typedef enum {
 		} \
 } while (0);
 
+PW32IO BOOL php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
+#ifdef PHP_EXPORTS
+/* This symbols are needed only for the DllMain, but should not be exported 
+	or be available when used with PHP binaries. */
+BOOL php_win32_ioutil_init(void);
+#endif
+
 /* Keep these functions aliased for case some additional handling
    is needed later. */
 __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
@@ -148,11 +159,19 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 			free(mb);
 			return NULL;
 		}
-		memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-		memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
-		ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
 
-		mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		(void)php_win32_ioutil_normalize_path_w(&mb, mb_len, &mb_len);
+
+		if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(mb, mb_len)) {
+			memmove(ret, mb, mb_len * sizeof(wchar_t));
+			ret[mb_len] = L'\0';
+		} else {
+			memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+			memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
+			ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
+
+			mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		}
 
 		free(mb);
 	} else {
