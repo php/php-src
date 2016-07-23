@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
   . Fixed bug #71911 (Unable to set --enable-debug on building extensions by
     phpize on Windows). (Yuji Uchiyama)
+  . Fixed bug causing ClosedGeneratorException being thrown into the calling
+    code instead of the Generator yielding from. (Bob)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
