@@ -60,6 +60,10 @@ PHP 7.1 UPGRADE NOTES
     mt_srand() to produce a deterministic sequence, it can be called using
     mt_srand($seed, MT_RAND_PHP) to produce old the sequences.
 
+- GD:
+  . Reflection related: the name of the second parameter of the image writer
+    functions (e.g. imagepng()) has been changed from `filename` to `to`.
+
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
     values.

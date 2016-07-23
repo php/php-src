@@ -361,45 +361,45 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegif, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_PNG
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_WEBP
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewebp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_JPG
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagejpeg, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, quality)
 ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewbmp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, foreground)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd2, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, chunk_size)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
@@ -2674,7 +2674,7 @@ PHP_FUNCTION(imagexbm)
 }
 /* }}} */
 
-/* {{{ proto bool imagegif(resource im [, string filename])
+/* {{{ proto bool imagegif(resource im [, mixed to])
    Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
@@ -2683,7 +2683,7 @@ PHP_FUNCTION(imagegif)
 /* }}} */
 
 #ifdef HAVE_GD_PNG
-/* {{{ proto bool imagepng(resource im [, string filename])
+/* {{{ proto bool imagepng(resource im [, mixed to])
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
@@ -2694,7 +2694,7 @@ PHP_FUNCTION(imagepng)
 
 
 #ifdef HAVE_GD_WEBP
-/* {{{ proto bool imagewebp(resource im [, string filename[, int quality]] )
+/* {{{ proto bool imagewebp(resource im [, mixed to[, int quality]] )
    Output WEBP image to browser or file */
 PHP_FUNCTION(imagewebp)
 {
@@ -2705,7 +2705,7 @@ PHP_FUNCTION(imagewebp)
 
 
 #ifdef HAVE_GD_JPG
-/* {{{ proto bool imagejpeg(resource im [, string filename [, int quality]])
+/* {{{ proto bool imagejpeg(resource im [, mixed to [, int quality]])
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
@@ -2714,7 +2714,7 @@ PHP_FUNCTION(imagejpeg)
 /* }}} */
 #endif /* HAVE_GD_JPG */
 
-/* {{{ proto bool imagewbmp(resource im [, string filename [, int foreground]])
+/* {{{ proto bool imagewbmp(resource im [, mixed to [, int foreground]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
@@ -2722,7 +2722,7 @@ PHP_FUNCTION(imagewbmp)
 }
 /* }}} */
 
-/* {{{ proto bool imagegd(resource im [, string filename])
+/* {{{ proto bool imagegd(resource im [, mixed to])
    Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
@@ -2730,7 +2730,7 @@ PHP_FUNCTION(imagegd)
 }
 /* }}} */
 
-/* {{{ proto bool imagegd2(resource im [, string filename [, int chunk_size [, int type]]])
+/* {{{ proto bool imagegd2(resource im [, mixed to [, int chunk_size [, int type]]])
    Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
