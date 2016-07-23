@@ -1568,8 +1568,8 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 			}
 
 			if (m >= src_h - 1) {
-				src_offset_x[8] = n;
-				src_offset_y[8] = m;
+				src_offset_x[9] = n;
+				src_offset_y[9] = m;
 			} else {
 				src_offset_x[9] = n;
 				src_offset_y[9] = m;
@@ -2073,8 +2073,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 				}
 
 				if (m >= src_h-1) {
-					src_offset_x[8] = - 1;
-					src_offset_y[8] = - 1;
+					src_offset_x[9] = - 1;
+					src_offset_y[9] = - 1;
 				} else {
 					src_offset_x[9] = n;
 					src_offset_y[9] = m;
