@@ -540,15 +540,15 @@ PW32IO BOOL php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t 
 }/*}}}*/
 
 static HRESULT MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
-{
+{/*{{{*/
 	cchPathOut = wcslen(pszPathIn);
 	memmove(pszPathOut, pszPathIn, (cchPathOut + 1) * sizeof(wchar_t));
 
 	return S_OK;
-}
+}/*}}}*/
 
 BOOL php_win32_ioutil_init(void)
-{
+{/*{{{*/
 	HMODULE hMod = GetModuleHandle("api-ms-win-core-path-l1-1-0");
 
 	if (hMod) {
@@ -561,7 +561,8 @@ BOOL php_win32_ioutil_init(void)
 	}
 
 	return TRUE;
-}
+}/*}}}*/
+
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
