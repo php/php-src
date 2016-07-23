@@ -554,10 +554,10 @@ BOOL php_win32_ioutil_init(void)
 	if (hMod) {
 		canonicalize_path_w = (MyPathCchCanonicalizeEx)GetProcAddress(hMod, "PathCchCanonicalizeEx");
 		if (!canonicalize_path_w) {
-			canonicalize_path_w = MyPathCchCanonicalizeExFallback;
+			canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
 		}
 	} else {
-		canonicalize_path_w = MyPathCchCanonicalizeExFallback;
+		canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
 	}
 
 	return TRUE;
