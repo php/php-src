@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   . Fixed bug #70315 (500 Server Error but page is fully rendered). (cmb)
   . Fixed bug #43828 (broken transparency of imagearc for truecolor in
     blendingmode). (cmb)
+  . Fixed bug #66555 (Always false condition in ext/gd/libgd/gdkanji.c). (cmb)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
@@ -73,7 +74,7 @@ PHP                                                                        NEWS
     applications). (CVE-2016-5385) (Stas)
 
 - bz2:
-  . Fixed bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at 
+  . Fixed bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at
     stealien dot com).
   . Fixed bug #72613 (Inadequate error handling in bzread()). (Stas)
 
