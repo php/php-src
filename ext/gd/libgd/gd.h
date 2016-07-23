@@ -611,6 +611,38 @@ gdImagePtr gdImageCreateFromGif(FILE *fd);
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
 
+/**
+ * Group: GifAnim
+ *
+ *   Legal values for Disposal. gdDisposalNone is always used by
+ *   the built-in optimizer if previm is passed.
+ *
+ * Constants: gdImageGifAnim
+ *
+ *   gdDisposalUnknown              - Not recommended
+ *   gdDisposalNone                 - Preserve previous frame
+ *   gdDisposalRestoreBackground    - First allocated color of palette
+ *   gdDisposalRestorePrevious      - Restore to before start of frame
+ *
+ * See also: <gdImageGifAnimAdd>
+ */
+enum {
+	gdDisposalUnknown,
+	gdDisposalNone,
+	gdDisposalRestoreBackground,
+	gdDisposalRestorePrevious
+};
+
+void gdImageGifAnimBegin(gdImagePtr im, FILE *outFile, int GlobalCM, int Loops);
+void gdImageGifAnimAdd(gdImagePtr im, FILE *outFile, int LocalCM, int LeftOfs, int TopOfs, int Delay, int Disposal, gdImagePtr previm);
+void gdImageGifAnimEnd(FILE *outFile);
+void gdImageGifAnimBeginCtx(gdImagePtr im, gdIOCtx *out, int GlobalCM, int Loops);
+void gdImageGifAnimAddCtx(gdImagePtr im, gdIOCtx *out, int LocalCM, int LeftOfs, int TopOfs, int Delay, int Disposal, gdImagePtr previm);
+void gdImageGifAnimEndCtx(gdIOCtx *out);
+void * gdImageGifAnimBeginPtr(gdImagePtr im, int *size, int GlobalCM, int Loops);
+void * gdImageGifAnimAddPtr(gdImagePtr im, int *size, int LocalCM, int LeftOfs, int TopOfs, int Delay, int Disposal, gdImagePtr previm);
+void * gdImageGifAnimEndPtr(int *size);
+
 /* A custom data sink. For backwards compatibility. Use
 	gdIOCtx instead. */
 /* The sink function must return -1 on error, otherwise the number

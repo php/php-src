@@ -201,6 +201,10 @@ PHP_FUNCTION(imageconvolution);
 
 PHP_FUNCTION(imageresolution);
 
+PHP_FUNCTION(imagegifanimbegin);
+PHP_FUNCTION(imagegifanimadd);
+PHP_FUNCTION(imagegifanimend);
+
 PHP_GD_API int phpi_get_le_gd(void);
 
 #else

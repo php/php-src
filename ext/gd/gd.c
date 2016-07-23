@@ -842,6 +842,28 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imageresolution, 0, 0, 1)
 	ZEND_ARG_INFO(0, res_y)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_imagegifanimbegin, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO(0, global_cm)
+	ZEND_ARG_INFO(0, loops)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_imagegifanimadd, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO(0, local_cm)
+	ZEND_ARG_INFO(0, left_ofs)
+	ZEND_ARG_INFO(0, top_ofs)
+	ZEND_ARG_INFO(0, delay)
+	ZEND_ARG_INFO(0, disposal)
+	ZEND_ARG_INFO(0, prev_im)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_imagegifanimend, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ gd_functions[]
@@ -988,6 +1010,10 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imageconvolution,						arginfo_imageconvolution)
 
 	PHP_FE(imageresolution,							arginfo_imageresolution)
+
+	PHP_FE(imagegifanimbegin,						arginfo_imagegifanimbegin)
+	PHP_FE(imagegifanimadd,							arginfo_imagegifanimadd)
+	PHP_FE(imagegifanimend,							arginfo_imagegifanimend)
 
 	PHP_FE_END
 };
@@ -1171,6 +1197,11 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FILTER_PIXELATE", IMAGE_FILTER_PIXELATE, CONST_CS | CONST_PERSISTENT);
 	/* End Section Filters */
+
+	REGISTER_LONG_CONSTANT("IMG_DISPOSAL_UNKNOWN", gdDisposalUnknown, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_DISPOSAL_NONE", gdDisposalNone, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_DISPOSAL_RESTORE_BACKGROUND", gdDisposalRestoreBackground, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_DISPOSAL_RESTORE_PREVIOUS", gdDisposalRestorePrevious, CONST_CS | CONST_PERSISTENT);
 
 #ifdef GD_VERSION_STRING
 	REGISTER_STRING_CONSTANT("GD_VERSION", GD_VERSION_STRING, CONST_CS | CONST_PERSISTENT);
@@ -1568,7 +1599,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 		RETURN_FALSE;
 	}
 	if (gdImageTrueColorToPalette(im, dither, (int)ncolors)) {
-		RETURN_TRUE;
+	RETURN_TRUE;
 	} else {
 		php_error_docref(NULL, E_WARNING, "Couldn't convert to palette");
 		RETURN_FALSE;
@@ -2559,10 +2590,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		fn = file;
 		if (argc >= 3) {
 			q = quality;
-			if (argc == 4) {
-				t = type;
-			}
+		if (argc == 4) {
+			t = type;
 		}
+	}
 	}
 
 	if (argc >= 2 && file_len) {
@@ -3130,7 +3161,7 @@ PHP_FUNCTION(imageline)
 		gdImageSetAntiAliased(im, col);
 		col = gdAntiAliased;
 	}
-	gdImageLine(im, x1, y1, x2, y2, col);
+		gdImageLine(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3423,7 +3454,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 			gdImagePolygon(im, points, npoints, col);
 			break;
 		case 1:
-			gdImageFilledPolygon(im, points, npoints, col);
+		gdImageFilledPolygon(im, points, npoints, col);
 			break;
 	}
 
@@ -4073,7 +4104,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 		if (!gdImageTrueColorToPalette(im_org, 1, 256)) {
 			php_error_docref(NULL, E_WARNING, "Unable to convert to palette");
 			return;
-		}
+	}
 	}
 
 	for (y = 0; y < dest_height; y++) {
@@ -5105,6 +5136,125 @@ PHP_FUNCTION(imageresolution)
 }
 /* }}} */
 
+/* {{{ */
+static gdIOCtx *make_gd_io_ctx(php_stream *stream)
+{
+	gdIOCtx * ctx;
+
+	ctx = emalloc(sizeof(gdIOCtx));
+	ctx->putC = _php_image_stream_putc;
+	ctx->putBuf = _php_image_stream_putbuf;
+	ctx->gd_free = NULL;
+	ctx->data = (void *)stream;
+	return ctx;
+}
+/* }}} */
+
+/* {{{ proto bool imagegifanimbegin(resource im, resource stream[, bool global_cm = true[, int loops = -1]])
+   Start GIF animation writing. */
+PHP_FUNCTION(imagegifanimbegin)
+{
+	zval *imgind;
+	gdImagePtr im;
+	zval *to_zval = NULL;
+	php_stream *stream;
+	gdIOCtx *ctx;
+	zend_bool global_cm = 1;
+	zend_long loops = -1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|bl", &imgind, &to_zval, &global_cm, &loops) == FAILURE) {
+		return;
+	}
+	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(imgind), "Image", phpi_get_le_gd())) == NULL) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
+		php_stream_from_zval_no_verify(stream, to_zval);
+		if (stream == NULL) {
+			RETURN_FALSE;
+		}
+	} else {
+		php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, it must be a stream");
+		RETURN_FALSE;
+	}
+
+	ctx = make_gd_io_ctx(stream);
+	gdImageGifAnimBeginCtx(im, ctx, global_cm, loops);
+	efree(ctx);
+}
+/* }}} */
+
+/* {{{ proto bool imagegifanimadd(resource im, resource stream, bool local_cm, int left_ofs, int top_ofs, int delay, [int disposal = IMG_DISPOSAL_NONE, [resource prev_im = null])
+   Write a GIF animation frame. */
+PHP_FUNCTION(imagegifanimadd)
+{
+	zval *imgind;
+	zval *to_zval = NULL;
+	zend_bool local_cm;
+	zend_long left_ofs, top_ofs, delay, disposal = gdDisposalNone;
+	zval *prev_imgind = NULL;
+	gdImagePtr im, prev_im = NULL;
+	php_stream *stream;
+	gdIOCtx *ctx;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rzblll|lz", &imgind, &to_zval, &local_cm, &left_ofs, &top_ofs, &delay, &disposal, &prev_imgind) == FAILURE) {
+		return;
+	}
+	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(imgind), "Image", phpi_get_le_gd())) == NULL) {
+		RETURN_FALSE;
+	}
+	if (prev_imgind) {
+		if (Z_TYPE_P(prev_imgind) == IS_RESOURCE) {
+			if ((prev_im = (gdImagePtr)zend_fetch_resource(Z_RES_P(prev_imgind), "Image", phpi_get_le_gd())) == NULL) {
+				RETURN_FALSE;
+			}
+		} else if (Z_TYPE_P(prev_imgind) != IS_NULL) {
+			php_error_docref(NULL, E_WARNING, "$prev_im must be stream or null");
+			RETURN_FALSE;
+		}
+	}
+	if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
+		php_stream_from_zval_no_verify(stream, to_zval);
+		if (stream == NULL) {
+			RETURN_FALSE;
+		}
+	} else {
+		php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, it must be a stream");
+		RETURN_FALSE;
+	}
+
+	ctx = make_gd_io_ctx(stream);
+	gdImageGifAnimAddCtx(im, ctx, local_cm, left_ofs, top_ofs, delay, disposal, prev_im);
+	efree(ctx);
+}
+/* }}} */
+
+/* {{{ proto bool imagegifanimend(resource stream)
+   Terminate GIF animation writing. */
+PHP_FUNCTION(imagegifanimend)
+{
+	zval *to_zval = NULL;
+	php_stream *stream;
+	gdIOCtx *ctx;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &to_zval) == FAILURE) {
+		return;
+	}
+	if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
+		php_stream_from_zval_no_verify(stream, to_zval);
+		if (stream == NULL) {
+			RETURN_FALSE;
+		}
+	} else {
+		php_error_docref(NULL, E_WARNING, "Invalid 1nd parameter, it must be a stream");
+		RETURN_FALSE;
+	}
+
+	ctx = make_gd_io_ctx(stream);
+	gdImageGifAnimEndCtx(ctx);
+	efree(ctx);
+}
+/* }}} */
 /*
  * Local variables:
  * tab-width: 4
