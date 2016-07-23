@@ -58,11 +58,17 @@
 #include "win32/ioutil.h"
 #include "win32/codepage.h"
 
+#include <pathcch.h>
+
 /*
 #undef NONLS
 #undef _WINNLS_
 #include <winnls.h>
 */
+
+typedef HRESULT (WINAPI *MyPathCchCanonicalizeEx)(_Out_ PWSTR pszPathOut, _In_  size_t cchPathOut, _In_  PCWSTR pszPathIn, _In_  unsigned long dwFlags);
+
+static MyPathCchCanonicalizeEx canonicalize_path_w = NULL;
 
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts)
 {/*{{{*/
@@ -424,8 +430,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	return (wchar_t *)buf;
 }/*}}}*/
 
-/* based on zend_dirname().
- 	TODO support long path if needed. */
+/* based on zend_dirname(). */
 PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 {/*{{{*/
 	char *ret = NULL, *start;
@@ -488,7 +493,11 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	*(endw+1) = L'\0';
 
 	ret_len = (endw + 1 - startw);
-	ret = php_win32_ioutil_conv_w_to_any(startw, ret_len, &ret_len);
+	if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(startw, ret_len)) {
+		ret = php_win32_ioutil_conv_w_to_any(startw + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, ret_len - PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, &ret_len);
+	} else {
+		ret = php_win32_ioutil_conv_w_to_any(startw, ret_len, &ret_len);
+	}
 	memmove(start, ret, ret_len+1);
 	assert(start[ret_len] == '\0');
 	free(ret);
@@ -497,6 +506,62 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	return ret_len;
 }/*}}}*/
 
+PW32IO BOOL php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len)
+{/*{{{*/
+	wchar_t *pos, *idx = *buf, canonicalw[MAXPATHLEN];
+	size_t ret_len = len, canonicalw_len, shift;
+
+	if (len >= MAXPATHLEN) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_BUFFER_OVERFLOW);
+		return FALSE;
+	}
+
+	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && idx - *buf <= len) {
+		*pos = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+		idx = pos++;
+	}
+
+	shift = PHP_WIN32_IOUTIL_IS_LONG_PATHW(*buf, len) ? PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW : 0;
+	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, *buf + shift, PATHCCH_ALLOW_LONG_PATHS)) {
+		*new_len = ret_len;
+		return FALSE;
+	}
+	canonicalw_len = wcslen(canonicalw);
+	if (canonicalw_len + shift != len) {
+		if (canonicalw_len > len) {
+			*buf = realloc(*buf, (canonicalw_len + 1) * sizeof(wchar_t));
+		}
+		memmove(*buf + shift, canonicalw, (canonicalw_len + 1) * sizeof(wchar_t));
+		ret_len = canonicalw_len + shift;
+	}
+	*new_len = ret_len;
+
+	return TRUE;
+}/*}}}*/
+
+static HRESULT MyPathCchCanonicalizeExFallback(_Out_ PWSTR pszPathOut, _In_  size_t cchPathOut, _In_  PCWSTR pszPathIn, _In_  unsigned long dwFlags)
+{
+	pszPathOut = pszPathIn;
+	cchPathOut = wcslen(pszPathOut);
+
+	return S_OK;
+}
+
+BOOL php_win32_ioutil_init(void)
+{
+	HMODULE hMod = GetModuleHandle("api-ms-win-core-path-l1-1-0");
+
+	if (hMod) {
+		canonicalize_path_w = (MyPathCchCanonicalizeEx)GetProcAddress(hMod, "PathCchCanonicalizeEx");
+		if (!canonicalize_path_w) {
+			canonicalize_path_w = MyPathCchCanonicalizeExFallback;
+		}
+	} else {
+		canonicalize_path_w = MyPathCchCanonicalizeExFallback;
+	}
+
+	return TRUE;
+}
 /* an extended version could be implemented, for now direct functions can be used. */
 #if 0
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
