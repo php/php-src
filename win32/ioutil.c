@@ -66,7 +66,7 @@
 #include <winnls.h>
 */
 
-typedef HRESULT (WINAPI *MyPathCchCanonicalizeEx)(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags);
+typedef HRESULT (__stdcall *MyPathCchCanonicalizeEx)(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags);
 
 static MyPathCchCanonicalizeEx canonicalize_path_w = NULL;
 
@@ -506,14 +506,14 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	return ret_len;
 }/*}}}*/
 
-PW32IO BOOL php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len)
+PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len)
 {/*{{{*/
 	wchar_t *pos, *idx = *buf, canonicalw[MAXPATHLEN];
-	size_t ret_len = len, canonicalw_len, shift;
+	size_t ret_len = len;
 
 	if (len >= MAXPATHLEN) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_BUFFER_OVERFLOW);
-		return FALSE;
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
+		return PHP_WIN32_IOUTIL_NORM_FAIL;
 	}
 
 	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && idx - *buf <= len) {
@@ -521,30 +521,29 @@ PW32IO BOOL php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t 
 		idx = pos++;
 	}
 
-	shift = PHP_WIN32_IOUTIL_IS_LONG_PATHW(*buf, len) ? PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW : 0;
-	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, *buf + shift, PATHCCH_ALLOW_LONG_PATHS)) {
-		*new_len = ret_len;
-		return FALSE;
+	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, *buf, PATHCCH_ALLOW_LONG_PATHS)) {
+		return PHP_WIN32_IOUTIL_NORM_PARTIAL;
 	}
-	canonicalw_len = wcslen(canonicalw);
-	if (canonicalw_len + shift != len) {
-		if (canonicalw_len > len) {
-			*buf = realloc(*buf, (canonicalw_len + 1) * sizeof(wchar_t));
+	ret_len = wcslen(canonicalw);
+	if (ret_len != len) {
+		if (ret_len > len) {
+			wchar_t *tmp = realloc(*buf, (ret_len + 1) * sizeof(wchar_t));
+			if (!tmp) {
+				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+				return PHP_WIN32_IOUTIL_NORM_PARTIAL;
+			}
+			*buf = tmp;
 		}
-		memmove(*buf + shift, canonicalw, (canonicalw_len + 1) * sizeof(wchar_t));
-		ret_len = canonicalw_len + shift;
+		memmove(*buf, canonicalw, (ret_len + 1) * sizeof(wchar_t));
 	}
 	*new_len = ret_len;
 
-	return TRUE;
+	return PHP_WIN32_IOUTIL_NORM_OK;
 }/*}}}*/
 
-static HRESULT MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
+static HRESULT __stdcall MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
 {/*{{{*/
-	cchPathOut = wcslen(pszPathIn);
-	memmove(pszPathOut, pszPathIn, (cchPathOut + 1) * sizeof(wchar_t));
-
-	return S_OK;
+	return -42;
 }/*}}}*/
 
 BOOL php_win32_ioutil_init(void)
