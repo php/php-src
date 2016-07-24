@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
     array elements). (Laruence)
 
+- Zip:
+  . Fixed bug #72660 (NULL Pointer dereference in zend_virtual_cwd).
+    (Laruence)
+
 21 Jul 2016, PHP 7.1.0beta1
 
 - Core:
