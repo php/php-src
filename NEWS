@@ -96,6 +96,10 @@ PHP                                                                        NEWS
 - Wddx:
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
 
+- Zip:
+  . Fixed bug #72660 (NULL Pointer dereference in zend_virtual_cwd).
+    (Laruence)
+
 21 Jul 2016 PHP 7.0.9
 
 - Core:
