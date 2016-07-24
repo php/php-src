@@ -117,7 +117,10 @@ PHP_METHOD(sqlite3, open)
 	if (strlen(filename) != filename_len) {
 		return;
 	}
-	if (filename_len != sizeof(":memory:")-1 ||
+	if (filename_len == 0) {
+		fullpath = emalloc(1);
+		*fullpath = '\0';
+	} else if (filename_len != sizeof(":memory:")-1 ||
 			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
 			zend_throw_exception(zend_ce_exception, "Unable to expand filepath", 0);
