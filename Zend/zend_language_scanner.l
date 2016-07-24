@@ -226,6 +226,7 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 	lex_state->script_encoding = SCNG(script_encoding);
 
 	lex_state->on_event = SCNG(on_event);
+	lex_state->on_event_context = SCNG(on_event_context);
 
 	lex_state->ast = CG(ast);
 	lex_state->ast_arena = CG(ast_arena);
@@ -265,6 +266,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	SCNG(script_encoding) = lex_state->script_encoding;
 
 	SCNG(on_event) = lex_state->on_event;
+	SCNG(on_event_context) = lex_state->on_event_context;
 
 	CG(ast) = lex_state->ast;
 	CG(ast_arena) = lex_state->ast_arena;
@@ -284,7 +286,9 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 
 ZEND_API void zend_lex_tstring(zval *zv)
 {
-	if (SCNG(on_event)) SCNG(on_event)(ON_FEEDBACK, T_STRING, 0);
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, SCNG(on_event_context));
+	}
 
 	ZVAL_STRINGL(zv, (char*)SCNG(yy_text), SCNG(yy_leng));
 }
@@ -1082,7 +1086,9 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 static zend_always_inline int emit_token(int token, int token_line)
 {
-	if(SCNG(on_event)) SCNG(on_event)(ON_TOKEN, token, token_line);
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_TOKEN, token, token_line, SCNG(on_event_context));
+	}
 
 	return token;
 }

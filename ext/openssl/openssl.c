@@ -6375,7 +6375,7 @@ PHP_FUNCTION(openssl_decrypt)
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (!(options & OPENSSL_RAW_DATA)) {
-		base64_str = php_base64_decode((unsigned char*)data, (int)data_len);
+		base64_str = php_base64_decode_ex((unsigned char*)data, (int)data_len, 1);
 		if (!base64_str) {
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
 			EVP_CIPHER_CTX_free(cipher_ctx);
