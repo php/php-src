@@ -95,6 +95,26 @@ int gdGetWord (int *result, gdIOCtx * ctx)
 }
 
 
+int gdGetWordLSB(signed short int *result, gdIOCtx *ctx)
+{
+	int high = 0, low = 0;
+	low = (ctx->getC) (ctx);
+	if (low == EOF) {
+		return 0;
+	}
+
+	high = (ctx->getC) (ctx);
+	if (high == EOF) {
+		return 0;
+	}
+
+	if (result) {
+		*result = (high << 8) | low;
+	}
+
+	return 1;
+}
+
 int gdGetInt (int *result, gdIOCtx * ctx)
 {
 	int r;
@@ -115,6 +135,45 @@ int gdGetInt (int *result, gdIOCtx * ctx)
 	r = (ctx->getC) (ctx);
 	GD_IO_EOF_CHK(r);
 	*result += r;
+
+	return 1;
+}
+
+int gdGetIntLSB(signed int *result, gdIOCtx *ctx)
+{
+	int c = 0;
+	unsigned int r = 0;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+	r >>= 8;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+	r >>= 8;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+	r >>= 8;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+
+	if (result) {
+		*result = (signed int)r;
+	}
 
 	return 1;
 }
