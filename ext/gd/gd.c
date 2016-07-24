@@ -353,6 +353,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgd2part, 0)
 	ZEND_ARG_INFO(0, height)
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_GD_BMP)
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefrombmp, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagexbm, 0, 0, 2)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -403,6 +409,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd2, 0, 0, 1)
 	ZEND_ARG_INFO(0, chunk_size)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GD_BMP)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagebmp, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, compression)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagedestroy, 0)
 	ZEND_ARG_INFO(0, im)
@@ -904,6 +918,9 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagecreatefromgd,						arginfo_imagecreatefromgd)
 	PHP_FE(imagecreatefromgd2,						arginfo_imagecreatefromgd2)
 	PHP_FE(imagecreatefromgd2part,					arginfo_imagecreatefromgd2part)
+#ifdef HAVE_GD_BMP
+	PHP_FE(imagecreatefrombmp,						arginfo_imagecreatefrombmp)
+#endif
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagepng,								arginfo_imagepng)
 #endif
@@ -917,6 +934,9 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagewbmp,                               arginfo_imagewbmp)
 	PHP_FE(imagegd,									arginfo_imagegd)
 	PHP_FE(imagegd2,								arginfo_imagegd2)
+#ifdef HAVE_GD_BMP
+	PHP_FE(imagebmp,								arginfo_imagebmp)
+#endif
 
 	PHP_FE(imagedestroy,							arginfo_imagedestroy)
 	PHP_FE(imagegammacorrect,						arginfo_imagegammacorrect)
@@ -1063,6 +1083,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_WBMP", 8, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_XPM", 16, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_WEBP", 32, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_BMP", 64, CONST_CS | CONST_PERSISTENT);
 
 	/* special colours for gd */
 	REGISTER_LONG_CONSTANT("IMG_COLOR_TILED", gdTiled, CONST_CS | CONST_PERSISTENT);
@@ -1314,6 +1335,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "WebP Support", 1);
 #else
 	add_assoc_bool(return_value, "WebP Support", 0);
+#endif
+#ifdef HAVE_GD_BMP
+	add_assoc_bool(return_value, "BMP Support", 1);
+#else
+	add_assoc_bool(return_value, "BMP Support", 0);
 #endif
 #if defined(USE_GD_JISX0208)
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
@@ -2143,6 +2169,9 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_WEBP
 	ret |= 32;
 #endif
+#ifdef HAVE_GD_BMP
+	ret |= 64;
+#endif
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2193,6 +2222,8 @@ static int _php_image_type (char data[8])
 		}
 	} else if (!memcmp(data, php_sig_gif, 3)) {
 		return PHP_GDIMG_TYPE_GIF;
+	} else if (!memcmp(data, php_sig_bmp, sizeof(php_sig_bmp))) {
+		return PHP_GDIMG_TYPE_BMP;
 	}
 	else {
 		gdIOCtx *io_ctx;
@@ -2288,6 +2319,10 @@ PHP_FUNCTION(imagecreatefromstring)
 
 		case PHP_GDIMG_TYPE_GD2:
 			im = _php_image_create_from_string(data, "GD2", gdImageCreateFromGd2Ctx);
+			break;
+
+		case PHP_GDIMG_TYPE_BMP:
+			im = _php_image_create_from_string(data, "BMP", gdImageCreateFromBmpCtx);
 			break;
 
 		default:
@@ -2510,6 +2545,16 @@ PHP_FUNCTION(imagecreatefromgd2part)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2PART, "GD2", gdImageCreateFromGd2Part, gdImageCreateFromGd2PartCtx);
 }
 /* }}} */
+
+#if defined(HAVE_GD_BMP)
+/* {{{ proto resource imagecreatefrombmp(string filename)
+   Create a new image from BMP file or URL */
+PHP_FUNCTION(imagecreatefrombmp)
+{
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_BMP, "BMP", gdImageCreateFromBmp, gdImageCreateFromBmpCtx);
+}
+/* }}} */
+#endif
 
 /* {{{ _php_image_output
  */
@@ -2737,6 +2782,16 @@ PHP_FUNCTION(imagegd2)
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2", gdImageGd2);
 }
 /* }}} */
+
+#ifdef HAVE_GD_BMP
+/* {{{ proto bool imagebmp(resource im [, string filename [, int compression]])
+   Output BMP image to browser or file */
+PHP_FUNCTION(imagebmp)
+{
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_BMP, "BMP", gdImageBmpCtx);
+}
+/* }}} */
+#endif
 
 /* {{{ proto bool imagedestroy(resource im)
    Destroy an image */

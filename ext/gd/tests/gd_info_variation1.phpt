@@ -42,6 +42,8 @@ array(%d) {
   bool%a
   ["XBM Support"]=>
   bool%a
+  ["BMP Support"]=>
+  bool%a
   ["JIS-mapped Japanese Font Support"]=>
   bool%a
 }
