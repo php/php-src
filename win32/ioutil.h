@@ -87,6 +87,11 @@ typedef enum {
 	PHP_WIN32_IOUTIL_IS_UTF8
 } php_win32_ioutil_encoding;
 
+typedef enum {
+	PHP_WIN32_IOUTIL_NORM_OK,
+	PHP_WIN32_IOUTIL_NORM_PARTIAL,
+	PHP_WIN32_IOUTIL_NORM_FAIL,
+} php_win32_ioutil_normalization_result;
 
 #define PHP_WIN32_IOUTIL_FW_SLASHW L'/'
 #define PHP_WIN32_IOUTIL_FW_SLASH '/'
@@ -133,7 +138,7 @@ typedef enum {
 		} \
 } while (0);
 
-PW32IO BOOL php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
+PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
 #ifdef PHP_EXPORTS
 /* This symbols are needed only for the DllMain, but should not be exported 
 	or be available when used with PHP binaries. */
@@ -160,6 +165,11 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 			return NULL;
 		}
 
+		/* The return can be ignored here, as the normalization can fail for
+		   various reasons not directly related to the operation itself.
+		   Partial normalization could still do a better job further. And
+		   otherwise, the path might be unchanged which is ok if the path
+		   was valid long one. */
 		(void)php_win32_ioutil_normalize_path_w(&mb, mb_len, &mb_len);
 
 		if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(mb, mb_len)) {
@@ -425,7 +435,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		free(tmp_bufw);
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return buf;
-	} else if (strlen(tmp_bufa) > len) {
+	} else if ((int)strlen(tmp_bufa) > len) {
 		free(tmp_bufa);
 		free(tmp_bufw);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
