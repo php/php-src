@@ -17,9 +17,6 @@ while ($fn=readdir($ds)) {
 }
 
 closedir($ds);
-
-
-
 ?>
 ==DONE== 
 --EXPECTF--
