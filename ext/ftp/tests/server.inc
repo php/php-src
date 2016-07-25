@@ -265,7 +265,7 @@ if ($pid) {
 
 		} elseif (preg_match("~^NLST(?: ([A-Za-z./]+))?\r\n$~", $buf, $m)) {
 
-			if (isset($m[1]) && $m[1] === 'bogusdir') {
+			if (isset($m[1]) && (($m[1] === 'bogusdir') || ($m[1] === '/bogusdir'))) {
 				fputs($s, "250 $m[1]: No such file or directory\r\n");
 				continue;
 			}
@@ -276,11 +276,17 @@ if ($pid) {
 				continue;
 			}
 
+			if (empty($pasv)) {
+			   if (!$fs = stream_socket_client("tcp://$host:$port")) {
+			        fputs($s, "425 Can't open data connection\r\n");
+			        continue;
+			   }
+			} else {
+			  $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port");
+			}
 			fputs($s, "150 File status okay; about to open data connection\r\n");
-
-			if (!$fs = stream_socket_client("tcp://$host:$port")) {
-				fputs($s, "425 Can't open data connection\r\n");
-				continue;
+			if (!empty($pasv)) {
+			   $fs = stream_socket_accept($soc, 5);
 			}
 
 			if (empty($m[1]) || $m[1] !== 'emptydir') {
@@ -368,7 +374,7 @@ if ($pid) {
                                         }
 					fputs($s, "226 Closing data Connection.\r\n");
                                         break;
-                case "mediumfile":
+				case "mediumfile":
 					fputs($s, "150 File status okay; about to open data connection.\r\n");
 					for($i = 0; $i < 150; $i++){
 						fputs($fs, "This is line $i of the test data.\n");
@@ -384,13 +390,14 @@ if ($pid) {
 
 
 		}elseif (preg_match('/^PASV/', $buf, $matches)) {
+			$pasv=true;
 			$port = $pasv_port;
 			$p2 = $port % ((int) 1 << 8);
 			$p1 = ($port-$p2)/((int) 1 << 8);
 			$host = "127.0.0.1";
 			fputs($s, "227 Entering Passive Mode. (127,0,0,1,{$p1},{$p2})\r\n");
-
-
+		}elseif (preg_match('/^EPSV/', $buf, $matches)) {
+			fputs($s, "550 Extended passsive mode not supported.\r\n");
 		} elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
 			fputs($s, "200 OK\r\n");
 
