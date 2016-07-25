@@ -8,7 +8,7 @@ opendir() with 'ftps://' stream.
 $ssl=true;
 require __DIR__ . "/../../../ftp/tests/server.inc";
 
-$path="ftps://localhost:" . $port."/bogusdir";
+$path="ftps://127.0.0.1:" . $port."/bogusdir";
 
 $context = stream_context_create(array('ssl' => array('cafile' =>  __DIR__ . '/../../../ftp/tests/test.pem')));
 
@@ -16,7 +16,7 @@ var_dump(opendir($path, $context));
 ?>
 ==DONE== 
 --EXPECTF--
-Warning: opendir(ftps://localhost:%d/bogusdir): failed to open dir: FTP server reports 250 /bogusdir: No such file or directory
+Warning: opendir(ftps://127.0.0.1:%d/bogusdir): failed to open dir: FTP server reports 250 /bogusdir: No such file or directory
  in %s on line %d
 bool(false)
 ==DONE==
