@@ -720,18 +720,17 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	if (hoststart == NULL) {
 		hoststart = resource->host;
 	}
-	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
-	if (datastream == NULL) {
-		goto opendir_errexit;
-	}
 
 	result = GET_FTP_RESULT(stream);
 	if (result != 150 && result != 125) {
 		/* Could not retrieve or send the file
 		 * this data will only be sent to us after connection on the data port was initiated.
 		 */
-		php_stream_close(datastream);
-		datastream = NULL;
+		goto opendir_errexit;
+	}
+
+	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
+	if (datastream == NULL) {
 		goto opendir_errexit;
 	}
 
