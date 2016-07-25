@@ -588,9 +588,14 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	zval *zv;
 	int retval = FAILURE;
 	php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
+	zval object_copy;
 
 	PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
 	gmp_create(object, &gmpnum);
+
+	/* The "object" variable may be modified during the execution of this unserialize handler
+	 * (it may turn into a reference). Keep the original object around for futher operations. */
+	ZVAL_COPY_VALUE(&object_copy, object);
 
 	p = buf;
 	max = buf + buf_len;
@@ -614,7 +619,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(zv)) != 0) {
 		zend_hash_copy(
-			zend_std_get_properties(object), Z_ARRVAL_P(zv),
+			zend_std_get_properties(&object_copy), Z_ARRVAL_P(zv),
 			(copy_ctor_func_t) zval_add_ref
 		);
 	}
