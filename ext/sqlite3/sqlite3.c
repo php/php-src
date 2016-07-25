@@ -660,8 +660,10 @@ PHP_METHOD(sqlite3, querySingle)
 			break;
 		}
 		default:
+		if (!EG(exception)) {
 			php_sqlite3_error(db_obj, "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
-			RETVAL_FALSE;
+		}
+		RETVAL_FALSE;
 	}
 	sqlite3_finalize(stmt);
 }
