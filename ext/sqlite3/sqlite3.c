@@ -555,7 +555,9 @@ PHP_METHOD(sqlite3, query)
 			break;
 		}
 		default:
-			php_sqlite3_error(db_obj, "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
+			if (!EG(exception)) {
+				php_sqlite3_error(db_obj, "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
+			}
 			sqlite3_finalize(stmt_obj->stmt);
 			stmt_obj->initialised = 0;
 			zval_dtor(return_value);
@@ -1611,7 +1613,9 @@ PHP_METHOD(sqlite3stmt, execute)
 			sqlite3_reset(stmt_obj->stmt);
 
 		default:
-			php_sqlite3_error(stmt_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
+			if (!EG(exception)) {
+				php_sqlite3_error(stmt_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
+			}
 			zval_dtor(return_value);
 			RETURN_FALSE;
 	}
