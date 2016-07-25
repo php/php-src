@@ -17,39 +17,27 @@
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
    |                                                                      |
-   | Based on code from: Richard J. Wagner <rjwagner@writeme.com>         |
-   |                     Makoto Matsumoto <matumoto@math.keio.ac.jp>      |
-   |                     Takuji Nishimura                                 |
-   |                     Shawn Cokus <Cokus@math.washington.edu>          |
+   | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
 
-#include "php.h"
+#ifndef PHP_MT_RAND_H
+#define PHP_MT_RAND_H
+
+#include "php_lcg.h"
 #include "php_rand.h"
-#include "php_mt_rand.h"
 
-/* {{{ php_srand
- */
-PHPAPI void php_srand(zend_long seed)
-{
-	php_mt_srand(seed);
-}
-/* }}} */
+#define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
 
-/* {{{ php_rand
- */
-PHPAPI zend_long php_rand(void)
-{
-	return php_mt_rand();
-}
-/* }}} */
+#define MT_RAND_MT19937 0
+#define MT_RAND_PHP 1
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+PHPAPI void php_mt_srand(uint32_t seed);
+PHPAPI uint32_t php_mt_rand(void);
+PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);
+
+PHP_MINIT_FUNCTION(mt_rand);
+
+#endif	/* PHP_MT_RAND_H */
+

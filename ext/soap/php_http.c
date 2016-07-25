@@ -22,7 +22,7 @@
 #include "php_soap.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/md5.h"
-#include "ext/standard/php_rand.h"
+#include "ext/standard/php_random.h"
 
 static char *get_http_header_value(char *headers, char *type);
 static zend_string *get_http_body(php_stream *socketd, int close, char *headers);
@@ -639,11 +639,15 @@ try_again:
 			if ((digest = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest")-1)) != NULL) {
 				if (Z_TYPE_P(digest) == IS_ARRAY) {
 					char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
+					zend_long     nonce;
 					PHP_MD5_CTX   md5ctx;
 					unsigned char hash[16];
 
+					php_random_bytes_throw(&nonce, sizeof(nonce));
+					nonce &= 0x7fffffff;
+
 					PHP_MD5Init(&md5ctx);
-					snprintf(cnonce, sizeof(cnonce), ZEND_LONG_FMT, php_rand());
+					snprintf(cnonce, sizeof(cnonce), ZEND_LONG_FMT, nonce);
 					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
 					PHP_MD5Final(hash, &md5ctx);
 					make_digest(cnonce, hash);
