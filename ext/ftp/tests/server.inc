@@ -2,16 +2,18 @@
 
 $socket = null;
 $errno = 0;
-$context = stream_context_create(array('ssl' => array('local_cert' => dirname(__FILE__).'/cert.pem', 'passphrase' => 'pass')));
+$context = stream_context_create(array('ssl' => array('local_cert' => dirname(__FILE__).'/test.pem')));
 
 for ($i=0; $i<10 && !$socket; ++$i) {
 	$port = rand(50000, 65535);
+	$port=50000;
 	
 	$socket = stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 }
 //set anther random port that is not the same as $port
 do{
 	$pasv_port = rand(50000, 65535);
+	$pasv_port=50001;
 }while($pasv_port == $port);
 
 if (!$socket) {
@@ -282,12 +284,21 @@ if ($pid) {
 			        continue;
 			   }
 			} else {
-			  $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port");
+			  if (!empty($ssl)) {
+			    $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+			  } else {
+			    $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port");
+			  }
 			}
+
 			fputs($s, "150 File status okay; about to open data connection\r\n");
 			if (!empty($pasv)) {
 			   $fs = stream_socket_accept($soc, 5);
 			}
+
+                        if ((!empty($ssl)) && (!stream_socket_enable_crypto($fs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
+                                die("SSLv23 handshake failed.\n");
+                        }
 
 			if (empty($m[1]) || $m[1] !== 'emptydir') {
 				fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
