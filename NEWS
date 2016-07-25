@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
     IntlCalendar and adds a property). (Laruence)
+  . Fixed bug #72658 (Locale::lookup() / locale_lookup() hangs if no match
+    found). (Anatol)
 
 - Reflection:
   . Fixed bug #72661 (ReflectionType::__toString crashes with iterable).
