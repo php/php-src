@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
   . Fixed bug #71911 (Unable to set --enable-debug on building extensions by
     phpize on Windows). (Yuji Uchiyama)
+  . Fixed bug causing ClosedGeneratorException being thrown into the calling
+    code instead of the Generator yielding from. (Bob)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
@@ -39,6 +41,8 @@ PHP                                                                        NEWS
   . Fixed bug #70315 (500 Server Error but page is fully rendered). (cmb)
   . Fixed bug #43828 (broken transparency of imagearc for truecolor in
     blendingmode). (cmb)
+  . Fixed bug #66555 (Always false condition in ext/gd/libgd/gdkanji.c). (cmb)
+  . Fixed bug #68712 (suspicious if-else statements). (cmb)
 
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
@@ -63,6 +67,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
+  . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
+    character). (cmb)
 
 - SQLite3:
   . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
@@ -76,9 +82,23 @@ PHP                                                                        NEWS
     mode). (Lauri Kenttä)
   . Fixed bug #72264 (base64_decode $strict fails with whitespace between
     padding). (Lauri Kenttä)
+  . Fixed bug #72330 (CSV fields incorrectly split if escape char followed by
+    UTF chars). (cmb)
+
+- Streams:
+  . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
+  . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
+
+- XMLRPC:
+  . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
+    array elements). (Laruence)
 
 - Wddx:
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
+
+- Zip:
+  . Fixed bug #72660 (NULL Pointer dereference in zend_virtual_cwd).
+    (Laruence)
 
 21 Jul 2016 PHP 7.0.9
 
