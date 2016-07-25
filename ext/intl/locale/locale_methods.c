@@ -145,10 +145,10 @@ static char* getPreferredTag(const char* gf_tag)
 * or -1 if no token
 * strtokr equivalent search for token in reverse direction
 */
-static int getStrrtokenPos(char* str, int savedPos)
+static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 {
-	int result =-1;
-	int i;
+	zend_off_t result =-1;
+	zend_off_t i;
 
 	for(i=savedPos-1; i>=0; i--) {
 		if(isIDSeparator(*(str+i)) ){
@@ -1429,7 +1429,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	char* cur_loc_range	= NULL;
 	zend_string* can_loc_range	= NULL;
-	size_t	saved_pos = 0;
+	zend_off_t saved_pos = 0;
 
 	zend_string* return_value = NULL;
 
