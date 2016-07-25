@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #72581 (previous property undefined in Exception after
     deserialization). (Laruence)
   . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
+  . Implemented FR #72614 (Support "nmake test" on building extensions by
+    phpize). (Yuji Uchiyama)
+  . Fixed bug #72641 (phpize (on Windows) ignores PHP_PREFIX).
+    (Yuji Uchiyama)
 
 - Curl:
   . Fixed bug #71144 (Segmentation fault when using cURL with ZTS).
