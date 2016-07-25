@@ -124,7 +124,7 @@ static int16_t findOffset(const char* const* list, const char* key)
 static char* getPreferredTag(const char* gf_tag)
 {
 	char* result = NULL;
-	int grOffset = 0;
+	zend_off_t grOffset = 0;
 
 	grOffset = findOffset( LOC_GRANDFATHERED ,gf_tag);
 	if(grOffset < 0) {
@@ -175,11 +175,11 @@ static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 * returns -1 if no singleton
 * strtok equivalent search for singleton
 */
-static int getSingletonPos(const char* str)
+static zend_off_t getSingletonPos(const char* str)
 {
-	int result =-1;
-	int i=0;
-	int len = 0;
+	zend_off_t result =-1;
+	zend_off_t i=0;
+	zend_off_t len = 0;
 
 	if( str && ((len=strlen(str))>0) ){
 		for( i=0; i<len ; i++){
