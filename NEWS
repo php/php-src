@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
 
+- SQLite3:
+  . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
+    function). (Laruence)
+
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
     array elements). (Laruence)
