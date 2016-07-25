@@ -75,6 +75,8 @@ PHP                                                                        NEWS
     character). (cmb)
 
 - SQLite3:
+  . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
+    function). (Laruence)
   . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
 
 - Standard:

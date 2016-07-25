@@ -1,0 +1,24 @@
+--TEST--
+Bug #72668 (Spurious warning when exception is thrown in user defined function)
+--SKIPIF--
+<?php
+if (!extension_loaded('sqlite3')) die('skip'); ?>
+--FILE--
+<?php
+function my_udf_md5($string) {
+	    throw new \Exception("test exception\n");
+}
+
+$db = new SQLite3(':memory:');
+$db->createFunction('my_udf_md5', 'my_udf_md5');
+
+try {
+	    $result = $db->querySingle('SELECT my_udf_md5("test")');
+		    var_dump($result);
+}
+catch(\Exception $e) {
+	    echo "Exception: ".$e->getMessage();
+}
+?>
+--EXPECT--
+Exception: test exception
