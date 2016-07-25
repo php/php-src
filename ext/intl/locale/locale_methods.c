@@ -179,10 +179,10 @@ static zend_off_t getSingletonPos(const char* str)
 {
 	zend_off_t result =-1;
 	zend_off_t i=0;
-	zend_off_t len = 0;
+	size_t len = 0;
 
 	if( str && ((len=strlen(str))>0) ){
-		for( i=0; i<len ; i++){
+		for( i=0; (size_t)i < len ; i++){
 			if( isIDSeparator(*(str+i)) ){
 				if( i==1){
 					/* string is of the form x-avy or a-prv1 */
