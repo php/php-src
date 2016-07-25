@@ -27,7 +27,7 @@ array(%d) {
   ["GD Version"]=>
   string(%d) %s
   ["FreeType Support"]=>
-  bool(%s)
+  bool(%a
   ["GIF Read Support"]=>
   bool(%s)
   ["GIF Create Support"]=>
