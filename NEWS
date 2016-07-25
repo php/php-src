@@ -57,6 +57,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
   . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
+  . Fixed bug #72667 (opendir() with ftp:// attempts to open data stream for
+    non-existent directories). (vhuk)
 
 - SPL:
   . Fixed bug #72122 (IteratorIterator breaks '@' error suppression). (kinglozzer)
