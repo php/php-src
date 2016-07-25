@@ -1577,9 +1577,9 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 	if (apply_trans_sid) {
 		zend_string *sname;
 		sname = zend_string_init(PS(session_name), strlen(PS(session_name)), 0);
-		php_url_scanner_reset_var(sname, 1); /* This may fail when session name has changed */
+		php_url_scanner_reset_session_var(sname, 1); /* This may fail when session name has changed */
 		zend_string_release(sname);
-		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
+		php_url_scanner_add_session_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
 	}
 }
 /* }}} */

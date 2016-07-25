@@ -3481,6 +3481,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
 	memset(&BG(url_adapt_session_ex), 0, sizeof(BG(url_adapt_session_ex)));
+	memset(&BG(url_adapt_output_ex), 0, sizeof(BG(url_adapt_output_ex)));
 
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
@@ -3497,6 +3498,10 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 	if (basic_globals_p->url_adapt_session_ex.tags) {
 		zend_hash_destroy(basic_globals_p->url_adapt_session_ex.tags);
 		free(basic_globals_p->url_adapt_session_ex.tags);
+	}
+	if (basic_globals_p->url_adapt_output_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_output_ex.tags);
+		free(basic_globals_p->url_adapt_output_ex.tags);
 	}
 }
 /* }}} */

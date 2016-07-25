@@ -76,30 +76,30 @@ Test use_trans_sid=1
 
 --EXPECT--
 Without session
-<a href="?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="./foo.php?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="//php.net/foo.php"> </a>
 <a href="http://php.net/foo.php"> </a>
 <a href="bad://php.net/foo.php"> </a>
 <a href="//www.php.net/foo.php"> </a>
 
-<form method="get"><input type="hidden" name="PHPSESSID" value="testid" /><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </form>
-<form action="./foo.php" method="get"><input type="hidden" name="PHPSESSID" value="testid" /><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
+<form method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </form>
+<form action="./foo.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
 <form action="//php.net/bar.php" method="get"> </a>
 <form action="http://php.net/bar.php" method="get"> </a>
 <form action="bad://php.net/bar.php" method="get"> </a>
 <form action="//www.php.net/bar.php" method="get"> </a>
 
 Test use_trans_sid=0
-<a href="?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="./foo.php?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="//php.net/foo.php"> </a>
 <a href="http://php.net/foo.php"> </a>
 <a href="bad://php.net/foo.php"> </a>
 <a href="//www.php.net/foo.php"> </a>
 
 <form method="get"> </form>
-<form action="./foo.php" method="get"><input type="hidden" name="PHPSESSID" value="testid" /><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
+<form action="./foo.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
 <form action="//php.net/bar.php" method="get"> </a>
 <form action="http://php.net/bar.php" method="get"> </a>
 <form action="bad://php.net/bar.php" method="get"> </a>
@@ -113,8 +113,8 @@ Test use_trans_sid=1
 <a href="bad://php.net/foo.php"> </a>
 <a href="//www.php.net/foo.php"> </a>
 
-<form method="get"> </form>
-<form action="./foo.php" method="get"><input type="hidden" name="PHPSESSID" value="testid" /><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /> </a>
+<form method="get"><input type="hidden" name="PHPSESSID" value="testid" /> </form>
+<form action="./foo.php" method="get"><input type="hidden" name="%3CNAME%3E" value="%3CVALUE%3E" /><input type="hidden" name="PHPSESSID" value="testid" /> </a>
 <form action="//php.net/bar.php" method="get"> </a>
 <form action="http://php.net/bar.php" method="get"> </a>
 <form action="bad://php.net/bar.php" method="get"> </a>

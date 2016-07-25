@@ -32,4 +32,4 @@ foreach (glob(__DIR__ . '/sess_*') as $filename) {
 }
 ?>
 --EXPECTF--
-<a href='a?q=1&PHPSESSID=%s&a=b'>asd</a>
+<a href='a?q=1&a=b&PHPSESSID=%s'>asd</a>

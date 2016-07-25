@@ -56,10 +56,10 @@ echo '
 *** Testing basic session functionality : variation4 use_trans_sid ***
 *** Test trans sid ***
 
-<a href="/?testvar1=testvalue1&testvar2=testvalue2&PHPSESSID=test2">
+<a href="/?PHPSESSID=test2&testvar1=testvalue1&testvar2=testvalue2">
 <form action="" method="post"><input type="hidden" name="testvar1" value="testvalue1" /><input type="hidden" name="testvar2" value="testvalue2" /><input type="hidden" name="PHPSESSID" value="test2" />
 </form>
 
-<a href="/?testvar1=testvalue1&testvar2=testvalue2&PHPSESSID=test2">
+<a href="/?PHPSESSID=test2&testvar1=testvalue1&testvar2=testvalue2">
 <form action="" method="post"><input type="hidden" name="testvar1" value="testvalue1" /><input type="hidden" name="testvar2" value="testvalue2" /><input type="hidden" name="PHPSESSID" value="test2" />
 </form>
