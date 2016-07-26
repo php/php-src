@@ -16,12 +16,14 @@ session.save_handler=files
 <?php
 
 error_reporting(E_ALL);
-ini_set('url_rewriter.hosts', 'php.net');
+ini_set('session.trans_sid_hosts', 'php.net');
 $_SERVER['HTTP_HOST'] = 'php.net';
 
 session_id("abtest");
 session_start();
 ?>
+<form action="//bad.net/do.php">
+<fieldset>
 <form action="//php.net/do.php">
 <fieldset>
 <?php
@@ -56,11 +58,13 @@ ini_set("url_rewriter.tags", "a=href,fieldset=,area=href,frame=src,input=src");
 session_destroy();
 ?>
 --EXPECT--
+<form action="//bad.net/do.php">
+<fieldset>
 <form action="//php.net/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
 <fieldset>
 <form action="../do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
 <fieldset>
 <form action="/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
 <fieldset>
-<form action="/foo/do.php">
+<form action="/foo/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
 <fieldset>

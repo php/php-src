@@ -7,6 +7,7 @@ Test output_add_rewrite_var() function basic feature
 	ob_start();
 // Common setting
 ini_set('url_rewriter.hosts', 'php.net,www.php.net');
+ini_set('session.trans_sid_hosts', 'php.net,www.php.net');
 ini_set('session.use_only_cookies', 1);
 ini_set('session.use_cookies', 1);
 ini_set('session.use_strict_mode', 0);

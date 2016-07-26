@@ -195,10 +195,10 @@ static PHP_INI_MH(OnUpdateOutputHosts)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=", PHP_INI_ALL, OnUpdateSessionTags, url_adapt_session_ex, php_basic_globals, basic_globals)
-	STD_PHP_INI_ENTRY("url_rewriter.hosts", "", PHP_INI_ALL, OnUpdateSessionHosts, url_adapt_session_hosts_ht, php_basic_globals, basic_globals)
-	STD_PHP_INI_ENTRY("url_rewriter.output_tags", "a=href,area=href,frame=src,form=", PHP_INI_ALL, OnUpdateOutputTags, url_adapt_session_ex, php_basic_globals, basic_globals)
-	STD_PHP_INI_ENTRY("url_rewriter.output_hosts", "", PHP_INI_ALL, OnUpdateOutputHosts, url_adapt_session_hosts_ht, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("session.trans_sid_tags", "a=href,area=href,frame=src,form=", PHP_INI_ALL, OnUpdateSessionTags, url_adapt_session_ex, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("session.trans_sid_hosts", "", PHP_INI_ALL, OnUpdateSessionHosts, url_adapt_session_hosts_ht, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=", PHP_INI_ALL, OnUpdateOutputTags, url_adapt_session_ex, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("url_rewriter.hosts", "", PHP_INI_ALL, OnUpdateOutputHosts, url_adapt_session_hosts_ht, php_basic_globals, basic_globals)
 PHP_INI_END()
 
 /*!re2c

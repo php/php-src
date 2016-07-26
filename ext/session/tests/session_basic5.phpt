@@ -19,7 +19,7 @@ session.name=PHPSESSID
 ob_start();
 
 $_SERVER['HTTP_HOST'] = 'php.net';
-ini_set('url_rewriter.hosts','php.net,example.com');
+ini_set('session.trans_sid_hosts','php.net,example.com');
 
 /*
  * Prototype : session.use_trans_sid=1
