@@ -14,11 +14,7 @@ PDOTest::skip();
 
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 
-$config['ENV']['PDOTEST_DSN'] = 'pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres';
-$config['ENV']['PDOTEST_USER'] = 'postgres';
-$config['ENV']['PDOTEST_PASS'] = 'postgres';
-
-$db = PDOTest::factory();
+$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
