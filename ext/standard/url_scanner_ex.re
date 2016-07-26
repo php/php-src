@@ -230,6 +230,15 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		return;
 	}
 
+	/* Check protocol. Only http/https is allowed. */
+	if (url_parts->scheme
+		&& strncasecmp("http", url_parts->scheme, sizeof("http"))
+		&& strncasecmp("https", url_parts->scheme, sizeof("https"))) {
+		smart_str_append_smart_str(dest, url);
+		php_url_free(url_parts);
+		return;
+	}
+
 	/* Check host whitelist. If it's not listed, do nothing. */
 	if (url_parts->host
 		&& (tmp_len = strlen(url_parts->host))
@@ -314,18 +323,21 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type)
 {
 	char f = 0;
 
-	if (strncasecmp(ZSTR_VAL(ctx->arg.s), ctx->lookup_data, ZSTR_LEN(ctx->arg.s)) == 0)
+	if (strncasecmp(ZSTR_VAL(ctx->arg.s), ctx->lookup_data, ZSTR_LEN(ctx->arg.s)) == 0) {
 		f = 1;
+	}
 
-	if (quotes)
+	if (quotes) {
 		smart_str_appendc(&ctx->result, type);
+	}
 	if (f) {
 		append_modified_url(&ctx->val, &ctx->result, &ctx->url_app, PG(arg_separator).output);
 	} else {
 		smart_str_append_smart_str(&ctx->result, &ctx->val);
 	}
-	if (quotes)
+	if (quotes) {
 		smart_str_appendc(&ctx->result, type);
+	}
 }
 
 enum {
@@ -374,7 +386,17 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 
 	if (!url_parts) {
 		return FAILURE;
-	} else if (!url_parts->host) {
+	}
+	if (url_parts->scheme) {
+		/* Only http/https should be handled.
+		   A bit hacky check this here, but saves a URL parse. */
+		if (strncasecmp(url_parts->scheme, "http", sizeof("http")) &&
+			strncasecmp(url_parts->scheme, "https", sizeof("https"))) {
+		php_url_free(url_parts);
+		return FAILURE;
+		}
+	}
+	if (!url_parts->host) {
 		php_url_free(url_parts);
 		return SUCCESS;
 	}

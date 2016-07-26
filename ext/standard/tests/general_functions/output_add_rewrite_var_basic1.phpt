@@ -23,11 +23,11 @@ Without session
 <a href="//www.php.net/foo.php"> </a>
 
 <form method="get"> </form>
-<form action="./foo.php" method="get"> </a>
-<form action="//php.net/bar.php" method="get"> </a>
-<form action="http://php.net/bar.php" method="get"> </a>
-<form action="bad://php.net/bar.php" method="get"> </a>
-<form action="//www.php.net/bar.php" method="get"> </a>
+<form action="./foo.php" method="get">
+<form action="//php.net/bar.php" method="get">
+<form action="http://php.net/bar.php" method="get">
+<form action="bad://php.net/bar.php" method="get">
+<form action="//www.php.net/bar.php" method="get">
 
 <?php
 ini_set('session.use_trans_sid', 0);
@@ -43,11 +43,11 @@ Test use_trans_sid=0
 <a href="//www.php.net/foo.php"> </a>
 
 <form method="get"> </form>
-<form action="./foo.php" method="get"> </a>
-<form action="//php.net/bar.php" method="get"> </a>
-<form action="http://php.net/bar.php" method="get"> </a>
-<form action="bad://php.net/bar.php" method="get"> </a>
-<form action="//www.php.net/bar.php" method="get"> </a>
+<form action="./foo.php" method="get"> </form>
+<form action="//php.net/bar.php" method="get"> </form>
+<form action="http://php.net/bar.php" method="get"> </form>
+<form action="bad://php.net/bar.php" method="get"> </form>
+<form action="//www.php.net/bar.php" method="get"> </form>
 
 <?php
 session_commit();
@@ -65,11 +65,11 @@ Test use_trans_sid=1
 <a href="//www.php.net/foo.php"> </a>
 
 <form method="get"> </form>
-<form action="./foo.php" method="get"> </a>
-<form action="//php.net/bar.php" method="get"> </a>
-<form action="http://php.net/bar.php" method="get"> </a>
-<form action="bad://php.net/bar.php" method="get"> </a>
-<form action="//www.php.net/bar.php" method="get"> </a>
+<form action="./foo.php" method="get"> </form>
+<form action="//php.net/bar.php" method="get"> </form>
+<form action="http://php.net/bar.php" method="get"> </form>
+<form action="bad://php.net/bar.php" method="get"> </form>
+<form action="//www.php.net/bar.php" method="get"> </form>
 
 --EXPECT--
 Without session
@@ -77,42 +77,42 @@ Without session
 <a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="//php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="http://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="bad://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="bad://php.net/foo.php"> </a>
 <a href="//www.php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 
 <form method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </form>
-<form action="./foo.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="//php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="http://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="bad://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
+<form action="./foo.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" />
+<form action="//php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" />
+<form action="http://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" />
+<form action="bad://php.net/bar.php" method="get">
+<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" />
 
 Test use_trans_sid=0
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="//php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="http://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="bad://php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="bad://php.net/foo.php"> </a>
 <a href="//www.php.net/foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
 
 <form method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </form>
-<form action="./foo.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="//php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="http://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="bad://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
-<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </a>
+<form action="./foo.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </form>
+<form action="//php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </form>
+<form action="http://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </form>
+<form action="bad://php.net/bar.php" method="get"> </form>
+<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /> </form>
 
 Test use_trans_sid=1
 <a href="?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="./foo.php?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="//php.net/foo.php?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="http://php.net/foo.php?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
-<a href="bad://php.net/foo.php?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
+<a href="bad://php.net/foo.php"> </a>
 <a href="//www.php.net/foo.php?PHPSESSID=testid&%3CNAME%3E=%3CVALUE%3E"> </a>
 
 <form method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </form>
-<form action="./foo.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </a>
-<form action="//php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </a>
-<form action="http://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </a>
-<form action="bad://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </a>
-<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </a>
+<form action="./foo.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </form>
+<form action="//php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </form>
+<form action="http://php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </form>
+<form action="bad://php.net/bar.php" method="get"> </form>
+<form action="//www.php.net/bar.php" method="get"><input type="hidden" name="&lt;NAME&gt;" value="&lt;VALUE&gt;" /><input type="hidden" name="PHPSESSID" value="testid" /> </form>
