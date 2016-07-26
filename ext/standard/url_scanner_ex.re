@@ -672,7 +672,7 @@ static int php_url_scanner_ex_deactivate(int type)
 	return SUCCESS;
 }
 
-void php_url_scanner_session_handler_impl(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode, int type)
+static inline void php_url_scanner_session_handler_impl(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode, int type)
 {
 	size_t len;
 	url_adapt_state_ex_t *url_state;
@@ -719,7 +719,7 @@ static void php_url_scanner_output_handler(char *output, size_t output_len, char
 	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, 0);
 }
 
-static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value, size_t value_len, int encode, int type)
+static inline int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value, size_t value_len, int encode, int type)
 {
 	smart_str sname = {0};
 	smart_str svalue = {0};
@@ -826,7 +826,7 @@ PHPAPI int php_url_scanner_reset_vars(void)
 }
 
 
-static int php_url_scanner_reset_var_impl(zend_string *name, int encode, int type)
+static inline int php_url_scanner_reset_var_impl(zend_string *name, int encode, int type)
 {
 	char *start, *end, *limit;
 	size_t separator_len;
