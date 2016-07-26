@@ -367,7 +367,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	const char *q[1];
 	q[0] = name;
 
-	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= PQserverVersion(H->servir) && name == NULL) {
+	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= PQserverVersion(H->server) && name == NULL) {
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
 		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
