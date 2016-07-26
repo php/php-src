@@ -27,12 +27,12 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RINIT_FUNCTION(url_scanner_ex);
 PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
 
-PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, int urlencode);
-PHPAPI int php_url_scanner_add_session_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode);
-PHPAPI int php_url_scanner_reset_session_var(zend_string *name, int urlencode);
+PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, int encode);
+PHPAPI int php_url_scanner_add_session_var(char *name, size_t name_len, char *value, size_t value_len, int encode);
+PHPAPI int php_url_scanner_reset_session_var(zend_string *name, int encode);
 PHPAPI int php_url_scanner_reset_session_vars(void);
-PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode);
-PHPAPI int php_url_scanner_reset_var(zend_string *name, int urlencode);
+PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int encode);
+PHPAPI int php_url_scanner_reset_var(zend_string *name, int encode);
 PHPAPI int php_url_scanner_reset_vars(void);
 
 #include "zend_smart_str_public.h"

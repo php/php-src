@@ -574,7 +574,7 @@ stop:
 }
 
 
-PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, int urlencode)
+PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, int encode)
 {
 	char *result;
 	smart_str surl = {0};
@@ -584,7 +584,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 
 	smart_str_appendl(&surl, url, urllen);
 
-	if (urlencode) {
+	if (encode) {
 		encoded = php_raw_url_encode(name, strlen(name));
 		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
 		zend_string_free(encoded);
@@ -592,7 +592,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 		smart_str_appends(&url_app, name);
 	}
 	smart_str_appendc(&url_app, '=');
-	if (urlencode) {
+	if (encode) {
 		encoded = php_raw_url_encode(value, strlen(value));
 		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
 		zend_string_free(encoded);
@@ -719,7 +719,7 @@ static void php_url_scanner_output_handler(char *output, size_t output_len, char
 	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, 0);
 }
 
-static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value, size_t value_len, int urlencode, int type)
+static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value, size_t value_len, int encode, int type)
 {
 	smart_str sname = {0};
 	smart_str svalue = {0};
@@ -747,7 +747,7 @@ static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value
 		smart_str_appends(&url_state->url_app, PG(arg_separator).output);
 	}
 
-	if (urlencode) {
+	if (encode) {
 		encoded = php_raw_url_encode(name, name_len);
 		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
 		encoded = php_raw_url_encode(value, value_len);
@@ -782,15 +782,15 @@ static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value
 }
 
 
-PHPAPI int php_url_scanner_add_session_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode)
+PHPAPI int php_url_scanner_add_session_var(char *name, size_t name_len, char *value, size_t value_len, int encode)
 {
-	return php_url_scanner_add_var_impl(name, name_len, value, value_len, urlencode, 1);
+	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 1);
 }
 
 
-PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode)
+PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int encode)
 {
-	return php_url_scanner_add_var_impl(name, name_len, value, value_len, urlencode, 0);
+	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 0);
 }
 
 
@@ -826,7 +826,7 @@ PHPAPI int php_url_scanner_reset_vars(void)
 }
 
 
-static int php_url_scanner_reset_var_impl(zend_string *name, int urlencode, int type)
+static int php_url_scanner_reset_var_impl(zend_string *name, int encode, int type)
 {
 	char *start, *end, *limit;
 	size_t separator_len;
@@ -850,7 +850,7 @@ static int php_url_scanner_reset_var_impl(zend_string *name, int urlencode, int 
 		return SUCCESS;
 	}
 
-	if (urlencode) {
+	if (encode) {
 		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
 		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
 		zend_string_free(encoded);
@@ -946,15 +946,15 @@ finish:
 }
 
 
-PHPAPI int php_url_scanner_reset_session_var(zend_string *name, int urlencode)
+PHPAPI int php_url_scanner_reset_session_var(zend_string *name, int encode)
 {
-	return php_url_scanner_reset_var_impl(name, urlencode, 1);
+	return php_url_scanner_reset_var_impl(name, encode, 1);
 }
 
 
-PHPAPI int php_url_scanner_reset_var(zend_string *name, int urlencode)
+PHPAPI int php_url_scanner_reset_var(zend_string *name, int encode)
 {
-	return php_url_scanner_reset_var_impl(name, urlencode, 0);
+	return php_url_scanner_reset_var_impl(name, encode, 0);
 }
 
 
