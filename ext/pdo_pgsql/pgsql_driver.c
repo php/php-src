@@ -1,20 +1,20 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
+  | PHP Version 7														|
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group								|
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | This source file is subject to version 3.01 of the PHP license,	  |
+  | that is bundled with this package in the file LICENSE, and is		|
+  | available through the world-wide-web at the following url:		   |
+  | http://www.php.net/license/3_01.txt								  |
   | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | obtain it through the world-wide-web, please send a note to		  |
+  | license@php.net so we can mail you a copy immediately.			   |
   +----------------------------------------------------------------------+
-  | Authors: Edin Kadribasic <edink@emini.dk>                            |
-  |          Ilia Alshanestsky <ilia@prohost.org>                        |
-  |          Wez Furlong <wez@php.net>                                   |
+  | Authors: Edin Kadribasic <edink@emini.dk>							|
+  |		  Ilia Alshanestsky <ilia@prohost.org>						|
+  |		  Wez Furlong <wez@php.net>								   |
   +----------------------------------------------------------------------+
 */
 
@@ -361,13 +361,17 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
+	char *version = NULL;
 
 	PGresult *res;
 	ExecStatusType status;
 	const char *q[1];
 	q[0] = name;
 
-	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= PQserverVersion && name == NULL) {
+	res = PQexec(H->server, "SHOW server_version_num");
+	version = estrdup((char *)PQgetvalue(res, 0, 0));
+
+	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= atoi(version) && name == NULL) {
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
 		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
@@ -379,12 +383,14 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		*len = PQgetlength(res, 0, 0);
 	} else {
 		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
-        *len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
+		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
 	}
 
 	if (res) {
 		PQclear(res);
 	}
+
+	efree(version);
 
 	return id;
 }
@@ -713,8 +719,8 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 		PQclear(pgsql_result);
 		while ((buf = php_stream_get_line(stream, NULL, 0, &line_len)) != NULL) {
 			if (PQputCopyData(H->server, buf, line_len) != 1) {
-	                        efree(buf);
-        	                pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+							efree(buf);
+							pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
 				php_stream_close(stream);
 				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;
@@ -892,7 +898,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 
 	if (status == PGRES_COPY_OUT && pgsql_result) {
 		PQclear(pgsql_result);
-                array_init(return_value);
+				array_init(return_value);
 
 		while (1) {
 			char *csv = NULL;
@@ -1135,8 +1141,8 @@ static const zend_function_entry dbh_methods[] = {
 	PHP_ME(PDO, pgsqlCopyFromFile, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlCopyToArray, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlCopyToFile, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(PDO, pgsqlGetNotify, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(PDO, pgsqlGetPid, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlGetNotify, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlGetPid, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
