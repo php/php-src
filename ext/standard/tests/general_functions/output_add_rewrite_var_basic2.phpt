@@ -2,6 +2,8 @@
 Test output_add_rewrite_var() function basic feature
 --SKIPIF--
 --INI--
+session.trans_sid_tags="a=href,area=href,frame=src,form="
+url_rewriter.tags="a=href,area=href,frame=src,form="
 --FILE--
 <?php
 	ob_start();

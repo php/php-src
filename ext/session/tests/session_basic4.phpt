@@ -12,6 +12,8 @@ session.gc_divisor=1000
 session.gc_maxlifetime=300
 session.save_path=
 session.name=PHPSESSID
+session.trans_sid_tags="a=href,area=href,frame=src,form="
+url_rewriter.tags="a=href,area=href,frame=src,form="
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
