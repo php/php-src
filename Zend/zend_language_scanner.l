@@ -1778,12 +1778,14 @@ string:
 
 
 <INITIAL>"<?=" {
+	CG(zend_tag_lineno) = CG(zend_lineno);
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_OPEN_TAG_WITH_ECHO);
 }
 
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
+	CG(zend_tag_lineno) = CG(zend_lineno);
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_OPEN_TAG);
@@ -1792,6 +1794,7 @@ string:
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
+		CG(zend_tag_lineno) = CG(zend_lineno);
 		BEGIN(ST_IN_SCRIPTING);
 		RETURN_TOKEN(T_OPEN_TAG);
 	} else {
@@ -1905,7 +1908,7 @@ inline_char_handler:
 				CG(zend_lineno)++;
 				break;
 			case '?':
-				if (*YYCURSOR == '>') {
+				if (*YYCURSOR == '>' && (CG(zend_lineno) == CG(zend_tag_lineno))) {
 					YYCURSOR--;
 					break;
 				}

@@ -74,6 +74,7 @@ struct _zend_compiler_globals {
 
 	zend_string *compiled_filename;
 
+	int zend_tag_lineno;
 	int zend_lineno;
 
 	zend_op_array *active_op_array;
