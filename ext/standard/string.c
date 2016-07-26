@@ -2301,6 +2301,34 @@ truncate_len:
 }
 /* }}} */
 
+/* {{{ proto boolean str_begins(string str, string search_value)
+   Checks if str begins with search_value */
+PHP_FUNCTION(str_begins) {
+	zend_string *str, *search_value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &str, &search_value) == FAILURE) 
+		RETURN_NULL();
+	
+	for (int i = 0; i < search_value->len; i++) 
+		if (str->val[i] != search_value->val[i])
+			RETURN_BOOL(0);
+	RETURN_BOOL(1);
+}
+
+/* {{{ proto boolean str_ends(string str, string search_value)
+   Checks if str ends with search_value */
+PHP_FUNCTION(str_ends) {
+	zend_string *str, *search_value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &str, &search_value) == FAILURE) 
+		RETURN_NULL();
+	
+	for (int i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) 
+		if (str->val[i] != search_value->val[j])
+			RETURN_BOOL(0);
+	RETURN_BOOL(1);
+}
+
 /* {{{ proto string|array|false substr_replace(mixed str, mixed repl, mixed start [, mixed length])
    Replaces part of a string with another string */
 PHP_FUNCTION(substr_replace)
