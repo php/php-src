@@ -24,16 +24,18 @@
 #include "config.h"
 #endif
 
-#ifdef PHP_WIN32
-#define _WINNLS_
-#endif
-
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_calendar.h"
 #include "sdncal.h"
 
 #include <stdio.h>
+
+#ifdef PHP_WIN32
+/* This conflicts with a define in winnls.h, but that header is needed
+   to have GetACP(). */
+#undef CAL_GREGORIAN
+#endif
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_unixtojd, 0, 0, 0)
