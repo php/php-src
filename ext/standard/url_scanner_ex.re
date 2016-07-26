@@ -32,12 +32,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "SAPI.h"
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_string.h"
 #define STATE_TAG SOME_OTHER_STATE_TAG
 #include "basic_functions.h"
 #include "url.h"
+#include "html.h"
 #undef STATE_TAG
 
 #define url_scanner url_scanner_ex
@@ -699,6 +701,8 @@ static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value
 {
 	smart_str sname = {0};
 	smart_str svalue = {0};
+	smart_str hname = {0};
+	smart_str hvalue = {0};
 	zend_string *encoded;
 	url_adapt_state_ex_t *url_state;
 	php_output_handler_func_t handler;
@@ -723,14 +727,18 @@ static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value
 
 	if (urlencode) {
 		encoded = php_raw_url_encode(name, name_len);
-		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
-		zend_string_free(encoded);
+		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
 		encoded = php_raw_url_encode(value, value_len);
-		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
-		zend_string_free(encoded);
+		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		encoded = php_escape_html_entities_ex((unsigned char*)name, name_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), 0);
+		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		encoded = php_escape_html_entities_ex((unsigned char*)value, value_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), 0);
+		smart_str_appendl(&hvalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
 	} else {
 		smart_str_appendl(&sname, name, name_len);
 		smart_str_appendl(&svalue, value, value_len);
+		smart_str_appendl(&hname, name, name_len);
+		smart_str_appendl(&hvalue, value, value_len);
 	}
 
 	smart_str_append_smart_str(&url_state->url_app, &sname);
@@ -738,13 +746,15 @@ static int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value
 	smart_str_append_smart_str(&url_state->url_app, &svalue);
 
 	smart_str_appends(&url_state->form_app, "<input type=\"hidden\" name=\"");
-	smart_str_append_smart_str(&url_state->form_app, &sname);
+	smart_str_append_smart_str(&url_state->form_app, &hname);
 	smart_str_appends(&url_state->form_app, "\" value=\"");
-	smart_str_append_smart_str(&url_state->form_app, &svalue);
+	smart_str_append_smart_str(&url_state->form_app, &hvalue);
 	smart_str_appends(&url_state->form_app, "\" />");
 
 	smart_str_free(&sname);
 	smart_str_free(&svalue);
+	smart_str_free(&hname);
+	smart_str_free(&hvalue);
 
 	return SUCCESS;
 }
@@ -799,7 +809,7 @@ static int php_url_scanner_reset_var_impl(zend_string *name, int urlencode, int 
 	char *start, *end, *limit;
 	size_t separator_len;
 	smart_str sname = {0};
-	smart_str svalue = {0};
+	smart_str hname = {0};
 	smart_str url_app = {0};
 	smart_str form_app = {0};
 	zend_string *encoded;
@@ -822,17 +832,22 @@ static int php_url_scanner_reset_var_impl(zend_string *name, int urlencode, int 
 		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
 		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
 		zend_string_free(encoded);
+		encoded = php_escape_html_entities_ex((unsigned char *)ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), 0);
+		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		zend_string_free(encoded);
 	} else {
 		smart_str_appendl(&sname, ZSTR_VAL(name), ZSTR_LEN(name));
+		smart_str_appendl(&hname, ZSTR_VAL(name), ZSTR_LEN(name));
 	}
 	smart_str_0(&sname);
+	smart_str_0(&hname);
 
 	smart_str_append_smart_str(&url_app, &sname);
 	smart_str_appendc(&url_app, '=');
 	smart_str_0(&url_app);
 
 	smart_str_appends(&form_app, "<input type=\"hidden\" name=\"");
-	smart_str_append_smart_str(&form_app, &sname);
+	smart_str_append_smart_str(&form_app, &hname);
 	smart_str_appends(&form_app, "\" value=\"");
 	smart_str_0(&form_app);
 
@@ -904,7 +919,7 @@ finish:
 	smart_str_free(&url_app);
 	smart_str_free(&form_app);
 	smart_str_free(&sname);
-	smart_str_free(&svalue);
+	smart_str_free(&hname);
 	return ret;
 }
 
