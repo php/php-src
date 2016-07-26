@@ -390,8 +390,8 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 	if (url_parts->scheme) {
 		/* Only http/https should be handled.
 		   A bit hacky check this here, but saves a URL parse. */
-		if (strncasecmp(url_parts->scheme, "http", sizeof("http")) &&
-			strncasecmp(url_parts->scheme, "https", sizeof("https"))) {
+		if (strcasecmp(url_parts->scheme, "http") &&
+			strcasecmp(url_parts->scheme, "https")) {
 		php_url_free(url_parts);
 		return FAILURE;
 		}
@@ -420,7 +420,7 @@ static void handle_form(STD_PARA)
 	if (ZSTR_LEN(ctx->form_app.s) > 0) {
 		switch (ZSTR_LEN(ctx->tag.s)) {
 			case sizeof("form") - 1:
-				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), ZEND_STRL("form"))
+				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "form", ZSTR_LEN(ctx->tag.s))
 					&& check_host_whitelist(ctx) == SUCCESS) {
 					doit = 1;
 				}
