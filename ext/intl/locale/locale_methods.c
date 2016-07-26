@@ -219,7 +219,7 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
 /* {{{ proto static string Locale::setDefault( string $locale )
    Set default locale */
 /* }}} */
-/* {{{ proto sta tic string locale_set_default( string $locale )
+/* {{{ proto static string locale_set_default( string $locale )
    Set default locale */
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
@@ -435,10 +435,10 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */ 
 
-/* {{{ proto stat ic string Locale::getScript($locale)
+/* {{{ proto static string Locale::getScript($locale)
  * gets the script for the $locale
  }}} */
-/* {{{ proto stati c string locale_get_script($locale)
+/* {{{ proto static string locale_get_script($locale)
  * gets the script for the $locale
  */
 PHP_FUNCTION( locale_get_script )
@@ -449,8 +449,8 @@ PHP_FUNCTION( locale_get_script )
 
 /* {{{ proto static string Locale::getRegion($locale)
  * gets the region for the $locale
- }}} */ 
-/* {{{ p roto static string locale_get_region($locale)
+ }}} */
+/* {{{ proto static string locale_get_region($locale)
  * gets the region for the $locale
  */
 PHP_FUNCTION( locale_get_region )
