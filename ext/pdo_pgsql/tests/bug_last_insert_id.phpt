@@ -1,7 +1,5 @@
 --TEST--
-currval() vs lastval()
-PDO PgSQL Bug #1134 [BUG] New record, PostgreSQL and the Primary key https://github.com/phalcon/cphalcon/issues/1134
-Fix PHP original PDO_PGSQL::lastInsertId https://github.com/doctrine/dbal/pull/2329
+currval() vs lastval() - PDO PgSQL Bug #1134 [BUG] New record, PostgreSQL and the Primary key https://github.com/phalcon/cphalcon/issues/1134
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
