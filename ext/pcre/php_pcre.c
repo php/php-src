@@ -215,7 +215,7 @@ static char **make_subpats_table(int num_subpats, pcre_cache_entry *pce TSRMLS_D
 		}
 
 		while (ni++ < name_cnt) {
-			name_idx = 0xff * (unsigned char)name_table[0] + (unsigned char)name_table[1];
+			name_idx = 0x100 * (unsigned char)name_table[0] + (unsigned char)name_table[1];
 			subpat_names[name_idx] = name_table + 2;
 			if (is_numeric_string(subpat_names[name_idx], strlen(subpat_names[name_idx]), NULL, NULL, 0) > 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric named subpatterns are not allowed");

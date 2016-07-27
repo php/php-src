@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
     names). (cmb)
+- PCRE:
+  . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
 
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
