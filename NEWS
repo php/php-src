@@ -60,6 +60,9 @@ PHP                                                                        NEWS
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur)
 
+-PCRE:
+  . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
+
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
 
