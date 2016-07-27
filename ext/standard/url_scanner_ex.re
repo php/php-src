@@ -118,47 +118,12 @@ static int php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *new_value
 	char *tmp;
 	char *lasts = NULL;
 
-	/*
-	 * Due to initialization order, this INI cannot be set at startup.
-	 */
-	if (stage & PHP_INI_STAGE_STARTUP) {
-		if (ZSTR_LEN(new_value)) {
-			php_error_docref(NULL, E_WARNING, "url_rewriter.hosts cannot be set at startup. Set hosts by ini_set().");
-		}
-		return SUCCESS;
-	}
-
 	if (type) {
 		hosts = &BG(url_adapt_session_hosts_ht);
 	} else {
 		hosts = &BG(url_adapt_output_hosts_ht);
 	}
 	zend_hash_clean(hosts);
-
-	/* When * is set, default to $_SERVER['HTTP_HOST'] */
-	if (ZSTR_LEN(new_value) == 1
-		&& *ZSTR_VAL(new_value) == '*'
-	) {
-		zval *host, *tmp;
-		zend_string *host_tmp;
-		char *colon;
-
-		if ((tmp  = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))) &&
-			(host = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("HTTP_HOST"))) &&
-			Z_TYPE_P(host) == IS_STRING) {
-			host_tmp = php_string_tolower(Z_STR_P(host));
-			/* HTTP_HOST could be 'localhost:8888' etc. */
-			colon = strchr(ZSTR_VAL(host_tmp), ':');
-			if (colon) {
-				ZSTR_LEN(host_tmp) = colon - ZSTR_VAL(host_tmp);
-				ZSTR_VAL(host_tmp)[ZSTR_LEN(host_tmp)] = '\0';
-			}
-			zend_hash_add_empty_element(hosts, host_tmp);
-			zend_string_release(host_tmp);
-			return SUCCESS;
-		}
-		return FAILURE;
-	}
 
 	/* Use user supplied host whitelist */
 	tmp = estrndup(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
@@ -373,6 +338,31 @@ static inline void passthru(STD_PARA)
 }
 
 
+static int check_http_host(char *target)
+{
+	zval *host, *tmp;
+	zend_string *host_tmp;
+	char *colon;
+
+	if ((tmp  = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))) &&
+		(host = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("HTTP_HOST"))) &&
+		Z_TYPE_P(host) == IS_STRING) {
+		host_tmp = zend_string_init(Z_STRVAL_P(host), Z_STRLEN_P(host), 0);
+		/* HTTP_HOST could be 'localhost:8888' etc. */
+		colon = strchr(ZSTR_VAL(host_tmp), ':');
+		if (colon) {
+			ZSTR_LEN(host_tmp) = colon - ZSTR_VAL(host_tmp);
+			ZSTR_VAL(host_tmp)[ZSTR_LEN(host_tmp)] = '\0';
+		}
+		if (!strcasecmp(ZSTR_VAL(host_tmp), target)) {
+			zend_string_release(host_tmp);
+			return SUCCESS;
+		}
+		zend_string_release(host_tmp);
+	}
+	return FAILURE;
+}
+
 static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
 	php_url *url_parts = NULL;
@@ -398,6 +388,11 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 		}
 	}
 	if (!url_parts->host) {
+		php_url_free(url_parts);
+		return SUCCESS;
+	}
+	if (!zend_hash_num_elements(&BG(url_adapt_session_hosts_ht)) &&
+		check_http_host(url_parts->host) == SUCCESS) {
 		php_url_free(url_parts);
 		return SUCCESS;
 	}

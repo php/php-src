@@ -1467,6 +1467,7 @@ session.trans_sid_tags = "a=href,area=href,frame=src,form="
 ; at RUNTIME. i.e. use ini_set()
 ; <form> tags is special. PHP will check action attribute's URL regardless
 ; of session.trans_sid_tags setting.
+; If no host is defined, HTTP_HOST will be used for allowed host.
 ; Example value: php.net,www.php.net,wiki.php.net
 ; Use "," for multiple hosts. No spaces are allowed.
 ; Default Value: ""
