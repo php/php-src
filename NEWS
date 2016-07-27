@@ -22,6 +22,7 @@ PHP                                                                        NEWS
     (Yuji Uchiyama)
   . Fixed potential segfault in object storage freeing in shutdown sequence.
     (Bob)
+  . Fixed bug #72683 (getmxrr broken). (Anatol)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
