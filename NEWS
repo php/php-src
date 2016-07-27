@@ -29,6 +29,8 @@ PHP                                                                        NEWS
 - SQLite3:
   . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
     function). (Laruence)
+  . Implemented FR #72653 (SQLite should allow opening with empty filename).
+    (cmb)
 
 - Streams:
   . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
