@@ -198,8 +198,8 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 
 	/* Check protocol. Only http/https is allowed. */
 	if (url_parts->scheme
-		&& strncasecmp("http", url_parts->scheme, sizeof("http"))
-		&& strncasecmp("https", url_parts->scheme, sizeof("https"))) {
+		&& strcasecmp("http", url_parts->scheme)
+		&& strcasecmp("https", url_parts->scheme)) {
 		smart_str_append_smart_str(dest, url);
 		php_url_free(url_parts);
 		return;
@@ -466,7 +466,8 @@ static inline void handle_arg(STD_PARA)
 		ZSTR_LEN(ctx->arg.s) = 0;
 	}
 	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
-	if (ctx->tag_type == TAG_FORM && strncasecmp(ZSTR_VAL(ctx->arg.s), ZEND_STRL("action")) == 0) {
+	if (ctx->tag_type == TAG_FORM &&
+		strncasecmp(ZSTR_VAL(ctx->arg.s), "action", ZSTR_LEN(ctx->arg.s)) == 0) {
 		ctx->attr_type = ATTR_ACTION;
 	} else {
 		ctx->attr_type = ATTR_NORMAL;
@@ -610,7 +611,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 }
 
 
-static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_bool do_flush, 	url_adapt_state_ex_t *ctx)
+static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_bool do_flush, url_adapt_state_ex_t *ctx)
 {
 	char *retval;
 
@@ -896,8 +897,8 @@ static inline int php_url_scanner_reset_var_impl(zend_string *name, int encode, 
 		php_url_scanner_reset_vars_impl(type);
 		goto finish;
 	}
-    /* Check preceeding separator */
-    if (!sep_removed
+	/* Check preceeding separator */
+	if (!sep_removed
 		&& start - PG(arg_separator).output >= separator_len
 		&& !memcmp(start - separator_len, PG(arg_separator).output, separator_len)) {
 		start -= separator_len;
