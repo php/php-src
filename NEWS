@@ -78,6 +78,8 @@ PHP                                                                        NEWS
   . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
     function). (Laruence)
   . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
+  . Implemented FR #72653 (SQLite should allow opening with empty filename).
+    (cmb)
 
 - Standard:
   . Fixed bug #72622 (array_walk + array_replace_recursive create references
