@@ -746,6 +746,8 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		/* Could not retrieve or send the file
 		 * this data will only be sent to us after connection on the data port was initiated.
 		 */
+		php_stream_close(datastream);
+		datastream = NULL;
 		goto opendir_errexit;
 	}
 
