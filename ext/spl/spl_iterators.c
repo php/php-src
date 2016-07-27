@@ -1688,7 +1688,7 @@ static inline void spl_dual_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
 {
 	spl_dual_it_free(intern TSRMLS_CC);
 	intern->current.pos = 0;
-	if (intern->inner.iterator->funcs->rewind) {
+	if (intern->inner.iterator && intern->inner.iterator->funcs->rewind) {
 		intern->inner.iterator->funcs->rewind(intern->inner.iterator TSRMLS_CC);
 	}
 }
