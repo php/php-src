@@ -30,6 +30,12 @@ PHP                                                                        NEWS
   . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
     function). (Laruence)
 
+- Streams:
+  . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
+  . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
+  . Fixed bug #72667 (opendir() with ftp:// attempts to open data stream for
+    non-existent directories). (vhuk)
+
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
     array elements). (Laruence)
