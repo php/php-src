@@ -2,4 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.2.0alpha1
 
+- GMP:
+  . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
