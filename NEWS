@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     phpize). (Yuji Uchiyama)
   . Fixed bug #72641 (phpize (on Windows) ignores PHP_PREFIX).
     (Yuji Uchiyama)
+  . Fixed potential segfault in object storage freeing in shutdown sequence.
+    (Bob)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
