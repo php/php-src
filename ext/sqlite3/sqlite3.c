@@ -114,9 +114,6 @@ PHP_METHOD(sqlite3, open)
 		zend_throw_exception(zend_ce_exception, "Already initialised DB Object", 0);
 	}
 
-	if (strlen(filename) != filename_len) {
-		return;
-	}
 	if (filename_len != 0 && (filename_len != sizeof(":memory:")-1 ||
 			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0)) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
