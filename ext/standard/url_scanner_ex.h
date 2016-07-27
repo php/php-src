@@ -55,6 +55,7 @@ typedef struct {
 	char *lookup_data;
 	int state;
 
+	int type;
 	smart_str attr_val;
 	int tag_type;
 	int attr_type;

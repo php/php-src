@@ -366,6 +366,7 @@ static int check_http_host(char *target)
 static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
 	php_url *url_parts = NULL;
+	HashTable *allowed_hosts = ctx->type ? &BG(url_adapt_session_hosts_ht) : &BG(url_adapt_output_hosts_ht);
 
 	ZEND_ASSERT(ctx->tag_type == TAG_FORM);
 
@@ -391,12 +392,12 @@ static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 		php_url_free(url_parts);
 		return SUCCESS;
 	}
-	if (!zend_hash_num_elements(&BG(url_adapt_session_hosts_ht)) &&
+	if (!zend_hash_num_elements(allowed_hosts) &&
 		check_http_host(url_parts->host) == SUCCESS) {
 		php_url_free(url_parts);
 		return SUCCESS;
 	}
-	if (!zend_hash_str_find(&BG(url_adapt_session_hosts_ht),
+	if (!zend_hash_str_find(allowed_hosts,
 							url_parts->host,
 							strlen(url_parts->host))) {
 		php_url_free(url_parts);
@@ -963,6 +964,9 @@ PHP_MINIT_FUNCTION(url_scanner)
 	BG(url_adapt_output_ex).tags = NULL;
 	BG(url_adapt_output_ex).form_app.s = BG(url_adapt_output_ex).url_app.s = NULL;
 	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
+
+	BG(url_adapt_session_ex).type = 1;
+	BG(url_adapt_output_ex).type  = 0;
 
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
