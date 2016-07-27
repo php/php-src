@@ -1775,11 +1775,6 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 
 	if ((*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || (n == 4 && !memcmp("data:", path, 5)))) {
 		protocol = path;
-	} else if (n == 5 && strncasecmp(path, "zlib:", 5) == 0) {
-		/* BC with older php scripts and zlib wrapper */
-		protocol = "compress.zlib";
-		n = 13;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead");
 	}
 
 	if (protocol) {
