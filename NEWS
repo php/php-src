@@ -62,6 +62,7 @@ PHP                                                                        NEWS
 
 -PCRE:
   . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
+  . Upgraded to PCRE 8.39. (Anatol)
 
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
