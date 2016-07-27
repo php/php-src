@@ -36,7 +36,8 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
     }
   }
 
-  - Constants [14] {
+  - Constants [15] {
+    Constant [ integer PREG_NO_UTF8_CHECK ] { 8192 }
     Constant [ integer PREG_PATTERN_ORDER ] { 1 }
     Constant [ integer PREG_SET_ORDER ] { 2 }
     Constant [ integer PREG_OFFSET_CAPTURE ] { 256 }
