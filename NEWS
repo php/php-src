@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     phpize). (Yuji Uchiyama)
   . Fixed bug #72641 (phpize (on Windows) ignores PHP_PREFIX).
     (Yuji Uchiyama)
+  . Fixed bug #72683 (getmxrr broken). (Anatol)
 
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
