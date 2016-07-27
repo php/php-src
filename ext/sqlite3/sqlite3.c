@@ -100,6 +100,7 @@ PHP_METHOD(sqlite3, open)
 {
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
+	char empty_string[] = "";
 	char *filename, *encryption_key, *fullpath;
 	size_t filename_len, encryption_key_len = 0;
 	zend_long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
@@ -118,8 +119,7 @@ PHP_METHOD(sqlite3, open)
 		return;
 	}
 	if (filename_len == 0) {
-		fullpath = emalloc(1);
-		*fullpath = '\0';
+		fullpath = empty_string;
 	} else if (filename_len != sizeof(":memory:")-1 ||
 			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
@@ -142,7 +142,7 @@ PHP_METHOD(sqlite3, open)
 	if (sqlite3_open(fullpath, &(db_obj->db)) != SQLITE_OK) {
 #endif
 		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
-		if (fullpath) {
+		if (fullpath && fullpath != empty_string) {
 			efree(fullpath);
 		}
 		return;
@@ -163,7 +163,7 @@ PHP_METHOD(sqlite3, open)
 		sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, NULL);
 	}
 
-	if (fullpath) {
+	if (fullpath && fullpath != empty_string) {
 		efree(fullpath);
 	}
 }
