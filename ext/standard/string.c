@@ -2445,7 +2445,7 @@ PHP_FUNCTION(substr)
 }
 /* }}} */
 
-/* {{{ proto boolean str_begins(string str, string search_value [, case_sensitive = TRUE])
+/* {{{ proto boolean str_begins(string str, string search_value [, case_sensitive = true])
    Checks if str begins with search_value */
 PHP_FUNCTION(str_begins) {
 	zend_string *str, *search_value;
@@ -2467,7 +2467,7 @@ PHP_FUNCTION(str_begins) {
 	RETURN_BOOL(1);
 }
 
-/* {{{ proto boolean str_ends(string str, string search_value [, case_sensitive = TRUE)
+/* {{{ proto boolean str_ends(string str, string search_value [, case_sensitive = true)
    Checks if str ends with search_value */
 PHP_FUNCTION(str_ends) {
 	zend_string *str, *search_value;
