@@ -277,26 +277,16 @@ if ($pid) {
 			}
 
 			if (empty($pasv)) {
-			   if (!$fs = stream_socket_client("tcp://$host:$port")) {
-			        fputs($s, "425 Can't open data connection\r\n");
-			        continue;
-			   }
+				fputs($s, "150 File status okay; about to open data connection\r\n");
+				if (!$fs = stream_socket_client("tcp://$host:$port")) {
+					fputs($s, "425 Can't open data connection\r\n");
+					continue;
+				}
 			} else {
-			  if (!empty($ssl)) {
-			    $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-			  } else {
-			    $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port");
-			  }
+				fputs($s, "125 Data connection already open; transfer starting.\r\n");
+				$fs=$pasvs;
 			}
 
-			fputs($s, "150 File status okay; about to open data connection\r\n");
-			if (!empty($pasv)) {
-			   $fs = stream_socket_accept($soc, 5);
-			}
-
-                        if ((!empty($ssl)) && (!stream_socket_enable_crypto($fs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
-                                die("SSLv23 handshake failed.\n");
-                        }
 
 			if (empty($m[1]) || $m[1] !== 'emptydir') {
 				fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
@@ -400,11 +390,23 @@ if ($pid) {
 
 		}elseif (preg_match('/^PASV/', $buf, $matches)) {
 			$pasv=true;
-			$port = $pasv_port;
-			$p2 = $port % ((int) 1 << 8);
-			$p1 = ($port-$p2)/((int) 1 << 8);
+			$p2 = $pasv_port % ((int) 1 << 8);
+			$p1 = ($pasv_port-$p2)/((int) 1 << 8);
 			$host = "127.0.0.1";
+			if (!empty($ssl)) {
+				$soc = stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+			} else {
+				$soc = stream_socket_server("tcp://127.0.0.1:$pasv_port");
+			}
+
 			fputs($s, "227 Entering Passive Mode. (127,0,0,1,{$p1},{$p2})\r\n");
+
+			$pasvs = stream_socket_accept($soc,10);
+
+			if ((!empty($ssl)) && (!stream_socket_enable_crypto($pasvs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
+				die("SSLv23 handshake failed.\n");
+			}
+
 		}elseif (preg_match('/^EPSV/', $buf, $matches)) {
 			fputs($s, "550 Extended passsive mode not supported.\r\n");
 		} elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
