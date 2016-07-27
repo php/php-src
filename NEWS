@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     (Yuji Uchiyama)
   . Fixed bug #72683 (getmxrr broken). (Anatol)
 
+- CURL:
+  . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
+    (Pierrick)
+
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
     IntlCalendar and adds a property). (Laruence)
@@ -29,6 +33,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
+  . Fixed bug #72684 (AppendIterator segfault with closed generator). (Pierrick)
 
 - SQLite3:
   . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
