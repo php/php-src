@@ -27,6 +27,10 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
 
+- CURL:
+  . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
+    (Pierrick)
+
 - Date:
   . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
     parsing). (derick)
@@ -61,7 +65,7 @@ PHP                                                                        NEWS
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur)
 
--PCRE:
+- PCRE:
   . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
   . Upgraded to PCRE 8.39. (Anatol)
 
@@ -82,6 +86,7 @@ PHP                                                                        NEWS
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
+  . Fixed bug #72684 (AppendIterator segfault with closed generator). (Pierrick)
 
 - SQLite3:
   . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
