@@ -56,6 +56,9 @@ PHP                                                                        NEWS
   . Fixed bug #72330 (CSV fields incorrectly split if escape char followed by
     UTF chars). (cmb)
 
+- SPL:
+  . Fixed bug #72684 (AppendIterator segfault with closed generator). (Pierrick)
+
 - Streams:
   . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
   . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
