@@ -118,13 +118,11 @@ PHP_METHOD(sqlite3, open)
 
 	if (db_obj->initialised) {
 		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Already initialised DB Object", 0 TSRMLS_CC);
-	}
-
-	if (strlen(filename) != filename_len) {
 		return;
 	}
-	if (filename_len != sizeof(":memory:")-1 ||
-			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0) {
+
+	if (filename_len != 0 && (filename_len != sizeof(":memory:")-1 ||
+			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0)) {
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
 			zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unable to expand filepath", 0 TSRMLS_CC);
 			return;
@@ -144,7 +142,8 @@ PHP_METHOD(sqlite3, open)
 			return;
 		}
 	} else {
-		fullpath = estrdup(filename);
+		/* filename equals "" or ":memory:" */
+		fullpath = filename;
 	}
 
 #if SQLITE_VERSION_NUMBER >= 3005000
@@ -153,7 +152,7 @@ PHP_METHOD(sqlite3, open)
 	if (sqlite3_open(fullpath, &(db_obj->db)) != SQLITE_OK) {
 #endif
 		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
-		if (fullpath) {
+		if (fullpath != filename) {
 			efree(fullpath);
 		}
 		return;
@@ -178,7 +177,7 @@ PHP_METHOD(sqlite3, open)
 		sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, NULL);
 	}
 
-	if (fullpath) {
+	if (fullpath != filename) {
 		efree(fullpath);
 	}
 }
