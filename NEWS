@@ -58,6 +58,10 @@ PHP                                                                        NEWS
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
     names). (cmb)
 
+- mbstring:
+  . Fixed bug #72691 (mb_ereg_search raises a warning if a match zero-width).
+    (cmb)
+
 - Opcache:
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur)

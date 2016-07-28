@@ -1246,9 +1246,6 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		php_error_docref(NULL, E_WARNING, "mbregex search failure in mbregex_search(): %s", err_str);
 		RETVAL_FALSE;
 	} else {
-		if (MBREX(search_regs)->beg[0] == MBREX(search_regs)->end[0]) {
-			php_error_docref(NULL, E_WARNING, "Empty regular expression");
-		}
 		switch (mode) {
 		case 1:
 			array_init(return_value);
