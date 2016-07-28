@@ -26,12 +26,12 @@ var_dump(mb_ereg_search_getpos());
 var_dump(mb_ereg_search_getregs());
 ?>
 --EXPECT--
-int(1)
+int(0)
 array(1) {
   [0]=>
   string(0) ""
 }
-int(2)
+int(0)
 array(1) {
   [0]=>
   string(0) ""
@@ -39,9 +39,9 @@ array(1) {
 int(3)
 array(1) {
   [0]=>
-  string(1) "o"
+  string(3) "foo"
 }
-int(4)
+int(3)
 array(1) {
   [0]=>
   string(0) ""
