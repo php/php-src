@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Stream: 
   . Fixed bug #72743 (Out-of-bound read in php_stream_filter_create).
     (Loianhtuan)
+  . Implemented FR #27814 (Multiple small packets send for HTTP request).
+    (vhuk)
 
 04 Aug 2016, PHP 7.1.0beta2
 
