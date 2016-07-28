@@ -375,7 +375,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		*len = PQgetlength(res, 0, 0);
 	} else {
 		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
-		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
+		*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
 	}
 
 	if (res) {
