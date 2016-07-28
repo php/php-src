@@ -30,6 +30,7 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
     (Pierrick)
+  . Fixed bug #71929 (CURLINFO_CERTINFO data parsing error). (Pierrick)
 
 - Date:
   . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails

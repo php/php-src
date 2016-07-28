@@ -442,6 +442,8 @@ Other
 - Curl:
   . Removed support for disabling the CURLOPT_SAFE_UPLOAD option. All curl file
     uploads must use the curl_file / CURLFile APIs.
+  . curl_getinfo($ch, CURLINFO_CERTINFO) returns certificate Subject and Issuer
+    as a string (PHP >= 5.6.25)
 
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().
@@ -821,3 +823,7 @@ out, that the corresponding SDK isn't available anymore.
     of aditional information with internal functions. In PHP-5 it was possible
     to use zend_function.op_array.reserved[] even for internal functions, but
     now we don't allocate extra space.
+
+- CURL
+  . curl_getinfo($ch, CURLINFO_CERTINFO) returns certificate Subject and Issuer
+    as a string (PHP >= 7.0.10)
