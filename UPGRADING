@@ -157,6 +157,12 @@ PHP 7.1 UPGRADE NOTES
   . Added sapi_windows_cp_set(), sapi_windows_cp_get(), sapi_windows_cp_is_utf8(),
     sapi_windows_cp_conv() for codepage handling.
 
+- cURL:
+  . Added curl_multi_errno() and curl_share_errno() to return the last error
+    number of curl_multi and curl_share resources.
+  . Added curl_share_strerror() to convert error code to error message text
+    describing the error.
+
 - pcntl:
   . Added pcntl_signal_get_handler() that returns the current signal handler
     for a particular signal.
