@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #72641 (phpize (on Windows) ignores PHP_PREFIX).
     (Yuji Uchiyama)
 
+- Calendar:
+  . Fixed bug #67976 (cal_days_month() fails for final month of the French
+    calendar). (cmb)
+
 - Curl:
   . Fixed bug #71144 (Segmentation fault when using cURL with ZTS).
     (maroszek at gmx dot net)

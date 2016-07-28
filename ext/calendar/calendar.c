@@ -359,6 +359,10 @@ PHP_FUNCTION(cal_days_in_month)
 		}
 		else {
 			sdn_next = calendar->to_jd(year + 1, 1, 1);
+			if (cal == CAL_FRENCH && sdn_next == 0) {
+				/* The French calendar ends on 0014-13-05. */
+				sdn_next = 2380953;
+			}
 		}
 	}
 
