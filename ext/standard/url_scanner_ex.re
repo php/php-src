@@ -289,7 +289,10 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type)
 {
 	char f = 0;
 
-	if (strncasecmp(ZSTR_VAL(ctx->arg.s), ctx->lookup_data, ZSTR_LEN(ctx->arg.s)) == 0) {
+	/* arg.s is string WITHOUT NUL.
+	   To avoid partial match, NUL is added here */
+	ZSTR_VAL(ctx->arg.s)[ZSTR_LEN(ctx->arg.s)] = '\0';
+	if (!strcasecmp(ZSTR_VAL(ctx->arg.s), ctx->lookup_data)) {
 		f = 1;
 	}
 
@@ -451,7 +454,8 @@ static inline void handle_tag(STD_PARA)
     /* intentionally using str_find here, in case the hash value is set, but the string val is changed later */
 	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL) {
 		ok = 1;
-		if (strncasecmp(ZSTR_VAL(ctx->tag.s), "form", ZSTR_LEN(ctx->tag.s)) == 0) {
+		if (ZSTR_LEN(ctx->tag.s) == sizeof("form")-1
+			&& !strncasecmp(ZSTR_VAL(ctx->tag.s), "form", ZSTR_LEN(ctx->tag.s))) {
 			ctx->tag_type = TAG_FORM;
 		} else {
 			ctx->tag_type = TAG_NORMAL;
