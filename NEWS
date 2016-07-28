@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Calendar:
   . Fixed bug #67976 (cal_days_month() fails for final month of the French
     calendar). (cmb)
+  . Fixed bug #71894 (AddressSanitizer: global-buffer-overflow in
+    zif_cal_from_jd). (cmb)
 
 - CURL:
   . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
