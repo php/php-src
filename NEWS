@@ -32,10 +32,6 @@ PHP                                                                        NEWS
     (Pierrick)
   . Fixed bug #71929 (CURLINFO_CERTINFO data parsing error). (Pierrick)
 
-- Date:
-  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
-    parsing). (derick)
-
 - DOM:
   . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
 
@@ -147,6 +143,10 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed bug #72541 (size_t overflow lead to heap corruption). (Stas)
+
+- Date:
+  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
+    parsing). (derick)
 
 - Exif:
   . Fixed bug #72603 (Out of bound read in exif_process_IFD_in_MAKERNOTE).
