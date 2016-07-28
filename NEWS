@@ -127,9 +127,6 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #72533 (locale_accept_from_http out-of-bounds access). (Stas)
 
-- ODBC:
-  . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined columns)
-
 - OpenSSL:
   . Fixed bug #71915 (openssl_random_pseudo_bytes is not fork-safe).
     (Jakub Zelenka)
@@ -702,7 +699,7 @@ PHP                                                                        NEWS
 
 - ODBC:
   . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined
-    columns). (cmb)
+    columns). (CVE-2015-8879) (cmb)
 
 - OpenSSL:
   . Fixed bug #69882 (OpenSSL error "key values mismatch" after
