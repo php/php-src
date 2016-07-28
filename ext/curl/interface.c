@@ -1884,38 +1884,6 @@ php_curl *alloc_curl_handle()
 /* }}} */
 
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
-/* {{{ split_certinfo
- */
-static void split_certinfo(char *string, zval *hash)
-{
-	char *org = estrdup(string);
-	char *s = org;
-	char *split;
-
-	if(org) {
-		do {
-			char *key;
-			char *val;
-			char *tmp;
-
-			split = strstr(s, "; ");
-			if(split)
-				*split = '\0';
-
-			key = s;
-			tmp = memchr(key, '=', 64);
-			if(tmp) {
-				*tmp = '\0';
-				val = tmp+1;
-				add_assoc_string(hash, key, val);
-			}
-			s = split+2;
-		} while(split);
-		efree(org);
-	}
-}
-/* }}} */
-
 /* {{{ create_certinfo
  */
 static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
@@ -1938,16 +1906,7 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
 				if(tmp) {
 					*tmp = '\0';
 					len = strlen(s);
-					if (!strcmp(s, "Subject") || !strcmp(s, "Issuer")) {
-						zval hash;
-
-						array_init(&hash);
-
-						split_certinfo(&slist->data[len+1], &hash);
-						add_assoc_zval(&certhash, s, &hash);
-					} else {
-						add_assoc_string(&certhash, s, &slist->data[len+1]);
-					}
+					add_assoc_string(&certhash, s, &slist->data[len+1]);
 				} else {
 					php_error_docref(NULL, E_WARNING, "Could not extract hash key from certificate info");
 				}

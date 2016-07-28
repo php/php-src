@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
     (Pierrick)
+  . Fixed bug #71929 (CURLINFO_CERTINFO data parsing error). (Pierrick)
 
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
