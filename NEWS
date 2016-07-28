@@ -1358,7 +1358,7 @@ PHP                                                                        NEWS
 
 - ODBC:
   . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined
-    columns). (cmb)
+    columns). (CVE-2015-8879) (cmb)
 
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
