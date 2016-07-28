@@ -17,10 +17,6 @@ PHP                                                                        NEWS
   . Fixed bug #71929 (Certification information (CERTINFO) data parsing error).
     (Pierrick)
 
-- Date:
-  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
-    parsing). (derick)
-
 - DOM:
   . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
 
@@ -95,6 +91,10 @@ PHP                                                                        NEWS
   . Fixed bug #72447 (Type Confusion in php_bz2_filter_create()). (gogil at
     stealien dot com).
   . Fixed bug #72613 (Inadequate error handling in bzread()). (Stas)
+
+- Date:
+  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
+    parsing). (derick)
 
 - EXIF:
   . Fixed bug #50845 (exif_read_data() returns corrupted exif headers).
