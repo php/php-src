@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug #71144 (Segmentation fault when using cURL with ZTS).
     (maroszek at gmx dot net)
+  . Fixed bug #71929 (Certification information (CERTINFO) data parsing error).
+    (Pierrick)
 
 - Date:
   . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails

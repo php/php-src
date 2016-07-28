@@ -218,6 +218,9 @@ PHP 5.6 UPGRADE NOTES
     . CURLOPT_KRBLEVEL
     . CURLOPT_KRB4LEVEL
 
+  curl_getinfo($ch, CURLINFO_CERTINFO) returns certificate Subject and Issuer
+  as a string (PHP >= 5.6.25)
+
 - Strings:
   substr_compare() now allows $length to be zero.
   pack() and unpack() now support 64-bit format specifiers: q, Q, J and P.
