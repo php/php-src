@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     (Yuji Uchiyama)
   . Fixed bug #72683 (getmxrr broken). (Anatol)
 
+- Calendar:
+  . Fixed bug #67976 (cal_days_month() fails for final month of the French
+    calendar). (cmb)
+
 - CURL:
   . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
     (Pierrick)
