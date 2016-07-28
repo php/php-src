@@ -1272,7 +1272,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			break;
 		}
 		end = MBREX(search_regs)->end[0];
-		if (pos < end) {
+		if (pos <= end) {
 			MBREX(search_pos) = end;
 		} else {
 			MBREX(search_pos) = pos + 1;
