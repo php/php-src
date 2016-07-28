@@ -24,6 +24,10 @@ PHP                                                                        NEWS
     (Bob)
   . Fixed bug #72683 (getmxrr broken). (Anatol)
 
+- Calendar:
+  . Fixed bug #67976 (cal_days_month() fails for final month of the French
+    calendar). (cmb)
+
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
 
