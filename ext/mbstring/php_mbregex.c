@@ -1400,7 +1400,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
-	if (position < 0 || (MBREX(search_str) != NULL && Z_TYPE_P(MBREX(search_str)) == IS_STRING && position >= Z_STRLEN_P(MBREX(search_str)))) {
+	if (position < 0 || (MBREX(search_str) != NULL && Z_TYPE_P(MBREX(search_str)) == IS_STRING && position > Z_STRLEN_P(MBREX(search_str)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;
 		RETURN_FALSE;

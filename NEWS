@@ -44,8 +44,10 @@ PHP                                                                        NEWS
 - mbstring:
   . Fixed bug #72691 (mb_ereg_search raises a warning if a match zero-width).
     (cmb)
-  . Fixed Bug #72693 (mb_ereg_search increments search position when a match
+  . Fixed bug #72693 (mb_ereg_search increments search position when a match
     zero-width). (cmb)
+  . Fixed bug #72694 (mb_ereg_search_setpos does not accept a string's last
+    position). (cmb)
 
 - PCRE:
   . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
