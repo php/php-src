@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug #72658 (Locale::lookup() / locale_lookup() hangs if no match
     found). (Anatol)
 
+- mbstring:
+  . Fixed bug #72691 (mb_ereg_search raises a warning if a match zero-width).
+    (cmb)
+
 - Mysqlnd:
   . Fixed bug #71863 (Segfault when EXPLAIN with "Unknown column" error when
     using MariaDB). (Andrey)
