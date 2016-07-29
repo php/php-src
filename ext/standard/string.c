@@ -2306,19 +2306,17 @@ truncate_len:
 PHP_FUNCTION(str_begins) {
 	zend_string *str, *search_value;
 	int argc = ZEND_NUM_ARGS();
+	int case_sensitive;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &str, &search_value, &argc) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &str, &search_value, &case_sensitive) == FAILURE) 
 		RETURN_NULL();
-	
-	// Case sensitive checks
-	if (argc == 2) {
-		for (int i = 0; i < search_value->len; i++) 
-			if (str->val[i] != search_value->val[i])
-				RETURN_BOOL(0);
-	} else if (argc == 3) { // Case insensitive checks
-		for (int i = 0; i < search_value->len; i++) 
-			if (tolower(str->val[i]) != tolower(search_value->val[i]))
-				RETURN_BOOL(0);
+
+	for (int i = 0; i < search_value->len; i++) {
+		if (case_sensitive && str->val[i] != search_value->val[i]) {
+			RETURN_BOOL(0);
+		 } else if (!case_sensitive && tolower(str->val[i]) != tolower(search_value->val[i])) {
+			RETURN_BOOL(0); 
+		}
 	}
 	RETURN_BOOL(1);
 }
