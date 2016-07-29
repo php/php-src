@@ -2068,6 +2068,14 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 }
 /* }}} */
 
+static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_count TSRMLS_DC) /* {{{ */
+{
+	*gc_data = NULL;
+	*gc_data_count = 0;
+	return zend_std_get_properties(object TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ php_snmp_get_properties(zval *object)
    Returns all object properties. Injects SNMP properties into object on first call */
 static HashTable *php_snmp_get_properties(zval *object)
@@ -2357,6 +2365,7 @@ PHP_MINIT_FUNCTION(snmp)
 	php_snmp_object_handlers.write_property = php_snmp_write_property;
 	php_snmp_object_handlers.has_property = php_snmp_has_property;
 	php_snmp_object_handlers.get_properties = php_snmp_get_properties;
+	php_snmp_object_handlers.get_gc = php_snmp_get_gc;
 
 	/* Register SNMP Class */
 	INIT_CLASS_ENTRY(ce, "SNMP", php_snmp_class_methods);

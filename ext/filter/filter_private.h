@@ -57,6 +57,8 @@
 
 #define FILTER_FLAG_HOSTNAME               0x100000
 
+#define FILTER_FLAG_EMAIL_UNICODE          0x100000
+
 #define FILTER_VALIDATE_INT           0x0101
 #define FILTER_VALIDATE_BOOLEAN       0x0102
 #define FILTER_VALIDATE_FLOAT         0x0103

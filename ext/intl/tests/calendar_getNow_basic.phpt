@@ -13,11 +13,11 @@ $now = IntlCalendar::getNow();
 $proc_now = intlcal_get_now();
 $time = time();
 var_dump(abs($now - $proc_now) < 500);
-var_dump(abs($time * 1000 - $proc_now) < 1000);
+var_dump(abs($time * 1000 - $proc_now) < 2000);
 
 ?>
 ==DONE==
 --EXPECT--
 bool(true)
 bool(true)
-==DONE==
+==DONE==

@@ -254,7 +254,7 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
 	intern = (Calendar_object*)ecalloc(1, sizeof(Calendar_object) + sizeof(zval) * (ce->default_properties_count - 1));
 
 	zend_object_std_init(&intern->zo, ce);
-    object_properties_init((zend_object*) intern, ce);
+    object_properties_init(&intern->zo, ce);
 	calendar_object_init(intern);
 
 

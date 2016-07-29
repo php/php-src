@@ -1144,6 +1144,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 				if (EG(objects_store).object_buckets &&
 				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
+					EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
 					GC_TYPE(obj) = IS_NULL;
 					if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 						GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
