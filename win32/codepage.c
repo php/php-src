@@ -32,7 +32,7 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	int ret_len, tmp_len;
 
 	if (!in || in_len > (size_t)INT_MAX) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETERER);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 	assert(in_len ? in[in_len] == L'\0' : 1);
@@ -97,13 +97,13 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
 	if (!in) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETERER);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	} else if (0 == in_len) {
 		/* Not binary safe. */
 		in_len = strlen(in);
 		if (in_len > (size_t)INT_MAX) {
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETERER);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 			return NULL;
 		}
 	}
@@ -134,7 +134,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 			if (-1 == k) {
 				free(ret);
-				SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETERER);
+				SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 				return NULL;
 			}
 
@@ -171,7 +171,7 @@ __forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_
 	char* target;
 
 	if (!in || in_len > INT_MAX) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETERER);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 	assert(in_len ? in[in_len] == '\0' : 1);
