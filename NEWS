@@ -57,6 +57,15 @@ PHP                                                                        NEWS
   . Implemented FR #72653 (SQLite should allow opening with empty filename).
     (cmb)
 
+- Standard:
+  . Fixed bug #61967 (unset array item in array_walk_recursive cause
+    inconsistent array). (Nikita)
+  . Fixed bug #62607 (array_walk_recursive move internal pointer). (Nikita)
+  . Fixed bug #69068 (Exchanging array during array_walk -> memory errors).
+    (Nikita)
+  . Fixed bug #70713 (Use After Free Vulnerability in array_walk()/
+    array_walk_recursive()). (Nikita)
+
 - Streams:
   . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
   . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)

@@ -1407,11 +1407,15 @@ PHP_FUNCTION(max)
 }
 /* }}} */
 
-static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive) /* {{{ */
+static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 {
 	zval args[3],		/* Arguments to userland function */
 		 retval,		/* Return value - unused */
 		 *zv;
+	HashTable *target_hash = HASH_OF(array);
+	HashPosition pos;
+	uint32_t ht_iter;
+	int result = SUCCESS;
 
 	/* Set up known arguments */
 	ZVAL_UNDEF(&args[1]);
@@ -1424,89 +1428,112 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive)
 	BG(array_walk_fci).params = args;
 	BG(array_walk_fci).no_separation = 0;
 
+	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
+	ht_iter = zend_hash_iterator_add(target_hash, pos);
+
 	/* Iterate through hash */
-	zend_hash_internal_pointer_reset(target_hash);
-	while (!EG(exception) && (zv = zend_hash_get_current_data(target_hash)) != NULL) {
+	do {
+		/* Retrieve value */
+		zv = zend_hash_get_current_data_ex(target_hash, &pos);
+		if (zv == NULL) {
+			break;
+		}
+
+		/* Skip undefined indirect elements */
 		if (Z_TYPE_P(zv) == IS_INDIRECT) {
 			zv = Z_INDIRECT_P(zv);
 			if (Z_TYPE_P(zv) == IS_UNDEF) {
-				zend_hash_move_forward(target_hash);
+				zend_hash_move_forward_ex(target_hash, &pos);
 				continue;
 			}
 		}
-		if (recursive &&
-		    (Z_TYPE_P(zv) == IS_ARRAY ||
-		     (Z_ISREF_P(zv) && Z_TYPE_P(Z_REFVAL_P(zv)) == IS_ARRAY))) {
+
+		/* Ensure the value is a reference. Otherwise the location of the value may be freed. */
+		ZVAL_MAKE_REF(zv);
+
+		/* Retrieve key */
+		zend_hash_get_current_key_zval_ex(target_hash, &args[1], &pos);
+
+		/* Move to next element already now -- this mirrors the approach used by foreach
+		 * and ensures proper behavior with regard to modifications. */
+		zend_hash_move_forward_ex(target_hash, &pos);
+
+		/* Back up hash position, as it may change */
+		EG(ht_iterators)[ht_iter].pos = pos;
+
+		if (recursive && Z_TYPE_P(Z_REFVAL_P(zv)) == IS_ARRAY) {
 			HashTable *thash;
 			zend_fcall_info orig_array_walk_fci;
 			zend_fcall_info_cache orig_array_walk_fci_cache;
+			zval ref;
+			ZVAL_COPY_VALUE(&ref, zv);
 
 			ZVAL_DEREF(zv);
 			SEPARATE_ARRAY(zv);
 			thash = Z_ARRVAL_P(zv);
 			if (thash->u.v.nApplyCount > 1) {
 				php_error_docref(NULL, E_WARNING, "recursion detected");
-				if (userdata) {
-					zval_ptr_dtor(&args[2]);
-				}
-				return 0;
+				result = FAILURE;
+				break;
 			}
 
 			/* backup the fcall info and cache */
 			orig_array_walk_fci = BG(array_walk_fci);
 			orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
+			Z_ADDREF(ref);
 			thash->u.v.nApplyCount++;
-			php_array_walk(thash, userdata, recursive);
-			thash->u.v.nApplyCount--;
+			result = php_array_walk(zv, userdata, recursive);
+			if (Z_TYPE_P(Z_REFVAL(ref)) == IS_ARRAY && thash == Z_ARRVAL_P(Z_REFVAL(ref))) {
+				/* If the hashtable changed in the meantime, we'll "leak" this apply count
+				 * increment -- our reference to thash is no longer valid. */
+				thash->u.v.nApplyCount--;
+			}
+			zval_ptr_dtor(&ref);
 
 			/* restore the fcall info and cache */
 			BG(array_walk_fci) = orig_array_walk_fci;
 			BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		} else {
-			int was_ref = Z_ISREF_P(zv);
-
 			ZVAL_COPY(&args[0], zv);
 
-			/* Allocate space for key */
-			zend_hash_get_current_key_zval(target_hash, &args[1]);
-
 			/* Call the userland function */
-			if (zend_call_function(&BG(array_walk_fci), &BG(array_walk_fci_cache)) == SUCCESS) {
-				if (!was_ref && Z_ISREF(args[0])) {
-					/* copy reference back */
-					zval garbage;
-					if (Z_REFCOUNT(args[0]) == 1) {
-						ZVAL_UNREF(&args[0]);
-					}
-					ZVAL_COPY_VALUE(&garbage, zv);
-					ZVAL_COPY_VALUE(zv, &args[0]);
-					zval_ptr_dtor(&garbage);
-				} else {
-					zval_ptr_dtor(&args[0]);
-				}
+			result = zend_call_function(&BG(array_walk_fci), &BG(array_walk_fci_cache));
+			if (result == SUCCESS) {
 				zval_ptr_dtor(&retval);
-			} else {
-				zval_ptr_dtor(&args[0]);
-				if (Z_TYPE(args[1]) != IS_UNDEF) {
-					zval_ptr_dtor(&args[1]);
-					ZVAL_UNDEF(&args[1]);
-				}
-				break;
 			}
+
+			zval_ptr_dtor(&args[0]);
 		}
 
 		if (Z_TYPE(args[1]) != IS_UNDEF) {
 			zval_ptr_dtor(&args[1]);
 			ZVAL_UNDEF(&args[1]);
 		}
-		zend_hash_move_forward(target_hash);
-	}
+
+		if (result == FAILURE) {
+			break;
+		}
+
+		/* Reload array and position -- both may have changed */
+		if (Z_TYPE_P(array) == IS_ARRAY) {
+			pos = zend_hash_iterator_pos_ex(ht_iter, array);
+			target_hash = Z_ARRVAL_P(array);
+		} else if (Z_TYPE_P(array) == IS_OBJECT) {
+			target_hash = Z_OBJPROP_P(array);
+			pos = zend_hash_iterator_pos(ht_iter, target_hash);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Iterated value is no longer an array or object");
+			result = FAILURE;
+			break;
+		}
+	} while (!EG(exception));
 
 	if (userdata) {
 		zval_ptr_dtor(&args[2]);
 	}
-	return 0;
+	zend_hash_iterator_del(ht_iter);
+	return result;
 }
 /* }}} */
 
@@ -1514,7 +1541,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive)
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
-	HashTable *array;
+	zval *array;
 	zval *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
@@ -1523,14 +1550,14 @@ PHP_FUNCTION(array_walk)
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H/f|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/f|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
 		Z_PARAM_FUNC(BG(array_walk_fci), BG(array_walk_fci_cache))
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL_EX(userdata, 0, 1)
@@ -1552,7 +1579,7 @@ PHP_FUNCTION(array_walk)
    Apply a user function recursively to every member of an array */
 PHP_FUNCTION(array_walk_recursive)
 {
-	HashTable *array;
+	zval *array;
 	zval *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
@@ -1560,7 +1587,7 @@ PHP_FUNCTION(array_walk_recursive)
 	orig_array_walk_fci = BG(array_walk_fci);
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H/f|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/f|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
