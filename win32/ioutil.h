@@ -437,16 +437,17 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		free(tmp_bufa);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
 		return NULL;
-	} else if (tmp_bufa_len + 1 > len) {
-		free(tmp_bufa);
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
-		return NULL;
 	}
 
 	if (!buf) {
 		/* If buf was NULL, the result has to be freed outside here. */
 		buf = tmp_bufa;
 	} else {
+		if (tmp_bufa_len + 1 > len) {
+			free(tmp_bufa);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+			return NULL;
+		}
 		memmove(buf, tmp_bufa, tmp_bufa_len + 1);
 		free(tmp_bufa);
 	}
