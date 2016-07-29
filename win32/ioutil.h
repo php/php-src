@@ -230,7 +230,7 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
-	int ret;
+	int ret, err;
 
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
@@ -239,9 +239,13 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
 
-	/* TODO set errno. */
 	ret = _waccess(pathw, mode);
+	_get_errno(&err);
 	PHP_WIN32_IOUTIL_CLEANUP_W()
+
+	if (0 > ret) {
+		_set_errno(err);
+	}
 
 	return ret;
 }/*}}}*/
