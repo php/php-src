@@ -3075,16 +3075,12 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				}
 				zval_ptr_dtor(&tmp);
 			} else {
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
-				zend_hash_add_new(dest, string_key, src_entry);
+				zval *zv = zend_hash_add_new(dest, string_key, src_entry);
+				zval_add_ref(zv);
 			}
 		} else {
-			if (Z_REFCOUNTED_P(src_entry)) {
-				Z_ADDREF_P(src_entry);
-			}
-			zend_hash_next_index_insert_new(dest, src_entry);
+			zval *zv = zend_hash_next_index_insert_new(dest, src_entry);
+			zval_add_ref(zv);
 		}
 	} ZEND_HASH_FOREACH_END();
 	return 1;
@@ -3134,11 +3130,8 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 				(Z_TYPE_P(dest_entry) != IS_ARRAY &&
 				 (!Z_ISREF_P(dest_entry) || Z_TYPE_P(Z_REFVAL_P(dest_entry)) != IS_ARRAY))) {
 
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
-				zend_hash_update(dest, string_key, src_entry);
-
+				zval *zv = zend_hash_update(dest, string_key, src_entry);
+				zval_add_ref(zv);
 				continue;
 			}
 		} else {
@@ -3147,11 +3140,8 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 				(Z_TYPE_P(dest_entry) != IS_ARRAY &&
 				 (!Z_ISREF_P(dest_entry) || Z_TYPE_P(Z_REFVAL_P(dest_entry)) != IS_ARRAY))) {
 
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
-				}
-				zend_hash_index_update(dest, num_key, src_entry);
-
+				zval *zv = zend_hash_index_update(dest, num_key, src_entry);
+				zval_add_ref(zv);
 				continue;
 			}
 		}
