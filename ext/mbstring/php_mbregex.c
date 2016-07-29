@@ -646,6 +646,50 @@ _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option
 }
 /* }}} */
 
+
+/*
+ * Callbacks for named subpatterns
+ */
+
+/* {{{ struct mb_ereg_groups_iter_arg */
+typedef struct mb_regex_groups_iter_args {
+	zval		*groups;
+	char		*search_str;
+	int			search_len;
+	OnigRegion	*region;
+} mb_regex_groups_iter_args;
+/* }}} */
+
+/* {{{ mb_ereg_groups_iter */
+static int
+mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngroup_num, int* group_nums, regex_t* reg, void* parg)
+{
+	mb_regex_groups_iter_args *args = (mb_regex_groups_iter_args *) parg;
+	int i, gn, ref, beg, end;
+
+	for (i = 0; i < ngroup_num; i++) {
+		gn = group_nums[i];
+		ref = onig_name_to_backref_number(reg, name, name_end, args->region);
+		if (ref != gn) {
+			/*
+			 * In case of duplicate groups, keep only the last suceeding one
+			 * to be consistent with preg_match with the PCRE_DUPNAMES option.
+			 */
+			continue;
+		}
+		beg = args->region->beg[gn];
+		end = args->region->end[gn];
+		if (beg >= 0 && beg < end && end <= args->search_len) {
+			add_assoc_stringl_ex(args->groups, (char *)name, name_end - name, &args->search_str[beg], end - beg);
+		} else {
+			add_assoc_bool_ex(args->groups, (char *)name, name_end - name, 0);
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
 /*
  * php functions
  */
@@ -761,6 +805,11 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			} else {
 				add_index_bool(array, i, 0);
 			}
+		}
+
+		if (onig_number_of_names(re) > 0) {
+			mb_regex_groups_iter_args args = {array, string, string_len, regs};
+			onig_foreach_name(re, mb_regex_groups_iter, &args);
 		}
 	}
 
@@ -1291,6 +1340,15 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 					add_index_bool(return_value, i, 0);
 				}
 			}
+			if (onig_number_of_names(MBREX(search_re)) > 0) {
+				mb_regex_groups_iter_args args = {
+					return_value,
+					Z_STRVAL(MBREX(search_str)),
+					Z_STRLEN(MBREX(search_str)),
+					MBREX(search_regs)
+				};
+				onig_foreach_name(MBREX(search_re), mb_regex_groups_iter, &args);
+			}
 			break;
 		default:
 			RETVAL_TRUE;
@@ -1416,6 +1474,15 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 			} else {
 				add_index_bool(return_value, i, 0);
 			}
+		}
+		if (onig_number_of_names(MBREX(search_re)) > 0) {
+			mb_regex_groups_iter_args args = {
+				return_value,
+				Z_STRVAL(MBREX(search_str)),
+				len,
+				MBREX(search_regs)
+			};
+			onig_foreach_name(MBREX(search_re), mb_regex_groups_iter, &args);
 		}
 	} else {
 		RETVAL_FALSE;
