@@ -37,6 +37,7 @@ PHP                                                                        NEWS
 - Mysqlnd:
   . Fixed bug #71863 (Segfault when EXPLAIN with "Unknown column" error when
     using MariaDB). (Andrey)
+  . Fixed bug #72701 (mysqli_get_host_info() wrong output). (Anatol)
 
 - PCRE:
   . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
