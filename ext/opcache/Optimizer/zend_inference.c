@@ -3697,7 +3697,7 @@ static zend_bool can_convert_to_double(
 static int zend_type_narrowing(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
 {
 	uint32_t bitset_len = zend_bitset_len(ssa->vars_count);
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap)
 	zend_bitset visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
 	zend_bitset worklist = visited + bitset_len;
 	int i, v;
