@@ -54,6 +54,8 @@ PHP                                                                        NEWS
     zero-width). (cmb)
   . Fixed bug #72694 (mb_ereg_search_setpos does not accept a string's last
     position). (cmb)
+  . Fixed bug #72710 (`mb_ereg` causes buffer overflow on regexp compile error).
+    (ju1ius)
 
 - PCRE:
   . Fixed bug #72688 (preg_match missing group names in matches). (cmb)

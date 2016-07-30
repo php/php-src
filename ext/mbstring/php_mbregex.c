@@ -456,7 +456,7 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 	found = zend_hash_find(&MBREX(ht_rc), (char *)pattern, patlen+1, (void **) &rc);
 	if (found == FAILURE || (*rc)->options != options || (*rc)->enc != enc || (*rc)->syntax != syntax) {
 		if ((err_code = onig_new(&retval, (OnigUChar *)pattern, (OnigUChar *)(pattern + patlen), options, enc, syntax, &err_info)) != ONIG_NORMAL) {
-			onig_error_code_to_str(err_str, err_code, err_info);
+			onig_error_code_to_str(err_str, err_code, &err_info);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex compile err: %s", err_str);
 			retval = NULL;
 			goto out;
