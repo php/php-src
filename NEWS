@@ -87,10 +87,6 @@ PHP                                                                        NEWS
   . Implemented FR #72633 (Postgres PDO lastInsertId() should work without
     specifying a sequence). (Pablo Santiago Sánchez)
 
-- Posix:
-  . Fixed bug #71219 (php's configure script incorrectly checks for ttyname_r
-    availability). (Nikita)
-
 - Reflection:
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
     (Nikita Nefedov)
