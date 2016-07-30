@@ -373,6 +373,7 @@ void php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len)
 	if (comment) {
 		char *escaped;
 		size_t escaped_len;
+		TSRMLS_FETCH();
 		escaped = php_escape_html_entities(
 			comment, comment_len, &escaped_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 
