@@ -89,6 +89,10 @@ PHP                                                                        NEWS
   . Implemented FR #72653 (SQLite should allow opening with empty filename).
     (cmb)
 
+- Wddx:
+  . Fixed bug #72142 (WDDX Packet Injection Vulnerability in
+    wddx_serialize_value()). (Taoguang Chen)
+
 21 Jul 2016, PHP 5.6.24
 
 - Core:
