@@ -63,6 +63,10 @@ PHP                                                                        NEWS
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
 
+- Posix:
+  . Fixed bug #71219 (php's configure script incorrectly checks for ttyname_r
+    availability). (Nikita)
+
 - Reflection:
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
     (Nikita Nefedov)
