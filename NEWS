@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
 
+- mbstring:
+  . Fixed bug #72711 (`mb_ereg` does not clear the `$regs` parameter on
+    failure). (ju1ius)
+
 - Stream: 
   . Fixed bug #72743 (Out-of-bound read in php_stream_filter_create).
     (Loianhtuan)
