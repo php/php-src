@@ -74,6 +74,10 @@ PHP                                                                        NEWS
   . Fixed bug #72667 (opendir() with ftp:// attempts to open data stream for
     non-existent directories). (vhuk)
 
+- Wddx:
+  . Fixed bug #72142 (WDDX Packet Injection Vulnerability in
+    wddx_serialize_value()). (Taoguang Chen)
+
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
     array elements). (Laruence)
