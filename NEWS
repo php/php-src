@@ -133,6 +133,9 @@ PHP                                                                        NEWS
 
 - Wddx:
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
+  . Fixed bug #72142 (WDDX Packet Injection Vulnerability in
+    wddx_serialize_value()). (Taoguang Chen)
+
 
 - Zip:
   . Fixed bug #72660 (NULL Pointer dereference in zend_virtual_cwd).
