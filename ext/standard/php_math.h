@@ -22,6 +22,7 @@
 #ifndef PHP_MATH_H
 #define PHP_MATH_H
 
+PHPAPI double _php_math_round(double, int, int);
 PHPAPI zend_string *_php_math_number_format(double, int, char, char);
 PHPAPI zend_string *_php_math_number_format_ex(double, int, char *, size_t, char *, size_t);
 PHPAPI zend_string * _php_math_longtobase(zval *arg, int base);

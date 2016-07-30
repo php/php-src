@@ -45,6 +45,7 @@
 #include "basic_functions.h"
 #include "php_string.h"
 #include "php_rand.h"
+#include "php_math.h"
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
 #include "ext/spl/spl_array.h"
@@ -2141,7 +2142,7 @@ PHP_FUNCTION(array_fill_keys)
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
 			RETURN_FALSE; \
 		} \
-		size = (uint32_t)round(__calc_size); \
+		size = (uint32_t)_php_math_round(__calc_size, 0, PHP_ROUND_HALF_UP); \
 		array_init_size(return_value, size); \
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
 	} while (0)
@@ -5060,6 +5061,7 @@ PHP_FUNCTION(array_rand)
 	zend_bitset bitset;
 	int negative_bitset = 0;
 	uint32_t bitset_len;
+	ALLOCA_FLAG(use_heap)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|l", &input, &num_req) == FAILURE) {
 		return;
@@ -5113,7 +5115,6 @@ PHP_FUNCTION(array_rand)
 		num_req = num_avail - num_req;
 	}
 
-	ALLOCA_FLAG(use_heap);
 	bitset_len = zend_bitset_len(num_avail);
 	bitset = ZEND_BITSET_ALLOCA(bitset_len, use_heap);
 	zend_bitset_clear(bitset, bitset_len);
