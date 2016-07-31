@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
+  . Downgraded to PCRE 8.38. (Anatol)
 
 - Reflection:
   . Fixed bug #72661 (ReflectionType::__toString crashes with iterable).
