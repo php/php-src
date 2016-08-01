@@ -687,7 +687,7 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 }
 /* }}} */
 
-static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty, zend_bool report_empty) /* {{{ */
+static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty) /* {{{ */
 {
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
@@ -718,7 +718,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 				if (add_empty) {
 					add_assoc_null_ex(return_value, ZSTR_VAL(arg_key), ZSTR_LEN(arg_key));
 				}
-				if (report_empty) {
+				else {
 					IF_G(validation_error) = 1;
 				}
 			} else {
@@ -780,7 +780,7 @@ PHP_FUNCTION(validate_input_array)
 
 	IF_G(validation_error) = 0;
 	/* Successfull call sets proper return_value */
-	php_filter_array_handler(array_input, op, return_value, add_empty, !add_empty);
+	php_filter_array_handler(array_input, op, return_value, add_empty);
 	if (IF_G(validation_error)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -805,7 +805,7 @@ PHP_FUNCTION(validate_var_array)
 	}
 
 	IF_G(validation_error) = 0;
-	php_filter_array_handler(array_input, op, return_value, add_empty, !add_empty);
+	php_filter_array_handler(array_input, op, return_value, add_empty);
 	if (IF_G(validation_error)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -933,7 +933,7 @@ PHP_FUNCTION(filter_input_array)
 		}
 	}
 
-	php_filter_array_handler(array_input, op, return_value, add_empty, 0);
+	php_filter_array_handler(array_input, op, return_value, add_empty);
 }
 /* }}} */
 
@@ -953,7 +953,7 @@ PHP_FUNCTION(filter_var_array)
 		RETURN_FALSE;
 	}
 
-	php_filter_array_handler(array_input, op, return_value, add_empty, 0);
+	php_filter_array_handler(array_input, op, return_value, add_empty);
 }
 /* }}} */
 
