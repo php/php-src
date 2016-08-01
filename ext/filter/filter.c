@@ -786,6 +786,7 @@ PHP_FUNCTION(validate_input_array)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 
 /* {{{ proto bool validate_var_array(array data, [, mixed options [, bool add_empty]]])
@@ -805,12 +806,14 @@ PHP_FUNCTION(validate_var_array)
 	}
 
 	IF_G(validation_error) = 0;
+	/* Successfull call sets proper return_value */
 	php_filter_array_handler(array_input, op, return_value, add_empty);
 	if (IF_G(validation_error)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 
 /* {{{ proto mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
