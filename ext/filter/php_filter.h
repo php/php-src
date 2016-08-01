@@ -46,6 +46,8 @@ PHP_RINIT_FUNCTION(filter);
 PHP_RSHUTDOWN_FUNCTION(filter);
 PHP_MINFO_FUNCTION(filter);
 
+PHP_FUNCTION(validate_input_array);
+PHP_FUNCTION(validate_var_array);
 PHP_FUNCTION(filter_input);
 PHP_FUNCTION(filter_var);
 PHP_FUNCTION(filter_input_array);
@@ -63,6 +65,7 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval session_array;
 	zend_long default_filter;
 	zend_long default_filter_flags;
+	zend_bool validation_error;
 ZEND_END_MODULE_GLOBALS(filter)
 
 #if defined(COMPILE_DL_FILTER) && defined(ZTS)

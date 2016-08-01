@@ -82,6 +82,18 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_l
 static unsigned int php_sapi_filter_init(void);
 
 /* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_input_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, definition)
+	ZEND_ARG_INFO(0, add_empty)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_var_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, definition)
+	ZEND_ARG_INFO(0, add_empty)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_input, 0, 0, 2)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, variable_name)
@@ -123,6 +135,8 @@ ZEND_END_ARG_INFO()
 /* {{{ filter_functions[]
  */
 static const zend_function_entry filter_functions[] = {
+	PHP_FE(validate_input_array,	arginfo_validate_input_array)
+	PHP_FE(validate_var_array,		arginfo_validate_var_array)
 	PHP_FE(filter_input,		arginfo_filter_input)
 	PHP_FE(filter_var,		arginfo_filter_var)
 	PHP_FE(filter_input_array,	arginfo_filter_input_array)
@@ -390,6 +404,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 
 		ce = Z_OBJCE_P(value);
 		if (!ce->__tostring) {
+			IF_G(validation_error) = 1;
 			zval_ptr_dtor(value);
 			/* #67167: doesn't return null on failure for objects */
 			if (flags & FILTER_NULL_ON_FAILURE) {
@@ -587,6 +602,7 @@ PHP_FUNCTION(filter_has_var)
 }
 /* }}} */
 
+
 static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args, const int copy, zend_long filter_flags) /* {{{ */
 {
 	zval *options = NULL;
@@ -633,6 +649,7 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 
 	if (Z_TYPE_P(filtered) == IS_ARRAY) {
 		if (filter_flags & FILTER_REQUIRE_SCALAR) {
+			IF_G(validation_error) = 1;
 			if (copy) {
 				SEPARATE_ZVAL(filtered);
 			}
@@ -670,7 +687,7 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 }
 /* }}} */
 
-static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty) /* {{{ */
+static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty, zend_bool report_empty) /* {{{ */
 {
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
@@ -691,7 +708,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 				php_error_docref(NULL, E_WARNING, "Numeric keys are not allowed in the definition array");
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
-	 		}
+			}
 			if (ZSTR_LEN(arg_key) == 0) {
 				php_error_docref(NULL, E_WARNING, "Empty keys are not allowed in the definition array");
 				zval_ptr_dtor(return_value);
@@ -700,6 +717,9 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 			if ((tmp = zend_hash_find(Z_ARRVAL_P(input), arg_key)) == NULL) {
 				if (add_empty) {
 					add_assoc_null_ex(return_value, ZSTR_VAL(arg_key), ZSTR_LEN(arg_key));
+				}
+				if (report_empty) {
+					IF_G(validation_error) = 1;
 				}
 			} else {
 				zval nval;
@@ -714,6 +734,84 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 	}
 }
 /* }}} */
+
+
+/* {{{ proto bool validate_input_array(constant type, [, mixed options [, array &offending]]])
+ * Returns an array with all arguments defined in 'definition'.
+ */
+PHP_FUNCTION(validate_input_array)
+{
+	zend_long    fetch_from;
+	zval   *array_input = NULL, *op = NULL;
+	zend_bool add_empty = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|zb",  &fetch_from, &op, &add_empty) == FAILURE) {
+		return;
+	}
+
+	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
+		RETURN_FALSE;
+	}
+
+	array_input = php_filter_get_storage(fetch_from);
+
+	if (!array_input || !HASH_OF(array_input)) {
+		zend_long filter_flags = 0;
+		zval *option;
+		if (op) {
+			if (Z_TYPE_P(op) == IS_LONG) {
+				filter_flags = Z_LVAL_P(op);
+			} else if (Z_TYPE_P(op) == IS_ARRAY && (option = zend_hash_str_find(HASH_OF(op), "flags", sizeof("flags") - 1)) != NULL) {
+				filter_flags = zval_get_long(option);
+			}
+		}
+
+		/* The FILTER_NULL_ON_FAILURE flag inverts the usual return values of
+		 * the function: normally when validation fails false is returned, and
+		 * when the input value doesn't exist NULL is returned. With the flag
+		 * set, NULL and false should be returned, respectively. Ergo, although
+		 * the code below looks incorrect, it's actually right. */
+		if (filter_flags & FILTER_NULL_ON_FAILURE) {
+			RETURN_FALSE;
+		} else {
+			RETURN_NULL();
+		}
+	}
+
+	IF_G(validation_error) = 0;
+	/* Successfull call sets proper return_value */
+	php_filter_array_handler(array_input, op, return_value, add_empty, !add_empty);
+	if (IF_G(validation_error)) {
+		zval_ptr_dtor(return_value);
+		RETURN_FALSE;
+	}
+}
+
+
+/* {{{ proto bool filter_var_array(array data, [, mixed options [, array &offending]]])
+ * Returns an array with all arguments defined in 'definition'.
+ */
+PHP_FUNCTION(validate_var_array)
+{
+	zval *array_input = NULL, *op = NULL;
+	zend_bool add_empty = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|zb",  &array_input, &op, &add_empty) == FAILURE) {
+		return;
+	}
+
+	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
+		RETURN_FALSE;
+	}
+
+	IF_G(validation_error) = 0;
+	php_filter_array_handler(array_input, op, return_value, add_empty, !add_empty);
+	if (IF_G(validation_error)) {
+		zval_ptr_dtor(return_value);
+		RETURN_FALSE;
+	}
+}
+
 
 /* {{{ proto mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
  * Returns the filtered variable 'name'* from source `type`.
@@ -835,7 +933,7 @@ PHP_FUNCTION(filter_input_array)
 		}
 	}
 
-	php_filter_array_handler(array_input, op, return_value, add_empty);
+	php_filter_array_handler(array_input, op, return_value, add_empty, 0);
 }
 /* }}} */
 
@@ -855,7 +953,7 @@ PHP_FUNCTION(filter_var_array)
 		RETURN_FALSE;
 	}
 
-	php_filter_array_handler(array_input, op, return_value, add_empty);
+	php_filter_array_handler(array_input, op, return_value, add_empty, 0);
 }
 /* }}} */
 
