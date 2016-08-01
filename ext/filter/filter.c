@@ -736,7 +736,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto bool validate_input_array(constant type, [, mixed options [, array &offending]]])
+/* {{{ proto bool validate_input_array(constant type, [, mixed options [, bool add_empty]]])
  * Returns an array with all arguments defined in 'definition'.
  */
 PHP_FUNCTION(validate_input_array)
@@ -788,7 +788,7 @@ PHP_FUNCTION(validate_input_array)
 }
 
 
-/* {{{ proto bool filter_var_array(array data, [, mixed options [, array &offending]]])
+/* {{{ proto bool validate_var_array(array data, [, mixed options [, bool add_empty]]])
  * Returns an array with all arguments defined in 'definition'.
  */
 PHP_FUNCTION(validate_var_array)
