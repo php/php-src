@@ -454,7 +454,7 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 	rc = zend_hash_str_find_ptr(&MBREX(ht_rc), (char *)pattern, patlen);
 	if (!rc || rc->options != options || rc->enc != enc || rc->syntax != syntax) {
 		if ((err_code = onig_new(&retval, (OnigUChar *)pattern, (OnigUChar *)(pattern + patlen), options, enc, syntax, &err_info)) != ONIG_NORMAL) {
-			onig_error_code_to_str(err_str, err_code, err_info);
+			onig_error_code_to_str(err_str, err_code, &err_info);
 			php_error_docref(NULL, E_WARNING, "mbregex compile err: %s", err_str);
 			retval = NULL;
 			goto out;
@@ -1246,9 +1246,6 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		php_error_docref(NULL, E_WARNING, "mbregex search failure in mbregex_search(): %s", err_str);
 		RETVAL_FALSE;
 	} else {
-		if (MBREX(search_regs)->beg[0] == MBREX(search_regs)->end[0]) {
-			php_error_docref(NULL, E_WARNING, "Empty regular expression");
-		}
 		switch (mode) {
 		case 1:
 			array_init(return_value);
@@ -1275,7 +1272,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			break;
 		}
 		end = MBREX(search_regs)->end[0];
-		if (pos < end) {
+		if (pos <= end) {
 			MBREX(search_pos) = end;
 		} else {
 			MBREX(search_pos) = pos + 1;
@@ -1411,7 +1408,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
-	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position >= Z_STRLEN(MBREX(search_str)))) {
+	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position > Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;
 		RETURN_FALSE;

@@ -16,13 +16,27 @@ PHP                                                                        NEWS
     phpize on Windows). (Yuji Uchiyama)
   . Fixed bug causing ClosedGeneratorException being thrown into the calling
     code instead of the Generator yielding from. (Bob)
+  . Implemented FR #72614 (Support "nmake test" on building extensions by
+    phpize). (Yuji Uchiyama)
+  . Fixed bug #72641 (phpize (on Windows) ignores PHP_PREFIX).
+    (Yuji Uchiyama)
+  . Fixed potential segfault in object storage freeing in shutdown sequence.
+    (Bob)
+  . Fixed bug #72683 (getmxrr broken). (Anatol)
+
+- Calendar:
+  . Fixed bug #67976 (cal_days_month() fails for final month of the French
+    calendar). (cmb)
+  . Fixed bug #71894 (AddressSanitizer: global-buffer-overflow in
+    zif_cal_from_jd). (cmb)
 
 - COM:
   . Fixed bug #72569 (DOTNET/COM array parameters broke in PHP7). (Anatol)
 
-- Date:
-  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
-    parsing). (derick)
+- CURL:
+  . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
+    (Pierrick)
+  . Fixed bug #71929 (CURLINFO_CERTINFO data parsing error). (Pierrick)
 
 - DOM:
   . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
@@ -50,12 +64,27 @@ PHP                                                                        NEWS
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
     names). (cmb)
 
+- mbstring:
+  . Fixed bug #72691 (mb_ereg_search raises a warning if a match zero-width).
+    (cmb)
+  . Fixed bug #72693 (mb_ereg_search increments search position when a match
+    zero-width). (cmb)
+  . Fixed bug #72694 (mb_ereg_search_setpos does not accept a string's last
+    position). (cmb)
+  . Fixed bug #72710 (`mb_ereg` causes buffer overflow on regexp compile error).
+    (ju1ius)
+
 - Opcache:
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur)
 
+- PCRE:
+  . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
+
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
+  . Implemented FR #72633 (Postgres PDO lastInsertId() should work without
+    specifying a sequence). (Pablo Santiago Sánchez)
 
 - Reflection:
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
@@ -69,9 +98,15 @@ PHP                                                                        NEWS
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
+  . Fixed bug #72684 (AppendIterator segfault with closed generator). (Pierrick)
 
 - SQLite3:
+  . Fixed bug #72668 (Spurious warning when exception is thrown in user defined
+    function). (Laruence)
   . Fixed bug #72571 (SQLite3::bindValue, SQLite3::bindParam crash). (Laruence)
+  . Implemented FR #72653 (SQLite should allow opening with empty filename).
+    (cmb)
+  . Updated to SQLite3 3.13.0. (cmb)
 
 - Standard:
   . Fixed bug #72622 (array_walk + array_replace_recursive create references
@@ -88,6 +123,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
   . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
+  . Fixed bug #72667 (opendir() with ftp:// attempts to open data stream for
+    non-existent directories). (vhuk)
 
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
@@ -95,6 +132,9 @@ PHP                                                                        NEWS
 
 - Wddx:
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
+  . Fixed bug #72142 (WDDX Packet Injection Vulnerability in
+    wddx_serialize_value()). (Taoguang Chen)
+
 
 - Zip:
   . Fixed bug #72660 (NULL Pointer dereference in zend_virtual_cwd).
@@ -122,6 +162,10 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed bug #72541 (size_t overflow lead to heap corruption). (Stas)
+
+- Date:
+  . Fixed bug #66836 (DateTime::createFromFormat 'U' with pre 1970 dates fails
+    parsing). (derick)
 
 - Exif:
   . Fixed bug #72603 (Out of bound read in exif_process_IFD_in_MAKERNOTE).
@@ -1324,7 +1368,7 @@ PHP                                                                        NEWS
 
 - ODBC:
   . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined
-    columns). (cmb)
+    columns). (CVE-2015-8879) (cmb)
 
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
