@@ -553,8 +553,8 @@ AC_CHECK_DECLS([getrandom])
 dnl
 dnl Check for argon2
 dnl
-PHP_ARG_WITH(argon2, for Argon2 support,
-[  --with-argon2[=DIR]           Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
+PHP_ARG_WITH(password-argon2, for Argon2 support,
+[  --with-password-argon2[=DIR]           Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
 
 if test "$PHP_ARGON2" != "no"; then
   AC_MSG_CHECKING([for Argon2 library])

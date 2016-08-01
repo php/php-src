@@ -1,7 +1,7 @@
 // vim:ft=javascript
 // $Id$
 
-ARG_WITH("argon2", "Argon2 support", "no");
+ARG_WITH("password-argon2", "Argon2 support", "no");
 
 if (PHP_ARGON2 != "no") {
 	if (CHECK_LIB("Argon2Ref.lib", null, PHP_ARGON2)

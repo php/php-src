@@ -14,13 +14,9 @@ var_dump(password_verify($password, $hash));
 $hash = password_hash($password, PASSWORD_ARGON2I);
 var_dump(password_verify($password, $hash));
 
-$hash = password_hash($password, PASSWORD_ARGON2D);
-var_dump(password_verify($password, $hash));
-
 echo "OK!";
 ?>
 --EXPECT--
-bool(true)
 bool(true)
 bool(true)
 OK!

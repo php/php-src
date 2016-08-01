@@ -43,8 +43,7 @@ typedef enum {
     PHP_PASSWORD_UNKNOWN,
     PHP_PASSWORD_BCRYPT,
 #if HAVE_ARGON2LIB
-    PHP_PASSWORD_ARGON2D,
-    PHP_PASSWORD_ARGON2I
+    PHP_PASSWORD_ARGON2I,
 #endif
 } php_password_algo;
 

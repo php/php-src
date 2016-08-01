@@ -45,7 +45,6 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 #if HAVE_ARGON2LIB
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2I", PHP_PASSWORD_ARGON2I, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2D", PHP_PASSWORD_ARGON2D, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2", PHP_PASSWORD_ARGON2, CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -68,8 +67,6 @@ static char* php_password_get_algo_name(const php_password_algo algo)
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 			return "argon2i";
-		case PHP_PASSWORD_ARGON2D:
-			return "argon2d";	
 #endif
 		case PHP_PASSWORD_UNKNOWN:
 		default:
@@ -85,8 +82,6 @@ static php_password_algo php_password_determine_algo(const char *hash, const siz
 #if HAVE_ARGON2LIB
 	if (len >= sizeof("$argon2i$")-1 && !memcmp(hash, "$argon2i$", sizeof("$argon2i$")-1)) {
     	return PHP_PASSWORD_ARGON2I;
-	} else if (len >= sizeof("$argon2d$")-1 && !memcmp(hash, "$argon2d$", sizeof("$argon2d$")-1)) {
-		return PHP_PASSWORD_ARGON2D;
 	}
 #endif
 
@@ -198,14 +193,13 @@ PHP_FUNCTION(password_get_info)
 			break;
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
-		case PHP_PASSWORD_ARGON2D:
 			{
 				zend_long v = 0;
 				zend_long m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				zend_long t_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				zend_long threads = PHP_PASSWORD_ARGON2_THREADS;
 
-				sscanf(hash, "$%*[argon2id]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
+				sscanf(hash, "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
 				add_assoc_long(&options, "m_cost", m_cost);
 				add_assoc_long(&options, "t_cost", t_cost);
 				add_assoc_long(&options, "threads", threads);
@@ -263,7 +257,6 @@ PHP_FUNCTION(password_needs_rehash)
 			break;
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
-		case PHP_PASSWORD_ARGON2D:
 			{
 				zend_long v = 0;
 				zend_long new_m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, m_cost = 0;
@@ -282,7 +275,7 @@ PHP_FUNCTION(password_needs_rehash)
 					new_threads = zval_get_long(option_buffer);
 				}
 
-				sscanf(hash, "$%*[argon2id]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
+				sscanf(hash, "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
 
 				if (new_t_cost != t_cost || new_m_cost != m_cost || new_threads != threads) {
 					RETURN_TRUE;
@@ -317,15 +310,8 @@ PHP_FUNCTION(password_verify)
 	switch(algo) {
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
-		case PHP_PASSWORD_ARGON2D:
 			{
 				argon2_type type = Argon2_i;
-
-				if (algo == PHP_PASSWORD_ARGON2I) {
-					type = Argon2_i;
-				} else if (algo == PHP_PASSWORD_ARGON2D) {
-					type = Argon2_d;
-				}
 
 				status = argon2_verify(hash, password, password_len, type);
 				
@@ -412,7 +398,6 @@ PHP_FUNCTION(password_hash)
 			break;
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
-		case PHP_PASSWORD_ARGON2D:
 			{
 				if (options && (option_buffer = zend_hash_str_find(options, "m_cost", sizeof("m_cost")-1)) != NULL) {
 					m_cost = zval_get_long(option_buffer);
@@ -439,12 +424,6 @@ PHP_FUNCTION(password_hash)
 				if (threads > ARGON2_MAX_LANES || threads == 0) {
 					php_error_docref(NULL, E_WARNING, "Invalid number of threads", threads);
 					RETURN_NULL();
-				}
-
-				if (algo == PHP_PASSWORD_ARGON2D) {
-					type = Argon2_d;
-				} else if (algo == PHP_PASSWORD_ARGON2I) {
-					type = Argon2_i;
 				}
 
 				required_salt_len = 16;
@@ -547,7 +526,6 @@ PHP_FUNCTION(password_hash)
 			break;
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
-		case PHP_PASSWORD_ARGON2D:
 			{
 				size_t out_len = 32;
 				size_t encoded_len;
