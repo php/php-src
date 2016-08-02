@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #72658 (Locale::lookup() / locale_lookup() hangs if no match
     found). (Anatol)
 
+- GD:
+  . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
+
 - mbstring:
   . Fixed bug #72691 (mb_ereg_search raises a warning if a match zero-width).
     (cmb)
