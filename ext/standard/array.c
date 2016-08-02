@@ -3542,7 +3542,7 @@ zend_bool array_column_param_helper(zval *param,
 }
 /* }}} */
 
-static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
+static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /* {{{ */
 {
 	zval *prop = NULL;
 
@@ -3572,6 +3572,7 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
 
 	return prop;
 }
+/* }}} */
 
 /* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
