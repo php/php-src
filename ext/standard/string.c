@@ -2306,12 +2306,12 @@ truncate_len:
 PHP_FUNCTION(str_begins) {
 	zend_string *str, *search_value;
 	int argc = ZEND_NUM_ARGS();
-	int case_sensitive;
+	int case_sensitive, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &str, &search_value, &case_sensitive) == FAILURE) 
 		RETURN_NULL();
 
-	for (int i = 0; i < search_value->len; i++) {
+	for (i = 0; i < search_value->len; i++) {
 		if (case_sensitive && str->val[i] != search_value->val[i]) {
 			RETURN_BOOL(0);
 		} else if (!case_sensitive && tolower(str->val[i]) != tolower(search_value->val[i])) {
@@ -2326,12 +2326,12 @@ PHP_FUNCTION(str_begins) {
 PHP_FUNCTION(str_ends) {
 	zend_string *str, *search_value;
 	int argc = ZEND_NUM_ARGS();
-	int case_sensitive;
+	int case_sensitive, i, j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &str, &search_value, &case_sensitive) == FAILURE) 
 		RETURN_NULL();
 
-	for (int i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) {
+	for (i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) {
 		if (case_sensitive && str->val[i] != search_value->val[j]) {
 			RETURN_BOOL(0);
 		} else if (!case_sensitive && tolower(str->val[i]) != tolower(search_value->val[j])) {	
