@@ -42,6 +42,7 @@ PHP                                                                        NEWS
     blendingmode). (cmb)
   . Fixed bug #66555 (Always false condition in ext/gd/libgd/gdkanji.c). (cmb)
   . Fixed bug #68712 (suspicious if-else statements). (cmb)
+  . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain

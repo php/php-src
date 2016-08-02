@@ -1555,6 +1555,7 @@ PHP_FUNCTION(imagesetstyle)
 	int * stylearr;
 	int index;
 	HashPosition pos;
+    int num_styles;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &IM, &styles) == FAILURE)  {
 		return;
@@ -1562,8 +1563,14 @@ PHP_FUNCTION(imagesetstyle)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
+    num_styles = zend_hash_num_elements(HASH_OF(styles));
+    if (num_styles == 0) {
+        php_error_docref(NULL, E_WARNING, "styles array must not be empty");
+        RETURN_FALSE;
+    }
+
 	/* copy the style values in the stylearr */
-	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(HASH_OF(styles)), 0);
+	stylearr = safe_emalloc(sizeof(int), num_styles, 0);
 
 	zend_hash_internal_pointer_reset_ex(HASH_OF(styles), &pos);
 
