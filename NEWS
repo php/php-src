@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
+  . Implemented FR #72633 (Postgres PDO lastInsertId() should work without
+    specifying a sequence). (Pablo Santiago Sánchez)
 
 - Reflection:
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
