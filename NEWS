@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.11
 
+- GD:
+  . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
 
 
 ?? ??? 2016 PHP 7.0.10
