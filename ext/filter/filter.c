@@ -30,6 +30,8 @@
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
 #include "filter_private.h"
+#include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 
 typedef struct filter_list_entry {
 	const char *name;
@@ -783,6 +785,7 @@ PHP_FUNCTION(validate_input_array)
 	php_filter_array_handler(array_input, op, return_value, add_empty);
 	if (IF_G(validation_error)) {
 		zval_ptr_dtor(return_value);
+		zend_throw_exception(spl_ce_UnexpectedValueException, "Input validation error", 0);
 		RETURN_FALSE;
 	}
 }
@@ -810,6 +813,7 @@ PHP_FUNCTION(validate_var_array)
 	php_filter_array_handler(array_input, op, return_value, add_empty);
 	if (IF_G(validation_error)) {
 		zval_ptr_dtor(return_value);
+		zend_throw_exception(spl_ce_UnexpectedValueException, "Variable validation error", 0);
 		RETURN_FALSE;
 	}
 }

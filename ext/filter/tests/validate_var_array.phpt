@@ -1,5 +1,5 @@
 --TEST--
-Simple validate_var() tests
+Simple validate_var_array() tests
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
@@ -33,17 +33,21 @@ $args = array(
 
 );
 
-var_dump(
-    filter_var_array($data, $args),
-    validate_var_array($data, $args)
-);
+try {
+	var_dump(filter_var_array($data, $args)); // Should pass
+	var_dump(validate_var_array($data, $args)); // Should fail
+} catch (UnexpectedValueException $e) {
+	var_dump($e->getMessage());
+}
 
 // Fix data so that 'testscalar' validates
 $data['testscalar'] = '9999';
-var_dump(
-    validate_var_array($data, $args), // Should pass
-    validate_var_array($data, $args, FALSE) // Try w/o add_empty flag. Should fail.
-);
+try {
+	var_dump(validate_var_array($data, $args)); // Should pass
+	var_dump(validate_var_array($data, $args, FALSE)); // Try w/o add_empty flag. Should fail.
+} catch (UnexpectedValueException $e) {
+	var_dump($e->getMessage());
+}
 ?>
 --EXPECT--
 array(6) {
@@ -66,7 +70,7 @@ array(6) {
     int(2)
   }
 }
-bool(false)
+string(21) "Data validation error"
 array(6) {
   ["product_id"]=>
   string(17) "libgd%3Cscript%3E"
@@ -87,4 +91,4 @@ array(6) {
     int(2)
   }
 }
-bool(false)
+string(21) "Variable validation error"
