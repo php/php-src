@@ -3012,8 +3012,12 @@ PHP_FUNCTION(array_slice)
 				if (pos > offset + length) {
 					break;
 				}
+				if (UNEXPECTED(Z_ISREF_P(entry))
+					&& UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
+					ZVAL_UNREF(entry);
+				}
+				Z_TRY_ADDREF_P(entry);
 				ZEND_HASH_FILL_ADD(entry);
-				zval_add_ref(entry);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
 	} else {
@@ -3126,24 +3130,32 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 	zval *src_entry;
 	zend_string *string_key;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
-		if (Z_REFCOUNTED_P(src_entry)) {
-			if (UNEXPECTED(Z_ISREF_P(src_entry))
-			 && UNEXPECTED(Z_REFCOUNT_P(src_entry) == 1)) {
-				ZVAL_UNREF(src_entry);
-				if (Z_REFCOUNTED_P(src_entry)) {
-					Z_ADDREF_P(src_entry);
+	if ((dest->u.flags & HASH_FLAG_PACKED) && (src->u.flags & HASH_FLAG_PACKED)) {
+		zend_hash_extend(dest, zend_hash_num_elements(dest) + zend_hash_num_elements(src), 1);
+		ZEND_HASH_FILL_PACKED(dest) {
+			ZEND_HASH_FOREACH_VAL(src, src_entry) {
+				if (UNEXPECTED(Z_ISREF_P(src_entry)) &&
+					UNEXPECTED(Z_REFCOUNT_P(src_entry) == 1)) {
+					ZVAL_UNREF(src_entry);
 				}
-			} else {
-				Z_ADDREF_P(src_entry);
+				Z_TRY_ADDREF_P(src_entry);
+				ZEND_HASH_FILL_ADD(src_entry);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
+	} else {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
+			if (UNEXPECTED(Z_ISREF_P(src_entry)) &&
+				UNEXPECTED(Z_REFCOUNT_P(src_entry) == 1)) {
+				ZVAL_UNREF(src_entry);
 			}
-		}
-		if (string_key) {
-			zend_hash_update(dest, string_key, src_entry);
-		} else {
-			zend_hash_next_index_insert_new(dest, src_entry);
-		}
-	} ZEND_HASH_FOREACH_END();
+			Z_TRY_ADDREF_P(src_entry);
+			if (string_key) {
+				zend_hash_update(dest, string_key, src_entry);
+			} else {
+				zend_hash_next_index_insert_new(dest, src_entry);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 	return 1;
 }
 /* }}} */
@@ -3678,8 +3690,12 @@ PHP_FUNCTION(array_reverse)
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
+				if (UNEXPECTED(Z_ISREF_P(entry))
+					&& UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
+					ZVAL_UNREF(entry);
+				}
+				Z_TRY_ADDREF_P(entry);
 				ZEND_HASH_FILL_ADD(entry);
-				zval_add_ref(entry);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
 	} else {
