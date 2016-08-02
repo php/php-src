@@ -605,49 +605,39 @@ PHP_FUNCTION(filter_has_var)
 /* }}} */
 
 
-static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args, const int copy, zend_long filter_flags) /* {{{ */
+static void php_filter_call_setup_options(zval *filter_args, zend_long *filter, zend_long *filter_flags, zval **options) /* {{{ */
 {
-	zval *options = NULL;
 	zval *option;
-	char *charset = NULL;
 
-	if (filter_args && Z_TYPE_P(filter_args) != IS_ARRAY) {
-		zend_long lval = zval_get_long(filter_args);
+	if ((option = zend_hash_str_find(HASH_OF(filter_args), "filter", sizeof("filter") - 1)) != NULL) {
+		*filter = zval_get_long(option);
+	}
 
-		if (filter != -1) { /* handler for array apply */
-			/* filter_args is the filter_flags */
-			filter_flags = lval;
+	if ((option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
+		*filter_flags = zval_get_long(option);
 
-			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
-				filter_flags |= FILTER_REQUIRE_SCALAR;
-			}
-		} else {
-			filter = lval;
-		}
-	} else if (filter_args) {
-		if ((option = zend_hash_str_find(HASH_OF(filter_args), "filter", sizeof("filter") - 1)) != NULL) {
-			filter = zval_get_long(option);
-		}
-
-		if ((option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
-			filter_flags = zval_get_long(option);
-
-			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
-				filter_flags |= FILTER_REQUIRE_SCALAR;
-			}
-		}
-
-		if ((option = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL) {
-			if (filter != FILTER_CALLBACK) {
-				if (Z_TYPE_P(option) == IS_ARRAY) {
-					options = option;
-				}
-			} else {
-				options = option;
-				filter_flags = 0;
-			}
+		if (!(*filter_flags & FILTER_REQUIRE_ARRAY || *filter_flags & FILTER_FORCE_ARRAY)) {
+			*filter_flags |= FILTER_REQUIRE_SCALAR;
 		}
 	}
+
+	if ((option = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL) {
+		if (*filter != FILTER_CALLBACK) {
+			if (Z_TYPE_P(option) == IS_ARRAY) {
+				*options = option;
+			}
+		} else {
+			*options = option;
+			*filter_flags = 0;
+		}
+	}
+}
+/* }}} */
+
+
+static void php_filter_call_apply(zval *filtered, zend_long filter, zend_long filter_flags, zval *options, const int copy) /* {{{ */
+{
+	char *charset = NULL;
 
 	if (Z_TYPE_P(filtered) == IS_ARRAY) {
 		if (filter_flags & FILTER_REQUIRE_SCALAR) {
@@ -688,6 +678,41 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 	}
 }
 /* }}} */
+
+
+static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args, const int copy, zend_long filter_flags) /* {{{ */
+{
+	zval *options = NULL, *nested_args;
+
+	if (filter_args && Z_TYPE_P(filter_args) != IS_ARRAY) {
+		zend_long lval = zval_get_long(filter_args);
+
+		if (filter != -1) { /* handler for array apply */
+			/* filter_args is the filter_flags */
+			filter_flags = lval;
+
+			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
+				filter_flags |= FILTER_REQUIRE_SCALAR;
+			}
+		} else {
+			filter = lval;
+		}
+	} else if (filter_args) {
+		zend_ulong idx;
+		zend_string *key = NULL;
+		(void)(idx);
+		ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(filter_args), idx, key, nested_args) {
+			if (!key && Z_TYPE_P(nested_args) == IS_ARRAY) {
+				php_filter_call_setup_options(nested_args, &filter, &filter_flags, &options);
+				php_filter_call_apply(filtered, filter, filter_flags, options, copy);
+			}
+		} ZEND_HASH_FOREACH_END();
+		php_filter_call_setup_options(filter_args, &filter, &filter_flags, &options);
+	}
+	php_filter_call_apply(filtered, filter, filter_flags, options, copy);
+}
+/* }}} */
+
 
 static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty) /* {{{ */
 {
@@ -732,6 +757,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
+		IF_G(validation_error) = 1;
 		RETURN_FALSE;
 	}
 }
