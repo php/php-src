@@ -65,7 +65,7 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval session_array;
 	zend_long default_filter;
 	zend_long default_filter_flags;
-	zend_bool validation_error;
+	zend_bool raise_exception;
 ZEND_END_MODULE_GLOBALS(filter)
 
 #if defined(COMPILE_DL_FILTER) && defined(ZTS)

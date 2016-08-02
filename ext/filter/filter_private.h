@@ -96,15 +96,22 @@
 || (id >= FILTER_VALIDATE_ALL && id <= FILTER_VALIDATE_LAST) \
 || id == FILTER_CALLBACK)
 
-#define RETURN_VALIDATION_FAILED	\
+#define PHP_FILTER_RAISE_EXCEPTION(message, code) \
+	do { \
+		if (IF_G(raise_exception)) { \
+			zend_throw_exception(spl_ce_UnexpectedValueException, message, code); \
+		} \
+	} while(0)
+
+#define RETURN_VALIDATION_FAILED(message, code)	\
 	zval_dtor(value);	\
 	if (flags & FILTER_NULL_ON_FAILURE) {	\
 		ZVAL_NULL(value);	\
 	} else {	\
-		IF_G(validation_error) = 1;	\
+		PHP_FILTER_RAISE_EXCEPTION(message, code);	\
 		ZVAL_FALSE(value);	\
 	}	\
-	return;	\
+	return
 
 #define PHP_FILTER_TRIM_DEFAULT(p, len) PHP_FILTER_TRIM_DEFAULT_EX(p, len, 1);
 
@@ -114,7 +121,7 @@
 		len--; \
 	} \
 	if (len < 1 && return_if_empty) { \
-		RETURN_VALIDATION_FAILED \
+		RETURN_VALIDATION_FAILED("Filter validated value became empty after trim.", 0); \
 	} \
 	if (len > 0) { \
 		while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
@@ -122,6 +129,7 @@
 		} \
 	} \
 }
+
 
 #endif /* FILTER_PRIVATE_H */
 

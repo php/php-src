@@ -70,7 +70,7 @@ array(6) {
     int(2)
   }
 }
-string(25) "Variable validation error"
+string(53) "Filter validated value is array, but requires scalar."
 array(6) {
   ["product_id"]=>
   string(17) "libgd%3Cscript%3E"
@@ -91,4 +91,4 @@ array(6) {
     int(2)
   }
 }
-string(25) "Variable validation error"
+string(38) "Filter validated value does not exist."

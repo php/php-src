@@ -25,7 +25,8 @@ ZEND_DECLARE_MODULE_GLOBALS(filter)
 #include "filter_private.h"
 #include "ext/standard/url.h"
 #include "ext/pcre/php_pcre.h"
-
+#include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 #include "zend_multiply.h"
 
 #if HAVE_ARPA_INET_H
@@ -205,7 +206,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	len = Z_STRLEN_P(value);
 
 	if (len == 0) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Int validation: Empty input.", 0);
 	}
 
 	if (option_flags & FILTER_FLAG_ALLOW_OCTAL) {
@@ -243,7 +244,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	if (error > 0 || (min_range_set && (ctx_value < min_range)) || (max_range_set && (ctx_value > max_range))) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Int validation: Out of range.", 0);
 	} else {
 		zval_ptr_dtor(value);
 		ZVAL_LONG(value, ctx_value);
@@ -313,7 +314,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	if (ret == -1) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Bool validation: Invalid bool.", 0);
 	} else {
 		zval_dtor(value);
 		ZVAL_BOOL(value, ret);
@@ -349,7 +350,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (decimal_set) {
 		if (decimal_len != 1) {
 			php_error_docref(NULL, E_WARNING, "decimal separator must be one char");
-			RETURN_VALIDATION_FAILED
+			RETURN_VALIDATION_FAILED("Float validation: Invalid decimal separator. It must be one char.", 0);
 		} else {
 			dec_sep = *decimal;
 		}
@@ -418,7 +419,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		default:
 error:
 			efree(num);
-			RETURN_VALIDATION_FAILED
+			RETURN_VALIDATION_FAILED("Float validation: Invalid float.", 0);
 	}
 	efree(num);
 }
@@ -440,18 +441,18 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (!regexp_set) {
 		php_error_docref(NULL, E_WARNING, "'regexp' option missing");
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Regexp validation: Missing 'regexp' option", 0);
 	}
 
 	re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options);
 	if (!re) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Regexp validation: Failed to compile regexp.", 0);
 	}
 	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Regexp validation: Failed to match.", 0);
 	}
 }
 
@@ -510,7 +511,7 @@ static int _php_filter_validate_domain(char * domain, int len, zend_long flags) 
 void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	if (!_php_filter_validate_domain(Z_STRVAL_P(value), Z_STRLEN_P(value), flags)) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Domain valiation: Invlaid domain.", 0);
 	}
 }
 /* }}} */
@@ -523,14 +524,14 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	php_filter_url(value, flags, option_array, charset);
 
 	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("URL validation: Invalid URL.", 0);
 	}
 
 	/* Use parse_url - if it returns false, we return NULL */
 	url = php_url_parse_ex(Z_STRVAL_P(value), Z_STRLEN_P(value));
 
 	if (url == NULL) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("URL validation: Failed to parse URL.", 0);
 	}
 
 	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
@@ -555,7 +556,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		// Validate domain
 		if (!_php_filter_validate_domain(url->host, l, FILTER_FLAG_HOSTNAME)) {
 			php_url_free(url);
-			RETURN_VALIDATION_FAILED
+			RETURN_VALIDATION_FAILED("URL validation: Invalid domain.", 0);
 		}
 	}
 
@@ -567,7 +568,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	) {
 bad_url:
 		php_url_free(url);
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("URL validation: Invalid URL.", 0);
 	}
 	php_url_free(url);
 }
@@ -620,21 +621,21 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	/* The maximum length of an e-mail address is 320 octets, per RFC 2821. */
 	if (Z_STRLEN_P(value) > 320) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Email validation: Too long address.", 0);
 	}
 
 	sregexp = zend_string_init(regexp, regexp_len, 0);
 	re = pcre_get_compiled_regex(sregexp, &pcre_extra, &preg_options);
 	if (!re) {
 		zend_string_release(sregexp);
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Email validation: Failed to compile email regex.", 0);
 	}
 	zend_string_release(sregexp);
 	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("Email validation: Invalid email address.", 0);
 	}
 
 }
@@ -769,21 +770,21 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	} else if (memchr(Z_STRVAL_P(value), '.', Z_STRLEN_P(value))) {
 		mode = FORMAT_IPV4;
 	} else {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("IP address validatation: invalid address string", 0);
 	}
 
 	if ((flags & FILTER_FLAG_IPV4) && (flags & FILTER_FLAG_IPV6)) {
 		/* Both formats are cool */
 	} else if ((flags & FILTER_FLAG_IPV4) && mode == FORMAT_IPV6) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("IP address validation: IPv4 mode, but format is IPv6", 0);
 	} else if ((flags & FILTER_FLAG_IPV6) && mode == FORMAT_IPV4) {
-		RETURN_VALIDATION_FAILED
+		RETURN_VALIDATION_FAILED("IP address validation: IPv6 mode, but format is IPv4", 0);
 	}
 
 	switch (mode) {
 		case FORMAT_IPV4:
 			if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
-				RETURN_VALIDATION_FAILED
+				RETURN_VALIDATION_FAILED("IP address validation: Invalid IPv4 address.", 0);
 			}
 
 			/* Check flags */
@@ -794,7 +795,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					(ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||
 					(ip[0] == 192 && ip[1] == 168)
 				) {
-					RETURN_VALIDATION_FAILED
+					RETURN_VALIDATION_FAILED("IP address validation: IPv4 address is local address", 0);
 				}
 			}
 
@@ -815,7 +816,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					(ip[0] == 203 && ip[1] == 0 && ip[2] == 113) ||
 					(ip[0] >= 224 && ip[0] <= 255)
 				) {
-					RETURN_VALIDATION_FAILED
+					RETURN_VALIDATION_FAILED("IP address validataion: IPv4 address is reverved range.", 0);
 				}
 			}
 			break;
@@ -825,12 +826,12 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 				int res = 0;
 				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value));
 				if (res < 1) {
-					RETURN_VALIDATION_FAILED
+					RETURN_VALIDATION_FAILED("IP address validataion: Invalid IPv6 address.", 0);
 				}
 				/* Check flags */
 				if (flags & FILTER_FLAG_NO_PRIV_RANGE) {
 					if (Z_STRLEN_P(value) >=2 && (!strncasecmp("FC", Z_STRVAL_P(value), 2) || !strncasecmp("FD", Z_STRVAL_P(value), 2))) {
-						RETURN_VALIDATION_FAILED
+						RETURN_VALIDATION_FAILED("IP address validation: IPv6 address is local range.", 0);
 					}
 				}
 				if (flags & FILTER_FLAG_NO_RES_RANGE) {
@@ -839,12 +840,12 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 							break;
 						case 2:
 							if (!strcmp("::", Z_STRVAL_P(value))) {
-								RETURN_VALIDATION_FAILED
+								RETURN_VALIDATION_FAILED("IP address validation: IPv6 address is reverved range.", 0);
 							}
 							break;
 						case 3:
 							if (!strcmp("::1", Z_STRVAL_P(value)) || !strcmp("5f:", Z_STRVAL_P(value))) {
-								RETURN_VALIDATION_FAILED
+								RETURN_VALIDATION_FAILED("IP address validataion: IPv6 address is reserved range.", 0);
 							}
 							break;
 						default:
@@ -855,7 +856,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 									!strncasecmp("fea", Z_STRVAL_P(value), 3) ||
 									!strncasecmp("feb", Z_STRVAL_P(value), 3)
 								) {
-									RETURN_VALIDATION_FAILED
+									RETURN_VALIDATION_FAILED("IP address validataion: IPv6 address is reserved range.", 0);
 								}
 							}
 							if (
@@ -864,7 +865,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 								(Z_STRLEN_P(value) >= 4 &&  !strncasecmp("3ff3", Z_STRVAL_P(value), 4)) ||
 								(Z_STRLEN_P(value) >= 8 &&  !strncasecmp("2001:001", Z_STRVAL_P(value), 8))
 							) {
-								RETURN_VALIDATION_FAILED
+								RETURN_VALIDATION_FAILED("IP address validataion: IPv6 address is reserved range.", 0);
 							}
 					}
 				}
@@ -889,7 +890,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (exp_separator_set && exp_separator_len != 1) {
 		php_error_docref(NULL, E_WARNING, "Separator must be exactly one character long");
-		RETURN_VALIDATION_FAILED;
+		RETURN_VALIDATION_FAILED("MAC address validation: Invalid separator option.", 0);
 	}
 
 	if (14 == input_len) {
@@ -910,11 +911,11 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		length = 2;
 		separator = ':';
 	} else {
-		RETURN_VALIDATION_FAILED;
+		RETURN_VALIDATION_FAILED("MAC address validation: Invalid address.", 0);
 	}
 
 	if (exp_separator_set && separator != exp_separator[0]) {
-		RETURN_VALIDATION_FAILED;
+		RETURN_VALIDATION_FAILED("MAC address validation: Separator mismatch.", 0);
 	}
 
 	/* Essentially what we now have is a set of tokens each consisting of
@@ -926,11 +927,11 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 		if (i < tokens - 1 && input[offset + length] != separator) {
 			/* The current token did not end with e.g. a "." */
-			RETURN_VALIDATION_FAILED
+			RETURN_VALIDATION_FAILED("MAC address validation: Invalid MAC address", 0);
 		}
 		if (php_filter_parse_hex(input + offset, length, &ret) < 0) {
 			/* The current token is no valid hexadecimal digit */
-			RETURN_VALIDATION_FAILED
+			RETURN_VALIDATION_FAILED("MAC address validation: Invalid HEX", 0);
 		}
 	}
 }
