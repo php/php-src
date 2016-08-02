@@ -3599,41 +3599,61 @@ PHP_FUNCTION(array_column)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_VAL(arr_hash, data) {
-		ZVAL_DEREF(data);
+	if (!zkey) {
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			ZEND_HASH_FOREACH_VAL(arr_hash, data) {
+				ZVAL_DEREF(data);
+				if (!zcolumn) {
+					zcolval = data;
+					Z_TRY_ADDREF_P(zcolval);
+				} else if ((zcolval = array_column_fetch_prop(data, zcolumn, &rvc)) == NULL) {
+					continue;
+				} else if (zcolval != &rvc) {
+					Z_TRY_ADDREF_P(zcolval);
+				}
+				ZEND_HASH_FILL_ADD(zcolval);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
+	} else {
+		ZEND_HASH_FOREACH_VAL(arr_hash, data) {
+			ZVAL_DEREF(data);
 
-		if (!zcolumn) {
-			zcolval = data;
-		} else if ((zcolval = array_column_fetch_prop(data, zcolumn, &rvc)) == NULL) {
-			continue;
-		}
+			if (!zcolumn) {
+				zcolval = data;
+				Z_TRY_ADDREF_P(zcolval);
+			} else if ((zcolval = array_column_fetch_prop(data, zcolumn, &rvc)) == NULL) {
+				continue;
+			} else if (zcolval != &rvc) {
+				Z_TRY_ADDREF_P(zcolval);
+			}
 
-		/* Failure will leave zkeyval alone which will land us on the final else block below
-		 * which is to append the value as next_index
-		 */
-		if (zkey) {
-			zkeyval = array_column_fetch_prop(data, zkey, &rvk);
-		}
-
-		Z_TRY_ADDREF_P(zcolval);
-		if (zkeyval && Z_TYPE_P(zkeyval) == IS_STRING) {
-			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
-		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_LONG) {
-			add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
-		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_OBJECT) {
-			zend_string *key = zval_get_string(zkeyval);
-			zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
-			zend_string_release(key);
-		} else {
-			add_next_index_zval(return_value, zcolval);
-		}
-		if (zcolval == &rvc) {
-			zval_ptr_dtor(&rvc);
-		}
-		if (zkeyval == &rvk) {
-			zval_ptr_dtor(&rvk);
-		}
-	} ZEND_HASH_FOREACH_END();
+			/* Failure will leave zkeyval alone which will land us on the final else block below
+			 * which is to append the value as next_index
+			 */
+			if (zkey) {
+				zkeyval = array_column_fetch_prop(data, zkey, &rvk);
+			}
+			if (zkeyval) {
+				if (Z_TYPE_P(zkeyval) == IS_STRING) {
+					zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
+				} else if (Z_TYPE_P(zkeyval) == IS_LONG) {
+					add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
+				} else if (Z_TYPE_P(zkeyval) == IS_OBJECT) {
+					zend_string *key = zval_get_string(zkeyval);
+					zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
+					zend_string_release(key);
+				} else {
+					add_next_index_zval(return_value, zcolval);
+				}
+				if (zkeyval == &rvk) {
+					zval_ptr_dtor(&rvk);
+				}
+			} else {
+				add_next_index_zval(return_value, zcolval);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
