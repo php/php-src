@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
 
+- Session:
+  . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
+
 
 ?? ??? 2016 PHP 7.0.10
 
