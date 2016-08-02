@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0beta2
+?? ??? 2016, PHP 7.1.0beta3
+
+
+
+04 Aug 2016, PHP 7.1.0beta2
 
 - Core:
   . Implemented FR #72614 (Support "nmake test" on building extensions by
