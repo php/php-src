@@ -16,7 +16,7 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-@$db->query('CREATE TABLE test_last_id (id SERIAL NOT NULL, field1 VARCHAR(10))');
+$db->query('CREATE TABLE test_last_id (id SERIAL NOT NULL, field1 VARCHAR(10))');
 
 $stmt = $db->prepare("INSERT INTO test_last_id (field1) VALUES ('test')");
 
@@ -30,6 +30,9 @@ var_dump($db->lastInsertId());
  * Sequence name informed
  */
 var_dump($db->lastInsertId('test_last_id_id_seq'));
+
+$db->query('DROP TABLE test_last_id');
+
 ?>
 --EXPECTREGEX--
 string\([0-9]*\)\ \"[0-9]*\"
