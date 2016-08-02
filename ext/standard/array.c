@@ -3012,7 +3012,7 @@ PHP_FUNCTION(array_slice)
 					break;
 				}
 				ZEND_HASH_FILL_ADD(entry);
-				Z_TRY_ADDREF_P(entry);
+				zval_add_ref(entry);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
 	} else {
@@ -3034,7 +3034,7 @@ PHP_FUNCTION(array_slice)
 					entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
 				}
 			}
-			Z_TRY_ADDREF_P(entry);
+			zval_add_ref(entry);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
@@ -3658,7 +3658,7 @@ PHP_FUNCTION(array_reverse)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
 				ZEND_HASH_FILL_ADD(entry);
-				Z_TRY_ADDREF_P(entry);
+				zval_add_ref(entry);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
 	} else {
@@ -3672,7 +3672,7 @@ PHP_FUNCTION(array_reverse)
 					entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
 				}
 			}
-			Z_TRY_ADDREF_P(entry);
+			zval_add_ref(entry);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
