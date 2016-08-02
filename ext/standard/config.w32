@@ -3,8 +3,8 @@
 
 ARG_WITH("password-argon2", "Argon2 support", "no");
 
-if (PHP_ARGON2 != "no") {
-	if (CHECK_LIB("Argon2Ref.lib", null, PHP_ARGON2)
+if (PHP_PASSWORD_ARGON2 != "no") {
+	if (CHECK_LIB("Argon2Ref.lib", null, PHP_PASSWORD_ARGON2)
 	&& CHECK_HEADER_ADD_INCLUDE("argon2.h", "CFLAGS")) {
 		AC_DEFINE('HAVE_ARGON2LIB', 1);
 	} else {

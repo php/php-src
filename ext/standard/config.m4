@@ -556,9 +556,9 @@ dnl
 PHP_ARG_WITH(password-argon2, for Argon2 support,
 [  --with-password-argon2[=DIR]           Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
 
-if test "$PHP_ARGON2" != "no"; then
+if test "$PHP_PASSWORD_ARGON2" != "no"; then
   AC_MSG_CHECKING([for Argon2 library])
-  for i in $PHP_ARGON2 /usr /usr/local ; do
+  for i in $PHP_PASSWORD_ARGON2 /usr /usr/local ; do
     if test -r $i/include/argon2.h; then
       ARGON2_DIR=$i;
       AC_MSG_RESULT(found in $i)
