@@ -1859,11 +1859,11 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (!length)
 				break;
 		case TAG_FMT_UNDEFINED:
-			if (tag == TAG_MAKER_NOTE) {
-				length = MIN(length, strlen(value));
-			}
-
 			if (value) {
+				if (tag == TAG_MAKER_NOTE) {
+					length = MIN(length, strlen(value));
+				}
+
 				/* do not recompute length here */
 				info_value->s = estrndup(value, length);
 				info_data->length = length;
