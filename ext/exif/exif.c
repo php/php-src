@@ -1095,6 +1095,20 @@ static tag_info_array tag_table_VND_PANASONIC = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_DJI = {
+  { 0x0001, "Make"}, 
+  { 0x0003, "SpeedX"}, 
+  { 0x0004, "SpeedY"}, 
+  { 0x0005, "SpeedZ"}, 
+  { 0x0006, "Pitch"}, 
+  { 0x0007, "Yaw"}, 
+  { 0x0008, "Roll"}, 
+  { 0x0009, "CameraPitch"}, 
+  { 0x000a, "CameraYaw"}, 
+  { 0x000b, "CameraRoll"}, 
+  TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -1127,7 +1141,8 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_NIKON_990, "NIKON",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
+  { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
