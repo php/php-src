@@ -3746,7 +3746,7 @@ PHP_FUNCTION(array_pad)
 		}
 
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(input), value) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), value) {
 				Z_TRY_ADDREF_P(value);
 				ZEND_HASH_FILL_ADD(value);
 			} ZEND_HASH_FOREACH_END();
