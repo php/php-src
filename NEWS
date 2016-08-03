@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle)
+  . Fixed Redhat bug #1362571 (PHP not returning full results for 
+    exif_read_data function). (Kalle)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
