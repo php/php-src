@@ -42,6 +42,7 @@ typedef struct filter_list_entry {
 
 /* {{{ filter_list */
 static const filter_list_entry filter_list[] = {
+	{ "invalid",         0,                             NULL                       },
 	{ "int",             FILTER_VALIDATE_INT,           php_filter_int             },
 	{ "boolean",         FILTER_VALIDATE_BOOLEAN,       php_filter_boolean         },
 	{ "float",           FILTER_VALIDATE_FLOAT,         php_filter_float           },
@@ -147,6 +148,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_id, 0, 0, 1)
 	ZEND_ARG_INFO(0, filtername)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_check_definition, 0, 0, 1)
+	ZEND_ARG_INFO(0, definition)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ filter_functions[]
@@ -163,6 +168,7 @@ static const zend_function_entry filter_functions[] = {
 	PHP_FE(filter_list,		arginfo_filter_list)
 	PHP_FE(filter_has_var,		arginfo_filter_has_var)
 	PHP_FE(filter_id,		arginfo_filter_id)
+	PHP_FE(filter_check_definition,	arginfo_filter_check_definition)
 	PHP_FE_END
 };
 /* }}} */
@@ -382,6 +388,7 @@ PHP_MINFO_FUNCTION(filter)
 }
 /* }}} */
 
+/* FIXME: This could be simpler by array lookup */
 static filter_list_entry php_find_filter(zend_long id) /* {{{ */
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
@@ -391,13 +398,14 @@ static filter_list_entry php_find_filter(zend_long id) /* {{{ */
 			return filter_list[i];
 		}
 	}
+	/* FIXME: Fallback to filter does nothing is not a good idea for security feature */
 	/* Fallback to "string" filter */
 	for (i = 0; i < size; ++i) {
 		if (filter_list[i].id == FILTER_DEFAULT) {
 			return filter_list[i];
 		}
 	}
-	/* To shut up GCC */
+	/* Return invalid filter */
 	return filter_list[0];
 }
 /* }}} */
@@ -419,9 +427,17 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 
 	filter_func = php_find_filter(filter);
 
+	/* Before adding "invalid" filter, this "if" does not have any effect. */
 	if (!filter_func.id) {
 		/* Find default filter */
-		filter_func = php_find_filter(FILTER_DEFAULT);
+		/* filter_func = php_find_filter(FILTER_DEFAULT); */
+		/* XXX: This code does not make sense. This filter does nothing. */
+
+		/* This should not happen unless user set insane filter ID. */
+		zval_ptr_dtor(value);
+		ZVAL_FALSE(value);
+		PHP_FILTER_RAISE_EXCEPTION("Invalid filter specifieid", 0);
+		return;
 	}
 
 	if (copy) {
@@ -1142,6 +1158,186 @@ PHP_FUNCTION(filter_id)
 	RETURN_FALSE;
 }
 /* }}} */
+
+
+static int php_filter_check_options_array(zval *options) /* {{{ */
+{
+	zval *val;
+	zend_ulong idx;
+	zend_string *key;
+	zend_bool status = SUCCESS, found;
+	const char *opts[] = {"min_range", "max_range", "min_bytes", "max_bytes", "encoding",
+						  "default", "decimal", "regexp", "callback" };
+	zend_long nopts = sizeof(opts)/sizeof(opts[0]), i;
+
+	ZEND_ASSERT(Z_TYPE_P(options) == IS_ARRAY);
+	(void)(val);
+	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(options), idx, key, val) {
+		ZVAL_DEREF(val);
+		/* Only key is checked. Invalid values should be handled by filter functions. */
+		if (!key) {
+			status = FAILURE;
+			php_error_docref(NULL, E_WARNING,
+							 "Invalid spec: Found index(" ZEND_LONG_FMT ")", idx);
+			continue;
+		}
+		found = 0;
+		for (i=0; i < nopts; i++) {
+			if (!strcmp(ZSTR_VAL(key), opts[i])) {
+				found = 1;
+			}
+		}
+		if (!found) {
+			status = FAILURE;
+			php_error_docref(NULL, E_WARNING,
+							 "Invalid spec: Found invalid option name key (%s)", ZSTR_VAL(key));
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return status;
+}
+/* }}} */
+
+
+static int php_filter_check_spec_array(zval *spec) /* {{{ */
+{
+	zval *val;
+	zend_ulong idx;
+	zend_string *key;
+	zend_bool status = SUCCESS;
+	filter_list_entry filter_func;
+
+	ZEND_ASSERT(Z_TYPE_P(spec) == IS_ARRAY);
+
+	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(spec), idx, key, val) {
+		ZVAL_DEREF(val);
+		if (key) {
+			if (strcmp("filter", ZSTR_VAL(key))
+				&& strcmp("flags", ZSTR_VAL(key))
+				&& strcmp("options", ZSTR_VAL(key))) {
+				status = FAILURE;
+				php_error_docref(NULL, E_WARNING,
+								 "Invalid spec: Found invalid key (%s)", ZSTR_VAL(key));
+			} else {
+				if (!strcmp("filter", ZSTR_VAL(key))) {
+					if (Z_TYPE_P(val) != IS_LONG) {
+						status = FAILURE;
+						php_error_docref(NULL, E_WARNING,
+										 "Invalid spec: 'filter' data type is not long", ZSTR_VAL(key));
+						continue;
+					}
+					filter_func = php_find_filter(Z_LVAL_P(val));
+					if (filter_func.id == 0) {
+						status = FAILURE;
+						php_error_docref(NULL, E_WARNING,
+										 "Invalid spec: 'filter' is invalid and cannot find valid filter (%s)", Z_LVAL_P(val));
+						continue;
+					}
+				}
+				if (!strcmp("flags", ZSTR_VAL(key))) {
+					if (Z_TYPE_P(val) != IS_LONG) {
+						status = FAILURE;
+						php_error_docref(NULL, E_WARNING,
+										 "Invalid spec: 'flags' data type is not long");
+					}
+					if (Z_LVAL_P(val) < 0) {
+						php_error_docref(NULL, E_WARNING,
+										 "Invalid spec: 'flags' cannot be negative");
+					}
+					continue;
+				}
+				if (!strcmp("options", ZSTR_VAL(key))) {
+					if (Z_TYPE_P(val) == IS_ARRAY) {
+						if (php_filter_check_options_array(val) == FAILURE) {
+							status = FAILURE;
+						}
+					} else {
+						status = FAILURE;
+						php_error_docref(NULL, E_WARNING,
+										 "Invalid spec: 'options' data type is not array");
+					}
+				}
+			}
+		} else {
+			if (Z_TYPE_P(val) != IS_ARRAY) {
+				status = FAILURE;
+				php_error_docref(NULL, E_WARNING,
+								 "Invalid spec: Multiple filters spec must be array. Non array found (" ZEND_LONG_FMT ")", idx);
+			} else {
+				/* Multiple filters */
+				/* FIXME: Check too deep spec which is invalid */
+				if (php_filter_check_spec_array(val) == FAILURE) {
+					status = FAILURE;
+				}
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return status;
+}
+/* }}} */
+
+
+static int php_filter_check_definition(zval *definitions) /* {{{ */
+{
+	zval *val;
+	zend_ulong idx;
+	zend_string *key;
+	zend_bool status = SUCCESS;
+	filter_list_entry filter_func;
+
+	ZEND_ASSERT(Z_TYPE_P(definitions) == IS_ARRAY);
+
+	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(definitions), idx, key, val) {
+		ZVAL_DEREF(val);
+		if (Z_TYPE_P(val) == IS_ARRAY) {
+			/* array spec */
+			if (php_filter_check_spec_array(val) == FAILURE) {
+				status = FAILURE;
+			}
+		} else if (Z_TYPE_P(val) == IS_LONG) {
+			/* filter long constant */
+			filter_func = php_find_filter(Z_TYPE_P(val));
+			if (filter_func.id == 0) {
+				status = FAILURE;
+				php_error_docref(NULL, E_WARNING,
+								 "Invalid filter ID(" ZEND_LONG_FMT ")", Z_LVAL_P(val));
+			}
+		} else {
+			/* string/float/bool/etc is invalid */
+			status = FAILURE;
+			if (key) {
+				php_error_docref(NULL, E_WARNING,
+								 "Invalid option value. Option should be array or long (key=%s)", ZSTR_VAL(key));
+			} else {
+				php_error_docref(NULL, E_WARNING,
+								 "Invalid option value. Option should be array or long (index=" ZEND_LONG_FMT ")", idx);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return status;
+}
+/* }}} */
+
+
+/* {{{ proto filter_check_definition(array filter_definitions)
+ * Checks filter definitions array for *_array() functions */
+PHP_FUNCTION(filter_check_definition)
+{
+	zval *definitions;
+	zend_bool ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &definitions) == FAILURE) {
+		return;
+	}
+
+	ret = php_filter_check_definition(definitions);
+	if (ret == SUCCESS) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
 
 /*
  * Local variables:

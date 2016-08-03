@@ -9,7 +9,8 @@ default_charset=UTF-8
 <?php
 include dirname(__FILE__) . '/033_run.inc';
 ?>
---EXPECT--     
+--EXPECT--
+invalid                                                                                                                              
 int                      1                                               123                                                         
 boolean                  1                                                                                                           
 float                    1                                               123                                                         

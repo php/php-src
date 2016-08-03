@@ -62,7 +62,7 @@ float(0.007)
 float(1.234)
 float(1.234)
 
-Warning: validate_var(): decimal separator must be one char in /home/yohgaki/workspace/ext/git/oss/php.net/github-php-src/ext/filter/tests/validate_var_float.php on line 34
+Warning: validate_var(): decimal separator must be one char in %s on line 34
 string(64) "Float validation: Invalid decimal separator. It must be one char"
 float(1.234)
 string(31) "Float validation: Invalid float"

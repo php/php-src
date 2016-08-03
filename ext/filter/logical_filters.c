@@ -471,6 +471,9 @@ void php_filter_validate_string(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	if (flags & FILTER_FLAG_STRING_RAW) {
+		if ((flags ^ FILTER_FLAG_STRING_RAW) || encoding_set) {
+			RETURN_VALIDATION_FAILED("String validation: FILTER_FLAG_STRING_RAW is set, but encoding or other flags are set also", 0);
+		}
 		return;
 	}
 

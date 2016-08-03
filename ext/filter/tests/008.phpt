@@ -11,50 +11,52 @@ var_dump(filter_list(array()));
 echo "Done\n";
 ?>
 --EXPECTF--	
-array(22) {
+array(23) {
   [0]=>
-  string(3) "int"
+  string(7) "invalid"
   [1]=>
-  string(7) "boolean"
+  string(3) "int"
   [2]=>
-  string(5) "float"
+  string(7) "boolean"
   [3]=>
-  string(15) "validate_string"
+  string(5) "float"
   [4]=>
-  string(15) "validate_regexp"
+  string(15) "validate_string"
   [5]=>
-  string(15) "validate_domain"
+  string(15) "validate_regexp"
   [6]=>
-  string(12) "validate_url"
+  string(15) "validate_domain"
   [7]=>
-  string(14) "validate_email"
+  string(12) "validate_url"
   [8]=>
-  string(11) "validate_ip"
+  string(14) "validate_email"
   [9]=>
-  string(12) "validate_mac"
+  string(11) "validate_ip"
   [10]=>
-  string(6) "string"
+  string(12) "validate_mac"
   [11]=>
-  string(8) "stripped"
+  string(6) "string"
   [12]=>
-  string(7) "encoded"
+  string(8) "stripped"
   [13]=>
-  string(13) "special_chars"
+  string(7) "encoded"
   [14]=>
-  string(18) "full_special_chars"
+  string(13) "special_chars"
   [15]=>
-  string(10) "unsafe_raw"
+  string(18) "full_special_chars"
   [16]=>
-  string(5) "email"
+  string(10) "unsafe_raw"
   [17]=>
-  string(3) "url"
+  string(5) "email"
   [18]=>
-  string(10) "number_int"
+  string(3) "url"
   [19]=>
-  string(12) "number_float"
+  string(10) "number_int"
   [20]=>
-  string(12) "magic_quotes"
+  string(12) "number_float"
   [21]=>
+  string(12) "magic_quotes"
+  [22]=>
   string(8) "callback"
 }
 
