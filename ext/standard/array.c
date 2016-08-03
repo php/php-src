@@ -3729,31 +3729,56 @@ PHP_FUNCTION(array_pad)
 	}
 
 	num_pads = pad_size_abs - input_size;
-	array_init_size(return_value, pad_size_abs);
 	if (Z_REFCOUNTED_P(pad_value)) {
 		GC_REFCOUNT(Z_COUNTED_P(pad_value)) += num_pads;
 	}
 
-	if (pad_size < 0) {
-		for (i = 0; i < num_pads; i++) {
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), pad_value);
-		}
-	}
+	array_init_size(return_value, pad_size_abs);
+	if (Z_ARRVAL_P(input)->u.flags & HASH_FLAG_PACKED) {
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(Z_ARRVAL_P(input), key, value) {
-		if (Z_REFCOUNTED_P(value)) {
-			Z_ADDREF_P(value);
+		if (pad_size < 0) {
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (i = 0; i < num_pads; i++) {
+					ZEND_HASH_FILL_ADD(pad_value);
+				}
+			} ZEND_HASH_FILL_END();
 		}
-		if (key) {
-			zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
-		} else {
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), value);
-		}
-	} ZEND_HASH_FOREACH_END();
 
-	if (pad_size > 0) {
-		for (i = 0; i < num_pads; i++) {
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), pad_value);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(input), value) {
+				Z_TRY_ADDREF_P(value);
+				ZEND_HASH_FILL_ADD(value);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
+
+		if (pad_size > 0) {
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (i = 0; i < num_pads; i++) {
+					ZEND_HASH_FILL_ADD(pad_value);
+				}
+			} ZEND_HASH_FILL_END();
+		}
+	} else {
+		if (pad_size < 0) {
+			for (i = 0; i < num_pads; i++) {
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), pad_value);
+			}
+		}
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(Z_ARRVAL_P(input), key, value) {
+			Z_TRY_ADDREF_P(value);
+			if (key) {
+				zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+			} else {
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), value);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		if (pad_size > 0) {
+			for (i = 0; i < num_pads; i++) {
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), pad_value);
+			}
 		}
 	}
 }
