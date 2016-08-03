@@ -55,13 +55,27 @@
 #define FILTER_FLAG_NO_RES_RANGE            0x400000
 #define FILTER_FLAG_NO_PRIV_RANGE           0x800000
 
-#define FILTER_FLAG_HOSTNAME               0x100000
+#define FILTER_FLAG_HOSTNAME                0x100000
 
-#define FILTER_FLAG_EMAIL_UNICODE          0x100000
+#define FILTER_FLAG_EMAIL_UNICODE           0x100000
+
+/* FILTER_VALIDATE_STRING encoding options */
+#define FILTER_STRING_ENCODING_PASS              0
+#define FILTER_STRING_ENCODING_UTF8              1
+
+#define FILTER_FLAG_STRING_RAW              0x0001
+#define FILTER_FLAG_STRING_ALLOW_CNTRL      0x0002
+#define FILTER_FLAG_STRING_MULTI_LINE       0x0004
+#define FILTER_FLAG_STRING_ALPHA            0x0008
+#define FILTER_FLAG_STRING_NUM              0x0010
+#define FILTER_FLAG_STRING_ALNUM            0x0020
+
+#define FILTER_VALIDATE_DEFAULT       0x0104
 
 #define FILTER_VALIDATE_INT           0x0101
 #define FILTER_VALIDATE_BOOLEAN       0x0102
 #define FILTER_VALIDATE_FLOAT         0x0103
+#define FILTER_VALIDATE_STRING        0x0104
 
 #define FILTER_VALIDATE_REGEXP        0x0110
 #define FILTER_VALIDATE_URL           0x0111
@@ -121,7 +135,7 @@
 		len--; \
 	} \
 	if (len < 1 && return_if_empty) { \
-		RETURN_VALIDATION_FAILED("Filter validated value became empty after trim.", 0); \
+		RETURN_VALIDATION_FAILED("Filter validated value became empty after trim", 0); \
 	} \
 	if (len > 0) { \
 		while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \

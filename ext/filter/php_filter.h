@@ -46,6 +46,8 @@ PHP_RINIT_FUNCTION(filter);
 PHP_RSHUTDOWN_FUNCTION(filter);
 PHP_MINFO_FUNCTION(filter);
 
+PHP_FUNCTION(validate_input);
+PHP_FUNCTION(validate_var);
 PHP_FUNCTION(validate_input_array);
 PHP_FUNCTION(validate_var_array);
 PHP_FUNCTION(filter_input);
@@ -78,6 +80,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL);
+void php_filter_validate_string(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL);

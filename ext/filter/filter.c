@@ -16,6 +16,7 @@
   |          Derick Rethans <derick@php.net>                             |
   |          Pierre-A. Joye <pierre@php.net>                             |
   |          Ilia Alshanetsky <iliaa@php.net>                            |
+  |          Yasuo Ohgaki <yohgaki@ohgaki.net>                           |
   +----------------------------------------------------------------------+
 */
 
@@ -45,6 +46,7 @@ static const filter_list_entry filter_list[] = {
 	{ "boolean",         FILTER_VALIDATE_BOOLEAN,       php_filter_boolean         },
 	{ "float",           FILTER_VALIDATE_FLOAT,         php_filter_float           },
 
+	{ "validate_string", FILTER_VALIDATE_STRING,        php_filter_validate_string },
 	{ "validate_regexp", FILTER_VALIDATE_REGEXP,        php_filter_validate_regexp },
 	{ "validate_domain", FILTER_VALIDATE_DOMAIN,        php_filter_validate_domain },
 	{ "validate_url",    FILTER_VALIDATE_URL,           php_filter_validate_url    },
@@ -84,6 +86,19 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_l
 static unsigned int php_sapi_filter_init(void);
 
 /* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_input, 0, 0, 2)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, variable_name)
+	ZEND_ARG_INFO(0, filter)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_var, 0, 0, 1)
+	ZEND_ARG_INFO(0, variable)
+	ZEND_ARG_INFO(0, filter)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_input_array, 0, 0, 1)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, definition)
@@ -137,6 +152,8 @@ ZEND_END_ARG_INFO()
 /* {{{ filter_functions[]
  */
 static const zend_function_entry filter_functions[] = {
+	PHP_FE(validate_input,		arginfo_validate_input)
+	PHP_FE(validate_var,		arginfo_validate_var)
 	PHP_FE(validate_input_array,	arginfo_validate_input_array)
 	PHP_FE(validate_var_array,		arginfo_validate_var_array)
 	PHP_FE(filter_input,		arginfo_filter_input)
@@ -247,10 +264,22 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_FORCE_ARRAY", FILTER_FORCE_ARRAY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_NULL_ON_FAILURE", FILTER_NULL_ON_FAILURE, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("FILTER_STRING_ENCODING_PASS", FILTER_STRING_ENCODING_PASS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_STRING_ENCODING_UTF8", FILTER_STRING_ENCODING_UTF8, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_RAW", FILTER_FLAG_STRING_RAW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_ALLOW_CNTRL", FILTER_FLAG_STRING_ALLOW_CNTRL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_MULTI_LINE", FILTER_FLAG_STRING_MULTI_LINE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_ALPHA", FILTER_FLAG_STRING_ALPHA, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_NUM", FILTER_FLAG_STRING_NUM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_ALNUM", FILTER_FLAG_STRING_ALNUM, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_FLOAT", FILTER_VALIDATE_FLOAT, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_DEFAULT", FILTER_VALIDATE_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_STRING", FILTER_VALIDATE_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_REGEXP", FILTER_VALIDATE_REGEXP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_DOMAIN", FILTER_VALIDATE_DOMAIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_URL", FILTER_VALIDATE_URL, CONST_CS | CONST_PERSISTENT);
@@ -413,7 +442,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 			} else {
 				ZVAL_FALSE(value);
 			}
-			PHP_FILTER_RAISE_EXCEPTION("Filter validated value object does not have __toString.", 0);
+			PHP_FILTER_RAISE_EXCEPTION("Filter validated value object does not have __toString", 0);
 			return;
 		}
 	}
@@ -649,13 +678,14 @@ static void php_filter_call_apply(zval *filtered, zend_long filter, zend_long fi
 				ZVAL_NULL(filtered);
 			} else {
 				ZVAL_FALSE(filtered);
+				PHP_FILTER_RAISE_EXCEPTION("Filter validated value is array, but requires scalar", 0);
 			}
-			PHP_FILTER_RAISE_EXCEPTION("Filter validated value is array, but requires scalar.", 0);
 			return;
 		}
 		php_zval_filter_recursive(filtered, filter, filter_flags, options, charset, copy);
 		return;
 	}
+
 	if (filter_flags & FILTER_REQUIRE_ARRAY) {
 		if (copy) {
 			SEPARATE_ZVAL(filtered);
@@ -665,6 +695,7 @@ static void php_filter_call_apply(zval *filtered, zend_long filter, zend_long fi
 			ZVAL_NULL(filtered);
 		} else {
 			ZVAL_FALSE(filtered);
+			PHP_FILTER_RAISE_EXCEPTION("Filter validated value is scalar, but requires array", 0);
 		}
 		return;
 	}
@@ -724,7 +755,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 	if (!op) {
 		zval_ptr_dtor(return_value);
 		ZVAL_DUP(return_value, input);
-		PHP_FILTER_RAISE_EXCEPTION("Filter validation rule does not exist.", 0);
+		PHP_FILTER_RAISE_EXCEPTION("Filter validation rule does not exist", 0);
 		php_filter_call(return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY, exception);
 	} else if (Z_TYPE_P(op) == IS_LONG) {
 		zval_ptr_dtor(return_value);
@@ -749,7 +780,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 					add_assoc_null_ex(return_value, ZSTR_VAL(arg_key), ZSTR_LEN(arg_key));
 				}
 				else {
-					PHP_FILTER_RAISE_EXCEPTION("Filter validated value does not exist.", 0);
+					PHP_FILTER_RAISE_EXCEPTION("Filter validated value does not exist", 0);
 				}
 			} else {
 				zval nval;
@@ -760,7 +791,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		PHP_FILTER_RAISE_EXCEPTION("Filter validation rule is invalid.", 0);
+		PHP_FILTER_RAISE_EXCEPTION("Filter validation rule is invalid", 0);
 		RETURN_FALSE;
 	}
 }
@@ -812,6 +843,88 @@ PHP_FUNCTION(validate_input_array)
 
 	/* Successfull call sets proper return_value */
 	php_filter_array_handler(array_input, op, return_value, add_empty, exception);
+}
+/* }}} */
+
+
+/* {{{ proto mixed validate_input(constant type, string variable_name [, long filter [, mixed options]])
+ * Returns the filtered variable 'name'* from source `type`.
+ */
+PHP_FUNCTION(validate_input)
+{
+	zend_long fetch_from, filter = FILTER_VALIDATE_DEFAULT;
+	zval *filter_args = NULL, *tmp;
+	zval *input = NULL;
+	zend_string *var;
+	zend_bool exception = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS|lz", &fetch_from, &var, &filter, &filter_args) == FAILURE) {
+		return;
+	}
+
+	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		RETURN_FALSE;
+	}
+
+	input = php_filter_get_storage(fetch_from);
+
+	if (!input || !HASH_OF(input) || (tmp = zend_hash_find(HASH_OF(input), var)) == NULL) {
+		zend_long filter_flags = 0;
+		zval *option, *opt, *def;
+		if (filter_args) {
+			if (Z_TYPE_P(filter_args) == IS_LONG) {
+				filter_flags = Z_LVAL_P(filter_args);
+			} else if (Z_TYPE_P(filter_args) == IS_ARRAY && (option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
+				filter_flags = zval_get_long(option);
+			}
+			if (Z_TYPE_P(filter_args) == IS_ARRAY &&
+				(opt = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL &&
+				Z_TYPE_P(opt) == IS_ARRAY &&
+				(def = zend_hash_str_find(HASH_OF(opt), "default", sizeof("default") - 1)) != NULL) {
+				ZVAL_COPY(return_value, def);
+				return;
+			}
+		}
+
+		/* The FILTER_NULL_ON_FAILURE flag inverts the usual return values of
+		 * the function: normally when validation fails false is returned, and
+		 * when the input value doesn't exist NULL is returned. With the flag
+		 * set, NULL and false should be returned, respectively. Ergo, although
+		 * the code below looks incorrect, it's actually right. */
+		if (filter_flags & FILTER_NULL_ON_FAILURE) {
+			RETURN_FALSE;
+		} else {
+			RETURN_NULL();
+		}
+	}
+
+	ZVAL_DUP(return_value, tmp);
+
+	php_filter_call(return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR, exception);
+}
+/* }}} */
+
+/* {{{ proto mixed validate_var(mixed variable [, long filter [, mixed options]])
+ * Returns the filtered version of the variable.
+ */
+PHP_FUNCTION(validate_var)
+{
+	zend_long filter = FILTER_VALIDATE_DEFAULT;
+	zval *filter_args = NULL, *data;
+	zend_bool exception = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz", &data, &filter, &filter_args) == FAILURE) {
+		return;
+	}
+
+	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		php_error_docref(NULL, E_WARNING, "Filter does not exists");
+		RETURN_FALSE;
+	}
+
+	ZVAL_DUP(return_value, data);
+
+	php_filter_call(return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR, exception);
 }
 /* }}} */
 

@@ -13,6 +13,7 @@ include dirname(__FILE__) . '/033_run.inc';
 int                      1                                               123                                                         
 boolean                  1                                                                                                           
 float                    1                                               123                                                         
+validate_string     PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry        하퍼    aa:bb:cc:dd:ee:ff
 validate_regexp                                                                                   O'Henry                            
 validate_domain     PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry        하퍼    aa:bb:cc:dd:ee:ff
 validate_url                               http://a.b.c                                                                              
