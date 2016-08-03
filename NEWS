@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.2.0alpha1
 
+- EXIF:
+  . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle)
+
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
