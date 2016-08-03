@@ -1844,6 +1844,10 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (!length)
 				break;
 		case TAG_FMT_UNDEFINED:
+			if (tag == TAG_MAKER_NOTE) {
+				length = MIN(length, strlen(value));
+			}
+
 			if (value) {
 				/* do not recompute length here */
 				info_value->s = estrndup(value, length);
@@ -2855,8 +2859,14 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	char *dir_start;
 	
 	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
-		if (i==sizeof(maker_note_array)/sizeof(maker_note_type))
-			return FALSE;
+		if (i==sizeof(maker_note_array)/sizeof(maker_note_type)) {
+#ifdef EXIF_DEBUG
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "No maker note data found. Detected maker: %s (length = %d)", ImageInfo->make, strlen(ImageInfo->make));
+#endif
+			/* unknown manufacturer, not an error, use it as a string */
+			return TRUE;
+		}
+
 		maker_note = maker_note_array+i;
 
 		/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "check (%s,%s)", maker_note->make?maker_note->make:"", maker_note->model?maker_note->model:"");*/
