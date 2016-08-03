@@ -4,7 +4,7 @@ Bug #72735 (Samsung picture thumb not read (zero size))
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --FILE--
 <?php
-foreach (['nokia.jpg', 'samsung.jpg'] as $picture) {
+foreach (['nokia.jpg', 'samsung.jpg', 'panasonic.jpg'] as $picture) {
 	echo $picture . ': ';
 
 	$len = strlen(exif_thumbnail(__DIR__ . DIRECTORY_SEPARATOR . $picture));
@@ -21,3 +21,4 @@ foreach (['nokia.jpg', 'samsung.jpg'] as $picture) {
 --EXPECTF--
 nokia.jpg: int(5899)
 samsung.jpg: int(5778)
+panasonic.jpg: int(651)
