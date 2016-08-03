@@ -5177,19 +5177,25 @@ PHP_FUNCTION(array_rand)
 			i--;
 		}
 	}
+	/* i = 0; */
 
-	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
-	i = 0;
-	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
-		if (zend_bitset_in(bitset, i) ^ negative_bitset) {
-			if (string_key) {
-				add_next_index_str(return_value, zend_string_copy(string_key));
-			} else {
-				add_next_index_long(return_value, num_key);
+	zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+		zval zv;
+		/* We can't use zend_hash_index_find()
+		 * because the array may have string keys or gaps. */
+		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
+			if (zend_bitset_in(bitset, i) ^ negative_bitset) {
+				if (string_key) {
+					ZVAL_STR_COPY(&zv, string_key);
+				} else {
+					ZVAL_LONG(&zv, num_key);
+				}
+				ZEND_HASH_FILL_ADD(&zv);
 			}
-		}
-		i++;
-	} ZEND_HASH_FOREACH_END();
+			i++;
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FILL_END();
 
 	free_alloca(bitset, use_heap);
 }
