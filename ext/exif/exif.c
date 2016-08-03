@@ -3152,7 +3152,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	for (de=0;de<NumDirEntries;de++) {
 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
 								  offset_base, IFDlength, displacement, section_index, 1, exif_get_tag_table(section_index))) {
-			return FALSE;
+			continue;
 		}
 	}
 	/*
@@ -3430,7 +3430,6 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 				if ((itemlen - 2) < 6) {
 					return FALSE;
 				}
-
 				exif_process_SOFn(Data, marker, &sof_info);
 				ImageInfo->Width  = sof_info.width;
 				ImageInfo->Height = sof_info.height;
