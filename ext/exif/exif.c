@@ -955,6 +955,40 @@ static tag_info_array tag_table_VND_OLYMPUS = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_SAMSUNG = {
+	{ 0x0001, "Version"}, 
+	{ 0x0021, "PictureWizard"}, 
+	{ 0x0030, "LocalLocationName"}, 
+	{ 0x0031, "LocationName"}, 
+	{ 0x0035, "Preview"}, 
+	{ 0x0043, "CameraTemperature"}, 
+	{ 0xa001, "FirmwareName"}, 
+	{ 0xa003, "LensType"}, 
+	{ 0xa004, "LensFirmware"}, 
+	{ 0xa010, "SensorAreas"}, 
+	{ 0xa011, "ColorSpace"}, 
+	{ 0xa012, "SmartRange"}, 
+	{ 0xa013, "ExposureBiasValue"}, 
+	{ 0xa014, "ISO"}, 
+	{ 0xa018, "ExposureTime"}, 
+	{ 0xa019, "FNumber"}, 
+	{ 0xa01a, "FocalLengthIn35mmFormat"}, 
+	{ 0xa020, "EncryptionKey"}, 
+	{ 0xa021, "WB_RGGBLevelsUncorrected"}, 
+	{ 0xa022, "WB_RGGBLevelsAuto"}, 
+	{ 0xa023, "WB_RGGBLevelsIlluminator1"}, 
+	{ 0xa024, "WB_RGGBLevelsIlluminator2"}, 
+	{ 0xa028, "WB_RGGBLevelsBlack"}, 
+	{ 0xa030, "ColorMatrix"}, 
+	{ 0xa031, "ColorMatrixSRGB"}, 
+	{ 0xa032, "ColorMatrixAdobeRGB"}, 
+	{ 0xa040, "ToneCurve1"}, 
+	{ 0xa041, "ToneCurve2"}, 
+	{ 0xa042, "ToneCurve3"}, 
+	{ 0xa043, "ToneCurve4"}, 
+	TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -986,6 +1020,7 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_NIKON_990, "NIKON",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
@@ -2711,7 +2746,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	int NumDirEntries, old_motorola_intel, offset_diff;
 	const maker_note_type *maker_note;
 	char *dir_start;
-
+	
 	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
 		if (i==sizeof(maker_note_array)/sizeof(maker_note_type))
 			return FALSE;
@@ -2726,7 +2761,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 			continue;
 		break;
 	}
-
+	
 	if (maker_note->offset >= value_len) {
 		/* Do not go past the value end */
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);
