@@ -5700,14 +5700,15 @@ PHP_FUNCTION(substr_compare)
 {
 	zend_string *s1, *s2;
 	zend_long offset, len=0;
+	zend_bool len_is_default=1;
 	zend_bool cs=0;
 	size_t cmp_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl|lb", &s1, &s2, &offset, &len, &cs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl|l!b", &s1, &s2, &offset, &len, &len_is_default, &cs) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() >= 4 && len <= 0) {
+	if (!len_is_default && len <= 0) {
 		if (len == 0) {
 			RETURN_LONG(0L);
 		} else {

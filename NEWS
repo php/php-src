@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
 
+- Standard:
+  . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
+    Kenttä)
+
 - Streams:
   . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
     with IIS FTP 7.5, 8.5). (vhuk)
