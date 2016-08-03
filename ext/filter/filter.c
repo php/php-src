@@ -805,7 +805,7 @@ PHP_FUNCTION(validate_input_array)
 {
 	zend_long    fetch_from;
 	zval   *array_input = NULL, *op = NULL;
-	zend_bool add_empty = 1;
+	zend_bool add_empty = 0;
 	zend_bool exception = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|zb",  &fetch_from, &op, &add_empty) == FAILURE) {
@@ -813,6 +813,7 @@ PHP_FUNCTION(validate_input_array)
 	}
 
 	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
+		php_error_docref(NULL, E_WARNING, "Invalid option parameter");
 		RETURN_FALSE;
 	}
 
@@ -863,6 +864,7 @@ PHP_FUNCTION(validate_input)
 	}
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		php_error_docref(NULL, E_WARNING, "Invalid filter");
 		RETURN_FALSE;
 	}
 
@@ -918,7 +920,7 @@ PHP_FUNCTION(validate_var)
 	}
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
-		php_error_docref(NULL, E_WARNING, "Filter does not exists");
+		php_error_docref(NULL, E_WARNING, "Invalid filter");
 		RETURN_FALSE;
 	}
 
@@ -935,7 +937,7 @@ PHP_FUNCTION(validate_var)
 PHP_FUNCTION(validate_var_array)
 {
 	zval *array_input = NULL, *op = NULL;
-	zend_bool add_empty = 1;
+	zend_bool add_empty = 0;
 	zend_bool exception = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|zb",  &array_input, &op, &add_empty) == FAILURE) {
@@ -943,6 +945,7 @@ PHP_FUNCTION(validate_var_array)
 	}
 
 	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
+		php_error_docref(NULL, E_WARNING, "Invalid option parameter");
 		RETURN_FALSE;
 	}
 

@@ -43,7 +43,7 @@ try {
 // Fix data so that 'testscalar' validates
 $data['testscalar'] = '9999';
 try {
-	var_dump(validate_var_array($data, $args)); // Should pass
+	var_dump(validate_var_array($data, $args, TRUE)); // Should pass
 	var_dump(validate_var_array($data, $args, FALSE)); // Try w/o add_empty flag. Should fail.
 } catch (UnexpectedValueException $e) {
 	var_dump($e->getMessage());

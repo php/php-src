@@ -103,77 +103,118 @@ try {
 
 
 echo "-- (5)\n";
-var_dump(validate_var_array(array("var_name"=>""), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
+try {
+	var_dump(validate_var_array(array("var_name"=>""), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
+} catch (Exception $e) {
+	var_dump($e->getMessage());
+}
+
+try {
 var_dump(validate_var_array(array("asdas"=>"text"), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>"")));
+} catch (Exception $e) {
+	var_dump($e->getMessage());
+}
 
+try {
+	$a = array(""=>""); $b = -1;
+	var_dump(validate_var_array($a, $b));
+	var_dump($a, $b);
+} catch (Exception $e) {
+	var_dump($e->getMessage());
+}
 
-$a = array(""=>""); $b = -1;
-var_dump(validate_var_array($a, $b));
-var_dump($a, $b);
+try {
+	$a = array(""=>""); $b = 100000;
+	var_dump(validate_var_array($a, $b));
+	var_dump($a, $b);
+} catch (Exception $e) {
+	var_dump($e->getMessage());
+}
 
-$a = array(""=>""); $b = 100000;
-var_dump(validate_var_array($a, $b));
-var_dump($a, $b);
+try {
+	$a = array(""=>""); $b = "";
+	var_dump(validate_var_array($a, $b));
+	var_dump($a, $b);
+} catch (Exception $e) {
+	var_dump($e->getMessage());
+}
 
-$a = array(""=>""); $b = "";
-var_dump(validate_var_array($a, $b));
-var_dump($a, $b);
 
 echo "Done\n";
 ?>
 --EXPECTF--
 -- (1)
 
-Warning: validate_var_array() expects parameter 1 to be array, null given in %s on line %d
+Warning: validate_var_array() expects parameter 1 to be array, null given in %s on line 5
 NULL
 string(37) "Filter validation rule does not exist"
 string(37) "Filter validation rule does not exist"
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 20
 bool(false)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 25
 bool(false)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 30
 bool(false)
 -- (2)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 38
 bool(false)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 43
 bool(false)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 48
 bool(false)
 -- (3)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 56
 bool(false)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 61
 bool(false)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 66
 bool(false)
 -- (4)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 74
 bool(false)
 array(0) {
 }
-array(1) {
-  ["var_name"]=>
-  NULL
-}
-array(1) {
-  ["var_name"]=>
-  NULL
-}
+string(37) "Filter validated value does not exist"
+string(37) "Filter validated value does not exist"
 array(1) {
   ["var_name"]=>
   string(0) ""
 }
 -- (5)
 
-Warning: validate_var_array(): Empty keys are not allowed in the definition array in %s on line %d
-bool(false)
+Warning: validate_var_array(): Empty keys are not allowed in the definition array in %s on line 102
+string(37) "Filter validated value does not exist"
 
-Warning: validate_var_array(): Empty keys are not allowed in the definition array in %s on line %d
-bool(false)
+Warning: validate_var_array(): Empty keys are not allowed in the definition array in %s on line 108
+string(37) "Filter validated value does not exist"
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 115
 bool(false)
 array(1) {
   [""]=>
   string(0) ""
 }
 int(-1)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 123
 bool(false)
 array(1) {
   [""]=>
   string(0) ""
 }
 int(100000)
+
+Warning: validate_var_array(): Invalid option parameter in %s on line 131
 bool(false)
 array(1) {
   [""]=>
