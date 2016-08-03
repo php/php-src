@@ -1223,14 +1223,14 @@ static int php_filter_check_spec_array(zval *spec) /* {{{ */
 					if (Z_TYPE_P(val) != IS_LONG) {
 						status = FAILURE;
 						php_error_docref(NULL, E_WARNING,
-										 "Invalid spec: 'filter' data type is not long", ZSTR_VAL(key));
+										 "Invalid spec: 'filter' data type is not long");
 						continue;
 					}
 					filter_func = php_find_filter(Z_LVAL_P(val));
 					if (filter_func.id == 0) {
 						status = FAILURE;
 						php_error_docref(NULL, E_WARNING,
-										 "Invalid spec: 'filter' is invalid and cannot find valid filter (%s)", Z_LVAL_P(val));
+										 "Invalid spec: 'filter' is invalid and cannot find valid filter");
 						continue;
 					}
 				}
@@ -1241,6 +1241,7 @@ static int php_filter_check_spec_array(zval *spec) /* {{{ */
 										 "Invalid spec: 'flags' data type is not long");
 					}
 					if (Z_LVAL_P(val) < 0) {
+						status = FAILURE;
 						php_error_docref(NULL, E_WARNING,
 										 "Invalid spec: 'flags' cannot be negative");
 					}
