@@ -3,9 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.2.0alpha1
 
 - EXIF:
-  . Changed the way that EXIF processes MAKERNOTE data to not stop parsing 
-    in case of an unknown signature. (Kalle, Remi)
-  . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some 
     images). (Kalle)
   . Fixed Redhat bug #1362571 (PHP not returning full results for 
