@@ -57,6 +57,7 @@ PHP_FUNCTION(filter_var_array);
 PHP_FUNCTION(filter_list);
 PHP_FUNCTION(filter_has_var);
 PHP_FUNCTION(filter_id);
+PHP_FUNCTION(filter_check_definition);
 
 ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval post_array;
