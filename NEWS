@@ -24,6 +24,9 @@ PHP                                                                        NEWS
     (Pierrick)
   . Fixed bug #71929 (CURLINFO_CERTINFO data parsing error). (Pierrick)
 
+- EXIF:
+  . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
+
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
     IntlCalendar and adds a property). (Laruence)
