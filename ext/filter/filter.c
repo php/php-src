@@ -87,26 +87,26 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_l
 static unsigned int php_sapi_filter_init(void);
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_input, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_input, 0, 0, 3)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, variable_name)
 	ZEND_ARG_INFO(0, filter)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_var, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_var, 0, 0, 2)
 	ZEND_ARG_INFO(0, variable)
 	ZEND_ARG_INFO(0, filter)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_input_array, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_input_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, definition)
 	ZEND_ARG_INFO(0, add_empty)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_var_array, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_validate_var_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, definition)
 	ZEND_ARG_INFO(0, add_empty)
@@ -814,7 +814,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto bool validate_input_array(constant type, [, mixed options [, bool add_empty]]])
+/* {{{ proto bool validate_input_array(constant type, mixed options [, bool add_empty])
  * Returns an array with all arguments defined in 'definition'.
  */
 PHP_FUNCTION(validate_input_array)
@@ -824,7 +824,7 @@ PHP_FUNCTION(validate_input_array)
 	zend_bool add_empty = 0;
 	zend_bool exception = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|zb",  &fetch_from, &op, &add_empty) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|b",  &fetch_from, &op, &add_empty) == FAILURE) {
 		return;
 	}
 
@@ -864,7 +864,7 @@ PHP_FUNCTION(validate_input_array)
 /* }}} */
 
 
-/* {{{ proto mixed validate_input(constant type, string variable_name [, long filter [, mixed options]])
+/* {{{ proto mixed validate_input(constant type, string variable_name , long filter [, mixed options])
  * Returns the filtered variable 'name'* from source `type`.
  */
 PHP_FUNCTION(validate_input)
@@ -875,7 +875,7 @@ PHP_FUNCTION(validate_input)
 	zend_string *var;
 	zend_bool exception = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS|lz", &fetch_from, &var, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lSl|z", &fetch_from, &var, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 
@@ -922,7 +922,7 @@ PHP_FUNCTION(validate_input)
 }
 /* }}} */
 
-/* {{{ proto mixed validate_var(mixed variable [, long filter [, mixed options]])
+/* {{{ proto mixed validate_var(mixed variable , long filter [, mixed options])
  * Returns the filtered version of the variable.
  */
 PHP_FUNCTION(validate_var)
@@ -931,7 +931,7 @@ PHP_FUNCTION(validate_var)
 	zval *filter_args = NULL, *data;
 	zend_bool exception = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz", &data, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/l|z", &data, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 
@@ -947,7 +947,7 @@ PHP_FUNCTION(validate_var)
 /* }}} */
 
 
-/* {{{ proto bool validate_var_array(array data, [, mixed options [, bool add_empty]]])
+/* {{{ proto bool validate_var_array(array data, mixed options [, bool add_empty])
  * Returns an array with all arguments defined in 'definition'.
  */
 PHP_FUNCTION(validate_var_array)
@@ -956,7 +956,7 @@ PHP_FUNCTION(validate_var_array)
 	zend_bool add_empty = 0;
 	zend_bool exception = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|zb",  &array_input, &op, &add_empty) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "az|b",  &array_input, &op, &add_empty) == FAILURE) {
 		return;
 	}
 

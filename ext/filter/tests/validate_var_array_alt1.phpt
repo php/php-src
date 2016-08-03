@@ -145,10 +145,14 @@ echo "Done\n";
 --EXPECTF--
 -- (1)
 
-Warning: validate_var_array() expects parameter 1 to be array, null given in %s on line 5
+Warning: validate_var_array() expects at least 2 parameters, 1 given in %s on line 5
 NULL
-string(37) "Filter validation rule does not exist"
-string(37) "Filter validation rule does not exist"
+
+Warning: validate_var_array() expects at least 2 parameters, 1 given in %s on line 10
+NULL
+
+Warning: validate_var_array() expects at least 2 parameters, 1 given in %s on line 15
+NULL
 
 Warning: validate_var_array(): Invalid option parameter in %s on line 20
 bool(false)
