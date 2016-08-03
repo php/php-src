@@ -46,6 +46,17 @@ typedef struct {
 	void *next;
 } var_wakeup_entries;
 
+struct php_unserialize_data_extended {
+	php_unserialize_data_t inner;
+	// Additional properties.
+	void *first_wakeup;
+	void *last_wakeup;
+};
+
+typedef struct php_unserialize_data_extended *php_unserialize_data_extended_t;
+
+static zval *var_tmp_wakeup_var(php_unserialize_data_extended_t var_hashx_extended);
+
 static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
@@ -73,21 +84,21 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	zval *tmp_var = var_tmp_var(var_hashx);
-    if (!tmp_var) {
-        return;
-    }
+	if (!tmp_var) {
+		return;
+	}
 	ZVAL_COPY(tmp_var, rval);
 }
 
 /* Create a copy of rval (of type IS_OBJECT, with method "__wakeup" defined). Defer the call to __wakeup. */
-PHPAPI void var_push_wakeup(php_unserialize_data_t *var_hashx, zval *rval)
+PHPAPI void var_push_wakeup(php_unserialize_data_extended_t var_hashx, zval *rval)
 {
-    /* TODO: This could be refactored into a common macro/data structures with var_tmp_var once the implementation is certain. */
-    zval *tmp_var = var_tmp_wakeup_var(var_hashx);
-    if (!tmp_var) {
-        return;
-    }
-    ZVAL_COPY(tmp_var, rval);
+	/* TODO: This could be refactored into a common macro/data structures with var_tmp_var once the implementation is certain. */
+	zval *tmp_var = var_tmp_wakeup_var(var_hashx);
+	if (!tmp_var) {
+		return;
+	}
+	ZVAL_COPY(tmp_var, rval);
 }
 
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
@@ -117,31 +128,31 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
 }
 
 /* Create a temporary variable, for calling __wakeup() when unserialization is finished */
-PHPAPI zval *var_tmp_wakeup_var(php_unserialize_data_t *var_hashx)
+static zval *var_tmp_wakeup_var(php_unserialize_data_extended_t var_hashx_extended)
 {
-    /* TODO: This could be refactored into a common macro/data structures with var_tmp_var once the implementation is certain. */
-    var_wakeup_entries *var_hash;
+	/* TODO: This could be refactored into a common macro/data structures with var_tmp_var once the implementation is certain. */
+	var_wakeup_entries *var_hash;
 
-    if (!var_hashx || !*var_hashx) {
-        return NULL;
-    }
+	if (!var_hashx_extended) {
+		return NULL;
+	}
 
-    var_hash = (*var_hashx)->last_wakeup;
-    if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
-        var_hash = emalloc(sizeof(var_wakeup_entries));
-        var_hash->used_slots = 0;
-        var_hash->next = 0;
+	var_hash = var_hashx_extended->last_wakeup;
+	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
+		var_hash = emalloc(sizeof(var_wakeup_entries));
+		var_hash->used_slots = 0;
+		var_hash->next = 0;
 
-        if (!(*var_hashx)->first_wakeup) {
-            (*var_hashx)->first_wakeup = var_hash;
-        } else {
-            ((var_wakeup_entries *) (*var_hashx)->last_wakeup)->next = var_hash;
-        }
+		if (!var_hashx_extended->first_wakeup) {
+			var_hashx_extended->first_wakeup = var_hash;
+		} else {
+			((var_wakeup_entries *) var_hashx_extended->last_wakeup)->next = var_hash;
+		}
 
-        (*var_hashx)->last_wakeup = var_hash;
-    }
-    ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
-    return &var_hash->data[var_hash->used_slots++];
+		var_hashx_extended->last_wakeup = var_hash;
+	}
+	ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
+	return &var_hash->data[var_hash->used_slots++];
 }
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nzval)
@@ -182,14 +193,18 @@ static zval *var_access(php_unserialize_data_t *var_hashx, zend_long id)
 	return var_hash->data[id];
 }
 
-static int var_wakeup_all(php_unserialize_data_t *var_hashx, const zend_bool is_cleanup)
+static int var_wakeup_all(php_unserialize_data_extended_t var_hashx_extended, const zend_bool is_cleanup)
 {
 	void *next;
 	zend_long i;
 	zval fname;
-	var_wakeup_entries *wakeup_hash = (*var_hashx)->first_wakeup;
+	var_wakeup_entries *wakeup_hash;
 	zend_bool should_wakeup = !is_cleanup;
 	int ret = 1;
+	if (!var_hashx_extended) {
+		return 1;
+	}
+	wakeup_hash = var_hashx_extended->first_wakeup;
 
 #if VAR_ENTRIES_DBG
 	fprintf(stderr, "var_wakeup_all(%ld)\n", wakeup_hash?wakeup_hash->used_slots:-1L);
@@ -228,7 +243,7 @@ static int var_wakeup_all(php_unserialize_data_t *var_hashx, const zend_bool is_
 	if (!is_cleanup) {
 		zval_dtor(&fname);
 	}
-	(*var_hashx)->first_wakeup = NULL;
+	var_hashx_extended->first_wakeup = NULL;
 	return ret;
 }
 
@@ -260,7 +275,6 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
-	var_wakeup_all(var_hashx, 1); /* Free the copies of objects (which would call __wakeup) if we haven't already. */
 }
 
 /* }}} */
@@ -335,7 +349,7 @@ static inline int unserialize_allowed_class(zend_string *class_name, HashTable *
 #define YYMARKER marker
 
 
-#line 343 "ext/standard/var_unserializer.re"
+#line 357 "ext/standard/var_unserializer.re"
 
 
 
@@ -398,9 +412,12 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes
 
-static int php_var_unserialize_ex_inner(UNSERIALIZE_PARAMETER);
+#define UNSERIALIZE_PARAMETER_EXTENDED zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_extended_t var_hash_extended, HashTable *classes
+#define UNSERIALIZE_PASSTHRU_EXTENDED rval, p, max, var_hash_extended, classes
 
-static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
+static int php_var_unserialize_ex_inner(UNSERIALIZE_PARAMETER_EXTENDED);
+
+static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER_EXTENDED, HashTable *ht, zend_long elements, int objprops)
 {
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
@@ -422,7 +439,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 numeric_key:
 				if (UNEXPECTED((old_data = zend_hash_index_find(ht, idx)) != NULL)) {
 					//??? update hash
-					var_push_dtor(var_hash, old_data);
+					var_push_dtor(&(var_hash_extended->inner), old_data);
 					data = zend_hash_index_update(ht, idx, &d);
 				} else {
 					data = zend_hash_index_add_new(ht, idx, &d);
@@ -433,7 +450,7 @@ numeric_key:
 				}
 				if (UNEXPECTED((old_data = zend_hash_find(ht, Z_STR(key))) != NULL)) {
 					//??? update hash
-					var_push_dtor(var_hash, old_data);
+					var_push_dtor(&(var_hash_extended->inner), old_data);
 					data = zend_hash_update(ht, Z_STR(key), &d);
 				} else {
 					data = zend_hash_add_new(ht, Z_STR(key), &d);
@@ -449,7 +466,7 @@ string_key:
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
 						old_data = Z_INDIRECT_P(old_data);
 					}
-					var_push_dtor(var_hash, old_data);
+					var_push_dtor(&(var_hash_extended->inner), old_data);
 					data = zend_hash_update_ind(ht, Z_STR(key), &d);
 				} else {
 					data = zend_hash_add_new(ht, Z_STR(key), &d);
@@ -464,7 +481,7 @@ string_key:
 			}
 		}
 
-		if (!php_var_unserialize_ex_inner(data, p, max, var_hash, classes)) {
+		if (!php_var_unserialize_ex_inner(data, p, max, var_hash_extended, classes)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -476,7 +493,7 @@ string_key:
 				zend_hash_del_ind(ht, Z_STR(key));
 			}
 		} else {
-			var_push_dtor(var_hash, data);
+			var_push_dtor(&(var_hash_extended->inner), data);
 		}
 
 		zval_dtor(&key);
@@ -490,7 +507,7 @@ string_key:
 	return 1;
 }
 
-static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
+static inline int finish_nested_data(UNSERIALIZE_PARAMETER_EXTENDED)
 {
 	if (*((*p)++) == '}')
 		return 1;
@@ -501,7 +518,7 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 	return 0;
 }
 
-static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
+static inline int object_custom(UNSERIALIZE_PARAMETER_EXTENDED, zend_class_entry *ce)
 {
 	zend_long datalen;
 
@@ -517,16 +534,16 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %s has no unserializer", ZSTR_VAL(ce->name));
 		object_init_ex(rval, ce);
-	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash) != SUCCESS) {
+	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)&(var_hash_extended->inner)) != SUCCESS) {
 		return 0;
 	}
 
 	(*p) += datalen;
 
-	return finish_nested_data(UNSERIALIZE_PASSTHRU);
+	return finish_nested_data(UNSERIALIZE_PASSTHRU_EXTENDED);
 }
 
-static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
+static inline zend_long object_common1(UNSERIALIZE_PARAMETER_EXTENDED, zend_class_entry *ce)
 {
 	zend_long elements;
 
@@ -549,8 +566,10 @@ static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *
 #ifdef PHP_WIN32
 # pragma optimize("", off)
 #endif
-static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
+static inline int object_common2(UNSERIALIZE_PARAMETER_EXTENDED, zend_long elements)
 {
+	/* Allocates properties for an object, then defers a call to __wakeup if necessary */
+	/* Precondition: var_hash_extended != NULL */
 	HashTable *ht;
 
 	if (Z_TYPE_P(rval) != IS_OBJECT) {
@@ -559,21 +578,21 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 
 	ht = Z_OBJPROP_P(rval);
 	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU_EXTENDED, ht, elements, 1)) {
 		return 0;
 	}
 
 	ZVAL_DEREF(rval);
 	if (Z_OBJCE_P(rval) != PHP_IC_ENTRY &&
 		zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1)) {
-		var_push_wakeup(var_hash, rval); /* __wakeup will be called in post-order of the graph of zvals (child nodes first), after everything is initialized */
+		var_push_wakeup(var_hash_extended, rval); /* __wakeup will be called in post-order of the graph of zvals (child nodes first), after everything is initialized */
 	}
 
 	if (EG(exception)) {
 		return 0;
 	}
 
-	return finish_nested_data(UNSERIALIZE_PASSTHRU);
+	return finish_nested_data(UNSERIALIZE_PASSTHRU_EXTENDED);
 
 }
 #ifdef PHP_WIN32
@@ -589,10 +608,22 @@ PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsign
 
 PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 {
-	if (php_var_unserialize_ex_inner(UNSERIALIZE_PASSTHRU) == 0) {
+	struct php_unserialize_data_extended var_hash_extended_val;
+	php_unserialize_data_extended_t var_hash_extended;
+	if (var_hash != NULL) {
+		var_hash_extended_val.inner = *var_hash;
+		var_hash_extended_val.first_wakeup = NULL;
+		var_hash_extended_val.last_wakeup  = NULL;
+		var_hash_extended = &var_hash_extended_val;
+	} else {
+		var_hash_extended = NULL;
+	}
+
+	if (php_var_unserialize_ex_inner(UNSERIALIZE_PASSTHRU_EXTENDED) == 0) {
+		var_wakeup_all(var_hash_extended, 1); /* Free the copies of objects (which would call __wakeup) if we haven't already. */
 		return 0;
 	}
-	if (var_wakeup_all(var_hash, 0) == 0) {
+	if (var_wakeup_all(var_hash_extended, 0) == 0) {
 		return 0;
 	}
 	return 1;
@@ -600,7 +631,7 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 
 /* Unserialize a zval, deferring calls to __wakeup(). This was split out because many extensions call php_var_unserialize/php_var_unserialize_ex directly. */
 /* We ensure __wakeup is called at the very end, so that it doesn't modify/invalidate/delete the arrays/objects/references we are unserializing.. */
-static int php_var_unserialize_ex_inner(UNSERIALIZE_PARAMETER) {
+static int php_var_unserialize_ex_inner(UNSERIALIZE_PARAMETER_EXTENDED) {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
 
@@ -611,49 +642,49 @@ static int php_var_unserialize_ex_inner(UNSERIALIZE_PARAMETER) {
 		return 0;
 	}
 
-	if (var_hash && (*p)[0] != 'R') {
-		var_push(var_hash, rval);
+	if (var_hash_extended && (*p)[0] != 'R') {
+		var_push(&(var_hash_extended->inner), rval);
 	}
 
 	start = cursor;
 
 
-#line 622 "ext/standard/var_unserializer.c"
+#line 653 "ext/standard/var_unserializer.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
 	};
 
 	if ((YYLIMIT - YYCURSOR) < 7) YYFILL(7);
@@ -678,9 +709,9 @@ yy2:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == ':') goto yy95;
 yy3:
-#line 988 "ext/standard/var_unserializer.re"
+#line 1019 "ext/standard/var_unserializer.re"
 	{ return 0; }
-#line 684 "ext/standard/var_unserializer.c"
+#line 715 "ext/standard/var_unserializer.c"
 yy4:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == ':') goto yy89;
@@ -723,13 +754,13 @@ yy13:
 	goto yy3;
 yy14:
 	++YYCURSOR;
-#line 982 "ext/standard/var_unserializer.re"
+#line 1013 "ext/standard/var_unserializer.re"
 	{
 	/* this is the case where we have less data than planned */
 	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");
 	return 0; /* not sure if it should be 0 or 1 here? */
 }
-#line 733 "ext/standard/var_unserializer.c"
+#line 764 "ext/standard/var_unserializer.c"
 yy16:
 	yych = *++YYCURSOR;
 	goto yy3;
@@ -759,7 +790,7 @@ yy20:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 837 "ext/standard/var_unserializer.re"
+#line 868 "ext/standard/var_unserializer.re"
 	{
 	size_t len, len2, len3, maxlen;
 	zend_long elements;
@@ -774,7 +805,7 @@ yy20:
 	zval retval;
 	zval args[1];
 
-    if (!var_hash) return 0;
+	if (!var_hash_extended) return 0;
 	if (*start == 'C') {
 		custom_object = 1;
 	}
@@ -886,7 +917,7 @@ yy20:
 	if (custom_object) {
 		int ret;
 
-		ret = object_custom(UNSERIALIZE_PASSTHRU, ce);
+		ret = object_custom(UNSERIALIZE_PASSTHRU_EXTENDED, ce);
 
 		if (ret && incomplete_class) {
 			php_store_class_name(rval, ZSTR_VAL(class_name), len2);
@@ -895,16 +926,16 @@ yy20:
 		return ret;
 	}
 
-	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
+	elements = object_common1(UNSERIALIZE_PASSTHRU_EXTENDED, ce);
 
 	if (incomplete_class) {
 		php_store_class_name(rval, ZSTR_VAL(class_name), len2);
 	}
 	zend_string_release(class_name);
 
-	return object_common2(UNSERIALIZE_PASSTHRU, elements);
+	return object_common2(UNSERIALIZE_PASSTHRU_EXTENDED, elements);
 }
-#line 908 "ext/standard/var_unserializer.c"
+#line 939 "ext/standard/var_unserializer.c"
 yy25:
 	yych = *++YYCURSOR;
 	if (yych <= ',') {
@@ -929,14 +960,14 @@ yy27:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 830 "ext/standard/var_unserializer.re"
+#line 861 "ext/standard/var_unserializer.re"
 	{
-    if (!var_hash) return 0;
+	if (!var_hash_extended) return 0;
 
-	return object_common2(UNSERIALIZE_PASSTHRU,
-			object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR));
+	return object_common2(UNSERIALIZE_PASSTHRU_EXTENDED,
+			object_common1(UNSERIALIZE_PASSTHRU_EXTENDED, ZEND_STANDARD_CLASS_DEF_PTR));
 }
-#line 940 "ext/standard/var_unserializer.c"
+#line 971 "ext/standard/var_unserializer.c"
 yy32:
 	yych = *++YYCURSOR;
 	if (yych == '+') goto yy33;
@@ -957,12 +988,12 @@ yy34:
 	yych = *++YYCURSOR;
 	if (yych != '{') goto yy18;
 	++YYCURSOR;
-#line 806 "ext/standard/var_unserializer.re"
+#line 837 "ext/standard/var_unserializer.re"
 	{
 	zend_long elements = parse_iv(start + 2);
 	/* use iv() not uiv() in order to check data range */
 	*p = YYCURSOR;
-    if (!var_hash) return 0;
+	if (!var_hash_extended) return 0;
 
 	if (elements < 0) {
 		return 0;
@@ -975,13 +1006,13 @@ yy34:
 		zend_hash_real_init(Z_ARRVAL_P(rval), 0);
 	}
 
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, 0)) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU_EXTENDED, Z_ARRVAL_P(rval), elements, 0)) {
 		return 0;
 	}
 
-	return finish_nested_data(UNSERIALIZE_PASSTHRU);
+	return finish_nested_data(UNSERIALIZE_PASSTHRU_EXTENDED);
 }
-#line 985 "ext/standard/var_unserializer.c"
+#line 1016 "ext/standard/var_unserializer.c"
 yy39:
 	yych = *++YYCURSOR;
 	if (yych == '+') goto yy40;
@@ -1002,7 +1033,7 @@ yy41:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 772 "ext/standard/var_unserializer.re"
+#line 803 "ext/standard/var_unserializer.re"
 	{
 	size_t len, maxlen;
 	zend_string *str;
@@ -1036,7 +1067,7 @@ yy41:
 	ZVAL_STR(rval, str);
 	return 1;
 }
-#line 1040 "ext/standard/var_unserializer.c"
+#line 1071 "ext/standard/var_unserializer.c"
 yy46:
 	yych = *++YYCURSOR;
 	if (yych == '+') goto yy47;
@@ -1057,7 +1088,7 @@ yy48:
 	yych = *++YYCURSOR;
 	if (yych != '"') goto yy18;
 	++YYCURSOR;
-#line 740 "ext/standard/var_unserializer.re"
+#line 771 "ext/standard/var_unserializer.re"
 	{
 	size_t len, maxlen;
 	char *str;
@@ -1089,7 +1120,7 @@ yy48:
 	ZVAL_STRINGL(rval, str, len);
 	return 1;
 }
-#line 1093 "ext/standard/var_unserializer.c"
+#line 1124 "ext/standard/var_unserializer.c"
 yy53:
 	yych = *++YYCURSOR;
 	if (yych <= '/') {
@@ -1177,7 +1208,7 @@ yy61:
 	}
 yy63:
 	++YYCURSOR;
-#line 731 "ext/standard/var_unserializer.re"
+#line 762 "ext/standard/var_unserializer.re"
 	{
 #if SIZEOF_ZEND_LONG == 4
 use_double:
@@ -1186,7 +1217,7 @@ use_double:
 	ZVAL_DOUBLE(rval, zend_strtod((const char *)start + 2, NULL));
 	return 1;
 }
-#line 1190 "ext/standard/var_unserializer.c"
+#line 1221 "ext/standard/var_unserializer.c"
 yy65:
 	yych = *++YYCURSOR;
 	if (yych <= ',') {
@@ -1245,7 +1276,7 @@ yy73:
 	yych = *++YYCURSOR;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 715 "ext/standard/var_unserializer.re"
+#line 746 "ext/standard/var_unserializer.re"
 	{
 	*p = YYCURSOR;
 
@@ -1261,7 +1292,7 @@ yy73:
 
 	return 1;
 }
-#line 1265 "ext/standard/var_unserializer.c"
+#line 1296 "ext/standard/var_unserializer.c"
 yy76:
 	yych = *++YYCURSOR;
 	if (yych == 'N') goto yy73;
@@ -1288,7 +1319,7 @@ yy79:
 	if (yych <= '9') goto yy79;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 689 "ext/standard/var_unserializer.re"
+#line 720 "ext/standard/var_unserializer.re"
 	{
 #if SIZEOF_ZEND_LONG == 4
 	int digits = YYCURSOR - start - 3;
@@ -1314,7 +1345,7 @@ yy79:
 	ZVAL_LONG(rval, parse_iv(start + 2));
 	return 1;
 }
-#line 1318 "ext/standard/var_unserializer.c"
+#line 1349 "ext/standard/var_unserializer.c"
 yy83:
 	yych = *++YYCURSOR;
 	if (yych <= '/') goto yy18;
@@ -1322,22 +1353,22 @@ yy83:
 	yych = *++YYCURSOR;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 683 "ext/standard/var_unserializer.re"
+#line 714 "ext/standard/var_unserializer.re"
 	{
 	*p = YYCURSOR;
 	ZVAL_BOOL(rval, parse_iv(start + 2));
 	return 1;
 }
-#line 1332 "ext/standard/var_unserializer.c"
+#line 1363 "ext/standard/var_unserializer.c"
 yy87:
 	++YYCURSOR;
-#line 677 "ext/standard/var_unserializer.re"
+#line 708 "ext/standard/var_unserializer.re"
 	{
 	*p = YYCURSOR;
 	ZVAL_NULL(rval);
 	return 1;
 }
-#line 1341 "ext/standard/var_unserializer.c"
+#line 1372 "ext/standard/var_unserializer.c"
 yy89:
 	yych = *++YYCURSOR;
 	if (yych <= ',') {
@@ -1360,15 +1391,15 @@ yy91:
 	if (yych <= '9') goto yy91;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 652 "ext/standard/var_unserializer.re"
+#line 683 "ext/standard/var_unserializer.re"
 	{
 	zend_long id;
 
  	*p = YYCURSOR;
-	if (!var_hash) return 0;
+	if (!var_hash_extended) return 0;
 
 	id = parse_iv(start + 2) - 1;
-	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
+	if (id == -1 || (rval_ref = var_access(&(var_hash_extended->inner), id)) == NULL) {
 		return 0;
 	}
 
@@ -1385,7 +1416,7 @@ yy91:
 
 	return 1;
 }
-#line 1389 "ext/standard/var_unserializer.c"
+#line 1420 "ext/standard/var_unserializer.c"
 yy95:
 	yych = *++YYCURSOR;
 	if (yych <= ',') {
@@ -1408,15 +1439,15 @@ yy97:
 	if (yych <= '9') goto yy97;
 	if (yych != ';') goto yy18;
 	++YYCURSOR;
-#line 626 "ext/standard/var_unserializer.re"
+#line 657 "ext/standard/var_unserializer.re"
 	{
 	zend_long id;
 
  	*p = YYCURSOR;
-	if (!var_hash) return 0;
+	if (!var_hash_extended) return 0;
 
 	id = parse_iv(start + 2) - 1;
-	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
+	if (id == -1 || (rval_ref = var_access(&(var_hash_extended->inner), id)) == NULL) {
 		return 0;
 	}
 
@@ -1434,9 +1465,9 @@ yy97:
 
 	return 1;
 }
-#line 1438 "ext/standard/var_unserializer.c"
+#line 1469 "ext/standard/var_unserializer.c"
 }
-#line 990 "ext/standard/var_unserializer.re"
+#line 1021 "ext/standard/var_unserializer.re"
 
 
 	return 0;

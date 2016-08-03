@@ -48,8 +48,7 @@ struct php_unserialize_data {
 	void *last;
 	void *first_dtor;
 	void *last_dtor;
-	void *first_wakeup;
-	void *last_wakeup;
+	// In php 7.0, additional properties (if php_unserialize_data was passed) are found in a struct wrapping a pointer to this.
 };
 
 typedef struct php_serialize_data *php_serialize_data_t;
@@ -119,9 +118,7 @@ do { \
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);
-PHPAPI void var_push_wakeup(php_unserialize_data_t *var_hash, zval *val);
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx);
-PHPAPI zval *var_tmp_wakeup_var(php_unserialize_data_t *var_hashx);
 PHPAPI void var_destroy(php_unserialize_data_t *var_hash);
 
 #endif /* PHP_VAR_H */
