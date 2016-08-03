@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 5.6.25
+?? ??? 2016, PHP 5.6.26
+
+18 Aug 2016, PHP 5.6.25
 
 - Core:
   . Fixed bug #72581 (previous property undefined in Exception after
