@@ -1565,7 +1565,7 @@ PHP_FUNCTION(imagesetstyle)
 
     num_styles = zend_hash_num_elements(HASH_OF(styles));
     if (num_styles == 0) {
-        php_error_docref(NULL, E_WARNING, "styles array must not be empty");
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "styles array must not be empty");
         RETURN_FALSE;
     }
 
