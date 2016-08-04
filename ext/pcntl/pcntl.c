@@ -82,6 +82,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
 	ZEND_ARG_INFO(1, oldset)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_STRUCT_SIGINFO_T
+# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigwaitinfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, set)
 	ZEND_ARG_INFO(1, info)
@@ -93,6 +95,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigtimedwait, 0, 0, 1)
 	ZEND_ARG_INFO(0, seconds)
 	ZEND_ARG_INFO(0, nanoseconds)
 ZEND_END_ARG_INFO()
+# endif
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexited, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
@@ -185,9 +189,11 @@ const zend_function_entry pcntl_functions[] = {
 #ifdef HAVE_SIGPROCMASK
 	PHP_FE(pcntl_sigprocmask,	arginfo_pcntl_sigprocmask)
 #endif
-#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#ifdef HAVE_STRUCT_SIGINFO_T
+# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 	PHP_FE(pcntl_sigwaitinfo,	arginfo_pcntl_sigwaitinfo)
 	PHP_FE(pcntl_sigtimedwait,	arginfo_pcntl_sigtimedwait)
+# endif
 #endif
 #ifdef HAVE_WCONTINUED
 	PHP_FE(pcntl_wifcontinued,	arginfo_pcntl_wifcontinued)
@@ -219,7 +225,12 @@ ZEND_GET_MODULE(pcntl)
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
+#ifdef HAVE_STRUCT_SIGINFO_T
+static void pcntl_signal_handler(int, siginfo_t*, void*);
+static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
+#else
 static void pcntl_signal_handler(int);
+#endif
 static void pcntl_signal_dispatch();
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
 
@@ -549,6 +560,11 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	while (PCNTL_G(head)) {
 		sig = PCNTL_G(head);
 		PCNTL_G(head) = sig->next;
+#ifdef HAVE_STRUCT_SIGINFO_T
+		if (sig->siginfo) {
+			zend_array_destroy(sig->siginfo);
+		}
+#endif
 		efree(sig);
 	}
 	while (PCNTL_G(spares)) {
@@ -997,7 +1013,7 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL, E_WARNING, "Invalid value for handle argument specified");
 			RETURN_FALSE;
 		}
-		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == SIG_ERR) {
+		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (Sigfunc *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -1019,7 +1035,7 @@ PHP_FUNCTION(pcntl_signal)
 		if (Z_REFCOUNTED_P(handle)) Z_ADDREF_P(handle);
 	}
 
-	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == SIG_ERR) {
+	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (Sigfunc *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
@@ -1114,7 +1130,8 @@ PHP_FUNCTION(pcntl_sigprocmask)
 /* }}} */
 #endif
 
-#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#ifdef HAVE_STRUCT_SIGINFO_T
+# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{{ */
 {
 	zval            *user_set, *user_signo, *user_siginfo = NULL;
@@ -1168,48 +1185,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	if (!signo && siginfo.si_signo) {
 		signo = siginfo.si_signo;
 	}
-
-	if (signo > 0 && user_siginfo) {
-		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
-			zval_dtor(user_siginfo);
-			array_init(user_siginfo);
-		} else {
-			zend_hash_clean(Z_ARRVAL_P(user_siginfo));
-		}
-		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo")-1, siginfo.si_signo);
-		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno")-1, siginfo.si_errno);
-		add_assoc_long_ex(user_siginfo, "code",  sizeof("code")-1,  siginfo.si_code);
-		switch(signo) {
-#ifdef SIGCHLD
-			case SIGCHLD:
-				add_assoc_long_ex(user_siginfo,   "status", sizeof("status")-1, siginfo.si_status);
-# ifdef si_utime
-				add_assoc_double_ex(user_siginfo, "utime",  sizeof("utime")-1,  siginfo.si_utime);
-# endif
-# ifdef si_stime
-				add_assoc_double_ex(user_siginfo, "stime",  sizeof("stime")-1,  siginfo.si_stime);
-# endif
-				add_assoc_long_ex(user_siginfo,   "pid",    sizeof("pid")-1,    siginfo.si_pid);
-				add_assoc_long_ex(user_siginfo,   "uid",    sizeof("uid")-1,    siginfo.si_uid);
-				break;
-#endif
-			case SIGILL:
-			case SIGFPE:
-			case SIGSEGV:
-			case SIGBUS:
-				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo.si_addr);
-				break;
-#ifdef SIGPOLL
-			case SIGPOLL:
-				add_assoc_long_ex(user_siginfo, "band", sizeof("band")-1, siginfo.si_band);
-# ifdef si_fd
-				add_assoc_long_ex(user_siginfo, "fd",   sizeof("fd")-1,   siginfo.si_fd);
-# endif
-				break;
-#endif
-		}
-	}
-
+	pcntl_siginfo_to_zval(signo, &siginfo, user_siginfo);
 	RETURN_LONG(signo);
 }
 /* }}} */
@@ -1227,6 +1203,57 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
 	pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+# endif
+
+static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo) /* {{{ */
+{
+	if (signo > 0 && user_siginfo) {
+		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
+			zval_dtor(user_siginfo);
+			array_init(user_siginfo);
+		} else {
+			zend_hash_clean(Z_ARRVAL_P(user_siginfo));
+		}
+		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo")-1, siginfo->si_signo);
+		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno")-1, siginfo->si_errno);
+		add_assoc_long_ex(user_siginfo, "code",  sizeof("code")-1,  siginfo->si_code);
+		switch(signo) {
+#ifdef SIGCHLD
+			case SIGCHLD:
+				add_assoc_long_ex(user_siginfo,   "status", sizeof("status")-1, siginfo->si_status);
+# ifdef si_utime
+				add_assoc_double_ex(user_siginfo, "utime",  sizeof("utime")-1,  siginfo->si_utime);
+# endif
+# ifdef si_stime
+				add_assoc_double_ex(user_siginfo, "stime",  sizeof("stime")-1,  siginfo->si_stime);
+# endif
+				add_assoc_long_ex(user_siginfo,   "pid",    sizeof("pid")-1,    siginfo->si_pid);
+				add_assoc_long_ex(user_siginfo,   "uid",    sizeof("uid")-1,    siginfo->si_uid);
+				break;
+			case SIGUSR1:
+			case SIGUSR2:
+				add_assoc_long_ex(user_siginfo,   "pid",    sizeof("pid")-1,    siginfo->si_pid);
+				add_assoc_long_ex(user_siginfo,   "uid",    sizeof("uid")-1,    siginfo->si_uid);
+				break;
+#endif
+			case SIGILL:
+			case SIGFPE:
+			case SIGSEGV:
+			case SIGBUS:
+				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
+				break;
+#ifdef SIGPOLL
+			case SIGPOLL:
+				add_assoc_long_ex(user_siginfo, "band", sizeof("band")-1, siginfo->si_band);
+# ifdef si_fd
+				add_assoc_long_ex(user_siginfo, "fd",   sizeof("fd")-1,   siginfo->si_fd);
+# endif
+				break;
+#endif
+		}
+	}
 }
 /* }}} */
 #endif
@@ -1333,7 +1360,11 @@ PHP_FUNCTION(pcntl_strerror)
 /* }}} */
 
 /* Our custom signal handler that calls the appropriate php_function */
+#ifdef HAVE_STRUCT_SIGINFO_T
+static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
+#else
 static void pcntl_signal_handler(int signo)
+#endif
 {
 	struct php_pcntl_pending_signal *psig;
 
@@ -1346,6 +1377,14 @@ static void pcntl_signal_handler(int signo)
 
 	psig->signo = signo;
 	psig->next = NULL;
+
+#ifdef HAVE_STRUCT_SIGINFO_T
+	zval user_siginfo;
+	array_init(&user_siginfo);
+	pcntl_siginfo_to_zval(signo, siginfo, &user_siginfo);
+	psig->siginfo = zend_array_dup(Z_ARRVAL(user_siginfo));
+	zval_ptr_dtor(&user_siginfo);
+#endif
 
 	/* the head check is important, as the tick handler cannot atomically clear both
 	 * the head and tail */
@@ -1363,7 +1402,7 @@ static void pcntl_signal_handler(int signo)
 
 void pcntl_signal_dispatch()
 {
-	zval param, *handle, retval;
+	zval params[2], *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;
 	sigset_t mask;
 	sigset_t old_mask;
@@ -1376,8 +1415,8 @@ void pcntl_signal_dispatch()
 	sigfillset(&mask);
 	sigprocmask(SIG_BLOCK, &mask, &old_mask);
 
-	/* Bail if the queue is empty or if we are already playing the queue*/
-	if (! PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
+	/* Bail if the queue is empty or if we are already playing the queue */
+	if (!PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
 		sigprocmask(SIG_SETMASK, &old_mask, NULL);
 		return;
 	}
@@ -1394,13 +1433,19 @@ void pcntl_signal_dispatch()
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_NULL(&retval);
-				ZVAL_LONG(&param, queue->signo);
+				ZVAL_LONG(&params[0], queue->signo);
+#ifdef HAVE_STRUCT_SIGINFO_T
+				ZVAL_ARR(&params[1], queue->siginfo);
+#else
+				ZVAL_NULL(&params[1]);
+#endif
 
 				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
-				call_user_function(EG(function_table), NULL, handle, &retval, 1, &param);
-				zval_ptr_dtor(&param);
+				call_user_function(EG(function_table), NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
+				zval_ptr_dtor(&params[0]);
+				zval_ptr_dtor(&params[1]);
 			}
 		}
 

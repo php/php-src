@@ -89,7 +89,7 @@ typedef unsigned char uchar;
 
 #define EFREE_IF(ptr)	if (ptr) efree(ptr)
 
-#define MAX_IFD_NESTING_LEVEL 100
+#define MAX_IFD_NESTING_LEVEL 150
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_exif_tagname, 0)
@@ -955,6 +955,160 @@ static tag_info_array tag_table_VND_OLYMPUS = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_SAMSUNG = {
+  { 0x0001, "Version"}, 
+  { 0x0021, "PictureWizard"}, 
+  { 0x0030, "LocalLocationName"}, 
+  { 0x0031, "LocationName"}, 
+  { 0x0035, "Preview"}, 
+  { 0x0043, "CameraTemperature"}, 
+  { 0xa001, "FirmwareName"}, 
+  { 0xa003, "LensType"}, 
+  { 0xa004, "LensFirmware"}, 
+  { 0xa010, "SensorAreas"}, 
+  { 0xa011, "ColorSpace"}, 
+  { 0xa012, "SmartRange"}, 
+  { 0xa013, "ExposureBiasValue"}, 
+  { 0xa014, "ISO"}, 
+  { 0xa018, "ExposureTime"}, 
+  { 0xa019, "FNumber"}, 
+  { 0xa01a, "FocalLengthIn35mmFormat"}, 
+  { 0xa020, "EncryptionKey"}, 
+  { 0xa021, "WB_RGGBLevelsUncorrected"}, 
+  { 0xa022, "WB_RGGBLevelsAuto"}, 
+  { 0xa023, "WB_RGGBLevelsIlluminator1"}, 
+  { 0xa024, "WB_RGGBLevelsIlluminator2"}, 
+  { 0xa028, "WB_RGGBLevelsBlack"}, 
+  { 0xa030, "ColorMatrix"}, 
+  { 0xa031, "ColorMatrixSRGB"}, 
+  { 0xa032, "ColorMatrixAdobeRGB"}, 
+  { 0xa040, "ToneCurve1"}, 
+  { 0xa041, "ToneCurve2"}, 
+  { 0xa042, "ToneCurve3"}, 
+  { 0xa043, "ToneCurve4"}, 
+  TAG_TABLE_END
+};
+
+static tag_info_array tag_table_VND_PANASONIC = {
+  { 0x0001, "Quality"},
+  { 0x0002, "FirmwareVersion"},
+  { 0x0003, "WhiteBalance"},
+  { 0x0004, "0x0004"},
+  { 0x0007, "FocusMode"},
+  { 0x000f, "AFMode"},
+  { 0x001a, "ImageStabilization"},
+  { 0x001c, "Macro"},
+  { 0x001f, "ShootingMode"},
+  { 0x0020, "Audio"},
+  { 0x0021, "DataDump"},
+  { 0x0022, "0x0022"},
+  { 0x0023, "WhiteBalanceBias"},
+  { 0x0024, "FlashBias"},
+  { 0x0025, "InternalSerialNumber"},
+  { 0x0026, "ExifVersion"},
+  { 0x0027, "0x0027"},
+  { 0x0028, "ColorEffect"},
+  { 0x0029, "TimeSincePowerOn"},
+  { 0x002a, "BurstMode"},
+  { 0x002b, "SequenceNumber"},
+  { 0x002c, "Contrast"},
+  { 0x002d, "NoiseReduction"},
+  { 0x002e, "SelfTimer"},
+  { 0x002f, "0x002f"},
+  { 0x0030, "Rotation"},
+  { 0x0031, "AFAssistLamp"},
+  { 0x0032, "ColorMode"},
+  { 0x0033, "BabyAge1"},
+  { 0x0034, "OpticalZoomMode"},
+  { 0x0035, "ConversionLens"},
+  { 0x0036, "TravelDay"},
+  { 0x0039, "Contrast"},
+  { 0x003a, "WorldTimeLocation"},
+  { 0x003b, "TextStamp1"},
+  { 0x003c, "ProgramISO"},
+  { 0x003d, "AdvancedSceneType"},
+  { 0x003e, "TextStamp2"},
+  { 0x003f, "FacesDetected"},
+  { 0x0040, "Saturation"},
+  { 0x0041, "Sharpness"},
+  { 0x0042, "FilmMode"},
+  { 0x0044, "ColorTempKelvin"},
+  { 0x0045, "BracketSettings"},
+  { 0x0046, "WBAdjustAB"},
+  { 0x0047, "WBAdjustGM"},
+  { 0x0048, "FlashCurtain"},
+  { 0x0049, "LongShutterNoiseReduction"},
+  { 0x004b, "ImageWidth"},
+  { 0x004c, "ImageHeight"},
+  { 0x004d, "AFPointPosition"},
+  { 0x004e, "FaceDetInfo"},
+  { 0x0051, "LensType"},
+  { 0x0052, "LensSerialNumber"},
+  { 0x0053, "AccessoryType"},
+  { 0x0054, "AccessorySerialNumber"},
+  { 0x0059, "Transform1"},
+  { 0x005d, "IntelligentExposure"},
+  { 0x0060, "LensFirmwareVersion"},
+  { 0x0061, "FaceRecInfo"},
+  { 0x0062, "FlashWarning"},
+  { 0x0065, "Title"},
+  { 0x0066, "BabyName"},
+  { 0x0067, "Location"},
+  { 0x0069, "Country"},
+  { 0x006b, "State"},
+  { 0x006d, "City"},
+  { 0x006f, "Landmark"},
+  { 0x0070, "IntelligentResolution"},
+  { 0x0077, "BurstSheed"},
+  { 0x0079, "IntelligentDRange"},
+  { 0x007c, "ClearRetouch"},
+  { 0x0080, "City2"},
+  { 0x0086, "ManometerPressure"},
+  { 0x0089, "PhotoStyle"},
+  { 0x008a, "ShadingCompensation"},
+  { 0x008c, "AccelerometerZ"},
+  { 0x008d, "AccelerometerX"},
+  { 0x008e, "AccelerometerY"},
+  { 0x008f, "CameraOrientation"},
+  { 0x0090, "RollAngle"},
+  { 0x0091, "PitchAngle"},
+  { 0x0093, "SweepPanoramaDirection"},
+  { 0x0094, "PanoramaFieldOfView"},
+  { 0x0096, "TimerRecording"},
+  { 0x009d, "InternalNDFilter"},
+  { 0x009e, "HDR"},
+  { 0x009f, "ShutterType"},
+  { 0x00a3, "ClearRetouchValue"},
+  { 0x00ab, "TouchAE"},
+  { 0x0e00, "PrintIM"},
+  { 0x4449, "0x4449"},
+  { 0x8000, "MakerNoteVersion"},
+  { 0x8001, "SceneMode"},
+  { 0x8004, "WBRedLevel"},
+  { 0x8005, "WBGreenLevel"},
+  { 0x8006, "WBBlueLevel"},
+  { 0x8007, "FlashFired"},
+  { 0x8008, "TextStamp3"},
+  { 0x8009, "TextStamp4"},
+  { 0x8010, "BabyAge2"},
+  { 0x8012, "Transform2"},
+  TAG_TABLE_END
+};
+
+static tag_info_array tag_table_VND_DJI = {
+  { 0x0001, "Make"}, 
+  { 0x0003, "SpeedX"}, 
+  { 0x0004, "SpeedY"}, 
+  { 0x0005, "SpeedZ"}, 
+  { 0x0006, "Pitch"}, 
+  { 0x0007, "Yaw"}, 
+  { 0x0008, "Roll"}, 
+  { 0x0009, "CameraPitch"}, 
+  { 0x000a, "CameraYaw"}, 
+  { 0x000b, "CameraRoll"}, 
+  TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -986,6 +1140,9 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_NIKON_990, "NIKON",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
@@ -1703,6 +1860,10 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				break;
 		case TAG_FMT_UNDEFINED:
 			if (value) {
+				if (tag == TAG_MAKER_NOTE) {
+					length = MIN(length, strlen(value));
+				}
+
 				/* do not recompute length here */
 				info_value->s = estrndup(value, length);
 				info_data->length = length;
@@ -2604,6 +2765,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 	*pszEncoding = NULL;
 	/* Copy the comment */
 	if (ByteCount>=8) {
+		const zend_encoding *from, *to;
 		if (!memcmp(szValuePtr, "UNICODE\0", 8)) {
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
@@ -2624,15 +2786,16 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			} else {
 				decode = ImageInfo->decode_unicode_le;
 			}
+			to = zend_multibyte_fetch_encoding(ImageInfo->encode_unicode);
+			from = zend_multibyte_fetch_encoding(decode);
 			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
-			if (zend_multibyte_encoding_converter(
+			if (!to || !from || zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr,
 					&len,
 					(unsigned char*)szValuePtr,
 					ByteCount,
-					zend_multibyte_fetch_encoding(ImageInfo->encode_unicode),
-					zend_multibyte_fetch_encoding(decode)
-					) == (size_t)-1) {
+					to,
+					from) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2646,14 +2809,15 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
-			if (zend_multibyte_encoding_converter(
+			to = zend_multibyte_fetch_encoding(ImageInfo->encode_jis);
+			from = zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le);
+			if (!to || !from || zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr,
 					&len,
 					(unsigned char*)szValuePtr,
 					ByteCount,
-					zend_multibyte_fetch_encoding(ImageInfo->encode_jis),
-					zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le)
-					) == (size_t)-1) {
+					to,
+					from) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2708,10 +2872,16 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	int NumDirEntries, old_motorola_intel, offset_diff;
 	const maker_note_type *maker_note;
 	char *dir_start;
-
+	
 	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
-		if (i==sizeof(maker_note_array)/sizeof(maker_note_type))
-			return FALSE;
+		if (i==sizeof(maker_note_array)/sizeof(maker_note_type)) {
+#ifdef EXIF_DEBUG
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "No maker note data found. Detected maker: %s (length = %d)", ImageInfo->make, strlen(ImageInfo->make));
+#endif
+			/* unknown manufacturer, not an error, use it as a string */
+			return TRUE;
+		}
+
 		maker_note = maker_note_array+i;
 
 		/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "check (%s,%s)", maker_note->make?maker_note->make:"", maker_note->model?maker_note->model:"");*/
@@ -2722,6 +2892,12 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 		if (maker_note->id_string && strncmp(maker_note->id_string, value_ptr, maker_note->id_string_len))
 			continue;
 		break;
+	}
+	
+	if (maker_note->offset >= value_len) {
+		/* Do not go past the value end */
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);
+		return FALSE;
 	}
 
 	dir_start = value_ptr + maker_note->offset;
@@ -2752,10 +2928,19 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 			offset_base = value_ptr;
 			break;
 		case MN_OFFSET_GUESS:
+			if (maker_note->offset + 10 + 4 >= value_len) {
+				/* Can not read dir_start+10 since it's beyond value end */
+				exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X", value_len);
+				return FALSE;
+			}
 			offset_diff = 2 + NumDirEntries*12 + 4 - php_ifd_get32u(dir_start+10, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Using automatic offset correction: 0x%04X", ((int)dir_start-(int)offset_base+maker_note->offset+displacement) + offset_diff);
 #endif
+			if (offset_diff < 0 || offset_diff >= value_len ) {
+				exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data bad offset: 0x%04X length 0x%04X", offset_diff, value_len);
+				return FALSE;
+			}
 			offset_base = value_ptr + offset_diff;
 			break;
 		default:
@@ -2764,7 +2949,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	}
 
 	if ((2+NumDirEntries*12) > value_len) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 2 + x%04X*12 = x%04X > x%04X", NumDirEntries, 2+NumDirEntries*12, value_len);
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 2 + 0x%04X*12 = 0x%04X > 0x%04X", NumDirEntries, 2+NumDirEntries*12, value_len);
 		return FALSE;
 	}
 
@@ -3050,7 +3235,10 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_MAKER_NOTE:
-				exif_process_IFD_in_MAKERNOTE(ImageInfo, value_ptr, byte_count, offset_base, IFDlength, displacement);
+				if (!exif_process_IFD_in_MAKERNOTE(ImageInfo, value_ptr, byte_count, offset_base, IFDlength, displacement)) {
+					EFREE_IF(outside);
+					return FALSE;
+				}
 				break;
 
 			case TAG_EXIF_IFD_POINTER:
@@ -4167,7 +4355,7 @@ PHP_FUNCTION(exif_imagetype)
 	php_stream * stream;
  	int itype = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &imagefile, &imagefile_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &imagefile, &imagefile_len) == FAILURE) {
 		return;
 	}
 

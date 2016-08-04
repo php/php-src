@@ -63,6 +63,9 @@
 static int le_gd, le_gd_font;
 
 #include <gd.h>
+#ifndef HAVE_GD_BUNDLED
+# include <gd_errors.h>
+#endif
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */
 #include <gdfontmb.h> /* 3 Medium bold font */
@@ -1021,7 +1024,19 @@ static void php_free_gd_font(zend_resource *rsrc)
 void php_gd_error_method(int type, const char *format, va_list args)
 {
 
-	php_verror(NULL, "", type, format, args);
+	switch (type) {
+		case GD_DEBUG:
+		case GD_INFO:
+		case GD_NOTICE:
+			type = E_NOTICE;
+			break;
+		case GD_WARNING:
+			type = E_WARNING;
+			break;
+		default:
+			type = E_ERROR;
+	}
+	php_verror(NULL, "", type, format, args TSRMLS_CC);
 }
 /* }}} */
 #endif
@@ -1429,6 +1444,7 @@ PHP_FUNCTION(imagesetstyle)
 	gdImagePtr im;
 	int *stylearr;
 	int index = 0;
+    uint32_t num_styles;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &IM, &styles) == FAILURE)  {
 		return;
@@ -1438,8 +1454,14 @@ PHP_FUNCTION(imagesetstyle)
 		RETURN_FALSE;
 	}
 
+    num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
+    if (num_styles == 0) {
+        php_error_docref(NULL, E_WARNING, "styles array must not be empty");
+        RETURN_FALSE;
+    }
+
 	/* copy the style values in the stylearr */
-	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(Z_ARRVAL_P(styles)), 0);
+	stylearr = safe_emalloc(sizeof(int), num_styles, 0);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
 		stylearr[index++] = zval_get_long(item);
@@ -4621,8 +4643,8 @@ PHP_FUNCTION(imagecropauto)
 			break;
 
 		case GD_CROP_THRESHOLD:
-			if (color < 0) {
-				php_error_docref(NULL, E_WARNING, "Color argument missing with threshold mode");
+			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color argument missing with threshold mode");
 				RETURN_FALSE;
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);

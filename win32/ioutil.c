@@ -58,11 +58,17 @@
 #include "win32/ioutil.h"
 #include "win32/codepage.h"
 
+#include <pathcch.h>
+
 /*
 #undef NONLS
 #undef _WINNLS_
 #include <winnls.h>
 */
+
+typedef HRESULT (__stdcall *MyPathCchCanonicalizeEx)(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags);
+
+static MyPathCchCanonicalizeEx canonicalize_path_w = NULL;
 
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts)
 {/*{{{*/
@@ -419,13 +425,13 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	if (!GetCurrentDirectoryW(len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
 	}
 
 	return (wchar_t *)buf;
 }/*}}}*/
 
-/* based on zend_dirname().
- 	TODO support long path if needed. */
+/* based on zend_dirname(). */
 PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 {/*{{{*/
 	char *ret = NULL, *start;
@@ -488,13 +494,73 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	*(endw+1) = L'\0';
 
 	ret_len = (endw + 1 - startw);
-	ret = php_win32_ioutil_conv_w_to_any(startw, ret_len, &ret_len);
+	if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(startw, ret_len)) {
+		ret = php_win32_ioutil_conv_w_to_any(startw + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, ret_len - PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, &ret_len);
+	} else {
+		ret = php_win32_ioutil_conv_w_to_any(startw, ret_len, &ret_len);
+	}
 	memmove(start, ret, ret_len+1);
 	assert(start[ret_len] == '\0');
 	free(ret);
 	free(startw);
 
 	return ret_len;
+}/*}}}*/
+
+PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len)
+{/*{{{*/
+	wchar_t *pos, *idx = *buf, canonicalw[MAXPATHLEN];
+	size_t ret_len = len;
+
+	if (len >= MAXPATHLEN) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
+		return PHP_WIN32_IOUTIL_NORM_FAIL;
+	}
+
+	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && idx - *buf <= len) {
+		*pos = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+		idx = pos++;
+	}
+
+	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, *buf, PATHCCH_ALLOW_LONG_PATHS)) {
+		return PHP_WIN32_IOUTIL_NORM_PARTIAL;
+	}
+	ret_len = wcslen(canonicalw);
+	if (ret_len != len) {
+		if (ret_len > len) {
+			wchar_t *tmp = realloc(*buf, (ret_len + 1) * sizeof(wchar_t));
+			if (!tmp) {
+				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+				return PHP_WIN32_IOUTIL_NORM_PARTIAL;
+			}
+			*buf = tmp;
+		}
+		memmove(*buf, canonicalw, (ret_len + 1) * sizeof(wchar_t));
+	}
+	*new_len = ret_len;
+
+	return PHP_WIN32_IOUTIL_NORM_OK;
+}/*}}}*/
+
+static HRESULT __stdcall MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
+{/*{{{*/
+	return -42;
+}/*}}}*/
+
+BOOL php_win32_ioutil_init(void)
+{/*{{{*/
+	HMODULE hMod = GetModuleHandle("api-ms-win-core-path-l1-1-0");
+
+	if (hMod) {
+		canonicalize_path_w = (MyPathCchCanonicalizeEx)GetProcAddress(hMod, "PathCchCanonicalizeEx");
+		if (!canonicalize_path_w) {
+			canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
+		}
+	} else {
+		canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
+	}
+
+	return TRUE;
 }/*}}}*/
 
 /* an extended version could be implemented, for now direct functions can be used. */

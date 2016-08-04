@@ -237,7 +237,11 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 
 		/* Discard numbers over the limit to avoid modulo bias */
 		while (UNEXPECTED(result > limit)) {
+#if ZEND_ULONG_MAX > UINT32_MAX
 			result = (result << 32) | php_mt_rand();
+#else
+			result = php_mt_rand();
+#endif
 		}
 	}
 

@@ -689,7 +689,6 @@ default_charset = "UTF-8"
 
 ; PHP output character encoding is set to empty.
 ; If empty, default_charset is used.
-; mbstring or iconv output handler is used.
 ; See also output_buffer.
 ; http://php.net/output-encoding
 ;output_encoding =
@@ -1843,6 +1842,11 @@ ldap.max_links = -1
 
 ; Enables or disables checksum validation when script loaded from file cache.
 ;opcache.file_cache_consistency_checks=1
+
+; Implies opcache.file_cache_only=1 for a certain process that failed to
+; reattach to the shared memory (for Windows only). Explicitly enabled file
+; cache is required.
+;opcache.file_cache_fallback=1
 
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.

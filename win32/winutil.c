@@ -397,6 +397,8 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 996 */   ,   {   ERROR_IO_INCOMPLETE             ,   EAGAIN          }
         /* 997 */   ,   {   ERROR_IO_PENDING                ,   EAGAIN          }
 
+        /* 1004 */   ,  {   ERROR_INVALID_FLAGS             ,   EINVAL          }
+        /* 1113 */   ,  {   ERROR_NO_UNICODE_TRANSLATION    ,   EINVAL          }
         /* 1168 */   ,  {   ERROR_NOT_FOUND                 ,   ENOENT          }
         /* 1816 */  ,   {   ERROR_NOT_ENOUGH_QUOTA          ,   ENOMEM          }
 					,   {   ERROR_ABANDONED_WAIT_0          ,   EIO }

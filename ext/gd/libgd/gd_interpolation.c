@@ -879,20 +879,42 @@ int getPixelInterpolated(gdImagePtr im, const double x, const double y, const in
 static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, unsigned int windows_size)
 {
 	unsigned int u = 0;
-    LineContribType *res;
+	LineContribType *res;
+	int overflow_error = 0;
 
 	res = (LineContribType *) gdMalloc(sizeof(LineContribType));
 	if (!res) {
 		return NULL;
 	}
-    res->WindowSize = windows_size;
-    res->LineLength = line_length;
-    res->ContribRow = (ContributionType *) gdMalloc(line_length * sizeof(ContributionType));
-
-    for (u = 0 ; u < line_length ; u++) {
-        res->ContribRow[u].Weights = (double *) gdMalloc(windows_size * sizeof(double));
-    }
-    return res;
+	res->WindowSize = windows_size;
+	res->LineLength = line_length;
+	if (overflow2(line_length, sizeof(ContributionType))) {
+		gdFree(res);
+		return NULL;
+	}
+	res->ContribRow = (ContributionType *) gdMalloc(line_length * sizeof(ContributionType));
+	if (res->ContribRow == NULL) {
+		gdFree(res);
+		return NULL;
+	}
+	for (u = 0 ; u < line_length ; u++) {
+		if (overflow2(windows_size, sizeof(double))) {
+			overflow_error = 1;
+		} else {
+			res->ContribRow[u].Weights = (double *) gdMalloc(windows_size * sizeof(double));
+		}
+		if (overflow_error == 1 || res->ContribRow[u].Weights == NULL) {
+			unsigned int i;
+			u--;
+			for (i=0;i<=u;i++) {
+				gdFree(res->ContribRow[i].Weights);
+			}
+			gdFree(res->ContribRow);
+			gdFree(res);
+			return NULL;
+		}
+	}
+	return res;
 }
 
 static inline void _gdContributionsFree(LineContribType * p)
@@ -907,59 +929,62 @@ static inline void _gdContributionsFree(LineContribType * p)
 
 static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsigned int src_size, double scale_d,  const interpolation_method pFilter)
 {
-    double width_d;
-    double scale_f_d = 1.0;
-    const double filter_width_d = DEFAULT_BOX_RADIUS;
+	double width_d;
+	double scale_f_d = 1.0;
+	const double filter_width_d = DEFAULT_BOX_RADIUS;
 	int windows_size;
 	unsigned int u;
 	LineContribType *res;
+	int overflow_error = 0;
 
-    if (scale_d < 1.0) {
-        width_d = filter_width_d / scale_d;
-        scale_f_d = scale_d;
-    }  else {
-        width_d= filter_width_d;
-    }
+	if (scale_d < 1.0) {
+		width_d = filter_width_d / scale_d;
+		scale_f_d = scale_d;
+	}  else {
+		width_d= filter_width_d;
+	}
 
-    windows_size = 2 * (int)ceil(width_d) + 1;
-    res = _gdContributionsAlloc(line_size, windows_size);
-
-    for (u = 0; u < line_size; u++) {
-        const double dCenter = (double)u / scale_d;
-        /* get the significant edge points affecting the pixel */
-        register int iLeft = MAX(0, (int)floor (dCenter - width_d));
-        int iRight = MIN((int)ceil(dCenter + width_d), (int)src_size - 1);
-        double dTotalWeight = 0.0;
+	windows_size = 2 * (int)ceil(width_d) + 1;
+	res = _gdContributionsAlloc(line_size, windows_size);
+	if (res == NULL) {
+		return NULL;
+	}
+	for (u = 0; u < line_size; u++) {
+	const double dCenter = (double)u / scale_d;
+	/* get the significant edge points affecting the pixel */
+	register int iLeft = MAX(0, (int)floor (dCenter - width_d));
+	int iRight = MIN((int)ceil(dCenter + width_d), (int)src_size - 1);
+	double dTotalWeight = 0.0;
 		int iSrc;
 
-        /* Cut edge points to fit in filter window in case of spill-off */
-        if (iRight - iLeft + 1 > windows_size)  {
-            if (iLeft < ((int)src_size - 1 / 2))  {
-                iLeft++;
-            } else {
-                iRight--;
-            }
-        }
+	/* Cut edge points to fit in filter window in case of spill-off */
+	if (iRight - iLeft + 1 > windows_size)  {
+		if (iLeft < ((int)src_size - 1 / 2))  {
+			iLeft++;
+		} else {
+			iRight--;
+		}
+	}
 
-        res->ContribRow[u].Left = iLeft;
-        res->ContribRow[u].Right = iRight;
+	res->ContribRow[u].Left = iLeft;
+	res->ContribRow[u].Right = iRight;
 
-        for (iSrc = iLeft; iSrc <= iRight; iSrc++) {
-            dTotalWeight += (res->ContribRow[u].Weights[iSrc-iLeft] =  scale_f_d * (*pFilter)(scale_f_d * (dCenter - (double)iSrc)));
-        }
+	for (iSrc = iLeft; iSrc <= iRight; iSrc++) {
+		dTotalWeight += (res->ContribRow[u].Weights[iSrc-iLeft] =  scale_f_d * (*pFilter)(scale_f_d * (dCenter - (double)iSrc)));
+	}
 
 		if (dTotalWeight < 0.0) {
 			_gdContributionsFree(res);
 			return NULL;
 		}
 
-        if (dTotalWeight > 0.0) {
-            for (iSrc = iLeft; iSrc <= iRight; iSrc++) {
-                res->ContribRow[u].Weights[iSrc-iLeft] /= dTotalWeight;
-            }
-        }
-   }
-   return res;
+	if (dTotalWeight > 0.0) {
+		for (iSrc = iLeft; iSrc <= iRight; iSrc++) {
+			res->ContribRow[u].Weights[iSrc-iLeft] /= dTotalWeight;
+		}
+	}
+	}
+	return res;
 }
 
 static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImagePtr dst, unsigned int dst_width, unsigned int row, LineContribType *contrib)
@@ -1244,7 +1269,13 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
 	if (new_img == NULL) {
 		return NULL;
 	}
-	new_img->transparent = gdTrueColorAlpha(im->red[transparent], im->green[transparent], im->blue[transparent], im->alpha[transparent]);
+
+	if (transparent < 0) {
+		/* uninitialized */
+		new_img->transparent = -1;
+	} else {
+		new_img->transparent = gdTrueColorAlpha(im->red[transparent], im->green[transparent], im->blue[transparent], im->alpha[transparent]);
+	}
 
 	for (i=0; i < _height; i++) {
 		long j;
@@ -1478,13 +1509,8 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 				src_offset_y[0] = m;
 			}
 
-			if (m < 1) {
-				src_offset_x[1] = n;
-				src_offset_y[1] = m;
-			} else {
-				src_offset_x[1] = n;
-				src_offset_y[1] = m;
-			}
+			src_offset_x[1] = n;
+			src_offset_y[1] = m;
 
 			if ((m < 1) || (n >= src_w - 1)) {
 				src_offset_x[2] = n;
@@ -1536,13 +1562,8 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 				src_offset_y[8] = m;
 			}
 
-			if (m >= src_h - 1) {
-				src_offset_x[8] = n;
-				src_offset_y[8] = m;
-			} else {
-				src_offset_x[9] = n;
-				src_offset_y[9] = m;
-			}
+			src_offset_x[9] = n;
+			src_offset_y[9] = m;
 
 			if ((m >= src_h-1) || (n >= src_w-1)) {
 				src_offset_x[10] = n;
@@ -1568,13 +1589,8 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 				src_offset_y[12] = m;
 			}
 
-			if (m >= src_h - 2) {
-				src_offset_x[13] = n;
-				src_offset_y[13] = m;
-			} else {
-				src_offset_x[13] = n;
-				src_offset_y[13] = m;
-			}
+			src_offset_x[13] = n;
+			src_offset_y[13] = m;
 
 			if ((m >= src_h - 2) || (n >= src_w - 1)) {
 				src_offset_x[14] = n;
@@ -1983,13 +1999,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 					src_offset_y[0] = m;
 				}
 
-				if (m < 1) {
-					src_offset_x[1] = n;
-					src_offset_y[1] = m;
-				} else {
-					src_offset_x[1] = n;
-					src_offset_y[1] = m ;
-				}
+				src_offset_x[1] = n;
+				src_offset_y[1] = m;
 
 				if ((m < 1) || (n >= src_w-1)) {
 					src_offset_x[2] = - 1;
@@ -2042,8 +2053,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 				}
 
 				if (m >= src_h-1) {
-					src_offset_x[8] = - 1;
-					src_offset_y[8] = - 1;
+					src_offset_x[9] = - 1;
+					src_offset_y[9] = - 1;
 				} else {
 					src_offset_x[9] = n;
 					src_offset_y[9] = m;

@@ -58,9 +58,11 @@ PHP_FUNCTION(pcntl_strerror);
 #ifdef HAVE_SIGPROCMASK
 PHP_FUNCTION(pcntl_sigprocmask);
 #endif
-#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#ifdef HAVE_STRUCT_SIGINFO_T
+# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 PHP_FUNCTION(pcntl_sigwaitinfo);
 PHP_FUNCTION(pcntl_sigtimedwait);
+# endif
 #endif
 PHP_FUNCTION(pcntl_exec);
 #ifdef HAVE_GETPRIORITY
@@ -74,6 +76,9 @@ PHP_FUNCTION(pcntl_async_signals);
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
 	zend_long signo;
+#ifdef HAVE_STRUCT_SIGINFO_T
+	zend_array *siginfo;
+#endif
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)

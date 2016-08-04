@@ -165,6 +165,9 @@ PHP 7.1 UPGRADE NOTES
 - file_get_contents() accepts a negative seek offset if the stream is seekable.
 - tempnam() throws a notice when failing back to the system temp dir.
 - getopt() has an extra by-ref parameter : optind
+- mb_ereg() and mb_ereg_replace() reject illegal byte sequences.
+- FILTER_FLAG_EMAIL_UNICODE can be used with filter_var() for email validation
+  according to RFC 6531.
 
 ========================================
 6. New Functions
@@ -326,7 +329,7 @@ PHP 7.1 UPGRADE NOTES
 - Core:
   . Support for long and UTF-8 path;
 
-    If an application is UTF-8 conform, no further action is required. For
+    If an application is UTF-8 conforming, no further action is required. For
     applications depending on paths in non UTF-8 encodings for I/O, an explicit
     INI directive has to be set. The encoding INI settings check relies on the
     order in the core:
@@ -334,7 +337,7 @@ PHP 7.1 UPGRADE NOTES
       - default_charset
       - zend.multibyte
 
-    Several functions for codepage handling were itroduced:
+    Several functions for codepage handling were introduced:
       - sapi_windows_cp_set() to set the default codepage
       - sapi_windows_cp_get() to retrieve the current codepage
       - sapi_windows_cp_is_utf8()
