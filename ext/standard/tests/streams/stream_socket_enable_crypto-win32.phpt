@@ -5,7 +5,7 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 --SKIPIF--
 <?php
 if (phpversion() < "5.3.0") { die('SKIP php version so lower.'); }
-if (!extension_loaded('openssl')) { die('ext/openssl required'); }
+if (!extension_loaded('openssl')) { die('skip ext/openssl required'); }
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 	die('skip windows only test');
 }
