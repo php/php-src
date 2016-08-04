@@ -2692,7 +2692,8 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 #else /* OCI_MAJOR_VERSION */
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, invokedstatement);
 
-	if (invokedstatement->impres_flag == PHP_OCI_IMPRES_NO_CHILDREN) {
+	if (invokedstatement->impres_flag == PHP_OCI_IMPRES_NO_CHILDREN ||
+        invokedstatement->impres_flag == PHP_OCI_IMPRES_IS_CHILD) {
 		/* Already know there are no Implicit Result Sets */
 	    statement = invokedstatement; 
 	} else if (invokedstatement->impres_flag == PHP_OCI_IMPRES_HAS_CHILDREN) {
