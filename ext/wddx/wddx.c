@@ -1123,18 +1123,26 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 			case ST_DATETIME: {
 				char *tmp;
 
-				tmp = emalloc(len + 1);
-				memcpy(tmp, s, len);
+				if (Z_TYPE_P(ent->data) == IS_STRING) {
+					tmp = safe_emalloc(Z_STRLEN_P(ent->data), 1, (size_t)len + 1);
+					memcpy(tmp, Z_STRVAL_P(ent->data), Z_STRLEN_P(ent->data));
+					memcpy(tmp + Z_STRLEN_P(ent->data), s, len);
+					len += Z_STRLEN_P(ent->data);
+					efree(Z_STRVAL_P(ent->data));
+					Z_TYPE_P(ent->data) = IS_LONG;
+				} else {
+					tmp = emalloc(len + 1);
+					memcpy(tmp, s, len);
+				}
 				tmp[len] = '\0';
 
 				Z_LVAL_P(ent->data) = php_parse_date(tmp, NULL);
 				/* date out of range < 1969 or > 2038 */
 				if (Z_LVAL_P(ent->data) == -1) {
-					Z_TYPE_P(ent->data) = IS_STRING;
-					Z_STRLEN_P(ent->data) = len;
-					Z_STRVAL_P(ent->data) = estrndup(s, len);
+					ZVAL_STRINGL(ent->data, tmp, len, 0);
+				} else {
+					efree(tmp);
 				}
-				efree(tmp);
 			}
 				break;
 
