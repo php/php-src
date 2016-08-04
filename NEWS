@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
 
+- Stream: 
+  . Fixed bug #72743 (Out-of-bound read in php_stream_filter_create).
+    (Loianhtuan)
+
 04 Aug 2016, PHP 7.1.0beta2
 
 - Core:
