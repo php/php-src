@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
 
+- OCI8
+  . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
+  . Fixed bug #72524 (Binding null values triggers ORA-24816 error). (Chris Jones)
+
 - Session:
   . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
 
