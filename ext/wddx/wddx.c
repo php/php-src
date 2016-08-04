@@ -1038,14 +1038,22 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 			case ST_DATETIME: {
 				char *tmp;
 
-				tmp = emalloc(len + 1);
-				memcpy(tmp, (char *)s, len);
+				if (Z_TYPE(ent->data) == IS_STRING) {
+					tmp = safe_emalloc(Z_STRLEN(ent->data), 1, (size_t)len + 1);
+					memcpy(tmp, Z_STRVAL(ent->data), Z_STRLEN(ent->data));
+					memcpy(tmp + Z_STRLEN(ent->data), s, len);
+					len += Z_STRLEN(ent->data);
+					zval_dtor(&ent->data);
+				} else {
+					tmp = emalloc(len + 1);
+					memcpy(tmp, (char *)s, len);
+				}
 				tmp[len] = '\0';
 
-				Z_LVAL(ent->data) = php_parse_date(tmp, NULL);
+				ZVAL_LONG(&ent->data, php_parse_date(tmp, NULL));
 				/* date out of range < 1969 or > 2038 */
 				if (Z_LVAL(ent->data) == -1) {
-					ZVAL_STRINGL(&ent->data, (char *)s, len);
+					ZVAL_STRINGL(&ent->data, (char *)tmp, len);
 				}
 				efree(tmp);
 			}
