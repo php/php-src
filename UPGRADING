@@ -73,20 +73,20 @@ PHP 7.1 UPGRADE NOTES
 
 - Session:
   . Session ID is generated from CSPNG directly. As a result, Session ID length
-    could be any length between 22 and 256.
-  . New default has much larger bits for session ID (240 bits vs. 128 bits), less
-    likely to have collisions. (Note: Session module has collision detection)
+    could be any length between 22 and 256. Note: Max size of session ID depends
+    on save handler you are using.
   . Following INIs are removed
      . session.hash_function
      . session.hash_bits_per_charactor
      . session.entropy_file
      . session.entropy_length
   . New INIs and defaults
-     . session.sid_length (Number of session ID characters - 22 to 256. Default: 48)
-     . session.sid_bits_per_character (Bits used per byte. 4 to 6. Default: 5)
-  . If you need old INI compatibility, use following settings.
+     . session.sid_length (Number of session ID characters - 22 to 256. Default: 32)
+     . session.sid_bits_per_character (Bits used per byte. 4 to 6. Default: 4)
+  . If you were using session.hash_func=1(SHA1) and session.hash_bits_per_charactor=6
+    Use following INIs to achive the same or better session ID strength.
      . session.sid_length=32
-     . session.sid_bits_per_character=4
+     . session.sid_bits_per_character=6
 
 
 

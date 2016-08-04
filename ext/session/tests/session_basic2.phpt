@@ -65,15 +65,15 @@ string(6) "testid"
 bool(true)
 bool(true)
 NULL
-string(48) "%s"
+string(32) "%s"
 *** With lazy_write ***
-string(48) "%s"
+string(32) "%s"
 bool(true)
 bool(true)
 NULL
-string(48) "%s"
+string(32) "%s"
 *** Cleanup ***
-string(48) "%s"
+string(32) "%s"
 bool(true)
 bool(true)
 string(0) ""

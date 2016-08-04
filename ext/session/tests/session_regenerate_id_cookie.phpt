@@ -78,7 +78,7 @@ bool(true)
 Set-Cookie: PHPSESSID=%s; path=/
 bool(true)
 bool(true)
-string(48) "%s"
+string(32) "%s"
 bool(true)
 "
 Done
