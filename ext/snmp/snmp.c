@@ -1032,7 +1032,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Got empty OID array");
 			return FALSE;
 		}
-		objid_query->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg) * zend_hash_num_elements(Z_ARRVAL_PP(oid)));
+		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(Z_ARRVAL_PP(oid)), 0);
 		if (objid_query->vars == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while parsing oid array: %s", strerror(errno));
 			efree(objid_query->vars);
