@@ -82,6 +82,7 @@ typedef struct _php_ftp_dirstream_data {
  */
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size)
 {
+	buffer[0] = '\0'; /* in case read fails to read anything */
 	while (php_stream_gets(stream, buffer, buffer_size-1) &&
 		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
@@ -707,7 +708,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	if (result > 299 || result < 200)
 		goto opendir_errexit;
 
-	// tmp_line isn't relevant after the php_fopen_do_pasv().  
+	// tmp_line isn't relevant after the php_fopen_do_pasv().
 	tmp_line[0] = '\0';
 
 	/* set up the passive connection */
@@ -735,7 +736,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		php_stream_wrapper_log_error(wrapper, options, "Unable to activate SSL mode");
 		php_stream_close(datastream);
 		datastream = NULL;
-		goto opendir_errexit;	
+		goto opendir_errexit;
 	}
 
 
