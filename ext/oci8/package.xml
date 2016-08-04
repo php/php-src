@@ -482,7 +482,7 @@ This version is for PHP 7 only.
 Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
   </notes>
 </release>
-
+   
 <release>
   <version>
    <release>2.1.0</release>
