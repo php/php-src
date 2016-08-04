@@ -1424,11 +1424,14 @@ session.cache_expire = 180
 ; http://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
-; Set session ID charactor length. This value could be between 22 to 256.
+; Set session ID character length. This value could be between 22 to 256.
 ; Shorter length than default is supported only for compatibility reason.
-; Users must use 32 or more chars.
+; Users should use 32 or more chars.
 ; http://php.net/session.sid_length
-;session.sid_length = 32
+; Default Value: 32
+; Development Value: 26
+; Production Value: 26
+session.sid_length = 26
 
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.
