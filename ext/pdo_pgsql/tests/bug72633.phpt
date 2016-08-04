@@ -1,5 +1,5 @@
 --TEST--
-currval() vs lastval() - PDO PgSQL Bug #1134 [BUG] New record, PostgreSQL and the Primary key https://github.com/phalcon/cphalcon/issues/1134
+PDO PgSQL Bug #72633 (Postgres PDO lastInsertId() should work without specifying a sequence)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');

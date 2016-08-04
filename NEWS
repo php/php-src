@@ -202,7 +202,7 @@ PHP                                                                        NEWS
   . Fixed bug #72570 (Segmentation fault when binding parameters on a query
     without placeholders). (Matteo)
   . Implemented FR #72633 (Postgres PDO lastInsertId() should work without
-    specifying a sequence). (Pablo Santiago Sánchez)
+    specifying a sequence). (Pablo Santiago Sánchez, Matteo)
 
 - Pcntl
   . Implemented asynchronous signal handling without TICKS. (Dmitry)
