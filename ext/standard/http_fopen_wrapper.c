@@ -117,11 +117,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	php_url *resource = NULL;
 	int use_ssl;
 	int use_proxy = 0;
-	char *scratch = NULL;
 	zend_string *tmp = NULL;
 	char *ua_str = NULL;
 	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
-	size_t scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
 	zval response_header;
@@ -135,8 +133,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	size_t transport_len;
 	int have_header = 0;
 	zend_bool request_fulluri = 0, ignore_errors = 0;
-	char *protocol_version = NULL;
-	int protocol_version_len = 3; /* Default: "1.0" */
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
@@ -146,6 +142,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int response_code;
 	zend_array *symbol_table;
 	smart_str req_buf = {0};
+	zend_bool custom_request_method;
 
 	ZVAL_UNDEF(&response_header);
 	tmp_line[0] = '\0';
@@ -363,6 +360,7 @@ finish:
 		redirect_max = (int)zval_get_long(tmpzval);
 	}
 
+	custom_request_method = 0;
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "method")) != NULL) {
 		if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 			/* As per the RFC, automatically redirected requests MUST NOT use other methods than
@@ -371,22 +369,15 @@ finish:
 				|| (Z_STRLEN_P(tmpzval) == 3 && memcmp("GET", Z_STRVAL_P(tmpzval), 3) == 0)
 				|| (Z_STRLEN_P(tmpzval) == 4 && memcmp("HEAD",Z_STRVAL_P(tmpzval), 4) == 0)
 			) {
-				scratch_len = strlen(path) + 29 + Z_STRLEN_P(tmpzval);
-				scratch = emalloc(scratch_len);
-				strlcpy(scratch, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) + 1);
-				strncat(scratch, " ", 1);
+				custom_request_method = 1;
+				smart_str_append(&req_buf, Z_STR_P(tmpzval));
+				smart_str_appendc(&req_buf, ' ');
 			}
 		}
 	}
 
-	if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
-		protocol_version_len = (int)spprintf(&protocol_version, 0, "%.1F", zval_get_double(tmpzval));
-	}
-
-	if (!scratch) {
-		scratch_len = strlen(path) + 29 + protocol_version_len;
-		scratch = emalloc(scratch_len);
-		strncpy(scratch, "GET ", scratch_len);
+	if (!custom_request_method) {
+		smart_str_appends(&req_buf, "GET ");
 	}
 
 	/* Should we send the entire path in the request line, default to no. */
@@ -397,34 +388,36 @@ finish:
 
 	if (request_fulluri) {
 		/* Ask for everything */
-		strcat(scratch, path);
+		smart_str_appends(&req_buf, path);
 	} else {
 		/* Send the traditional /path/to/file?query_string */
 
 		/* file */
 		if (resource->path && *resource->path) {
-			strlcat(scratch, resource->path, scratch_len);
+			smart_str_appends(&req_buf, resource->path);
 		} else {
-			strlcat(scratch, "/", scratch_len);
+			smart_str_appendc(&req_buf, '/');
 		}
 
 		/* query string */
 		if (resource->query) {
-			strlcat(scratch, "?", scratch_len);
-			strlcat(scratch, resource->query, scratch_len);
+			smart_str_appendc(&req_buf, '?');
+			smart_str_appends(&req_buf, resource->query);
 		}
 	}
 
 	/* protocol version we are speaking */
-	if (protocol_version) {
-		strlcat(scratch, " HTTP/", scratch_len);
-		strlcat(scratch, protocol_version, scratch_len);
-		strlcat(scratch, "\r\n", scratch_len);
-	} else {
-		strlcat(scratch, " HTTP/1.0\r\n", scratch_len);
-	}
+	if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
+		char *protocol_version;
+		spprintf(&protocol_version, 0, "%.1F", zval_get_double(tmpzval));
 
-	smart_str_appends(&req_buf, scratch);
+		smart_str_appends(&req_buf, " HTTP/");
+		smart_str_appends(&req_buf, protocol_version);
+		smart_str_appends(&req_buf, "\r\n");
+		efree(protocol_version);
+	} else {
+		smart_str_appends(&req_buf, " HTTP/1.0\r\n");
+	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
 		tmp = NULL;
@@ -537,11 +530,14 @@ finish:
 
 	/* auth header if it was specified */
 	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user) {
+		/* make scratch large enough to hold the whole URL (over-estimate) */
+		size_t scratch_len = strlen(path) + 1;
+		char *scratch = emalloc(scratch_len);
 		zend_string *stmp;
+
 		/* decode the strings first */
 		php_url_decode(resource->user, strlen(resource->user));
 
-		/* scratch is large enough, since it was made large enough for the whole URL */
 		strcpy(scratch, resource->user);
 		strcat(scratch, ":");
 
@@ -553,31 +549,33 @@ finish:
 
 		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
 
-		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", ZSTR_VAL(stmp)) > 0) {
-			smart_str_appends(&req_buf, scratch);
-			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
-		}
+		smart_str_appends(&req_buf, "Authorization: Basic ");
+		smart_str_appends(&req_buf, ZSTR_VAL(stmp));
+		smart_str_appends(&req_buf, "\r\n");
+
+		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 
 		zend_string_free(stmp);
+		efree(scratch);
 	}
 
 	/* if the user has configured who they are, send a From: line */
-	if (((have_header & HTTP_HEADER_FROM) == 0) && FG(from_address)) {
-		if (snprintf(scratch, scratch_len, "From: %s\r\n", FG(from_address)) > 0)
-			smart_str_appends(&req_buf, scratch);
+	if (!(have_header & HTTP_HEADER_FROM) && FG(from_address)) {
+		smart_str_appends(&req_buf, "From: ");
+		smart_str_appends(&req_buf, FG(from_address));
+		smart_str_appends(&req_buf, "\r\n");
 	}
 
 	/* Send Host: header so name-based virtual hosts work */
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
+		smart_str_appends(&req_buf, "Host: ");
+		smart_str_appends(&req_buf, resource->host);
 		if ((use_ssl && resource->port != 443 && resource->port != 0) ||
 			(!use_ssl && resource->port != 80 && resource->port != 0)) {
-			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0)
-				smart_str_appends(&req_buf, scratch);
-		} else {
-			if (snprintf(scratch, scratch_len, "Host: %s\r\n", resource->host) > 0) {
-				smart_str_appends(&req_buf, scratch);
-			}
+			smart_str_appendc(&req_buf, ':');
+			smart_str_append_unsigned(&req_buf, resource->port);
 		}
+		smart_str_appends(&req_buf, "\r\n");
 	}
 
 	/* Send a Connection: close header to avoid hanging when the server
@@ -587,7 +585,7 @@ finish:
 	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
 	 * keep-alive response, which is the preferred response type. */
 	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
-		smart_str_appends(&req_buf,"Connection: close\r\n");
+		smart_str_appends(&req_buf, "Connection: close\r\n");
 	}
 
 	if (context &&
@@ -629,8 +627,9 @@ finish:
 				(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0
 		) {
-			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %zd\r\n", Z_STRLEN_P(tmpzval));
-			smart_str_appendl(&req_buf, scratch, scratch_len);
+			smart_str_appends(&req_buf, "Content-Length: ");
+			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
+			smart_str_appends(&req_buf, "\r\n");
 			have_header |= HTTP_HEADER_CONTENT_LENGTH;
 		}
 
@@ -644,8 +643,9 @@ finish:
 		(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 		Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %zd\r\n", Z_STRLEN_P(tmpzval));
-			smart_str_appendl(&req_buf, scratch, scratch_len);
+			smart_str_appends(&req_buf, "Content-Length: ");
+			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
+			smart_str_appends(&req_buf, "\r\n");
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
 			smart_str_appends(&req_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
@@ -898,16 +898,8 @@ out:
 
 	smart_str_free(&req_buf);
 
-	if (protocol_version) {
-		efree(protocol_version);
-	}
-
 	if (http_header_line) {
 		efree(http_header_line);
-	}
-
-	if (scratch) {
-		efree(scratch);
 	}
 
 	if (resource) {
