@@ -22,6 +22,8 @@ PHP                                                                        NEWS
     (Loianhtuan)
   . Implemented FR #27814 (Multiple small packets send for HTTP request).
     (vhuk)
+  . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
+    with IIS FTP 7.5, 8.5). (vhuk)
 
 04 Aug 2016, PHP 7.1.0beta2
 
