@@ -1109,6 +1109,62 @@ static tag_info_array tag_table_VND_DJI = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_SONY = {
+  { 0x0102, "Quality"}, 
+  { 0x0104, "FlashExposureComp"}, 
+  { 0x0105, "Teleconverter"}, 
+  { 0x0112, "WhiteBalanceFineTune"}, 
+  { 0x0114, "CameraSettings"}, 
+  { 0x0115, "WhiteBalance"}, 
+  { 0x0116, "0x0116"}, 
+  { 0x0e00, "PrintIM"}, 
+  { 0x1000, "MultiBurstMode"}, 
+  { 0x1001, "MultiBurstImageWidth"}, 
+  { 0x1002, "MultiBurstImageHeight"}, 
+  { 0x1003, "Panorama"}, 
+  { 0x2000, "0x2000"}, 
+  { 0x2001, "PreviewImage"}, 
+  { 0x2002, "0x2002"}, 
+  { 0x2003, "0x2003"}, 
+  { 0x2004, "Contrast"}, 
+  { 0x2005, "Saturation"}, 
+  { 0x2006, "0x2006"}, 
+  { 0x2007, "0x2007"}, 
+  { 0x2008, "0x2008"}, 
+  { 0x2009, "0x2009"}, 
+  { 0x200a, "AutoHDR"}, 
+  { 0x3000, "ShotInfo"}, 
+  { 0xb000, "FileFormat"}, 
+  { 0xb001, "SonyModelID"}, 
+  { 0xb020, "ColorReproduction"}, 
+  { 0xb021, "ColorTemperature"}, 
+  { 0xb022, "ColorCompensationFilter"}, 
+  { 0xb023, "SceneMode"}, 
+  { 0xb024, "ZoneMatching"}, 
+  { 0xb025, "DynamicRangeOptimizer"}, 
+  { 0xb026, "ImageStabilization"}, 
+  { 0xb027, "LensID"}, 
+  { 0xb028, "MinoltaMakerNote"}, 
+  { 0xb029, "ColorMode"}, 
+  { 0xb02b, "FullImageSize"}, 
+  { 0xb02c, "PreviewImageSize"}, 
+  { 0xb040, "Macro"}, 
+  { 0xb041, "ExposureMode"}, 
+  { 0xb042, "FocusMode"}, 
+  { 0xb043, "AFMode"}, 
+  { 0xb044, "AFIlluminator"}, 
+  { 0xb047, "JPEGQuality"}, 
+  { 0xb048, "FlashLevel"}, 
+  { 0xb049, "ReleaseMode"}, 
+  { 0xb04a, "SequenceNumber"}, 
+  { 0xb04b, "AntiBlur"}, 
+  { 0xb04e, "LongExposureNoiseReduction"}, 
+  { 0xb04f, "DynamicRangeOptimizer"}, 
+  { 0xb052, "IntelligentAuto"}, 
+  { 0xb054, "WhiteBalance2"}, 
+  TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -1142,7 +1198,8 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
   { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
+  { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
