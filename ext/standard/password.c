@@ -45,7 +45,6 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 #if HAVE_ARGON2LIB
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2I", PHP_PASSWORD_ARGON2I, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2", PHP_PASSWORD_ARGON2, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
@@ -195,13 +194,13 @@ PHP_FUNCTION(password_get_info)
 		case PHP_PASSWORD_ARGON2I:
 			{
 				zend_long v = 0;
-				zend_long m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
-				zend_long t_cost = PHP_PASSWORD_ARGON2_TIME_COST;
+				zend_long memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
+				zend_long time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				zend_long threads = PHP_PASSWORD_ARGON2_THREADS;
 
-				sscanf(hash, "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
-				add_assoc_long(&options, "m_cost", m_cost);
-				add_assoc_long(&options, "t_cost", t_cost);
+				sscanf(hash, "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &memory_cost, &time_cost, &threads);
+				add_assoc_long(&options, "memory_cost", memory_cost);
+				add_assoc_long(&options, "time_cost", time_cost);
 				add_assoc_long(&options, "threads", threads);
 			}
 			break;
@@ -259,25 +258,25 @@ PHP_FUNCTION(password_needs_rehash)
 		case PHP_PASSWORD_ARGON2I:
 			{
 				zend_long v = 0;
-				zend_long new_m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, m_cost = 0;
-				zend_long new_t_cost = PHP_PASSWORD_ARGON2_TIME_COST, t_cost = 0;
+				zend_long new_memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, memory_cost = 0;
+				zend_long new_time_cost = PHP_PASSWORD_ARGON2_TIME_COST, time_cost = 0;
 				zend_long new_threads = PHP_PASSWORD_ARGON2_THREADS, threads = 0;
 
-				if (options && (option_buffer = zend_hash_str_find(options, "m_cost", sizeof("m_cost")-1)) != NULL) {
-					new_m_cost = zval_get_long(option_buffer);
+				if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
+					new_memory_cost = zval_get_long(option_buffer);
 				}
 
-				if (options && (option_buffer = zend_hash_str_find(options, "t_cost", sizeof("t_cost")-1)) != NULL) {
-					new_t_cost = zval_get_long(option_buffer);
+				if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
+					new_time_cost = zval_get_long(option_buffer);
 				}
 
 				if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
 					new_threads = zval_get_long(option_buffer);
 				}
 
-				sscanf(hash, "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &m_cost, &t_cost, &threads);
+				sscanf(hash, "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &memory_cost, &time_cost, &threads);
 
-				if (new_t_cost != t_cost || new_m_cost != m_cost || new_threads != threads) {
+				if (new_time_cost != time_cost || new_memory_cost != memory_cost || new_threads != threads) {
 					RETURN_TRUE;
 				}
 			}
@@ -367,8 +366,8 @@ PHP_FUNCTION(password_hash)
 	zval *option_buffer;
 
 #if HAVE_ARGON2LIB
-	size_t t_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
-	size_t m_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
+	size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
+	size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 	argon2_type type = Argon2_i;
 #endif
@@ -399,21 +398,21 @@ PHP_FUNCTION(password_hash)
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 			{
-				if (options && (option_buffer = zend_hash_str_find(options, "m_cost", sizeof("m_cost")-1)) != NULL) {
-					m_cost = zval_get_long(option_buffer);
+				if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
+					memory_cost = zval_get_long(option_buffer);
 				}
 
-				if (m_cost > ARGON2_MAX_MEMORY || m_cost < ARGON2_MIN_MEMORY) {
-					php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range", m_cost);
+				if (memory_cost > ARGON2_MAX_MEMORY || memory_cost < ARGON2_MIN_MEMORY) {
+					php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range", memory_cost);
 					RETURN_NULL();
 				}
 
-				if (options && (option_buffer = zend_hash_str_find(options, "t_cost", sizeof("t_cost")-1)) != NULL) {
-					t_cost = zval_get_long(option_buffer);
+				if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
+					time_cost = zval_get_long(option_buffer);
 				}
 
-				if (t_cost > ARGON2_MAX_TIME || t_cost < ARGON2_MIN_TIME) {
-					php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range", t_cost);
+				if (time_cost > ARGON2_MAX_TIME || time_cost < ARGON2_MIN_TIME) {
+					php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range", time_cost);
 					RETURN_NULL();
 				}
 				
@@ -532,8 +531,8 @@ PHP_FUNCTION(password_hash)
 				int status = 0;
 
 				encoded_len = argon2_encodedlen(
-					t_cost,
-					m_cost,
+					time_cost,
+					memory_cost,
 					threads,
 					(uint32_t)salt_len,
 					out_len
@@ -543,8 +542,8 @@ PHP_FUNCTION(password_hash)
 				zend_string *encoded = zend_string_alloc(encoded_len, 0);
 
 				status = argon2_hash(
-					t_cost,
-					m_cost,
+					time_cost,
+					memory_cost,
 					threads,
 					password,
 					password_len,
