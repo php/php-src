@@ -90,6 +90,8 @@ PHP                                                                        NEWS
   . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
   . Fixed bug #72667 (opendir() with ftp:// attempts to open data stream for
     non-existent directories). (vhuk)
+  . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
+    with IIS FTP 7.5, 8.5). (vhuk)
 
 - SPL:
   . Fixed bug #72122 (IteratorIterator breaks '@' error suppression). (kinglozzer)

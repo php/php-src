@@ -737,17 +737,6 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		goto opendir_errexit;
 	}
 
-	php_stream_context_set(datastream, context);
-	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
-			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
-			php_stream_xport_crypto_enable(datastream, 1 TSRMLS_CC) < 0)) {
-
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
-		php_stream_close(datastream);
-		datastream = NULL;
-		goto opendir_errexit;
-	}
-
 
 	php_stream_printf(stream TSRMLS_CC, "NLST %s\r\n", (resource->path != NULL ? resource->path : "/"));
 
@@ -756,6 +745,17 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		/* Could not retrieve or send the file
 		 * this data will only be sent to us after connection on the data port was initiated.
 		 */
+		php_stream_close(datastream);
+		datastream = NULL;
+		goto opendir_errexit;
+	}
+
+	php_stream_context_set(datastream, context);
+	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
+			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
+			php_stream_xport_crypto_enable(datastream, 1 TSRMLS_CC) < 0)) {
+
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
 		php_stream_close(datastream);
 		datastream = NULL;
 		goto opendir_errexit;
