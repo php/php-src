@@ -2153,6 +2153,7 @@ static void check_type_narrowing(const zend_op_array *op_array, zend_ssa *ssa, z
 	 * type inference)
 	 */
 	if (old_type & ~new_type) {
+		ZEND_ASSERT(0); /* Currently this should never happen */
 		reset_dependent_vars(op_array, ssa, worklist, var);
 	}
 }
