@@ -436,7 +436,10 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		/* This should not happen unless user set insane filter ID. */
 		zval_ptr_dtor(value);
 		ZVAL_FALSE(value);
-		PHP_FILTER_RAISE_EXCEPTION("Invalid filter specifieid", 0);
+		/* Should raise error here when exception is disabled */
+		if (IF_G(raise_exception)) {
+			php_error_docref(NULL, E_WARNING, "Invalid filter specifieid (" ZEND_LONG_FMT ")", filter);
+		}
 		return;
 	}
 
@@ -771,7 +774,10 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 	if (!op) {
 		zval_ptr_dtor(return_value);
 		ZVAL_DUP(return_value, input);
-		PHP_FILTER_RAISE_EXCEPTION("Filter validation rule does not exist", 0);
+		/* Should raise error here when exception is disabled */
+		if (exception) {
+			php_error_docref(NULL, E_WARNING, "Filter validation rule does not exist");
+		}
 		php_filter_call(return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY, exception);
 	} else if (Z_TYPE_P(op) == IS_LONG) {
 		zval_ptr_dtor(return_value);
@@ -807,7 +813,10 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		PHP_FILTER_RAISE_EXCEPTION("Filter validation rule is invalid", 0);
+		/* Should raise error here when exception is disabled */
+		if (exception) {
+			php_error_docref(NULL, E_WARNING, "Filter validation rule is invalid");
+		}
 		RETURN_FALSE;
 	}
 }
@@ -1167,7 +1176,7 @@ static int php_filter_check_options_array(zval *options) /* {{{ */
 	zend_string *key;
 	zend_bool status = SUCCESS, found;
 	const char *opts[] = {"min_range", "max_range", "min_bytes", "max_bytes", "encoding",
-						  "default", "decimal", "regexp", "callback" };
+						  "allowed_chars", "default", "decimal", "regexp", "callback" };
 	zend_long nopts = sizeof(opts)/sizeof(opts[0]), i;
 
 	ZEND_ASSERT(Z_TYPE_P(options) == IS_ARRAY);
@@ -1327,14 +1336,12 @@ static int php_filter_check_definition(zval *definitions) /* {{{ */
 PHP_FUNCTION(filter_check_definition)
 {
 	zval *definitions;
-	zend_bool ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &definitions) == FAILURE) {
 		return;
 	}
 
-	ret = php_filter_check_definition(definitions);
-	if (ret == SUCCESS) {
+	if (php_filter_check_definition(definitions) == SUCCESS) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;

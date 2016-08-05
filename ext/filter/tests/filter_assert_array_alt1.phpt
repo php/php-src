@@ -199,6 +199,8 @@ array(1) {
 Warning: filter_assert_array(): Empty keys are not allowed in the definition array in %s on line 102
 string(37) "Filter validated value does not exist"
 
+Warning: filter_assert_array(): Invalid filter specifieid (0) in %s on line 108
+
 Warning: filter_assert_array(): Empty keys are not allowed in the definition array in %s on line 108
 string(37) "Filter validated value does not exist"
 
