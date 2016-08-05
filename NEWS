@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     Samsung, DJI & Panasonic. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some 
     images). (Kalle)
+  . Fixed bug #68547 (Exif Header component value check error). 
+    (sjh21a at gmail dot com, Kalle)
   . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level 
     reached for some cameras). (Kalle)
   . Fixed Redhat bug #1362571 (PHP not returning full results for 
