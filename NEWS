@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
 
+- Streams:
+  . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
+    with IIS FTP 7.5, 8.5). (vhuk)
+
 
 ?? ??? 2016 PHP 7.0.10
 
