@@ -171,7 +171,7 @@ ZEND_INI_MH(OnUpdateEncode)
 			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", ZSTR_VAL(new_value));
 			return FAILURE;
 		}
-		efree(return_list);
+		pefree((void *) return_list, 0);
 	}
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -186,7 +186,7 @@ ZEND_INI_MH(OnUpdateDecode)
 			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", ZSTR_VAL(new_value));
 			return FAILURE;
 		}
-		efree(return_list);
+		pefree((void *) return_list, 0);
 	}
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
