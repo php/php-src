@@ -1,151 +1,151 @@
 --TEST--
-validate_var() and FILTER_VALIDATE_IP
+filter_assert() and FILTER_VALIDATE_IP
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 try {
-	var_dump(validate_var("192.168.0.1", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("192.168.0.1", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("192.168.0.1.1", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("192.168.0.1.1", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("::1", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("::1", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("fe00::0", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("fe00::0", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("::123456", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("::123456", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("::1::b", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("::1::b", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("127.0.0.1", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("127.0.0.1", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("192.168.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE));
+	var_dump(filter_assert("192.168.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("192.0.34.166", FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE));
+	var_dump(filter_assert("192.0.34.166", FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+	var_dump(filter_assert("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("192.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+	var_dump(filter_assert("192.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("100.64.0.0", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+	var_dump(filter_assert("100.64.0.0", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("100.127.255.255", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+	var_dump(filter_assert("100.127.255.255", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("192.0.34.166", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("192.0.34.166", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("256.1237.123.1", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("256.1237.123.1", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("255.255.255.255", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("255.255.255.255", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("255.255.255.255", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
+	var_dump(filter_assert("255.255.255.255", FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var(-1, FILTER_VALIDATE_IP));
+	var_dump(filter_assert(-1, FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
+	var_dump(filter_assert("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
+	var_dump(filter_assert("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
+	var_dump(filter_assert("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_RES_RANGE));
+	var_dump(filter_assert("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_RES_RANGE));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
+	var_dump(filter_assert("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("....", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("....", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("...", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("...", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("..", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("..", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var(".", FILTER_VALIDATE_IP));
+	var_dump(filter_assert(".", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 try {
-	var_dump(validate_var("1.1.1.1", FILTER_VALIDATE_IP));
+	var_dump(filter_assert("1.1.1.1", FILTER_VALIDATE_IP));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }

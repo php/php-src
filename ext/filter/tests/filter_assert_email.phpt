@@ -1,5 +1,5 @@
 --TEST--
-validate_var() and FILTER_VALIDATE_EMAIL
+filter_assert() and FILTER_VALIDATE_EMAIL
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
@@ -23,7 +23,7 @@ $values = Array(
 );
 foreach ($values as $value) {
 	try {
-		var_dump(validate_var($value, FILTER_VALIDATE_EMAIL));
+		var_dump(filter_assert($value, FILTER_VALIDATE_EMAIL));
 	} catch (Exception $e) {
 		var_dump($e->getMessage());
 	}

@@ -9,16 +9,16 @@ a=1&b=2
 function myfunc($val) {
 	return $val . '_callback';
 }
-echo validate_input(INPUT_GET, 'a', FILTER_CALLBACK, array("options"=>'myfunc'));
+echo filter_assert_input(INPUT_GET, 'a', FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
-echo validate_input(INPUT_GET, 'b', FILTER_VALIDATE_INT);
+echo filter_assert_input(INPUT_GET, 'b', FILTER_VALIDATE_INT);
 echo "\n";
 $data = "data";
 
-echo validate_var($data, FILTER_CALLBACK, array("options"=>'myfunc'));
+echo filter_assert($data, FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
 
-$res = validate_input_array(INPUT_GET, array(
+$res = filter_assert_input_array(INPUT_GET, array(
 				'a' => array(
 					'filter' => FILTER_CALLBACK,
 					'options' => 'myfunc'
