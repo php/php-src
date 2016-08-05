@@ -110,21 +110,41 @@
 || (id >= FILTER_VALIDATE_ALL && id <= FILTER_VALIDATE_LAST) \
 || id == FILTER_CALLBACK)
 
+#define PHP_FILTER_SAVE_CURRENT_KEY(idx, key) \
+	do { \
+		if (!Z_ISUNDEF(IF_G(current_key))) {   \
+			zval_ptr_dtor(&IF_G(current_key)); \
+		} \
+		if (key) { \
+			ZVAL_STR_COPY(&IF_G(current_key), key); \
+		} else { \
+			ZVAL_LONG(&IF_G(current_key), idx); \
+		} \
+	} while(0)
+
+#define PHP_FILTER_SAVE_INVALID_KEY() \
+	if (!Z_ISUNDEF(IF_G(invalid_key))) { \
+		zval_ptr_dtor(&IF_G(invalid_key)); \
+	} \
+	ZVAL_COPY(&IF_G(invalid_key), &IF_G(current_key))
+
 #define PHP_FILTER_RAISE_EXCEPTION(message, code) \
+	PHP_FILTER_SAVE_INVALID_KEY(); \
 	do { \
 		if (IF_G(raise_exception)) { \
 			zend_throw_exception(spl_ce_UnexpectedValueException, message, code); \
 		} \
 	} while(0)
 
-#define RETURN_VALIDATION_FAILED(message, code)	\
-	zval_dtor(value);	\
-	if (flags & FILTER_NULL_ON_FAILURE) {	\
-		ZVAL_NULL(value);	\
-	} else {	\
-		PHP_FILTER_RAISE_EXCEPTION(message, code);	\
-		ZVAL_FALSE(value);	\
-	}	\
+#define RETURN_VALIDATION_FAILED(message, code) \
+	PHP_FILTER_SAVE_INVALID_KEY(); \
+	zval_dtor(value); \
+	if (flags & FILTER_NULL_ON_FAILURE) { \
+		ZVAL_NULL(value); \
+	} else { \
+		PHP_FILTER_RAISE_EXCEPTION(message, code); \
+		ZVAL_FALSE(value); \
+	} \
 	return
 
 #define PHP_FILTER_TRIM_DEFAULT(p, len) PHP_FILTER_TRIM_DEFAULT_EX(p, len, 1);

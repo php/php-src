@@ -47,9 +47,10 @@ PHP_RSHUTDOWN_FUNCTION(filter);
 PHP_MINFO_FUNCTION(filter);
 
 PHP_FUNCTION(filter_assert_input);
-PHP_FUNCTION(filter_assert);
 PHP_FUNCTION(filter_assert_input_array);
+PHP_FUNCTION(filter_assert);
 PHP_FUNCTION(filter_assert_array);
+PHP_FUNCTION(filter_assert_get_invalid_key);
 PHP_FUNCTION(filter_input);
 PHP_FUNCTION(filter_var);
 PHP_FUNCTION(filter_input_array);
@@ -69,6 +70,8 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zend_long default_filter;
 	zend_long default_filter_flags;
 	zend_bool raise_exception;
+	zval current_key;
+	zval invalid_key;
 ZEND_END_MODULE_GLOBALS(filter)
 
 #if defined(COMPILE_DL_FILTER) && defined(ZTS)

@@ -112,6 +112,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_assert_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, add_empty)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_assert_get_invalid_key, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_input, 0, 0, 2)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, variable_name)
@@ -161,6 +164,7 @@ static const zend_function_entry filter_functions[] = {
 	PHP_FE(filter_assert,		arginfo_filter_assert)
 	PHP_FE(filter_assert_input_array,	arginfo_filter_assert_input_array)
 	PHP_FE(filter_assert_array,		arginfo_filter_assert_array)
+	PHP_FE(filter_assert_get_invalid_key,		arginfo_filter_assert_get_invalid_key)
 	PHP_FE(filter_input,		arginfo_filter_input)
 	PHP_FE(filter_var,		arginfo_filter_var)
 	PHP_FE(filter_input_array,	arginfo_filter_input_array)
@@ -241,6 +245,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	ZVAL_UNDEF(&filter_globals->env_array);
 	ZVAL_UNDEF(&filter_globals->server_array);
 	ZVAL_UNDEF(&filter_globals->session_array);
+	ZVAL_UNDEF(&filter_globals->invalid_key);
 	filter_globals->default_filter = FILTER_DEFAULT;
 }
 /* }}} */
@@ -357,20 +362,23 @@ PHP_MSHUTDOWN_FUNCTION(filter)
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
-#define VAR_ARRAY_COPY_DTOR(a)   \
+#define FILTER_GDTOR(a)   \
+	do \
 	if (!Z_ISUNDEF(IF_G(a))) {   \
 		zval_ptr_dtor(&IF_G(a)); \
 		ZVAL_UNDEF(&IF_G(a));    \
-	}
+	} while(0)
 
 PHP_RSHUTDOWN_FUNCTION(filter)
 {
-	VAR_ARRAY_COPY_DTOR(get_array)
-	VAR_ARRAY_COPY_DTOR(post_array)
-	VAR_ARRAY_COPY_DTOR(cookie_array)
-	VAR_ARRAY_COPY_DTOR(server_array)
-	VAR_ARRAY_COPY_DTOR(env_array)
-	VAR_ARRAY_COPY_DTOR(session_array)
+	FILTER_GDTOR(get_array);
+	FILTER_GDTOR(post_array);
+	FILTER_GDTOR(cookie_array);
+	FILTER_GDTOR(server_array);
+	FILTER_GDTOR(env_array);
+	FILTER_GDTOR(session_array);
+	FILTER_GDTOR(current_key);
+	FILTER_GDTOR(invalid_key);
 	return SUCCESS;
 }
 /* }}} */
@@ -563,13 +571,17 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_l
 static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, zend_bool copy) /* {{{ */
 {
 	if (Z_TYPE_P(value) == IS_ARRAY) {
+		zend_ulong idx;
+		zend_string *key;
 		zval *element;
 
 		if (Z_ARRVAL_P(value)->u.v.nApplyCount > 1) {
 			return;
 		}
 
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
+		ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(value), idx, key, element) {
+			/* Save processing key to retreive after validation exception */
+			PHP_FILTER_SAVE_CURRENT_KEY(idx, key);
 			ZVAL_DEREF(element);
 			SEPARATE_ZVAL_NOREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
@@ -752,6 +764,7 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 		(void)(idx);
 		ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(filter_args), idx, key, nested_args) {
 			if (!key && Z_TYPE_P(nested_args) == IS_ARRAY) {
+				PHP_FILTER_SAVE_CURRENT_KEY(idx, key);
 				php_filter_call_setup_options(nested_args, &filter, &filter_flags, &options);
 				php_filter_call_apply(filtered, filter, filter_flags, options, copy);
 			}
@@ -772,7 +785,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 	if (!op) {
 		zval_ptr_dtor(return_value);
 		ZVAL_DUP(return_value, input);
-		/* Should raise error here when exception is disabled */
+		/* Should not raise error here when exception is disabled */
 		if (exception) {
 			php_error_docref(NULL, E_WARNING, "Filter validation rule does not exist");
 		}
@@ -800,18 +813,20 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 					add_assoc_null_ex(return_value, ZSTR_VAL(arg_key), ZSTR_LEN(arg_key));
 				}
 				else {
+					PHP_FILTER_SAVE_CURRENT_KEY(0, arg_key);
 					PHP_FILTER_RAISE_EXCEPTION("Filter validated value does not exist", 0);
 				}
 			} else {
 				zval nval;
 				ZVAL_DEREF(tmp);
 				ZVAL_DUP(&nval, tmp);
+				PHP_FILTER_SAVE_CURRENT_KEY(0, arg_key);
 				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR, exception);
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		/* Should raise error here when exception is disabled */
+		/* Should not raise error here when exception is disabled */
 		if (exception) {
 			php_error_docref(NULL, E_WARNING, "Filter validation rule is invalid");
 		}
@@ -976,6 +991,21 @@ PHP_FUNCTION(filter_assert_array)
 	php_filter_array_handler(array_input, op, return_value, add_empty, exception);
 }
 /* }}} */
+
+
+/* {{{ proto mixed filter_assert_get_invalid_key(void)
+ * Retrieve key info of invalid element */
+PHP_FUNCTION(filter_assert_get_invalid_key)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (Z_ISUNDEF(IF_G(invalid_key))) {
+		return;
+	}
+	ZVAL_COPY(return_value, &IF_G(invalid_key));
+}
 
 
 /* {{{ proto mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
@@ -1329,7 +1359,7 @@ static int php_filter_check_definition(zval *definitions) /* {{{ */
 /* }}} */
 
 
-/* {{{ proto filter_check_definition(array filter_definitions)
+/* {{{ proto bool filter_check_definition(array filter_definitions)
  * Checks filter definitions array for *_array() functions */
 PHP_FUNCTION(filter_check_definition)
 {
@@ -1344,6 +1374,7 @@ PHP_FUNCTION(filter_check_definition)
 	}
 	RETURN_FALSE;
 }
+
 
 /*
  * Local variables:

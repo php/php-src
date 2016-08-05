@@ -35,9 +35,10 @@ $args = array(
 
 try {
 	var_dump(filter_var_array($data, $args)); // Should pass
-	var_dump(filter_assert_array($data, $args)); // Should fail
+	var_dump(filter_assert_array($data, $args, TRUE)); // Should fail
 } catch (UnexpectedValueException $e) {
 	var_dump($e->getMessage());
+	var_dump(filter_assert_get_invalid_key());
 }
 
 // Fix data so that 'testscalar' validates
@@ -47,6 +48,7 @@ try {
 	var_dump(filter_assert_array($data, $args, FALSE)); // Try w/o add_empty flag. Should fail.
 } catch (UnexpectedValueException $e) {
 	var_dump($e->getMessage());
+	var_dump(filter_assert_get_invalid_key());
 }
 ?>
 --EXPECT--
@@ -71,6 +73,7 @@ array(6) {
   }
 }
 string(52) "Filter validated value is array, but requires scalar"
+string(10) "testscalar"
 array(6) {
   ["product_id"]=>
   string(17) "libgd%3Cscript%3E"
@@ -92,3 +95,4 @@ array(6) {
   }
 }
 string(37) "Filter validated value does not exist"
+string(12) "doesnotexist"
