@@ -3139,9 +3139,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					if (t1 & MAY_BE_ARRAY_KEY_STRING) {
 						tmp |= MAY_BE_STRING;
 					}
-					if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
-						tmp |= MAY_BE_NULL;
-					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}

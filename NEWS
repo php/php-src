@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #72711 (`mb_ereg` does not clear the `$regs` parameter on
     failure). (ju1ius)
 
+- Opcache:
+  . Fixed bug #72762 (Infinite loop while parsing a file with opcache enabled).
+    (Nikita)
+
 - Stream: 
   . Fixed bug #72743 (Out-of-bound read in php_stream_filter_create).
     (Loianhtuan)
