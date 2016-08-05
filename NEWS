@@ -3,8 +3,12 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.2.0alpha1
 
 - EXIF:
+  . Added support for vendor specific tags for the following formats: Sony, 
+    Samsung, DJI & Panasonic. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some 
     images). (Kalle)
+  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level 
+    reached for some cameras). (Kalle)
   . Fixed Redhat bug #1362571 (PHP not returning full results for 
     exif_read_data function). (Kalle)
 

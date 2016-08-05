@@ -199,6 +199,10 @@ PHP 7.1 UPGRADE NOTES
   . Attempting to read an invalid or write to a readonly property will throw
     an instance of Error instead of resulting in a fatal error.
 
+- EXIF:
+   . Added extended exif tag support for the following formats: Sony, 
+     Samsung, DJI & Panasonic.
+
 - GD:
   . Changed the default of the ini setting gd.jpeg_ignore_warning to 1.
 
