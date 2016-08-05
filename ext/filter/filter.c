@@ -436,10 +436,8 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		/* This should not happen unless user set insane filter ID. */
 		zval_ptr_dtor(value);
 		ZVAL_FALSE(value);
-		/* Should raise error here when exception is disabled */
-		if (IF_G(raise_exception)) {
-			php_error_docref(NULL, E_WARNING, "Invalid filter specifieid (" ZEND_LONG_FMT ")", filter);
-		}
+		/* Cannot use php_error_docref() here */
+		PHP_FILTER_RAISE_EXCEPTION("Invalid filter specifieid", 0);
 		return;
 	}
 
