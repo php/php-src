@@ -435,6 +435,7 @@ void php_filter_validate_string(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zend_bool cntrl = !(flags & FILTER_FLAG_STRING_ALLOW_CNTRL);
 	zend_bool cntrl_checked = 0;
 	zend_bool multi_line = flags & FILTER_FLAG_STRING_MULTI_LINE;
+	zend_bool allow_tab = flags & FILTER_FLAG_STRING_ALLOW_TAB;
 	zend_bool alpha = flags & FILTER_FLAG_STRING_ALPHA;
 	zend_bool num = flags & FILTER_FLAG_STRING_NUM;
 	zend_bool alnum = flags & FILTER_FLAG_STRING_ALNUM;
@@ -498,7 +499,7 @@ void php_filter_validate_string(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 							RETURN_VALIDATION_FAILED("String validation: Invalid UTF-8 encoding", 0);
 						}
 						if (cntrl && (this_char < 32 || this_char == 127)) {
-							if (this_char == '\t') {
+							if (allow_tab && this_char == '\t') {
 								continue;
 							} else if (multi_line &&
 									   (this_char == '\n' || this_char == '\r' || this_char == '\t')) {
