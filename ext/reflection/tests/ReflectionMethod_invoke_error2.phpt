@@ -21,7 +21,7 @@ var_dump($methodWithArgs->invoke($testClassInstance));
 --EXPECTF--
 Method with args:
 
-Fatal error: Uncaught Error: Too few arguments to function TestClass::methodWithArgs(), 0 passed and exactly 2 expected in %sReflectionMethod_invoke_error2.php:5
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function TestClass::methodWithArgs(), 0 passed and exactly 2 expected in %sReflectionMethod_invoke_error2.php:5
 Stack trace:
 #0 [internal function]: TestClass->methodWithArgs()
 #1 %sReflectionMethod_invoke_error2.php(15): ReflectionMethod->invoke(Object(TestClass))
