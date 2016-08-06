@@ -2235,7 +2235,7 @@ PHP_FUNCTION(mssql_guid_string)
 	char *binary;
 	int binary_len;
 	zend_bool sf = 0;
-	char buffer[32+1] = NULL;
+	char buffer[32+1] = { 0 };
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &binary, &binary_len, &sf) == FAILURE) {
 		return;
@@ -2251,7 +2251,7 @@ PHP_FUNCTION(mssql_guid_string)
 		RETURN_STRING(buffer, 1);
 	} else {
 		int i;
-		char buffer2[36+1] = NULL;
+		char buffer2[36+1] = { 0 };
 
 		/* FIXME this works only on little endian machine */
 		for (i=0; i<4; i++) {
