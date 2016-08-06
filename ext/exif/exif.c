@@ -1282,6 +1282,33 @@ static tag_info_array tag_table_VND_MINOLTA = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_SIGMA = {
+  { 0x0002, "SerialNumber"},
+  { 0x0003, "DriveMode"},
+  { 0x0004, "ResolutionMode"},
+  { 0x0005, "AutofocusMode"},
+  { 0x0006, "FocusSetting"},
+  { 0x0007, "WhiteBalance"},
+  { 0x0008, "ExposureMode"},
+  { 0x0009, "MeteringMode"},
+  { 0x000a, "LensRange"},
+  { 0x000b, "ColorSpace"},
+  { 0x000c, "Exposure"},
+  { 0x000d, "Contrast"},
+  { 0x000e, "Shadow"},
+  { 0x000f, "Highlight"},
+  { 0x0010, "Saturation"},
+  { 0x0011, "Sharpness"},
+  { 0x0012, "FillLight"},
+  { 0x0014, "ColorAdjustment"},
+  { 0x0015, "AdjustmentMode"},
+  { 0x0016, "Quality"},
+  { 0x0017, "Firmware"},
+  { 0x0018, "Software"},
+  { 0x0019, "AutoBracket"},
+  TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -1317,7 +1344,9 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
   { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
   { tag_table_VND_PENTAX,    "PENTAX",                  NULL, "AOC\x00",                   6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
+  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "SIGMA\x00\x00\x00",         10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "FOVEON\x00\x00\x00",        10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
