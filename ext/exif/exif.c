@@ -1166,7 +1166,7 @@ static tag_info_array tag_table_VND_SONY = {
 };
 
 static tag_info_array tag_table_VND_PENTAX = {
-	  { 0x0000, "Version"},
+  { 0x0000, "Version"},
   { 0x0001, "Mode"},
   { 0x0002, "PreviewResolution"},
   { 0x0003, "PreviewLength"},
@@ -1250,6 +1250,38 @@ static tag_info_array tag_table_VND_PENTAX = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_MINOLTA = {
+  { 0x0000, "Version"},
+  { 0x0001, "CameraSettingsStdOld"},
+  { 0x0003, "CameraSettingsStdNew"},
+  { 0x0004, "CameraSettings7D"},
+  { 0x0018, "ImageStabilizationData"},
+  { 0x0020, "WBInfoA100"},
+  { 0x0040, "CompressedImageSize"},
+  { 0x0081, "Thumbnail"},
+  { 0x0088, "ThumbnailOffset"},
+  { 0x0089, "ThumbnailLength"},
+  { 0x0100, "SceneMode"},
+  { 0x0101, "ColorMode"},
+  { 0x0102, "Quality"},
+  { 0x0103, "0x0103"},
+  { 0x0104, "FlashExposureComp"},
+  { 0x0105, "Teleconverter"},
+  { 0x0107, "ImageStabilization"},
+  { 0x0109, "RawAndJpgRecording"},
+  { 0x010a, "ZoneMatching"},
+  { 0x010b, "ColorTemperature"},
+  { 0x010c, "LensID"},
+  { 0x0111, "ColorCompensationFilter"},
+  { 0x0112, "WhiteBalanceFineTune"},
+  { 0x0113, "ImageStabilizationA100"},
+  { 0x0114, "CameraSettings5D"},
+  { 0x0115, "WhiteBalance"},
+  { 0x0e00, "PrintIM"},
+  { 0x0f00, "CameraSettingsZ1"},
+  TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -1284,7 +1316,8 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
   { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
   { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_PENTAX,    "PENTAX",                  NULL, "AOC\x00",                   6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
+  { tag_table_VND_PENTAX,    "PENTAX",                  NULL, "AOC\x00",                   6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
