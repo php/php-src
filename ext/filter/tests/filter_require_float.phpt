@@ -47,19 +47,29 @@ foreach ($floats as $float => $dec) {
 
 ?>
 --EXPECTF--
-float(1.234)
-float(1.234)
+string(52) "Float validation: Invalid float format. Found spaces"
+
+Notice: Undefined variable: out in %s on line 20
+NULL
+string(52) "Float validation: Invalid float format. Found spaces"
+
+Notice: Undefined variable: out in %s on line 20
+NULL
 float(1.234)
 float(1200)
 float(7000)
+string(52) "Float validation: Invalid float format. Found spaces"
 float(7000)
+string(52) "Float validation: Invalid float format. Found spaces"
 float(7000)
-float(0.007)
+string(52) "Float validation: Invalid float format. Found spaces"
+float(7000)
 
 custom decimal:
-string(31) "Float validation: Invalid float"
-float(0.007)
+string(52) "Float validation: Invalid float format. Found spaces"
+float(7000)
 float(1.234)
+string(52) "Float validation: Invalid float format. Found spaces"
 float(1.234)
 
 Warning: filter_require_var(): decimal separator must be one char in %s on line 34

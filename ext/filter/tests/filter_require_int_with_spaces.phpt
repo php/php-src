@@ -25,5 +25,5 @@ foreach ($vals as $var) {
 --EXPECT--
 string(46) "Filter validated value became empty after trim"
 string(46) "Filter validated value became empty after trim"
-float(123)
-float(123.01)
+string(52) "Float validation: Invalid float format. Found spaces"
+string(52) "Float validation: Invalid float format. Found spaces"

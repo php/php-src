@@ -21,13 +21,14 @@
 #ifndef FILTER_PRIVATE_H
 #define FILTER_PRIVATE_H
 
+/* Filter flags - some flags are reusing value */
 #define FILTER_FLAG_NONE                    0x0000
 
-#define FILTER_REQUIRE_ARRAY			0x1000000
-#define FILTER_REQUIRE_SCALAR			0x2000000
+#define FILTER_REQUIRE_ARRAY             0x1000000
+#define FILTER_REQUIRE_SCALAR            0x2000000
 
-#define FILTER_FORCE_ARRAY			0x4000000
-#define FILTER_NULL_ON_FAILURE			0x8000000
+#define FILTER_FORCE_ARRAY               0x4000000
+#define FILTER_NULL_ON_FAILURE           0x8000000
 
 #define FILTER_FLAG_ALLOW_OCTAL             0x0001
 #define FILTER_FLAG_ALLOW_HEX               0x0002
@@ -45,32 +46,34 @@
 #define FILTER_FLAG_ALLOW_THOUSAND          0x2000
 #define FILTER_FLAG_ALLOW_SCIENTIFIC        0x4000
 
-#define FILTER_FLAG_SCHEME_REQUIRED         0x010000
-#define FILTER_FLAG_HOST_REQUIRED           0x020000
-#define FILTER_FLAG_PATH_REQUIRED           0x040000
-#define FILTER_FLAG_QUERY_REQUIRED          0x080000
+#define FILTER_FLAG_SCHEME_REQUIRED        0x010000
+#define FILTER_FLAG_HOST_REQUIRED          0x020000
+#define FILTER_FLAG_PATH_REQUIRED          0x040000
+#define FILTER_FLAG_QUERY_REQUIRED         0x080000
 
-#define FILTER_FLAG_IPV4                    0x100000
-#define FILTER_FLAG_IPV6                    0x200000
-#define FILTER_FLAG_NO_RES_RANGE            0x400000
-#define FILTER_FLAG_NO_PRIV_RANGE           0x800000
+#define FILTER_FLAG_IPV4                   0x100000
+#define FILTER_FLAG_IPV6                   0x200000
+#define FILTER_FLAG_NO_RES_RANGE           0x400000
+#define FILTER_FLAG_NO_PRIV_RANGE          0x800000
 
-#define FILTER_FLAG_HOSTNAME                0x100000
+#define FILTER_FLAG_HOSTNAME               0x100000
 
-#define FILTER_FLAG_EMAIL_UNICODE           0x100000
+#define FILTER_FLAG_EMAIL_UNICODE          0x100000
 
 /* FILTER_VALIDATE_STRING encoding options */
-#define FILTER_STRING_ENCODING_PASS              0
-#define FILTER_STRING_ENCODING_UTF8              1
+#define FILTER_STRING_ENCODING_PASS               0
+#define FILTER_STRING_ENCODING_UTF8               1
 
-#define FILTER_FLAG_STRING_RAW              0x0001
-#define FILTER_FLAG_STRING_ALLOW_CNTRL      0x0002
-#define FILTER_FLAG_STRING_ALLOW_TAB        0x0004
-#define FILTER_FLAG_STRING_MULTI_LINE       0x0008
-#define FILTER_FLAG_STRING_ALPHA            0x0010
-#define FILTER_FLAG_STRING_NUM              0x0020
-#define FILTER_FLAG_STRING_ALNUM            0x0040
+#define FILTER_FLAG_STRING_RAW               0x0001
+#define FILTER_FLAG_STRING_ALLOW_CNTRL       0x0002
+#define FILTER_FLAG_STRING_ALLOW_TAB         0x0004
+#define FILTER_FLAG_STRING_MULTI_LINE        0x0008
+#define FILTER_FLAG_STRING_ALPHA             0x0010
+#define FILTER_FLAG_STRING_NUM               0x0020
+#define FILTER_FLAG_STRING_ALNUM             0x0040
+#define FILTER_FLAG_BOOL_ALLOW_EMPTY         0x0080
 
+/* Filters */
 #define FILTER_VALIDATE_DEFAULT       0x0104
 
 #define FILTER_VALIDATE_INT           0x0101
@@ -88,6 +91,10 @@
 
 #define FILTER_VALIDATE_ALL           0x0100
 
+/*
+ * FIXME: Falling back to filter that does nothing as defualt
+ * is not good for security feature.
+ */
 #define FILTER_DEFAULT                0x0204
 #define FILTER_UNSAFE_RAW             0x0204
 

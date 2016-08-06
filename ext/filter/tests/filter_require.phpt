@@ -162,9 +162,9 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-int(234)
-int(234)
-int(234)
+string(48) "Int validation: Invalid int format. Found spaces"
+string(48) "Int validation: Invalid int format. Found spaces"
+string(48) "Int validation: Invalid int format. Found spaces"
 int(255)
 int(255)
 int(255)

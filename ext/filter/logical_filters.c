@@ -194,7 +194,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zend_long  min_range, max_range, option_flags;
 	int   min_range_set, max_range_set;
 	int   allow_octal = 0, allow_hex = 0;
-	size_t	  len;
+	size_t orig_len,len;
 	int error = 0;
 	zend_long  ctx_value;
 	char *p;
@@ -204,7 +204,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	FETCH_LONG_OPTION(max_range,    "max_range");
 	option_flags = flags;
 
-	len = Z_STRLEN_P(value);
+	orig_len = len = Z_STRLEN_P(value);
 
 	if (len == 0) {
 		RETURN_VALIDATION_FAILED("Int validation: Empty input", 0);
@@ -223,6 +223,10 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	ctx_value = 0;
 
 	PHP_FILTER_TRIM_DEFAULT(p, len);
+	if (IF_G(raise_exception)
+		&& orig_len != len) {
+		RETURN_VALIDATION_FAILED("Int validation: Invalid int format. Found spaces", 0);
+	}
 
 	if (*p == '0') {
 		p++; len--;
@@ -257,10 +261,22 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *str = Z_STRVAL_P(value);
-	size_t len = Z_STRLEN_P(value);
+	size_t orig_len, len;
 	int ret;
 
+	orig_len = len = Z_STRLEN_P(value);
+
+	if (IF_G(raise_exception)
+		&& !(flags & FILTER_FLAG_BOOL_ALLOW_EMPTY)
+		&& len == 0) {
+		RETURN_VALIDATION_FAILED("Bool validation: Empty input", 0);
+	}
+
 	PHP_FILTER_TRIM_DEFAULT_EX(str, len, 0);
+	if (IF_G(raise_exception)
+		&& orig_len != len) {
+		RETURN_VALIDATION_FAILED("Bool validation: Invalid boolean format. Found spaces", 0);
+	}
 
 	/* returns true for "1", "true", "on" and "yes"
 	 * returns false for "0", "false", "off", "no", and ""
@@ -325,7 +341,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	size_t len;
+	size_t len, orig_len;
 	char *str, *end;
 	char *num, *p;
 	zval *option_val;
@@ -340,10 +356,18 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	int first, n;
 
-	len = Z_STRLEN_P(value);
+	orig_len = len = Z_STRLEN_P(value);
 	str = Z_STRVAL_P(value);
 
+	if (IF_G(raise_exception) && len == 0) {
+		RETURN_VALIDATION_FAILED("Float validation: Empty input", 0);
+	}
+
 	PHP_FILTER_TRIM_DEFAULT(str, len);
+	if (IF_G(raise_exception)
+		&& len != orig_len) {
+		RETURN_VALIDATION_FAILED("Float validation: Invalid float format. Found spaces", 0);
+	}
 	end = str + len;
 
 	FETCH_STRING_OPTION(decimal, "decimal");

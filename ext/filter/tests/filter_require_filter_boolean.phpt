@@ -99,7 +99,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 bool(false)
-bool(false)
+string(28) "Bool validation: Empty input"
 string(29) "Bool validation: Invalid bool"
 string(29) "Bool validation: Invalid bool"
 bool(true)
@@ -110,7 +110,7 @@ bool(true)
 bool(false)
 bool(true)
 string(29) "Bool validation: Invalid bool"
-bool(false)
+string(28) "Bool validation: Empty input"
 string(29) "Bool validation: Invalid bool"
 string(29) "Bool validation: Invalid bool"
 string(29) "Bool validation: Invalid bool"

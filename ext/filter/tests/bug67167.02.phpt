@@ -17,4 +17,3 @@ Requires php_zval_filter to not use convert_to_string for all filters.
 
 --EXPECTF--
 NULL
-
