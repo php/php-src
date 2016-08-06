@@ -481,10 +481,10 @@ void php_filter_validate_string(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	/* Set default min=1, max=90. User must set proper values anyway. Be conservative. */
 	if (!min_bytes_set) {
-		min_bytes = 1;
+		min_bytes = 2;
 	}
 	if (!max_bytes_set) {
-		max_bytes = 90;
+		max_bytes = 20;
 	}
 
 	/* Size validation */
