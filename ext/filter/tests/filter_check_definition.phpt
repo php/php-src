@@ -34,7 +34,7 @@ validate_check_definition() tests
 		'name'        => array(
 			array(
 				'filter' => FILTER_VALIDATE_STRING,
-				'flags'  => FILTER_FLAG_STRING_ALNUM | FILTER_FLAG_STRING_MULTI_LINE,
+				'flags'  => FILTER_FLAG_STRING_ALNUM | FILTER_FLAG_STRING_ALLOW_NEWLINE,
 				'options' => array(
 					'min_bytes' => 10,
 					'max_bytes' => 1000,

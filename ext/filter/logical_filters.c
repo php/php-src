@@ -458,7 +458,7 @@ void php_filter_validate_string(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zend_long encoding, min_bytes, max_bytes;
 	zend_bool cntrl = !(flags & FILTER_FLAG_STRING_ALLOW_CNTRL);
 	zend_bool cntrl_checked = 0;
-	zend_bool multi_line = flags & FILTER_FLAG_STRING_MULTI_LINE;
+	zend_bool multi_line = flags & FILTER_FLAG_STRING_ALLOW_NEWLINE;
 	zend_bool allow_tab = flags & FILTER_FLAG_STRING_ALLOW_TAB;
 	zend_bool alpha = flags & FILTER_FLAG_STRING_ALPHA;
 	zend_bool num = flags & FILTER_FLAG_STRING_NUM;
