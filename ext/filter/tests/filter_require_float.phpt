@@ -1,5 +1,5 @@
 --TEST--
-filter_assert() and FLOAT
+filter_require_var() and FLOAT
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
@@ -20,7 +20,7 @@ $floats = array(
 
 foreach ($floats as $float) {
 	try {
-		$out = filter_assert($float, FILTER_VALIDATE_FLOAT);
+		$out = filter_require_var($float, FILTER_VALIDATE_FLOAT);
 	} catch (Exception $e) {
 		var_dump($e->getMessage());
 	}
@@ -38,7 +38,7 @@ $floats = array(
 echo "\ncustom decimal:\n";
 foreach ($floats as $float => $dec) {
 	try {
-		$out = filter_assert($float, FILTER_VALIDATE_FLOAT, array("options"=>array('decimal' => $dec)));
+		$out = filter_require_var($float, FILTER_VALIDATE_FLOAT, array("options"=>array('decimal' => $dec)));
 	} catch (Exception $e) {
 		var_dump($e->getMessage());
 	}
@@ -62,7 +62,7 @@ float(0.007)
 float(1.234)
 float(1.234)
 
-Warning: filter_assert(): decimal separator must be one char in %s on line 34
+Warning: filter_require_var(): decimal separator must be one char in %s on line 34
 string(64) "Float validation: Invalid decimal separator. It must be one char"
 float(1.234)
 string(31) "Float validation: Invalid float"

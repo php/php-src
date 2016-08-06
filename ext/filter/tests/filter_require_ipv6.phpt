@@ -1,5 +1,5 @@
 --TEST--
-filter_assert() and IPv6
+filter_require_var() and IPv6
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
@@ -51,11 +51,11 @@ $ipv6_test = array(
 );
 foreach ($ipv6_test as $ip => $exp) {
 	try {
-    $out = filter_assert($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+    $out = filter_require_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
 	} catch (Exception $e) {
 		var_dump($e->getMessage());
 	}
-	var_dump($out); //zif_filter_assert() returns FALSE, but $out became TURE because exception prevents return value assignment to $out.
+	var_dump($out); //zif_filter_require_var() returns FALSE, but $out became TURE because exception prevents return value assignment to $out.
     $out = ($out === $ip);
     if ($exp !== $out) {
         echo "$ip failed (expected ", $exp?"true":"false", ", got ", 

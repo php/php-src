@@ -87,32 +87,32 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_l
 static unsigned int php_sapi_filter_init(void);
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_assert_input, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_reuiqre_input, 0, 0, 3)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, variable_name)
 	ZEND_ARG_INFO(0, filter)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_assert, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_require_var, 0, 0, 2)
 	ZEND_ARG_INFO(0, variable)
 	ZEND_ARG_INFO(0, filter)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_assert_input_array, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_reuiqre_input_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, definition)
 	ZEND_ARG_INFO(0, add_empty)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_assert_array, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_require_var_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, definition)
 	ZEND_ARG_INFO(0, add_empty)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_assert_get_invalid_key, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_get_invalid_key, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_input, 0, 0, 2)
@@ -160,11 +160,11 @@ ZEND_END_ARG_INFO()
 /* {{{ filter_functions[]
  */
 static const zend_function_entry filter_functions[] = {
-	PHP_FE(filter_assert_input,		arginfo_filter_assert_input)
-	PHP_FE(filter_assert,		arginfo_filter_assert)
-	PHP_FE(filter_assert_input_array,	arginfo_filter_assert_input_array)
-	PHP_FE(filter_assert_array,		arginfo_filter_assert_array)
-	PHP_FE(filter_assert_get_invalid_key,		arginfo_filter_assert_get_invalid_key)
+	PHP_FE(filter_reuiqre_input,		arginfo_filter_reuiqre_input)
+	PHP_FE(filter_require_var,		arginfo_filter_require_var)
+	PHP_FE(filter_reuiqre_input_array,	arginfo_filter_reuiqre_input_array)
+	PHP_FE(filter_require_var_array,		arginfo_filter_require_var_array)
+	PHP_FE(filter_get_invalid_key,		arginfo_filter_get_invalid_key)
 	PHP_FE(filter_input,		arginfo_filter_input)
 	PHP_FE(filter_var,		arginfo_filter_var)
 	PHP_FE(filter_input_array,	arginfo_filter_input_array)
@@ -280,6 +280,7 @@ PHP_MINIT_FUNCTION(filter)
 
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_RAW", FILTER_FLAG_STRING_RAW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_ALLOW_CNTRL", FILTER_FLAG_STRING_ALLOW_CNTRL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_ALLOW_TAB", FILTER_FLAG_STRING_ALLOW_TAB, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_MULTI_LINE", FILTER_FLAG_STRING_MULTI_LINE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_ALPHA", FILTER_FLAG_STRING_ALPHA, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRING_NUM", FILTER_FLAG_STRING_NUM, CONST_CS | CONST_PERSISTENT);
@@ -836,10 +837,10 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto mixed filter_assert_input(constant type, string variable_name , long filter [, mixed options])
+/* {{{ proto mixed filter_reuiqre_input(constant type, string variable_name , long filter [, mixed options])
  * Returns the filtered variable 'name'* from source `type`.
  */
-PHP_FUNCTION(filter_assert_input)
+PHP_FUNCTION(filter_reuiqre_input)
 {
 	zend_long fetch_from, filter = FILTER_VALIDATE_DEFAULT;
 	zval *filter_args = NULL, *tmp;
@@ -894,10 +895,10 @@ PHP_FUNCTION(filter_assert_input)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_assert(mixed variable , long filter [, mixed options])
+/* {{{ proto mixed filter_require_var(mixed variable , long filter [, mixed options])
  * Returns the filtered version of the variable.
  */
-PHP_FUNCTION(filter_assert)
+PHP_FUNCTION(filter_require_var)
 {
 	zend_long filter = FILTER_VALIDATE_DEFAULT;
 	zval *filter_args = NULL, *data;
@@ -919,10 +920,10 @@ PHP_FUNCTION(filter_assert)
 /* }}} */
 
 
-/* {{{ proto bool filter_assert_input_array(constant type, mixed options [, bool add_empty])
+/* {{{ proto bool filter_reuiqre_input_array(constant type, mixed options [, bool add_empty])
  * Returns an array with all arguments defined in 'definition'.
  */
-PHP_FUNCTION(filter_assert_input_array)
+PHP_FUNCTION(filter_reuiqre_input_array)
 {
 	zend_long    fetch_from;
 	zval   *array_input = NULL, *op = NULL;
@@ -969,10 +970,10 @@ PHP_FUNCTION(filter_assert_input_array)
 /* }}} */
 
 
-/* {{{ proto bool filter_assert_array(array data, mixed options [, bool add_empty])
+/* {{{ proto bool filter_require_var_array(array data, mixed options [, bool add_empty])
  * Returns an array with all arguments defined in 'definition'.
  */
-PHP_FUNCTION(filter_assert_array)
+PHP_FUNCTION(filter_require_var_array)
 {
 	zval *array_input = NULL, *op = NULL;
 	zend_bool add_empty = 0;
@@ -993,9 +994,9 @@ PHP_FUNCTION(filter_assert_array)
 /* }}} */
 
 
-/* {{{ proto mixed filter_assert_get_invalid_key(void)
+/* {{{ proto mixed filter_get_invalid_key(void)
  * Retrieve key info of invalid element */
-PHP_FUNCTION(filter_assert_get_invalid_key)
+PHP_FUNCTION(filter_get_invalid_key)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;

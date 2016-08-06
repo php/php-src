@@ -1,5 +1,5 @@
 --TEST--
-filter_assert() and FILTER_VALIDATE_URL
+filter_require_var() and FILTER_VALIDATE_URL
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
@@ -51,54 +51,54 @@ array(),
 );
 foreach ($values as $value) {
     try {
-        var_dump(filter_assert($value, FILTER_VALIDATE_URL));
+        var_dump(filter_require_var($value, FILTER_VALIDATE_URL));
     } catch (Exception $e) {
         var_dump($e->getMessage());
     }
 }
 
 try {
-    var_dump(filter_assert("qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
+    var_dump(filter_require_var("qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("http://qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
+    var_dump(filter_require_var("http://qwe", FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("http://", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
+    var_dump(filter_require_var("http://", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("/tmp/test", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
+    var_dump(filter_require_var("/tmp/test", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
+    var_dump(filter_require_var("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
+    var_dump(filter_require_var("http://www.example.com", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("http://www.example.com/path/at/the/server/", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
+    var_dump(filter_require_var("http://www.example.com/path/at/the/server/", FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("http://www.example.com/index.html", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
+    var_dump(filter_require_var("http://www.example.com/index.html", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 try {
-    var_dump(filter_assert("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
+    var_dump(filter_require_var("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }

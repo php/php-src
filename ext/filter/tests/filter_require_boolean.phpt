@@ -23,7 +23,7 @@ $booleans = array(
 
 foreach($booleans as $val=>$exp) {
     try {
-        $res =filter_assert($val, FILTER_VALIDATE_BOOLEAN);
+        $res =filter_require_var($val, FILTER_VALIDATE_BOOLEAN);
     } catch (Exception $e) {
         var_dump($e->getMessage());
     }

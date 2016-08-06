@@ -16,7 +16,7 @@ $vals = array(
 
 foreach ($vals as $var) {
     try {
-        var_dump(filter_assert($var, FILTER_VALIDATE_FLOAT));
+        var_dump(filter_require_var($var, FILTER_VALIDATE_FLOAT));
     } catch (Exception $e) {
         var_dump($e->getMessage());
     }

@@ -46,11 +46,11 @@ PHP_RINIT_FUNCTION(filter);
 PHP_RSHUTDOWN_FUNCTION(filter);
 PHP_MINFO_FUNCTION(filter);
 
-PHP_FUNCTION(filter_assert_input);
-PHP_FUNCTION(filter_assert_input_array);
-PHP_FUNCTION(filter_assert);
-PHP_FUNCTION(filter_assert_array);
-PHP_FUNCTION(filter_assert_get_invalid_key);
+PHP_FUNCTION(filter_reuiqre_input);
+PHP_FUNCTION(filter_reuiqre_input_array);
+PHP_FUNCTION(filter_require_var);
+PHP_FUNCTION(filter_require_var_array);
+PHP_FUNCTION(filter_get_invalid_key);
 PHP_FUNCTION(filter_input);
 PHP_FUNCTION(filter_var);
 PHP_FUNCTION(filter_input_array);
