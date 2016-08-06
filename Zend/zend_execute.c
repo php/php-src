@@ -131,7 +131,8 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	((ZEND_VM_STACK_PAGE_SLOTS(gen) - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
 
 #define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(gen, size) \
-	(((size) + (ZEND_VM_STACK_FREE_PAGE_SIZE(gen) - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE(gen) - 1))
+	(((size) + ZEND_VM_STACK_HEADER_SLOTS * sizeof(zval) \
+	  + (ZEND_VM_STACK_PAGE_SIZE(gen) - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE(gen) - 1))
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);

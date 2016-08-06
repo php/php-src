@@ -68,6 +68,10 @@ PHP 7.1 UPGRADE NOTES
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
     U+2029 are escaped.
 
+- mbstring:
+  . mb_ereg() and mb_eregi() will now set the $regs argument to an empty array,
+    if nothing matched. Formerly, $regs was not modified in that case.
+
 - OpenSSL:
   . Dropped sslv2 stream.
 
@@ -198,6 +202,10 @@ PHP 7.1 UPGRADE NOTES
     fatal error.
   . Attempting to read an invalid or write to a readonly property will throw
     an instance of Error instead of resulting in a fatal error.
+
+- EXIF:
+   . Added extended exif tag support for the following formats: Sony, 
+     Samsung, DJI & Panasonic.
 
 - GD:
   . Changed the default of the ini setting gd.jpeg_ignore_warning to 1.

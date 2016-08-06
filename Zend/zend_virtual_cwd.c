@@ -299,7 +299,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	LARGE_INTEGER t;
 	const size_t path_len = strlen(path);
-	ALLOCA_FLAG(use_heap_large);
+	ALLOCA_FLAG(use_heap_large)
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
 
 	if (!pathw) {

@@ -288,6 +288,10 @@ if ($pid) {
 			}
 
 
+			if ((!empty($ssl)) && (!stream_socket_enable_crypto($pasvs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
+				die("SSLv23 handshake failed.\n");
+			}
+
 			if (empty($m[1]) || $m[1] !== 'emptydir') {
 				fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
 			}
@@ -402,10 +406,6 @@ if ($pid) {
 			fputs($s, "227 Entering Passive Mode. (127,0,0,1,{$p1},{$p2})\r\n");
 
 			$pasvs = stream_socket_accept($soc,10);
-
-			if ((!empty($ssl)) && (!stream_socket_enable_crypto($pasvs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
-				die("SSLv23 handshake failed.\n");
-			}
 
 		}elseif (preg_match('/^EPSV/', $buf, $matches)) {
 			fputs($s, "550 Extended passsive mode not supported.\r\n");
