@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 5.6.26
 
+- MSSQL:
+  . Fixed bug #72039 (Use of uninitialised value on mssql_guid_string). (Kalle)
+
 18 Aug 2016, PHP 5.6.25
 
 - Core:

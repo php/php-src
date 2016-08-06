@@ -2235,21 +2235,24 @@ PHP_FUNCTION(mssql_guid_string)
 	char *binary;
 	int binary_len;
 	zend_bool sf = 0;
-	char buffer[32+1];
-	char buffer2[36+1];
+	char buffer[32+1] = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &binary, &binary_len, &sf) == FAILURE) {
 		return;
 	}
 
-	dbconvert(NULL, SQLBINARY, (BYTE*) binary, MIN(16, binary_len), SQLCHAR, buffer, -1);
+	if (dbconvert(NULL, SQLBINARY, (BYTE*) binary, MIN(16, binary_len), SQLCHAR, buffer, (DBINT) -1) == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert binary string to GUID string");
+		RETURN_FALSE;
+	}
 
 	if (sf) {
 		php_strtoupper(buffer, 32);
 		RETURN_STRING(buffer, 1);
-	}
-	else {
+	} else {
 		int i;
+		char buffer2[36+1] = NULL;
+
 		/* FIXME this works only on little endian machine */
 		for (i=0; i<4; i++) {
 			buffer2[2*i] = buffer[6-2*i];
