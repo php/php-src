@@ -68,6 +68,10 @@ PHP 7.1 UPGRADE NOTES
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
     U+2029 are escaped.
 
+- mbstring:
+  . mb_ereg() and mb_eregi() will now set the $regs argument to an empty array,
+    if nothing matched. Formerly, $regs was not modified in that case.
+
 - OpenSSL:
   . Dropped sslv2 stream.
 
