@@ -204,8 +204,8 @@ PHP 7.1 UPGRADE NOTES
     an instance of Error instead of resulting in a fatal error.
 
 - EXIF:
-   . Added extended exif tag support for the following formats: Sony, 
-     Samsung, DJI & Panasonic.
+   . Added extended exif tag support for the following formats: 
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
 
 - GD:
   . Changed the default of the ini setting gd.jpeg_ignore_warning to 1.

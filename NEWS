@@ -6,8 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
 
 - EXIF:
-  . Added support for vendor specific tags for the following formats: Sony, 
-    Samsung, DJI & Panasonic. (Kalle)
+  . Added support for vendor specific tags for the following formats: 
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some 
     images). (Kalle)
   . Fixed bug #68547 (Exif Header component value check error). 
