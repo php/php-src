@@ -37,6 +37,6 @@ NULL
 
 -- Testing array_udiff() function with less than expected no. of arguments --
 
-Warning: array_udiff(): at least 3 parameters are required, 2 given in %sarray_udiff_error.php on line %d
+Warning: array_udiff() expects at least 3 parameters, 2 given in %sarray_udiff_error.php on line %d
 NULL
 ===DONE===

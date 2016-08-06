@@ -47,7 +47,7 @@ NULL
 
 -- Testing array_intersect_uassoc() function with less than expected no. of arguments --
 
-Warning: array_intersect_uassoc(): at least 3 parameters are required, 2 given in %s on line %d
+Warning: array_intersect_uassoc() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
 Warning: array_intersect_uassoc() expects parameter 3 to be a valid callback, second array member is not a valid method in %s on line %d
@@ -55,6 +55,6 @@ NULL
 
 -- Testing array_intersect_uassoc() function with no arguments --
 
-Warning: array_intersect_uassoc(): at least 3 parameters are required, 0 given in %s on line %d
+Warning: array_intersect_uassoc() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 ===DONE===

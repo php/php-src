@@ -31,11 +31,11 @@ echo "Done";
 
 -- Testing array_diff_assoc() function with zero arguments --
 
-Warning: array_diff_assoc(): at least 2 parameters are required, 0 given in %s on line %d
+Warning: array_diff_assoc() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
 -- Testing array_diff_assoc() function with less than expected no. of arguments --
 
-Warning: array_diff_assoc(): at least 2 parameters are required, 1 given in %s on line %d
+Warning: array_diff_assoc() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done

@@ -26,11 +26,11 @@ var_dump( array_diff_key() );
 
 -- Testing array_diff_key() function with less than expected no. of arguments --
 
-Warning: array_diff_key(): at least 2 parameters are required, 1 given in %s on line %d
+Warning: array_diff_key() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
 -- Testing array_diff_key() function with no arguments --
 
-Warning: array_diff_key(): at least 2 parameters are required, 0 given in %s on line %d
+Warning: array_diff_key() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 ===DONE===

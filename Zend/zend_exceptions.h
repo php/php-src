@@ -32,6 +32,7 @@ extern ZEND_API zend_class_entry *zend_ce_error_exception;
 extern ZEND_API zend_class_entry *zend_ce_error;
 extern ZEND_API zend_class_entry *zend_ce_parse_error;
 extern ZEND_API zend_class_entry *zend_ce_type_error;
+extern ZEND_API zend_class_entry *zend_ce_argument_count_error;
 extern ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 extern ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
 

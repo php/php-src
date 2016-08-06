@@ -40,6 +40,6 @@ NULL
 
 -- Testing array_uintersect() function with less than expected no. of arguments --
 
-Warning: array_uintersect(): at least 3 parameters are required, 2 given in %sarray_uintersect_error.php on line %d
+Warning: array_uintersect() expects at least 3 parameters, 2 given in %sarray_uintersect_error.php on line %d
 NULL
 ===DONE===
