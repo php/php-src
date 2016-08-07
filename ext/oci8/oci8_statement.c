@@ -1513,7 +1513,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		convert_to_long(&tmp);
 		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0);
 		if (!column) {
-			php_error_docref(NULL, E_WARNING, "Invalid column index \"%pd\"", Z_LVAL(tmp));
+			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", Z_LVAL(tmp));
 			zval_dtor(&tmp);
 			return NULL;
 		}
@@ -1580,7 +1580,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 	convert_to_array(var);
 
 	if (maxlength < -1) {
-		php_error_docref(NULL, E_WARNING, "Invalid max length value (%pd)", maxlength);
+		php_error_docref(NULL, E_WARNING, "Invalid max length value (" ZEND_LONG_FMT ")", maxlength);
 		return 1;
 	}
 	
@@ -1611,7 +1611,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 			bind = php_oci_bind_array_helper_date(var, max_table_length, statement->connection);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown or unsupported datatype given: %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unknown or unsupported datatype given: " ZEND_LONG_FMT, type);
 			return 1;
 			break;
 	}
