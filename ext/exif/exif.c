@@ -218,7 +218,7 @@ static PHP_GINIT_FUNCTION(exif)
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(exif)
-   Get the size of an image as 4-element array */
+ */
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
