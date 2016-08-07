@@ -1641,6 +1641,20 @@ static double exif_convert_any_format(void *value, int format, int motorola_inte
 }
 /* }}} */
 
+/* {{{ exif_rewrite_tag_format_to_unsigned
+ * Rewrite format tag so that it specifies an unsigned type for a tag */
+static int exif_rewrite_tag_format_to_unsigned(int format)
+{
+	switch(format) {
+		case TAG_FMT_SBYTE: return TAG_FMT_BYTE;
+		case TAG_FMT_SRATIONAL: return TAG_FMT_URATIONAL;
+		case TAG_FMT_SSHORT: return TAG_FMT_USHORT;
+		case TAG_FMT_SLONG: return TAG_FMT_ULONG;
+	}
+	return format;
+}
+/* }}} */
+
 /* {{{ exif_convert_any_to_int
  * Evaluate number, be it int, rational, or float from directory. */
 static size_t exif_convert_any_to_int(void *value, int format, int motorola_intel)
@@ -3304,18 +3318,18 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			switch(tag) {
 				case TAG_IMAGEWIDTH:
 				case TAG_COMP_IMAGE_WIDTH:
-					ImageInfo->Thumbnail.width = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.width = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_IMAGEHEIGHT:
 				case TAG_COMP_IMAGE_HEIGHT:
-					ImageInfo->Thumbnail.height = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.height = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_STRIP_OFFSETS:
 				case TAG_JPEG_INTERCHANGE_FORMAT:
 					/* accept both formats */
-					ImageInfo->Thumbnail.offset = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.offset = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_STRIP_BYTE_COUNTS:
@@ -3325,13 +3339,13 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						/* motorola is easier to read */
 						ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_TIFF_MM;
 					}
-					ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_JPEG_INTERCHANGE_FORMAT_LEN:
 					if (ImageInfo->Thumbnail.filetype == IMAGE_FILETYPE_UNKNOWN) {
 						ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_JPEG;
-						ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+						ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					}
 					break;
 			}
@@ -3403,7 +3417,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_COMP_IMAGE_WIDTH:
-				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 				break;
 
 			case TAG_FOCALPLANE_X_RES:

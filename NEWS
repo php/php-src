@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some 
     images). (Kalle)
+  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap 
+    overflow in debug mode). (hlt99 at blinkenshell dot org, Kalle)
   . Fixed bug #68547 (Exif Header component value check error). 
     (sjh21a at gmail dot com, Kalle)
   . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level 
