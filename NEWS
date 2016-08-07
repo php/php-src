@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #72711 (`mb_ereg` does not clear the `$regs` parameter on
     failure). (ju1ius)
 
+- OCI8
+  . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
+  . Fixed bug #72524 (Binding null values triggers ORA-24816 error). (Chris Jones)
+
 - Opcache:
   . Fixed bug #72762 (Infinite loop while parsing a file with opcache enabled).
     (Nikita)
