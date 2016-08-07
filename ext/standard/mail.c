@@ -188,34 +188,6 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 }
 
 
-#define PHP_MAIL_BUILD_HEADER_CHECK(target, s, key, val) \
-do { \
-	if (Z_TYPE_P(val) == IS_STRING) { \
-		php_mail_build_headers_elem(&s, key, val); \
-	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
-		if (!strncasecmp(target, ZSTR_VAL(key), ZSTR_LEN(key))) { \
-			php_error_docref(NULL, E_WARNING, "'%s' header must be at most one header. Array is passed for '%s'", target, target); \
-			continue; \
-		} \
-		php_mail_build_headers_elems(&s, key, val); \
-	} else { \
-		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than stirng or array.", ZSTR_VAL(key)); \
-	} \
-} while(0)
-
-
-#define PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val) \
-do { \
-	if (Z_TYPE_P(val) == IS_STRING) { \
-		php_mail_build_headers_elem(&s, key, val); \
-	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
-		php_mail_build_headers_elems(&s, key, val); \
-	} else { \
-		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than stirng or array.", ZSTR_VAL(key)); \
-	} \
-} while(0)
-
-
 PHPAPI zend_string *php_mail_build_headers(zval *headers)
 {
 	zend_ulong idx;
@@ -320,7 +292,7 @@ PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL;
 	char *subject=NULL;
-	zend_string *extra_cmd=NULL, *str_headers=NULL, *tmp_headers=NULL;
+	zend_string *extra_cmd=NULL, *str_headers=NULL, *tmp_headers;
 	zval *headers = NULL;
 	size_t to_len, message_len;
 	size_t subject_len, i;
