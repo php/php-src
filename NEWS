@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #72762 (Infinite loop while parsing a file with opcache enabled).
     (Nikita)
 
+- Standard:
+  . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
+    Kenttä)
+
 - Stream: 
   . Fixed bug #72743 (Out-of-bound read in php_stream_filter_create).
     (Loianhtuan)
