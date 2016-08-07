@@ -959,8 +959,12 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 			new_str = php_base64_decode(Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data), &new_len);
 			STR_FREE(Z_STRVAL_P(ent1->data));
-			Z_STRVAL_P(ent1->data) = new_str;
-			Z_STRLEN_P(ent1->data) = new_len;
+			if (new_str) {
+				Z_STRVAL_P(ent1->data) = new_str;
+				Z_STRLEN_P(ent1->data) = new_len;
+			} else {
+				ZVAL_EMPTY_STRING(ent1->data);
+			}
 		}
 
 		/* Call __wakeup() method on the object. */
