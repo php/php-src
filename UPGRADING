@@ -363,6 +363,10 @@ PHP 7.1 UPGRADE NOTES
 
   . Support for ftok()
 
+  . PHP on Windows now ensures that the correct version of the Winsock 
+    library is loaded and will error out in case Winsock 2.0 is not found 
+	on the system.
+
 - FCGI
   . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,
     the first php-fcgi.exe process will exec the specified number of children.
