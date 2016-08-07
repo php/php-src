@@ -230,7 +230,7 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
-	int ret;
+	int ret, err;
 
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
@@ -239,9 +239,13 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
 
-	/* TODO set errno. */
 	ret = _waccess(pathw, mode);
+	_get_errno(&err);
 	PHP_WIN32_IOUTIL_CLEANUP_W()
+
+	if (0 > ret) {
+		_set_errno(err);
+	}
 
 	return ret;
 }/*}}}*/
@@ -437,16 +441,17 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		free(tmp_bufa);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
 		return NULL;
-	} else if (tmp_bufa_len + 1 > len) {
-		free(tmp_bufa);
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
-		return NULL;
 	}
 
 	if (!buf) {
 		/* If buf was NULL, the result has to be freed outside here. */
 		buf = tmp_bufa;
 	} else {
+		if (tmp_bufa_len + 1 > (size_t)len) {
+			free(tmp_bufa);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+			return NULL;
+		}
 		memmove(buf, tmp_bufa, tmp_bufa_len + 1);
 		free(tmp_bufa);
 	}

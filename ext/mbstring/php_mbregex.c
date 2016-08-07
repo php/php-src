@@ -454,7 +454,7 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 	rc = zend_hash_str_find_ptr(&MBREX(ht_rc), (char *)pattern, patlen);
 	if (!rc || rc->options != options || rc->enc != enc || rc->syntax != syntax) {
 		if ((err_code = onig_new(&retval, (OnigUChar *)pattern, (OnigUChar *)(pattern + patlen), options, enc, syntax, &err_info)) != ONIG_NORMAL) {
-			onig_error_code_to_str(err_str, err_code, err_info);
+			onig_error_code_to_str(err_str, err_code, &err_info);
 			php_error_docref(NULL, E_WARNING, "mbregex compile err: %s", err_str);
 			retval = NULL;
 			goto out;
@@ -713,6 +713,11 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		RETURN_FALSE;
 	}
 
+	if (array != NULL) {
+		zval_dtor(array);
+		array_init(array);
+	}
+
 	options = MBREX(regex_default_options);
 	if (icase) {
 		options |= ONIG_OPTION_IGNORECASE;
@@ -751,8 +756,6 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	match_len = 1;
 	str = string;
 	if (array != NULL) {
-		zval_dtor(array);
-		array_init(array);
 
 		match_len = regs->end[0] - regs->beg[0];
 		for (i = 0; i < regs->num_regs; i++) {
