@@ -78,6 +78,11 @@ PHP 7.1 UPGRADE NOTES
 - OpenSSL:
   . Dropped sslv2 stream.
 
+- Reflection:
+  . The behavior of ReflectionMethod::invoke() and ::invokeArgs() has been
+    aligned, what causes slightly different behavior than before for some
+    pathological cases.
+
 ========================================
 2. New Features
 ========================================

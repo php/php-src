@@ -3185,109 +3185,14 @@ ZEND_METHOD(reflection_method, getClosure)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionMethod::invoke(mixed object, mixed* args)
-   Invokes the method. */
-ZEND_METHOD(reflection_method, invoke)
+/* {{{ reflection_method_invoke */
+static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 {
 	zval retval;
-	zval *params = NULL;
-	zend_object *object;
+	zval *params = NULL, *val, *object;
 	reflection_object *intern;
 	zend_function *mptr;
-	int result, num_args = 0;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zend_class_entry *obj_ce;
-
-	METHOD_NOTSTATIC(reflection_method_ptr);
-
-	GET_REFLECTION_OBJECT_PTR(mptr);
-
-	if ((!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
-		 && intern->ignore_visibility == 0)
-	{
-		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Trying to invoke abstract method %s::%s()",
-				ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
-		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Trying to invoke %s method %s::%s() from scope %s",
-				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
-				ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name),
-				ZSTR_VAL(Z_OBJCE_P(getThis())->name));
-		}
-		return;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &params, &num_args) == FAILURE) {
-		return;
-	}
-
-	/* In case this is a static method, we should'nt pass an object_ptr
-	 * (which is used as calling context aka $this). We can thus ignore the
-	 * first parameter.
-	 *
-	 * Else, we verify that the given object is an instance of the class.
-	 */
-	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
-		obj_ce = mptr->common.scope;
-	} else {
-		if (Z_TYPE(params[0]) != IS_OBJECT) {
-			_DO_THROW("Non-object passed to Invoke()");
-			/* Returns from this function */
-		}
-
-		obj_ce = Z_OBJCE(params[0]);
-
-		if (!instanceof_function(obj_ce, mptr->common.scope)) {
-			_DO_THROW("Given object is not an instance of the class this method was declared in");
-			/* Returns from this function */
-		}
-
-		object = Z_OBJ(params[0]);
-	}
-
-	fci.size = sizeof(fci);
-	ZVAL_UNDEF(&fci.function_name);
-	fci.object = object;
-	fci.retval = &retval;
-	fci.param_count = num_args - 1;
-	fci.params = params + 1;
-	fci.no_separation = 1;
-
-	fcc.initialized = 1;
-	fcc.function_handler = mptr;
-	fcc.calling_scope = obj_ce;
-	fcc.called_scope = intern->ce;
-	fcc.object = object;
-
-	result = zend_call_function(&fci, &fcc);
-
-	if (result == FAILURE) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Invocation of method %s::%s() failed", ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
-		return;
-	}
-
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		ZVAL_COPY_VALUE(return_value, &retval);
-	}
-}
-/* }}} */
-
-/* {{{ proto public mixed ReflectionMethod::invokeArgs(mixed object, array args)
-   Invokes the function and pass its arguments as array. */
-ZEND_METHOD(reflection_method, invokeArgs)
-{
-	zval retval;
-	zval *params, *val, *object;
-	reflection_object *intern;
-	zend_function *mptr;
-	int i, argc;
-	int result;
+	int i, argc = 0, result;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zend_class_entry *obj_ce;
@@ -3297,10 +3202,6 @@ ZEND_METHOD(reflection_method, invokeArgs)
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!a", &object, &param_array) == FAILURE) {
-		return;
-	}
-
 	if ((!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
 		 && intern->ignore_visibility == 0)
@@ -3319,14 +3220,24 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		return;
 	}
 
-	argc = zend_hash_num_elements(Z_ARRVAL_P(param_array));
+	if (variadic) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!*", &object, &params, &argc) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!a", &object, &param_array) == FAILURE) {
+			return;
+		}
 
-	params = safe_emalloc(sizeof(zval), argc, 0);
-	argc = 0;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(param_array), val) {
-		ZVAL_COPY(&params[argc], val);
-		argc++;
-	} ZEND_HASH_FOREACH_END();
+		argc = zend_hash_num_elements(Z_ARRVAL_P(param_array));
+
+		params = safe_emalloc(sizeof(zval), argc, 0);
+		argc = 0;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(param_array), val) {
+			ZVAL_COPY(&params[argc], val);
+			argc++;
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	/* In case this is a static method, we should'nt pass an object_ptr
 	 * (which is used as calling context aka $this). We can thus ignore the
@@ -3339,7 +3250,6 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		obj_ce = mptr->common.scope;
 	} else {
 		if (!object) {
-			efree(params);
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Trying to invoke non static method %s::%s() without an object",
 				ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
@@ -3349,7 +3259,9 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		obj_ce = Z_OBJCE_P(object);
 
 		if (!instanceof_function(obj_ce, mptr->common.scope)) {
-			efree(params);
+			if (!variadic) {
+				efree(params);
+			}
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			/* Returns from this function */
 		}
@@ -3367,21 +3279,25 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
-	fcc.object = (object) ? Z_OBJ_P(object) : NULL;
+	fcc.object = object ? Z_OBJ_P(object) : NULL;
 
-	/*
-	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
-	 */
-	if ((mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		fcc.function_handler = _copy_function(mptr);
+	if (!variadic) {
+		/*
+		 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
+		 */
+		if ((mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+			fcc.function_handler = _copy_function(mptr);
+		}
 	}
 
 	result = zend_call_function(&fci, &fcc);
 
-	for (i = 0; i < argc; i++) {
-		zval_ptr_dtor(&params[i]);
+	if (!variadic) {
+		for (i = 0; i < argc; i++) {
+			zval_ptr_dtor(&params[i]);
+		}
+		efree(params);
 	}
-	efree(params);
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3392,6 +3308,22 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionMethod::invoke(mixed object, mixed* args)
+   Invokes the method. */
+ZEND_METHOD(reflection_method, invoke)
+{
+	reflection_method_invoke(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionMethod::invokeArgs(mixed object, array args)
+   Invokes the function and pass its arguments as array. */
+ZEND_METHOD(reflection_method, invokeArgs)
+{
+	reflection_method_invoke(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 

@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #72762 (Infinite loop while parsing a file with opcache enabled).
     (Nikita)
 
+- Reflection:
+  . Implemented request #38992 (invoke() and invokeArgs() static method calls
+    should match). (cmb)
+
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
     Kenttä)
