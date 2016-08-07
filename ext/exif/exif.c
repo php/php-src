@@ -136,7 +136,16 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_row(2, "EXIF Support", "enabled");
 	php_info_print_table_row(2, "EXIF Version", PHP_EXIF_VERSION);
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
-	php_info_print_table_row(2, "Supported filetypes", "JPEG,TIFF");
+	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
+
+	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) { 
+		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
+	} else {
+		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
+	}
+
+	php_info_print_table_row(2, "Extended EXIF tag formats", "Canon, Casio, Fujifilm, Nikon, Olympus, Samsung, Panasonic, DJI, Sony, Pentax, Minolta, Sigma, Foveon");
+
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -1332,6 +1341,7 @@ typedef struct {
 	mn_offset_mode_t offset_mode;
 } maker_note_type;
 
+/* Remember to update PHP_MINFO if updated */
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
   { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,                       0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
