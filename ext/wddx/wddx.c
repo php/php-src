@@ -897,7 +897,11 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 			zend_string *new_str = php_base64_decode(
 				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
 			zval_ptr_dtor(&ent1->data);
-			ZVAL_STR(&ent1->data, new_str);
+			if (new_str) {
+				ZVAL_STR(&ent1->data, new_str);
+			} else {
+				ZVAL_EMPTY_STRING(&ent1->data);
+			}
 		}
 
 		/* Call __wakeup() method on the object. */
