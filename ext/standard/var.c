@@ -962,6 +962,7 @@ PHP_FUNCTION(unserialize)
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (!php_var_unserialize(&return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
+		var_push_dtor(&var_hash, &return_value);
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
 		if (!EG(exception)) {
