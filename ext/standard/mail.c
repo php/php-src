@@ -294,6 +294,13 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
 				}
 				break;
+			case sizeof("subject")-1:
+				if (!strncasecmp("subject", ZSTR_VAL(key), ZSTR_LEN(key))) {
+					php_error_docref(NULL, E_WARNING, "Extra header cannot contain 'Subject' header");
+					continue;
+				}
+				PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
+				break;
 			default:
 				PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
 		}
