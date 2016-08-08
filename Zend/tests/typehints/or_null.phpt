@@ -219,99 +219,99 @@ try {
 
 ?>
 --EXPECTF--
-TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, instance of stdClass given, called in %s/or_null.php on line 8 and defined in %s/or_null.php:5
+TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, instance of stdClass given, called in %s on line 8 and defined in %s:5
 Stack trace:
-#0 %s/or_null.php(8): unloadedClass(Object(stdClass))
+#0 %s(8): unloadedClass(Object(stdClass))
 #1 {main}
-TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, instance of stdClass given, called in %s/or_null.php on line 20 and defined in %s/or_null.php:16
+TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, instance of stdClass given, called in %s on line 20 and defined in %s:16
 Stack trace:
-#0 %s/or_null.php(20): loadedClass(Object(stdClass))
+#0 %s(20): loadedClass(Object(stdClass))
 #1 {main}
-TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, instance of stdClass given, called in %s/or_null.php on line 26 and defined in %s/or_null.php:17
+TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, instance of stdClass given, called in %s on line 26 and defined in %s:17
 Stack trace:
-#0 %s/or_null.php(26): loadedInterface(Object(stdClass))
+#0 %s(26): loadedInterface(Object(stdClass))
 #1 {main}
-TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, integer given, called in %s/or_null.php on line 32 and defined in %s/or_null.php:5
+TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, integer given, called in %s on line 32 and defined in %s:5
 Stack trace:
-#0 %s/or_null.php(32): unloadedClass(1)
+#0 %s(32): unloadedClass(1)
 #1 {main}
-TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, integer given, called in %s/or_null.php on line 38 and defined in %s/or_null.php:16
+TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, integer given, called in %s on line 38 and defined in %s:16
 Stack trace:
-#0 %s/or_null.php(38): loadedClass(1)
+#0 %s(38): loadedClass(1)
 #1 {main}
-TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, integer given, called in %s/or_null.php on line 44 and defined in %s/or_null.php:17
+TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, integer given, called in %s on line 44 and defined in %s:17
 Stack trace:
-#0 %s/or_null.php(44): loadedInterface(1)
+#0 %s(44): loadedInterface(1)
 #1 {main}
-TypeError: Argument 1 passed to callableF() must be callable or null, integer given, called in %s/or_null.php on line 52 and defined in %s/or_null.php:49
+TypeError: Argument 1 passed to callableF() must be callable or null, integer given, called in %s on line 52 and defined in %s:49
 Stack trace:
-#0 %s/or_null.php(52): callableF(1)
+#0 %s(52): callableF(1)
 #1 {main}
-TypeError: Argument 1 passed to iterableF() must be iterable or null, integer given, called in %s/or_null.php on line 60 and defined in %s/or_null.php:57
+TypeError: Argument 1 passed to iterableF() must be iterable or null, integer given, called in %s on line 60 and defined in %s:57
 Stack trace:
-#0 %s/or_null.php(60): iterableF(1)
+#0 %s(60): iterableF(1)
 #1 {main}
-TypeError: Argument 1 passed to intF() must be of the type integer or null, object given, called in %s/or_null.php on line 68 and defined in %s/or_null.php:65
+TypeError: Argument 1 passed to intF() must be of the type integer or null, object given, called in %s on line 68 and defined in %s:65
 Stack trace:
-#0 %s/or_null.php(68): intF(Object(stdClass))
+#0 %s(68): intF(Object(stdClass))
 #1 {main}
-TypeError: Return value of returnUnloadedClass() must be an instance of I\Dont\Exist or null, instance of stdClass returned in %s/or_null.php:74
+TypeError: Return value of returnUnloadedClass() must be an instance of I\Dont\Exist or null, instance of stdClass returned in %s:74
 Stack trace:
-#0 %s/or_null.php(78): returnUnloadedClass()
+#0 %s(78): returnUnloadedClass()
 #1 {main}
-TypeError: Return value of returnLoadedClass() must be an instance of RealClass or null, instance of stdClass returned in %s/or_null.php:84
+TypeError: Return value of returnLoadedClass() must be an instance of RealClass or null, instance of stdClass returned in %s:84
 Stack trace:
-#0 %s/or_null.php(88): returnLoadedClass()
+#0 %s(88): returnLoadedClass()
 #1 {main}
-TypeError: Return value of returnLoadedInterface() must implement interface RealInterface or be null, instance of stdClass returned in %s/or_null.php:94
+TypeError: Return value of returnLoadedInterface() must implement interface RealInterface or be null, instance of stdClass returned in %s:94
 Stack trace:
-#0 %s/or_null.php(98): returnLoadedInterface()
+#0 %s(98): returnLoadedInterface()
 #1 {main}
-TypeError: Return value of returnUnloadedClassScalar() must be an instance of I\Dont\Exist or null, integer returned in %s/or_null.php:104
+TypeError: Return value of returnUnloadedClassScalar() must be an instance of I\Dont\Exist or null, integer returned in %s:104
 Stack trace:
-#0 %s/or_null.php(108): returnUnloadedClassScalar()
+#0 %s(108): returnUnloadedClassScalar()
 #1 {main}
-TypeError: Return value of returnLoadedClassScalar() must be an instance of RealClass or null, integer returned in %s/or_null.php:114
+TypeError: Return value of returnLoadedClassScalar() must be an instance of RealClass or null, integer returned in %s:114
 Stack trace:
-#0 %s/or_null.php(118): returnLoadedClassScalar()
+#0 %s(118): returnLoadedClassScalar()
 #1 {main}
-TypeError: Return value of returnLoadedInterfaceScalar() must implement interface RealInterface or be null, integer returned in %s/or_null.php:124
+TypeError: Return value of returnLoadedInterfaceScalar() must implement interface RealInterface or be null, integer returned in %s:124
 Stack trace:
-#0 %s/or_null.php(128): returnLoadedInterfaceScalar()
+#0 %s(128): returnLoadedInterfaceScalar()
 #1 {main}
-TypeError: Return value of returnCallable() must be callable or null, integer returned in %s/or_null.php:134
+TypeError: Return value of returnCallable() must be callable or null, integer returned in %s:134
 Stack trace:
-#0 %s/or_null.php(138): returnCallable()
+#0 %s(138): returnCallable()
 #1 {main}
-TypeError: Return value of returnIterable() must be iterable or null, integer returned in %s/or_null.php:144
+TypeError: Return value of returnIterable() must be iterable or null, integer returned in %s:144
 Stack trace:
-#0 %s/or_null.php(148): returnIterable()
+#0 %s(148): returnIterable()
 #1 {main}
-TypeError: Return value of returnInt() must be of the type integer or null, object returned in %s/or_null.php:154
+TypeError: Return value of returnInt() must be of the type integer or null, object returned in %s:154
 Stack trace:
-#0 %s/or_null.php(158): returnInt()
+#0 %s(158): returnInt()
 #1 {main}
-TypeError: Return value of returnMissingUnloadedClass() must be an instance of I\Dont\Exist or null, none returned in %s/or_null.php:164
+TypeError: Return value of returnMissingUnloadedClass() must be an instance of I\Dont\Exist or null, none returned in %s:164
 Stack trace:
-#0 %s/or_null.php(167): returnMissingUnloadedClass()
+#0 %s(167): returnMissingUnloadedClass()
 #1 {main}
-TypeError: Return value of returnMissingLoadedClass() must be an instance of RealClass or null, none returned in %s/or_null.php:173
+TypeError: Return value of returnMissingLoadedClass() must be an instance of RealClass or null, none returned in %s:173
 Stack trace:
-#0 %s/or_null.php(176): returnMissingLoadedClass()
+#0 %s(176): returnMissingLoadedClass()
 #1 {main}
-TypeError: Return value of returnMissingLoadedInterface() must implement interface RealInterface or be null, none returned in %s/or_null.php:182
+TypeError: Return value of returnMissingLoadedInterface() must implement interface RealInterface or be null, none returned in %s:182
 Stack trace:
-#0 %s/or_null.php(185): returnMissingLoadedInterface()
+#0 %s(185): returnMissingLoadedInterface()
 #1 {main}
-TypeError: Return value of returnMissingCallable() must be callable or null, none returned in %s/or_null.php:191
+TypeError: Return value of returnMissingCallable() must be callable or null, none returned in %s:191
 Stack trace:
-#0 %s/or_null.php(194): returnMissingCallable()
+#0 %s(194): returnMissingCallable()
 #1 {main}
-TypeError: Return value of returnMissingIterable() must be iterable or null, none returned in %s/or_null.php:200
+TypeError: Return value of returnMissingIterable() must be iterable or null, none returned in %s:200
 Stack trace:
-#0 %s/or_null.php(203): returnMissingIterable()
+#0 %s(203): returnMissingIterable()
 #1 {main}
-TypeError: Return value of returnMissingInt() must be of the type integer or null, none returned in %s/or_null.php:209
+TypeError: Return value of returnMissingInt() must be of the type integer or null, none returned in %s:209
 Stack trace:
-#0 %s/or_null.php(212): returnMissingInt()
+#0 %s(212): returnMissingInt()
 #1 {main}
