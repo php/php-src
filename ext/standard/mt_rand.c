@@ -276,6 +276,7 @@ PHP_FUNCTION(mt_rand)
 
 	if (UNEXPECTED(max < min)) {
 		php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
+		max ^= min ^= max ^= min;
 	}
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
