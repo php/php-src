@@ -913,7 +913,7 @@ static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const ch
 }
 
 #if ZEND_DEBUG
-static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
+static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *need_or_null, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = ZSTR_VAL(zf->common.function_name);
 	const char *fsep;
@@ -927,8 +927,8 @@ static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf,
 		fclass = "";
 	}
 
-	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must %s%s, %s%s returned",
-		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
+	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must %s%s%s, %s%s returned",
+		fclass, fsep, fname, need_msg, need_kind, need_or_null, returned_msg, returned_kind);
 }
 
 static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, const char *returned_msg, const char *returned_kind)
@@ -961,22 +961,22 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 			if (ret_info->class_name) {
 				need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce);
 				if (!ce || !instanceof_function(Z_OBJCE_P(ret), ce)) {
-					zend_verify_internal_return_error(zf, need_msg, class_name, "instance of ", ZSTR_VAL(Z_OBJCE_P(ret)->name));
+					zend_verify_internal_return_error(zf, need_msg, class_name, (ret_info->allow_null ? " or null" : ""), "instance of ", ZSTR_VAL(Z_OBJCE_P(ret)->name));
 					return 0;
 				}
 			}
 		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
 			if (ret_info->class_name) {
 				need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce);
-				zend_verify_internal_return_error(zf, need_msg, class_name, zend_zval_type_name(ret), "");
+				zend_verify_internal_return_error(zf, need_msg, class_name, (ret_info->allow_null ? " or null" : ""), zend_zval_type_name(ret), "");
 			} else if (ret_info->type_hint == IS_CALLABLE) {
 				if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
-					zend_verify_internal_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
+					zend_verify_internal_return_error(zf, "be callable", "", (ret_info->allow_null ? " or null" : ""), zend_zval_type_name(ret), "");
 					return 0;
 				}
 			} else if (ret_info->type_hint == IS_ITERABLE) {
 				if (!zend_is_iterable(ret) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
-					zend_verify_internal_return_error(zf, "be iterable", "", zend_zval_type_name(ret), "");
+					zend_verify_internal_return_error(zf, "be iterable", "", (ret_info->allow_null ? " or null" : ""), zend_zval_type_name(ret), "");
 					return 0;
 				}
 			} else if (ret_info->type_hint == _IS_BOOL &&
@@ -986,7 +986,7 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 				zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
 			} else {
 				/* Use strict check to verify return value of internal function */
-				zend_verify_internal_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
+				zend_verify_internal_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), (ret_info->allow_null ? " or null" : ""), zend_zval_type_name(ret), "");
 				return 0;
 			}
 		}
