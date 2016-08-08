@@ -1003,7 +1003,6 @@ PHP_FUNCTION(filter_require_var_array)
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
-
 }
 /* }}} */
 
