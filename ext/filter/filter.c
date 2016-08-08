@@ -34,6 +34,27 @@ ZEND_DECLARE_MODULE_GLOBALS(filter)
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 
+
+#define PHP_FILTER_SAVE_CURRENT_KEY(idx, key) \
+	do { \
+		if (!Z_ISUNDEF(IF_G(current_key))) {   \
+			zval_ptr_dtor(&IF_G(current_key)); \
+		} \
+		if (key) { \
+			ZVAL_STR_COPY(&IF_G(current_key), key); \
+		} else { \
+			ZVAL_LONG(&IF_G(current_key), idx); \
+		} \
+	} while(0)
+
+
+/* FilterValidateException class */
+zend_class_entry *php_filter_validate_exception_class_entry;
+
+const zend_function_entry php_filter_validate_exception_methods[] = {
+	PHP_FE_END
+};
+
 typedef struct filter_list_entry {
 	const char *name;
 	int    id;
@@ -112,9 +133,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_require_var_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, add_empty)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_get_invalid_key, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_input, 0, 0, 2)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, variable_name)
@@ -164,7 +182,6 @@ static const zend_function_entry filter_functions[] = {
 	PHP_FE(filter_require_var,		arginfo_filter_require_var)
 	PHP_FE(filter_require_input_array,	arginfo_filter_require_input_array)
 	PHP_FE(filter_require_var_array,		arginfo_filter_require_var_array)
-	PHP_FE(filter_get_invalid_key,		arginfo_filter_get_invalid_key)
 	PHP_FE(filter_input,		arginfo_filter_input)
 	PHP_FE(filter_var,		arginfo_filter_var)
 	PHP_FE(filter_input_array,	arginfo_filter_input_array)
@@ -256,6 +273,8 @@ ZEND_TSRMLS_CACHE_UPDATE();
  */
 PHP_MINIT_FUNCTION(filter)
 {
+	zend_class_entry cex;
+
 	ZEND_INIT_MODULE_GLOBALS(filter, php_filter_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
@@ -352,6 +371,15 @@ PHP_MINIT_FUNCTION(filter)
 
 	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
 
+	INIT_CLASS_ENTRY(cex, "FilterValidateException", php_filter_validate_exception_methods);
+	php_filter_validate_exception_class_entry = zend_register_internal_class_ex(&cex, zend_ce_exception);
+	/* php_filter_validate_exception_class_entry->ce_flags |= ZEND_ACC_FINAL; */
+	zend_declare_property_null(php_filter_validate_exception_class_entry, ZEND_STRL("invalid_key"), ZEND_ACC_PROTECTED);
+	zend_declare_property_null(php_filter_validate_exception_class_entry, ZEND_STRL("invalid_value"), ZEND_ACC_PROTECTED);
+	zend_declare_property_null(php_filter_validate_exception_class_entry, ZEND_STRL("filter_id"), ZEND_ACC_PROTECTED);
+	zend_declare_property_null(php_filter_validate_exception_class_entry, ZEND_STRL("filter_name"), ZEND_ACC_PROTECTED);
+	zend_declare_property_null(php_filter_validate_exception_class_entry, ZEND_STRL("filter_flags"), ZEND_ACC_PROTECTED);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -402,6 +430,19 @@ PHP_MINFO_FUNCTION(filter)
 }
 /* }}} */
 
+static const char *php_find_filter_name(zend_long id) /* {{{ */
+{
+	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
+
+	for (i = 0; i < size; ++i) {
+		if (filter_list[i].id == id) {
+			return filter_list[i].name;
+		}
+	}
+	return filter_list[0].name;
+}
+/* }}} */
+
 /* FIXME: This could be simpler by array lookup */
 static filter_list_entry php_find_filter(zend_long id) /* {{{ */
 {
@@ -435,8 +476,66 @@ static unsigned int php_sapi_filter_init(void)
 	return SUCCESS;
 }
 
+
+void php_filter_throw_validate_exception(zval *invalid_key, zval *invalid_value, zend_long filter_id, zend_long filter_flags, char *format, ...)
+{
+	zval validate_exception;
+	va_list arg;
+	char *message, *message_final;
+	char *key = (!invalid_key || Z_ISUNDEF_P(invalid_key)) ? "" : Z_STRVAL_P(invalid_key);
+	const char *filter_name = php_find_filter_name(filter_id);
+
+	va_start(arg, format);
+	vspprintf(&message, 0, format, arg);
+	va_end(arg);
+
+	if (message) {
+		spprintf(&message_final, 1024, "%s (invalid_key: %s, filter_name: %s, filter_flags: " ZEND_LONG_FMT ")", message, key, filter_name, filter_flags);
+		efree(message);
+	} else {
+		spprintf(&message_final, 1024, "(invalid_key: %s, filter_name: %s, filter_flags: " ZEND_LONG_FMT ")", key, filter_name, filter_flags);
+	}
+
+	object_init_ex(&validate_exception, php_filter_validate_exception_class_entry);
+
+	if (message_final) {
+		zend_update_property_string(php_filter_validate_exception_class_entry, &validate_exception,
+									ZEND_STRL("message"), message_final);
+		efree(message_final);
+	}
+
+	if (!invalid_key || Z_ISUNDEF_P(invalid_key)) {
+		zend_update_property_null(php_filter_validate_exception_class_entry, &validate_exception,
+								  ZEND_STRL("invalid_key"));
+	} else {
+		zend_update_property(php_filter_validate_exception_class_entry, &validate_exception,
+							 ZEND_STRL("invalid_key"), invalid_key);
+	}
+
+	if (!invalid_value || Z_ISUNDEF_P(invalid_value)) {
+		zend_update_property_null(php_filter_validate_exception_class_entry, &validate_exception,
+								  ZEND_STRL("invalid_value"));
+	} else {
+		zend_update_property(php_filter_validate_exception_class_entry, &validate_exception,
+							 ZEND_STRL("invalid_value"), invalid_value);
+	}
+
+	zend_update_property_long(php_filter_validate_exception_class_entry, &validate_exception,
+							  ZEND_STRL("filter_id"), filter_id);
+
+	zend_update_property_string(php_filter_validate_exception_class_entry, &validate_exception,
+								ZEND_STRL("filter_name"), filter_name);
+
+	zend_update_property_long(php_filter_validate_exception_class_entry, &validate_exception,
+							  ZEND_STRL("filter_flags"), filter_flags);
+
+	zend_throw_exception_object(&validate_exception);
+}
+
+
 static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, zend_bool copy) /* {{{ */
 {
+	zend_long filter_id = filter;
 	filter_list_entry  filter_func;
 
 	filter_func = php_find_filter(filter);
@@ -451,7 +550,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		zval_ptr_dtor(value);
 		ZVAL_FALSE(value);
 		/* Cannot use php_error_docref() here */
-		PHP_FILTER_RAISE_EXCEPTION("Invalid filter specifieid", 0);
+		PHP_FILTER_RAISE_EXCEPTION("Invalid filter specifieid");
 		return;
 	}
 
@@ -473,7 +572,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 			} else {
 				ZVAL_FALSE(value);
 			}
-			PHP_FILTER_RAISE_EXCEPTION("Filter validated value object does not have __toString", 0);
+			PHP_FILTER_RAISE_EXCEPTION("Filter validated value object does not have __toString");
 			return;
 		}
 	}
@@ -605,7 +704,6 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 /* }}} */
 
 static zval *php_filter_get_storage(zend_long arg)/* {{{ */
-
 {
 	zval *array_ptr = NULL;
 
@@ -702,6 +800,8 @@ static void php_filter_call_setup_options(zval *filter_args, zend_long *filter, 
 static void php_filter_call_apply(zval *filtered, zend_long filter, zend_long filter_flags, zval *options, const int copy) /* {{{ */
 {
 	char *charset = NULL;
+	zval *value = filtered;
+	zend_long filter_id = filter, flags = filter_flags;
 
 	if (Z_TYPE_P(filtered) == IS_ARRAY) {
 		if (filter_flags & FILTER_REQUIRE_SCALAR) {
@@ -713,7 +813,7 @@ static void php_filter_call_apply(zval *filtered, zend_long filter, zend_long fi
 				ZVAL_NULL(filtered);
 			} else {
 				ZVAL_FALSE(filtered);
-				PHP_FILTER_RAISE_EXCEPTION("Filter validated value is array, but requires scalar", 0);
+				PHP_FILTER_RAISE_EXCEPTION("Filter validated value is array, but requires scalar");
 			}
 			return;
 		}
@@ -730,7 +830,7 @@ static void php_filter_call_apply(zval *filtered, zend_long filter, zend_long fi
 			ZVAL_NULL(filtered);
 		} else {
 			ZVAL_FALSE(filtered);
-			PHP_FILTER_RAISE_EXCEPTION("Filter validated value is scalar, but requires array", 0);
+			PHP_FILTER_RAISE_EXCEPTION("Filter validated value is scalar, but requires array");
 		}
 		return;
 	}
@@ -786,6 +886,9 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 {
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
+	zend_long filter_id = 0;
+	zval *value = NULL;
+	zend_long flags = 0;
 
 	IF_G(raise_exception) = PHP_FILTER_EXCEPTION(func_opts);
 	if (!op) {
@@ -793,7 +896,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 		ZVAL_DUP(return_value, input);
 		/* Should not raise error here when exception is disabled */
 		if (PHP_FILTER_EXCEPTION(func_opts)) {
-			php_error_docref(NULL, E_WARNING, "Filter validation rule does not exist");
+			PHP_FILTER_RAISE_EXCEPTION("Filter validation rule does not exist");
 		}
 		php_filter_call(return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY, func_opts);
 	} else if (Z_TYPE_P(op) == IS_LONG) {
@@ -820,7 +923,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 				}
 				else {
 					PHP_FILTER_SAVE_CURRENT_KEY(0, arg_key);
-					PHP_FILTER_RAISE_EXCEPTION("Filter validated value does not exist", 0);
+					PHP_FILTER_RAISE_EXCEPTION("Filter validated value does not exist");
 				}
 			} else {
 				zval nval;
@@ -1005,21 +1108,6 @@ PHP_FUNCTION(filter_require_var_array)
 	}
 }
 /* }}} */
-
-
-/* {{{ proto mixed filter_get_invalid_key(void)
- * Retrieve key info of invalid element */
-PHP_FUNCTION(filter_get_invalid_key)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	if (Z_ISUNDEF(IF_G(invalid_key))) {
-		return;
-	}
-	ZVAL_COPY(return_value, &IF_G(invalid_key));
-}
 
 
 /* {{{ proto mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])

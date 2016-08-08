@@ -50,7 +50,6 @@ PHP_FUNCTION(filter_require_input);
 PHP_FUNCTION(filter_require_input_array);
 PHP_FUNCTION(filter_require_var);
 PHP_FUNCTION(filter_require_var_array);
-PHP_FUNCTION(filter_get_invalid_key);
 PHP_FUNCTION(filter_input);
 PHP_FUNCTION(filter_var);
 PHP_FUNCTION(filter_input_array);
@@ -79,6 +78,8 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #define IF_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(filter, v)
+
+extern zend_class_entry *php_filter_validate_exception_class_entry;
 
 #define PHP_INPUT_FILTER_PARAM_DECL zval *value, zend_long flags, zval *option_array, char *charset
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL);

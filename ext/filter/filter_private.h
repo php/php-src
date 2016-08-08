@@ -118,6 +118,11 @@
 
 #define FILTER_CALLBACK               0x0400
 
+
+extern zend_class_entry *php_filter_validate_exception_class_entry;
+void php_filter_throw_validate_exception(zval *invalid_key, zval *invalid_value, zend_long filter_id, zend_long filter_options, char *format, ...);
+
+
 #define PHP_FILTER_EXCEPTION(func_opts) (!(func_opts & FILTER_OPTS_DISABLE_EXCEPTION))
 #define PHP_FILTER_ERROR(func_opts) (func_opts & FILTER_OPTS_RAISE_ERROR)
 #define PHP_FILTER_ADD_EMPTY(func_opts) (func_opts & FILTER_OPTS_ADD_EMPTY)
@@ -127,60 +132,20 @@
 || (id >= FILTER_VALIDATE_ALL && id <= FILTER_VALIDATE_LAST) \
 || id == FILTER_CALLBACK)
 
-#define PHP_FILTER_SAVE_CURRENT_KEY(idx, key) \
-	do { \
-		if (!Z_ISUNDEF(IF_G(current_key))) {   \
-			zval_ptr_dtor(&IF_G(current_key)); \
-		} \
-		if (key) { \
-			ZVAL_STR_COPY(&IF_G(current_key), key); \
-		} else { \
-			ZVAL_LONG(&IF_G(current_key), idx); \
-		} \
-	} while(0)
-
 #define PHP_FILTER_SAVE_INVALID_KEY() \
 	if (!Z_ISUNDEF(IF_G(invalid_key))) { \
 		zval_ptr_dtor(&IF_G(invalid_key)); \
 	} \
 	ZVAL_COPY(&IF_G(invalid_key), &IF_G(current_key))
 
-#define PHP_FILTER_RAISE_EXCEPTION(message, code) \
+#define PHP_FILTER_RAISE_EXCEPTION(message, ...) \
 	PHP_FILTER_SAVE_INVALID_KEY(); \
 	do { \
 		if (IF_G(raise_exception)) { \
-			zend_throw_exception(spl_ce_UnexpectedValueException, message, code); \
+			/* zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, message, ##__VA_ARGS__); */ \
+			php_filter_throw_validate_exception(&IF_G(invalid_key), value, filter_id, flags, message, ##__VA_ARGS__); \
 		} \
 	} while(0)
-
-#define RETURN_VALIDATION_FAILED(message, code) \
-	PHP_FILTER_SAVE_INVALID_KEY(); \
-	zval_dtor(value); \
-	if (flags & FILTER_NULL_ON_FAILURE) { \
-		ZVAL_NULL(value); \
-	} else { \
-		PHP_FILTER_RAISE_EXCEPTION(message, code); \
-		ZVAL_FALSE(value); \
-	} \
-	return
-
-#define PHP_FILTER_TRIM_DEFAULT(p, len) PHP_FILTER_TRIM_DEFAULT_EX(p, len, 1);
-
-#define PHP_FILTER_TRIM_DEFAULT_EX(p, len, return_if_empty) { \
-	while ((len > 0)  && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\v' || *p == '\n')) { \
-		p++; \
-		len--; \
-	} \
-	if (len < 1 && return_if_empty) { \
-		RETURN_VALIDATION_FAILED("Filter validated value became empty after trim", 0); \
-	} \
-	if (len > 0) { \
-		while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
-			len--; \
-		} \
-	} \
-}
-
 
 #endif /* FILTER_PRIVATE_H */
 

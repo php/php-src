@@ -188,8 +188,8 @@ Warning: filter_require_var_array(): Invalid option parameter in %s on line 74
 bool(false)
 array(0) {
 }
-string(37) "Filter validated value does not exist"
-string(37) "Filter validated value does not exist"
+string(100) "Filter validated value does not exist (invalid_key: var_name, filter_name: invalid, filter_flags: 0)"
+string(100) "Filter validated value does not exist (invalid_key: var_name, filter_name: invalid, filter_flags: 0)"
 array(1) {
   ["var_name"]=>
   string(0) ""
@@ -197,10 +197,10 @@ array(1) {
 -- (5)
 
 Warning: filter_require_var_array(): Empty keys are not allowed in the definition array in %s on line 102
-string(37) "Filter validated value does not exist"
+string(95) "Filter validated value does not exist (invalid_key: qwe, filter_name: invalid, filter_flags: 0)"
 
 Warning: filter_require_var_array(): Empty keys are not allowed in the definition array in %s on line 108
-string(37) "Filter validated value does not exist"
+string(95) "Filter validated value does not exist (invalid_key: qwe, filter_name: invalid, filter_flags: 0)"
 
 Warning: filter_require_var_array(): Invalid option parameter in %s on line 115
 bool(false)

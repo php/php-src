@@ -36,9 +36,8 @@ $args = array(
 try {
 	var_dump(filter_var_array($data, $args)); // Should pass
 	var_dump(filter_require_var_array($data, $args, 0)); // Should fail
-} catch (UnexpectedValueException $e) {
+} catch (FilterValidateException $e) {
 	var_dump($e->getMessage());
-	var_dump(filter_get_invalid_key());
 }
 
 // Fix data so that 'testscalar' validates
@@ -46,9 +45,8 @@ $data['testscalar'] = '9999';
 try {
 	var_dump(filter_require_var_array($data, $args, FILTER_OPTS_ADD_EMPTY)); // Should pass
 	var_dump(filter_require_var_array($data, $args, 0)); // Try w/o add_empty flag. Should fail.
-} catch (UnexpectedValueException $e) {
+} catch (FilterValidateException $e) {
 	var_dump($e->getMessage());
-	var_dump(filter_get_invalid_key());
 }
 ?>
 --EXPECT--
@@ -72,8 +70,7 @@ array(6) {
     int(2)
   }
 }
-string(52) "Filter validated value is array, but requires scalar"
-string(10) "testscalar"
+string(120) "Filter validated value is array, but requires scalar (invalid_key: testscalar, filter_name: int, filter_flags: 33554432)"
 array(6) {
   ["product_id"]=>
   string(17) "libgd%3Cscript%3E"
@@ -94,5 +91,4 @@ array(6) {
     int(2)
   }
 }
-string(37) "Filter validated value does not exist"
-string(12) "doesnotexist"
+string(104) "Filter validated value does not exist (invalid_key: doesnotexist, filter_name: invalid, filter_flags: 0)"
