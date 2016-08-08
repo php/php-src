@@ -9,16 +9,16 @@ a=1&b=2
 function myfunc($val) {
 	return $val . '_callback';
 }
-echo filter_reuiqre_input(INPUT_GET, 'a', FILTER_CALLBACK, array("options"=>'myfunc'));
+echo filter_require_input(INPUT_GET, 'a', FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
-echo filter_reuiqre_input(INPUT_GET, 'b', FILTER_VALIDATE_INT);
+echo filter_require_input(INPUT_GET, 'b', FILTER_VALIDATE_INT);
 echo "\n";
 $data = "data";
 
 echo filter_require_var($data, FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
 
-$res = filter_reuiqre_input_array(INPUT_GET, array(
+$res = filter_require_input_array(INPUT_GET, array(
 				'a' => array(
 					'filter' => FILTER_CALLBACK,
 					'options' => 'myfunc'

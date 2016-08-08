@@ -73,6 +73,11 @@
 #define FILTER_FLAG_STRING_ALNUM             0x0040
 #define FILTER_FLAG_BOOL_ALLOW_EMPTY         0x0080
 
+/* filter_require_*_array() function behavior options */
+#define FILTER_OPTS_ADD_EMPTY                0x0001
+#define FILTER_OPTS_DISABLE_EXCEPTION        0x0002
+#define FILTER_OPTS_RAISE_ERROR              0x0004
+
 /* Filters */
 #define FILTER_VALIDATE_DEFAULT       0x0104
 
@@ -112,6 +117,10 @@
 #define FILTER_SANITIZE_ALL           0x0200
 
 #define FILTER_CALLBACK               0x0400
+
+#define PHP_FILTER_EXCEPTION(func_opts) (!(func_opts & FILTER_OPTS_DISABLE_EXCEPTION))
+#define PHP_FILTER_ERROR(func_opts) (func_opts & FILTER_OPTS_RAISE_ERROR)
+#define PHP_FILTER_ADD_EMPTY(func_opts) (func_opts & FILTER_OPTS_ADD_EMPTY)
 
 #define PHP_FILTER_ID_EXISTS(id) \
 ((id >= FILTER_SANITIZE_ALL && id <= FILTER_SANITIZE_LAST) \

@@ -35,7 +35,7 @@ $args = array(
 
 try {
 	var_dump(filter_var_array($data, $args)); // Should pass
-	var_dump(filter_require_var_array($data, $args, TRUE)); // Should fail
+	var_dump(filter_require_var_array($data, $args, 0)); // Should fail
 } catch (UnexpectedValueException $e) {
 	var_dump($e->getMessage());
 	var_dump(filter_get_invalid_key());
@@ -44,8 +44,8 @@ try {
 // Fix data so that 'testscalar' validates
 $data['testscalar'] = '9999';
 try {
-	var_dump(filter_require_var_array($data, $args, TRUE)); // Should pass
-	var_dump(filter_require_var_array($data, $args, FALSE)); // Try w/o add_empty flag. Should fail.
+	var_dump(filter_require_var_array($data, $args, FILTER_OPTS_ADD_EMPTY)); // Should pass
+	var_dump(filter_require_var_array($data, $args, 0)); // Try w/o add_empty flag. Should fail.
 } catch (UnexpectedValueException $e) {
 	var_dump($e->getMessage());
 	var_dump(filter_get_invalid_key());

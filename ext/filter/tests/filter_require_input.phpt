@@ -9,28 +9,28 @@ ar[elm1]=1234&ar[elm2]=0660&a=0234
 --FILE--
 <?php
 try {
-	$ret = filter_reuiqre_input(INPUT_GET, 'a', FILTER_VALIDATE_INT);
+	$ret = filter_require_input(INPUT_GET, 'a', FILTER_VALIDATE_INT);
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 var_dump($ret);
 
 try {
-	$ret = filter_reuiqre_input(INPUT_GET, 'a', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL));
+	$ret = filter_require_input(INPUT_GET, 'a', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 var_dump($ret);
 
 try {
-	$ret = filter_reuiqre_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_REQUIRE_ARRAY));
+	$ret = filter_require_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_REQUIRE_ARRAY));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
 var_dump($ret);
 
 try {
-	$ret = filter_reuiqre_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL|FILTER_REQUIRE_ARRAY));
+	$ret = filter_require_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL|FILTER_REQUIRE_ARRAY));
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
