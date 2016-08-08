@@ -127,6 +127,12 @@ PHP 7.1 UPGRADE NOTES
   . Closure::fromCallable (RFC: https://wiki.php.net/rfc/closurefromcallable)
   . Added support for class constant visibility modifiers.
     (RFC: https://wiki.php.net/rfc/class_const_visibility)
+  . TypeError messages for arg_info type checks will now say "must be ...
+    or null", or "must ... or be null" where the parameter or return type
+    accepts null. arg_info type checks are used by all userland functions with
+    type declarations, and some internal functions. Both nullable type
+    declarations (?int) and parameters with default values of null
+    (int $foo = NULL) are considered to "accept null" for this purpose.
 
 ========================================
 3. Changes in SAPI modules

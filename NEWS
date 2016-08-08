@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #72767 (PHP Segfaults when trying to expand an infinite operator).
     (Nikita)
+  . TypeError messages for arg_info type checks will now say "must be ...
+    or null" where the parameter or return type accepts null. (Andrea)
 
 - EXIF:
   . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
