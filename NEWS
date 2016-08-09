@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug #72788 (Invalid memory access when using persistent PDO
     connection). (Keyur)
+  . Fixed bug #72791 (Memory leak in PDO persistent connection handling). (Keyur)
 
 - Reflection:
   . Implemented request #38992 (invoke() and invokeArgs() static method calls
