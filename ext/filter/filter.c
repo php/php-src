@@ -1008,7 +1008,7 @@ PHP_FUNCTION(filter_require_input)
  */
 PHP_FUNCTION(filter_require_var)
 {
-	zend_long filter = FILTER_VALIDATE_DEFAULT;
+	zend_long filter;
 	zval *filter_args = NULL, *data;
 	zend_long func_opts = 0;
 
