@@ -60,6 +60,7 @@ PHPAPI zend_class_entry *reflection_function_ptr;
 PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
+PHPAPI zend_class_entry *reflection_named_type_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
 PHPAPI zend_class_entry *reflection_method_ptr;
@@ -1276,7 +1277,7 @@ static void reflection_type_factory(zend_function *fptr, zval *closure_object, s
 	reflection_object *intern;
 	type_reference *reference;
 
-	reflection_instantiate(reflection_type_ptr, object);
+	reflection_instantiate(reflection_named_type_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
 	reference->arg_info = arg_info;
@@ -3005,18 +3006,61 @@ ZEND_METHOD(reflection_type, __toString)
 {
 	reflection_object *intern;
 	type_reference *param;
+	zend_string *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
+	
+	switch (param->arg_info->type_hint) {
+		case IS_ARRAY:    str = zend_string_init("array", sizeof("array") - 1, 0); break;
+		case IS_CALLABLE: str = zend_string_init("callable", sizeof("callable") - 1, 0); break;
+		case IS_OBJECT:
+			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
+				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+				str = zend_string_init(((zend_internal_arg_info*)param->arg_info)->class_name, strlen(((zend_internal_arg_info*)param->arg_info)->class_name), 0);
+			} else {
+				str = zend_string_copy(param->arg_info->class_name);
+			}
+			break;
+		case IS_STRING:   str = zend_string_init("string", sizeof("string") - 1, 0); break;
+		case _IS_BOOL:    str = zend_string_init("bool", sizeof("bool") - 1, 0); break;
+		case IS_LONG:     str = zend_string_init("int", sizeof("int") - 1, 0); break;
+		case IS_DOUBLE:   str = zend_string_init("float", sizeof("float") - 1, 0); break;
+		case IS_VOID:     str = zend_string_init("void", sizeof("void") - 1, 0); break;
+		case IS_ITERABLE: str = zend_string_init("iterable", sizeof("iterable") - 1, 0); break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+	
+	if (param->arg_info->allow_null) {
+		str = zend_string_extend(str, ZSTR_LEN(str) + 1, 0);
+		memcpy(ZSTR_VAL(str) + 1, ZSTR_VAL(str), ZSTR_LEN(str));
+		ZSTR_VAL(str)[0] = '?';
+	}
+	
+	RETURN_STR_COPY(str);
+}
+/* }}} */
 
+/* {{{ proto public string ReflectionNamedType::getName()
+ Return the text of the type hint */
+ZEND_METHOD(reflection_named_type, getName)
+{
+	reflection_object *intern;
+	type_reference *param;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+	
 	switch (param->arg_info->type_hint) {
 		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
 		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
 		case IS_OBJECT:
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 				RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
 			}
 			RETURN_STR_COPY(param->arg_info->class_name);
@@ -6688,6 +6732,11 @@ static const zend_function_entry reflection_type_functions[] = {
 	PHP_FE_END
 };
 
+static const zend_function_entry reflection_named_type_functions[] = {
+	ZEND_ME(reflection_named_type, getName, arginfo_reflection__void, 0)
+	PHP_FE_END
+};
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_extension_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, return)
@@ -6804,6 +6853,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionType", reflection_type_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_type_ptr = zend_register_internal_class(&_reflection_entry);
+	
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionNamedType", reflection_named_type_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_named_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
 	_reflection_entry.create_object = reflection_objects_new;
