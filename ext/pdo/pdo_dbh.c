@@ -36,6 +36,7 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 
+static void _php_pdo_pdhb_to_delete_dtor(zval *zv);
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp) /* {{{ */
@@ -297,8 +298,15 @@ static PHP_METHOD(PDO, dbh_constructor)
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
 						/* nope... need to kill it */
-						/*??? memory leak */
 						zend_list_close(le);
+
+						/* add to this list in case any PDO objects still have references to this pdbh */
+						if (!PDOG(pdo_pdbh_to_delete)) {
+							ALLOC_HASHTABLE(PDOG(pdo_pdbh_to_delete));
+							zend_hash_init(PDOG(pdo_pdbh_to_delete), 4, NULL, _php_pdo_pdhb_to_delete_dtor, 0);
+						}
+						zend_hash_next_index_insert_ptr(PDOG(pdo_pdbh_to_delete), pdbh);
+
 						pdbh = NULL;
 					}
 				}
@@ -1586,6 +1594,13 @@ ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 	}
 }
 /* }}} */
+
+static void _php_pdo_pdhb_to_delete_dtor(zval *zv) /* {{{ */
+{
+	pdo_dbh_t *pdbh = (pdo_dbh_t*)Z_PTR_P(zv);
+	dbh_free(pdbh, 1);
+} /* }}} */
+
 
 /*
  * Local variables:

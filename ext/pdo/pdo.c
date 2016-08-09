@@ -146,8 +146,8 @@ zend_module_entry pdo_module_entry = {
 	pdo_functions,
 	PHP_MINIT(pdo),
 	PHP_MSHUTDOWN(pdo),
-	NULL,
-	NULL,
+	PHP_RINIT(pdo),
+	PHP_RSHUTDOWN(pdo),
 	PHP_MINFO(pdo),
 	PHP_PDO_VERSION,
 	PHP_MODULE_GLOBALS(pdo),
@@ -169,6 +169,7 @@ ZEND_GET_MODULE(pdo)
 static PHP_GINIT_FUNCTION(pdo)
 {
 	pdo_globals->global_value = 0;
+	pdo_globals->pdo_pdbh_to_delete = NULL;
 }
 /* }}} */
 
@@ -380,6 +381,27 @@ PHP_MSHUTDOWN_FUNCTION(pdo)
 {
 	zend_hash_destroy(&pdo_driver_hash);
 	pdo_sqlstate_fini_error_table();
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION */
+PHP_RINIT_FUNCTION(pdo)
+{
+	PDOG(pdo_pdbh_to_delete) = NULL;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+PHP_RSHUTDOWN_FUNCTION(pdo)
+{
+	if (PDOG(pdo_pdbh_to_delete)) {
+		zend_hash_destroy(PDOG(pdo_pdbh_to_delete));
+		FREE_HASHTABLE(PDOG(pdo_pdbh_to_delete));
+		PDOG(pdo_pdbh_to_delete) = NULL;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
