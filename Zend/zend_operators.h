@@ -445,7 +445,23 @@ ZEND_API void zend_update_current_locale(void);
 
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-#if defined(__GNUC__) && defined(__i386__)
+#if __has_builtin(__builtin_saddl_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif __has_builtin(__builtin_saddll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(__GNUC__) && defined(__i386__)
 	__asm__(
 		"incl (%0)\n\t"
 		"jno  0f\n\t"
@@ -483,7 +499,23 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 
 static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-#if defined(__GNUC__) && defined(__i386__)
+#if __has_builtin(__builtin_ssubl_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif __has_builtin(__builtin_ssubll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(__GNUC__) && defined(__i386__)
 	__asm__(
 		"decl (%0)\n\t"
 		"jno  0f\n\t"
