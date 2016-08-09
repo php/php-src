@@ -511,14 +511,13 @@ void php_filter_throw_validate_exception(zval *invalid_key, zval *invalid_value,
 							 ZEND_STRL("invalid_key"), invalid_key);
 	}
 
-	/* Disabled for now */
-	/* if (!invalid_value || Z_ISUNDEF_P(invalid_value)) { */
-	/* 	zend_update_property_null(ce, &validate_exception, */
-	/* 							  ZEND_STRL("invalid_value")); */
-	/* } else { */
-	/* 	zend_update_property(ce, &validate_exception, */
-	/* 						 ZEND_STRL("invalid_value"), invalid_value); */
-	/* } */
+	if (!invalid_value || Z_ISUNDEF_P(invalid_value)) {
+		zend_update_property_null(ce, &validate_exception,
+								  ZEND_STRL("invalid_value"));
+	} else {
+		zend_update_property(ce, &validate_exception,
+							 ZEND_STRL("invalid_value"), invalid_value);
+	}
 
 	zend_update_property_long(ce, &validate_exception,
 							  ZEND_STRL("filter_id"), filter_id);

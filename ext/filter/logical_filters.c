@@ -41,11 +41,12 @@ ZEND_DECLARE_MODULE_GLOBALS(filter)
 
 #define RETURN_VALIDATION_FAILED(message, ...) \
 	PHP_FILTER_SAVE_INVALID_KEY(); \
-	zval_dtor(value); \
 	if (flags & FILTER_NULL_ON_FAILURE) { \
+		zval_dtor(value); \
 		ZVAL_NULL(value); \
 	} else { \
 		PHP_FILTER_RAISE_EXCEPTION(message, ##__VA_ARGS__); \
+		zval_dtor(value); \
 		ZVAL_FALSE(value); \
 	} \
 	return
