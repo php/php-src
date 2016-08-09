@@ -3039,7 +3039,7 @@ ZEND_METHOD(reflection_type, __toString)
 	
 	if (param->arg_info->allow_null) {
 		str = zend_string_extend(str, ZSTR_LEN(str) + 1, 0);
-		memmove(ZSTR_VAL(str) + 1, ZSTR_VAL(str), ZSTR_LEN(str));
+		memmove(ZSTR_VAL(str) + 1, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 		ZSTR_VAL(str)[0] = '?';
 	}
 	
