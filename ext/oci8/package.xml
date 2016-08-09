@@ -46,7 +46,7 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2016-08-04</date>
+ <date>2016-08-07</date>
  <time>12:00:00</time>
 
   <version>
@@ -61,6 +61,7 @@ Interoperability Support" (ID 207303.1) for details.
   <notes>
 This version is for PHP 7 only.
 Fixed invalid handle error with Implicit Result Sets
+Fixed bug #72524 (Binding null values triggers ORA-24816 error)
   </notes>
  <contents>
   <dir name="/">
@@ -163,6 +164,7 @@ Fixed invalid handle error with Implicit Result Sets
     <file name="bug68298.phpt" role="test" />
     <file name="bug71422.phpt" role="test" />
     <file name="bug71600.phpt" role="test" />
+    <file name="bug72524.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />

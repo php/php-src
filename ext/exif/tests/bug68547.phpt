@@ -8,5 +8,5 @@ exif_read_data(__DIR__ . DIRECTORY_SEPARATOR . 'bug68547.jpg');
 ?>
 ===DONE===
 --EXPECTF--
-Warning: exif_read_data(bug68547.jpg): Process tag(x9C9E=Keywords   ): Illegal components(0) in %sbug68547.php on line %d
+Warning: exif_read_data(bug68547.jpg): Process tag(x9C9E=Keywords   ): Illegal components(%d) in %sbug68547.php on line %d
 ===DONE===

@@ -369,6 +369,10 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	} while (NULL != (cur = strchr(prev, '\0')) && cur++ && *cur && bin_len + (cur - prev) < 32760);
 
 	envw = (wchar_t *) malloc((bin_len + 3) * sizeof(wchar_t));	
+	if (!envw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
+		return NULL;
+	}
 	memmove(envw, ew, bin_len * sizeof(wchar_t));
 	envw[bin_len] = L'\0';
 	envw[bin_len + 1] = L'\0';

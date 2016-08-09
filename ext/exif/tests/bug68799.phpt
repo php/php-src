@@ -39,7 +39,7 @@ print_r(exif_read_data(__DIR__.'/bug68799.jpg'));
 
 ?>
 --EXPECTF--
-Warning: exif_read_data(bug68799.jpg): Process tag(x9C9D=Author     ): Illegal components(0) in %s on line %d
+Warning: exif_read_data(bug68799.jpg): Process tag(x9C9D=Author     ): Illegal components(%d) in %s on line %d
 Array
 (
     [FileName] => bug68799.jpg

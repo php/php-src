@@ -218,9 +218,11 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 	zend_ulong result;
 
 	result = php_mt_rand();
+#if ZEND_ULONG_MAX > UINT32_MAX
 	if (umax > UINT32_MAX) {
 		result = (result << 32) | php_mt_rand();
 	}
+#endif
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == ZEND_ULONG_MAX)) {
@@ -238,7 +240,12 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 		/* Discard numbers over the limit to avoid modulo bias */
 		while (UNEXPECTED(result > limit)) {
 #if ZEND_ULONG_MAX > UINT32_MAX
-			result = (result << 32) | php_mt_rand();
+			if (umax > UINT32_MAX) {
+				result = (result << 32) | php_mt_rand();
+			}
+			else {
+				result = php_mt_rand();
+			}
 #else
 			result = php_mt_rand();
 #endif
@@ -269,7 +276,7 @@ PHP_FUNCTION(mt_rand)
 
 	if (UNEXPECTED(max < min)) {
 		php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
-		RETURN_FALSE;
+		max ^= min ^= max ^= min;
 	}
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {

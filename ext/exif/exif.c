@@ -136,7 +136,16 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_row(2, "EXIF Support", "enabled");
 	php_info_print_table_row(2, "EXIF Version", PHP_EXIF_VERSION);
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
-	php_info_print_table_row(2, "Supported filetypes", "JPEG,TIFF");
+	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
+
+	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) { 
+		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
+	} else {
+		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
+	}
+
+	php_info_print_table_row(2, "Extended EXIF tag formats", "Canon, Casio, Fujifilm, Nikon, Olympus, Samsung, Panasonic, DJI, Sony, Pentax, Minolta, Sigma, Foveon");
+
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -218,7 +227,7 @@ static PHP_GINIT_FUNCTION(exif)
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(exif)
-   Get the size of an image as 4-element array */
+ */
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
@@ -1165,6 +1174,150 @@ static tag_info_array tag_table_VND_SONY = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_PENTAX = {
+  { 0x0000, "Version"},
+  { 0x0001, "Mode"},
+  { 0x0002, "PreviewResolution"},
+  { 0x0003, "PreviewLength"},
+  { 0x0004, "PreviewOffset"},
+  { 0x0005, "ModelID"},
+  { 0x0006, "Date"},
+  { 0x0007, "Time"},
+  { 0x0008, "Quality"},
+  { 0x0009, "Size"},
+  { 0x000c, "Flash"},
+  { 0x000d, "Focus"},
+  { 0x000e, "AFPoint"},
+  { 0x000f, "AFPointInFocus"},
+  { 0x0012, "ExposureTime"},
+  { 0x0013, "FNumber"},
+  { 0x0014, "ISO"},
+  { 0x0016, "ExposureCompensation"},
+  { 0x0017, "MeteringMode"},
+  { 0x0018, "AutoBracketing"},
+  { 0x0019, "WhiteBalance"},
+  { 0x001a, "WhiteBalanceMode"},
+  { 0x001b, "BlueBalance"},
+  { 0x001c, "RedBalance"},
+  { 0x001d, "FocalLength"},
+  { 0x001e, "DigitalZoom"},
+  { 0x001f, "Saturation"},
+  { 0x0020, "Contrast"},
+  { 0x0021, "Sharpness"},
+  { 0x0022, "Location"},
+  { 0x0023, "Hometown"},
+  { 0x0024, "Destination"},
+  { 0x0025, "HometownDST"},
+  { 0x0026, "DestinationDST"},
+  { 0x0027, "DSPFirmwareVersion"},
+  { 0x0028, "CPUFirmwareVersion"},
+  { 0x0029, "FrameNumber"},
+  { 0x002d, "EffectiveLV"},
+  { 0x0032, "ImageProcessing"},
+  { 0x0033, "PictureMode"},
+  { 0x0034, "DriveMode"},
+  { 0x0037, "ColorSpace"},
+  { 0x0038, "ImageAreaOffset"},
+  { 0x0039, "RawImageSize"},
+  { 0x003e, "PreviewImageBorders"},
+  { 0x003f, "LensType"},
+  { 0x0040, "SensitivityAdjust"},
+  { 0x0041, "DigitalFilter"},
+  { 0x0047, "Temperature"},
+  { 0x0048, "AELock"},
+  { 0x0049, "NoiseReduction"},
+  { 0x004d, "FlashExposureCompensation"},
+  { 0x004f, "ImageTone"},
+  { 0x0050, "ColorTemperature"},
+  { 0x005c, "ShakeReduction"},
+  { 0x005d, "ShutterCount"},
+  { 0x0069, "DynamicRangeExpansion"},
+  { 0x0071, "HighISONoiseReduction"},
+  { 0x0072, "AFAdjustment"},
+  { 0x0200, "BlackPoint"},
+  { 0x0201, "WhitePoint"},
+  { 0x0205, "ShotInfo"},
+  { 0x0206, "AEInfo"},
+  { 0x0207, "LensInfo"},
+  { 0x0208, "FlashInfo"},
+  { 0x0209, "AEMeteringSegments"},
+  { 0x020a, "FlashADump"},
+  { 0x020b, "FlashBDump"},
+  { 0x020d, "WB_RGGBLevelsDaylight"},
+  { 0x020e, "WB_RGGBLevelsShade"},
+  { 0x020f, "WB_RGGBLevelsCloudy"},
+  { 0x0210, "WB_RGGBLevelsTungsten"},
+  { 0x0211, "WB_RGGBLevelsFluorescentD"},
+  { 0x0212, "WB_RGGBLevelsFluorescentN"},
+  { 0x0213, "WB_RGGBLevelsFluorescentW"},
+  { 0x0214, "WB_RGGBLevelsFlash"},
+  { 0x0215, "CameraInfo"},
+  { 0x0216, "BatteryInfo"},
+  { 0x021f, "AFInfo"},
+  { 0x0222, "ColorInfo"},
+  { 0x0229, "SerialNumber"},
+  TAG_TABLE_END
+};
+
+static tag_info_array tag_table_VND_MINOLTA = {
+  { 0x0000, "Version"},
+  { 0x0001, "CameraSettingsStdOld"},
+  { 0x0003, "CameraSettingsStdNew"},
+  { 0x0004, "CameraSettings7D"},
+  { 0x0018, "ImageStabilizationData"},
+  { 0x0020, "WBInfoA100"},
+  { 0x0040, "CompressedImageSize"},
+  { 0x0081, "Thumbnail"},
+  { 0x0088, "ThumbnailOffset"},
+  { 0x0089, "ThumbnailLength"},
+  { 0x0100, "SceneMode"},
+  { 0x0101, "ColorMode"},
+  { 0x0102, "Quality"},
+  { 0x0103, "0x0103"},
+  { 0x0104, "FlashExposureComp"},
+  { 0x0105, "Teleconverter"},
+  { 0x0107, "ImageStabilization"},
+  { 0x0109, "RawAndJpgRecording"},
+  { 0x010a, "ZoneMatching"},
+  { 0x010b, "ColorTemperature"},
+  { 0x010c, "LensID"},
+  { 0x0111, "ColorCompensationFilter"},
+  { 0x0112, "WhiteBalanceFineTune"},
+  { 0x0113, "ImageStabilizationA100"},
+  { 0x0114, "CameraSettings5D"},
+  { 0x0115, "WhiteBalance"},
+  { 0x0e00, "PrintIM"},
+  { 0x0f00, "CameraSettingsZ1"},
+  TAG_TABLE_END
+};
+
+static tag_info_array tag_table_VND_SIGMA = {
+  { 0x0002, "SerialNumber"},
+  { 0x0003, "DriveMode"},
+  { 0x0004, "ResolutionMode"},
+  { 0x0005, "AutofocusMode"},
+  { 0x0006, "FocusSetting"},
+  { 0x0007, "WhiteBalance"},
+  { 0x0008, "ExposureMode"},
+  { 0x0009, "MeteringMode"},
+  { 0x000a, "LensRange"},
+  { 0x000b, "ColorSpace"},
+  { 0x000c, "Exposure"},
+  { 0x000d, "Contrast"},
+  { 0x000e, "Shadow"},
+  { 0x000f, "Highlight"},
+  { 0x0010, "Saturation"},
+  { 0x0011, "Sharpness"},
+  { 0x0012, "FillLight"},
+  { 0x0014, "ColorAdjustment"},
+  { 0x0015, "AdjustmentMode"},
+  { 0x0016, "Quality"},
+  { 0x0017, "Firmware"},
+  { 0x0018, "Software"},
+  { 0x0019, "AutoBracket"},
+  TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -1188,9 +1341,9 @@ typedef struct {
 	mn_offset_mode_t offset_mode;
 } maker_note_type;
 
+/* Remember to update PHP_MINFO if updated */
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
-/*  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},*/
   { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,                       0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
   { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00", 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MAKER},
   { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
@@ -1199,7 +1352,11 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
   { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
   { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
+  { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_PENTAX,    "PENTAX",                  NULL, "AOC\x00",                   6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "SIGMA\x00\x00\x00",         10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "FOVEON\x00\x00\x00",        10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
@@ -1481,6 +1638,20 @@ static double exif_convert_any_format(void *value, int format, int motorola_inte
 			return *(double *)value;
 	}
 	return 0;
+}
+/* }}} */
+
+/* {{{ exif_rewrite_tag_format_to_unsigned
+ * Rewrite format tag so that it specifies an unsigned type for a tag */
+static int exif_rewrite_tag_format_to_unsigned(int format)
+{
+	switch(format) {
+		case TAG_FMT_SBYTE: return TAG_FMT_BYTE;
+		case TAG_FMT_SRATIONAL: return TAG_FMT_URATIONAL;
+		case TAG_FMT_SSHORT: return TAG_FMT_USHORT;
+		case TAG_FMT_SLONG: return TAG_FMT_ULONG;
+	}
+	return format;
 }
 /* }}} */
 
@@ -3147,18 +3318,18 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			switch(tag) {
 				case TAG_IMAGEWIDTH:
 				case TAG_COMP_IMAGE_WIDTH:
-					ImageInfo->Thumbnail.width = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.width = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_IMAGEHEIGHT:
 				case TAG_COMP_IMAGE_HEIGHT:
-					ImageInfo->Thumbnail.height = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.height = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_STRIP_OFFSETS:
 				case TAG_JPEG_INTERCHANGE_FORMAT:
 					/* accept both formats */
-					ImageInfo->Thumbnail.offset = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.offset = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_STRIP_BYTE_COUNTS:
@@ -3168,13 +3339,13 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						/* motorola is easier to read */
 						ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_TIFF_MM;
 					}
-					ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_JPEG_INTERCHANGE_FORMAT_LEN:
 					if (ImageInfo->Thumbnail.filetype == IMAGE_FILETYPE_UNKNOWN) {
 						ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_JPEG;
-						ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+						ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					}
 					break;
 			}
@@ -3246,7 +3417,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_COMP_IMAGE_WIDTH:
-				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 				break;
 
 			case TAG_FOCALPLANE_X_RES:
