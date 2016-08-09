@@ -3593,7 +3593,7 @@ PHP_FUNCTION(array_column)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(arr_hash));
 	if (!zkey) {
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
