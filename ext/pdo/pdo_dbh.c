@@ -1508,7 +1508,7 @@ static void dbh_free(pdo_dbh_t *dbh, zend_bool free_persistent)
 
 	if (dbh->is_persistent) {
 #if ZEND_DEBUG
-		ZEND_ASSERT(free_persistent && (dbh->refcount == 1));
+		ZEND_ASSERT(!free_persistent || (dbh->refcount == 1));
 #endif
 		if (!free_persistent && (--dbh->refcount)) {
 			return;
