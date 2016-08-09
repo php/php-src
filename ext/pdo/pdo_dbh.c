@@ -1499,13 +1499,13 @@ static void dbh_free(pdo_dbh_t *dbh, zend_bool free_persistent)
 {
 	int i;
 
-	if (dbh->is_persistent && !free_persistent) {
-		return;
-	}
-
 	if (dbh->query_stmt) {
 		zval_ptr_dtor(&dbh->query_stmt_zval);
 		dbh->query_stmt = NULL;
+	}
+
+	if (dbh->is_persistent && !free_persistent) {
+		return;
 	}
 
 	if (dbh->methods) {
