@@ -111,6 +111,8 @@ PHP 7.1 UPGRADE NOTES
     ++ and --, which have a unique approach to handling numeric strings.
     (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
   . Closure::fromCallable (RFC: https://wiki.php.net/rfc/closurefromcallable)
+  . Added support for class constant visibility modifiers.
+    (RFC: https://wiki.php.net/rfc/class_const_visibility)
 
 ========================================
 3. Changes in SAPI modules
