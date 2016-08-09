@@ -430,6 +430,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_check_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_scrub, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
@@ -555,6 +560,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_send_mail,			arginfo_mb_send_mail)
 	PHP_FE(mb_get_info,				arginfo_mb_get_info)
 	PHP_FE(mb_check_encoding,		arginfo_mb_check_encoding)
+	PHP_FE(mb_scrub,		arginfo_mb_scrub)
 #if HAVE_MBREGEX
 	PHP_MBREGEX_FUNCTION_ENTRIES
 #endif
@@ -4742,6 +4748,53 @@ PHP_FUNCTION(mb_check_encoding)
 	if (php_mb_check_encoding(var, var_len, enc)) {
 		RETVAL_TRUE;
 	}
+}
+/* }}} */
+
+static inline char* php_mb_scrub(const char* str, size_t str_len, const char* enc)
+{
+	size_t ret_len;
+
+	return php_mb_convert_encoding(str, str_len, enc, enc, &ret_len);
+}
+
+/* {{{ proto bool mb_scrub([string str[, string encoding]]) */
+PHP_FUNCTION(mb_scrub)
+{
+	char* str;
+	size_t str_len;
+	char *enc = NULL;
+	size_t enc_len;
+
+	char *ret;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
+		return;
+	}
+#else
+ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(enc, enc_len)
+ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	if (enc == NULL) {
+		enc = (char *) MBSTRG(current_internal_encoding)->name;
+	} else if (!mbfl_is_support_encoding(enc)) {
+		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc);
+		RETURN_FALSE; 
+	}
+
+	ret = php_mb_scrub(str, str_len, enc);
+
+	if (ret == NULL) {
+		RETURN_FALSE;
+	}
+
+	RETVAL_STRING(ret);
+	efree(ret);
 }
 /* }}} */
 
