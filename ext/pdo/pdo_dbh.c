@@ -297,7 +297,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
 						/* nope... need to kill it */
-						/*??? memory leak */
+						pdbh->refcount--;
 						zend_list_close(le);
 						pdbh = NULL;
 					}
@@ -310,6 +310,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 				/* need a brand new pdbh */
 				pdbh = pecalloc(1, sizeof(*pdbh), 1);
 
+				pdbh->refcount = 1;
 				pdbh->is_persistent = 1;
 				pdbh->persistent_id = pemalloc(plen + 1, 1);
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
@@ -322,6 +323,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 			efree(dbh);
 			/* switch over to the persistent one */
 			Z_PDO_OBJECT_P(object)->inner = pdbh;
+			pdbh->refcount++;
 			dbh = pdbh;
 		}
 
@@ -1508,8 +1510,13 @@ static void dbh_free(pdo_dbh_t *dbh, zend_bool free_persistent)
 		dbh->query_stmt = NULL;
 	}
 
-	if (dbh->is_persistent && !free_persistent) {
-		return;
+	if (dbh->is_persistent) {
+#if ZEND_DEBUG
+		ZEND_ASSERT(free_persistent && (dbh->refcount == 1));
+#endif
+		if (!free_persistent && (--dbh->refcount)) {
+			return;
+		}
 	}
 
 	if (dbh->methods) {
