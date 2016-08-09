@@ -635,7 +635,7 @@ void php_filter_validate_string(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-	
+
 void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zend_long filter_id = FILTER_VALIDATE_REGEXP;

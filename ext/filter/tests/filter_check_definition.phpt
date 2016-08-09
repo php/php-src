@@ -1,5 +1,5 @@
 --TEST--
-validate_check_definition() tests 
+validate_check_definition() tests
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
@@ -9,7 +9,7 @@ validate_check_definition() tests
 		'product_id'   => FILTER_SANITIZE_ENCODED,
 		'component'    => array(
 			'filter'      => FILTER_VALIDATE_INT,
-			'flags'       => FILTER_FORCE_ARRAY, 
+			'flags'       => FILTER_FORCE_ARRAY,
 			'options'     => array('min_range' => 1, 'max_range' => 10)
 		),
 		'versions'     => FILTER_SANITIZE_ENCODED,
@@ -52,7 +52,7 @@ var_dump(filter_check_definition($def));
 		FILTER_SANITIZE_ENCODED,
 		'component'    => array(
 			'filters'   => FILTER_VALIDATE_INT,
-			'flag'      => FILTER_FORCE_ARRAY, 
+			'flag'      => FILTER_FORCE_ARRAY,
 			'option'    => array('min_rang' => 1, 'max_rangee' => 10)
 		),
 		'versions'     => 'abc',

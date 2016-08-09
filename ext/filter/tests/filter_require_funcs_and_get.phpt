@@ -23,7 +23,7 @@ $res = filter_require_input_array(INPUT_GET, array(
 					'filter' => FILTER_CALLBACK,
 					'options' => 'myfunc'
 					),
-				'b' => FILTER_VALIDATE_INT 
+				'b' => FILTER_VALIDATE_INT
 		)
 	);
 
