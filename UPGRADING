@@ -93,6 +93,9 @@ PHP 7.1 UPGRADE NOTES
   . The behavior of ReflectionMethod::invoke() and ::invokeArgs() has been
     aligned, what causes slightly different behavior than before for some
     pathological cases.
+  . ReflectionType::__toString() will now return the type name with a leading
+    "?" if it is nullable. To retrieve the type name without leading "?" the new
+    ReflectionNamedType::getName() method can be used.
 
 ========================================
 2. New Features
