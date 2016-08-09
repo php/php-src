@@ -3000,6 +3000,28 @@ ZEND_METHOD(reflection_type, isBuiltin)
 }
 /* }}} */
 
+/* {{{ reflection_type_name */
+static zend_string *reflection_type_name(type_reference *param) {
+	switch (param->arg_info->type_hint) {
+		case IS_ARRAY:    return zend_string_init("array", sizeof("array") - 1, 0);
+		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
+		case IS_OBJECT:
+			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
+				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+				return zend_string_init(((zend_internal_arg_info*)param->arg_info)->class_name, strlen(((zend_internal_arg_info*)param->arg_info)->class_name), 0);
+			}
+			return zend_string_copy(param->arg_info->class_name);
+		case IS_STRING:   return zend_string_init("string", sizeof("string") - 1, 0);
+		case _IS_BOOL:    return zend_string_init("bool", sizeof("bool") - 1, 0);
+		case IS_LONG:     return zend_string_init("int", sizeof("int") - 1, 0);
+		case IS_DOUBLE:   return zend_string_init("float", sizeof("float") - 1, 0);
+		case IS_VOID:     return zend_string_init("void", sizeof("void") - 1, 0);
+		case IS_ITERABLE: return zend_string_init("iterable", sizeof("iterable") - 1, 0);
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+/* }}} */
+
 /* {{{ proto public string ReflectionType::__toString()
    Return the text of the type hint */
 ZEND_METHOD(reflection_type, __toString)
@@ -3013,33 +3035,15 @@ ZEND_METHOD(reflection_type, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 	
-	switch (param->arg_info->type_hint) {
-		case IS_ARRAY:    str = zend_string_init("array", sizeof("array") - 1, 0); break;
-		case IS_CALLABLE: str = zend_string_init("callable", sizeof("callable") - 1, 0); break;
-		case IS_OBJECT:
-			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-				str = zend_string_init(((zend_internal_arg_info*)param->arg_info)->class_name, strlen(((zend_internal_arg_info*)param->arg_info)->class_name), 0);
-			} else {
-				str = zend_string_copy(param->arg_info->class_name);
-			}
-			break;
-		case IS_STRING:   str = zend_string_init("string", sizeof("string") - 1, 0); break;
-		case _IS_BOOL:    str = zend_string_init("bool", sizeof("bool") - 1, 0); break;
-		case IS_LONG:     str = zend_string_init("int", sizeof("int") - 1, 0); break;
-		case IS_DOUBLE:   str = zend_string_init("float", sizeof("float") - 1, 0); break;
-		case IS_VOID:     str = zend_string_init("void", sizeof("void") - 1, 0); break;
-		case IS_ITERABLE: str = zend_string_init("iterable", sizeof("iterable") - 1, 0); break;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
+	str = reflection_type_name(param);
 	
 	if (param->arg_info->allow_null) {
 		str = zend_string_extend(str, ZSTR_LEN(str) + 1, 0);
-		memcpy(ZSTR_VAL(str) + 1, ZSTR_VAL(str), ZSTR_LEN(str));
+		memmove(ZSTR_VAL(str) + 1, ZSTR_VAL(str), ZSTR_LEN(str));
 		ZSTR_VAL(str)[0] = '?';
 	}
 	
-	RETURN_STR_COPY(str);
+	RETURN_STR(str);
 }
 /* }}} */
 
@@ -3055,23 +3059,7 @@ ZEND_METHOD(reflection_named_type, getName)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 	
-	switch (param->arg_info->type_hint) {
-		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
-		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
-		case IS_OBJECT:
-			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-				RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
-			}
-			RETURN_STR_COPY(param->arg_info->class_name);
-		case IS_STRING:   RETURN_STRINGL("string", sizeof("string") - 1);
-		case _IS_BOOL:    RETURN_STRINGL("bool", sizeof("bool") - 1);
-		case IS_LONG:     RETURN_STRINGL("int", sizeof("int") - 1);
-		case IS_DOUBLE:   RETURN_STRINGL("float", sizeof("float") - 1);
-		case IS_VOID:     RETURN_STRINGL("void", sizeof("void") - 1);
-		case IS_ITERABLE: RETURN_STRINGL("iterable", sizeof("iterable") - 1);
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
+	RETURN_STR(reflection_type_name(param));
 }
 /* }}} */
 
