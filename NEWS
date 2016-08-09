@@ -6,20 +6,21 @@ PHP                                                                        NEWS
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
 
 - EXIF:
-  . Added support for vendor specific tags for the following formats: 
+  . Added support for vendor specific tags for the following formats:
     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
-  . Fixed bug #72682 (exif_read_data() fails to read all data for some 
+  . Fixed bug #72682 (exif_read_data() fails to read all data for some
     images). (Kalle)
-  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap 
+  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
     overflow in debug mode). (hlt99 at blinkenshell dot org, Kalle)
-  . Fixed bug #68547 (Exif Header component value check error). 
+  . Fixed bug #68547 (Exif Header component value check error).
     (sjh21a at gmail dot com, Kalle)
-  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level 
+  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level
     reached for some cameras). (Kalle)
-  . Fixed Redhat bug #1362571 (PHP not returning full results for 
+  . Fixed Redhat bug #1362571 (PHP not returning full results for
     exif_read_data function). (Kalle)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
+
