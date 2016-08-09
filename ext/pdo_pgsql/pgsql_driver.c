@@ -363,12 +363,13 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	char *id = NULL;
 	PGresult *res;
 	ExecStatusType status;
-	const char *q[1];
-	q[0] = name;
 
-	if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= PQserverVersion(H->server) && name == NULL) {
+	if (name == NULL) {
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
+		const char *q[1];
+		q[0] = name;
+
 		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
 	}
 	status = PQresultStatus(res);

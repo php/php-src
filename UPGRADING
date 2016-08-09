@@ -68,6 +68,10 @@ PHP 7.1 UPGRADE NOTES
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
     U+2029 are escaped.
 
+- mbstring:
+  . mb_ereg() and mb_eregi() will now set the $regs argument to an empty array,
+    if nothing matched. Formerly, $regs was not modified in that case.
+
 - OpenSSL:
   . Dropped sslv2 stream.
 
@@ -228,6 +232,10 @@ PHP 7.1 UPGRADE NOTES
   . Attempting to read an invalid or write to a readonly property will throw
     an instance of Error instead of resulting in a fatal error.
 
+- EXIF:
+   . Added extended exif tag support for the following formats: 
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+
 - GD:
   . Changed the default of the ini setting gd.jpeg_ignore_warning to 1.
 
@@ -382,6 +390,10 @@ PHP 7.1 UPGRADE NOTES
     by utilizing UTF-8.
 
   . Support for ftok()
+
+  . PHP on Windows now ensures that the correct version of the Winsock 
+    library is loaded and will error out in case Winsock 2.0 is not found 
+	on the system.
 
 - FCGI
   . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,
