@@ -136,7 +136,16 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_row(2, "EXIF Support", "enabled");
 	php_info_print_table_row(2, "EXIF Version", PHP_EXIF_VERSION);
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
-	php_info_print_table_row(2, "Supported filetypes", "JPEG,TIFF");
+	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
+
+	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) { 
+		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
+	} else {
+		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
+	}
+
+	php_info_print_table_row(2, "Extended EXIF tag formats", "Canon, Casio, Fujifilm, Nikon, Olympus, Samsung, Panasonic, DJI, Sony, Pentax, Minolta, Sigma, Foveon");
+
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -218,7 +227,7 @@ static PHP_GINIT_FUNCTION(exif)
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(exif)
-   Get the size of an image as 4-element array */
+ */
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
@@ -1332,6 +1341,7 @@ typedef struct {
 	mn_offset_mode_t offset_mode;
 } maker_note_type;
 
+/* Remember to update PHP_MINFO if updated */
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
   { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,                       0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
@@ -1628,6 +1638,20 @@ static double exif_convert_any_format(void *value, int format, int motorola_inte
 			return *(double *)value;
 	}
 	return 0;
+}
+/* }}} */
+
+/* {{{ exif_rewrite_tag_format_to_unsigned
+ * Rewrite format tag so that it specifies an unsigned type for a tag */
+static int exif_rewrite_tag_format_to_unsigned(int format)
+{
+	switch(format) {
+		case TAG_FMT_SBYTE: return TAG_FMT_BYTE;
+		case TAG_FMT_SRATIONAL: return TAG_FMT_URATIONAL;
+		case TAG_FMT_SSHORT: return TAG_FMT_USHORT;
+		case TAG_FMT_SLONG: return TAG_FMT_ULONG;
+	}
+	return format;
 }
 /* }}} */
 
@@ -3294,18 +3318,18 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			switch(tag) {
 				case TAG_IMAGEWIDTH:
 				case TAG_COMP_IMAGE_WIDTH:
-					ImageInfo->Thumbnail.width = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.width = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_IMAGEHEIGHT:
 				case TAG_COMP_IMAGE_HEIGHT:
-					ImageInfo->Thumbnail.height = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.height = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_STRIP_OFFSETS:
 				case TAG_JPEG_INTERCHANGE_FORMAT:
 					/* accept both formats */
-					ImageInfo->Thumbnail.offset = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.offset = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_STRIP_BYTE_COUNTS:
@@ -3315,13 +3339,13 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						/* motorola is easier to read */
 						ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_TIFF_MM;
 					}
-					ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+					ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					break;
 
 				case TAG_JPEG_INTERCHANGE_FORMAT_LEN:
 					if (ImageInfo->Thumbnail.filetype == IMAGE_FILETYPE_UNKNOWN) {
 						ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_JPEG;
-						ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+						ImageInfo->Thumbnail.size = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 					}
 					break;
 			}
@@ -3393,7 +3417,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_COMP_IMAGE_WIDTH:
-				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
+				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 				break;
 
 			case TAG_FOCALPLANE_X_RES:
