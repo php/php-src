@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #72762 (Infinite loop while parsing a file with opcache enabled).
     (Nikita)
 
+- PDO:
+  . Fixed bug #72788 (Invalid memory access when using persistent PDO
+    connection). (Keyur)
+
 - Reflection:
   . Implemented request #38992 (invoke() and invokeArgs() static method calls
     should match). (cmb)
