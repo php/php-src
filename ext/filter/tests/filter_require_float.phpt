@@ -47,33 +47,33 @@ foreach ($floats as $float => $dec) {
 
 ?>
 --EXPECTF--
-string(52) "Float validation: Invalid float format. Found spaces"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 
 Notice: Undefined variable: out in %s on line 20
 NULL
-string(52) "Float validation: Invalid float format. Found spaces"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 
 Notice: Undefined variable: out in %s on line 20
 NULL
 float(1.234)
 float(1200)
 float(7000)
-string(52) "Float validation: Invalid float format. Found spaces"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 float(7000)
-string(52) "Float validation: Invalid float format. Found spaces"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 float(7000)
-string(52) "Float validation: Invalid float format. Found spaces"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 float(7000)
 
 custom decimal:
-string(52) "Float validation: Invalid float format. Found spaces"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 float(7000)
 float(1.234)
-string(52) "Float validation: Invalid float format. Found spaces"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 float(1.234)
 
 Warning: filter_require_var(): decimal separator must be one char in %s on line 34
-string(64) "Float validation: Invalid decimal separator. It must be one char"
+string(127) "Float validation: Invalid decimal separator. It must be one char (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 float(1.234)
-string(31) "Float validation: Invalid float"
+string(94) "Float validation: Invalid float (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
 float(1.234)

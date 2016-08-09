@@ -99,9 +99,9 @@ echo "Done\n";
 ?>
 --EXPECT--
 bool(false)
-string(28) "Bool validation: Empty input"
-string(29) "Bool validation: Invalid bool"
-string(29) "Bool validation: Invalid bool"
+string(93) "Bool validation: Empty input (invalid_key: N/A, filter_name: boolean, filter_flags: 33554432)"
+string(94) "Bool validation: Invalid bool (invalid_key: N/A, filter_name: boolean, filter_flags: 33554432)"
+string(94) "Bool validation: Invalid bool (invalid_key: N/A, filter_name: boolean, filter_flags: 16777216)"
 bool(true)
 bool(true)
 bool(false)
@@ -109,9 +109,9 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-string(29) "Bool validation: Invalid bool"
-string(28) "Bool validation: Empty input"
-string(29) "Bool validation: Invalid bool"
-string(29) "Bool validation: Invalid bool"
-string(29) "Bool validation: Invalid bool"
+string(94) "Bool validation: Invalid bool (invalid_key: N/A, filter_name: boolean, filter_flags: 33554432)"
+string(93) "Bool validation: Empty input (invalid_key: N/A, filter_name: boolean, filter_flags: 33554432)"
+string(94) "Bool validation: Invalid bool (invalid_key: N/A, filter_name: boolean, filter_flags: 33554432)"
+string(94) "Bool validation: Invalid bool (invalid_key: N/A, filter_name: boolean, filter_flags: 33554432)"
+string(94) "Bool validation: Invalid bool (invalid_key: N/A, filter_name: boolean, filter_flags: 33554432)"
 Done

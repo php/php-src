@@ -479,10 +479,11 @@ static unsigned int php_sapi_filter_init(void)
 
 void php_filter_throw_validate_exception(zval *invalid_key, zval *invalid_value, zend_long filter_id, zend_long filter_flags, char *format, ...)
 {
+	zend_class_entry *ce = php_filter_validate_exception_class_entry;
 	zval validate_exception;
 	va_list arg;
 	char *message, *message_final;
-	char *key = (!invalid_key || Z_ISUNDEF_P(invalid_key)) ? "" : Z_STRVAL_P(invalid_key);
+	char *key = (!invalid_key || Z_ISUNDEF_P(invalid_key) || Z_TYPE_P(invalid_key) != IS_STRING) ? "N/A" : Z_STRVAL_P(invalid_key);
 	const char *filter_name = php_find_filter_name(filter_id);
 
 	va_start(arg, format);
@@ -496,37 +497,36 @@ void php_filter_throw_validate_exception(zval *invalid_key, zval *invalid_value,
 		spprintf(&message_final, 1024, "(invalid_key: %s, filter_name: %s, filter_flags: " ZEND_LONG_FMT ")", key, filter_name, filter_flags);
 	}
 
-	object_init_ex(&validate_exception, php_filter_validate_exception_class_entry);
+	object_init_ex(&validate_exception, ce);
 
-	if (message_final) {
-		zend_update_property_string(php_filter_validate_exception_class_entry, &validate_exception,
-									ZEND_STRL("message"), message_final);
-		efree(message_final);
-	}
+	zend_update_property_string(ce, &validate_exception,
+								ZEND_STRL("message"), message_final);
+	efree(message_final);
 
 	if (!invalid_key || Z_ISUNDEF_P(invalid_key)) {
-		zend_update_property_null(php_filter_validate_exception_class_entry, &validate_exception,
+		zend_update_property_null(ce, &validate_exception,
 								  ZEND_STRL("invalid_key"));
 	} else {
-		zend_update_property(php_filter_validate_exception_class_entry, &validate_exception,
+		zend_update_property(ce, &validate_exception,
 							 ZEND_STRL("invalid_key"), invalid_key);
 	}
 
-	if (!invalid_value || Z_ISUNDEF_P(invalid_value)) {
-		zend_update_property_null(php_filter_validate_exception_class_entry, &validate_exception,
-								  ZEND_STRL("invalid_value"));
-	} else {
-		zend_update_property(php_filter_validate_exception_class_entry, &validate_exception,
-							 ZEND_STRL("invalid_value"), invalid_value);
-	}
+	/* Disabled for now */
+	/* if (!invalid_value || Z_ISUNDEF_P(invalid_value)) { */
+	/* 	zend_update_property_null(ce, &validate_exception, */
+	/* 							  ZEND_STRL("invalid_value")); */
+	/* } else { */
+	/* 	zend_update_property(ce, &validate_exception, */
+	/* 						 ZEND_STRL("invalid_value"), invalid_value); */
+	/* } */
 
-	zend_update_property_long(php_filter_validate_exception_class_entry, &validate_exception,
+	zend_update_property_long(ce, &validate_exception,
 							  ZEND_STRL("filter_id"), filter_id);
 
-	zend_update_property_string(php_filter_validate_exception_class_entry, &validate_exception,
+	zend_update_property_string(ce, &validate_exception,
 								ZEND_STRL("filter_name"), filter_name);
 
-	zend_update_property_long(php_filter_validate_exception_class_entry, &validate_exception,
+	zend_update_property_long(ce, &validate_exception,
 							  ZEND_STRL("filter_flags"), filter_flags);
 
 	zend_throw_exception_object(&validate_exception);

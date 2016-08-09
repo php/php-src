@@ -23,7 +23,7 @@ foreach ($vals as $var) {
 }
 ?>
 --EXPECT--
-string(46) "Filter validated value became empty after trim"
-string(46) "Filter validated value became empty after trim"
-string(52) "Float validation: Invalid float format. Found spaces"
-string(52) "Float validation: Invalid float format. Found spaces"
+string(109) "Filter validated value became empty after trim (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
+string(109) "Filter validated value became empty after trim (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"
+string(115) "Float validation: Invalid float format. Found spaces (invalid_key: N/A, filter_name: float, filter_flags: 33554432)"

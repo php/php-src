@@ -45,12 +45,12 @@ var_dump($res);
 ?>
 --EXPECT--
 int(12)
-string(110) "Filter validated value is array, but requires scalar (invalid_key: , filter_name: int, filter_flags: 33554433)"
+string(113) "Filter validated value is array, but requires scalar (invalid_key: N/A, filter_name: int, filter_flags: 33554433)"
 array(1) {
   [0]=>
   int(12)
 }
-string(110) "Filter validated value is scalar, but requires array (invalid_key: , filter_name: int, filter_flags: 16777217)"
+string(113) "Filter validated value is scalar, but requires array (invalid_key: N/A, filter_name: int, filter_flags: 16777217)"
 array(1) {
   [0]=>
   int(12)

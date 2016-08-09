@@ -38,12 +38,12 @@ var_dump($ret);
 
 ?>
 --EXPECTF--
-string(28) "Int validation: Out of range"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
 
-Notice: Undefined variable: ret in %s on line %d
+Notice: Undefined variable: ret in %s on line 7
 NULL
 int(156)
-string(28) "Int validation: Out of range"
+string(90) "Int validation: Out of range (invalid_key: elm2, filter_name: int, filter_flags: 16777216)"
 int(156)
 array(2) {
   ["elm1"]=>

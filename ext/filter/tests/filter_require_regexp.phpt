@@ -39,11 +39,11 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(4) "data"
-string(34) "Regexp validation: Failed to match"
+string(107) "Regexp validation: Failed to match (invalid_key: N/A, filter_name: validate_regexp, filter_flags: 33554432)"
 string(4) "data"
-string(34) "Regexp validation: Failed to match"
-string(34) "Regexp validation: Failed to match"
+string(107) "Regexp validation: Failed to match (invalid_key: N/A, filter_name: validate_regexp, filter_flags: 33554432)"
+string(107) "Regexp validation: Failed to match (invalid_key: N/A, filter_name: validate_regexp, filter_flags: 33554432)"
 
-Warning: filter_require_var(): 'regexp' option missing in %s on line %d
-string(42) "Regexp validation: Missing 'regexp' option"
+Warning: filter_require_var(): 'regexp' option missing in /home/yohgaki/workspace/ext/git/oss/php.net/github-php-src/ext/filter/tests/filter_require_regexp.php on line 28
+string(115) "Regexp validation: Missing 'regexp' option (invalid_key: N/A, filter_name: validate_regexp, filter_flags: 33554432)"
 Done

@@ -162,9 +162,9 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-string(48) "Int validation: Invalid int format. Found spaces"
-string(48) "Int validation: Invalid int format. Found spaces"
-string(48) "Int validation: Invalid int format. Found spaces"
+string(109) "Int validation: Invalid int format. Found spaces (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(109) "Int validation: Invalid int format. Found spaces (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(109) "Int validation: Invalid int format. Found spaces (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
 int(255)
 int(255)
 int(255)
@@ -172,24 +172,24 @@ int(255)
 int(7)
 int(16711680)
 int(438)
-string(28) "Int validation: Out of range"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554433)"
 int(0)
 int(0)
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554434)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554434)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554434)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554434)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554433)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554434)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554433)"
 int(6)
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
 int(-1)
-string(27) "Int validation: Empty input"
-string(27) "Int validation: Empty input"
-string(27) "Int validation: Empty input"
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
-string(28) "Int validation: Out of range"
+string(88) "Int validation: Empty input (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(88) "Int validation: Empty input (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(88) "Int validation: Empty input (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
+string(89) "Int validation: Out of range (invalid_key: N/A, filter_name: int, filter_flags: 33554432)"
 Done

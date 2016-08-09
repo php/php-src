@@ -67,17 +67,17 @@ echo "Ok\n";
 ?>
 --EXPECT--
 string(11) "::127.0.0.1"
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(true)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
 string(28) "FF01:0:0:0:237:101:127.0.1.1"
 string(9) "FF01::101"
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(true)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
 string(21) "1080::8:800:200C:417A"
 string(26) "1080:0:0:0:8:800:200C:417A"
@@ -86,44 +86,44 @@ string(24) "ffff::FFFF:129.144.52.38"
 string(14) "::ffff:1.2.3.4"
 string(28) "0:0:0:0:0:FFFF:129.144.52.38"
 string(21) "0:0:0:0:0:0:13.1.68.3"
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(true)
 string(11) "::13.1.68.3"
 string(20) "::FFFF:129.144.52.38"
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(true)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
 string(15) "::1:2:3:4:5:6:7"
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(true)
 string(15) "1:2:3:4:5:6:7::"
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(true)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
 string(18) "a:b:c:d:e::1.2.3.4"
 string(15) "::0:a:b:c:d:e:f"
 string(15) "0:a:b:c:d:e:f::"
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(true)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
-string(44) "IP address validataion: Invalid IPv6 address"
+string(113) "IP address validataion: Invalid IPv6 address (invalid_key: N/A, filter_name: validate_ip, filter_flags: 35651584)"
 bool(false)
 string(22) "0:0:0::255.255.255.255"
 Ok
