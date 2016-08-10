@@ -99,7 +99,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 
 #include "gd_ctx.c"
 
-/* as it is not really public, duplicate declaration here to avoid 
+/* as it is not really public, duplicate declaration here to avoid
    pointless warnings */
 int overflow2(int a, int b);
 
@@ -1197,7 +1197,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
 
-	
+
 	REGISTER_LONG_CONSTANT("IMG_BELL", GD_BELL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BESSEL", GD_BESSEL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BILINEAR_FIXED", GD_BILINEAR_FIXED, CONST_CS | CONST_PERSISTENT);
@@ -1658,11 +1658,11 @@ PHP_FUNCTION(imagetruecolortopalette)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	if (ncolors <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of colors has to be greater than zero");
+	if (ncolors <= 0 || ncolors > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of colors has to be greater than zero and no more than %d", INT_MAX);
 		RETURN_FALSE;
 	}
-	gdImageTrueColorToPalette(im, dither, ncolors);
+	gdImageTrueColorToPalette(im, dither, (int)ncolors);
 
 	RETURN_TRUE;
 }
@@ -3913,7 +3913,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 #endif /* VIRTUAL_DIR */
 
 	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
-	
+
 #ifdef HAVE_GD_FREETYPE
 	if (extended) {
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
@@ -4491,7 +4491,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	int x, y;
 	float x_ratio, y_ratio;
     long ignore_warning;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pplll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
 		return;
 	}
@@ -5374,7 +5374,7 @@ PHP_FUNCTION(imageaffinematrixget)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing y position");
 				RETURN_FALSE;
 			}
-			
+
 			if (type == GD_AFFINE_TRANSLATE) {
 				res = gdAffineTranslate(affine, x, y);
 			} else {
