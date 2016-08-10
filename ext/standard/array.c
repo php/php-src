@@ -1601,6 +1601,15 @@ PHP_FUNCTION(array_walk_recursive)
 }
 /* }}} */
 
+#define ZVAL_STR_OR_LONG(zv,s,l) do {\
+		if (s) { \
+			ZVAL_STR_COPY(zv, s); \
+		} else { \
+			ZVAL_LONG(zv, l); \
+		} \
+	} while(0)
+
+
 /* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
  * 0 = return boolean
  * 1 = return key
@@ -1609,36 +1618,52 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 {
 	zval *value,				/* value to check for */
 		 *array,				/* array to check in */
-		 *entry;				/* pointer to array entry */
+		 *entry,				/* pointer to array entry */
+		  zkey;					/* temp ZVAL for key */
 	zend_ulong num_idx;
 	zend_string *str_idx;
 	zend_bool strict = 0;		/* strict comparison or not */
+	zend_bool all = 0;			/* return first key, or all */
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "za|b", &value, &array, &strict) == FAILURE) {
-		return;
+	if (behavior) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "za|bb", &value, &array, &strict, &all) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "za|b", &value, &array, &strict) == FAILURE) {
+			return;
+		}
 	}
 #else
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, (behavior ? 4 : 3))
 		Z_PARAM_ZVAL(value)
 		Z_PARAM_ARRAY(array)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(strict)
+		if (behavior) {
+			Z_PARAM_BOOL(all)
+		}
 	ZEND_PARSE_PARAMETERS_END();
 #endif
+
+	if (all) {
+		array_init(return_value);
+	} else {
+		RETVAL_FALSE;
+	}
 
 	if (strict) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 			ZVAL_DEREF(entry);
 			if (fast_is_identical_function(value, entry)) {
-				if (behavior == 0) {
+				if (all) {
+					ZVAL_STR_OR_LONG(&zkey, str_idx, num_idx);
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &zkey);
+				} else if (behavior == 0) {
 					RETURN_TRUE;
 				} else {
-					if (str_idx) {
-						RETVAL_STR_COPY(str_idx);
-					} else {
-						RETVAL_LONG(num_idx);
-					}
+					ZVAL_STR_OR_LONG(return_value, str_idx, num_idx);
 					return;
 				}
 			}
@@ -1647,14 +1672,13 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 		if (Z_TYPE_P(value) == IS_LONG) {
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_long(value, entry)) {
-					if (behavior == 0) {
+					if (all) {
+						ZVAL_STR_OR_LONG(&zkey, str_idx, num_idx);
+						zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &zkey);
+					} else if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
-						} else {
-							RETVAL_LONG(num_idx);
-						}
+						ZVAL_STR_OR_LONG(return_value, str_idx, num_idx);
 						return;
 					}
 				}
@@ -1662,14 +1686,13 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 		} else if (Z_TYPE_P(value) == IS_STRING) {
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_string(value, entry)) {
-					if (behavior == 0) {
+					if (all) {
+						ZVAL_STR_OR_LONG(&zkey, str_idx, num_idx);
+						zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &zkey);
+					} else if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
-						} else {
-							RETVAL_LONG(num_idx);
-						}
+						ZVAL_STR_OR_LONG(return_value, str_idx, num_idx);
 						return;
 					}
 				}
@@ -1677,14 +1700,13 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 		} else {
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_function(value, entry)) {
-					if (behavior == 0) {
+					if (all) {
+						ZVAL_STR_OR_LONG(&zkey, str_idx, num_idx);
+						zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &zkey);
+					} else if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETVAL_STR_COPY(str_idx);
-						} else {
-							RETVAL_LONG(num_idx);
-						}
+						ZVAL_STR_OR_LONG(return_value, str_idx, num_idx);
 						return;
 					}
 				}
@@ -1692,7 +1714,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
  		}
 	}
 
-	RETURN_FALSE;
+	return;
 }
 /* }}} */
 
@@ -1704,7 +1726,7 @@ PHP_FUNCTION(in_array)
 }
 /* }}} */
 
-/* {{{ proto mixed array_search(mixed needle, array haystack [, bool strict])
+/* {{{ proto mixed array_search(mixed needle, array haystack [, bool strict [, bool all]])
    Searches the array for a given value and returns the corresponding key if successful */
 PHP_FUNCTION(array_search)
 {
@@ -3394,22 +3416,14 @@ PHP_FUNCTION(array_keys)
 			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
 				ZVAL_DEREF(entry);
 				if (fast_is_identical_function(search_value, entry)) {
-					if (str_idx) {
-						ZVAL_STR_COPY(&new_val, str_idx);
-					} else {
-						ZVAL_LONG(&new_val, num_idx);
-					}
+					ZVAL_STR_OR_LONG(&new_val, str_idx, num_idx);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
 			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
 				if (fast_equal_check_function(search_value, entry)) {
-					if (str_idx) {
-						ZVAL_STR_COPY(&new_val, str_idx);
-					} else {
-						ZVAL_LONG(&new_val, num_idx);
-					}
+					ZVAL_STR_OR_LONG(&new_val, str_idx, num_idx);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -3423,11 +3437,7 @@ PHP_FUNCTION(array_keys)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			/* Go through input array and add keys to the return array */
 			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
-				if (str_idx) {
-					ZVAL_STR_COPY(&new_val, str_idx);
-				} else {
-					ZVAL_LONG(&new_val, num_idx);
-				}
+				ZVAL_STR_OR_LONG(&new_val, str_idx, num_idx);
 				ZEND_HASH_FILL_ADD(&new_val);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
@@ -3802,18 +3812,10 @@ PHP_FUNCTION(array_flip)
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 		ZVAL_DEREF(entry);
 		if (Z_TYPE_P(entry) == IS_LONG) {
-			if (str_idx) {
-				ZVAL_STR_COPY(&data, str_idx);
-			} else {
-				ZVAL_LONG(&data, num_idx);
-			}
+			ZVAL_STR_OR_LONG(&data, str_idx, num_idx);
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
 		} else if (Z_TYPE_P(entry) == IS_STRING) {
-			if (str_idx) {
-				ZVAL_STR_COPY(&data, str_idx);
-			} else {
-				ZVAL_LONG(&data, num_idx);
-			}
+			ZVAL_STR_OR_LONG(&data, str_idx, num_idx);
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Can only flip STRING and INTEGER values!");
