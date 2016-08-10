@@ -23,7 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
 - Mbstring:
-  . Implemented reuqest #66024 (chr() and mb_ord()) (Masakielastic, Yasuo)
+  . Implemented request #66024 (chr() and mb_ord()) (Masakielastic, Yasuo)
+  . Implemented request #65081 (mb_scrub()) (Masakielastic, Yasuo)
+  . Implemented request #69086 (enhancement for mb_convert_encoding() that
+    handles multibyte replacement char nicely) (Masakielastic, Yasuo)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
 

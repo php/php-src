@@ -167,6 +167,7 @@ PHP 7.1 UPGRADE NOTES
 
 - Mbstring:
   . Added mb_chr() and mb_ord().
+  . Added mb_scurb() that scrub broken mutilbyte strings.
 
 - Standard:
   . Added is_iterable() that determines if a value will be accepted by the new
