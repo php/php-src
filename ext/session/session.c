@@ -2195,7 +2195,20 @@ static PHP_FUNCTION(session_create_id)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		new_id = PS(mod)->s_create_sid(&PS(mod_data));
+		int limit = 3;
+		while (limit--) {
+			new_id = PS(mod)->s_create_sid(&PS(mod_data));
+			if (!PS(mod)->s_validate_sid) {
+				break;
+			} else {
+				/* Detect collision and retry */
+				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == FAILURE) {
+					zend_string_release(new_id);
+					continue;
+				}
+				break;
+			}
+		}
 	} else {
 		new_id = php_session_create_id(NULL);
 	}
