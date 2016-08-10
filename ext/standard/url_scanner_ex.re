@@ -107,12 +107,38 @@ alphadash = ([a-zA-Z] | "-");
 #define YYLIMIT q
 #define YYMARKER r
 	
-static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator)
+static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator TSRMLS_DC)
 {
 	register const char *p, *q;
 	const char *bash = NULL;
 	const char *sep = "?";
-	
+
+	/*
+	 * Don't modify "//example.com" full path, unless
+	 * HTTP_HOST matches.
+	 */
+	if (url->c[0] == '/' && url->c[1] == '/') {
+		zval **tmp, **http_host;
+		size_t target_len, host_len;
+		if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **)&tmp) == FAILURE
+			|| Z_TYPE_PP(tmp) != IS_ARRAY
+			|| zend_hash_find(Z_ARRVAL_PP(tmp), "HTTP_HOST", sizeof("HTTP_HOST"), (void **)&http_host) == FAILURE
+			|| Z_TYPE_PP(http_host) != IS_STRING) {
+			smart_str_append(dest, url);
+			return;
+		}
+		/* HTTP_HOST could be "example.com:8888", etc. */
+		/* Need to find end of URL in buffer */
+		host_len   = strcspn(Z_STRVAL_PP(http_host), ":");
+		target_len = strcspn(url->c+2, "/\"'?>\r\n");
+		if (host_len
+			&& host_len == target_len
+			&& strncasecmp(Z_STRVAL_PP(http_host), url->c+2, host_len)) {
+			smart_str_append(dest, url);
+			return;
+		}
+	}
+
 	q = (p = url->c) + url->len;
 
 scan:
@@ -159,7 +185,7 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type TSR
 	if (quotes)
 		smart_str_appendc(&ctx->result, type);
 	if (f) {
-		append_modified_url(&ctx->val, &ctx->result, &ctx->url_app, PG(arg_separator).output);
+		append_modified_url(&ctx->val, &ctx->result, &ctx->url_app, PG(arg_separator).output TSRMLS_CC);
 	} else {
 		smart_str_append(&ctx->result, &ctx->val);
 	}
@@ -369,7 +395,7 @@ char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const cha
 	smart_str_appendc(&url_app, '=');
 	smart_str_appends(&url_app, value);
 
-	append_modified_url(&surl, &buf, &url_app, PG(arg_separator).output);
+	append_modified_url(&surl, &buf, &url_app, PG(arg_separator).output TSRMLS_CC);
 
 	smart_str_0(&buf);
 	if (newlen) *newlen = buf.len;
