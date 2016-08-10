@@ -375,7 +375,7 @@ static inline unsigned int get_next_char(
  * defaults to UTF-8 */
 static enum entity_charset determine_charset(char *charset_hint)
 {
-	int i;
+	size_t i;
 	enum entity_charset charset = cs_utf_8;
 	size_t len = 0;
 	const zend_encoding *zenc;
@@ -1271,7 +1271,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 	} else {
 		maxlen = 2 * oldlen;
 		if (maxlen < oldlen) {
-			zend_error_noreturn(E_ERROR, "Input string is too long");
+			zend_throw_error(NULL, "Input string is too long");
 			return NULL;
 		}
 	}

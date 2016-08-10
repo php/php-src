@@ -91,25 +91,35 @@ fclose($fp);
 *** Testing rand) : usage variations ***
 
 -- Iteration 1 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 2 --
-int(%i)
+
+Warning: rand(): max(1) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 3 --
 int(%i)
 
 -- Iteration 4 --
-int(%i)
+
+Warning: rand(): max(-2345) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 5 --
 int(%i)
 
 -- Iteration 6 --
-int(%i)
+
+Warning: rand(): max(10) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 7 --
-int(%i)
+
+Warning: rand(): max(-10) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 8 --
 
@@ -117,28 +127,44 @@ Warning: rand() expects parameter 2 to be integer, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 10 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 11 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 12 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 13 --
-int(%i)
+
+Warning: rand(): max(1) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 14 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 15 --
-int(%i)
+
+Warning: rand(): max(1) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 16 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 17 --
 
@@ -176,10 +202,14 @@ Warning: rand() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 25 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 26 --
 

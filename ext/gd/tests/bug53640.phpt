@@ -12,8 +12,6 @@ $white = imagecolorallocate($im, 255, 255, 255);
 imagefilledrectangle($im, 2, 2, 6, 6, $white);
 imagexbm($im, NULL);
 ?>
---XFAIL--
-Padding is not implemented yet
 --EXPECT--
 #define image_width 9
 #define image_height 9

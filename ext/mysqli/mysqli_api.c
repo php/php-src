@@ -354,7 +354,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		RETURN_FALSE;
 	}
 
-	if (types_len != argc - start) {
+	if (types_len != (size_t)(argc - start)) {
 		/* number of bind variables doesn't match number of elements in type definition string */
 		php_error_docref(NULL, E_WARNING, "Number of elements in type definition string doesn't match number of bind variables");
 		RETURN_FALSE;
@@ -596,7 +596,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (argc != mysql_stmt_field_count(stmt->stmt)) {
+	if ((uint)argc != mysql_stmt_field_count(stmt->stmt)) {
 		php_error_docref(NULL, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_FALSE;
 	}
@@ -1330,7 +1330,7 @@ PHP_FUNCTION(mysqli_field_seek)
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	if (fieldnr < 0 || fieldnr >= mysql_num_fields(result)) {
+	if (fieldnr < 0 || (uint)fieldnr >= mysql_num_fields(result)) {
 		php_error_docref(NULL, E_WARNING, "Invalid field offset");
 		RETURN_FALSE;
 	}
@@ -2333,7 +2333,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	if (mode_in < 0) {
-		php_error_docref(NULL, E_WARNING, "mode should be non-negative, %pd passed", mode_in);
+		php_error_docref(NULL, E_WARNING, "mode should be non-negative, " ZEND_LONG_FMT " passed", mode_in);
 		RETURN_FALSE;
 	}
 

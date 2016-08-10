@@ -54,14 +54,14 @@
 #include <limits.h>
 #endif
 
-static int cmd_max_len;
+static size_t cmd_max_len;
 
 /* {{{ PHP_MINIT_FUNCTION(exec) */
 PHP_MINIT_FUNCTION(exec)
 {
 #ifdef _SC_ARG_MAX
 	cmd_max_len = sysconf(_SC_ARG_MAX);
-	if (-1 == cmd_max_len) {
+	if ((size_t)-1 == cmd_max_len) {
 #ifdef _POSIX_ARG_MAX
 		cmd_max_len = _POSIX_ARG_MAX;
 #else
@@ -278,7 +278,7 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI zend_string *php_escape_shell_cmd(char *str)
 {
-	register int x, y;
+	register size_t x, y;
 	size_t l = strlen(str);
 	uint64_t estimate = (2 * (uint64_t)l) + 1;
 	zend_string *cmd;
@@ -385,7 +385,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
  */
 PHPAPI zend_string *php_escape_shell_arg(char *str)
 {
-	int x, y = 0;
+	size_t x, y = 0;
 	size_t l = strlen(str);
 	zend_string *cmd;
 	uint64_t estimate = (4 * (uint64_t)l) + 3;

@@ -51,7 +51,8 @@ typedef struct _zend_lex_state {
 	const zend_encoding *script_encoding;
 
 	/* hooks */
-	void (* on_event)(zend_php_scanner_event event, int token, int line);
+	void (*on_event)(zend_php_scanner_event event, int token, int line, void *context);
+	void *on_event_context;
 
 	zend_ast *ast;
 	zend_arena *ast_arena;
@@ -63,7 +64,6 @@ typedef struct _zend_heredoc_label {
 } zend_heredoc_label;
 
 BEGIN_EXTERN_C()
-int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state);
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename);

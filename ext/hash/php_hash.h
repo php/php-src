@@ -64,6 +64,8 @@ extern const php_hash_ops php_hash_sha224_ops;
 extern const php_hash_ops php_hash_sha256_ops;
 extern const php_hash_ops php_hash_sha384_ops;
 extern const php_hash_ops php_hash_sha512_ops;
+extern const php_hash_ops php_hash_sha512_256_ops;
+extern const php_hash_ops php_hash_sha512_224_ops;
 extern const php_hash_ops php_hash_sha3_224_ops;
 extern const php_hash_ops php_hash_sha3_256_ops;
 extern const php_hash_ops php_hash_sha3_384_ops;

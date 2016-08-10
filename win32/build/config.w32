@@ -63,6 +63,9 @@ toolset_setup_common_cflags();
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
 if (VS_TOOLSET && PHP_MP != 'disable') {
+	if(PHP_DEBUG == 'yes') {
+		STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
+	} else {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
@@ -75,6 +78,7 @@ if (VS_TOOLSET && PHP_MP != 'disable') {
 				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
 			}
 		}
+	}
 }
 
 if (!PHP_MP_DISABLED) {
@@ -161,7 +165,7 @@ ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
-	getrusage.c ftok.c");
+	getrusage.c ftok.c ioutil.c codepage.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 

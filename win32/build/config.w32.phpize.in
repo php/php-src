@@ -23,7 +23,7 @@ toolset_setup_project_tools();
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
 object_out_dir_option_handle();
 
-ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
+ARG_ENABLE('debug', 'Compile with debugging symbols', PHP_DEBUG);
 ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
 if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
@@ -40,7 +40,7 @@ DEFINE("BASE_INCLUDES", "/I " + PHP_DIR + "/include /I " + PHP_DIR + "/include/m
 
 toolset_setup_common_cflags();
 
-ARG_WITH('prefix', 'PHP installation prefix', '');
+ARG_WITH('prefix', 'PHP installation prefix', PHP_PREFIX);
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
 if (VS_TOOLSET && PHP_MP != 'disable') {

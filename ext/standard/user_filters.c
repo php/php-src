@@ -452,7 +452,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}
-		if ((int)bucket->buflen != Z_STRLEN_P(pzdata)) {
+		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
 			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
 			bucket->buflen = Z_STRLEN_P(pzdata);
 		}

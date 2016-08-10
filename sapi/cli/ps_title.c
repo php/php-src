@@ -224,8 +224,10 @@ char** save_ps_args(int argc, char** argv)
         for (i = 0; i < argc; i++)
         {
             new_argv[i] = strdup(argv[i]);
-            if (!new_argv[i])
+            if (!new_argv[i]) {
+                free(new_argv);
                 goto clobber_error;
+            }
         }
         new_argv[argc] = NULL;
 

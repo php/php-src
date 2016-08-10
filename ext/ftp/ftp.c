@@ -866,7 +866,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 	}
 
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == (size_t)-1) {
 			goto bail;
 		}
 
@@ -1829,7 +1829,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	lines = 0;
 	lastch = 0;
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1 || rcvd > ((size_t)(-1))-size) {
+		if (rcvd == (size_t)-1 || rcvd > ((size_t)(-1))-size) {
 			goto bail;
 		}
 
@@ -1958,7 +1958,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 
 	lastch = ftp->lastch;
 	if ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == (size_t)-1) {
 			goto bail;
 		}
 

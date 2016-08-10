@@ -191,7 +191,7 @@ PHP_FUNCTION(iptcembed)
 	zend_long spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
-	int inx;
+	size_t inx;
 	zend_string *spoolbuf = NULL;
 	unsigned char *poi = NULL;
 	zend_stat_t sb;
@@ -314,7 +314,7 @@ PHP_FUNCTION(iptcembed)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	int inx = 0, len;
+	size_t inx = 0, len;
 	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset;
 	char *str, key[16];
@@ -358,7 +358,7 @@ PHP_FUNCTION(iptcparse)
 			inx += 2;
 		}
 
-		if ((len < 0) || (len > str_len) || (inx + len) > str_len) {
+		if ((len > str_len) || (inx + len) > str_len) {
 			break;
 		}
 

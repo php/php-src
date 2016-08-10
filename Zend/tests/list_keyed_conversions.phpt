@@ -30,3 +30,5 @@ int(0)
 int(1)
 
 Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+
+Notice: Undefined offset: 1 in %s on line %d

@@ -262,19 +262,19 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_IP", IPPROTO_IP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#ifdef IPPROTO_TCP
+#if defined(IPPROTO_TCP) || defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_TCP", IPPROTO_TCP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#ifdef IPPROTO_UDP
+#if defined(IPPROTO_UDP) || defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_UDP", IPPROTO_UDP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#ifdef IPPROTO_ICMP
+#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_ICMP", IPPROTO_ICMP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#ifdef IPPROTO_RAW
+#if defined(IPPROTO_RAW) || defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_RAW", IPPROTO_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
 
@@ -555,7 +555,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if (maxlen > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "maxlen truncated from %pd to %d bytes", maxlen, INT_MAX);
+		php_error_docref(NULL, E_WARNING, "maxlen truncated from " ZEND_LONG_FMT " to %d bytes", maxlen, INT_MAX);
 		maxlen = INT_MAX;
 	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
@@ -576,7 +576,7 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	size_t filename_len;
 	zval *data;
-	zend_long numbytes = 0;
+	size_t numbytes = 0;
 	zend_long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -695,7 +695,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 	php_stream_close(stream);
 
-	if (numbytes < 0) {
+	if (numbytes == (size_t)-1) {
 		RETURN_FALSE;
 	}
 
@@ -897,7 +897,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL, E_WARNING, "%pd is not a valid stream resource", stream->res->handle);
+		php_error_docref(NULL, E_WARNING, "%d is not a valid stream resource", stream->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -2254,6 +2254,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 								memcpy(tptr, hunk_begin, bptr - hunk_begin);
 								tptr += (bptr - hunk_begin);
 								hunk_begin = bptr;
+								state = 0;
 								break;
 							default:
 								bptr += inc_len;

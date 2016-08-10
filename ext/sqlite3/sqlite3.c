@@ -112,13 +112,11 @@ PHP_METHOD(sqlite3, open)
 
 	if (db_obj->initialised) {
 		zend_throw_exception(zend_ce_exception, "Already initialised DB Object", 0);
-	}
-
-	if (strlen(filename) != filename_len) {
 		return;
 	}
-	if (filename_len != sizeof(":memory:")-1 ||
-			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0) {
+
+	if (filename_len != 0 && (filename_len != sizeof(":memory:")-1 ||
+			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0)) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
 			zend_throw_exception(zend_ce_exception, "Unable to expand filepath", 0);
 			return;
@@ -130,7 +128,8 @@ PHP_METHOD(sqlite3, open)
 			return;
 		}
 	} else {
-		fullpath = estrdup(filename);
+		/* filename equals "" or ":memory:" */
+		fullpath = filename;
 	}
 
 #if SQLITE_VERSION_NUMBER >= 3005000
@@ -139,7 +138,7 @@ PHP_METHOD(sqlite3, open)
 	if (sqlite3_open(fullpath, &(db_obj->db)) != SQLITE_OK) {
 #endif
 		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
-		if (fullpath) {
+		if (fullpath != filename) {
 			efree(fullpath);
 		}
 		return;
@@ -160,7 +159,7 @@ PHP_METHOD(sqlite3, open)
 		sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, NULL);
 	}
 
-	if (fullpath) {
+	if (fullpath != filename) {
 		efree(fullpath);
 	}
 }
@@ -555,7 +554,9 @@ PHP_METHOD(sqlite3, query)
 			break;
 		}
 		default:
-			php_sqlite3_error(db_obj, "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
+			if (!EG(exception)) {
+				php_sqlite3_error(db_obj, "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
+			}
 			sqlite3_finalize(stmt_obj->stmt);
 			stmt_obj->initialised = 0;
 			zval_dtor(return_value);
@@ -660,8 +661,10 @@ PHP_METHOD(sqlite3, querySingle)
 			break;
 		}
 		default:
+		if (!EG(exception)) {
 			php_sqlite3_error(db_obj, "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
-			RETVAL_FALSE;
+		}
+		RETVAL_FALSE;
 	}
 	sqlite3_finalize(stmt);
 }
@@ -683,7 +686,6 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	fake_argc = argc + is_agg;
 
 	fc->fci.size = sizeof(fc->fci);
-	fc->fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
 	fc->fci.object = NULL;
 	fc->fci.retval = &retval;
@@ -841,7 +843,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	int ret;
 
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
-	collation->fci.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
 	collation->fci.fci.object = NULL;
 	collation->fci.fci.retval = &retval;
@@ -1171,7 +1172,8 @@ static php_stream_ops php_stream_sqlite3_ops = {
 	"SQLite3",
 	php_sqlite3_stream_seek,
 	php_sqlite3_stream_cast,
-	php_sqlite3_stream_stat
+	php_sqlite3_stream_stat,
+	NULL
 };
 
 /* {{{ proto resource SQLite3::openBlob(string table, string column, int rowid [, string dbname])
@@ -1319,6 +1321,12 @@ PHP_METHOD(sqlite3stmt, clear)
 		RETURN_FALSE;
 	}
 
+	if (stmt_obj->bound_params) {
+		zend_hash_destroy(stmt_obj->bound_params);
+		FREE_HASHTABLE(stmt_obj->bound_params);
+		stmt_obj->bound_params = NULL;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1374,7 +1382,9 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 	}
 
 	if (param->param_number < 1) {
-		zend_string_release(param->name);
+		if (param->name) {
+			zend_string_release(param->name);
+		}
 		return 0;
 	}
 
@@ -1390,6 +1400,26 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 
 	return 1;
 }
+/* }}} */
+
+/* {{{ Best try to map between PHP and SQLite. Default is still text. */
+#define PHP_SQLITE3_SET_TYPE(z, p) \
+	switch (Z_TYPE_P(z)) { \
+		default: \
+			(p).type = SQLITE_TEXT; \
+			break; \
+		case IS_LONG: \
+		case IS_TRUE: \
+		case IS_FALSE: \
+			(p).type = SQLITE_INTEGER; \
+			break; \
+		case IS_DOUBLE: \
+			(p).type = SQLITE_FLOAT; \
+			break; \
+		case IS_NULL: \
+			(p).type = SQLITE_NULL; \
+			break; \
+	}
 /* }}} */
 
 /* {{{ proto bool SQLite3Stmt::bindParam(int parameter_number, mixed parameter [, int type])
@@ -1415,6 +1445,10 @@ PHP_METHOD(sqlite3stmt, bindParam)
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 	ZVAL_COPY(&param.parameter, parameter);
+
+	if (ZEND_NUM_ARGS() < 3) {
+		PHP_SQLITE3_SET_TYPE(parameter, param);
+	}
 
 	if (!register_bound_parameter_to_sqlite(&param, stmt_obj)) {
 		if (!Z_ISUNDEF(param.parameter)) {
@@ -1451,6 +1485,10 @@ PHP_METHOD(sqlite3stmt, bindValue)
 
 	ZVAL_COPY(&param.parameter, parameter);
 
+	if (ZEND_NUM_ARGS() < 3) {
+		PHP_SQLITE3_SET_TYPE(parameter, param);
+	}
+
 	if (!register_bound_parameter_to_sqlite(&param, stmt_obj)) {
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
@@ -1461,6 +1499,8 @@ PHP_METHOD(sqlite3stmt, bindValue)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#undef PHP_SQLITE3_SET_TYPE
 
 /* {{{ proto SQLite3Result SQLite3Stmt::execute()
    Executes a prepared statement and returns a result set object. */
@@ -1572,7 +1612,9 @@ PHP_METHOD(sqlite3stmt, execute)
 			sqlite3_reset(stmt_obj->stmt);
 
 		default:
-			php_sqlite3_error(stmt_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
+			if (!EG(exception)) {
+				php_sqlite3_error(stmt_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
+			}
 			zval_dtor(return_value);
 			RETURN_FALSE;
 	}

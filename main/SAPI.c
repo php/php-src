@@ -262,7 +262,7 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
-		php_error_docref(NULL, E_WARNING, "POST Content-Length of %pd bytes exceeds the limit of %pd bytes",
+		php_error_docref(NULL, E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
@@ -479,10 +479,9 @@ SAPI_API void sapi_activate(void)
 
 		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies();
-
-		if (sapi_module.activate) {
-			sapi_module.activate();
-		}
+	}
+	if (sapi_module.activate) {
+		sapi_module.activate();
 	}
 	if (sapi_module.input_filter_init) {
 		sapi_module.input_filter_init();
@@ -1020,6 +1019,10 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 
 SAPI_API char *sapi_getenv(char *name, size_t name_len)
 {
+	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
+		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
+		return NULL;
+	}
 	if (sapi_module.getenv) {
 		char *value, *tmp = sapi_module.getenv(name, name_len);
 		if (tmp) {

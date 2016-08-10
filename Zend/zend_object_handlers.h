@@ -27,8 +27,8 @@ struct _zend_property_info;
 #define ZEND_WRONG_PROPERTY_INFO \
 	((struct _zend_property_info*)((zend_intptr_t)-1))
 
-#define ZEND_DYNAMIC_PROPERTY_OFFSET (-1)
-#define ZEND_WRONG_PROPERTY_OFFSET   (-2)
+#define ZEND_DYNAMIC_PROPERTY_OFFSET ((uint32_t)(-1))
+#define ZEND_WRONG_PROPERTY_OFFSET   ((uint32_t)(-2))
 
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
@@ -179,6 +179,8 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name);
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
+
+ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
 
 #define zend_free_trampoline(func) do { \
 		if ((func) == &EG(trampoline)) { \

@@ -110,7 +110,7 @@ static const zend_function_entry php_dir_class_functions[] = {
 	PHP_FALIAS(close,	closedir,		arginfo_dir)
 	PHP_FALIAS(rewind,	rewinddir,		arginfo_dir)
 	PHP_NAMED_FE(read,  php_if_readdir, arginfo_dir)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 
@@ -278,7 +278,7 @@ PHP_FUNCTION(closedir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL, E_WARNING, "%d is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -394,7 +394,7 @@ PHP_FUNCTION(rewinddir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL, E_WARNING, "%d is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -413,7 +413,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL, E_WARNING, "%d is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -439,7 +439,7 @@ PHP_FUNCTION(glob)
 	size_t pattern_len;
 	zend_long flags = 0;
 	glob_t globbuf;
-	int n;
+	size_t n;
 	int ret;
 	zend_bool basedir_limit = 0;
 

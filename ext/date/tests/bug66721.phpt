@@ -8,4 +8,9 @@ $y = 'O:8:"DateTime":3:{s:4:"date";s:19:"2014-02-15 02:00:51";s:13:"timezone_typ
 var_dump(unserialize($y));
 ?>
 --EXPECTF--
-Fatal error: Invalid serialization data for DateTime object in %s on line %d
+Fatal error: Uncaught Error: Invalid serialization data for DateTime object in %sbug66721.php:%d
+Stack trace:
+#0 [internal function]: DateTime->__wakeup()
+#1 %sbug66721.php(%d): unserialize('O:8:"DateTime":...')
+#2 {main}
+  thrown in %sbug66721.php on line %d

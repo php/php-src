@@ -34,7 +34,7 @@ prompt> [L10 %s ECHO                    "ok"                                    
  00011: } finally {
  00012: 	echo " ... ok";
 prompt> ok
-[L11 %s FAST_CALL               J8                   try-catch(0)         ~%d                   %s]
+[L11 %s FAST_CALL               J8                                        ~%d                   %s]
 >00011: } finally {
  00012: 	echo " ... ok";
  00013: }

@@ -153,9 +153,9 @@ static void PHP_SHA3_Init(PHP_SHA3_CTX* ctx,
 static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
                             const unsigned char* buf,
                             unsigned int count,
-                            int block_size) {
+                            size_t block_size) {
 	while (count > 0) {
-		int len = block_size - ctx->pos;
+		unsigned int len = block_size - ctx->pos;
 		if (len > count) len = count;
 		count -= len;
 		while (len-- > 0) {

@@ -12,9 +12,9 @@ for ($i = 0; $i < 10001; $i++) {
 unset($b);
 $a->b = "xxx";
 unset($a);
-var_dump(gc_collect_cycles());
+var_dump(gc_collect_cycles() > 0);
 echo "ok\n";
 ?>
 --EXPECT--
-int(2)
+bool(true)
 ok

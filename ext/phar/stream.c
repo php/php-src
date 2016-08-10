@@ -45,6 +45,7 @@ php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_rename,   /* rename */
 	phar_wrapper_mkdir,    /* create directory */
 	phar_wrapper_rmdir,    /* remove directory */
+	NULL
 };
 
 php_stream_wrapper php_stream_phar_wrapper = {
