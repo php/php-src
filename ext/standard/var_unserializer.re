@@ -305,6 +305,8 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes
 
+static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER);
+
 static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
 {
 	while (elements-- > 0) {
@@ -313,7 +315,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 
 		ZVAL_UNDEF(&key);
 
-		if (!php_var_unserialize_ex(&key, p, max, NULL, classes)) {
+		if (!php_var_unserialize_internal(&key, p, max, NULL, classes)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -369,7 +371,7 @@ string_key:
 			}
 		}
 
-		if (!php_var_unserialize_ex(data, p, max, var_hash, classes)) {
+		if (!php_var_unserialize_internal(data, p, max, var_hash, classes)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -506,8 +508,34 @@ PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsign
 	return php_var_unserialize_ex(UNSERIALIZE_PASSTHRU);
 }
 
-
 PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
+{
+	var_entries *orig_var_entries = (*var_hash)->last;
+	zend_long orig_used_slots = orig_var_entries ? orig_var_entries->used_slots : 0;
+	int result;
+	
+	result = php_var_unserialize_internal(UNSERIALIZE_PASSTHRU);
+
+	if (!result) {
+		/* If the unserialization failed, mark all elements that have been added to var_hash
+		 * as NULL. This will forbid their use by other unserialize() calls in the same
+		 * unserialization context. */
+		var_entries *e = orig_var_entries;
+		zend_long s = orig_used_slots;
+		while (e) {
+			for (; s < e->used_slots; s++) {
+				e->data[s] = NULL;
+			}
+
+			e = e->next;
+			s = 0;
+		}
+	}
+
+	return result;
+}
+
+static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
