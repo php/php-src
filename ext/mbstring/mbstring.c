@@ -3148,6 +3148,31 @@ PHP_FUNCTION(mb_strimwidth)
 }
 /* }}} */
 
+
+/* See mbfl_no_encoding definition for list of unsupported encodings */
+static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc)
+{
+	return ((no_enc >= mbfl_no_encoding_invalid && no_enc <= mbfl_no_encoding_qprint)
+			|| (no_enc >= mbfl_no_encoding_utf7 && no_enc <= mbfl_no_encoding_utf7imap)
+			|| (no_enc >= mbfl_no_encoding_jis && no_enc <= mbfl_no_encoding_2022jpms)
+			|| (no_enc >= mbfl_no_encoding_cp50220 && no_enc <= mbfl_no_encoding_cp50222));
+}
+
+
+/* See mbfl_no_encoding definition for list of unicode encodings */
+static inline zend_bool php_mb_is_no_encoding_unicode(enum mbfl_no_encoding no_enc)
+{
+	return (no_enc >= mbfl_no_encoding_ucs4 && no_enc <= mbfl_no_encoding_utf8_sb);
+}
+
+
+/* See mbfl_no_encoding definition for list of UTF-8 encodings */
+static inline zend_bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
+{
+	return (no_enc >= mbfl_no_encoding_utf8 && no_enc <= mbfl_no_encoding_utf8_sb);
+}
+
+
 /* {{{ MBSTRING_API char *php_mb_convert_encoding() */
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, const char *_to_encoding, const char *_from_encodings, size_t *output_len)
 {
@@ -3218,7 +3243,28 @@ MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, co
 		return NULL;
 	}
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+
+	if (string.no_encoding == MBSTRG(current_internal_encoding)->no_encoding) {
+		mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+	} else if (php_mb_is_no_encoding_unicode(string.no_encoding) && php_mb_is_no_encoding_unicode(MBSTRG(current_internal_encoding)->no_encoding)) {
+
+		if (php_mb_is_no_encoding_utf8(string.no_encoding)) {
+
+			if (MBSTRG(current_filter_illegal_substchar) > 0xd7ff &&
+				0xe000 > MBSTRG(current_filter_illegal_substchar)
+			) {
+				mbfl_buffer_converter_illegal_substchar(convd, 0x3f);
+			} else {
+				mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+			}
+
+		} else {
+			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+		}
+
+	} else {
+		mbfl_buffer_converter_illegal_substchar(convd, 0x3f);
+	}
 
 	/* do it */
 	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
@@ -4762,30 +4808,6 @@ PHP_FUNCTION(mb_check_encoding)
 	}
 }
 /* }}} */
-
-
-/* See mbfl_no_encoding definition for list of unsupported encodings */
-static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc)
-{
-	return ((no_enc >= mbfl_no_encoding_invalid && no_enc <= mbfl_no_encoding_qprint)
-			|| (no_enc >= mbfl_no_encoding_utf7 && no_enc <= mbfl_no_encoding_utf7imap)
-			|| (no_enc >= mbfl_no_encoding_jis && no_enc <= mbfl_no_encoding_2022jpms)
-			|| (no_enc >= mbfl_no_encoding_cp50220 && no_enc <= mbfl_no_encoding_cp50222));
-}
-
-
-/* See mbfl_no_encoding definition for list of unicode encodings */
-static inline zend_bool php_mb_is_no_encoding_unicode(enum mbfl_no_encoding no_enc)
-{
-	return (no_enc >= mbfl_no_encoding_ucs4 && no_enc <= mbfl_no_encoding_utf8_sb);
-}
-
-
-/* See mbfl_no_encoding definition for list of UTF-8 encodings */
-static inline zend_bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
-{
-	return (no_enc >= mbfl_no_encoding_utf8 && no_enc <= mbfl_no_encoding_utf8_sb);
-}
 
 
 static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* enc)
