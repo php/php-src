@@ -33,6 +33,11 @@
 #include "php_incomplete_class.h"
 /* }}} */
 
+struct php_serialize_data {
+	HashTable ht;
+	uint32_t n;
+};
+
 #define COMMON (is_ref ? "&" : "")
 
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
@@ -992,6 +997,35 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 	smart_str_0(buf);
 }
 /* }}} */
+
+PHPAPI php_serialize_data_t php_var_serialize_init() {
+	struct php_serialize_data *d;
+	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
+	if (BG(serialize_lock) || !BG(serialize).level) {
+		d = emalloc(sizeof(struct php_serialize_data));
+		zend_hash_init(&d->ht, 16, NULL, ZVAL_PTR_DTOR, 0);
+		d->n = 0;
+		if (!BG(serialize_lock)) {
+			BG(serialize).data = d;
+			BG(serialize).level = 1;
+		}
+	} else {
+		d = BG(serialize).data;
+		++BG(serialize).level;
+	}
+	return d;
+}
+
+PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
+	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
+	if (BG(serialize_lock) || BG(serialize).level == 1) {
+		zend_hash_destroy(&d->ht);
+		efree(d);
+	}
+	if (!BG(serialize_lock) && !--BG(serialize).level) {
+		BG(serialize).data = NULL;
+	}
+}
 
 /* {{{ proto string serialize(mixed variable)
    Returns a string representation of variable (which can later be unserialized) */
