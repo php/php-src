@@ -130,6 +130,8 @@ PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
 PHP_FUNCTION(mb_check_encoding);
+PHP_FUNCTION(mb_ord);
+PHP_FUNCTION(mb_chr);
 
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
