@@ -3082,6 +3082,11 @@ PHP_FUNCTION(imagegammacorrect)
 		return;
 	}
 
+	if ( input <= 0.0 || output <= 0.0 ) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Gamma values should be positive");
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 	if (gdImageTrueColor(im))	{
