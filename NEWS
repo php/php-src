@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Implemented request #38992 (invoke() and invokeArgs() static method calls
     should match). (cmb)
 
+- SQLite3:
+  . Updated to SQLite3 3.14.0. (cmb)
+
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
     Kenttä)
