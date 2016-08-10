@@ -1088,7 +1088,7 @@ int php_wddx_deserialize_ex(const char *value, size_t vallen, zval *return_value
 
 	if (stack.top == 1) {
 		wddx_stack_top(&stack, (void**)&ent);
-		if (IS_UNDEF(ent->data)) {
+		if (Z_ISUNDEF(ent->data)) {
 			retval = FAILURE;
 		} else {
 			ZVAL_COPY(return_value, &ent->data);
