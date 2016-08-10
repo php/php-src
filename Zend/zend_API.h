@@ -59,6 +59,11 @@ typedef struct _zend_fcall_info_cache {
 	zend_object *object;
 } zend_fcall_info_cache;
 
+#define ZEND_FUNCTION_PROLOUGE(format, ...) \
+if (zend_parse_parameters(ZEND_NUM_ARGS(), format, __VA_ARGS__) == FAILURE) { \
+	return; \
+} \
+
 #define ZEND_NS_NAME(ns, name)			ns "\\" name
 
 #define ZEND_FN(name) zif_##name
