@@ -65,18 +65,26 @@ foreach ($ivs as $iv) {
 
 key length=8
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_3des_cbc.php on line 40
+
 Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=20
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_3des_cbc.php on line 40
+
 Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=24
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_3des_cbc.php on line 40
 string(112) "b85e21072239d60c63a80e7c9ae493cb741a1cd407e52f451c5f43a0d103f55a7b62617eb2e44213c2d44462d388bc0b8f119384b12c84ac"
 
 key length=26
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_3des_cbc.php on line 40
 
 Warning: mcrypt_encrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
@@ -85,13 +93,19 @@ string(0) ""
 
 iv length=4
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_3des_cbc.php on line 47
+
 Warning: mcrypt_encrypt(): Received initialization vector of size 4, but size 8 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=8
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_3des_cbc.php on line 47
 string(112) "b85e21072239d60c63a80e7c9ae493cb741a1cd407e52f451c5f43a0d103f55a7b62617eb2e44213c2d44462d388bc0b8f119384b12c84ac"
 
 iv length=9
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_3des_cbc.php on line 47
 
 Warning: mcrypt_encrypt(): Received initialization vector of size 9, but size 8 is required for this encryption mode in %s on line %d
 string(0) ""

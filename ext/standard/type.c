@@ -416,7 +416,7 @@ PHP_FUNCTION(is_callable)
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)
-		if (UNEXPECTED(ZSTR_LEN(name)) != strlen(ZSTR_VAL(name))) {
+		if (UNEXPECTED(ZSTR_LEN(name) != strlen(ZSTR_VAL(name)))) {
 			ZVAL_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
 			zend_string_release(name);
 		} else {
@@ -431,6 +431,20 @@ PHP_FUNCTION(is_callable)
 	}
 
 	RETURN_BOOL(retval);
+}
+/* }}} */
+
+/* {{{ proto bool is_iterable(mixed var)
+   Returns true if var is iterable (array or instance of Traversable). */
+PHP_FUNCTION(is_iterable)
+{
+	zval *var;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &var) == FAILURE) {
+		return;
+	}
+	
+	RETURN_BOOL(zend_is_iterable(var));
 }
 /* }}} */
 

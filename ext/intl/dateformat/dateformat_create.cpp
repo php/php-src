@@ -36,46 +36,51 @@ extern "C" {
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"
 
+#if U_ICU_VERSION_MAJOR_NUM < 50
+#define UDAT_PATTERN 0
+#endif
+
+#define INTL_UDATE_FMT_OK(i) \
+	(UDAT_FULL == (i) || UDAT_LONG == (i) ||    \
+	 UDAT_MEDIUM == (i) || UDAT_SHORT == (i) || \
+	 UDAT_RELATIVE == (i) || UDAT_FULL_RELATIVE == (i) || \
+	 UDAT_LONG_RELATIVE == (i) || UDAT_MEDIUM_RELATIVE == (i) || \
+	 UDAT_SHORT_RELATIVE == (i) || UDAT_NONE == (i) || \
+	 UDAT_PATTERN == (i))
+
 /* {{{ */
 static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	zval		*object;
-
 	const char	*locale_str;
-	size_t		locale_len		= 0;
+	size_t		locale_len	= 0;
 	Locale		locale;
-    zend_long	date_type		= 0;
-    zend_long	time_type		= 0;
+	zend_long	date_type	= 0;
+	zend_long	time_type	= 0;
 	zval		*calendar_zv	= NULL;
-	Calendar	*calendar		= NULL;
+	Calendar	*calendar	= NULL;
 	zend_long	calendar_type;
 	bool		calendar_owned;
 	zval		*timezone_zv	= NULL;
-	TimeZone	*timezone		= NULL;
+	TimeZone	*timezone	= NULL;
 	bool		explicit_tz;
-    char*       pattern_str		= NULL;
-    size_t      pattern_str_len	= 0;
-    UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
-    int32_t     slength			= 0;
+	char*       pattern_str		= NULL;
+	size_t      pattern_str_len	= 0;
+	UChar*      svalue		= NULL;		/* UTF-16 pattern_str */
+	int32_t     slength		= 0;
 	IntlDateFormatter_object* dfo;
 	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset(NULL);
 	object = return_value;
 	/* Parse parameters. */
-    if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "sll|zzs",
+	if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
 				"unable to parse input parameters", 0);
 		return FAILURE;
-    }
-
-	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
-	if (locale_len == 0) {
-		locale_str = intl_locale_get_default();
 	}
-	locale = Locale::createFromName(locale_str);
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
@@ -84,6 +89,21 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 				"datefmt_create: cannot call constructor twice", 0);
 		return FAILURE;
 	}
+
+	if (!INTL_UDATE_FMT_OK(date_type)) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid date format style", 0);
+		return FAILURE;
+	}
+	if (!INTL_UDATE_FMT_OK(time_type)) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid time format style", 0);
+		return FAILURE;
+	}
+
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
+	if (locale_len == 0) {
+		locale_str = intl_locale_get_default();
+	}
+	locale = Locale::createFromName(locale_str);
 
 	/* process calendar */
 	if (datefmt_process_calendar_arg(calendar_zv, locale, "datefmt_create",
@@ -117,17 +137,19 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 		}
 	}
 
+	DATE_FORMAT_OBJECT(dfo) = udat_open((UDateFormatStyle)time_type,
+			(UDateFormatStyle)date_type, locale_str, NULL, 0, svalue,
+			slength, &INTL_DATA_ERROR_CODE(dfo));
+
 	if (pattern_str && pattern_str_len > 0) {
-		DATE_FORMAT_OBJECT(dfo) = udat_open(UDAT_IGNORE, UDAT_IGNORE,
-				locale_str, NULL, 0, svalue, slength,
-				&INTL_DATA_ERROR_CODE(dfo));
-	} else {
-		DATE_FORMAT_OBJECT(dfo) = udat_open((UDateFormatStyle)time_type,
-				(UDateFormatStyle)date_type, locale_str, NULL, 0, svalue,
-				slength, &INTL_DATA_ERROR_CODE(dfo));
+		udat_applyPattern(DATE_FORMAT_OBJECT(dfo), true, svalue, slength);
+		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
+			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create: error applying pattern", 0);
+			goto error;
+		}
 	}
 
-    if (!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
+	if (!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
 		DateFormat *df = (DateFormat*)DATE_FORMAT_OBJECT(dfo);
 		if (calendar_owned) {
 			df->adoptCalendar(calendar);
@@ -139,7 +161,7 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 		if (timezone != NULL) {
 			df->adoptTimeZone(timezone);
 		}
-    } else {
+	} else {
 		intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo),	"datefmt_create: date "
 				"formatter creation failed", 0);
 		goto error;

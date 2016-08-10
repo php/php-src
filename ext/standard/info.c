@@ -229,9 +229,11 @@ static void php_print_gpcse_array(char *name, uint name_length)
 			}
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
+					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
 					php_info_print("<pre>");
-					zend_print_zval_r_ex((zend_write_func_t) php_info_print_html_esc, tmp, 0);
+					php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					php_info_print("</pre>");
+					zend_string_release(str);
 				} else {
 					zend_print_zval_r(tmp, 0);
 				}

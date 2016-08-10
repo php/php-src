@@ -15,7 +15,7 @@ class AnotherClass {
 }
 
 $instance = new TestClass();
-$instanceWithNoProperties = new AnotherClass();
+$invalidInstance = new AnotherClass();
 $propInfo = new ReflectionProperty('TestClass', 'pub2');
 
 echo "Too few args:\n";
@@ -45,9 +45,9 @@ catch(Exception $exc) {
     echo $exc->getMessage();
 }
 
-echo "\n\nInstance without property:\n";
+echo "\n\nInvalid instance:\n";
 $propInfo = new ReflectionProperty('TestClass', 'pub2');
-var_dump($propInfo->getValue($instanceWithNoProperties));
+var_dump($propInfo->getValue($invalidInstance));
 
 ?>
 --EXPECTF--
@@ -77,5 +77,10 @@ string(15) "static property"
 Protected property:
 Cannot access non-public member TestClass::prot
 
-Instance without property:
-NULL
+Invalid instance:
+
+Fatal error: Uncaught ReflectionException: Given object is not an instance of the class this property was declared in in %s:47
+Stack trace:
+#0 %s(47): ReflectionProperty->getValue(Object(AnotherClass))
+#1 {main}
+  thrown in %s on line 47

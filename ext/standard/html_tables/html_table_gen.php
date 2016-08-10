@@ -560,7 +560,7 @@ for ($i = 0; $i < 0x1E; $i++) {
 					echo "{0, { {\"$z\", ", strlen($z), "} } },";
 				else
 					echo "{1, { {(void *)", sprintf("multi_cp_{$ident}_%05X",
-						($i << 12) | ($k << 6) | $y ), "} } },";
+						($i << 12) | ($k << 6) | $y ), ", 0} } },";
 				
 			}
 			echo "\n};\n\n";

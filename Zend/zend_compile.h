@@ -191,6 +191,7 @@ typedef struct _zend_oparray_context {
 	int        backpatch_count;
 	int        in_finally;
 	uint32_t   fast_call_var;
+	uint32_t   try_catch_offset;
 	int        current_brk_cont;
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
@@ -363,8 +364,6 @@ struct _zend_op_array {
 
 	uint32_t *refcount;
 
-	uint32_t this_var;
-
 	uint32_t last;
 	zend_op *opcodes;
 
@@ -421,6 +420,7 @@ typedef struct _zend_internal_function {
 
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
+	uint32_t   quick_arg_flags;
 
 	struct {
 		zend_uchar type;  /* never used */
@@ -467,13 +467,17 @@ struct _zend_execute_data {
 #define ZEND_CALL_TOP                (1 << 1)
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
-#define ZEND_CALL_FREE_SYMBOL_TABLE  (1 << 4)
+#define ZEND_CALL_HAS_SYMBOL_TABLE   (1 << 4)
 #define ZEND_CALL_CLOSURE            (1 << 5)
 #define ZEND_CALL_RELEASE_THIS       (1 << 6)
 #define ZEND_CALL_ALLOCATED          (1 << 7)
+#define ZEND_CALL_GENERATOR          (1 << 8)
+#define ZEND_CALL_DYNAMIC            (1 << 9)
+
+#define ZEND_CALL_INFO_SHIFT         16
 
 #define ZEND_CALL_INFO(call) \
-	(Z_TYPE_INFO((call)->This) >> 24)
+	(Z_TYPE_INFO((call)->This) >> ZEND_CALL_INFO_SHIFT)
 
 #define ZEND_CALL_KIND_EX(call_info) \
 	(call_info & (ZEND_CALL_CODE | ZEND_CALL_TOP))
@@ -482,11 +486,11 @@ struct _zend_execute_data {
 	ZEND_CALL_KIND_EX(ZEND_CALL_INFO(call))
 
 #define ZEND_SET_CALL_INFO(call, object, info) do { \
-		Z_TYPE_INFO((call)->This) = ((object) ? IS_OBJECT_EX : IS_UNDEF) | ((info) << 24); \
+		Z_TYPE_INFO((call)->This) = ((object) ? IS_OBJECT_EX : IS_UNDEF) | ((info) << ZEND_CALL_INFO_SHIFT); \
 	} while (0)
 
 #define ZEND_ADD_CALL_FLAG_EX(call_info, flag) do { \
-		call_info |= ((flag) << 24); \
+		call_info |= ((flag) << ZEND_CALL_INFO_SHIFT); \
 	} while (0)
 
 #define ZEND_ADD_CALL_FLAG(call, flag) do { \
@@ -779,14 +783,14 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 
 zend_op *get_next_op(zend_op_array *op_array);
 void init_op(zend_op *op);
-int get_next_op_number(zend_op_array *op_array);
+uint32_t get_next_op_number(zend_op_array *op_array);
 ZEND_API int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
-ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc);
+ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
@@ -834,6 +838,12 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_NAME_FQ       0
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
+
+#define ZEND_TYPE_NULLABLE (1<<8)
+
+#define ZEND_ARRAY_SYNTAX_LIST 1  /* list() */
+#define ZEND_ARRAY_SYNTAX_LONG 2  /* array() */
+#define ZEND_ARRAY_SYNTAX_SHORT 3 /* [] */
 
 /* var status for backpatching */
 #define BP_VAR_R			0
@@ -887,14 +897,11 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
 
-#define ZEND_ARG_SEND_BY_REF (1<<0)
-#define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
-#define ZEND_ARG_SEND_FUNCTION (1<<2)
-#define ZEND_ARG_SEND_SILENT   (1<<3)
-
 #define ZEND_SEND_BY_VAL     0
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
+
+#define ZEND_DIM_IS 1
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
@@ -922,16 +929,16 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 
 #ifdef WORDS_BIGENDIAN
 # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
-		*(uint32_t*)&(zf)->type |= ((mask) << ((arg_num) - 1) * 2); \
+		(zf)->quick_arg_flags |= ((mask) << ((arg_num) - 1) * 2); \
 	} while (0)
 # define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
-	(((*((uint32_t*)&((zf)->type))) >> (((arg_num) - 1) * 2)) & (mask))
+	(((zf)->quick_arg_flags >> (((arg_num) - 1) * 2)) & (mask))
 #else
 # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
-		*(uint32_t*)&(zf)->type |= (((mask) << 6) << (arg_num) * 2); \
+		(zf)->quick_arg_flags |= (((mask) << 6) << (arg_num) * 2); \
 	} while (0)
 # define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
-	(((*(uint32_t*)&(zf)->type) >> (((arg_num) + 3) * 2)) & (mask))
+	(((zf)->quick_arg_flags >> (((arg_num) + 3) * 2)) & (mask))
 #endif
 
 #define QUICK_ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
@@ -949,11 +956,6 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 
 #define ZEND_RETURNS_FUNCTION 1<<0
 #define ZEND_RETURNS_VALUE    1<<1
-
-#define ZEND_FAST_RET_TO_CATCH		1
-#define ZEND_FAST_RET_TO_FINALLY	2
-
-#define ZEND_FAST_CALL_FROM_FINALLY	1
 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
@@ -1015,6 +1017,9 @@ END_EXTERN_C()
 
 /* force IS_OBJ_USE_GUARDS for all classes */
 #define ZEND_COMPILE_GUARDS						(1<<9)
+
+/* disable builtin special case function calls */
+#define ZEND_COMPILE_NO_BUILTINS				(1<<10)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

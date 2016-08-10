@@ -38,8 +38,8 @@
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 201502
-#define TIMELIB_ASCII_VERSION "2015.02"
+#define TIMELIB_VERSION 201602
+#define TIMELIB_ASCII_VERSION "2016.02"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01

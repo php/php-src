@@ -221,6 +221,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(void);
 /* Grabbing CE's so that other exts can use the date objects too */
 PHPAPI zend_class_entry *php_date_get_date_ce(void);
 PHPAPI zend_class_entry *php_date_get_immutable_ce(void);
+PHPAPI zend_class_entry *php_date_get_interface_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */

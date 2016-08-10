@@ -167,7 +167,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
-	zend_long size;
+	size_t size;
 	uint16_t i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
@@ -395,10 +395,9 @@ foundit:
 		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			size_t read;
 			php_stream *sigfile;
-			zend_off_t now;
 			char *sig;
 
-			now = php_stream_tell(fp);
+			php_stream_tell(fp);
 			pefree(entry.filename, entry.is_persistent);
 			sigfile = php_stream_fopen_tmpfile();
 			if (!sigfile) {
@@ -1110,14 +1109,14 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		char *signature, sigbuf[8];
 		phar_entry_info entry = {0};
 		php_stream *newfile;
-		zend_off_t tell, st;
+		zend_off_t tell;
 
 		newfile = php_stream_fopen_tmpfile();
 		if (newfile == NULL) {
 			spprintf(pass->error, 0, "phar error: unable to create temporary file for the signature file");
 			return FAILURE;
 		}
-		st = tell = php_stream_tell(pass->filefp);
+		tell = php_stream_tell(pass->filefp);
 		/* copy the local files, central directory, and the zip comment to generate the hash */
 		php_stream_seek(pass->filefp, 0, SEEK_SET);
 		php_stream_copy_to_stream_ex(pass->filefp, newfile, tell, NULL);

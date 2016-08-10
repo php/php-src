@@ -245,7 +245,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		/* check for invalid chars inside login/pass */
 		pp = s;
 		while (pp < p) {
-			if (!isalnum(*pp) && *pp != ':' && *pp != ';' && *pp != '=' && !(*pp >= '!' && *pp <= ',')) {
+			/* http://www.rfc-editor.org/rfc/rfc3986.txt §3.2.1 */
+			const char search_rfc3986[] = ":;=!$%_-.~&'()*+,";
+			if (!isalnum(*pp) && !strchr(search_rfc3986, *pp)) {
 				if (ret->scheme) {
 					efree(ret->scheme);
 				}

@@ -1,68 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0
+?? ??? 2016, PHP 7.2.0alpha1
 
 - Core:
-  . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
-  . Fixed bug #62814 (It is possible to stiffen child class members visibility).
-    (Nikita)
-  . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
-  . Fixed bug #71572 (String offset assignment from an empty string inserts
-    null byte). (Francois)
-  . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
-    Reeze Xia, Dmitry)
-  . Added void return type. (Andrea)
-  . Added support for negative string offsets in string offset syntax and
-    various string functions. (Francois)
-  . Added a form of the list() construct where keys can be specified. (Andrea)
-  . Number operators taking numeric strings now emit E_NOTICEs or E_WARNINGs
-    when given malformed numeric strings. (Andrea)
-  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
-    decoct(), dechex(), integer operators and other conversions now always
-    respect scientific notation in numeric strings. (Andrea)
+  . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
 
-- FTP:
-  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
-    (abrender at elitehosts dot com)
+- EXIF:
+  . Added support for vendor specific tags for the following formats:
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
+  . Fixed bug #72682 (exif_read_data() fails to read all data for some
+    images). (Kalle)
+  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
+    overflow in debug mode). (hlt99 at blinkenshell dot org, Kalle)
+  . Fixed bug #68547 (Exif Header component value check error).
+    (sjh21a at gmail dot com, Kalle)
+  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level
+    reached for some cameras). (Kalle)
+  . Fixed Redhat bug #1362571 (PHP not returning full results for
+    exif_read_data function). (Kalle)
 
-- Hash:
-  . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
-
-- JSON:
-  . Escaped U+2028 and U+2029 when JSON_UNESCAPED_UNICODE is supplied as
-    json_encode options and added JSON_UNESCAPED_LINE_TERMINATORS to restore
-    the previous behaviour. (Eddie Kohler)
-
-- PDO_Firebird:
-  . Fixed bug #60052 (Integer returned as a 64bit integer on X86_64). (Mariuz)
-
-- Pgsql:
-  . Implemented FR #31021 (pg_last_notice() is needed to get all notice
-    messages). (Yasuo)
-  . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
-
-- Session:
-  . Improved fix for bug #68063 (Empty session IDs do still start sessions).
-    (Yasuo)
-  . Fixed bug #71038 (session_start() returns TRUE on failure).
-    Session save handlers must return 'string' always for successful read.
-    i.e. Non-existing session read must return empty string. PHP 7.0 is made
-    not to tolerate buggy return value. (Yasuo)
-  . Fixed bug #71394 (session_regenerate_id() must close opened session on
-    errors). (Yasuo)
-
-- SQLite3:
-  . Implemented FR #71159 (Upgraded bundled SQLite lib to 3.9.2). (Laruence)
-
-- Standard:
-  . Fixed bug #71100 (long2ip() doesn't accept integers in strict mode).
-    (Laruence)
-  . Implemented FR #55716 (Add an option to pass a custom stream context to
-    get_headers()). (Ferenc)
-  . Additional validation for parse_url() for login/pass components).
-    (Ilia) (Julien)
-  . Implemented FR #69359 (Provide a way to fetch the current environment
-    variables). (Ferenc)
-  . unpack() function accepts an additional optional argument $offset. (Dmitry)
+- GMP:
+  . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
+

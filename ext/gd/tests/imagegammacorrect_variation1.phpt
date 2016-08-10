@@ -29,4 +29,4 @@ if ($gamma){
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-7716c0905ae08bd84b4d6cba8969a42e
+b017b1ddc8bda00e82aa8cbfb54c35d4

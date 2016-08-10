@@ -1611,7 +1611,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1,
 										STAT_BYTES_RECEIVED_PURE_DATA_PS,
 										(Z_TYPE_P(current_field) == IS_STRING)?
-											Z_STRLEN_P(current_field) : (p - orig_p));
+											Z_STRLEN_P(current_field) : (size_t)(p - orig_p));
 
 		if (!((bit<<=1) & 255)) {
 			bit = 1;	/* to the following byte */

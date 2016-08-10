@@ -1752,7 +1752,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 			SNMP_G(valueretrieval) = method;
 			RETURN_TRUE;
 	} else {
-		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '%pd'", method);
+		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '" ZEND_LONG_FMT "'", method);
 		RETURN_FALSE;
 	}
 }
@@ -2068,6 +2068,14 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 }
 /* }}} */
 
+static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_count TSRMLS_DC) /* {{{ */
+{
+	*gc_data = NULL;
+	*gc_data_count = 0;
+	return zend_std_get_properties(object TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ php_snmp_get_properties(zval *object)
    Returns all object properties. Injects SNMP properties into object on first call */
 static HashTable *php_snmp_get_properties(zval *object)
@@ -2077,12 +2085,11 @@ static HashTable *php_snmp_get_properties(zval *object)
 	HashTable *props;
 	zval rv;
 	zend_string *key;
-	zend_ulong num_key;
 
 	obj = Z_SNMP_P(object);
 	props = zend_std_get_properties(object);
 
-	ZEND_HASH_FOREACH_KEY_PTR(&php_snmp_properties, num_key, key, hnd) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
 		if (!hnd->read_func || hnd->read_func(obj, &rv) != SUCCESS) {
 			ZVAL_NULL(&rv);
 		}
@@ -2183,7 +2190,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 	if (Z_LVAL_P(newval) > 0) {
 		snmp_object->max_oids = Z_LVAL_P(newval);
 	} else {
-		php_error_docref(NULL, E_WARNING, "max_oids should be positive integer or NULL, got %pd", Z_LVAL_P(newval));
+		php_error_docref(NULL, E_WARNING, "max_oids should be positive integer or NULL, got " ZEND_LONG_FMT, Z_LVAL_P(newval));
 	}
 
 	if (newval == &ztmp) {
@@ -2210,7 +2217,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 	if (Z_LVAL_P(newval) >= 0 && Z_LVAL_P(newval) <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
 		snmp_object->valueretrieval = Z_LVAL_P(newval);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '%pd'", Z_LVAL_P(newval));
+		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '" ZEND_LONG_FMT "'", Z_LVAL_P(newval));
 		ret = FAILURE;
 	}
 
@@ -2260,7 +2267,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 			snmp_object->oid_output_format = Z_LVAL_P(newval);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown SNMP output print format '%pd'", Z_LVAL_P(newval));
+			php_error_docref(NULL, E_WARNING, "Unknown SNMP output print format '" ZEND_LONG_FMT "'", Z_LVAL_P(newval));
 			ret = FAILURE;
 			break;
 	}
@@ -2358,6 +2365,7 @@ PHP_MINIT_FUNCTION(snmp)
 	php_snmp_object_handlers.write_property = php_snmp_write_property;
 	php_snmp_object_handlers.has_property = php_snmp_has_property;
 	php_snmp_object_handlers.get_properties = php_snmp_get_properties;
+	php_snmp_object_handlers.get_gc = php_snmp_get_gc;
 
 	/* Register SNMP Class */
 	INIT_CLASS_ENTRY(ce, "SNMP", php_snmp_class_methods);

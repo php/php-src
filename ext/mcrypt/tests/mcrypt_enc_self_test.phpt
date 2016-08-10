@@ -6,5 +6,8 @@ mcrypt_enc_self_test
 <?php
 $td = mcrypt_module_open(MCRYPT_RIJNDAEL_256, '', MCRYPT_MODE_CBC, '');
 var_dump(mcrypt_enc_self_test($td));
---EXPECT--
+--EXPECTF--
+Deprecated: Function mcrypt_module_open() is deprecated in %s%emcrypt_enc_self_test.php on line 2
+
+Deprecated: Function mcrypt_enc_self_test() is deprecated in %s%emcrypt_enc_self_test.php on line 3
 int(0)
