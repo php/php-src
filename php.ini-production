@@ -158,11 +158,6 @@
 ;   Development Value: On
 ;   Production Value: Off
 
-; url_rewriter.tags
-;   Default Value: "a=href,area=href,frame=src,form=,fieldset="
-;   Development Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-;   Production Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-
 ; variables_order
 ;   Default Value: "EGPCS"
 ;   Development Value: "GPCS"
@@ -243,6 +238,23 @@ output_buffering = 4096
 ;   Instead you must use zlib.output_handler.
 ; http://php.net/output-handler
 ;output_handler =
+
+; URL rewriter function rewrites URL on the fly by using
+; output buffer. You can set target tags by this configuration.
+; "form" tag is special tag. It will add hidden input tag to pass values.
+; Refer to session.trans_sid_tags for usage.
+; Default Value: "form="
+; Development Value: "form="
+; Production Value: "form="
+;url_rewriter.tags
+
+; URL rewriter will not rewrites absolute URL nor form by default. To enable
+; absolute URL rewrite, allowed hosts must be defined at RUNTIME.
+; Refer to session.trans_sid_hosts for more details.
+; Default Value: ""
+; Development Value: ""
+; Production Value: ""
+;url_rewriter.hosts
 
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
@@ -1437,6 +1449,31 @@ session.cache_expire = 180
 ; http://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
+; The URL rewriter will look for URLs in a defined set of HTML tags.
+; <form> is special; if you include them here, the rewriter will
+; add a hidden <input> field with the info which is otherwise appended
+; to URLs. <form> tag's action attribute URL will not be modified
+; unless it is specified.
+; Note that all valid entries require a "=", even if no value follows.
+; Default Value: "a=href,area=href,frame=src,form="
+; Development Value: "a=href,area=href,frame=src,form="
+; Production Value: "a=href,area=href,frame=src,form="
+; http://php.net/url-rewriter.tags
+session.trans_sid_tags = "a=href,area=href,frame=src,form="
+
+; URL rewriter does not rewrite absolute URLs by default.
+; To enable rewrites for absolute pathes, target hosts must be specified
+; at RUNTIME. i.e. use ini_set()
+; <form> tags is special. PHP will check action attribute's URL regardless
+; of session.trans_sid_tags setting.
+; If no host is defined, HTTP_HOST will be used for allowed host.
+; Example value: php.net,www.php.net,wiki.php.net
+; Use "," for multiple hosts. No spaces are allowed.
+; Default Value: ""
+; Development Value: ""
+; Production Value: ""
+;session.trans_sid_hosts=""
+
 ; Select a hash function for use in generating session ids.
 ; Possible Values
 ;   0  (MD5 128 bits)
@@ -1458,17 +1495,6 @@ session.hash_function = 0
 ; Production Value: 5
 ; http://php.net/session.hash-bits-per-character
 session.hash_bits_per_character = 5
-
-; The URL rewriter will look for URLs in a defined set of HTML tags.
-; form/fieldset are special; if you include them here, the rewriter will
-; add a hidden <input> field with the info which is otherwise appended
-; to URLs.  If you want XHTML conformity, remove the form entry.
-; Note that all valid entries require a "=", even if no value follows.
-; Default Value: "a=href,area=href,frame=src,form=,fieldset="
-; Development Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-; Production Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-; http://php.net/url-rewriter.tags
-url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 ; Enable upload progress tracking in $_SESSION
 ; Default Value: On

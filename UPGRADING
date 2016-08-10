@@ -62,6 +62,17 @@ PHP 7.1 UPGRADE NOTES
     different sequence of outputs to previous versions. If you relied on
     mt_srand() to produce a deterministic sequence, it can be called using
     mt_srand($seed, MT_RAND_PHP) to produce old the sequences.
+  . URL rewriter has been improved.
+     . Use dedicated buffer for Session module rewrite and User rewrite.
+     . Full path URL rewrite is supported. Allowed domain can be specified.
+       $_SERVER['HTTP_HOST'] is allowed by default when host whitelist is empty.
+     . Use session.trans_sid_tags and session.trans_sid_hosts to control
+       session rewrite.
+     . Use url_rewriter.tags and url_rewriter.hosts to control user rewrite.
+     . <form>'s "action" attribute is used to check if URL rewrite is allowed
+       and listed under hosts whitelist.
+     . <fieldset> is no longer considered as a special tag. <form> is the
+       only tag considered special.
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
@@ -163,6 +174,8 @@ PHP 7.1 UPGRADE NOTES
 - mb_ereg() and mb_ereg_replace() reject illegal byte sequences.
 - FILTER_FLAG_EMAIL_UNICODE can be used with filter_var() for email validation
   according to RFC 6531.
+- output_reset_rewrite_vars() no longer reset session URL rewrite vars.
+
 
 ========================================
 6. New Functions
