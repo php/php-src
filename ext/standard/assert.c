@@ -180,10 +180,10 @@ PHP_FUNCTION(assert)
 		if (zend_eval_stringl(myeval, Z_STRLEN_P(assertion), &retval, compiled_string_description) == FAILURE) {
 			efree(compiled_string_description);
 			if (!description) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
+				zend_throw_error(NULL, "Failure evaluating code: %s%s", PHP_EOL, myeval);
 			} else {
 				zend_string *str = zval_get_string(description);
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, ZSTR_VAL(str), myeval);
+				zend_throw_error(NULL, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, ZSTR_VAL(str), myeval);
 				zend_string_release(str);
 			}
 			if (ASSERTG(bail)) {

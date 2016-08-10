@@ -720,7 +720,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	dlen--;
 
 	if (base64) {
-		base64_comma = php_base64_decode((const unsigned char *)comma, dlen);
+		base64_comma = php_base64_decode_ex((const unsigned char *)comma, dlen, 1);
 		if (!base64_comma) {
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_error(wrapper, options, "rfc2397: unable to decode");

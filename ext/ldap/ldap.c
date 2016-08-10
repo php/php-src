@@ -1912,8 +1912,11 @@ PHP_FUNCTION(ldap_modify_batch)
 				oper = LDAP_MOD_REPLACE;
 				break;
 			default:
-				php_error_docref(NULL, E_ERROR, "Unknown and uncaught modification type.");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "Unknown and uncaught modification type.");
+				RETVAL_FALSE;
+				efree(ldap_mods[i]);
+				num_mods = i;
+				goto cleanup;
 		}
 
 		/* fill in the basic info */
@@ -1958,7 +1961,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	} else RETVAL_TRUE;
 
 	/* clean up */
-	{
+	cleanup: {
 		for (i = 0; i < num_mods; i++) {
 			/* attribute */
 			efree(ldap_mods[i]->mod_type);
@@ -2823,7 +2826,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 /* }}} */
 #endif
 
-static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen)
+static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen, zend_long flags)
 {
 	char hex[] = "0123456789abcdef";
 	size_t i, p = 0;
@@ -2833,13 +2836,20 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 	for (i = 0; i < valuelen; i++) {
 		len += (map[(unsigned char) value[i]]) ? 3 : 1;
 	}
+	/* Per RFC 4514, a leading and trailing space must be escaped */
+	if ((flags & PHP_LDAP_ESCAPE_DN) && (value[0] == ' ')) {
+		len += 2;
+	}
+	if ((flags & PHP_LDAP_ESCAPE_DN) && ((valuelen > 1) && (value[valuelen - 1] == ' '))) {
+		len += 2;
+	}
 
 	ret =  zend_string_alloc(len, 0);
 
 	for (i = 0; i < valuelen; i++) {
 		unsigned char v = (unsigned char) value[i];
 
-		if (map[v]) {
+		if (map[v] || ((flags & PHP_LDAP_ESCAPE_DN) && ((i == 0) || (i + 1 == valuelen)) && (v == ' '))) {
 			ZSTR_VAL(ret)[p++] = '\\';
 			ZSTR_VAL(ret)[p++] = hex[v >> 4];
 			ZSTR_VAL(ret)[p++] = hex[v & 0x0f];
@@ -2884,7 +2894,7 @@ PHP_FUNCTION(ldap_escape)
 
 	if (flags & PHP_LDAP_ESCAPE_DN) {
 		havecharlist = 1;
-		php_ldap_escape_map_set_chars(map, "\\,=+<>;\"#", sizeof("\\,=+<>;\"#") - 1, 1);
+		php_ldap_escape_map_set_chars(map, "\\,=+<>;\"#\r", sizeof("\\,=+<>;\"#\r") - 1, 1);
 	}
 
 	if (!havecharlist) {
@@ -2897,7 +2907,7 @@ PHP_FUNCTION(ldap_escape)
 		php_ldap_escape_map_set_chars(map, ignores, ignoreslen, 0);
 	}
 
-	RETURN_NEW_STR(php_ldap_do_escape(map, value, valuelen));
+	RETURN_NEW_STR(php_ldap_do_escape(map, value, valuelen, flags));
 }
 
 #ifdef STR_TRANSLATION

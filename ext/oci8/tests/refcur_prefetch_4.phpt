@@ -157,7 +157,7 @@ echo "Done\n";
 ------Test 1 - Set Prefetch after PL/SQL fetch ----------
 
 Warning: oci_execute(): ORA-01001: %s
-ORA-06512: at "SYSTEM.REFCURPKG", line %d
+ORA-06512: at "%s.REFCURPKG", line %d
 ORA-06512: at line %d in %s on line %d
 Fetch Row from PL/SQL
 int(0)

@@ -235,6 +235,104 @@ ZEND_METHOD(Closure, bind)
 }
 /* }}} */
 
+static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval params[2];
+
+	memset(&fci, 0, sizeof(zend_fcall_info));
+	memset(&fci, 0, sizeof(zend_fcall_info_cache));
+
+	fci.size = sizeof(zend_fcall_info);
+	fci.retval = return_value;
+
+	fcc.initialized = 1;
+	fcc.function_handler = (zend_function *) EX(func)->common.arg_info;
+	fci.params = params;
+	fci.param_count = 2;
+	ZVAL_STR(&fci.params[0], EX(func)->common.function_name);
+	array_init(&fci.params[1]);
+	zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+
+	fci.object = Z_OBJ(EX(This));
+	fcc.object = Z_OBJ(EX(This));
+	fcc.calling_scope = zend_get_executed_scope();
+
+	zend_call_function(&fci, &fcc);
+
+	zval_ptr_dtor(&fci.params[0]);
+	zval_ptr_dtor(&fci.params[1]);
+}
+/* }}} */
+
+static int zend_create_closure_from_callable(zval *return_value, zval *callable, char **error) /* {{{ */ {
+	zend_fcall_info_cache fcc;
+	zend_function *mptr;
+	zval instance;
+	zend_internal_function call;
+
+	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, error)) {
+		return FAILURE;
+	}
+
+	mptr = fcc.function_handler;
+	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+		memset(&call, 0, sizeof(zend_internal_function));
+
+		call.type = ZEND_INTERNAL_FUNCTION;
+		call.handler = zend_closure_call_magic;
+		call.function_name = mptr->common.function_name;
+		call.arg_info = (zend_internal_arg_info *) mptr->common.prototype;
+		call.scope = mptr->common.scope;
+
+		zend_free_trampoline(mptr);
+		mptr = (zend_function *) &call;
+	}
+
+	if (fcc.object) {
+		ZVAL_OBJ(&instance, fcc.object);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.called_scope, &instance);
+	} else {
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.called_scope, NULL);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto Closure Closure::fromCallable(callable callable)
+   Create a closure from a callable using the current scope. */
+ZEND_METHOD(Closure, fromCallable)
+{
+	zval *callable;
+	int success;
+	char *error = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callable) == FAILURE) {
+		return;
+	}
+
+	if (Z_TYPE_P(callable) == IS_OBJECT && instanceof_function(Z_OBJCE_P(callable), zend_ce_closure)) {
+		/* It's already a closure */
+		RETURN_ZVAL(callable, 1, 0);
+	}
+
+	/* create closure as if it were called from parent scope */
+	EG(current_execute_data) = EX(prev_execute_data);
+	success = zend_create_closure_from_callable(return_value, callable, &error);
+	EG(current_execute_data) = execute_data;
+
+	if (success == FAILURE || error) {
+		if (error) {
+			zend_throw_exception_ex(zend_ce_type_error, 0, "Failed to create closure from callable: %s", error);
+			efree(error);
+		} else {
+			zend_throw_exception_ex(zend_ce_type_error, 0, "Failed to create closure from callable");
+		}
+	}
+}
+/* }}} */
+
 static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
 	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
@@ -489,11 +587,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_fromcallable, 0, 0, 1)
+	ZEND_ARG_INFO(0, callable)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, call, arginfo_closure_call, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, fromCallable, arginfo_closure_fromcallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 

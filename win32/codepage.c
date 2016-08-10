@@ -32,6 +32,7 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	int ret_len, tmp_len;
 
 	if (!in || in_len > (size_t)INT_MAX) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 	assert(in_len ? in[in_len] == L'\0' : 1);
@@ -40,17 +41,20 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 
 	ret_len = MultiByteToWideChar(cp, flags, in, tmp_len, NULL, 0);
 	if (ret_len == 0) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
 		return NULL;
 	}
 
 	ret = malloc(ret_len * sizeof(wchar_t));
 	if (!ret) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
 		return NULL;
 	}
 
 	tmp_len = MultiByteToWideChar(cp, flags, in, tmp_len, ret, ret_len);
 	if (tmp_len == 0) {
 		free(ret);
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
 		return NULL;
 	}
 
@@ -93,11 +97,13 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
 	if (!in) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	} else if (0 == in_len) {
 		/* Not binary safe. */
 		in_len = strlen(in);
 		if (in_len > (size_t)INT_MAX) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 			return NULL;
 		}
 	}
@@ -118,6 +124,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 		ret = malloc((in_len+1)*sizeof(wchar_t));
 		if (!ret) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
 			return NULL;
 		}
 
@@ -127,6 +134,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 			if (-1 == k) {
 				free(ret);
+				SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 				return NULL;
 			}
 
@@ -163,6 +171,7 @@ __forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_
 	char* target;
 
 	if (!in || in_len > INT_MAX) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 	assert(in_len ? in[in_len] == '\0' : 1);
@@ -171,19 +180,20 @@ __forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_
 
 	target_len = WideCharToMultiByte(cp, flags, in, tmp_len, NULL, 0, NULL, NULL);
 	if (target_len == 0) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
 		return NULL;
 	}
 
 	target = malloc(target_len);
 	if (target == NULL) {
-		SetLastError(ERROR_OUTOFMEMORY);
-		_set_errno(ENOMEM);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
 		return NULL;
 	}
 
 	r = WideCharToMultiByte(cp, flags, in, tmp_len, target, target_len, NULL, NULL);
 	if (r == 0) {
 		free(target);
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
 		return NULL;
 	}
 
@@ -258,6 +268,8 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 		}
 	}
 
+	SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_FOUND);
+
 	return NULL;
 }/*}}}*/
 
@@ -311,6 +323,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id)
 {/*{{{*/
 	const struct php_win32_cp *tmp;
 	if (!IsValidCodePage(id)) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 
@@ -334,6 +347,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	size_t bin_len = 0;
 
 	if (!env) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 
@@ -355,6 +369,10 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	} while (NULL != (cur = strchr(prev, '\0')) && cur++ && *cur && bin_len + (cur - prev) < 32760);
 
 	envw = (wchar_t *) malloc((bin_len + 3) * sizeof(wchar_t));	
+	if (!envw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
+		return NULL;
+	}
 	memmove(envw, ew, bin_len * sizeof(wchar_t));
 	envw[bin_len] = L'\0';
 	envw[bin_len + 1] = L'\0';
@@ -387,7 +405,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *enc)
 	cur_cp = php_win32_cp_get_by_enc(enc);
 
 	if (!strcmp(sapi_module.name, "cli")) {
-		php_win32_cp_cli_update();
+		php_win32_cp_cli_do_setup(cur_cp->id);
 	}
 
 	return cur_cp;

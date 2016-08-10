@@ -259,6 +259,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 	DBG_ENTER("mysqlnd_result_buffered::free_result");
 	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
 
+	mysqlnd_error_info_free_contents(&set->error_info);
+
 	if (set->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
 		MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)((MYSQLND_RES_BUFFERED_ZVAL *) set);
 	} if (set->type == MYSQLND_BUFFERED_TYPE_C) {
@@ -1954,7 +1956,6 @@ mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool p
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-
 	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
@@ -1993,6 +1994,10 @@ mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_boo
 	DBG_ENTER("mysqlnd_result_buffered_zval_init");
 
 	if (!ret) {
+		DBG_RETURN(NULL);
+	}
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, persistent)) {
+		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
 	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {
@@ -2036,6 +2041,10 @@ mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool p
 	DBG_ENTER("mysqlnd_result_buffered_c_init");
 
 	if (!ret) {
+		DBG_RETURN(NULL);
+	}
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, persistent)) {
+		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
 	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {

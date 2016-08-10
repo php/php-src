@@ -62,7 +62,6 @@ int fpm_scoreboard_init_main() /* {{{ */
 			if (!wp->scoreboard->procs[i]) {
 				return -1;
 			}
-			memset(wp->scoreboard->procs[i], 0, sizeof(struct fpm_scoreboard_proc_s));
 		}
 
 		wp->scoreboard->pm = wp->config->pm;

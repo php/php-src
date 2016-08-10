@@ -71,18 +71,26 @@ function special_var_dump($str) {
 
 key length=8
 
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_3des_ecb.php on line 43
+
 Warning: mcrypt_decrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=20
 
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_3des_ecb.php on line 43
+
 Warning: mcrypt_decrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=24
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_3des_ecb.php on line 43
 string(32) "736563726574206d6573736167650000"
 
 key length=26
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_3des_ecb.php on line 43
 
 Warning: mcrypt_decrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
@@ -90,11 +98,17 @@ string(0) ""
 --- testing different iv lengths
 
 iv length=4
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_3des_ecb.php on line 50
 string(32) "a9298896ed1b7335f8f10f7ff6d7a239"
 
 iv length=8
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_3des_ecb.php on line 50
 string(32) "a9298896ed1b7335f8f10f7ff6d7a239"
 
 iv length=9
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_decrypt_3des_ecb.php on line 50
 string(32) "a9298896ed1b7335f8f10f7ff6d7a239"
 ===DONE===

@@ -143,8 +143,12 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 {
 	char *digits, *dst, *src;
 	int i, decpt, sign;
+	int mode = ndigit >= 0 ? 2 : 0;
 
-	digits = zend_dtoa(value, 2, ndigit, &decpt, &sign, NULL);
+	if (mode == 0) {
+		ndigit = 17;
+	}
+	digits = zend_dtoa(value, mode, ndigit, &decpt, &sign, NULL);
 	if (decpt == 9999) {
 		/*
 		 * Infinity or NaN, convert to inf or nan with sign.

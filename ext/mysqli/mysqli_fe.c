@@ -63,10 +63,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 0)
 	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 0)
-	ZEND_ARG_VARIADIC_INFO(1, vars)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_poll, 0, 0, 4)
 	ZEND_ARG_ARRAY_INFO(1, read, 1)
 	ZEND_ARG_ARRAY_INFO(1, write, 1)

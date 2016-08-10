@@ -167,6 +167,20 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
+static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_info *arg_info) /* {{{ */
+{
+	if (arg_info->type_hint == IS_ARRAY) {
+		return 1;
+	}
+	
+	if (arg_info->class_name && zend_string_equals_literal_ci(arg_info->class_name, "Traversable")) {
+		return 1;
+	}
+	
+	return 0;
+}
+/* }}} */
+
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
@@ -268,8 +282,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 1;
 	}
 
-	/* If both methods are private do not enforce a signature */
-    if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
+	/* If the prototype method is private do not enforce a signature */
+	if (proto->common.fn_flags & ZEND_ACC_PRIVATE) {
 		return 1;
 	}
 
@@ -314,9 +328,18 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		} else {
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
-
+		
 		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
-			return 0;
+			switch (fe_arg_info->type_hint) {
+				case IS_ITERABLE:
+					if (!zend_iterable_compatibility_check(proto_arg_info)) {
+						return 0;
+					}
+					break;
+					
+				default:
+					return 0;
+			}
 		}
 
 		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
@@ -338,9 +361,18 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			return 0;
 		}
-
+		
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
-			return 0;
+			switch (proto->common.arg_info[-1].type_hint) {
+				case IS_ITERABLE:
+					if (!zend_iterable_compatibility_check(fe->common.arg_info - 1)) {
+						return 0;
+					}
+					break;
+					
+				default:
+					return 0;
+			}
 		}
 
 		if (fe->common.arg_info[-1].allow_null && !proto->common.arg_info[-1].allow_null) {

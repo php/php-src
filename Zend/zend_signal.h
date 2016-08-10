@@ -90,7 +90,6 @@ void zend_signal_activate(void);
 void zend_signal_deactivate(void);
 void zend_signal_startup(void);
 void zend_signal_init(void);
-void zend_signal_shutdown(void);
 
 ZEND_API int zend_signal(int signo, void (*handler)(int));
 ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact);
@@ -104,7 +103,6 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 # define zend_signal_deactivate()
 # define zend_signal_startup()
 # define zend_signal_init()
-# define zend_signal_shutdown()
 
 # define zend_signal(signo, handler)           signal(signo, handler)
 # define zend_sigaction(signo, act, oldact)    sigaction(signo, act, oldact)

@@ -4,6 +4,7 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 1. Internal API changes
   e. Codepage handling on Windows
   f. Path handling on Windows
+  g. SAPI logging
 
 2. Build system changes
   a. Unix build system changes
@@ -66,6 +67,12 @@ changes. See: https://wiki.php.net/phpng-upgrading
     The most optimal use case for scripts is utilizing UTF-8 for any I/O
     related functions. UTF-8 filenames are supported on any system disregarding
     the system OEM/ANSI codepage.
+
+  g. SAPI logging
+    The log_message callback in the SAPI struct was extended with the severity
+    argument. This allows SAPI modules to implement mapping between PHP and
+    corresponding server error levels. A reference mapping implementation
+    can be found in apache2handler.
 
 
 ========================

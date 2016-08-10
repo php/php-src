@@ -589,7 +589,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	globfree(&globbuf);
 	return globbuf.gl_pathc;
 #else
-	php_error_docref(NULL, E_ERROR, "Glob support is not available");
+	zend_throw_error(NULL, "Glob support is not available");
 	return 0;
 #endif  /* HAVE_GLOB */
 }
@@ -1619,10 +1619,10 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 {
 	struct zip *intern;
 	zval *self = getThis();
-	char *path = NULL;
+	char *path = ".";
 	char *remove_path = NULL;
 	char *add_path = NULL;
-	size_t  add_path_len, remove_path_len = 0, path_len = 0;
+	size_t  add_path_len, remove_path_len = 0, path_len = 1;
 	zend_long remove_all_path = 0;
 	zend_long flags = 0;
 	zval *options = NULL;

@@ -132,6 +132,7 @@ PHP_FUNCTION(openssl_get_cert_locations);
 
 #endif
 
+
 #endif
 
 /*

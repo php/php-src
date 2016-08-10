@@ -22,7 +22,6 @@ object(PDOStatement)#%d (1) {
 
 Fatal error: Uncaught PDOException: You may not create a PDORow manually in %spdo_036.php:8
 Stack trace:
-#0 [internal function]: PDORow->__construct()
-#1 %spdo_036.php(8): ReflectionClass->newInstance()
-#2 {main}
+#0 %spdo_036.php(8): ReflectionClass->newInstance()
+#1 {main}
   thrown in %spdo_036.php on line 8

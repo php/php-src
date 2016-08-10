@@ -61,7 +61,8 @@
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-	zend_bool server_obj_usable = IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
+	zend_bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
+		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
 		&& !(GC_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
 
 	if (S->result) {
@@ -292,6 +293,9 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				break;
 
 			case PDO_PARAM_EVT_ALLOC:
+				if (!stmt->bound_param_map) {
+					return 1;
+				}
 				if (!zend_hash_index_exists(stmt->bound_param_map, param->paramno)) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 					return 0;
@@ -304,7 +308,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 
 			case PDO_PARAM_EVT_EXEC_PRE:
 				if (!stmt->bound_param_map) {
-					return 0;
+					return 1;
 				}
 				if (!S->param_values) {
 					S->param_values = ecalloc(

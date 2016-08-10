@@ -372,22 +372,9 @@ zend_op_array *phpdbg_compile_string(zval *source_string, char *filename) {
 	return op_array;
 }
 
-void phpdbg_free_file_source(zval *zv) {
-	phpdbg_file_source *data = Z_PTR_P(zv);
-
-	if (data->buf) {
-		efree(data->buf);
-	}
-
-	destroy_op_array(&data->op_array);
-
-	efree(data);
-}
-
 void phpdbg_init_list(void) {
 	PHPDBG_G(compile_file) = zend_compile_file;
 	PHPDBG_G(compile_string) = zend_compile_string;
-	zend_hash_init(&PHPDBG_G(file_sources), 1, NULL, (dtor_func_t) phpdbg_free_file_source, 0);
 	zend_compile_file = phpdbg_compile_file;
 	zend_compile_string = phpdbg_compile_string;
 }

@@ -479,10 +479,9 @@ SAPI_API void sapi_activate(void)
 
 		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies();
-
-		if (sapi_module.activate) {
-			sapi_module.activate();
-		}
+	}
+	if (sapi_module.activate) {
+		sapi_module.activate();
 	}
 	if (sapi_module.input_filter_init) {
 		sapi_module.input_filter_init();
@@ -1020,6 +1019,10 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 
 SAPI_API char *sapi_getenv(char *name, size_t name_len)
 {
+	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
+		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
+		return NULL;
+	}
 	if (sapi_module.getenv) {
 		char *value, *tmp = sapi_module.getenv(name, name_len);
 		if (tmp) {

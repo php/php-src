@@ -299,7 +299,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	LARGE_INTEGER t;
 	const size_t path_len = strlen(path);
-	ALLOCA_FLAG(use_heap_large);
+	ALLOCA_FLAG(use_heap_large)
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
 
 	if (!pathw) {
@@ -311,7 +311,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 #if ZEND_ENABLE_ZVAL_LONG64
 		ret = _wstat64(pathw, buf);
 #else
-		ret = _wstat(pathw, buf);
+		ret = _wstat(pathw, (struct _stat32 *)buf);
 #endif
 		free(pathw);
 
@@ -1251,7 +1251,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	int add_slash;
 	void *tmp;
 
-	if (path_length == 0 || path_length >= MAXPATHLEN-1) {
+	if (path_length <= 0 || path_length >= MAXPATHLEN-1) {
 #ifdef ZEND_WIN32
 		_set_errno(EINVAL);
 #else
