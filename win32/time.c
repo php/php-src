@@ -51,11 +51,9 @@ static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
 	return timefunc;
 }
 
-BOOL php_win32_init_gettimeofday(void)
+void php_win32_init_gettimeofday(void)
 {
 	timefunc = get_time_func();
-
-	return (NULL != timefunc);
 }
 #endif
 
