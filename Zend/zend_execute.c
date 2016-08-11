@@ -863,6 +863,66 @@ static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, 
 	return 1;
 }
 
+static zend_always_inline zend_bool zend_check_type(
+		const zend_function *zf, const zend_arg_info *arg_info,
+		zval *arg, zend_class_entry **ce, void **cache_slot,
+		zval *default_value, zend_bool is_return_type)
+{
+	if (!arg_info->type_hint) {
+		return 1;
+	}
+
+	ZVAL_DEREF(arg);
+	if (EXPECTED(arg_info->type_hint == Z_TYPE_P(arg))) {
+		if (arg_info->class_name) {
+			if (EXPECTED(*cache_slot)) {
+				*ce = (zend_class_entry *) *cache_slot;
+			} else {
+				*ce = zend_verify_arg_class_kind(arg_info);
+				if (UNEXPECTED(!*ce)) {
+					return 0;
+				}
+				*cache_slot = (void *) *ce;
+			}
+			if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), *ce))) {
+				return 0;
+			}
+		}
+		return 1;
+	}
+
+	if (Z_TYPE_P(arg) == IS_NULL && (arg_info->allow_null || (default_value && is_null_constant(zf->common.scope, default_value)))) {
+		/* Null passed to nullable type */
+		return 1;
+	}
+
+	if (UNEXPECTED(arg_info->class_name)) {
+		/* This is always an error - we fetch the class name for the error message here */
+		if (EXPECTED(*cache_slot)) {
+			*ce = (zend_class_entry *) *cache_slot;
+		} else {
+			*ce = zend_verify_arg_class_kind(arg_info);
+			if (*ce) {
+				*cache_slot = (void *) *ce;
+			}
+		}
+		return 0;
+	} else if (arg_info->type_hint == IS_CALLABLE) {
+		return zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL);
+	} else if (arg_info->type_hint == IS_ITERABLE) {
+		return zend_is_iterable(arg);
+	} else if (arg_info->type_hint == _IS_BOOL &&
+			   EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
+		return 1;
+	} else {
+		return zend_verify_scalar_type_hint(arg_info->type_hint, arg,
+			is_return_type ? ZEND_RET_USES_STRICT_TYPES() : ZEND_ARG_USES_STRICT_TYPES());
+	}
+
+	/* Special handling for IS_VOID is not necessary (for return types),
+	 * because this case is already checked at compile-time. */
+}
+
 static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
@@ -876,57 +936,11 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 		return 1;
 	}
 
-	if (cur_arg_info->type_hint) {
-		ZVAL_DEREF(arg);
-		if (EXPECTED(cur_arg_info->type_hint == Z_TYPE_P(arg))) {
-			if (cur_arg_info->class_name) {
-				if (EXPECTED(*cache_slot)) {
-					ce = (zend_class_entry*)*cache_slot;
-				} else {
-					ce = zend_verify_arg_class_kind(cur_arg_info);
-					if (UNEXPECTED(!ce)) {
-						zend_verify_arg_error(zf, arg_num, NULL, arg);
-						return 0;
-					}
-					*cache_slot = (void*)ce;
-				}
-				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), ce))) {
-					zend_verify_arg_error(zf, arg_num, ce, arg);
-					return 0;
-				}
-			}
-		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(zf->common.scope, default_value)))) {
-			if (cur_arg_info->class_name) {
-				if (EXPECTED(*cache_slot)) {
-					ce = (zend_class_entry*)*cache_slot;
-				} else {
-					ce = zend_verify_arg_class_kind(cur_arg_info);
-					if (ce) {
-						*cache_slot = (void*)ce;
-					}
-				}
-				ZEND_ASSERT(Z_TYPE_P(arg) != IS_OBJECT);
-				zend_verify_arg_error(zf, arg_num, ce, arg);
-				return 0;
-			} else if (cur_arg_info->type_hint == IS_CALLABLE) {
-				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
-					zend_verify_arg_error(zf, arg_num, NULL, arg);
-					return 0;
-				}
-			} else if (cur_arg_info->type_hint == IS_ITERABLE) {
-				if (!zend_is_iterable(arg)) {
-					zend_verify_arg_error(zf, arg_num, NULL, arg);
-					return 0;
-				}
-			} else if (cur_arg_info->type_hint == _IS_BOOL &&
-			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
-				/* pass */
-			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, ZEND_ARG_USES_STRICT_TYPES()))) {
-				zend_verify_arg_error(zf, arg_num, NULL, arg);
-				return 0;
-			}
-		}
+	if (UNEXPECTED(!zend_check_type(zf, cur_arg_info, arg, &ce, cache_slot, default_value, 0))) {
+		zend_verify_arg_error(zf, arg_num, ce, arg);
+		return 0;
 	}
+
 	return 1;
 }
 
@@ -1051,57 +1065,10 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *ret, void **cache_slot)
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
-	zend_class_entry *ce;
-
-	if (ret_info->type_hint) {
-		if (EXPECTED(ret_info->type_hint == Z_TYPE_P(ret))) {
-			if (ret_info->class_name) {
-				if (EXPECTED(*cache_slot)) {
-					ce = (zend_class_entry*)*cache_slot;
-				} else {
-					ce = zend_verify_arg_class_kind(ret_info);
-					if (UNEXPECTED(!ce)) {
-						zend_verify_return_error(zf, ce, ret);
-						return;
-					}
-					*cache_slot = (void*)ce;
-				}
-				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(ret), ce))) {
-					zend_verify_return_error(zf, ce, ret);
-				}
-			}
-		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
-			if (ret_info->class_name) {
-				if (EXPECTED(*cache_slot)) {
-					ce = (zend_class_entry*)*cache_slot;
-				} else {
-					ce = zend_verify_arg_class_kind(ret_info);
-					if (ce) {
-						*cache_slot = (void*)ce;
-					}
-				}
-				zend_verify_return_error(zf, ce, ret);
-			} else if (ret_info->type_hint == IS_CALLABLE) {
-				if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL)) {
-					zend_verify_return_error(zf, NULL, ret);
-				}
-			} else if (ret_info->type_hint == IS_ITERABLE) {
-				if (!zend_is_iterable(ret)) {
-					zend_verify_return_error(zf, NULL, ret);
-				}
-			} else if (ret_info->type_hint == _IS_BOOL &&
-			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
-				/* pass */
-			/* There would be a check here for the IS_VOID type hint, which
-			 * would trigger an error because a value had been returned.
-			 * However, zend_compile.c already does a compile-time check
-			 * that bans `return ...;` within a void function. Thus we can skip
-			 * this part of the runtime check for non-internal functions.
-			 */
-			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(ret_info->type_hint, ret, ZEND_RET_USES_STRICT_TYPES()))) {
-				zend_verify_return_error(zf, NULL, ret);
-			}
-		}
+	zend_class_entry *ce = NULL;
+	
+	if (UNEXPECTED(!zend_check_type(zf, ret_info, ret, &ce, cache_slot, NULL, 1))) {
+		zend_verify_return_error(zf, ce, ret);
 	}
 }
 
