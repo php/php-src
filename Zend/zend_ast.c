@@ -1106,7 +1106,7 @@ static ZEND_COLD void zend_ast_export_var_list(smart_str *str, zend_ast_list *li
 		if (i != 0) {
 			smart_str_appends(str, ", ");
 		}
-		if (list->child[i]->attr) {
+		if (list->child[i]->attr & ZEND_BIND_REF) {
 			smart_str_appendc(str, '&');
 		}
 		smart_str_appendc(str, '$');

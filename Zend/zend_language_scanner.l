@@ -1268,6 +1268,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_EXIT);
 }
 
+<ST_IN_SCRIPTING>"fn" {
+	RETURN_TOKEN(T_FN);
+}
+
 <ST_IN_SCRIPTING>"function" {
 	RETURN_TOKEN(T_FUNCTION);
 }

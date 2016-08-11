@@ -8072,7 +8072,7 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 		}
 	} else {
 		var = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
-		if (UNEXPECTED(Z_ISUNDEF_P(var))) {
+		if (UNEXPECTED(Z_ISUNDEF_P(var)) && !(opline->extended_value & ZEND_BIND_IMPLICIT)) {
 			SAVE_OPLINE();
 			var = ZVAL_UNDEFINED_OP2();
 			if (UNEXPECTED(EG(exception))) {
@@ -8083,7 +8083,8 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 		Z_TRY_ADDREF_P(var);
 	}
 
-	zend_closure_bind_var_ex(closure, (opline->extended_value & ~ZEND_BIND_REF), var);
+	zend_closure_bind_var_ex(closure,
+		(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT)), var);
 	ZEND_VM_NEXT_OPCODE();
 }
 
