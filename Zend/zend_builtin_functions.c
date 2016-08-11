@@ -1009,7 +1009,7 @@ ZEND_FUNCTION(get_class)
 {
 	zval *obj = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &obj) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o", &obj) == FAILURE) {
 		RETURN_FALSE;
 	}
 
