@@ -1109,7 +1109,7 @@ PHP_FUNCTION(ibase_query)
 				isc_db_handle db = 0;
 				isc_tr_handle trans = 0;
 
-				} else if (((l = INI_INT("ibase.max_links")) != -1) && (IBG(num_links) >= l)) {
+				if (((l = INI_INT("ibase.max_links")) != -1) && (IBG(num_links) >= l)) {
 					_php_ibase_module_error("CREATE DATABASE is not allowed: maximum link count "
 						"(" ZEND_LONG_FMT ") reached", l);
 
