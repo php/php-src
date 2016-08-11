@@ -115,7 +115,7 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
-	if (GetDiskFreeSpaceExW(path, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
+	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
 		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
