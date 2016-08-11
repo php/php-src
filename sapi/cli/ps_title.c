@@ -109,8 +109,6 @@ extern char** environ;
 static char windows_error_details[64];
 static char ps_buffer[MAX_PATH];
 static const size_t ps_buffer_size = MAX_PATH;
-typedef BOOL (WINAPI *MySetConsoleTitle)(LPCTSTR);
-typedef DWORD (WINAPI *MyGetConsoleTitle)(LPTSTR, DWORD);
 #elif defined(PS_USE_CLOBBER_ARGV)
 static char *ps_buffer;         /* will point to argv area */
 static size_t ps_buffer_size;   /* space determined at run time */
@@ -371,22 +369,10 @@ int set_ps_title(const char* title)
 
 #ifdef PS_USE_WIN32
     {
-    	MySetConsoleTitle set_title = NULL;
-	HMODULE hMod = LoadLibrary("kernel32.dll");
-
-	if (!hMod) {
+		/* NOTE we don't use _UNICODE*/
+        if (!SetConsoleTitleA(ps_buffer)) {
             return PS_TITLE_WINDOWS_ERROR;
-	}
-
-	/* NOTE we don't use _UNICODE*/
-	set_title = (MySetConsoleTitle)GetProcAddress(hMod, "SetConsoleTitleA");
-	if (!set_title) {
-            return PS_TITLE_WINDOWS_ERROR;
-	}
-
-        if (!set_title(ps_buffer)) {
-            return PS_TITLE_WINDOWS_ERROR;
-	}
+		}
     }
 #endif /* PS_USE_WIN32 */
 
@@ -407,22 +393,10 @@ int get_ps_title(int *displen, const char** string)
 
 #ifdef PS_USE_WIN32
     {
-    	MyGetConsoleTitle get_title = NULL;
-	HMODULE hMod = LoadLibrary("kernel32.dll");
-
-	if (!hMod) {
+		/* NOTE we don't use _UNICODE*/
+        if (!(ps_buffer_cur_len = GetConsoleTitleA(ps_buffer, (DWORD)ps_buffer_size))) {
             return PS_TITLE_WINDOWS_ERROR;
-	}
-
-	/* NOTE we don't use _UNICODE*/
-	get_title = (MyGetConsoleTitle)GetProcAddress(hMod, "GetConsoleTitleA");
-	if (!get_title) {
-            return PS_TITLE_WINDOWS_ERROR;
-	}
-
-        if (!(ps_buffer_cur_len = get_title(ps_buffer, (DWORD)ps_buffer_size))) {
-            return PS_TITLE_WINDOWS_ERROR;
-	}
+		}
     }
 #endif
     *displen = (int)ps_buffer_cur_len;
