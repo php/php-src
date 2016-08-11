@@ -858,15 +858,15 @@ default_socket_timeout = 60
 ;
 ; For example, on Windows:
 ;
-;   extension=msql.dll
+;   extension=mysqli.dll
 ;
 ; ... or under UNIX:
 ;
-;   extension=msql.so
+;   extension=mysqli.so
 ;
 ; ... or with a path:
 ;
-;   extension=/path/to/extension/msql.so
+;   extension=/path/to/extension/mysqli.so
 ;
 ; If you only provide the name of the extension, PHP will look for it in its
 ; default extension directory.
