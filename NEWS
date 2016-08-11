@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.2.0alpha1
 
 - Core:
+  . Removed the sql.safe_mode directive. (Kalle)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
 
 - EXIF:
