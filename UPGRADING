@@ -316,6 +316,9 @@ PHP 7.1 UPGRADE NOTES
   . If the value is set to -1, then the dtoa mode 0 is used. No changes
     in default value which is still 14.
 
+- sql.safe_mode
+  . This INI directive have been removed.
+
 ========================================
 12. Windows Support
 ========================================
