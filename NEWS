@@ -44,6 +44,7 @@ PHP                                                                        NEWS
     (vhuk)
   . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
     with IIS FTP 7.5, 8.5). (vhuk)
+  . Fixed bug #72810 (Missing SKIP_ONLINE_TESTS checks). (vhuk)
 
 04 Aug 2016, PHP 7.1.0beta2
 
