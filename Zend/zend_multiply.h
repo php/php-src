@@ -19,10 +19,32 @@
 
 /* $Id$ */
 
+#include "zend_portability.h"
+
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H
 
-#if (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
+#if __has_builtin(__builtin_smull_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long __tmpvar;		 											\
+	if (((usedval) = __builtin_smull_overflow((a), (b), &__tmpvar))) {	\
+		(dval) = (double) (a) * (double) (b);						\
+	}																\
+	else (lval) = __tmpvar;											\
+} while (0)
+
+#elif __has_builtin(__builtin_smulll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long long __tmpvar; 											\
+	if (((usedval) = __builtin_smulll_overflow((a), (b), &__tmpvar))) {	\
+		(dval) = (double) (a) * (double) (b);						\
+	}																\
+	else (lval) = __tmpvar;											\
+} while (0)
+
+#elif (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	zend_long __tmpvar; 													\
