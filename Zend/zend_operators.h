@@ -560,7 +560,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 	} else {
 		ZVAL_LONG(result, lresult);
 	}
-#elif PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
