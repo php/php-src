@@ -886,10 +886,10 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		if (Z_TYPE(ent1->data) == IS_UNDEF) {
 			if (stack->top > 1) {
 				stack->top--;
+				efree(ent1);
 			} else {
 				stack->done = 1;
 			}
-			efree(ent1);
 			return;
 		}
 
