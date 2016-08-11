@@ -445,7 +445,7 @@ ZEND_API void zend_update_current_locale(void);
 
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-#if __has_builtin(__builtin_saddl_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#if PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
 		/* switch to double */
@@ -453,7 +453,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
-#elif __has_builtin(__builtin_saddll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
 		/* switch to double */
@@ -499,7 +499,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 
 static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-#if __has_builtin(__builtin_ssubl_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#if PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
 		/* switch to double */
@@ -507,7 +507,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
-#elif __has_builtin(__builtin_ssubll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
 		/* switch to double */
@@ -553,16 +553,16 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {
-#if __has_builtin(__builtin_saddl_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#if PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, lresult);
 	}
-#elif __has_builtin(__builtin_saddll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
-	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, llresult);
@@ -653,16 +653,16 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, zval *op2)
 {
-#if __has_builtin(__builtin_ssubl_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#if PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, lresult);
 	}
-#elif __has_builtin(__builtin_ssubll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
-	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, llresult);

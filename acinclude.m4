@@ -3111,3 +3111,123 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CTZLL], [
   AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CTZLL], [$have_builtin_ctzll], [Whether the compiler supports __builtin_ctzll])
 
 ])
+
+dnl PHP_CHECK_BUILTIN_SMULL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SMULL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_smull_overflow])
+
+  AC_TRY_LINK(, [
+    long tmpvar;
+    return __builtin_smull_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_smull_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_smull_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SMULL_OVERFLOW],
+   [$have_builtin_smull_overflow], [Whether the compiler supports __builtin_smull_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SMULLL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_smulll_overflow])
+
+  AC_TRY_LINK(, [
+    long long tmpvar;
+    return __builtin_smulll_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_smulll_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_smulll_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SMULLL_OVERFLOW],
+   [$have_builtin_smulll_overflow], [Whether the compiler supports __builtin_smulll_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SADDL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SADDL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_saddl_overflow])
+
+  AC_TRY_LINK(, [
+    long tmpvar;
+    return __builtin_saddl_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_saddl_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_saddl_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SADDL_OVERFLOW],
+   [$have_builtin_saddl_overflow], [Whether the compiler supports __builtin_saddl_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SADDLLL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SADDLL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_saddll_overflow])
+
+  AC_TRY_LINK(, [
+    long long tmpvar;
+    return __builtin_saddll_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_saddll_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_saddll_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SADDLLL_OVERFLOW],
+   [$have_builtin_saddll_overflow], [Whether the compiler supports __builtin_saddll_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SSUBL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_ssubl_overflow])
+
+  AC_TRY_LINK(, [
+    long tmpvar;
+    return __builtin_ssubl_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_ssubl_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ssubl_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SSUBL_OVERFLOW],
+   [$have_builtin_ssubl_overflow], [Whether the compiler supports __builtin_ssubl_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_ssubll_overflow])
+
+  AC_TRY_LINK(, [
+    long long tmpvar;
+    return __builtin_ssubll_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_ssubll_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ssubll_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW],
+   [$have_builtin_ssubll_overflow], [Whether the compiler supports __builtin_ssubll_overflow])
+
+])

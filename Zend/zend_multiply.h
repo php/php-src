@@ -24,7 +24,7 @@
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H
 
-#if __has_builtin(__builtin_smull_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#if PHP_HAVE_BUILTIN_SMULL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	long __tmpvar;		 											\
@@ -34,7 +34,7 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif __has_builtin(__builtin_smulll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif PHP_HAVE_BUILTIN_SMULLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	long long __tmpvar; 											\
