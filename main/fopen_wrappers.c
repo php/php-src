@@ -144,7 +144,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	char *path_file;
 	int resolved_basedir_len;
 	int resolved_name_len;
-	int path_len;
+	size_t path_len;
 	int nesting_level = 0;
 
 	/* Special case basedir==".": Use script-directory */
@@ -153,7 +153,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		strlcpy(local_open_basedir, basedir, sizeof(local_open_basedir));
 	}
 
-	path_len = (int)strlen(path);
+	path_len = strlen(path);
 	if (path_len > (MAXPATHLEN - 1)) {
 		/* empty and too long paths are invalid */
 		return -1;
@@ -164,7 +164,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		return -1;
 	}
 
-	path_len = (int)strlen(resolved_name);
+	path_len = strlen(resolved_name);
 	memcpy(path_tmp, resolved_name, path_len + 1); /* safe */
 
 	while (VCWD_REALPATH(path_tmp, resolved_name) == NULL) {
