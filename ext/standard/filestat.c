@@ -113,15 +113,18 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	PHP_WIN32_IOUTIL_INIT_W(path)
 
-	if (GetDiskFreeSpaceExA(path, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
+	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
 		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
 
 	/* i know - this is ugly, but i works <thies@thieso.net> */
 	*space = TotalNumberOfBytes.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + TotalNumberOfBytes.LowPart;
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	return SUCCESS;
 }
@@ -204,15 +207,18 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	PHP_WIN32_IOUTIL_INIT_W(path)
 
-	if (GetDiskFreeSpaceExA(path, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
+	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
 		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
 
 	/* i know - this is ugly, but i works <thies@thieso.net> */
 	*space = FreeBytesAvailableToCaller.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + FreeBytesAvailableToCaller.LowPart;
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	return SUCCESS;
 }
