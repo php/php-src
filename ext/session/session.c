@@ -1521,6 +1521,7 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 {
 	int module_number = PS(module_number);
 	zval *sid, *data, *ppid;
+	zend_bool apply_trans_sid;
 
 	if (!PS(id)) {
 		php_error_docref(NULL, E_WARNING, "Cannot set session ID - session ID is not initialized");
@@ -1561,19 +1562,25 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 	}
 
 	/* Apply trans sid if sid cookie is not set */
-	if (APPLY_TRANS_SID
-		&& (data = zend_hash_str_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE") - 1))) {
-		ZVAL_DEREF(data);
-		if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), strlen(PS(session_name))))) {
-			ZVAL_DEREF(ppid);
-		} else {
-			/* FIXME: Resetting vars are required when
-			   session is stop/start/regenerated. However,
-			   php_url_scanner_reset_vars() resets all vars
-			   including other URL rewrites set by elsewhere. */
-			/* php_url_scanner_reset_vars(); */
-			php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
+	apply_trans_sid = 0;
+	if (APPLY_TRANS_SID) {
+		apply_trans_sid = 1;
+		if (PS(use_cookies) &&
+			(data = zend_hash_str_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE") - 1))) {
+			ZVAL_DEREF(data);
+			if (Z_TYPE_P(data) == IS_ARRAY &&
+				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), strlen(PS(session_name))))) {
+				ZVAL_DEREF(ppid);
+				apply_trans_sid = 0;
+			}
 		}
+	}
+	if (apply_trans_sid) {
+		zend_string *sname;
+		sname = zend_string_init(PS(session_name), strlen(PS(session_name)), 0);
+		php_url_scanner_reset_session_var(sname, 1); /* This may fail when session name has changed */
+		zend_string_release(sname);
+		php_url_scanner_add_session_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
 	}
 }
 /* }}} */
