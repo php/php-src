@@ -150,7 +150,7 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	if ((attr = GetFileAttributes(topath)) == INVALID_FILE_ATTRIBUTES) {
+	if ((attr = GetFileAttributes(dest_p)) == INVALID_FILE_ATTRIBUTES) {
 			php_error_docref(NULL, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
 			RETURN_FALSE;
 	}
