@@ -89,6 +89,34 @@ PHP 7.1 UPGRADE NOTES
 - OpenSSL:
   . Dropped sslv2 stream.
 
+- Session:
+  . Session ID is generated from CSPNG directly. As a result, Session ID length
+    could be any length between 22 and 256. Note: Max size of session ID depends
+    on save handler you are using.
+  . Following INIs are removed
+     . session.hash_function
+     . session.hash_bits_per_charactor
+     . session.entropy_file
+     . session.entropy_length
+  . New INIs and defaults
+     . session.sid_length (Number of session ID characters - 22 to 256.
+       (php.ini-* default: 26 Compitled default: 32)
+     . session.sid_bits_per_character (Bits used per character. 4 to 6.
+       php.ini-* default: 5 Compiled default: 4)
+    Length of old session ID string is determined as follows
+     . Used hash function's bits.
+        . session.hash_function=0 - MD5 128 bits (This was default)
+        . session.hash_function=1 - SHA1 192 bits
+     . Bits per character. (4, 5 or 6 bits per character)
+     . Examples
+         MD5 and 4 bits = 32 chars,  ceil(128/4)=32
+         MD5 and 5 bits = 26 chars,  ceil(128/5)=26
+         MD5 and 6 bits = 22 chars,  ceil(128/6)=22
+         SHA1 and 4 bits = 48 chars, ceil(192/4)=48
+         SHA2 and 5 bits = 39 chars, ceil(192/5)=39
+         SHA1 and 6 bits = 32 chars, ceil(192/6)=32
+         and so on.
+
 - Reflection:
   . The behavior of ReflectionMethod::invoke() and ::invokeArgs() has been
     aligned, what causes slightly different behavior than before for some
@@ -280,8 +308,7 @@ PHP 7.1 UPGRADE NOTES
   . Custom session handlers that do not return strings for session IDs will 
     now throw an instance of Error instead of resulting in a fatal error
     when a function is called that must generate a session ID.
-  . An invalid setting for session.hash_function will throw an instance of
-    Error instead of resulting in a fatal error when a session ID is created.
+  . Only CSPRNG is used to generate session ID.
 
 - SimpleXML:
   . Creating an unnamed or duplicate attribute will throw an instance of Error

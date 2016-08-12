@@ -40,13 +40,11 @@
 #include "rfc1867.h"
 #include "php_variables.h"
 #include "php_session.h"
-#include "ext/standard/md5.h"
-#include "ext/standard/sha1.h"
+#include "ext/standard/php_random.h"
 #include "ext/standard/php_var.h"
 #include "ext/date/php_date.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/url_scanner_ex.h"
-#include "ext/standard/php_rand.h" /* for RAND_MAX */
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "ext/standard/url.h"
@@ -80,6 +78,8 @@ zend_class_entry *php_session_update_timestamp_class_entry;
 
 /* SessionUpdateTimestampInterface */
 zend_class_entry *php_session_update_timestamp_iface_entry;
+
+#define PS_MAX_SID_LENGTH 256
 
 /* ***********
    * Helpers *
@@ -259,17 +259,12 @@ static int php_session_decode(zend_string *data) /* {{{ */
 
 static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
-enum {
-	PS_HASH_FUNC_MD5,
-	PS_HASH_FUNC_SHA1,
-	PS_HASH_FUNC_OTHER
-};
-
 /* returns a pointer to the byte after the last valid character in out */
-static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits) /* {{{ */
+static size_t bin_to_readable(unsigned char *in, size_t inlen, char *out, char nbits) /* {{{ */
 {
 	unsigned char *p, *q;
 	unsigned short w;
+	size_t len = inlen;
 	int mask;
 	int have;
 
@@ -280,7 +275,7 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits) /* {
 	have = 0;
 	mask = (1 << nbits) - 1;
 
-	while (1) {
+	while (inlen--) {
 		if (have < nbits) {
 			if (p < q) {
 				w |= *p++ << have;
@@ -300,151 +295,24 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits) /* {
 	}
 
 	*out = '\0';
-	return out;
+	return len;
 }
 /* }}} */
 
+#define PS_EXTRA_RAND_BYTES 60
+
 PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 {
-	PHP_MD5_CTX md5_context;
-	PHP_SHA1_CTX sha1_context;
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-	void *hash_context = NULL;
-#endif
-	unsigned char *digest;
-	size_t digest_len;
-	char *buf;
-	struct timeval tv;
-	zval *array;
-	zval *token;
+	unsigned char rbuf[PS_MAX_SID_LENGTH + PS_EXTRA_RAND_BYTES];
 	zend_string *outid;
-	char *remote_addr = NULL;
 
-	gettimeofday(&tv, NULL);
-
-	if ((array = zend_hash_str_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER") - 1)) &&
-		Z_TYPE_P(array) == IS_ARRAY &&
-		(token = zend_hash_str_find(Z_ARRVAL_P(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR") - 1)) &&
-		Z_TYPE_P(token) == IS_STRING
-	) {
-		remote_addr = Z_STRVAL_P(token);
+	/* Read additional PS_EXTRA_RAND_BYTES just in case CSPRNG is not safe enough */
+	if (php_random_bytes_throw(rbuf, PS(sid_length) + PS_EXTRA_RAND_BYTES) == FAILURE) {
+		return NULL;
 	}
 
-	/* maximum 15+19+19+10 bytes */
-	spprintf(&buf, 0, "%.15s%ld" ZEND_LONG_FMT "%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (zend_long)tv.tv_usec, php_combined_lcg() * 10);
-
-	switch (PS(hash_func)) {
-		case PS_HASH_FUNC_MD5:
-			PHP_MD5Init(&md5_context);
-			PHP_MD5Update(&md5_context, (unsigned char *) buf, strlen(buf));
-			digest_len = 16;
-			break;
-		case PS_HASH_FUNC_SHA1:
-			PHP_SHA1Init(&sha1_context);
-			PHP_SHA1Update(&sha1_context, (unsigned char *) buf, strlen(buf));
-			digest_len = 20;
-			break;
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-		case PS_HASH_FUNC_OTHER:
-			if (!PS(hash_ops)) {
-				efree(buf);
-				zend_throw_error(NULL, "Invalid session hash function");
-				return NULL;
-			}
-
-			hash_context = emalloc(PS(hash_ops)->context_size);
-			PS(hash_ops)->hash_init(hash_context);
-			PS(hash_ops)->hash_update(hash_context, (unsigned char *) buf, strlen(buf));
-			digest_len = PS(hash_ops)->digest_size;
-			break;
-#endif /* HAVE_HASH_EXT */
-		default:
-			efree(buf);
-			zend_throw_error(NULL, "Invalid session hash function");
-			return NULL;
-	}
-	efree(buf);
-
-	if (PS(entropy_length) > 0) {
-#ifdef PHP_WIN32
-		unsigned char rbuf[2048];
-		size_t toread = PS(entropy_length);
-
-		if (php_win32_get_random_bytes(rbuf, MIN(toread, sizeof(rbuf))) == SUCCESS){
-
-			switch (PS(hash_func)) {
-				case PS_HASH_FUNC_MD5:
-					PHP_MD5Update(&md5_context, rbuf, toread);
-					break;
-				case PS_HASH_FUNC_SHA1:
-					PHP_SHA1Update(&sha1_context, rbuf, toread);
-					break;
-# if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-				case PS_HASH_FUNC_OTHER:
-					PS(hash_ops)->hash_update(hash_context, rbuf, toread);
-					break;
-# endif /* HAVE_HASH_EXT */
-			}
-		}
-#else
-		int fd;
-
-		fd = VCWD_OPEN(PS(entropy_file), O_RDONLY);
-		if (fd >= 0) {
-			unsigned char rbuf[2048];
-			int n;
-			int to_read = PS(entropy_length);
-
-			while (to_read > 0) {
-				n = read(fd, rbuf, MIN(to_read, sizeof(rbuf)));
-				if (n <= 0) break;
-
-				switch (PS(hash_func)) {
-					case PS_HASH_FUNC_MD5:
-						PHP_MD5Update(&md5_context, rbuf, n);
-						break;
-					case PS_HASH_FUNC_SHA1:
-						PHP_SHA1Update(&sha1_context, rbuf, n);
-						break;
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-					case PS_HASH_FUNC_OTHER:
-						PS(hash_ops)->hash_update(hash_context, rbuf, n);
-						break;
-#endif /* HAVE_HASH_EXT */
-				}
-				to_read -= n;
-			}
-			close(fd);
-		}
-#endif
-	}
-
-	digest = emalloc(digest_len + 1);
-	switch (PS(hash_func)) {
-		case PS_HASH_FUNC_MD5:
-			PHP_MD5Final(digest, &md5_context);
-			break;
-		case PS_HASH_FUNC_SHA1:
-			PHP_SHA1Final(digest, &sha1_context);
-			break;
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-		case PS_HASH_FUNC_OTHER:
-			PS(hash_ops)->hash_final(digest, hash_context);
-			efree(hash_context);
-			break;
-#endif /* HAVE_HASH_EXT */
-	}
-
-	if (PS(hash_bits_per_character) < 4
-			|| PS(hash_bits_per_character) > 6) {
-		PS(hash_bits_per_character) = 4;
-
-		php_error_docref(NULL, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
-	}
-
-	outid = zend_string_alloc((digest_len + 2) * ((8.0f / PS(hash_bits_per_character) + 0.5)), 0);
-	ZSTR_LEN(outid) = (size_t)(bin_to_readable((char *)digest, digest_len, ZSTR_VAL(outid), (char)PS(hash_bits_per_character)) - (char *)&ZSTR_VAL(outid));
-	efree(digest);
+	outid = zend_string_alloc(PS(sid_length), 0);
+	ZSTR_LEN(outid) = bin_to_readable(rbuf, PS(sid_length), ZSTR_VAL(outid), (char)PS(sid_bits_per_character));
 
 	return outid;
 }
@@ -476,7 +344,7 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
-	if (len == 0 || len > 128) {
+	if (len == 0 || len > PS_MAX_SID_LENGTH) {
 		ret = FAILURE;
 	}
 
@@ -773,54 +641,42 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 }
 /* }}} */
 
-static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
+static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 {
 	zend_long val;
 	char *endptr = NULL;
 
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-	PS(hash_ops) = NULL;
-#endif
-
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
-	if (endptr && (*endptr == '\0')) {
+	if (endptr && (*endptr == '\0')
+		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
 		/* Numeric value */
-		PS(hash_func) = val ? 1 : 0;
-
+		PS(sid_length) = val;
 		return SUCCESS;
 	}
 
-	if (ZSTR_LEN(new_value) == (sizeof("md5") - 1) &&
-		strncasecmp(ZSTR_VAL(new_value), "md5", sizeof("md5") - 1) == 0) {
-		PS(hash_func) = PS_HASH_FUNC_MD5;
-
-		return SUCCESS;
-	}
-
-	if (ZSTR_LEN(new_value) == (sizeof("sha1") - 1) &&
-		strncasecmp(ZSTR_VAL(new_value), "sha1", sizeof("sha1") - 1) == 0) {
-		PS(hash_func) = PS_HASH_FUNC_SHA1;
-
-		return SUCCESS;
-	}
-
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH) /* {{{ */
-{
-	php_hash_ops *ops = (php_hash_ops*)php_hash_fetch_ops(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
-
-	if (ops) {
-		PS(hash_func) = PS_HASH_FUNC_OTHER;
-		PS(hash_ops) = ops;
-
-		return SUCCESS;
-	}
-}
-#endif /* HAVE_HASH_EXT }}} */
-
-	php_error_docref(NULL, E_WARNING, "session.configuration 'session.hash_function' must be existing hash function. %s does not exist.", ZSTR_VAL(new_value));
+	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_length' must be between 22 and 256.");
 	return FAILURE;
 }
 /* }}} */
+
+static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
+{
+	zend_long val;
+	char *endptr = NULL;
+
+	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+	if (endptr && (*endptr == '\0')
+		&& val >= 4 && val <=6) {
+		/* Numeric value */
+		PS(sid_bits_per_character) = val;
+		return SUCCESS;
+	}
+
+	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_bits' must be between 4 and 6.");
+	return FAILURE;
+}
+/* }}} */
+
 
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
@@ -862,21 +718,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "1",         PHP_INI_ALL, OnUpdateBool,   use_only_cookies,   php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_strict_mode",  "0",         PHP_INI_ALL, OnUpdateBool,   use_strict_mode,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateString, extern_referer_chk, php_ps_globals,    ps_globals)
-#if HAVE_DEV_URANDOM
-	STD_PHP_INI_ENTRY("session.entropy_file",       "/dev/urandom",          PHP_INI_ALL, OnUpdateString, entropy_file,       php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_length",     "32",         PHP_INI_ALL, OnUpdateLong,   entropy_length,     php_ps_globals,    ps_globals)
-#elif HAVE_DEV_ARANDOM
-	STD_PHP_INI_ENTRY("session.entropy_file",       "/dev/arandom",          PHP_INI_ALL, OnUpdateString, entropy_file,       php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_length",     "32",         PHP_INI_ALL, OnUpdateLong,   entropy_length,     php_ps_globals,    ps_globals)
-#else
-	STD_PHP_INI_ENTRY("session.entropy_file",       "",          PHP_INI_ALL, OnUpdateString, entropy_file,       php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_length",     "0",         PHP_INI_ALL, OnUpdateLong,   entropy_length,     php_ps_globals,    ps_globals)
-#endif
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateString, cache_limiter,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateLong,   cache_expire,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.use_trans_sid",          "0",         PHP_INI_ALL, OnUpdateTransSid)
-	PHP_INI_ENTRY("session.hash_function",          "0",         PHP_INI_ALL, OnUpdateHashFunc)
-	STD_PHP_INI_ENTRY("session.hash_bits_per_character", "4",    PHP_INI_ALL, OnUpdateLong,   hash_bits_per_character, php_ps_globals, ps_globals)
+	PHP_INI_ENTRY("session.sid_length",             "32",        PHP_INI_ALL, OnUpdateSidLength)
+	PHP_INI_ENTRY("session.sid_bits_per_character", "4",         PHP_INI_ALL, OnUpdateSidBits)
 	STD_PHP_INI_BOOLEAN("session.lazy_write",       "1",         PHP_INI_ALL, OnUpdateBool,   lazy_write,         php_ps_globals,    ps_globals)
 
 	/* Upload progress */

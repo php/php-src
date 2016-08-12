@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Add ReflectionNamedType::getName() and return leading "?" for nullable types
     from ReflectionType::__toString(). (Trowski)
 
+- Session:
+  . Implemented RFC: Session ID without hashing. (Yasuo)
+    https://wiki.php.net/rfc/session-id-without-hashing
+
 - SQLite3:
   . Updated to SQLite3 3.14.0. (cmb)
 
