@@ -92,19 +92,19 @@ PHPAPI php_url *php_url_parse(char const *str)
 	return php_url_parse_ex(str, strlen(str));
 }
 
-/* {{{ php_url_parse
+/* {{{ php_url_parse_ex
  */
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 {
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
-	char const *s, *e, *p, *pp, *ue;
+	char const *s, *e = NULL, *p, *pp, *ue;
 
 	s = str;
 	ue = s + length;
 
 	/* parse scheme */
-	if ((e = memchr(s, ':', length)) && (e - s)) {
+	if (*s != '[' && (e = memchr(s, ':', length)) && (e - s)) {
 		/* validate scheme */
 		p = s;
 		while (p < e) {
@@ -211,7 +211,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		}
 	} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 		s += 2;
-	} else {
+	} else if (!(*s == '[' && (isdigit(*(s + 1)) || isalpha(*(s + 1)) || *(s + 1) == ':'))) { /* Not IPv6 Format Host */
 		just_path:
 		ue = s + length;
 		goto nohost;
