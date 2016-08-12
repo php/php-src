@@ -31,7 +31,12 @@
 #include "ext/standard/info.h"
 
 #include "tidy.h"
+
+#if HAVE_TIDYBUFFIO_H
+#include "tidybuffio.h"
+#else
 #include "buffio.h"
+#endif
 
 /* compatibility with older versions of libtidy */
 #ifndef TIDY_CALL
@@ -1078,6 +1083,9 @@ static PHP_MINFO_FUNCTION(tidy)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Tidy support", "enabled");
+#if HAVE_TIDYBUFFIO_H
+	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
+#endif
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
 	php_info_print_table_end();

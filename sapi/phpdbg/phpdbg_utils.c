@@ -532,7 +532,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			last_index[index_len] = 0;
 			if (!(zv = zend_symtable_str_find(parent, last_index, index_len))) {
 				if (!silent) {
-					phpdbg_error("variable", "type=\"undefined\" variable=\"%.*s\"", "%.*s is undefined", (int) i, input);
+					phpdbg_error("variable", "type=\"undefined\" variable=\"%.*s\"", "%.*s is undefined", (int) input[i] == ']' ? i + 1 : i, input);
 				}
 				return FAILURE;
 			}

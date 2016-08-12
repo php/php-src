@@ -97,14 +97,6 @@ static void transliterator_object_destroy( Transliterator_object* to )
 }
 /* }}} */
 
-/* {{{ Transliterator_objects_dtor */
-static void Transliterator_objects_dtor(
-	zend_object *object )
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
-
 /* {{{ Transliterator_objects_free */
 static void Transliterator_objects_free( zend_object *object )
 {
@@ -348,7 +340,6 @@ void transliterator_register_Transliterator_class( void )
 	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
 		sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
-	Transliterator_handlers.dtor_obj = Transliterator_objects_dtor;
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
 	Transliterator_handlers.get_property_ptr_ptr = Transliterator_get_property_ptr_ptr;

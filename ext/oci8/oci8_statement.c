@@ -25,9 +25,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1178,7 +1175,8 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 				} else if (Z_TYPE_P(var) == IS_STRING) {
 					value_sz = (sb4) Z_STRLEN_P(var);
 				} else {
-					value_sz = PHP_OCI_PIECE_SIZE;
+					/* Bug-72524: revert value_sz from PHP_OCI_PIECE_SIZE to 0. This restores PHP 5.6 behavior */
+					value_sz = 0;
 				}
 			} else {
 				value_sz = (sb4) maxlength;
@@ -1243,6 +1241,11 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		bindp = zend_hash_update_ptr(statement->binds, zvtmp, bindp);
 		zend_string_release(zvtmp);
 	}
+    /* Make sure the minimum of value_sz is 1 to avoid ORA-3149 
+     * when both in/out parameters are bound with empty strings
+     */
+	if (value_sz == 0)
+		value_sz = 1;
 	
 	bindp->descriptor = oci_desc;
 	bindp->statement = oci_stmt;

@@ -303,9 +303,8 @@ ZEND_METHOD(exception, __construct)
 /* {{{ proto Exception::__wakeup()
    Exception unserialize checks */
 #define CHECK_EXC_TYPE(id, type) \
-	ZVAL_UNDEF(&value); \
 	pvalue = zend_read_property_ex(i_get_exception_base(object), (object), CG(known_strings)[id], 1, &value); \
-	if(Z_TYPE_P(pvalue) != IS_UNDEF && Z_TYPE_P(pvalue) != type) { \
+	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
 		zval tmp; \
 		ZVAL_STR_COPY(&tmp, CG(known_strings)[id]); \
 		Z_OBJ_HANDLER_P(object, unset_property)(object, &tmp, NULL); \
@@ -532,6 +531,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_appends(str, "Object(");
 			smart_str_appends(str, ZSTR_VAL(class_name));
 			smart_str_appends(str, "), ");
+			zend_string_release(class_name);
 			break;
 		}
 	}
@@ -1040,6 +1040,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 
 	if (!exception_ce || !instanceof_function(exception_ce, zend_ce_throwable)) {
 		zend_throw_error(NULL, "Cannot throw objects that do not implement Throwable");
+		zval_ptr_dtor(exception);
 		return;
 	}
 	zend_throw_exception_internal(exception);

@@ -635,6 +635,16 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 						zend_throw_exception(zend_ce_ClosedGeneratorException, "Generator yielded from aborted, no return value available", 0);
 
 						EG(current_execute_data) = original_execute_data;
+
+						if (!((old_root ? old_root : generator)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
+							leaf->node.ptr.root = root;
+							root->node.parent = NULL;
+							if (old_root) {
+								OBJ_RELEASE(&old_root->std);
+							}
+							zend_generator_resume(leaf);
+							return leaf->node.ptr.root; /* this may be updated during zend_generator_resume! */
+						}
 					} else {
 						zval_ptr_dtor(&root->value);
 						ZVAL_COPY(&root->value, &root->node.parent->value);

@@ -209,13 +209,13 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BYTE * psec_desc = NULL;
 	BOOL fAccess = FALSE;
 
+	realpath_cache_bucket * bucket = NULL;
+	char * real_path = NULL;
+
 	PHP_WIN32_IOUTIL_INIT_W(pathname)
 	if (!pathw) {
 		return -1;
 	}
-
-	realpath_cache_bucket * bucket = NULL;
-	char * real_path = NULL;
 
 	if (mode == 1 /*X_OK*/) {
 		DWORD type;

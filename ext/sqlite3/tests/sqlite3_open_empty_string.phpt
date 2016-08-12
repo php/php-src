@@ -7,13 +7,8 @@ Thijs Feryn <thijs@feryn.eu>
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --FILE--
 <?php
-try{
-    $db = new SQLite3('');
-} catch(Exception $e) {
-    echo $e->getMessage().PHP_EOL;
-}
+$db = new SQLite3('');
 echo "Done\n";
 ?>
---EXPECTF--
-Unable to expand filepath
+--EXPECT--
 Done

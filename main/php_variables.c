@@ -749,6 +749,22 @@ static zend_bool php_auto_globals_create_files(zend_string *name)
 	return 0; /* don't rearm */
 }
 
+/* Upgly hack to fix HTTP_PROXY issue, see bug #72573 */
+static void check_http_proxy(HashTable *var_table)
+{
+	if (zend_hash_str_exists(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY")-1)) {
+		char *local_proxy = getenv("HTTP_PROXY");
+
+		if (!local_proxy) {
+			zend_hash_str_del(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY")-1);
+		} else {
+			zval local_zval;
+			ZVAL_STRING(&local_zval, local_proxy);
+			zend_hash_str_update(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY")-1, &local_zval);
+		}
+	}
+}
+
 static zend_bool php_auto_globals_create_server(zend_string *name)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s'))) {
@@ -774,6 +790,7 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 		array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
 	}
 
+	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_SERVER]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_SERVER]);
 
@@ -789,6 +806,7 @@ static zend_bool php_auto_globals_create_env(zend_string *name)
 		php_import_environment_variables(&PG(http_globals)[TRACK_VARS_ENV]);
 	}
 
+	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV]));
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_ENV]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_ENV]);
 

@@ -29,13 +29,6 @@ static zend_object_handlers Spoofchecker_handlers;
  * Auxiliary functions needed by objects of 'Spoofchecker' class
  */
 
-/* {{{ Spoofchecker_objects_dtor */
-static void Spoofchecker_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
-}
-/* }}} */
-
 /* {{{ Spoofchecker_objects_free */
 void Spoofchecker_objects_free(zend_object *object)
 {
@@ -124,7 +117,7 @@ static zend_object *spoofchecker_clone_obj(zval *object) /* {{{ */
 	if(U_FAILURE(SPOOFCHECKER_ERROR_CODE(new_sfo))) {
 		/* set up error in case error handler is interested */
 		intl_error_set( NULL, SPOOFCHECKER_ERROR_CODE(new_sfo), "Failed to clone SpoofChecker object", 0 );
-		Spoofchecker_objects_dtor(&new_sfo->zo); /* free new object */
+		Spoofchecker_objects_free(&new_sfo->zo); /* free new object */
 		zend_error(E_ERROR, "Failed to clone SpoofChecker object");
 	}
 	return new_obj_val;
@@ -147,7 +140,6 @@ void spoofchecker_register_Spoofchecker_class(void)
 		sizeof Spoofchecker_handlers);
 	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
-	Spoofchecker_handlers.dtor_obj = Spoofchecker_objects_dtor;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
 
 	if (!Spoofchecker_ce_ptr) {

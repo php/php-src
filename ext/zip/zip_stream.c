@@ -123,11 +123,11 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 {
 	struct zip_stat sb;
 	const char *path = stream->orig_path;
-	int path_len = strlen(stream->orig_path);
+	size_t path_len = strlen(stream->orig_path);
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
 	char *fragment;
-	int fragment_len;
+	size_t fragment_len;
 	int err;
 	zend_string *file_basename;
 
@@ -263,7 +263,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 											zend_string **opened_path,
 											php_stream_context *context STREAMS_DC)
 {
-	int path_len;
+	size_t path_len;
 
 	zend_string *file_basename;
 	char file_dirname[MAXPATHLEN];
@@ -271,7 +271,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	struct zip *za;
 	struct zip_file *zf = NULL;
 	char *fragment;
-	int fragment_len;
+	size_t fragment_len;
 	int err;
 
 	php_stream *stream = NULL;

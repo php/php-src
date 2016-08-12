@@ -47,6 +47,18 @@ PHP 7.1 UPGRADE NOTES
     syslog error levels. This brings finer differentiation in the error logs
     in contrary to the previous approach where all the errors are loggged with
     the notice level only.
+  . Don't call destructors of incompletely constructed objects, even if they
+    are kept referenced. See bug #29368 and Zend/tests/bug29368_1.phpt.
+  . rand() and srand() are now aliases of mt_rand() and mt_srand().
+    Consequently the output of the following functions has changed:
+     . rand()
+     . shuffle()
+     . str_shuffle()
+     . array_rand()
+  . Fixes to random number generators mean that mt_rand() now produces a
+    different sequence of outputs to previous versions. If you relied on
+    mt_srand() to produce a deterministic sequence, it can be called using
+    mt_srand($seed, MT_RAND_PHP) to produce old the sequences.
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
@@ -55,6 +67,13 @@ PHP 7.1 UPGRADE NOTES
     property name when decoding object to stdClass.
   . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
     U+2029 are escaped.
+
+- mbstring:
+  . mb_ereg() and mb_eregi() will now set the $regs argument to an empty array,
+    if nothing matched. Formerly, $regs was not modified in that case.
+
+- OpenSSL:
+  . Dropped sslv2 stream.
 
 ========================================
 2. New Features
@@ -88,10 +107,16 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 3. Changes in SAPI modules
 ========================================
+- apache2handler:
+  . Implemented per module logging.
+  . Implemented error level mapping between PHP and Apache for the error logs.
 
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- 'e' option of mb_ereg_replace() and mb_eregi_replace().
+- ext/mcrypt is now fully deprecated.
 
 ========================================
 5. Changed Functions
@@ -124,6 +149,10 @@ PHP 7.1 UPGRADE NOTES
 - substr_count() and mb_strimwidth() additionally also accept negative length.
 - file_get_contents() accepts a negative seek offset if the stream is seekable.
 - tempnam() throws a notice when failing back to the system temp dir.
+- getopt() has an extra by-ref parameter : optind
+- mb_ereg() and mb_ereg_replace() reject illegal byte sequences.
+- FILTER_FLAG_EMAIL_UNICODE can be used with filter_var() for email validation
+  according to RFC 6531.
 
 ========================================
 6. New Functions
@@ -131,6 +160,14 @@ PHP 7.1 UPGRADE NOTES
 - Core:
   . Added sapi_windows_cp_set(), sapi_windows_cp_get(), sapi_windows_cp_is_utf8(),
     sapi_windows_cp_conv() for codepage handling.
+
+- pcntl:
+  . Added pcntl_signal_get_handler() that returns the current signal handler
+    for a particular signal.
+
+- Mbstring:
+  . Added mb_chr() and mb_ord().
+  . Added mb_scurb() that scrub broken mutilbyte strings.
 
 - Standard:
   . Added is_iterable() that determines if a value will be accepted by the new
@@ -156,6 +193,11 @@ PHP 7.1 UPGRADE NOTES
     instance of Error from __wakeup() or __set_state() instead of resulting in
     a fatal error.
 
+- DBA:
+  . Data modification functions (e.g.: dba_insert()) now throw an instance of
+    Error instead of triggering a catchable fatal error if the key is does not
+    contain exactly two elements.
+
 - DOM:
   . Invalid schema or RelaxNG validation contexts will throw an instance of
     Error instead of resulting in a fatal error.
@@ -164,6 +206,10 @@ PHP 7.1 UPGRADE NOTES
     fatal error.
   . Attempting to read an invalid or write to a readonly property will throw
     an instance of Error instead of resulting in a fatal error.
+
+- EXIF:
+   . Added extended exif tag support for the following formats: 
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
 
 - GD:
   . Changed the default of the ini setting gd.jpeg_ignore_warning to 1.
@@ -247,6 +293,9 @@ PHP 7.1 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Core:
+  . PHP_FD_SETSIZE
+
 - JSON:
   . JSON_UNESCAPED_LINE_TERMINATORS
 
@@ -267,6 +316,9 @@ PHP 7.1 UPGRADE NOTES
   . If the value is set to -1, then the dtoa mode 0 is used. No changes
     in default value which is still 14.
 
+- sql.safe_mode
+  . This INI directive have been removed.
+
 ========================================
 12. Windows Support
 ========================================
@@ -274,7 +326,7 @@ PHP 7.1 UPGRADE NOTES
 - Core:
   . Support for long and UTF-8 path;
 
-    If an application is UTF-8 conform, no further action is required. For
+    If an application is UTF-8 conforming, no further action is required. For
     applications depending on paths in non UTF-8 encodings for I/O, an explicit
     INI directive has to be set. The encoding INI settings check relies on the
     order in the core:
@@ -282,7 +334,7 @@ PHP 7.1 UPGRADE NOTES
       - default_charset
       - zend.multibyte
 
-    Several functions for codepage handling were itroduced:
+    Several functions for codepage handling were introduced:
       - sapi_windows_cp_set() to set the default codepage
       - sapi_windows_cp_get() to retrieve the current codepage
       - sapi_windows_cp_is_utf8()
@@ -300,6 +352,8 @@ PHP 7.1 UPGRADE NOTES
     particular console program used. PHP automatically sets the console codepage
     according to the encoding rules from php.ini. Using alternative consoles
     instead of cmd.exe directly might bring better experience in some cases.
+    Nevertheless be aware, runtime codepage switch after the request start
+    might bring unexpected side effects on CLI. The preferrable way is php.ini.
 
     As a result of UTF-8 support in the streams, PHP scripts are not limited
     to ASCII or ANSI filenames anymore. This is supported out of the box on
@@ -315,6 +369,10 @@ PHP 7.1 UPGRADE NOTES
     by utilizing UTF-8.
 
   . Support for ftok()
+
+  . PHP on Windows now ensures that the correct version of the Winsock 
+    library is loaded and will error out in case Winsock 2.0 is not found 
+	on the system.
 
 - FCGI
   . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,

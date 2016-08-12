@@ -87,12 +87,21 @@ typedef enum {
 	PHP_WIN32_IOUTIL_IS_UTF8
 } php_win32_ioutil_encoding;
 
+typedef enum {
+	PHP_WIN32_IOUTIL_NORM_OK,
+	PHP_WIN32_IOUTIL_NORM_PARTIAL,
+	PHP_WIN32_IOUTIL_NORM_FAIL,
+} php_win32_ioutil_normalization_result;
 
-#define PHP_WIN32_IOUTIL_DEFAULT_SLASHW L'\\'
-#define PHP_WIN32_IOUTIL_DEFAULT_SLASH '\\'
+#define PHP_WIN32_IOUTIL_FW_SLASHW L'/'
+#define PHP_WIN32_IOUTIL_FW_SLASH '/'
+#define PHP_WIN32_IOUTIL_BW_SLASHW L'\\'
+#define PHP_WIN32_IOUTIL_BW_SLASH '\\'
+#define PHP_WIN32_IOUTIL_DEFAULT_SLASHW PHP_WIN32_IOUTIL_BW_SLASHW
+#define PHP_WIN32_IOUTIL_DEFAULT_SLASH PHP_WIN32_IOUTIL_BW_SLASH
 
 #define PHP_WIN32_IOUTIL_DEFAULT_DIR_SEPARATORW	L';'
-#define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == L'\\' || (c) == L'/')
+#define PHP_WIN32_IOUTIL_IS_SLASHW(c) ((c) == PHP_WIN32_IOUTIL_BW_SLASHW || (c) == PHP_WIN32_IOUTIL_FW_SLASHW)
 #define PHP_WIN32_IOUTIL_IS_LETTERW(c) (((c) >= L'a' && (c) <= L'z') || ((c) >= L'A' && (c) <= L'Z'))
 #define PHP_WIN32_IOUTIL_JUNCTION_PREFIXW L"\\??\\"
 #define PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW 4
@@ -129,6 +138,13 @@ typedef enum {
 		} \
 } while (0);
 
+PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
+#ifdef PHP_EXPORTS
+/* This symbols are needed only for the DllMain, but should not be exported 
+	or be available when used with PHP binaries. */
+BOOL php_win32_ioutil_init(void);
+#endif
+
 /* Keep these functions aliased for case some additional handling
    is needed later. */
 __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
@@ -148,11 +164,24 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 			free(mb);
 			return NULL;
 		}
-		memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-		memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
-		ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
 
-		mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		/* The return can be ignored here, as the normalization can fail for
+		   various reasons not directly related to the operation itself.
+		   Partial normalization could still do a better job further. And
+		   otherwise, the path might be unchanged which is ok if the path
+		   was valid long one. */
+		(void)php_win32_ioutil_normalize_path_w(&mb, mb_len, &mb_len);
+
+		if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(mb, mb_len)) {
+			memmove(ret, mb, mb_len * sizeof(wchar_t));
+			ret[mb_len] = L'\0';
+		} else {
+			memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+			memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
+			ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
+
+			mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		}
 
 		free(mb);
 	} else {
@@ -201,7 +230,7 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
-	int ret;
+	int ret, err;
 
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
@@ -210,9 +239,13 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
 
-	/* TODO set errno. */
 	ret = _waccess(pathw, mode);
+	_get_errno(&err);
 	PHP_WIN32_IOUTIL_CLEANUP_W()
+
+	if (0 > ret) {
+		_set_errno(err);
+	}
 
 	return ret;
 }/*}}}*/
@@ -388,28 +421,25 @@ __forceinline static int php_win32_ioutil_chdir(const char *patha)
 
 __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 {/*{{{*/
-	wchar_t *tmp_bufw = NULL;
+	wchar_t tmp_bufw[PHP_WIN32_IOUTIL_MAXPATHLEN];
 	char *tmp_bufa = NULL;
+	size_t tmp_bufa_len;
 	DWORD err = 0;
 
-	tmp_bufw = php_win32_ioutil_getcwd_w(tmp_bufw, len);
-	if (!tmp_bufw) {
+	if (php_win32_ioutil_getcwd_w(tmp_bufw, PHP_WIN32_IOUTIL_MAXPATHLEN) == NULL) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return NULL;
 	}
 
-	tmp_bufa = php_win32_ioutil_w_to_any(tmp_bufw);
+	tmp_bufa = php_win32_cp_conv_w_to_any(tmp_bufw, wcslen(tmp_bufw), &tmp_bufa_len);
 	if (!tmp_bufa) {
 		err = GetLastError();
-		buf = NULL;
-		free(tmp_bufw);
 		SET_ERRNO_FROM_WIN32_CODE(err);
-		return buf;
-	} else if (strlen(tmp_bufa) > len) {
+		return NULL;
+	} else if (tmp_bufa_len + 1 > PHP_WIN32_IOUTIL_MAXPATHLEN) {
 		free(tmp_bufa);
-		free(tmp_bufw);
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
 		return NULL;
 	}
 
@@ -417,11 +447,14 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		/* If buf was NULL, the result has to be freed outside here. */
 		buf = tmp_bufa;
 	} else {
-		memmove(buf, tmp_bufa, len);
+		if (tmp_bufa_len + 1 > (size_t)len) {
+			free(tmp_bufa);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+			return NULL;
+		}
+		memmove(buf, tmp_bufa, tmp_bufa_len + 1);
 		free(tmp_bufa);
 	}
-
-	free(tmp_bufw);
 
 	return buf;
 }/*}}}*/

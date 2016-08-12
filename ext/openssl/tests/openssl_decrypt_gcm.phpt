@@ -21,11 +21,14 @@ foreach ($tests as $idx => $test) {
 }
 
 // no IV
-var_dump(openssl_decrypt($test['ct'], $method, $test['key'], 0, NULL, $test['tag'], $test['aad']));
+var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
+	NULL, $test['tag'], $test['aad']));
 // failed because no AAD
-var_dump(openssl_decrypt($test['ct'], $method, $test['key'], 0, $test['iv'], $test['tag']));
+var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
+	$test['iv'], $test['tag']));
 // failed because wrong tag
-var_dump(openssl_decrypt($test['ct'], $method, $test['key'], 0, $test['iv'], str_repeat('x', 16), $test['aad']));
+var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
+	$test['iv'], str_repeat('x', 16), $test['aad']));
 
 ?>
 --EXPECTF--

@@ -9,7 +9,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
 
  <description>
 Use the OCI8 extension to access Oracle Database. PHP OCI8 2.1 builds
-with PHP 7.  Use 'pecl install oci8-2.0.11' to install OCI8 for PHP
+with PHP 7.  Use 'pecl install oci8-2.0.12' to install OCI8 for PHP
 5.2 - PHP 5.6.  Use 'pecl install oci8-1.4.10' to install PHP OCI8 1.4
 for PHP 4.3.9 - PHP 5.1.  The OCI8 extension can be linked with Oracle
 client libraries from Oracle Database 12.1, 11, or 10.2.  These
@@ -46,12 +46,12 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2016-04-15</date>
+ <date>2016-08-07</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.1</release>
-   <api>2.1.1</api>
+   <release>2.1.2</release>
+   <api>2.1.2</api>
   </version>
   <stability>
    <release>stable</release>
@@ -60,7 +60,8 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
+Fixed invalid handle error with Implicit Result Sets
+Fixed bug #72524 (Binding null values triggers ORA-24816 error)
   </notes>
  <contents>
   <dir name="/">
@@ -163,6 +164,7 @@ Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
     <file name="bug68298.phpt" role="test" />
     <file name="bug71422.phpt" role="test" />
     <file name="bug71600.phpt" role="test" />
+    <file name="bug72524.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
@@ -467,6 +469,22 @@ Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
  </extsrcrelease>
  <changelog>
 
+<release>
+  <version>
+   <release>2.1.1</release>
+   <api>2.1.1</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
+  </notes>
+</release>
+   
 <release>
   <version>
    <release>2.1.0</release>

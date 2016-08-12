@@ -35,6 +35,7 @@
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
+#include "ext/standard/php_mt_rand.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -633,8 +634,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_long2ip, 0)
 	ZEND_ARG_INFO(0, proper_address)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 1)
 	ZEND_ARG_INFO(0, varname)
+	ZEND_ARG_INFO(0, local_only)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_PUTENV
@@ -646,6 +648,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_getopt, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, opts) /* ARRAY_INFO(0, opts, 1) */
+	ZEND_ARG_INFO(1, optind)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_flush, 0)
@@ -1882,26 +1885,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_quoted_printable_encode, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ rand.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_srand, 0, 0, 0)
-	ZEND_ARG_INFO(0, seed)
-ZEND_END_ARG_INFO()
-
+/* {{{ mt_rand.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_srand, 0, 0, 0)
 	ZEND_ARG_INFO(0, seed)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_rand, 0, 0, 0)
-	ZEND_ARG_INFO(0, min)
-	ZEND_ARG_INFO(0, max)
+	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_rand, 0, 0, 0)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getrandmax, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_mt_getrandmax, 0)
@@ -2859,10 +2851,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(proc_nice,														arginfo_proc_nice)
 #endif
 
-	PHP_FE(rand,															arginfo_rand)
-	PHP_FE(srand,															arginfo_srand)
-	PHP_FE(getrandmax,													arginfo_getrandmax)
-	PHP_FE(mt_rand,														arginfo_mt_rand)
+	PHP_FE(rand,															arginfo_mt_rand)
+	PHP_FALIAS(srand, mt_srand,												arginfo_mt_srand)
+	PHP_FALIAS(getrandmax, mt_getrandmax,									arginfo_mt_getrandmax)
+	PHP_FE(mt_rand,															arginfo_mt_rand)
 	PHP_FE(mt_srand,														arginfo_mt_srand)
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
 
@@ -3477,8 +3469,8 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(rand_is_seeded) = 0;
 	BG(mt_rand_is_seeded) = 0;
+	BG(mt_rand_mode) = MT_RAND_MT19937;
 	BG(umask) = -1;
 	BG(next) = NULL;
 	BG(left) = -1;
@@ -3489,7 +3481,8 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
-	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
+	memset(&BG(url_adapt_session_ex), 0, sizeof(BG(url_adapt_session_ex)));
+	memset(&BG(url_adapt_output_ex), 0, sizeof(BG(url_adapt_output_ex)));
 
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
@@ -3503,9 +3496,13 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 
 static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	if (basic_globals_p->url_adapt_state_ex.tags) {
-		zend_hash_destroy(basic_globals_p->url_adapt_state_ex.tags);
-		free(basic_globals_p->url_adapt_state_ex.tags);
+	if (basic_globals_p->url_adapt_session_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_session_ex.tags);
+		free(basic_globals_p->url_adapt_session_ex.tags);
+	}
+	if (basic_globals_p->url_adapt_output_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_output_ex.tags);
+		free(basic_globals_p->url_adapt_output_ex.tags);
 	}
 }
 /* }}} */
@@ -3660,6 +3657,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
+	BASIC_MINIT_SUBMODULE(mt_rand)
 
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	BASIC_MINIT_SUBMODULE(localeconv)
@@ -4027,15 +4025,16 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv([string varname])
+/* {{{ proto string getenv(string varname[, bool local_only]
    Get the value of an environment variable or every available environment variable 
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
 	char *ptr, *str = NULL;
 	size_t str_len;
+	zend_bool local_only = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sb", &str, &str_len, &local_only) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4045,13 +4044,15 @@ PHP_FUNCTION(getenv)
 		return;
 	}
 
-	/* SAPI method returns an emalloc()'d string */
-	ptr = sapi_getenv(str, str_len);
-	if (ptr) {
-		// TODO: avoid realocation ???
-		RETVAL_STRING(ptr);
-		efree(ptr);
-		return;
+	if (!local_only) {
+		/* SAPI method returns an emalloc()'d string */
+		ptr = sapi_getenv(str, str_len);
+		if (ptr) {
+			// TODO: avoid realocation ???
+			RETVAL_STRING(ptr);
+			efree(ptr);
+			return;
+		}
 	}
 #ifdef PHP_WIN32
 	{
@@ -4269,7 +4270,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 }
 /* }}} */
 
-/* {{{ proto array getopt(string options [, array longopts])
+/* {{{ proto array getopt(string options [, array longopts [, int &optind]])
    Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
@@ -4281,11 +4282,18 @@ PHP_FUNCTION(getopt)
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	zval val, *args = NULL, *p_longopts = NULL;
+	zval *zoptind = NULL;
 	int optname_len = 0;
 	opt_struct *opts, *orig_opts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &options, &options_len, &p_longopts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|az/", &options, &options_len, &p_longopts, &zoptind) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	/* Init zoptind to 1 */
+	if (zoptind) {
+		zval_dtor(zoptind);
+		ZVAL_LONG(zoptind, 1);
 	}
 
 	/* Get argv from the global symbol table. We calculate argc ourselves
@@ -4427,6 +4435,11 @@ PHP_FUNCTION(getopt)
 		}
 
 		php_optarg = NULL;
+	}
+
+	/* Set zoptind to php_optind */
+	if (zoptind) {
+		ZVAL_LONG(zoptind, php_optind);
 	}
 
 	free_longopts(orig_opts);
@@ -4727,7 +4740,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
 
 		case 4: /* send to SAPI */
 			if (sapi_module.log_message) {
-				sapi_module.log_message(message);
+				sapi_module.log_message(message, -1);
 			} else {
 				return FAILURE;
 			}

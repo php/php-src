@@ -597,26 +597,24 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 				RESET_CONSTANT_VISITED(p);
 				return FAILURE;
 			} else {
-				zend_string *save = Z_STR_P(p);
-				char *slash;
-				size_t actual_len = Z_STRLEN_P(p);
-				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
-					actual = slash + 1;
-					actual_len -= (actual - Z_STRVAL_P(p));
-					if (inline_change) {
-						zend_string *s = zend_string_init(actual, actual_len, 0);
-						Z_STR_P(p) = s;
-						Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
-					}
-				}
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
-					zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save));
-					if (inline_change) {
-						zend_string_release(save);
-					}
+					zend_throw_error(NULL, "Undefined constant '%s'", Z_STRVAL_P(p));
 					RESET_CONSTANT_VISITED(p);
 					return FAILURE;
 				} else {
+					zend_string *save = Z_STR_P(p);
+					size_t actual_len = Z_STRLEN_P(p);
+					char *slash = (char *) zend_memrchr(actual, '\\', actual_len);
+					if (slash) {
+						actual = slash + 1;
+						actual_len -= (actual - Z_STRVAL_P(p));
+						if (inline_change) {
+							zend_string *s = zend_string_init(actual, actual_len, 0);
+							Z_STR_P(p) = s;
+							Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
+						}
+					}
+
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
 					if (!inline_change) {
 						ZVAL_STRINGL(p, actual, actual_len);
@@ -1188,7 +1186,8 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
 		uint error_lineno = 0;
-		char *log_buffer = NULL;
+		char log_buffer[2048];
+		int output_len = 0;
 
 		if (zend_is_compiling()) {
 			error_filename = ZSTR_VAL(zend_get_compiled_filename());
@@ -1206,8 +1205,10 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 			error_filename = "Unknown";
 		}
 
-		zend_spprintf(&log_buffer, 0, "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
-		write(2, log_buffer, strlen(log_buffer));
+		output_len = snprintf(log_buffer, sizeof(log_buffer), "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
+		if (output_len > 0) {
+			write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
+		}
 		_exit(1);
     }
 #endif

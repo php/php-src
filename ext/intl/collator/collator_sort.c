@@ -76,7 +76,8 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 			intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
 				"Object not initialized", 0 );
 			zend_throw_error(NULL, "Object not initialized");
-			return FAILURE;
+			rc = FAILURE;
+			goto cleanup;
 		}
 
 		/* Compare the strings using ICU. */
@@ -126,6 +127,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 		zval_ptr_dtor( norm2_p );
 	}
 
+cleanup:
 	if( num1_p )
 		zval_ptr_dtor( num1_p );
 

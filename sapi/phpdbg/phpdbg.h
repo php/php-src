@@ -45,11 +45,11 @@
 #include "zend_globals.h"
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
-#ifndef _WIN32
-#	include "zend_signal.h"
-# if !defined(ZEND_SIGNALS) && defined(HAVE_SIGNAL_H)
-#  include <signal.h>
-# endif
+#include "zend_signal.h"
+#if !defined(_WIN32) && !defined(ZEND_SIGNALS) && defined(HAVE_SIGNAL_H)
+#	include <signal.h>
+#elif PHP_WIN32
+#	include "win32/signal.h"
 #endif
 #include "SAPI.h"
 #include <fcntl.h>
@@ -253,12 +253,15 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
-	HashTable watchpoints;                       /* watchpoints */
+	HashTable watch_elements;                    /* user defined watch elements */
 	HashTable watch_collisions;                  /* collision table to check if multiple watches share the same recursive watchpoint */
-	zend_llist watchlist_mem;                    /* triggered watchpoints */
+	HashTable watch_recreation;                  /* watch elements pending recreation of their respective watchpoints */
+	HashTable watch_free;                        /* pointers to watch for being freed */
+	HashTable *watchlist_mem;                    /* triggered watchpoints */
+	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
 	zend_bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
-	phpdbg_watchpoint_t *watch_tmp;              /* temporary pointer for a watchpoint */
+	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */

@@ -54,14 +54,11 @@
 #include <process.h>
 #endif
 
-#include "php_lcg.h"
 #include "php_crypt.h"
-#include "php_rand.h"
+#include "php_random.h"
 
 /* sha512 crypt has the maximal salt length of 123 characters */
 #define PHP_MAX_SALT_LEN 123
-
-#define PHP_CRYPT_RAND php_rand()
 
 /* Used to check DES salts to ensure that they contain only valid characters */
 #define IS_VALID_SALT_CHARACTER(c) (((c) >= '.' && (c) <= '9') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= 'a' && (c) <= 'z'))
@@ -99,11 +96,11 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static void php_to64(char *s, zend_long v, int n) /* {{{ */
+static void php_to64(char *s, int n) /* {{{ */
 {
 	while (--n >= 0) {
-		*s++ = itoa64[v&0x3f];
-		v >>= 6;
+		*s = itoa64[*s & 0x3f];
+		s++;
 	}
 }
 /* }}} */
@@ -248,15 +245,15 @@ PHP_FUNCTION(crypt)
 	size_t str_len, salt_in_len = 0;
 	zend_string *result;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
+		return;
+	}
+
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
 	/* This will produce suitable results if people depend on DES-encryption
 	 * available (passing always 2-character salt). At least for glibc6.1 */
 	memset(&salt[1], '$', PHP_MAX_SALT_LEN - 1);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
-		return;
-	}
 
 	if (salt_in) {
 		memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
@@ -266,9 +263,9 @@ PHP_FUNCTION(crypt)
 
 	/* The automatic salt generation covers standard DES, md5-crypt and Blowfish (simple) */
 	if (!*salt) {
-		strncpy(salt, "$1$", PHP_MAX_SALT_LEN);
-		php_to64(&salt[3], PHP_CRYPT_RAND, 4);
-		php_to64(&salt[7], PHP_CRYPT_RAND, 4);
+		strncpy(salt, "$1$", 3);
+		php_random_bytes_throw(&salt[3], 8);
+		php_to64(&salt[3], 8);
 		strncpy(&salt[11], "$", PHP_MAX_SALT_LEN - 11);
 		salt_in_len = strlen(salt);
 	} else {

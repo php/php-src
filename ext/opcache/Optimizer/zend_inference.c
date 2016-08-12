@@ -2153,6 +2153,7 @@ static void check_type_narrowing(const zend_op_array *op_array, zend_ssa *ssa, z
 	 * type inference)
 	 */
 	if (old_type & ~new_type) {
+		ZEND_ASSERT(0); /* Currently this should never happen */
 		reset_dependent_vars(op_array, ssa, worklist, var);
 	}
 }
@@ -3139,9 +3140,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					if (t1 & MAY_BE_ARRAY_KEY_STRING) {
 						tmp |= MAY_BE_STRING;
 					}
-					if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
-						tmp |= MAY_BE_NULL;
-					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
@@ -3229,6 +3227,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_ADD_ARRAY_ELEMENT:
 						case ZEND_RETURN_BY_REF:
 						case ZEND_VERIFY_RETURN_TYPE:
+						case ZEND_MAKE_REF:
 							tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 							break;
 						case ZEND_PRE_INC:
@@ -3696,7 +3695,7 @@ static zend_bool can_convert_to_double(
 static int zend_type_narrowing(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
 {
 	uint32_t bitset_len = zend_bitset_len(ssa->vars_count);
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap)
 	zend_bitset visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
 	zend_bitset worklist = visited + bitset_len;
 	int i, v;
