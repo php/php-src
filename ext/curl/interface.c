@@ -3478,6 +3478,10 @@ PHP_FUNCTION(curl_escape)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
 	if ((res = curl_easy_escape(ch->cp, str, str_len))) {
+		if (strlen(res) > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Escaped string is too long, maximum is %d", INT_MAX);
+			RETURN_FALSE;
+		}
 		RETVAL_STRING(res, 1);
 		curl_free(res);
 	} else {
