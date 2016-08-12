@@ -143,7 +143,7 @@
 ;   Development Value: 1000
 ;   Production Value: 1000
 
-; session.hash_bits_per_character
+; session.sid_bits_per_character
 ;   Default Value: 4
 ;   Development Value: 5
 ;   Production Value: 5
@@ -1411,19 +1411,6 @@ session.gc_maxlifetime = 1440
 ; http://php.net/session.referer-check
 session.referer_check =
 
-; How many bytes to read from the file.
-; http://php.net/session.entropy-length
-;session.entropy_length = 32
-
-; Specified here to create the session id.
-; http://php.net/session.entropy-file
-; Defaults to /dev/urandom
-; On systems that don't have /dev/urandom but do have /dev/arandom, this will default to /dev/arandom
-; If neither are found at compile time, the default is no entropy file.
-; On windows, setting the entropy_length setting will activate the
-; Windows random source (using the CryptoAPI)
-;session.entropy_file = /dev/urandom
-
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
 ; http://php.net/session.cache-limiter
@@ -1444,6 +1431,15 @@ session.cache_expire = 180
 ;   always using URL stored in browser's history or bookmarks.
 ; http://php.net/session.use-trans-sid
 session.use_trans_sid = 0
+
+; Set session ID character length. This value could be between 22 to 256.
+; Shorter length than default is supported only for compatibility reason.
+; Users should use 32 or more chars.
+; http://php.net/session.sid_length
+; Default Value: 32
+; Development Value: 26
+; Production Value: 26
+session.sid_length = 26
 
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
 ; <form> is special; if you include them here, the rewriter will
@@ -1470,16 +1466,6 @@ session.trans_sid_tags = "a=href,area=href,frame=src,form="
 ; Production Value: ""
 ;session.trans_sid_hosts=""
 
-; Select a hash function for use in generating session ids.
-; Possible Values
-;   0  (MD5 128 bits)
-;   1  (SHA-1 160 bits)
-; This option may also be set to the name of any hash function supported by
-; the hash extension. A list of available hashes is returned by the hash_algos()
-; function.
-; http://php.net/session.hash-function
-session.hash_function = 0
-
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.
 ; Possible values:
@@ -1490,7 +1476,7 @@ session.hash_function = 0
 ; Development Value: 5
 ; Production Value: 5
 ; http://php.net/session.hash-bits-per-character
-session.hash_bits_per_character = 5
+session.sid_bits_per_character = 5
 
 ; Enable upload progress tracking in $_SESSION
 ; Default Value: On
