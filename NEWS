@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   . Fixed bug #72788 (Invalid memory access when using persistent PDO
     connection). (Keyur)
   . Fixed bug #72791 (Memory leak in PDO persistent connection handling). (Keyur)
+  . Fixed bug #60665 (call to empty() on NULL result using PDO::FETCH_LAZY
+    returns false). (cmb)
 
 - Session:
   . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
