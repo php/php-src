@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - MSSQL:
   . Fixed bug #72039 (Use of uninitialised value on mssql_guid_string). (Kalle)
 
+- PDO:
+  . Fixed bug #60665 (call to empty() on NULL result using PDO::FETCH_LAZY
+    returns false). (cmb)
+
 18 Aug 2016, PHP 5.6.25
 
 - Core:

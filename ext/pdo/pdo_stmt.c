@@ -2623,7 +2623,15 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, const ze
 			 * numbers */
 			for (colno = 0; colno < stmt->column_count; colno++) {
 				if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
-					return 1;
+					int res;
+					zval *val;
+
+					MAKE_STD_ZVAL(val);
+					fetch_value(stmt, val, colno, NULL TSRMLS_CC);
+					res = check_empty ? i_zend_is_true(val) : Z_TYPE_P(val) != IS_NULL;
+					zval_ptr_dtor(&val);
+
+					return res;
 				}
 			}
 		}
