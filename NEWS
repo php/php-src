@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.11
 
 - Core:
+  . Fixed bug #72813 (Segfault with __get returned by ref). (Laruence)
   . Fixed bug #72767 (PHP Segfaults when trying to expand an infinite operator).
     (Nikita)
 
