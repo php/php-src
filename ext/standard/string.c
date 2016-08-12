@@ -2301,43 +2301,63 @@ truncate_len:
 }
 /* }}} */
 
-/* {{{ proto boolean str_begins(string str, string search_value [, case_sensitive = true])
+/* {{{ proto boolean str_begin(string search_value, string str)
    Checks if str begins with search_value */
-PHP_FUNCTION(str_begins) {
+PHP_FUNCTION(str_begin) {
 	zend_string *str, *search_value;
-	int argc = ZEND_NUM_ARGS();
-	int case_sensitive, i;
+	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &str, &search_value, &case_sensitive) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
 		RETURN_NULL();
 
-	for (i = 0; i < search_value->len; i++) {
-		if (case_sensitive && str->val[i] != search_value->val[i]) {
+	for (i = 0; i < search_value->len; i++) 
+		if (str->val[i] != search_value->val[i]) 
 			RETURN_BOOL(0);
-		} else if (!case_sensitive && tolower(str->val[i]) != tolower(search_value->val[i])) {
-			RETURN_BOOL(0); 
-		}
-	}
 	RETURN_BOOL(1);
 }
 
-/* {{{ proto boolean str_ends(string str, string search_value [, case_sensitive = true)
-   Checks if str ends with search_value */
-PHP_FUNCTION(str_ends) {
+/* {{{ proto boolean str_ibegin(string search_value, string str)
+   Performs case insensitive check to determine if str begins with search_value */
+PHP_FUNCTION(str_ibegin) {
 	zend_string *str, *search_value;
-	int argc = ZEND_NUM_ARGS();
-	int case_sensitive, i, j;
+	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &str, &search_value, &case_sensitive) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
 		RETURN_NULL();
 
-	for (i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) {
-		if (case_sensitive && str->val[i] != search_value->val[j]) {
+	for (i = 0; i < search_value->len; i++) 
+		if (tolower(str->val[i]) != tolower(search_value->val[i])) 
+			RETURN_BOOL(0); 
+	RETURN_BOOL(1);
+}
+
+/* {{{ proto boolean str_end(string search_value, string str)
+   Checks if str ends with search_value */
+PHP_FUNCTION(str_end) {
+	zend_string *str, *search_value;
+	int i, j;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
+		RETURN_NULL();
+
+	for (i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) 
+		if (str->val[i] != search_value->val[j]) 
 			RETURN_BOOL(0);
-		} else if (!case_sensitive && tolower(str->val[i]) != tolower(search_value->val[j])) {	
+	RETURN_BOOL(1);
+}
+
+/* {{{ proto boolean str_iend(string search_value, string str)
+   Performs case insensitive check to determine if str ends with search_value */
+PHP_FUNCTION(str_iend) {
+	zend_string *str, *search_value;
+	int i, j;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
+		RETURN_NULL();
+
+	for (i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) 
+		if (tolower(str->val[i]) != tolower(search_value->val[j])) 	
 			RETURN_BOOL(0);
-		}
-	}
 	RETURN_BOOL(1);
 }
 
