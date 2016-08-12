@@ -62,6 +62,14 @@ AC_DEFUN([PHP_LDAP_SASL_CHECKS], [
       LDAP_SASL_DIR=$i
       AC_DEFINE(HAVE_LDAP_SASL_H,1,[ ])
       break
+    elif test -f $i/include/$MACHINE_INCLUDES/sasl/sasl.h; then
+      LDAP_SASL_DIR=$i
+      AC_DEFINE(HAVE_LDAP_SASL_H,1,[ ])
+      break
+    elif test -f $i/include/$MACHINE_INCLUDES/sasl.h; then
+      LDAP_SASL_DIR=$i
+      AC_DEFINE(HAVE_LDAP_SASL_H,1,[ ])
+      break
     fi
   done
 
