@@ -1,25 +1,16 @@
 --TEST--
-str_ends() function - unit tests for str_ends()
+str_end() function - unit tests for str_end()
 --FILE--
 <?php
-/* Prototype: boolean str_ends (string $str, string $search_value [, boolean $case_sensitive = true] );
+/* Prototype: boolean str_end (string $search_value string $str );
    Description: Determine if $str ends with $search_value
 */
-// First check with case sensitivity
-$testStr1 = "beginningMiddleEnd";
-var_dump(str_ends($testStr1, "End"));
-var_dump(str_ends($testStr1, "end"));
-var_dump(str_ends($testStr1, "en"));
-
-// Now check with case insensitivity
-var_dump(str_ends($testStr1, "End", false));
-var_dump(str_ends($testStr1, "end", false));
-var_dump(str_ends($testStr1, "en", false));
+$testStr = "beginningMiddleEnd";
+var_dump(str_end("End", $testStr));
+var_dump(str_end("end", $testStr));
+var_dump(str_end("en", $testStr));
 ?>
 --EXPECT--
 bool(true)
 bool(false)
-bool(false)
-bool(true)
-bool(true)
 bool(false)
