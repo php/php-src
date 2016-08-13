@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,9 +21,49 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
+#define ZEND_VM_SPEC		1
+#define ZEND_VM_LINES		0
+#define ZEND_VM_KIND_CALL	1
+#define ZEND_VM_KIND_SWITCH	2
+#define ZEND_VM_KIND_GOTO	3
+#define ZEND_VM_KIND		ZEND_VM_KIND_CALL
+
+#define ZEND_VM_OP_SPEC          0x00000001
+#define ZEND_VM_OP_CONST         0x00000002
+#define ZEND_VM_OP_TMPVAR        0x00000004
+#define ZEND_VM_OP_TMPVARCV      0x00000008
+#define ZEND_VM_OP_MASK          0x000000f0
+#define ZEND_VM_OP_NUM           0x00000010
+#define ZEND_VM_OP_JMP_ADDR      0x00000020
+#define ZEND_VM_OP_TRY_CATCH     0x00000030
+#define ZEND_VM_OP_LIVE_RANGE    0x00000040
+#define ZEND_VM_OP_THIS          0x00000050
+#define ZEND_VM_OP_NEXT          0x00000060
+#define ZEND_VM_OP_CLASS_FETCH   0x00000070
+#define ZEND_VM_OP_CONSTRUCTOR   0x00000080
+#define ZEND_VM_EXT_VAR_FETCH    0x00010000
+#define ZEND_VM_EXT_ISSET        0x00020000
+#define ZEND_VM_EXT_ARG_NUM      0x00040000
+#define ZEND_VM_EXT_ARRAY_INIT   0x00080000
+#define ZEND_VM_EXT_REF          0x00100000
+#define ZEND_VM_EXT_MASK         0x0f000000
+#define ZEND_VM_EXT_NUM          0x01000000
+#define ZEND_VM_EXT_JMP_ADDR     0x03000000
+#define ZEND_VM_EXT_DIM_OBJ      0x04000000
+#define ZEND_VM_EXT_CLASS_FETCH  0x05000000
+#define ZEND_VM_EXT_CONST_FETCH  0x06000000
+#define ZEND_VM_EXT_TYPE         0x07000000
+#define ZEND_VM_EXT_EVAL         0x08000000
+#define ZEND_VM_EXT_SRC          0x0b000000
+#define ZEND_VM_NO_CONST_CONST   0x40000000
+#define ZEND_VM_COMMUTATIVE      0x80000000
+#define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)
+#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)
+
 BEGIN_EXTERN_C()
 
 ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
+ZEND_API uint32_t zend_get_opcode_flags(zend_uchar opcode);
 
 END_EXTERN_C()
 
@@ -68,6 +108,7 @@ END_EXTERN_C()
 #define ZEND_ASSIGN                           38
 #define ZEND_ASSIGN_REF                       39
 #define ZEND_ECHO                             40
+#define ZEND_GENERATOR_CREATE                 41
 #define ZEND_JMP                              42
 #define ZEND_JMPZ                             43
 #define ZEND_JMPNZ                            44
@@ -75,12 +116,14 @@ END_EXTERN_C()
 #define ZEND_JMPZ_EX                          46
 #define ZEND_JMPNZ_EX                         47
 #define ZEND_CASE                             48
-#define ZEND_BRK                              50
-#define ZEND_CONT                             51
+#define ZEND_CHECK_VAR                        49
+#define ZEND_SEND_VAR_NO_REF_EX               50
+#define ZEND_MAKE_REF                         51
 #define ZEND_BOOL                             52
-#define ZEND_ADD_CHAR                         54
-#define ZEND_ADD_STRING                       55
-#define ZEND_ADD_VAR                          56
+#define ZEND_FAST_CONCAT                      53
+#define ZEND_ROPE_INIT                        54
+#define ZEND_ROPE_ADD                         55
+#define ZEND_ROPE_END                         56
 #define ZEND_BEGIN_SILENCE                    57
 #define ZEND_END_SILENCE                      58
 #define ZEND_INIT_FCALL_BY_NAME               59
@@ -124,7 +167,6 @@ END_EXTERN_C()
 #define ZEND_FETCH_OBJ_UNSET                  97
 #define ZEND_FETCH_LIST                       98
 #define ZEND_FETCH_CONSTANT                   99
-#define ZEND_GOTO                            100
 #define ZEND_EXT_STMT                        101
 #define ZEND_EXT_FCALL_BEGIN                 102
 #define ZEND_EXT_FCALL_END                   103
@@ -152,15 +194,21 @@ END_EXTERN_C()
 #define ZEND_FE_RESET_RW                     125
 #define ZEND_FE_FETCH_RW                     126
 #define ZEND_FE_FREE                         127
+#define ZEND_INIT_DYNAMIC_CALL               128
+#define ZEND_DO_ICALL                        129
+#define ZEND_DO_UCALL                        130
+#define ZEND_DO_FCALL_BY_NAME                131
 #define ZEND_PRE_INC_OBJ                     132
 #define ZEND_PRE_DEC_OBJ                     133
 #define ZEND_POST_INC_OBJ                    134
 #define ZEND_POST_DEC_OBJ                    135
 #define ZEND_ASSIGN_OBJ                      136
+#define ZEND_OP_DATA                         137
 #define ZEND_INSTANCEOF                      138
 #define ZEND_DECLARE_CLASS                   139
 #define ZEND_DECLARE_INHERITED_CLASS         140
 #define ZEND_DECLARE_FUNCTION                141
+#define ZEND_YIELD_FROM                      142
 #define ZEND_DECLARE_CONST                   143
 #define ZEND_ADD_INTERFACE                   144
 #define ZEND_DECLARE_INHERITED_CLASS_DELAYED 145
@@ -169,11 +217,14 @@ END_EXTERN_C()
 #define ZEND_ISSET_ISEMPTY_PROP_OBJ          148
 #define ZEND_HANDLE_EXCEPTION                149
 #define ZEND_USER_OPCODE                     150
+#define ZEND_ASSERT_CHECK                    151
 #define ZEND_JMP_SET                         152
 #define ZEND_DECLARE_LAMBDA_FUNCTION         153
 #define ZEND_ADD_TRAIT                       154
 #define ZEND_BIND_TRAITS                     155
 #define ZEND_SEPARATE                        156
+#define ZEND_FETCH_CLASS_NAME                157
+#define ZEND_CALL_TRAMPOLINE                 158
 #define ZEND_DISCARD_EXCEPTION               159
 #define ZEND_YIELD                           160
 #define ZEND_GENERATOR_RETURN                161
@@ -186,5 +237,22 @@ END_EXTERN_C()
 #define ZEND_BIND_GLOBAL                     168
 #define ZEND_COALESCE                        169
 #define ZEND_SPACESHIP                       170
+#define ZEND_DECLARE_ANON_CLASS              171
+#define ZEND_DECLARE_ANON_INHERITED_CLASS    172
+#define ZEND_FETCH_STATIC_PROP_R             173
+#define ZEND_FETCH_STATIC_PROP_W             174
+#define ZEND_FETCH_STATIC_PROP_RW            175
+#define ZEND_FETCH_STATIC_PROP_IS            176
+#define ZEND_FETCH_STATIC_PROP_FUNC_ARG      177
+#define ZEND_FETCH_STATIC_PROP_UNSET         178
+#define ZEND_UNSET_STATIC_PROP               179
+#define ZEND_ISSET_ISEMPTY_STATIC_PROP       180
+#define ZEND_FETCH_CLASS_CONSTANT            181
+#define ZEND_BIND_LEXICAL                    182
+#define ZEND_BIND_STATIC                     183
+#define ZEND_FETCH_THIS                      184
+#define ZEND_ISSET_ISEMPTY_THIS              186
+
+#define ZEND_VM_LAST_OPCODE                  186
 
 #endif

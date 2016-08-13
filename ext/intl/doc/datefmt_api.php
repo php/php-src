@@ -365,18 +365,6 @@ class DateFormatter {
 	 function datefmt_get_timezone_id($fmt) {}
 
 
-	/**
-	 * Sets the time zone to use
-         * @param DateFormatter $fmt The date formatter resource
-	 * @param string $zone zone ID string of the time zone to use.
-	 *                     if null or the empty string, the default time zone for
-	 *                     the runtime is used.
-	 * @return boolean 'true' on successful setting of the time zone, 'false'
-	 *                 if an error occurred (such as the time zone wasn't recognized).
-	 */
-        function datefmt_set_timezone_id($fmt , $zone) {}
-
-
         /**
          * Sets the calendar used to the appropriate calendar, which must be 
 	 * one of the constants defined above. Some examples include:

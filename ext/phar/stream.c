@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2015 The PHP Group                                |
+  | Copyright (c) 2005-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -45,6 +45,7 @@ php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_rename,   /* rename */
 	phar_wrapper_mkdir,    /* create directory */
 	phar_wrapper_rmdir,    /* remove directory */
+	NULL
 };
 
 php_stream_wrapper php_stream_phar_wrapper = {
@@ -103,7 +104,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		phar_archive_data *pphar = NULL, *phar;
 
-		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.u.flags && NULL == (pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len))) {
+		if (PHAR_G(request_init) && PHAR_G(phar_fname_map.u.flags) && NULL == (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), arch, arch_len))) {
 			pphar = NULL;
 		}
 		if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
@@ -155,7 +156,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 /**
  * used for fopen('phar://...') and company
  */
-static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_data *idata;
@@ -226,12 +227,13 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				}
 
 				metadata = pzoption;
-				ZVAL_ZVAL(&idata->internal_file->metadata, metadata, 1, 0);
+				ZVAL_DEREF(metadata);
+				ZVAL_COPY(&idata->internal_file->metadata, metadata);
 				idata->phar->is_modified = 1;
 			}
 		}
 		if (opened_path) {
-			spprintf(opened_path, MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+			*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
 		}
 		return fpf;
 	} else {
@@ -249,7 +251,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				}
 				efree(internal_file);
 				if (opened_path) {
-					spprintf(opened_path, MAXPATHLEN, "%s", phar->fname);
+					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
 				php_url_free(resource);
 				goto phar_stub;
@@ -275,7 +277,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				++(entry->fp_refcount);
 				php_url_free(resource);
 				if (opened_path) {
-					spprintf(opened_path, MAXPATHLEN, "%s", phar->fname);
+					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
 				efree(internal_file);
 				goto phar_stub;
@@ -332,7 +334,7 @@ idata_error:
 		}
 	}
 	if (opened_path) {
-		spprintf(opened_path, MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+		*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
 	}
 	efree(internal_file);
 phar_stub:
@@ -346,6 +348,9 @@ phar_stub:
  */
 static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 {
+	/* for some reasons phar needs to be flushed even if there is no write going on */
+	phar_stream_flush(stream);
+
 	phar_entry_delref((phar_entry_data *)stream->abstract);
 
 	return 0;
@@ -437,7 +442,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 	php_stream_seek(data->fp, data->position, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
 		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, data->internal_file->filename, data->phar->fname);
-		return -1;
+		return 0;
 	}
 	data->position = php_stream_tell(data->fp);
 	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {
@@ -629,7 +634,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		zend_string *str_key;
 
 		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
-			if ((int)str_key->len >= internal_file_len || strncmp(str_key->val, internal_file, str_key->len)) {
+			if ((int)ZSTR_LEN(str_key) >= internal_file_len || strncmp(ZSTR_VAL(str_key), internal_file, ZSTR_LEN(str_key))) {
 				continue;
 			} else {
 				char *test;
@@ -642,7 +647,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 				if (!entry->tmp || !entry->is_mounted) {
 					goto free_resource;
 				}
-				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + str_key->len);
+				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + ZSTR_LEN(str_key));
 				if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
 					efree(test);
 					continue;
@@ -701,7 +706,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	host_len = strlen(resource->host);
 	phar_request_initialize();
 
-	pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), resource->host, host_len);
+	pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), resource->host, host_len);
 	if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options, "phar error: write operations disabled by the php.ini setting phar.readonly");
@@ -902,21 +907,21 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			str_key = b->key;
 			entry = Z_PTR(b->val);
 			if (!entry->is_deleted &&
-				str_key->len > from_len &&
-				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
-				IS_SLASH(str_key->val[from_len])) {
+				ZSTR_LEN(str_key) > from_len &&
+				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
+				IS_SLASH(ZSTR_VAL(str_key)[from_len])) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
-				memcpy(new_str_key->val, resource_to->path + 1, to_len);
-				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
-				new_str_key->val[new_str_key->len] = 0;
+				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
+				memcpy(ZSTR_VAL(new_str_key), resource_to->path + 1, to_len);
+				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
+				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
 				is_modified = 1;
 				entry->is_modified = 1;
 				efree(entry->filename);
 				// TODO: avoid reallocation (make entry->filename zend_string*)
-				entry->filename = estrndup(new_str_key->val, new_str_key->len);
-				entry->filename_len = new_str_key->len;
+				entry->filename = estrndup(ZSTR_VAL(new_str_key), ZSTR_LEN(new_str_key));
+				entry->filename_len = ZSTR_LEN(new_str_key);
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);
@@ -927,14 +932,14 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->virtual_dirs, b) {
 			str_key = b->key;
-			if (str_key->len >= from_len &&
-				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
-				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
+			if (ZSTR_LEN(str_key) >= from_len &&
+				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
+				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
-				memcpy(new_str_key->val, resource_to->path + 1, to_len);
-				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
-				new_str_key->val[new_str_key->len] = 0;
+				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
+				memcpy(ZSTR_VAL(new_str_key), resource_to->path + 1, to_len);
+				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
+				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);
@@ -945,14 +950,14 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->mounted_dirs, b) {
 			str_key = b->key;
-			if (str_key->len >= from_len &&
-				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
-				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
+			if (ZSTR_LEN(str_key) >= from_len &&
+				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
+				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
-				memcpy(new_str_key->val, resource_to->path + 1, to_len);
-				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
-				new_str_key->val[new_str_key->len] = 0;
+				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
+				memcpy(ZSTR_VAL(new_str_key), resource_to->path + 1, to_len);
+				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
+				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);

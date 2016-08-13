@@ -129,8 +129,8 @@ array(3) {
   [0]=>
   %unicode|string%(5) "00000"
   [1]=>
-  int(1146)
+  NULL
   [2]=>
-  %unicode|string%(%d) "Table '%s.ihopeitdoesnotexist' doesn't exist"
+  NULL
 }
 done!

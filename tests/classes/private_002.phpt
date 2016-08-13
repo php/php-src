@@ -32,4 +32,8 @@ echo "Done\n"; // shouldn't be displayed
 Call pass::show()
 Call fail::show()
 
-Fatal error: Call to private method pass::show() from context 'fail' in %s on line %d
+Fatal error: Uncaught Error: Call to private method pass::show() from context 'fail' in %s:%d
+Stack trace:
+#0 %s(%d): fail::show()
+#1 {main}
+  thrown in %s on line %d

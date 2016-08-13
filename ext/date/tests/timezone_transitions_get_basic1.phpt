@@ -18,24 +18,24 @@ $tz = timezone_open("Europe/London");
 
 $tran = timezone_transitions_get($tz);
 
-echo "\n-- Get all transitions --\n"; 
-$tran = timezone_transitions_get($tz);
+echo "\n-- Get all 60s transitions --\n";
+$tran = timezone_transitions_get($tz, -306972000, -37241999);
 var_dump( gettype($tran) );
 
 echo "\n-- Total number of transitions: " . count($tran). " --\n"; 
 
 echo "\n-- Format a sample entry pfor Spring 1963 --\n";
-var_dump( $tran[97] );	
+var_dump( $tran[6] );
 
 ?>
 ===DONE===
 --EXPECT--
 *** Testing timezone_transitions_get() : basic functionality ***
 
--- Get all transitions --
+-- Get all 60s transitions --
 string(5) "array"
 
--- Total number of transitions: 243 --
+-- Total number of transitions: 18 --
 
 -- Format a sample entry pfor Spring 1963 --
 array(5) {

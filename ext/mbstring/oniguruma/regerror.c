@@ -251,7 +251,7 @@ onig_error_code_to_str(UChar* s, int code, ...)
 onig_error_code_to_str(s, code, va_alist)
   UChar* s;
   int code;
-  va_dcl
+  va_dcl 
 #endif
 {
   UChar *p, *q;

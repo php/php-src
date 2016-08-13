@@ -6,197 +6,241 @@ Bug #45923 (mb_st[r]ripos() offset not handled correctly)
 mbstring.internal_encoding=UTF-8
 --FILE--
 <?php
-var_dump(strpos("abc abc abc", "abc", 0));
-var_dump(strpos("abc abc abc", "abc", 3));
-var_dump(strpos("abc abc abc", "abc", 6));
-var_dump(strpos("abc abc abc", "abc", 9));
-var_dump(strpos("abc abc abc", "abc", 11));
-var_dump(strpos("abc abc abc", "abc", 12));
-var_dump(strpos("abc abc abc", "abc", -1));
-var_dump(strpos("abc abc abc", "abc", -3));
-var_dump(strpos("abc abc abc", "abc", -6));
 
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", 0));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", 3));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", 6));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", 9));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", 11));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", 12));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", -1));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", -3));
-var_dump(mb_strpos("●○◆ ●○◆ ●○◆", "●○◆", -6));
+function section($func, $haystack, $needle)
+{
+	echo "\n------- $func -----------\n\n";
+	foreach(array(0, 3, 6, 9, 11, 12, -1, -3, -6, -20) as $offset) {
+		echo "> Offset: $offset\n";
+		var_dump($func($haystack,$needle,$offset));
+	}
+}
 
-var_dump(stripos("abc abc abc", "abc", 0));
-var_dump(stripos("abc abc abc", "abc", 3));
-var_dump(stripos("abc abc abc", "abc", 6));
-var_dump(stripos("abc abc abc", "abc", 9));
-var_dump(stripos("abc abc abc", "abc", 11));
-var_dump(stripos("abc abc abc", "abc", 12));
-var_dump(stripos("abc abc abc", "abc", -1));
-var_dump(stripos("abc abc abc", "abc", -3));
-var_dump(stripos("abc abc abc", "abc", -6));
+section('strpos'     , "abc abc abc"  , "abc");
+section('mb_strpos'  , "●○◆ ●○◆ ●○◆", "●○◆");
 
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", 0));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", 3));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", 6));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", 9));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", 11));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", 12));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", -1));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", -3));
-var_dump(mb_stripos("●○◆ ●○◆ ●○◆", "●○◆", -6));
+section('stripos'    , "abc abc abc"  , "abc");
+section('mb_stripos' , "●○◆ ●○◆ ●○◆", "●○◆");
 
-var_dump(strrpos("abc abc abc", "abc", 0));
-var_dump(strrpos("abc abc abc", "abc", 3));
-var_dump(strrpos("abc abc abc", "abc", 6));
-var_dump(strrpos("abc abc abc", "abc", 9));
-var_dump(strrpos("abc abc abc", "abc", 11));
-var_dump(strrpos("abc abc abc", "abc", 12));
-var_dump(strrpos("abc abc abc", "abc", -1));
-var_dump(strrpos("abc abc abc", "abc", -3));
-var_dump(strrpos("abc abc abc", "abc", -6));
+section('strrpos'    , "abc abc abc"  , "abc");
+section('mb_strrpos' , "●○◆ ●○◆ ●○◆", "●○◆");
 
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", 0));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", 3));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", 6));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", 9));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", 11));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", 12));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", -1));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", -3));
-var_dump(mb_strrpos("●○◆ ●○◆ ●○◆", "●○◆", -6));
-
-var_dump(strripos("abc abc abc", "abc", 0));
-var_dump(strripos("abc abc abc", "abc", 3));
-var_dump(strripos("abc abc abc", "abc", 6));
-var_dump(strripos("abc abc abc", "abc", 9));
-var_dump(strripos("abc abc abc", "abc", 11));
-var_dump(strripos("abc abc abc", "abc", 12));
-var_dump(strripos("abc abc abc", "abc", -1));
-var_dump(strripos("abc abc abc", "abc", -3));
-var_dump(strripos("abc abc abc", "abc", -6));
-
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", 0));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", 3));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", 6));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", 9));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", 11));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", 12));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", -1));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", -3));
-var_dump(mb_strripos("●○◆ ●○◆ ●○◆", "●○◆", -6));
-
+section('strripos'   , "abc abc abc"  , "abc");
+section('mb_strripos', "●○◆ ●○◆ ●○◆", "●○◆");
 ?>
 --EXPECTF--
+------- strpos -----------
+
+> Offset: 0
 int(0)
+> Offset: 3
 int(4)
+> Offset: 6
 int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
 bool(false)
+> Offset: 12
+
+Warning: strpos(): Offset not contained in string in %s on line %d
+bool(false)
+> Offset: -1
+bool(false)
+> Offset: -3
+int(8)
+> Offset: -6
+int(8)
+> Offset: -20
 
 Warning: strpos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: strpos(): Offset not contained in string in %s on line %d
-bool(false)
+------- mb_strpos -----------
 
-Warning: strpos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: strpos(): Offset not contained in string in %s on line %d
-bool(false)
+> Offset: 0
 int(0)
+> Offset: 3
 int(4)
+> Offset: 6
 int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
 bool(false)
+> Offset: 12
+
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
+bool(false)
+> Offset: -1
+bool(false)
+> Offset: -3
+int(8)
+> Offset: -6
+int(8)
+> Offset: -20
 
 Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+------- stripos -----------
 
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+> Offset: 0
 int(0)
+> Offset: 3
 int(4)
+> Offset: 6
 int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
 bool(false)
+> Offset: 12
+
+Warning: stripos(): Offset not contained in string in %s on line %d
+bool(false)
+> Offset: -1
+bool(false)
+> Offset: -3
+int(8)
+> Offset: -6
+int(8)
+> Offset: -20
 
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+------- mb_stripos -----------
 
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+> Offset: 0
 int(0)
+> Offset: 3
 int(4)
+> Offset: 6
 int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
 bool(false)
+> Offset: 12
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
+bool(false)
+> Offset: -1
+bool(false)
+> Offset: -3
+int(8)
+> Offset: -6
+int(8)
+> Offset: -20
 
 Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+------- strrpos -----------
 
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+> Offset: 0
 int(8)
+> Offset: 3
 int(8)
+> Offset: 6
 int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
 bool(false)
+> Offset: 12
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+> Offset: -1
 int(8)
+> Offset: -3
 int(8)
+> Offset: -6
 int(4)
-int(8)
-int(8)
-int(8)
+> Offset: -20
+
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+
+------- mb_strrpos -----------
+
+> Offset: 0
+int(8)
+> Offset: 3
+int(8)
+> Offset: 6
+int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
+bool(false)
+> Offset: 12
 
 Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+> Offset: -1
 int(8)
+> Offset: -3
 int(8)
+> Offset: -6
 int(4)
-int(8)
-int(8)
-int(8)
+> Offset: -20
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+
+------- strripos -----------
+
+> Offset: 0
+int(8)
+> Offset: 3
+int(8)
+> Offset: 6
+int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
+bool(false)
+> Offset: 12
 
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+> Offset: -1
 int(8)
+> Offset: -3
 int(8)
+> Offset: -6
 int(4)
-int(8)
-int(8)
-int(8)
+> Offset: -20
+
+Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+
+------- mb_strripos -----------
+
+> Offset: 0
+int(8)
+> Offset: 3
+int(8)
+> Offset: 6
+int(8)
+> Offset: 9
 bool(false)
+> Offset: 11
+bool(false)
+> Offset: 12
 
 Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
+> Offset: -1
 int(8)
+> Offset: -3
 int(8)
+> Offset: -6
 int(4)
+> Offset: -20
+
+Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+bool(false)

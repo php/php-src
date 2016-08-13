@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -199,20 +199,18 @@ static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		convert_to_long_ex(v);
-		return Z_LVAL_P(v);
+		return zval_get_long(v);
 	}
 	return defval;
 }
-static inline char *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, char *defval)
+static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, zend_string *defval)
 {
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		convert_to_string_ex(v);
-		return estrndup(Z_STRVAL_P(v), Z_STRLEN_P(v));
+		return zval_get_string(v);
 	}
-	return defval ? estrdup(defval) : NULL;
+	return defval ? zend_string_copy(defval) : NULL;
 }
 /* }}} */
 
@@ -527,11 +525,10 @@ static inline pdo_dbh_object_t *php_pdo_dbh_fetch_object(zend_object *obj) {
 
 /* describes a column */
 struct pdo_column_data {
-	char *name;
+	zend_string *name;
 	size_t maxlen;
 	zend_ulong precision;
 	enum pdo_param_type param_type;
-	size_t namelen;
 
 	/* don't touch this unless your name is dbdo */
 	void *dbdo_data;
@@ -687,8 +684,7 @@ PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh);
 PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 
-PDO_API void php_pdo_stmt_addref(pdo_stmt_t *stmt);
-PDO_API void php_pdo_stmt_delref(pdo_stmt_t *stmt);
+PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 
 
 #endif /* PHP_PDO_DRIVER_H */

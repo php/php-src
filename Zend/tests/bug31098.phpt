@@ -18,7 +18,7 @@ var_dump(isset($a['b']));
 $simpleString = "Bogus String Text";
 echo isset($simpleString->wrong)?"bug\n":"ok\n";
 echo isset($simpleString["wrong"])?"bug\n":"ok\n";
-echo isset($simpleString[-1])?"bug\n":"ok\n";
+echo isset($simpleString[-20])?"bug\n":"ok\n";
 echo isset($simpleString[0])?"ok\n":"bug\n";
 echo isset($simpleString["0"])?"ok\n":"bug\n";
 echo isset($simpleString["16"])?"ok\n":"bug\n";

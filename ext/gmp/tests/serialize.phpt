@@ -18,7 +18,7 @@ try {
 } catch (Exception $e) { var_dump($e->getMessage()); }
 
 try {
-    unserialize('C:3:"GMP":8:{s:2:"42"}');
+    unserialize('C:3:"GMP":8:{s:2:"42";}');
 } catch (Exception $e) { var_dump($e->getMessage()); }
 
 ?>

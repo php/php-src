@@ -1,5 +1,5 @@
 #!/bin/bash
-export PHP_CURL_HTTP_REMOTE_SERVER="http://localhost"
+export PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8080"
 cd ./ext/curl/tests/responder
-sudo php -S localhost:80 &
+php -S localhost:8080 &
 cd -

@@ -24,7 +24,6 @@ new B;
 
 ?>
 --EXPECTF--
-Strict Standards: Redefining already defined constructor for class B in %s on line %d
 array(2) {
   [0]=>
   string(1) "a"

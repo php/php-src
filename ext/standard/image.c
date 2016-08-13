@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -204,7 +204,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	unsigned long len=64, szlength;
 	int factor = 1,maxfactor = 16;
 	int status = 0;
-	char *b, *buf = NULL;
+	unsigned char *b, *buf = NULL;
 	zend_string *bufz;
 
 	b = ecalloc(1, len + 1);
@@ -212,15 +212,20 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	if (php_stream_seek(stream, 5, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, a, sizeof(a)) != sizeof(a))
+	if (php_stream_read(stream, (char *) a, sizeof(a)) != sizeof(a))
 		return NULL;
 
 	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
 		/* failed to decompress the file, will try reading the rest of the file */
-		if (php_stream_seek(stream, 8, SEEK_SET))
+		if (php_stream_seek(stream, 8, SEEK_SET)) {
 			return NULL;
+		}
 
 		bufz = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
+
+		if (!bufz) {
+			return NULL;
+		}
 
 		/*
 		 * zlib::uncompress() wants to know the output data length
@@ -231,9 +236,9 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 		*/
 
 		do {
-			szlength = bufz->len * (1<<factor++);
-			buf = (char *) erealloc(buf, szlength);
-			status = uncompress(buf, &szlength, bufz->val, bufz->len);
+			szlength = ZSTR_LEN(bufz) * (1<<factor++);
+			buf = erealloc(buf, szlength);
+			status = uncompress(buf, &szlength, (unsigned char *) ZSTR_VAL(bufz), ZSTR_LEN(bufz));
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {
@@ -375,47 +380,35 @@ static unsigned short php_read2(php_stream * stream)
 
 /* {{{ php_next_marker
  * get next marker byte from file */
-static unsigned int php_next_marker(php_stream * stream, int last_marker, int comment_correction, int ff_read)
+static unsigned int php_next_marker(php_stream * stream, int last_marker, int ff_read)
 {
 	int a=0, marker;
 
 	/* get marker byte, swallowing possible padding                           */
-	if (last_marker==M_COM && comment_correction) {
-		/* some software does not count the length bytes of COM section           */
-		/* one company doing so is very much envolved in JPEG... so we accept too */
-		/* by the way: some of those companies changed their code now...          */
-		comment_correction = 2;
-	} else {
-		last_marker = 0;
-		comment_correction = 0;
+	if (!ff_read) {
+		size_t extraneous = 0;
+
+		while ((marker = php_stream_getc(stream)) != 0xff) {
+			if (marker == EOF) {
+				return M_EOI;/* we hit EOF */
 	}
-	if (ff_read) {
-		a = 1; /* already read 0xff in filetype detection */
+			extraneous++;
 	}
+		if (extraneous) {
+			php_error_docref(NULL, E_WARNING, "corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
+		}
+	}
+	a = 1;
 	do {
 		if ((marker = php_stream_getc(stream)) == EOF)
 		{
 			return M_EOI;/* we hit EOF */
-		}
-		if (last_marker==M_COM && comment_correction>0)
-		{
-			if (marker != 0xFF)
-			{
-				marker = 0xff;
-				comment_correction--;
-			} else {
-				last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
-			}
 		}
 		a++;
 	} while (marker == 0xff);
 	if (a < 2)
 	{
 		return M_EOI; /* at least one 0xff is needed before marker code */
-	}
-	if ( last_marker==M_COM && comment_correction)
-	{
-		return M_EOI; /* ah illegal: char after COM section not 0xFF */
 	}
 	return (unsigned int)marker;
 }
@@ -479,7 +472,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 	unsigned short length, ff_read=1;
 
 	for (;;) {
-		marker = php_next_marker(stream, marker, 1, ff_read);
+		marker = php_next_marker(stream, marker, ff_read);
 		ff_read = 0;
 		switch (marker) {
 			case M_SOF0:
@@ -969,6 +962,10 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 			return 0;
 		}
 		width = (width << 7) | (i & 0x7f);
+        /* maximum valid width for wbmp (although 127 may be a more accurate one) */
+        if (width > 2048) {
+            return 0;
+        }
 	} while (i & 0x80);
 
 	/* get height */
@@ -978,10 +975,13 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 			return 0;
 		}
 		height = (height << 7) | (i & 0x7f);
+        /* maximum valid heigth for wbmp (although 127 may be a more accurate one) */
+        if (height > 2048) {
+            return 0;
+        }
 	} while (i & 0x80);
 
-	/* maximum valid sizes for wbmp (although 127x127 may be a more accurate one) */
-	if (!height || !width || height > 2048 || width > 2048) {
+	if (!height || !width) {
 		return 0;
 	}
 
@@ -1223,6 +1223,7 @@ PHP_FUNCTION(image_type_to_extension)
 PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 {
 	char tmp[12];
+    int twelve_bytes_read;
 
 	if ( !filetype) filetype = tmp;
 	if((php_stream_read(stream, filetype, 3)) != 3) {
@@ -1273,12 +1274,11 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_ICO;
 	}
 
-	if (php_stream_read(stream, filetype+4, 8) != 8) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
-		return IMAGE_FILETYPE_UNKNOWN;
-	}
+    /* WBMP may be smaller than 12 bytes, so delay error */
+	twelve_bytes_read = (php_stream_read(stream, filetype+4, 8) == 8);
+    
 /* BYTES READ: 12 */
-   	if (!memcmp(filetype, php_sig_jp2, 12)) {
+   	if (twelve_bytes_read && !memcmp(filetype, php_sig_jp2, 12)) {
 		return IMAGE_FILETYPE_JP2;
 	}
 
@@ -1286,6 +1286,10 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 	if (php_get_wbmp(stream, NULL, 1)) {
 		return IMAGE_FILETYPE_WBMP;
 	}
+    if (!twelve_bytes_read) {
+		php_error_docref(NULL, E_NOTICE, "Read error!");
+		return IMAGE_FILETYPE_UNKNOWN;
+    }
 	if (php_get_xbm(stream, NULL)) {
 		return IMAGE_FILETYPE_XBM;
 	}

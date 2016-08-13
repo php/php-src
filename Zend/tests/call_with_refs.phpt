@@ -14,5 +14,4 @@ $data = call_user_func_array("substr_replace",array(&$my_var, new StdClass(),1))
 echo "OK!";
 --EXPECT--	
 Object of class stdClass could not be converted to string
-Object of class stdClass to string conversion
 OK!

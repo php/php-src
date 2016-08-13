@@ -60,19 +60,6 @@ Array
     [1] => Array
         (
             [file] => %s
-            [line] => 13
-            [function] => ThrowException
-            [class] => myClass
-            [type] => ::
-            [args] => Array
-                (
-                )
-
-        )
-
-    [2] => Array
-        (
-            [file] => %s
             [line] => 21
             [function] => thrower
             [args] => Array
@@ -104,19 +91,6 @@ Array
         )
 
     [1] => Array
-        (
-            [file] => %s
-            [line] => 17
-            [function] => foo
-            [class] => myClass
-            [type] => ->
-            [args] => Array
-                (
-                )
-
-        )
-
-    [2] => Array
         (
             [file] => %s
             [line] => 28

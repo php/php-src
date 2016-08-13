@@ -201,7 +201,7 @@ static void fpm_php_cleanup(int which, void *arg) /* {{{ */
 
 void fpm_php_soft_quit() /* {{{ */
 {
-	fcgi_set_in_shutdown(1);
+	fcgi_terminate();
 }
 /* }}} */
 
@@ -275,7 +275,7 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), str, tmp) {
-		if (str && !strncmp(str->val, key, str->len)) {
+		if (str && !strncmp(ZSTR_VAL(str), key, ZSTR_LEN(str))) {
 			return Z_STRVAL_P(tmp);
 		}
 	} ZEND_HASH_FOREACH_END();

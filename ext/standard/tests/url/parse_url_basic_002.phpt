@@ -69,7 +69,6 @@ echo "Done";
 --> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
 --> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
 --> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
 --> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
 --> nntp://news.php.net   : string(4) "nntp"
 --> ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz   : string(3) "ftp"
@@ -81,6 +80,7 @@ echo "Done";
 --> /foo.php?a=b&c=d   : NULL
 --> foo.php?a=b&c=d   : NULL
 --> http://user:passwd@www.example.com:8080?bar=1&boom=0   : string(4) "http"
+--> http://user_me-you:my_pas-word@www.example.com:8080?bar=1&boom=0   : string(4) "http"
 --> file:///path/to/file   : string(4) "file"
 --> file://path/to/file   : string(4) "file"
 --> file:/path/to/file   : string(4) "file"
@@ -89,7 +89,6 @@ echo "Done";
 --> scheme:   : string(6) "scheme"
 --> foo+bar://baz@bang/bla   : string(7) "foo+bar"
 --> gg:9130731   : string(2) "gg"
---> http://user:@pass@host/path?argument?value#etc   : string(4) "http"
 --> http://10.10.10.10/:80   : string(4) "http"
 --> http://x:?   : string(4) "http"
 --> x:blah.com   : string(1) "x"
@@ -125,4 +124,7 @@ echo "Done";
 --> http://:?   : bool(false)
 --> http://blah.com:123456   : bool(false)
 --> http://blah.com:abcdef   : bool(false)
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : bool(false)
+--> http://user:@pass@host/path?argument?value#etc   : bool(false)
+--> http://foo.com\@bar.com   : bool(false)
 Done

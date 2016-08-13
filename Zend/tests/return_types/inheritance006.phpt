@@ -21,4 +21,4 @@ class Bar extends Foo {
 }
 
 --EXPECTF--
-Fatal error: Declaration of Bar::test() must be compatible with Foo::test(): A in %sinheritance006.php on line 14
+Fatal error: Declaration of Bar::test(): B must be compatible with Foo::test(): A in %sinheritance006.php on line 14

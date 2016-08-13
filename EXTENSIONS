@@ -27,32 +27,10 @@ Status legend
 == Server APIs ==
 
 -------------------------------------------------------------------------------
-EXTENSION:           aolserver
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           apache
-PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           apache_hooks
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           apache2filter
-PRIMARY MAINTAINER:  Aaron Bannert <aaron@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Experimental
--------------------------------------------------------------------------------
 EXTENSION:           apache2handler
 PRIMARY MAINTAINER:  Aaron Bannert <aaron@php.net>, Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           caudium
-MAINTENANCE:         Unknown
-STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           cgi
 MAINTENANCE:         Unknown
@@ -62,11 +40,6 @@ EXTENSION:           cli
 MAINTENANCE:         Marcus Boerger <helly@php.net>, Edin Kadribasic <edink@php.net>
 STATUS:              Working
 SINCE:               4.3.0
--------------------------------------------------------------------------------
-EXTENSION:           continuity
-PRIMARY MAINTAINER:  Alex Leigh <aleigh@php.net>
-MAINTENANCE:         Unknown
-STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           embed
 PRIMARY MAINTAINER:  Edin Kadribasic <edink@php.net>
@@ -79,50 +52,15 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3.3
 -------------------------------------------------------------------------------
-EXTENSION:           isapi
-MAINTENANCE:         Unknown
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           litespeed
 PRIMARY MAINTAINER:  George Wang <gwang@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
-EXTENSION:           milter
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           nsapi
-PRIMARY MAINTAINER:  Uwe Schindler <thetaphi@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           phttpd
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           pi3web
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           roxen
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           thttpd
-PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
-MAINTENANCE:         Odd fixes
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           tux
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           webjames
-PRIMARY MAINTAINER:  Alex Waugh <alex@alexwaugh.com>
-MAINTENANCE:         Maintained
-STATUS:              Experimental
+EXTENSION:           phpdbg
+MAINTENANCE:         Joe Watkins <krakjoe@php.net>, Bob Weinand <bwoebi@php.net>
+STATUS:              5.6
 -------------------------------------------------------------------------------
 
 
@@ -138,17 +76,6 @@ COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
 EXTENSION:           interbase
 PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu>
 MAINTENANCE:         Odd fixes
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           mssql
-PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
-MAINTENANCE:         Maintained
-STATUS:              Working
-COMMENT:             Tested on phpts and isapi versions
--------------------------------------------------------------------------------
-EXTENSION:           mysql
-PRIMARY MAINTAINER:  Zak Greant <zak@mysql.com>, Georg Richter <georg@php.net>, Andrey Hristov <andrey@php.net>, Johannes Schlüter <johannes@php.net>,  Ulf Wendel <uw@php.net>
-MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mysqli
@@ -234,11 +161,6 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
 COMMENT:             Integrates SQLite 3 embeddable SQL database engine.
--------------------------------------------------------------------------------
-EXTENSION:           sybase_ct
-PRIMARY MAINTAINER:  Timm Friebe <thekid@thekid.de>
-MAINTENANCE:         Maintained
-STATUS:              Working
 -------------------------------------------------------------------------------
 
 
@@ -407,7 +329,7 @@ STATUS:              Working
 SINCE:               5.2
 -------------------------------------------------------------------------------
 EXTENSION:           ldap
-PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>, Douglas Goldstein <cardoe@php.net>, Pierre-Alain Joye <pajoye@php.net>
+PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>, Douglas Goldstein <cardoe@php.net>, Pierre-Alain Joye <pajoye@php.net>, Côme Bernigaud <mcmic@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

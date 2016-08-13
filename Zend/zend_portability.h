@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,14 +78,51 @@
 #include <intrin.h>
 #endif
 
+#include "zend_range_check.h"
+
+/* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
+#ifdef __GNUC__
+# define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
+#else
+# define ZEND_GCC_VERSION 0
+#endif
+
+/* Compatibility with non-clang compilers */
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+#ifndef __has_builtin
+# define __has_builtin(x) 0
+#endif
+
+#if defined(ZEND_WIN32) && !defined(__clang__)
+# define ZEND_ASSUME(c)	__assume(c)
+#elif ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4005) || __has_builtin(__builtin_unreachable)) && PHP_HAVE_BUILTIN_EXPECT
+# define ZEND_ASSUME(c)	do { \
+		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
+	} while (0)
+#else
+# define ZEND_ASSUME(c)
+#endif
+
+#if ZEND_DEBUG
+# define ZEND_ASSERT(c)	assert(c)
+#else
+# define ZEND_ASSERT(c) ZEND_ASSUME(c)
+#endif
+
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
 #if ZEND_DEBUG
 # define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_ASSERT(0); break;
-#elif defined(ZEND_WIN32)
-# define EMPTY_SWITCH_DEFAULT_CASE() default: __assume(0); break;
 #else
-# define EMPTY_SWITCH_DEFAULT_CASE()
+# define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_ASSUME(0); break;
+#endif
+
+#if defined(__GNUC__) && __GNUC__ >= 4
+# define ZEND_IGNORE_VALUE(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
+#else
+# define ZEND_IGNORE_VALUE(x) ((void) (x))
 #endif
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
@@ -140,19 +177,7 @@ char *alloca();
 # endif
 #endif
 
-/* Compatibility with non-clang compilers */
-#ifndef __has_attribute
-# define __has_attribute(x) 0
-#endif
-
-/* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
-#ifdef __GNUC__
-# define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
-#else
-# define ZEND_GCC_VERSION 0
-#endif
-
-#if ZEND_GCC_VERSION >= 2096
+#if ZEND_GCC_VERSION >= 2096 || __has_attribute(__malloc__)
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
 #else
 # define ZEND_ATTRIBUTE_MALLOC
@@ -184,7 +209,7 @@ char *alloca();
 
 #if ZEND_GCC_VERSION >= 3001 || __has_attribute(deprecated)
 # define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((deprecated))
-#elif defined(ZEND_WIN32) && defined(_MSC_VER) && _MSC_VER >= 1300
+#elif defined(ZEND_WIN32)
 # define ZEND_ATTRIBUTE_DEPRECATED  __declspec(deprecated)
 #else
 # define ZEND_ATTRIBUTE_DEPRECATED
@@ -193,16 +218,20 @@ char *alloca();
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
 # define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+# define ZEND_COLD __attribute__((cold))
+# define ZEND_HOT __attribute__((hot))
 #else
 # define ZEND_ATTRIBUTE_UNUSED
 # define ZEND_ATTRIBUTE_UNUSED_LABEL
+# define ZEND_COLD
+# define ZEND_HOT
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
-#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER <= 1700
+#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
 # define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800
+#elif defined(_MSC_VER) && _MSC_VER >= 1800 && !defined(__clang__)
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
@@ -226,6 +255,19 @@ char *alloca();
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
+# define HAVE_ATTRIBUTE_WEAK
+#endif
+
+#if ZEND_GCC_VERSION >= 3001 || __has_builtin(__builtin_constant_p)
+# define HAVE_BUILTIN_CONSTANT_P
+#endif
+
+#ifdef HAVE_BUILTIN_CONSTANT_P
+# define ZEND_CONST_COND(_condition, _default) \
+	(__builtin_constant_p(_condition) ? (_condition) : (_default))
+#else
+# define ZEND_CONST_COND(_condition, _default) \
+	(_default)
 #endif
 
 #if ZEND_DEBUG
@@ -242,7 +284,7 @@ char *alloca();
 #  endif
 # elif defined(_MSC_VER)
 #  define zend_always_inline __forceinline
-#  define zend_never_inline
+#  define zend_never_inline __declspec(noinline)
 # else
 #  if __has_attribute(always_inline)
 #   define zend_always_inline inline __attribute__((always_inline))
@@ -257,9 +299,9 @@ char *alloca();
 # endif
 #endif /* ZEND_DEBUG */
 
-#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
-# define EXPECTED(condition)   __builtin_expect(!(!(condition)), 1)
-# define UNEXPECTED(condition) __builtin_expect(!(!(condition)), 0)
+#if PHP_HAVE_BUILTIN_EXPECT
+# define EXPECTED(condition)   __builtin_expect(!!(condition), 1)
+# define UNEXPECTED(condition) __builtin_expect(!!(condition), 0)
 #else
 # define EXPECTED(condition)   (condition)
 # define UNEXPECTED(condition) (condition)
@@ -337,7 +379,6 @@ char *alloca();
 # define ZEND_FILE_LINE_EMPTY_CC		, ZEND_FILE_LINE_EMPTY_C
 # define ZEND_FILE_LINE_ORIG_RELAY_C	__zend_orig_filename, __zend_orig_lineno
 # define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
-# define ZEND_ASSERT(c)					assert(c)
 #else
 # define ZEND_FILE_LINE_D
 # define ZEND_FILE_LINE_DC
@@ -351,7 +392,6 @@ char *alloca();
 # define ZEND_FILE_LINE_EMPTY_CC
 # define ZEND_FILE_LINE_ORIG_RELAY_C
 # define ZEND_FILE_LINE_ORIG_RELAY_CC
-# define ZEND_ASSERT(c)
 #endif	/* ZEND_DEBUG */
 
 #if ZEND_DEBUG

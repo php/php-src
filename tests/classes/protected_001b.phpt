@@ -24,4 +24,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call fail()
 
-Fatal error: Call to protected method pass::fail() from context '' in %s on line %d
+Fatal error: Uncaught Error: Call to protected method pass::fail() from context '' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

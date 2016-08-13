@@ -172,6 +172,9 @@ void simplestring_free(simplestring* string) {
 }
 /******/
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
 /****f* FUNC/simplestring_addn
  * NAME
  *   simplestring_addn
@@ -190,18 +193,31 @@ void simplestring_free(simplestring* string) {
  *   simplestring_add ()
  * SOURCE
  */
-void simplestring_addn(simplestring* target, const char* source, int add_len) {
+void simplestring_addn(simplestring* target, const char* source, size_t add_len) {
+   size_t newsize = target->size, incr = 0;
    if(target && source) {
       if(!target->str) {
          simplestring_init_str(target);
       }
+
+      if((SIZE_MAX - add_len) < target->len || (SIZE_MAX - add_len - 1) < target->len) {
+    	  /* check for overflows, if there's a potential overflow do nothing */
+    	  return;
+      }
+
       if(target->len + add_len + 1 > target->size) {
          /* newsize is current length + new length */
-         int newsize = target->len + add_len + 1;
-         int incr = target->size * 2;
+         newsize = target->len + add_len + 1;
+         incr = target->size * 2;
 
          /* align to SIMPLESTRING_INCR increments */
-         newsize = newsize - (newsize % incr) + incr;
+         if (incr) {
+            newsize = newsize - (newsize % incr) + incr;
+         }
+         if(newsize < (target->len + add_len + 1)) {
+        	 /* some kind of overflow happened */
+        	 return;
+         }
          target->str = (char*)realloc(target->str, newsize);
 
          target->size = target->str ? newsize : 0;

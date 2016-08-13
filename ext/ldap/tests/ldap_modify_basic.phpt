@@ -11,23 +11,21 @@ Patrick Allaert <patrickallaert@php.net>
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
 $entry = array(
 	"objectClass"	=> array(
 		"top",
-		"dcObject",
 		"organization"),
-	"dc"		=> "my-domain",
-	"o"		=> "my-domain",
+	"o"		=> "test",
 	"description"	=> "Domain description",
 );
 
 var_dump(
-	ldap_modify($link, "dc=my-domain,dc=com", $entry),
+	ldap_modify($link, "o=test,$base", $entry),
 	ldap_get_entries(
 		$link,
-		ldap_search($link, "dc=my-domain,dc=com", "(Description=Domain description)")
+		ldap_search($link, "$base", "(Description=Domain description)")
 	)
 );
 ?>
@@ -38,45 +36,34 @@ require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 array(2) {
   ["count"]=>
   int(1)
   [0]=>
-  array(10) {
+  array(8) {
     ["objectclass"]=>
-    array(4) {
+    array(3) {
       ["count"]=>
-      int(3)
+      int(2)
       [0]=>
       string(3) "top"
       [1]=>
-      string(8) "dcObject"
-      [2]=>
       string(12) "organization"
     }
     [0]=>
     string(11) "objectclass"
-    ["dc"]=>
-    array(2) {
-      ["count"]=>
-      int(1)
-      [0]=>
-      string(9) "my-domain"
-    }
-    [1]=>
-    string(2) "dc"
     ["o"]=>
     array(2) {
       ["count"]=>
       int(1)
       [0]=>
-      string(9) "my-domain"
+      string(4) "test"
     }
-    [2]=>
+    [1]=>
     string(1) "o"
     ["description"]=>
     array(2) {
@@ -85,12 +72,12 @@ array(2) {
       [0]=>
       string(18) "Domain description"
     }
-    [3]=>
+    [2]=>
     string(11) "description"
     ["count"]=>
-    int(4)
+    int(3)
     ["dn"]=>
-    string(19) "dc=my-domain,dc=com"
+    string(%d) "o=test,%s"
   }
 }
 ===DONE===

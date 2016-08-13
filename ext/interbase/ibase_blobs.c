@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,7 @@ static void _php_ibase_free_blob(zend_resource *rsrc) /* {{{ */
 {
 	ibase_blob *ib_blob = (ibase_blob *)rsrc->ptr;
 
-	if (ib_blob->bl_handle != NULL) { /* blob open*/
+	if (ib_blob->bl_handle != 0) { /* blob open*/
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
 			_php_ibase_module_error("You can lose data. Close any blob after reading from or "
 				"writing to it. Use ibase_blob_close() before calling ibase_close()");
@@ -70,18 +70,15 @@ int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
 }
 /* }}} */
 
-char *_php_ibase_quad_to_string(ISC_QUAD const qd) /* {{{ */
+zend_string *_php_ibase_quad_to_string(ISC_QUAD const qd) /* {{{ */
 {
-	char *result;
-
 	/* shortcut for most common case */
 	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
-		spprintf(&result, BLOB_ID_LEN+1, "0x%0*" LL_MASK "x", 16, *(ISC_UINT64*)(void *) &qd);
+		return strpprintf(BLOB_ID_LEN+1, "0x%0*" LL_MASK "x", 16, *(ISC_UINT64*)(void *) &qd);
 	} else {
 		ISC_UINT64 res = ((ISC_UINT64) qd.gds_quad_high << 0x20) | qd.gds_quad_low;
-		spprintf(&result, BLOB_ID_LEN+1, "0x%0*" LL_MASK "x", 16, res);
+		return strpprintf(BLOB_ID_LEN+1, "0x%0*" LL_MASK "x", 16, res);
 	}
-	return result;
 }
 /* }}} */
 
@@ -93,34 +90,33 @@ typedef struct { /* {{{ */
 /* }}} */
 } IBASE_BLOBINFO;
 
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len) /* {{{ */
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, zend_ulong max_len) /* {{{ */
 {
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 
 		ISC_STATUS stat;
-		char *bl_data;
-		unsigned long cur_len;
+		zend_string *bl_data;
+		zend_ulong cur_len;
 		unsigned short seg_len;
 
-		bl_data = safe_emalloc(1, max_len, 1);
+		bl_data = zend_string_safe_alloc(1, max_len, 0, 0);
 
 		for (cur_len = stat = 0; (stat == 0 || stat == isc_segment) && cur_len < max_len; cur_len += seg_len) {
 
 			unsigned short chunk_size = (max_len-cur_len) > USHRT_MAX ? USHRT_MAX
 				: (unsigned short)(max_len-cur_len);
 
-			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, chunk_size, &bl_data[cur_len]);
+			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, chunk_size, &ZSTR_VAL(bl_data)[cur_len]);
 		}
 
-		bl_data[cur_len] = '\0';
 		if (IB_STATUS[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment)) {
-			efree(bl_data);
+			zend_string_free(bl_data);
 			_php_ibase_error();
 			return FAILURE;
 		}
-		// TODO: avoid double reallocation???
-		RETVAL_STRINGL(bl_data, cur_len);
-		efree(bl_data);
+		ZSTR_VAL(bl_data)[cur_len] = '\0';
+		ZSTR_LEN(bl_data) = cur_len;
+		RETVAL_NEW_STR(bl_data);
 	} else { /* null blob */
 		RETVAL_EMPTY_STRING(); /* empty string */
 	}
@@ -130,7 +126,7 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 
 int _php_ibase_blob_add(zval *string_arg, ibase_blob *ib_blob) /* {{{ */
 {
-	unsigned long put_cnt = 0, rem_cnt;
+	zend_ulong put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 
 	convert_to_string_ex(string_arg);
@@ -158,7 +154,7 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle, IBASE_BLOBINFO *bl_in
 		isc_info_blob_type
 	};
 
-	char bl_inf[sizeof(long)*8], *p;
+	char bl_inf[sizeof(zend_long)*8], *p;
 
 	bl_info->max_segment = 0;
 	bl_info->num_segments = 0;
@@ -220,7 +216,7 @@ PHP_FUNCTION(ibase_blob_create)
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
 	ib_blob = (ibase_blob *) emalloc(sizeof(ibase_blob));
-	ib_blob->bl_handle = NULL;
+	ib_blob->bl_handle = 0;
 	ib_blob->type = BLOB_INPUT;
 
 	if (isc_create_blob(IB_STATUS, &ib_link->handle, &trans->handle, &ib_blob->bl_handle, &ib_blob->bl_qd)) {
@@ -265,7 +261,7 @@ PHP_FUNCTION(ibase_blob_open)
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
 	ib_blob = (ibase_blob *) emalloc(sizeof(ibase_blob));
-	ib_blob->bl_handle = NULL;
+	ib_blob->bl_handle = 0;
 	ib_blob->type = BLOB_OUTPUT;
 
 	do {
@@ -300,7 +296,7 @@ PHP_FUNCTION(ibase_blob_add)
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &blob_arg, &string_arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &blob_arg, &string_arg)) {
 		return;
 	}
 
@@ -322,12 +318,12 @@ PHP_FUNCTION(ibase_blob_add)
 PHP_FUNCTION(ibase_blob_get)
 {
 	zval *blob_arg;
-	unsigned long len_arg;
+	zend_ulong len_arg;
 	ibase_blob *ib_blob;
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &blob_arg, &len_arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &blob_arg, &len_arg)) {
 		return;
 	}
 
@@ -348,11 +344,10 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 {
 	zval *blob_arg;
 	ibase_blob *ib_blob;
-	char *s;
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &blob_arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &blob_arg)) {
 		return;
 	}
 
@@ -366,18 +361,15 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 				RETURN_FALSE;
 			}
 		}
-		ib_blob->bl_handle = NULL;
+		ib_blob->bl_handle = 0;
 
-		s = _php_ibase_quad_to_string(ib_blob->bl_qd);
-		// TODO: avoid double reallocation???
-		RETVAL_STRINGL(s, BLOB_ID_LEN);
-		efree(s);
+		RETVAL_NEW_STR(_php_ibase_quad_to_string(ib_blob->bl_qd));
 	} else { /* discard created blob */
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
 			_php_ibase_error();
 			RETURN_FALSE;
 		}
-		ib_blob->bl_handle = NULL;
+		ib_blob->bl_handle = 0;
 		RETVAL_TRUE;
 	}
 	zend_list_delete(Z_RES_P(blob_arg));
@@ -409,7 +401,7 @@ PHP_FUNCTION(ibase_blob_info)
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
-	ibase_blob ib_blob = { NULL, BLOB_INPUT };
+	ibase_blob ib_blob = { 0, BLOB_INPUT };
 	IBASE_BLOBINFO bl_info;
 
 	RESET_ERRMSG;
@@ -485,7 +477,7 @@ PHP_FUNCTION(ibase_blob_echo)
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
-	ibase_blob ib_blob_id = { NULL, BLOB_OUTPUT  };
+	ibase_blob ib_blob_id = { 0, BLOB_OUTPUT  };
 	char bl_data[IBASE_BLOB_SEG];
 	unsigned short seg_len;
 
@@ -546,12 +538,11 @@ PHP_FUNCTION(ibase_blob_import)
 	zval *link = NULL, *file;
 	int size;
 	unsigned short b;
-	ibase_blob ib_blob = { NULL, 0 };
+	ibase_blob ib_blob = { 0, 0 };
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
 	char bl_data[IBASE_BLOB_SEG];
 	php_stream *stream;
-	char *s;
 
 	RESET_ERRMSG;
 
@@ -579,11 +570,7 @@ PHP_FUNCTION(ibase_blob_import)
 		if (isc_close_blob(IB_STATUS, &ib_blob.bl_handle)) {
 			break;
 		}
-		s = _php_ibase_quad_to_string(ib_blob.bl_qd);
-		// TODO: avoid double reallocation???
-		RETVAL_STRINGL(s, BLOB_ID_LEN);
-		efree(s);
-		return;
+		RETURN_NEW_STR(_php_ibase_quad_to_string(ib_blob.bl_qd));
 	} while (0);
 
 	_php_ibase_error();

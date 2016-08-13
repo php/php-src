@@ -139,21 +139,31 @@ float(20.3)
 float(1)
 
 -- Iteration 17 --
+
+Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 18 --
+
+Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 19 --
 int(1)
 
 -- Iteration 20 --
+
+Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 21 --
+
+Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 22 --
+
+Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 23 --

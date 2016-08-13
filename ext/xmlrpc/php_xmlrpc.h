@@ -37,7 +37,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,6 +60,9 @@
 
 extern zend_module_entry xmlrpc_module_entry;
 #define phpext_xmlrpc_ptr &xmlrpc_module_entry
+
+#include "php_version.h"
+#define PHP_XMLRPC_VERSION PHP_VERSION
 
 PHP_MINIT_FUNCTION(xmlrpc);
 PHP_MINFO_FUNCTION(xmlrpc);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,15 @@
 
 #include <sys/stat.h>
 
+#ifdef PHP_WIN32
+# include "win32/php_stdint.h"
+#else
+# if HAVE_INTTYPES_H
+#  include <inttypes.h>
+# elif HAVE_STDINT_H
+#  include <stdint.h>
+# endif
+#endif
 
 /* some defines for the different JPEG block types */
 #define M_SOF0  0xC0            /* Start Of Frame N */
@@ -182,8 +191,9 @@ PHP_FUNCTION(iptcembed)
 	zend_long spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
-	int inx;
-	unsigned char *spoolbuf = NULL, *poi = NULL;
+	size_t inx;
+	zend_string *spoolbuf = NULL;
+	unsigned char *poi = NULL;
 	zend_stat_t sb;
 	zend_bool written = 0;
 
@@ -195,6 +205,11 @@ PHP_FUNCTION(iptcembed)
 		RETURN_FALSE;
 	}
 
+	if (iptcdata_len >= SIZE_MAX - sizeof(psheader) - 1025) {
+		php_error_docref(NULL, E_WARNING, "IPTC data too large");
+		RETURN_FALSE;
+	}
+
 	if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {
 		php_error_docref(NULL, E_WARNING, "Unable to open %s", jpeg_file);
 		RETURN_FALSE;
@@ -203,14 +218,15 @@ PHP_FUNCTION(iptcembed)
 	if (spool < 2) {
 		zend_fstat(fileno(fp), &sb);
 
-		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
+		spoolbuf = zend_string_safe_alloc(1, iptcdata_len + sizeof(psheader) + 1024 + 1, sb.st_size, 0);
+		poi = (unsigned char*)ZSTR_VAL(spoolbuf);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
 	}
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xFF) {
 		fclose(fp);
 		if (spoolbuf) {
-			efree(spoolbuf);
+			zend_string_free(spoolbuf);
 		}
 		RETURN_FALSE;
 	}
@@ -218,7 +234,7 @@ PHP_FUNCTION(iptcembed)
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xD8) {
 		fclose(fp);
 		if (spoolbuf) {
-			efree(spoolbuf);
+			zend_string_free(spoolbuf);
 		}
 		RETURN_FALSE;
 	}
@@ -236,6 +252,7 @@ PHP_FUNCTION(iptcembed)
 			case M_APP13:
 				/* we are going to write a new APP13 marker, so don't output the old one */
 				php_iptc_skip_variable(fp, 0, 0);
+				fgetc(fp); /* skip already copied 0xFF byte */
 				php_iptc_read_remaining(fp, spool, poi?&poi:0);
 				done = 1;
 				break;
@@ -285,9 +302,8 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *) spoolbuf, poi - spoolbuf);
-		efree(spoolbuf);
+		spoolbuf = zend_string_truncate(spoolbuf, poi - (unsigned char*)ZSTR_VAL(spoolbuf), 0);
+		RETURN_NEW_STR(spoolbuf);
 	} else {
 		RETURN_TRUE;
 	}
@@ -298,7 +314,7 @@ PHP_FUNCTION(iptcembed)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	int inx = 0, len;
+	size_t inx = 0, len;
 	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset;
 	char *str, key[16];
@@ -342,7 +358,7 @@ PHP_FUNCTION(iptcparse)
 			inx += 2;
 		}
 
-		if ((len < 0) || (len > str_len) || (inx + len) > str_len) {
+		if ((len > str_len) || (inx + len) > str_len) {
 			break;
 		}
 

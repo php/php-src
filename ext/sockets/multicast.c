@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -90,10 +90,10 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out)
 	int ret;
 
 	if (Z_TYPE_P(val) == IS_LONG) {
-		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > UINT_MAX) {
+		if (Z_LVAL_P(val) < 0 || (zend_ulong)Z_LVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL, E_WARNING,
 				"the interface index cannot be negative or larger than %u;"
-				" given %pd", UINT_MAX, Z_LVAL_P(val));
+				" given " ZEND_LONG_FMT, UINT_MAX, Z_LVAL_P(val));
 			ret = FAILURE;
 		} else {
 			*out = Z_LVAL_P(val);
@@ -171,7 +171,7 @@ static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *
 			mcast_req_fun = &php_mcast_leave;
 mcast_req_fun:
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 				&glen) == FAILURE) {
@@ -207,7 +207,7 @@ mcast_req_fun:
 			mcast_sreq_fun = &php_mcast_leave_source;
 		mcast_sreq_fun:
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 					&glen) == FAILURE) {

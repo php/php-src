@@ -4,6 +4,9 @@
 extern zend_module_entry calendar_module_entry;
 #define	calendar_module_ptr &calendar_module_entry
 
+#include "php_version.h"
+#define PHP_CALENDAR_VERSION PHP_VERSION
+
 /* Functions */
 
 PHP_MINIT_FUNCTION(calendar);

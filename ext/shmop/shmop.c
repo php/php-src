@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -102,7 +102,7 @@ zend_module_entry shmop_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(shmop),
-	NO_VERSION_YET,
+	PHP_SHMOP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -203,6 +203,7 @@ PHP_FUNCTION(shmop_open)
 	}
 
 	if (shmctl(shmop->shmid, IPC_STAT, &shm)) {
+		/* please do not add coverage here: the segment would be leaked and impossible to delete via php */
 		php_error_docref(NULL, E_WARNING, "unable to get shared memory segment information '%s'", strerror(errno));
 		goto err;
 	}
@@ -256,7 +257,7 @@ PHP_FUNCTION(shmop_read)
 
 	return_string = zend_string_init(startaddr, bytes, 0);
 
-	RETURN_STR(return_string);
+	RETURN_NEW_STR(return_string);
 }
 /* }}} */
 
@@ -304,7 +305,7 @@ PHP_FUNCTION(shmop_size)
 PHP_FUNCTION(shmop_write)
 {
 	struct php_shmop *shmop;
-	int writesize;
+	zend_long writesize;
 	zend_long offset;
 	zend_string *data;
 	zval *shmid;
@@ -327,8 +328,8 @@ PHP_FUNCTION(shmop_write)
 		RETURN_FALSE;
 	}
 
-	writesize = (data->len < shmop->size - offset) ? data->len : shmop->size - offset;
-	memcpy(shmop->addr + offset, data->val, writesize);
+	writesize = ((zend_long)ZSTR_LEN(data) < shmop->size - offset) ? (zend_long)ZSTR_LEN(data) : shmop->size - offset;
+	memcpy(shmop->addr + offset, ZSTR_VAL(data), writesize);
 
 	RETURN_LONG(writesize);
 }

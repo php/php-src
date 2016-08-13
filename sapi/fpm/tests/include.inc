@@ -52,6 +52,18 @@ function run_fpm($config, &$out = false, $extra_args = '') /* {{{ */
 }
 /* }}} */
 
+function test_fpm_conf($config, &$msg = NULL) { /* {{{ */
+	$cfg = dirname(__FILE__).'/test-fpm-config.tmp';
+	file_put_contents($cfg, $config);
+	exec(get_fpm_path() . ' -t -y ' . $cfg . ' 2>&1', $output, $code);	
+	if ($code) {
+		$msg = preg_replace("/\[.+?\]/", "", $output[0]);
+		return false;
+	}
+	return true;
+}
+/* }}} */
+
 function run_fpm_till($needle, $config, $max = 10) /* {{{ */
 {
     $i = 0;
@@ -76,7 +88,7 @@ function run_fpm_till($needle, $config, $max = 10) /* {{{ */
 }
 /* }}} */
 
-function fpm_display_log($tail, $n=1, $ignore='systemd') {
+function fpm_display_log($tail, $n=1, $ignore='systemd') { /* {{{ */
 	while ($n) {
 		$a = fgets($tail);
 		if (empty($ignore) || !strpos($a, $ignore)) {
@@ -84,12 +96,12 @@ function fpm_display_log($tail, $n=1, $ignore='systemd') {
 			$n--;
 		}
 	}
-}
+} /* }}} */
 
-function run_request($host, $port, $uri='/ping', $query='') {
+function run_request($host, $port, $uri='/ping', $query='', $headers=array()) {  /* {{{ */
 	require_once 'fcgi.inc';
 	$client = new Adoy\FastCGI\Client($host, $port);
-	$params = array(
+	$params = array_merge(array(
 		'GATEWAY_INTERFACE' => 'FastCGI/1.0',
 		'REQUEST_METHOD'    => 'GET',
 		'SCRIPT_FILENAME'   => $uri,
@@ -106,6 +118,7 @@ function run_request($host, $port, $uri='/ping', $query='') {
 		'SERVER_PROTOCOL'   => 'HTTP/1.1',
 		'CONTENT_TYPE'      => '',
 		'CONTENT_LENGTH'    => 0
-	);
+	), $headers);
 	return $client->request($params, false)."\n";
 }
+/* }}} */

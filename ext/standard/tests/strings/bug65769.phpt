@@ -73,7 +73,7 @@ string(19) "Serbian_Serbia.1250"
 string(1) ","
 string(1) "."
 string(3) "RSD"
-string(4) "din."
+string(3) "RSD"
 string(1) ","
 string(1) "."
 ++++++++++++++++++++++

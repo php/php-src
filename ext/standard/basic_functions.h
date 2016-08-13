@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,6 +81,7 @@ PHP_FUNCTION(get_magic_quotes_gpc);
 
 PHP_FUNCTION(error_log);
 PHP_FUNCTION(error_get_last);
+PHP_FUNCTION(error_clear_last);
 
 PHP_FUNCTION(call_user_func);
 PHP_FUNCTION(call_user_func_array);
@@ -132,6 +133,13 @@ PHP_FUNCTION(parse_ini_string);
 PHP_FUNCTION(config_get_hash);
 #endif
 
+#if defined(PHP_WIN32)
+PHP_FUNCTION(sapi_windows_cp_set);
+PHP_FUNCTION(sapi_windows_cp_get);
+PHP_FUNCTION(sapi_windows_cp_is_utf8);
+PHP_FUNCTION(sapi_windows_cp_conv);
+#endif
+
 PHP_FUNCTION(str_rot13);
 PHP_FUNCTION(stream_get_filters);
 PHP_FUNCTION(stream_filter_register);
@@ -148,19 +156,11 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers);
 PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, char *opt, char *headers);
 PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, size_t var_name_len, zend_bool add_underscore);
 
-#if SIZEOF_INT == 4
-/* Most 32-bit and 64-bit systems have 32-bit ints */
-typedef unsigned int php_uint32;
-typedef signed int php_int32;
-#elif SIZEOF_LONG == 4
-/* 16-bit systems? */
-typedef unsigned long php_uint32;
-typedef signed long php_int32;
-#else
-#error Need type which holds 32 bits
-#endif
-
 #define MT_N (624)
+
+/* Deprecated type aliases -- use the standard types instead */
+typedef uint32_t php_uint32;
+typedef int32_t php_int32;
 
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
@@ -191,15 +191,13 @@ typedef struct _php_basic_globals {
 	char *CurrentStatFile, *CurrentLStatFile;
 	php_stream_statbuf ssb, lssb;
 
-	/* rand.c */
-	php_uint32   state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
-	php_uint32   *next;       /* next random value is computed from here */
+	/* mt_rand.c */
+	uint32_t state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
+	uint32_t *next;       /* next random value is computed from here */
 	int      left;        /* can *next++ this many times before reloading */
 
-	unsigned int rand_seed; /* Seed for rand(), in ts version */
-
-	zend_bool rand_is_seeded; /* Whether rand() has been seeded */
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
+	zend_long mt_rand_mode;
 
 	/* syslog.c */
 	char *syslog_device;
@@ -217,7 +215,10 @@ typedef struct _php_basic_globals {
 	} unserialize;
 
 	/* url_scanner_ex.re */
-	url_adapt_state_ex_t url_adapt_state_ex;
+	url_adapt_state_ex_t url_adapt_session_ex;
+	HashTable url_adapt_session_hosts_ht;
+	url_adapt_state_ex_t url_adapt_output_ex;
+	HashTable url_adapt_output_hosts_ht;
 
 #ifdef HAVE_MMAP
 	void *mmap_file;

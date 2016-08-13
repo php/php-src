@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -112,7 +112,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 /* Eat leading whitespace */
 #define EAT_LEADING_WHITESPACE()                     \
-	while (yytext[0]) {                              \
+	while (yyleng) {                                 \
 		if (yytext[0] == ' ' || yytext[0] == '\t') { \
 			SCNG(yy_text)++;                         \
 			yyleng--;                                \
@@ -123,7 +123,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 /* Eat trailing whitespace + extra char */
 #define EAT_TRAILING_WHITESPACE_EX(ch)              \
-	while (yyleng > 0 && (                          \
+	while (yyleng && (                              \
 		(ch != 'X' && yytext[yyleng - 1] ==  ch) || \
 		yytext[yyleng - 1] == '\n' ||               \
 		yytext[yyleng - 1] == '\r' ||               \
@@ -255,7 +255,7 @@ void shutdown_ini_scanner(void)
 
 /* {{{ zend_ini_scanner_get_lineno()
 */
-int zend_ini_scanner_get_lineno(void)
+ZEND_COLD int zend_ini_scanner_get_lineno(void)
 {
 	return SCNG(lineno);
 }
@@ -263,7 +263,7 @@ int zend_ini_scanner_get_lineno(void)
 
 /* {{{ zend_ini_scanner_get_filename()
 */
-char *zend_ini_scanner_get_filename(void)
+ZEND_COLD char *zend_ini_scanner_get_filename(void)
 {
 	return ini_filename ? ini_filename : "Unknown";
 }
@@ -524,7 +524,7 @@ end_raw_value_chars:
 	}
 
 	/* Eat leading and trailing double quotes */
-	if (yytext[0] == '"' && yytext[yyleng - 1] == '"') {
+	if (yyleng > 1 && yytext[0] == '"' && yytext[yyleng - 1] == '"') {
 		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
 	} else if (sc) {

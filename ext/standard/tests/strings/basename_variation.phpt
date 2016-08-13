@@ -66,7 +66,7 @@ $file_path_variations = array (
   /* empty paths */
   array(""),
   array(''),
-  array(NULL)
+  array(NULL),
 );
 
 function check_basename( $path_arrays ) {

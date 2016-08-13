@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,7 +77,7 @@ static zend_always_inline void zend_object_release(zend_object *obj)
 	if (--GC_REFCOUNT(obj) == 0) {
 		zend_objects_store_del(obj);
 	} else if (UNEXPECTED(!GC_INFO(obj))) {
-		gc_possible_root(&obj->gc);
+		gc_possible_root((zend_refcounted*)obj);
 	}
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -252,10 +252,10 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
-	int n;
+	size_t n;
 	char *period;
 
-	n = (int)strlen(filtername);
+	n = strlen(filtername);
 
 	if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, filtername, n))) {
 		filter = factory->create_filter(filtername, filterparams, persistent);

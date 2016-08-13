@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,8 +23,8 @@
 
 /* TIGER context */
 typedef struct {
-	php_hash_uint64 state[3];
-	php_hash_uint64 passed;
+	uint64_t state[3];
+	uint64_t passed;
 	unsigned char buffer[64];
 	unsigned int passes:1;
 	unsigned int length:7;

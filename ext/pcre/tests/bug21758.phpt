@@ -3,7 +3,7 @@ Bug #21758 (preg_replace_callback() not working with class methods)
 --FILE--
 <?php
   class Foo {
-    function foo() {
+    function __construct() {
       
       $s = 'preg_replace() is broken';
       

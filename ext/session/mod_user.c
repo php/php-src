@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,7 +85,16 @@ PS_OPEN_FUNC(user)
 	ZVAL_STRING(&args[0], (char*)save_path);
 	ZVAL_STRING(&args[1], (char*)session_name);
 
-	ps_call_handler(&PSF(open), 2, args, &retval);
+	zend_try {
+		ps_call_handler(&PSF(open), 2, args, &retval);
+	} zend_catch {
+		PS(session_status) = php_session_none;
+		if (!Z_ISUNDEF(retval)) {
+			zval_ptr_dtor(&retval);
+		}
+		zend_bailout();
+	} zend_end_try();
+
 	PS(mod_user_implemented) = 1;
 
 	FINISH;
@@ -191,12 +200,12 @@ PS_CREATE_SID_FUNC(user)
 			}
 			zval_ptr_dtor(&retval);
 		} else {
-			php_error_docref(NULL, E_ERROR, "No session id returned by function");
+			zend_throw_error(NULL, "No session id returned by function");
 			return NULL;
 		}
 
 		if (!id) {
-			php_error_docref(NULL, E_ERROR, "Session id must be a string");
+			zend_throw_error(NULL, "Session id must be a string");
 			return NULL;
 		}
 
@@ -222,7 +231,7 @@ PS_VALIDATE_SID_FUNC(user)
 	}
 
 	/* dummy function defined by PS_MOD */
-	return php_session_validate_sid(mod_data, key TSRMLS_CC);
+	return php_session_validate_sid(mod_data, key);
 }
 
 PS_UPDATE_TIMESTAMP_FUNC(user)

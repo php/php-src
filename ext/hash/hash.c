@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,12 +30,6 @@
 
 static int php_hash_le_hash;
 HashTable php_hash_hashtable;
-
-#if (PHP_MAJOR_VERSION >= 5)
-# define DEFAULT_CONTEXT FG(default_context)
-#else
-# define DEFAULT_CONTEXT NULL
-#endif
 
 #ifdef PHP_MHASH_BC
 struct mhash_bc_entry {
@@ -98,7 +92,7 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t alg
 
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops) /* {{{ */
 {
-	int algo_len = strlen(algo);
+	size_t algo_len = strlen(algo);
 	char *lower = zend_str_tolower_dup(algo, algo_len);
 	zend_hash_str_add_ptr(&php_hash_hashtable, lower, algo_len, (void *) ops);
 	efree(lower);
@@ -137,9 +131,10 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	}
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
+			php_error_docref(NULL, E_WARNING, "Invalid path");
 			RETURN_FALSE;
 		}
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -151,7 +146,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (isfilename) {
 		char buf[1024];
-		int n;
+		size_t n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
@@ -162,19 +157,19 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	}
 
 	digest = zend_string_alloc(ops->digest_size, 0);
-	ops->hash_final((unsigned char *) digest->val, context);
+	ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
 	efree(context);
 
 	if (raw_output) {
-		digest->val[ops->digest_size] = 0;
-		RETURN_STR(digest);
+		ZSTR_VAL(digest)[ops->digest_size] = 0;
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
-		hex_digest->val[2 * ops->digest_size] = 0;
+		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -213,7 +208,7 @@ static inline void php_hash_string_xor(unsigned char *out, const unsigned char *
 
 static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const size_t key_len) {
 	memset(K, 0, ops->block_size);
-	if (key_len > ops->block_size) {
+	if (key_len > (size_t)ops->block_size) {
 		/* Reduce the key first */
 		ops->hash_init(context);
 		ops->hash_update(context, key, key_len);
@@ -254,7 +249,11 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 		RETURN_FALSE;
 	}
 	if (isfilename) {
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
+		if (CHECK_NULL_PATH(data, data_len)) {
+			php_error_docref(NULL, E_WARNING, "Invalid path");
+			RETURN_FALSE;
+		}
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -277,14 +276,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
-		ops->hash_final((unsigned char *) digest->val, context);
+		ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
 	} else {
-		php_hash_hmac_round((unsigned char *) digest->val, ops, context, K, (unsigned char *) data, data_len);
+		php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) data, data_len);
 	}
 
 	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
 
-	php_hash_hmac_round((unsigned char *) digest->val, ops, context, K, (unsigned char *) digest->val, ops->digest_size);
+	php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 
 	/* Zero the key */
 	ZEND_SECURE_ZERO(K, ops->block_size);
@@ -292,15 +291,15 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	efree(context);
 
 	if (raw_output) {
-		digest->val[ops->digest_size] = 0;
-		RETURN_STR(digest);
+		ZSTR_VAL(digest)[ops->digest_size] = 0;
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
-		hex_digest->val[2 * ops->digest_size] = 0;
+		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -368,7 +367,7 @@ PHP_FUNCTION(hash_init)
 
 		memset(K, 0, ops->block_size);
 
-		if (key_len > ops->block_size) {
+		if (key_len > (size_t)ops->block_size) {
 			/* Reduce the key first */
 			ops->hash_update(context, (unsigned char *) key, key_len);
 			ops->hash_final((unsigned char *) K, context);
@@ -464,7 +463,7 @@ PHP_FUNCTION(hash_update_file)
 	char *filename, buf[1024];
 	size_t filename_len, n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -508,7 +507,7 @@ PHP_FUNCTION(hash_final)
 
 	digest_len = hash->ops->digest_size;
 	digest = zend_string_alloc(digest_len, 0);
-	hash->ops->hash_final((unsigned char *) digest->val, hash->context);
+	hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
 		int i;
 
@@ -520,36 +519,28 @@ PHP_FUNCTION(hash_final)
 		/* Feed this result into the outter hash */
 		hash->ops->hash_init(hash->context);
 		hash->ops->hash_update(hash->context, hash->key, hash->ops->block_size);
-		hash->ops->hash_update(hash->context, (unsigned char *) digest->val, hash->ops->digest_size);
-		hash->ops->hash_final((unsigned char *) digest->val, hash->context);
+		hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(digest), hash->ops->digest_size);
+		hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
 
 		/* Zero the key */
 		ZEND_SECURE_ZERO(hash->key, hash->ops->block_size);
 		efree(hash->key);
 		hash->key = NULL;
 	}
-	digest->val[digest_len] = 0;
+	ZSTR_VAL(digest)[digest_len] = 0;
 	efree(hash->context);
 	hash->context = NULL;
-
-	//???
-	//??? /* zend_list_REAL_delete() */
-	//??? if (zend_hash_index_find(&EG(regular_list), Z_RESVAL_P(zhash), (void *) &le)==SUCCESS) {
-	//??? 	/* This is a hack to avoid letting the resource hide elsewhere (like in separated vars)
-	//??? 		FETCH_RESOURCE is intelligent enough to handle dealing with any issues this causes */
-	//??? 	le->refcount = 1;
-	//??? } /* FAILURE is not an option */
 	zend_list_close(Z_RES_P(zhash));
 
 	if (raw_output) {
-		RETURN_STR(digest);
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(digest_len, 2, 0, 0);
 
-		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, digest_len);
-		hex_digest->val[2 * digest_len] = 0;
+		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
+		ZSTR_VAL(hex_digest)[2 * digest_len] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -721,13 +712,13 @@ PHP_FUNCTION(hash_pbkdf2)
 
 	returnval = zend_string_alloc(length, 0);
 	if (raw_output) {
-		memcpy(returnval->val, result, length);
+		memcpy(ZSTR_VAL(returnval), result, length);
 	} else {
-		php_hash_bin2hex(returnval->val, result, digest_length);
+		php_hash_bin2hex(ZSTR_VAL(returnval), result, digest_length);
 	}
-	returnval->val[length] = 0;
+	ZSTR_VAL(returnval)[length] = 0;
 	efree(result);
-	RETURN_STR(returnval);
+	RETURN_NEW_STR(returnval);
 }
 /* }}} */
 
@@ -738,7 +729,8 @@ PHP_FUNCTION(hash_equals)
 {
 	zval *known_zval, *user_zval;
 	char *known_str, *user_str;
-	int result = 0, j;
+	int result = 0;
+	size_t j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
 		return;
@@ -797,6 +789,9 @@ static void php_hash_dtor(zend_resource *rsrc) /* {{{ */
 
 #ifdef PHP_MHASH_BC
 
+#if 0
+/* See #69823, we should not insert module into module_registry while doing startup */
+
 PHP_MINFO_FUNCTION(mhash)
 {
 	php_info_print_table_start();
@@ -814,9 +809,10 @@ zend_module_entry mhash_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(mhash),
-	NO_VERSION_YET,
+	PHP_MHASH_VERSION,
 	STANDARD_MODULE_PROPERTIES,
 };
+#endif
 
 static void mhash_init(INIT_FUNC_ARGS)
 {
@@ -833,7 +829,8 @@ static void mhash_init(INIT_FUNC_ARGS)
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
 		zend_register_long_constant(buf, len, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number);
 	}
-	zend_register_internal_module(&mhash_module_entry);
+
+	/* TODO: this cause #69823 zend_register_internal_module(&mhash_module_entry); */
 }
 
 /* {{{ proto string mhash(int hash, string data [, string key])
@@ -847,9 +844,7 @@ PHP_FUNCTION(mhash)
 		return;
 	}
 
-	SEPARATE_ZVAL(z_algorithm);
-	convert_to_long_ex(z_algorithm);
-	algorithm = Z_LVAL_P(z_algorithm);
+	algorithm = zval_get_long(z_algorithm);
 
 	/* need to convert the first parameter from int constant to string algorithm name */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
@@ -1013,7 +1008,13 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("sha224",		&php_hash_sha224_ops);
 	php_hash_register_algo("sha256",		&php_hash_sha256_ops);
 	php_hash_register_algo("sha384",		&php_hash_sha384_ops);
+	php_hash_register_algo("sha512/224",            &php_hash_sha512_224_ops);
+	php_hash_register_algo("sha512/256",            &php_hash_sha512_256_ops);
 	php_hash_register_algo("sha512",		&php_hash_sha512_ops);
+	php_hash_register_algo("sha3-224",		&php_hash_sha3_224_ops);
+	php_hash_register_algo("sha3-256",		&php_hash_sha3_256_ops);
+	php_hash_register_algo("sha3-384",		&php_hash_sha3_384_ops);
+	php_hash_register_algo("sha3-512",		&php_hash_sha3_512_ops);
 	php_hash_register_algo("ripemd128",		&php_hash_ripemd128_ops);
 	php_hash_register_algo("ripemd160",		&php_hash_ripemd160_ops);
 	php_hash_register_algo("ripemd256",		&php_hash_ripemd256_ops);
@@ -1085,7 +1086,7 @@ PHP_MINFO_FUNCTION(hash)
 	char *s = buffer, *e = s + sizeof(buffer);
 
 	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
-		s += slprintf(s, e - s, "%s ", str->val);
+		s += slprintf(s, e - s, "%s ", ZSTR_VAL(str));
 	} ZEND_HASH_FOREACH_END();
 	*s = 0;
 
@@ -1093,6 +1094,14 @@ PHP_MINFO_FUNCTION(hash)
 	php_info_print_table_row(2, "hash support", "enabled");
 	php_info_print_table_row(2, "Hashing Engines", buffer);
 	php_info_print_table_end();
+
+#ifdef PHP_MHASH_BC
+	php_info_print_table_start();
+	php_info_print_table_row(2, "MHASH support", "Enabled");
+	php_info_print_table_row(2, "MHASH API Version", "Emulated Support");
+	php_info_print_table_end();
+#endif
+
 }
 /* }}} */
 
@@ -1271,9 +1280,7 @@ const zend_function_entry hash_functions[] = {
 /* {{{ hash_module_entry
  */
 zend_module_entry hash_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	PHP_HASH_EXTNAME,
 	hash_functions,
 	PHP_MINIT(hash),
@@ -1281,9 +1288,7 @@ zend_module_entry hash_module_entry = {
 	NULL, /* RINIT */
 	NULL, /* RSHUTDOWN */
 	PHP_MINFO(hash),
-#if ZEND_MODULE_API_NO >= 20010901
-	PHP_HASH_EXTVER, /* Replace with version number for your extension */
-#endif
+	PHP_HASH_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

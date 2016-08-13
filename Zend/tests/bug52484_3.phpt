@@ -10,10 +10,14 @@ class A {
 }
 
 $a = new A();
-$prop = null;
+$prop = "\0";
 
 var_dump($a->$prop);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot access empty property in %s on line %d
+Fatal error: Uncaught Error: Cannot access property started with '\0' in %s:%d
+Stack trace:
+#0 %s(%d): A->__get('\x00')
+#1 {main}
+  thrown in %s on line %d

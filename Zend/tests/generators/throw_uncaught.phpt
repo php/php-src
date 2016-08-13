@@ -13,7 +13,7 @@ var_dump($gen->throw(new RuntimeException('test')));
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' with message 'test' in %s:%d
+Fatal error: Uncaught RuntimeException: test in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

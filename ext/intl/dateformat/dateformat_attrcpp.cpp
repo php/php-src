@@ -44,8 +44,7 @@ static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
  */
 U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 {
-	char *str;
-	size_t str_len;
+	zend_string *u8str;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
@@ -59,12 +58,10 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 
 	UnicodeString res = UnicodeString();
 	fetch_datefmt(dfo)->getTimeZone().getID(res);
-	intl_charFromString(res, &str, &str_len, &INTL_DATA_ERROR_CODE(dfo));
+	u8str = intl_charFromString(res, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Could not convert time zone id to UTF-8");
 
-	RETVAL_STRINGL(str, str_len);
-	//????
-	efree(str);
+	RETVAL_STR(u8str);
 }
 
 /* {{{ proto IntlTimeZone IntlDateFormatter::getTimeZone()
@@ -94,24 +91,11 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, TimeZone_ce_ptr);
 	timezone_object_construct(tz_clone, return_value, 1);
 }
 
-U_CFUNC PHP_FUNCTION(datefmt_set_timezone_id)
-{
-	php_error_docref0(NULL, E_DEPRECATED,
-			"Use datefmt_set_timezone() instead, which also accepts a plain "
-			"time zone identifier and for which this function is now an "
-			"alias");
-	PHP_FN(datefmt_set_timezone)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
 /* {{{ proto boolean IntlDateFormatter::setTimeZone(mixed $timezone)
- * Set formatter's timezone. }}} */
-/* {{{ proto boolean datefmt_set_timezone_id(IntlDateFormatter $mf, $timezone_id)
- * Set formatter timezone_id.
- */
+ * Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 {
 	zval		*timezone_zv;

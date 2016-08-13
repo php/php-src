@@ -22,8 +22,8 @@ json_encode($b);
 var_dump(json_last_error(), json_last_error_msg());
 
 $c = array(
-    'foo' => $bad_utf8,
-    'bar' => 1
+	'foo' => $bad_utf8,
+	'bar' => 1
 );
 json_encode($c);
 var_dump(json_last_error(), json_last_error_msg());

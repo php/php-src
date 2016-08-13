@@ -40,7 +40,7 @@ $link->close();
 	$db1 = new mysqli();
 
 
-	$flags = MYSQLI_CLIENT_SSL;
+	$flags = MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT;
 
 	$link = mysqli_init();
 	mysqli_ssl_set($link, null, null, null, null, "RC4-MD5");

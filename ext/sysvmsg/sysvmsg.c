@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -110,7 +110,7 @@ zend_module_entry sysvmsg_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(sysvmsg),
-	NO_VERSION_YET,
+	PHP_SYSVMSG_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -268,12 +268,12 @@ PHP_FUNCTION(msg_get_queue)
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
 		if (mq->id < 0)	{
-			php_error_docref(NULL, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 			efree(mq);
 			RETURN_FALSE;
 		}
 	}
-	RETVAL_ZVAL(zend_list_insert(mq, le_sysvmsg), 0, 0);
+	ZVAL_COPY_VALUE(return_value, zend_list_insert(mq, le_sysvmsg));
 }
 /* }}} */
 
@@ -422,9 +422,9 @@ PHP_FUNCTION(msg_send)
 
 		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
 		 * allocate the extra byte. */
-		messagebuffer = safe_emalloc(msg_var.s->len, 1, sizeof(struct php_msgbuf));
-		memcpy(messagebuffer->mtext, msg_var.s->val, msg_var.s->len + 1);
-		message_len = msg_var.s->len;
+		messagebuffer = safe_emalloc(ZSTR_LEN(msg_var.s), 1, sizeof(struct php_msgbuf));
+		memcpy(messagebuffer->mtext, ZSTR_VAL(msg_var.s), ZSTR_LEN(msg_var.s) + 1);
+		message_len = ZSTR_LEN(msg_var.s);
 		smart_str_free(&msg_var);
 	} else {
 		char *p;
@@ -435,7 +435,7 @@ PHP_FUNCTION(msg_send)
 				break;
 
 			case IS_LONG:
-				message_len = spprintf(&p, 0, "%pd", Z_LVAL_P(message));
+				message_len = spprintf(&p, 0, ZEND_LONG_FMT, Z_LVAL_P(message));
 				break;
 			case IS_FALSE:
 				message_len = spprintf(&p, 0, "0");

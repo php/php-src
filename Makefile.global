@@ -53,7 +53,7 @@ install-headers:
 			paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 		done; \
 		$(mkinstalldirs) $$paths && \
-		echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
+		echo "Installing header files:           $(INSTALL_ROOT)$(phpincludedir)/" && \
 		for i in `echo $(INSTALL_HEADERS)`; do \
 			if test "$(PHP_PECL_EXTENSION)"; then \
 				src=`echo $$i | $(SED) -e "s#ext/$(PHP_PECL_EXTENSION)/##g"`; \
@@ -130,5 +130,18 @@ distclean: clean
 	fi
 	$(EGREP) define'.*include/php' $(top_srcdir)/configure | $(SED) 's/.*>//'|xargs rm -f
 
-.PHONY: all clean install distclean test
+prof-gen:
+	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-generate all
+
+prof-clean:
+	find . -name \*.lo -o -name \*.o | xargs rm -f
+	find . -name \*.la -o -name \*.a | xargs rm -f 
+	find . -name \*.so | xargs rm -f
+	rm -f libphp$(PHP_MAJOR_VERSION).la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_MILTER_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
+
+prof-use:
+	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-use all
+
+
+.PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:

@@ -12,4 +12,4 @@ $s->setMaxLineLen( 3);
 echo $s->getCurrentLine();
 ?>
 --EXPECT--
-<?
+<?p

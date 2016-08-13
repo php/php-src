@@ -20,9 +20,9 @@ AC_DEFUN([IMAP_LIB_CHK],[
   done
 ])
 
-dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok, extra-libs)
+dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok, extra-libs, extra-source)
 AC_DEFUN([PHP_IMAP_TEST_BUILD], [
-  PHP_TEST_BUILD([$1], [$2], [$3], [$4],
+  PHP_TEST_BUILD([$1], [$2], [$3], [$4], [$5]
   [
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define PHP_IMAP_EXPORT __attribute__ ((visibility("default")))
@@ -228,10 +228,15 @@ if test "$PHP_IMAP" != "no"; then
       AC_DEFINE(HAVE_IMAP_AUTH_GSS, 1, [ ])
     ], [], $TST_LIBS)
 
-    dnl Check if utf8_to_mutf7 exists
-    PHP_IMAP_TEST_BUILD(utf8_to_mutf7, [
+    dnl Check if utf8_to_mutf7 exists. We need to do some gymnastics because
+    dnl utf8_to_mutf7 takes an argument and will segfault without it. We
+    dnl therefore test another function utf8_to_mutf7_php() which calls
+    dnl the utf8_to_mutf7() function with the empty string as an argument.
+    PHP_IMAP_TEST_BUILD(utf8_to_mutf7_php, [
       AC_DEFINE(HAVE_IMAP_MUTF7, 1, [ ])
-    ], [], $TST_LIBS)
+    ], [], $TST_LIBS, [
+      char utf8_to_mutf7_php(){ return utf8_to_mutf7(""); }
+    ])
 
     AC_MSG_CHECKING(whether rfc822_output_address_list function present)
     PHP_TEST_BUILD(foobar, [

@@ -19,6 +19,7 @@ require_once('skipifconnectfailure.inc');
 	printf("\nMethods:\n");
 	$methods = get_class_methods($mysqli);
 	$expected_methods = array(
+		'__construct'			=> true,
 		'autocommit'			=> true,
 		'begin_transaction'		=> true,
 		'change_user'			=> true,
@@ -36,7 +37,6 @@ require_once('skipifconnectfailure.inc');
 		'kill'					=> true,
 		'more_results'			=> true,
 		'multi_query'			=> true,
-		'mysqli'				=> true,
 		'next_result'			=> true,
 		'options'				=> true,
 		'ping'					=> true,

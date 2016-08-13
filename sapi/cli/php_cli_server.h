@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ ZEND_END_MODULE_GLOBALS(cli_server)
 
 #ifdef ZTS
 #define CLI_SERVER_G(v) ZEND_TSRMG(cli_server_globals_id, zend_cli_server_globals *, v)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #else
 #define CLI_SERVER_G(v) (cli_server_globals.v)
 #endif

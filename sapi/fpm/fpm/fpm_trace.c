@@ -11,12 +11,8 @@
 int fpm_trace_get_strz(char *buf, size_t sz, long addr) /* {{{ */
 {
 	int i;
-	long l;
+	long l = addr;
 	char *lc = (char *) &l;
-
-	if (0 > fpm_trace_get_long(addr, &l)) {
-		return -1;
-	}
 
 	i = l % SIZEOF_LONG;
 	l -= i;

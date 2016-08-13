@@ -87,9 +87,8 @@
 		function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
 			global $connect_flags;
 
-			$flags = ($enable_env_flags) ? $connect_flags : false;
-
-			if ($flags !== false) {
+			$flags = $enable_env_flags? $connect_flags:0;
+			if ($flags !== 0) {
 				$link = mysqli_init();
 				if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
 					$link = false;
@@ -109,7 +108,7 @@
 			global $connect_flags;
 
 			if ($enable_env_flags)
-				$flags & $connect_flags;
+				$flags = $flags | $connect_flags;
 
 			return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
 		}
@@ -118,7 +117,7 @@
 			public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
 				global $connect_flags;
 
-				$flags = ($enable_env_flags) ? $connect_flags : false;
+				$flags = ($enable_env_flags) ? $connect_flags : 0;
 
 				if ($flags !== false) {
 					parent::init();

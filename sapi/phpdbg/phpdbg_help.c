@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,11 +25,11 @@
 #include "phpdbg_eol.h"
 #include "zend.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ Commands Table */
 #define PHPDBG_COMMAND_HELP_D(name, tip, alias, action) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, NULL, 0}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0}
 
 const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_HELP_D(aliases,    "show alias list", 'a', phpdbg_do_help_aliases),
@@ -342,6 +342,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **step**     continue execution until other line is reached" CR
 "  **continue** continue execution" CR
 "  **until**    continue execution up to the given location" CR
+"  **next**     continue execution up to the given location and halt on the first line after it" CR
 "  **finish**   continue up to end of the current execution frame" CR
 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
 "  **break**    set a breakpoint at the specified target" CR
@@ -377,30 +378,41 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-n**                          Disable default php.ini" CR
 "  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
-"  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
 "  **-i**      **-i**my.init           Set .phpdbginit file" CR
 "  **-I**                          Ignore default .phpdbginit" CR
 "  **-O**      **-O**my.oplog          Sets oplog output file" CR
 "  **-r**                          Run execution context" CR
-"  **-rr**                         Run execution context and quit after execution" CR
+"  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
+"  **-e**                          Generate extended information for debugger/profiler" CR
 "  **-E**                          Enable step through eval, careful!" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
 "  **-x**                          Enable xml output (instead of normal text output)" CR
+"  **-p**      **-p**, **-p=func**, **-p* **   Output opcodes and quit" CR
+"  **-h**                          Print the help overview" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR
 
 "**Remote Console Mode**" CR CR
 
-"This mode is enabled by specifying the **-a** option.  Phpdbg will bind only to the loopback "
+"This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
 "interface by default, and this can only be overridden by explicitly setting the remote console "
 "bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
-"interface/port."
+"interface/port." CR CR
+
+"**Opcode output**" CR CR
+
+"Outputting opcodes requires that a file path is passed as last argument. Modes of execution:" CR
+"**-p** Outputs the main execution context" CR
+"**-p* **Outputs all opcodes in the whole file (including classes and functions)" CR
+"**-p=function_name** Outputs opcodes of a given function in the file" CR
+"**-p=class_name::** Outputs opcodes of all the methods of a given class" CR
+"**-p=class_name::method** Outputs opcodes of a given method"
 },
 
 {"phpdbginit", CR
@@ -637,8 +649,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"frame",
 "The **frame** takes an optional integer argument. If omitted, then the current frame is displayed "
-"If specified then the current scope is set to the corresponding frame listed in a **back** trace. " "This can be used to allowing access to the variables in a higher stack frame than that currently "
-"being executed." CR CR
+"If specified then the current scope is set to the corresponding frame listed in a **back** trace. "
+"This can be used to allowing access to the variables in a higher stack frame than that currently being executed." CR CR
 
 "**Examples**" CR CR
 "    $P frame 2" CR
@@ -651,6 +663,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"info",
 "**info** commands provide quick access to various types of information about the PHP environment" CR
+"By default general information about environment and PHP build is shown." CR
 "Specific info commands are show below:" CR CR
 
 "  **Target**   **Alias**  **Purpose**" CR
@@ -738,7 +751,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"print",
-"By default, print will show information about the current execution context." CR
+"By default, print will show the opcodes of the current execution context." CR
 "Other printing commands give access to instruction information." CR
 "Specific printers loaded are show below:" CR CR
 
@@ -749,6 +762,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **method**  **m**      print out the instructions in the specified method" CR
 "  **func**    **f**      print out the instructions in the specified function" CR
 "  **stack**   **s**      print out the instructions in the current stack" CR CR
+
+"In case passed argument does not match a specific printing command, it will treat it as function or method name and print its opcodes" CR CR
 
 "**Examples**" CR CR
 "    $P print class \\\\my\\\\class" CR
@@ -794,9 +809,11 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"run",
-"Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
-"or completion of the script. Add parameters you want to use as $argv"
+"Enter the vm, starting execution. Execution will then continue until the next breakpoint "
+"or completion of the script. Add parameters you want to use as $argv" CR CR
+
 "**Examples**" CR CR
+
 "    $P run" CR
 "    $P r" CR
 "    Will cause execution of the context, if it is set" CR CR
@@ -887,10 +904,22 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P s" CR
 "    Will continue and break again in the next encountered line" CR CR
 },
+{"next",
+"The **next** command causes control to be passed back to the vm, continuing execution. Any "
+"breakpoints that are encountered before the next source line will be skipped. Execution will"
+"be stopped when that line is left." CR CR
 
+"Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "CR CR
+
+"Note that if the next line is **not** executed then **all** subsequent breakpoints will be "
+"skipped. " CR CR
+
+"Note **next** will trigger a \"not executing\" error if not executing."
+
+},
 {"until",
-"The **until** command causes control to be passed back to the vm, continuing execution.  Any "
-"breakpoints that are encountered before the next source line will be skipped.  Execution "
+"The **until** command causes control to be passed back to the vm, continuing execution. Any "
+"breakpoints that are encountered before the next source line will be skipped. Execution "
 "will then continue until the next breakpoint or completion of the script" CR CR
 
 "Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "CR CR

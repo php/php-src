@@ -58,7 +58,7 @@ zend_string
 	if (str == NULL) bc_out_of_memory();
 
 	/* The negative sign if needed. */
-	sptr = str->val;
+	sptr = ZSTR_VAL(str);
 	if (signch) *sptr++ = '-';
 
 	/* Load the whole number. */
@@ -76,6 +76,6 @@ zend_string
 
 	/* Terminate the string and return it! */
 	*sptr = '\0';
-	str->len = sptr - (char *)str->val;
+	ZSTR_LEN(str) = sptr - (char *)ZSTR_VAL(str);
 	return str;
 }

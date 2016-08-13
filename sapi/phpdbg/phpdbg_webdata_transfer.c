@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -167,8 +167,8 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len) {
 		PHP_VAR_SERIALIZE_INIT(var_hash);
 		php_var_serialize(&buf, &array, &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
-		*msg = buf.s->val;
-		*len = buf.s->len;
+		*msg = ZSTR_VAL(buf.s);
+		*len = ZSTR_LEN(buf.s);
 	}
 
 	zval_dtor(&array);

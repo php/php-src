@@ -6,7 +6,7 @@ if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php
 $original = str_repeat(b"hallo php",4096);
-$filename = tempnam("/tmp", "phpt");
+$filename = tempnam(sys_get_temp_dir(), "phpt");
 
 $fp = fopen($filename, "wb");
 fwrite($fp, $original);

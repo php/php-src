@@ -29,16 +29,19 @@
 PHP_METHOD(Spoofchecker, __construct)
 {
 	int checks;
+	zend_error_handling error_handling;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "") == FAILURE) {
 		return;
 	}
+
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
-	INTL_CTOR_CHECK_STATUS(co, "spoofchecker: unable to open ICU Spoof Checker");
+	INTL_METHOD_CHECK_STATUS(co, "spoofchecker: unable to open ICU Spoof Checker");
 
 	/* Single-script enforcement is on by default. This fails for languages
 	 like Japanese that legally use multiple scripts within a single word,
@@ -46,6 +49,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	*/
 	checks = uspoof_getChecks(co->uspoof, SPOOFCHECKER_ERROR_CODE_P(co));
 	uspoof_setChecks(co->uspoof, checks & ~USPOOF_SINGLE_SCRIPT, SPOOFCHECKER_ERROR_CODE_P(co));
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 

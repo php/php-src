@@ -19,8 +19,8 @@ $file2 = $path . session_id();
 var_dump(is_file($file2));
 
 // cleanup
-unlink($file1);
-unlink($file2);
+@unlink($file1);
+@unlink($file2);
 --EXPECT--
 bool(true)
 bool(true)

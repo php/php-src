@@ -18,6 +18,7 @@ $b->b();
 
 ?>
 --EXPECTF--
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; A has a deprecated constructor in %s on line %d
 array(2) {
   [0]=>
   object(ReflectionMethod)#%d (2) {

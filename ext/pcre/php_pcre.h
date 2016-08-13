@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,9 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(zend_string *regex, pcre_extra **extra, 
 
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
+
+#include "php_version.h"
+#define PHP_PCRE_VERSION PHP_VERSION
 
 typedef struct {
 	pcre *re;
@@ -78,11 +81,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	int  error_code;
 ZEND_END_MODULE_GLOBALS(pcre)
 
-#ifdef ZTS
-# define PCRE_G(v) ZEND_TSRMG(pcre_globals_id, zend_pcre_globals *, v)
-#else
-# define PCRE_G(v)	(pcre_globals.v)
-#endif
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(pcre)
+#define PCRE_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pcre, v)
 
 #else
 

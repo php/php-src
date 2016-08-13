@@ -8,4 +8,7 @@ class Foo {
 echo Foo::A."\n";
 ?>
 --EXPECTF--
-Fatal error: Undefined class constant 'self::B' in %sbug41633_2.php on line 5
+Fatal error: Uncaught Error: Undefined class constant 'self::B' in %sbug41633_2.php:5
+Stack trace:
+#0 {main}
+  thrown in %sbug41633_2.php on line 5

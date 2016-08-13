@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,8 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_LOGICAL_AND", T_LOGICAL_AND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_PRINT", T_PRINT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_YIELD", T_YIELD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_DOUBLE_ARROW", T_DOUBLE_ARROW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_YIELD_FROM", T_YIELD_FROM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_POW_EQUAL", T_POW_EQUAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_SR_EQUAL", T_SR_EQUAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_SL_EQUAL", T_SL_EQUAL, CONST_CS | CONST_PERSISTENT);
@@ -54,6 +56,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_COALESCE", T_COALESCE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_BOOLEAN_OR", T_BOOLEAN_OR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_BOOLEAN_AND", T_BOOLEAN_AND, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_SPACESHIP", T_SPACESHIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_IS_NOT_IDENTICAL", T_IS_NOT_IDENTICAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_IS_IDENTICAL", T_IS_IDENTICAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_IS_NOT_EQUAL", T_IS_NOT_EQUAL, CONST_CS | CONST_PERSISTENT);
@@ -84,7 +87,6 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_FINAL", T_FINAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_ABSTRACT", T_ABSTRACT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_STATIC", T_STATIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("T_DOUBLE_ARROW", T_DOUBLE_ARROW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_LNUMBER", T_LNUMBER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DNUMBER", T_DNUMBER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_STRING", T_STRING, CONST_CS | CONST_PERSISTENT);
@@ -177,6 +179,8 @@ char *get_token_type_name(int token_type)
 		case T_LOGICAL_AND: return "T_LOGICAL_AND";
 		case T_PRINT: return "T_PRINT";
 		case T_YIELD: return "T_YIELD";
+		case T_DOUBLE_ARROW: return "T_DOUBLE_ARROW";
+		case T_YIELD_FROM: return "T_YIELD_FROM";
 		case T_POW_EQUAL: return "T_POW_EQUAL";
 		case T_SR_EQUAL: return "T_SR_EQUAL";
 		case T_SL_EQUAL: return "T_SL_EQUAL";
@@ -192,6 +196,7 @@ char *get_token_type_name(int token_type)
 		case T_COALESCE: return "T_COALESCE";
 		case T_BOOLEAN_OR: return "T_BOOLEAN_OR";
 		case T_BOOLEAN_AND: return "T_BOOLEAN_AND";
+		case T_SPACESHIP: return "T_SPACESHIP";
 		case T_IS_NOT_IDENTICAL: return "T_IS_NOT_IDENTICAL";
 		case T_IS_IDENTICAL: return "T_IS_IDENTICAL";
 		case T_IS_NOT_EQUAL: return "T_IS_NOT_EQUAL";
@@ -222,7 +227,6 @@ char *get_token_type_name(int token_type)
 		case T_FINAL: return "T_FINAL";
 		case T_ABSTRACT: return "T_ABSTRACT";
 		case T_STATIC: return "T_STATIC";
-		case T_DOUBLE_ARROW: return "T_DOUBLE_ARROW";
 		case T_LNUMBER: return "T_LNUMBER";
 		case T_DNUMBER: return "T_DNUMBER";
 		case T_STRING: return "T_STRING";

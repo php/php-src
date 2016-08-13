@@ -169,7 +169,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		str_rules, str_rules_len, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* (I'm not a big fan of non-obvious flow control macros ).
 	 * This one checks the error value, destroys object and returns false */
-	INTL_CTOR_CHECK_STATUS( to, "String conversion of rules to UTF-16 failed" );
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "String conversion of rules to UTF-16 failed" );
 
 	/* Open ICU Transliterator. */
 	utrans = utrans_openU( id, ( sizeof( id ) - 1 ) / ( sizeof( *id ) ), (UTransDirection ) direction,
@@ -185,7 +185,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		smart_str parse_error_str;
 		parse_error_str = intl_parse_error_to_string( &parse_error );
 		spprintf( &msg, 0, "transliterator_create_from_rules: unable to "
-			"create ICU transliterator from rules (%s)", parse_error_str.s? parse_error_str.s->val : "" );
+			"create ICU transliterator from rules (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "" );
 		smart_str_free( &parse_error_str );
 		if( msg != NULL )
 		{
@@ -197,7 +197,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
     }
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_CTOR_CHECK_STATUS( to, "transliterator_create_from_rules: internal constructor call failed" );
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_from_rules: internal constructor call failed" );
 }
 /* }}} */
 
@@ -227,11 +227,11 @@ PHP_FUNCTION( transliterator_create_inverse )
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; /* change "to" into new object (from "object" ) */
 
 	utrans = utrans_openInverse( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
-	INTL_CTOR_CHECK_STATUS( to, "transliterator_create_inverse: could not create "
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_inverse: could not create "
 		"inverse ICU transliterator" );
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_CTOR_CHECK_STATUS( to, "transliterator_create: internal constructor call failed" );
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create: internal constructor call failed" );
 }
 /* }}} */
 
@@ -265,21 +265,15 @@ PHP_FUNCTION( transliterator_list_ids )
 	array_init( return_value );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
-		char *el_char = NULL;
-		size_t el_len   = 0;
+		zend_string *el = intl_convert_utf16_to_utf8(elem, elem_len, &status );
 
-		intl_convert_utf16_to_utf8( &el_char, &el_len, elem, elem_len, &status );
-
-		if( U_FAILURE( status ) )
+		if( !el )
 		{
-			efree( el_char );
 			break;
 		}
 		else
 		{
-		    // TODO: avoid reallocation ???
-			add_next_index_stringl( return_value, el_char, el_len);
-			efree(el_char);
+			add_next_index_str( return_value, el);
 		}
 	}
 	uenum_close( en );
@@ -338,7 +332,6 @@ PHP_FUNCTION( transliterator_transliterate )
 			int res;
 			if(Z_TYPE_P( arg1 ) != IS_STRING )
 			{
-				SEPARATE_ZVAL( arg1 );
 				convert_to_string( arg1 );
 			}
 			object = &tmp_object;
@@ -348,8 +341,9 @@ PHP_FUNCTION( transliterator_transliterate )
 			{
 				zend_string *message = intl_error_get_message( NULL );
 				php_error_docref0( NULL, E_WARNING, "Could not create "
-					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), message->val );
+					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), ZSTR_VAL(message) );
 				zend_string_free( message );
+				ZVAL_UNDEF(&tmp_object);
 				/* don't set U_ILLEGAL_ARGUMENT_ERROR to allow fetching of inner error */
 				goto cleanup;
 			}
@@ -463,7 +457,7 @@ cleanup:
 		RETVAL_FALSE;
 	}
 
-	/* zval_ptr_dtor( &tmp_object ); */
+	zval_ptr_dtor( &tmp_object );
 }
 /* }}} */
 

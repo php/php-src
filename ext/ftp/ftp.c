@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,7 +65,7 @@
 #include <sys/select.h>
 #endif
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 #include <openssl/ssl.h>
 #endif
 
@@ -182,7 +182,7 @@ ftp_close(ftpbuf_t *ftp)
 			php_stream_close(ftp->stream);
 	}
 	if (ftp->fd != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (ftp->ssl_active) {
 			SSL_shutdown(ftp->ssl_handle);
 			SSL_free(ftp->ssl_handle);
@@ -245,15 +245,17 @@ ftp_quit(ftpbuf_t *ftp)
 int
 ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	SSL_CTX	*ctx = NULL;
-	zend_long ssl_ctx_options = SSL_OP_ALL;
+	long ssl_ctx_options = SSL_OP_ALL;
+	int err, res;
+	zend_bool retry;
 #endif
 	if (ftp == NULL) {
 		return 0;
 	}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	if (ftp->use_ssl && !ftp->ssl_active) {
 		if (!ftp_putcmd(ftp, "AUTH", "TLS")) {
 			return 0;
@@ -289,6 +291,9 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 #endif
 		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
+		/* allow SSL to re-use sessions */
+		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
+
 		ftp->ssl_handle = SSL_new(ctx);
 		if (ftp->ssl_handle == NULL) {
 			php_error_docref(NULL, E_WARNING, "failed to create the SSL handle");
@@ -298,12 +303,43 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 
 		SSL_set_fd(ftp->ssl_handle, ftp->fd);
 
-		if (SSL_connect(ftp->ssl_handle) <= 0) {
-			php_error_docref(NULL, E_WARNING, "SSL/TLS handshake failed");
-			SSL_shutdown(ftp->ssl_handle);
-			SSL_free(ftp->ssl_handle);
-			return 0;
-		}
+		do {
+			res = SSL_connect(ftp->ssl_handle);
+			err = SSL_get_error(ftp->ssl_handle, res);
+
+			/* TODO check if handling other error codes would make sense */
+			switch (err) {
+				case SSL_ERROR_NONE:
+					retry = 0;
+					break;
+
+				case SSL_ERROR_ZERO_RETURN:
+					retry = 0;
+					SSL_shutdown(ftp->ssl_handle);
+					break;
+
+				case SSL_ERROR_WANT_READ:
+				case SSL_ERROR_WANT_WRITE: {
+						php_pollfd p;
+						int i;
+
+						p.fd = ftp->fd;
+						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
+						p.revents = 0;
+
+						i = php_poll2(&p, 1, 300);
+
+						retry = i > 0;
+					}
+					break;
+
+				default:
+					php_error_docref(NULL, E_WARNING, "SSL/TLS handshake failed");
+					SSL_shutdown(ftp->ssl_handle);
+					SSL_free(ftp->ssl_handle);
+					return 0;
+			}
+		} while (retry);
 
 		ftp->ssl_active = 1;
 
@@ -721,10 +757,11 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	memset(&ftp->pasvaddr, 0, n);
 	sa = (struct sockaddr *) &ftp->pasvaddr;
 
-#if HAVE_IPV6
 	if (getpeername(ftp->fd, sa, &n) < 0) {
 		return 0;
 	}
+
+#if HAVE_IPV6
 	if (sa->sa_family == AF_INET6) {
 		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sa;
 		char *endptr, delimiter;
@@ -777,8 +814,9 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 		ipbox.c[n] = (unsigned char) b[n];
 	}
 	sin = (struct sockaddr_in *) sa;
-	sin->sin_family = AF_INET;
-	sin->sin_addr = ipbox.ia[0];
+	if (ftp->usepasvaddress) {
+		sin->sin_addr = ipbox.ia[0];
+	}
 	sin->sin_port = ipbox.s[2];
 
 	ftp->pasv = 2;
@@ -831,7 +869,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 	}
 
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == (size_t)-1) {
 			goto bail;
 		}
 
@@ -1228,14 +1266,24 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
 	zend_long		size, sent;
     int         n;
+#ifdef HAVE_FTP_SSL
+	int err;
+	zend_bool retry = 0;
+	SSL *handle = NULL;
+	php_socket_t fd;
+#endif
+
 
 	size = len;
 	while (size) {
 		n = php_pollfd_for_ms(s, POLLOUT, ftp->timeout_sec * 1000);
 
 		if (n < 1) {
-
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+			if (n == 0) {
+				_set_errno(ETIMEDOUT);
+			}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 			if (n == 0) {
 				errno = ETIMEDOUT;
 			}
@@ -1243,15 +1291,54 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 			return -1;
 		}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
-			sent = SSL_write(ftp->ssl_handle, buf, size);
+			handle = ftp->ssl_handle;
+			fd = ftp->fd;
 		} else if (ftp->use_ssl && ftp->fd != s && ftp->use_ssl_for_data && ftp->data->ssl_active) {
-			sent = SSL_write(ftp->data->ssl_handle, buf, size);
+			handle = ftp->data->ssl_handle;
+			fd = ftp->data->fd;
+		}
+
+		if (handle) {
+			do {
+				sent = SSL_write(handle, buf, size);
+				err = SSL_get_error(handle, sent);
+
+				switch (err) {
+					case SSL_ERROR_NONE:
+						retry = 0;
+						break;
+
+					case SSL_ERROR_ZERO_RETURN:
+						retry = 0;
+						SSL_shutdown(handle);
+						break;
+
+					case SSL_ERROR_WANT_READ:
+					case SSL_ERROR_WANT_CONNECT: {
+							php_pollfd p;
+							int i;
+
+							p.fd = fd;
+							p.events = POLLOUT;
+							p.revents = 0;
+
+							i = php_poll2(&p, 1, 300);
+
+							retry = i > 0;
+						}
+						break;
+
+					default:
+						php_error_docref(NULL, E_WARNING, "SSL write failed");
+						return -1;
+				}
+			} while (retry);
 		} else {
 #endif
 			sent = send(s, buf, size, 0);
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		}
 #endif
 		if (sent == -1) {
@@ -1272,10 +1359,20 @@ int
 my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
 	int		n, nr_bytes;
+#ifdef HAVE_FTP_SSL
+	int err;
+	zend_bool retry = 0;
+	SSL *handle = NULL;
+	php_socket_t fd;
+#endif
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1283,15 +1380,54 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		return -1;
 	}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
-		nr_bytes = SSL_read(ftp->ssl_handle, buf, len);
+		handle = ftp->ssl_handle;
+		fd = ftp->fd;
 	} else if (ftp->use_ssl && ftp->fd != s && ftp->use_ssl_for_data && ftp->data->ssl_active) {
-		nr_bytes = SSL_read(ftp->data->ssl_handle, buf, len);
+		handle = ftp->data->ssl_handle;
+		fd = ftp->data->fd;
+	}
+
+	if (handle) {
+		do {
+			nr_bytes = SSL_read(handle, buf, len);
+			err = SSL_get_error(handle, nr_bytes);
+
+			switch (err) {
+				case SSL_ERROR_NONE:
+					retry = 0;
+					break;
+
+				case SSL_ERROR_ZERO_RETURN:
+					retry = 0;
+					SSL_shutdown(handle);
+					break;
+
+				case SSL_ERROR_WANT_READ:
+				case SSL_ERROR_WANT_CONNECT: {
+						php_pollfd p;
+						int i;
+
+						p.fd = fd;
+						p.events = POLLIN|POLLPRI;
+						p.revents = 0;
+
+						i = php_poll2(&p, 1, 300);
+
+						retry = i > 0;
+					}
+					break;
+
+				default:
+					php_error_docref(NULL, E_WARNING, "SSL read failed");
+					return -1;
+			}
+		} while (retry);
 	} else {
 #endif
 		nr_bytes = recv(s, buf, len, 0);
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	}
 #endif
 	return (nr_bytes);
@@ -1307,7 +1443,11 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
 	if (n < 1) {
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1327,7 +1467,11 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, POLLOUT, 1000);
 	if (n < 1) {
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1348,7 +1492,11 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1490,9 +1638,11 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	php_sockaddr_storage addr;
 	socklen_t			size;
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	SSL_CTX		*ctx;
-	zend_long ssl_ctx_options = SSL_OP_ALL;
+	SSL_SESSION *session;
+	int err, res;
+	zend_bool retry;
 #endif
 
 	if (data->fd != -1) {
@@ -1509,28 +1659,21 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	}
 
 data_accepted:
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 
 	/* now enable ssl if we need to */
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
-		ctx = SSL_CTX_new(SSLv23_client_method());
+		ctx = SSL_get_SSL_CTX(ftp->ssl_handle);
 		if (ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to create the SSL context");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL context");
 			return 0;
 		}
-
-#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
-		ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#endif
-		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
 		data->ssl_handle = SSL_new(ctx);
 		if (data->ssl_handle == NULL) {
 			php_error_docref(NULL, E_WARNING, "data_accept: failed to create the SSL handle");
-			SSL_CTX_free(ctx);
 			return 0;
 		}
-
 
 		SSL_set_fd(data->ssl_handle, data->fd);
 
@@ -1538,12 +1681,58 @@ data_accepted:
 			SSL_copy_session_id(data->ssl_handle, ftp->ssl_handle);
 		}
 
-		if (SSL_connect(data->ssl_handle) <= 0) {
-			php_error_docref(NULL, E_WARNING, "data_accept: SSL/TLS handshake failed");
-			SSL_shutdown(data->ssl_handle);
+		/* get the session from the control connection so we can re-use it */
+		session = SSL_get_session(ftp->ssl_handle);
+		if (session == NULL) {
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL session");
 			SSL_free(data->ssl_handle);
 			return 0;
 		}
+
+		/* and set it on the data connection */
+		res = SSL_set_session(data->ssl_handle, session);
+		if (res == 0) {
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to set the existing SSL session");
+			SSL_free(data->ssl_handle);
+			return 0;
+		}
+
+		do {
+			res = SSL_connect(data->ssl_handle);
+			err = SSL_get_error(data->ssl_handle, res);
+
+			switch (err) {
+				case SSL_ERROR_NONE:
+					retry = 0;
+					break;
+
+				case SSL_ERROR_ZERO_RETURN:
+					retry = 0;
+					SSL_shutdown(data->ssl_handle);
+					break;
+
+				case SSL_ERROR_WANT_READ:
+				case SSL_ERROR_WANT_WRITE: {
+						php_pollfd p;
+						int i;
+
+						p.fd = ftp->fd;
+						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
+						p.revents = 0;
+
+						i = php_poll2(&p, 1, 300);
+
+						retry = i > 0;
+					}
+					break;
+
+				default:
+					php_error_docref(NULL, E_WARNING, "data_accept: SSL/TLS handshake failed");
+					SSL_shutdown(data->ssl_handle);
+					SSL_free(data->ssl_handle);
+					return 0;
+			}
+		} while (retry);
 
 		data->ssl_active = 1;
 	}
@@ -1559,19 +1748,16 @@ data_accepted:
 databuf_t*
 data_close(ftpbuf_t *ftp, databuf_t *data)
 {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	SSL_CTX		*ctx;
 #endif
 	if (data == NULL) {
 		return NULL;
 	}
 	if (data->listener != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
-
-			ctx = SSL_get_SSL_CTX(data->ssl_handle);
-			SSL_CTX_free(ctx);
-
+			/* don't free the data context, it's the same as the control */
 			SSL_shutdown(data->ssl_handle);
 			SSL_free(data->ssl_handle);
 			data->ssl_active = 0;
@@ -1580,11 +1766,9 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 		closesocket(data->listener);
 	}
 	if (data->fd != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
-			ctx = SSL_get_SSL_CTX(data->ssl_handle);
-			SSL_CTX_free(ctx);
-
+			/* don't free the data context, it's the same as the control */
 			SSL_shutdown(data->ssl_handle);
 			SSL_free(data->ssl_handle);
 			data->ssl_active = 0;
@@ -1609,8 +1793,8 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	databuf_t	*data = NULL;
 	char		*ptr;
 	int		ch, lastch;
-	int		size, rcvd;
-	int		lines;
+	size_t		size, rcvd;
+	size_t		lines;
 	char		**ret = NULL;
 	char		**entry;
 	char		*text;
@@ -1652,7 +1836,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	lines = 0;
 	lastch = 0;
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == (size_t)-1 || rcvd > ((size_t)(-1))-size) {
 			goto bail;
 		}
 
@@ -1662,8 +1846,6 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 		for (ptr = data->buf; rcvd; rcvd--, ptr++) {
 			if (*ptr == '\n' && lastch == '\r') {
 				lines++;
-			} else {
-				size++;
 			}
 			lastch = *ptr;
 		}
@@ -1783,7 +1965,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 
 	lastch = ftp->lastch;
 	if ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == (size_t)-1) {
 			goto bail;
 		}
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -279,6 +279,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
+		zend_set_function_arg_flags((zend_function*)&f);
 
 		fptr = &f;
 
@@ -492,6 +493,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type)
 			break;
 		case IS_FALSE:
 		case IS_TRUE:
+		case _IS_BOOL:
 			vt = VT_BOOL;
 			break;
 		case IS_STRING:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -93,7 +93,7 @@
 	smart_string_append_unsigned_ex((dest), (val), 0)
 
 #define smart_string_appendc_ex(dest, ch, what) do {					\
-	register size_t __nl;											\
+	size_t __nl;													\
 	smart_string_alloc4((dest), 1, (what), __nl);						\
 	(dest)->len = __nl;												\
 	((unsigned char *) (dest)->c)[(dest)->len - 1] = (ch);			\
@@ -109,7 +109,7 @@
 } while (0)
 
 #define smart_string_appendl_ex(dest, src, nlen, what) do {			\
-	register size_t __nl;											\
+	size_t __nl;													\
 	smart_string *__dest = (smart_string *) (dest);						\
 																	\
 	smart_string_alloc4(__dest, (nlen), (what), __nl);					\

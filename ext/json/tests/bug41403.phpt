@@ -2,9 +2,7 @@
 Bug #41403 (json_decode cannot decode floats if localeconv decimal_point is not '.')
 --SKIPIF--
 <?php
-
 if (!extension_loaded('json')) die('skip'); 
-
 if (setlocale(LC_NUMERIC, "de_DE") === false) {
 	die("skip no de_DE locale");
 }

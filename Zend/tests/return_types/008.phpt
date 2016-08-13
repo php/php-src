@@ -18,4 +18,4 @@ $qux = new qux();
 var_dump($qux->bar());
 
 --EXPECTF--
-Fatal error: Declaration of qux::bar() must be compatible with foo::bar(): foo in %s008.php on line 7
+Fatal error: Declaration of qux::bar(): qux must be compatible with foo::bar(): foo in %s008.php on line 7

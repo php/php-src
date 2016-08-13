@@ -27,7 +27,7 @@ require_once('skipifconnectfailure.inc');
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
 		printf("[002a] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	if (!is_null($tmp = @mysqli_stmt_bind_result($stmt)))
+	if (!is_null($tmp = mysqli_stmt_bind_result($stmt)))
 		printf("[002b] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_stmt_close($stmt);
@@ -37,7 +37,7 @@ require_once('skipifconnectfailure.inc');
 	$label = null;
 	$foo = null;
 
-	if (!is_null($tmp = mysqli_stmt_bind_result($stmt)))
+	if (!is_null($tmp = mysqli_stmt_bind_result($stmt, $id)))
 		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
@@ -320,6 +320,8 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Warning: mysqli_stmt_bind_result() expects at least 2 parameters, 1 given in %s on line %d
+
 Warning: mysqli_stmt_bind_result(): invalid object or resource mysqli_stmt
  in %s on line %d
 

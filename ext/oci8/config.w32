@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 if (PHP_OCI8 != "no" && PHP_OCI8_11G != "no") {

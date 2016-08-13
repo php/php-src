@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -280,7 +280,7 @@ PHP_FUNCTION(convert_cyr_string)
 
 	str = zend_string_init(input, input_len, 0);
 
-	php_convert_cyr_string((unsigned char *) str->val, str->len, fr_cs[0], to_cs[0]);
+	php_convert_cyr_string((unsigned char *) ZSTR_VAL(str), ZSTR_LEN(str), fr_cs[0], to_cs[0]);
 	RETVAL_NEW_STR(str);
 }
 /* }}} */

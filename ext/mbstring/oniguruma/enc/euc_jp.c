@@ -115,7 +115,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
 #if 1
   if (enclen(ONIG_ENCODING_EUC_JP, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
-#endif
+#endif  
   return p - buf;
 }
 

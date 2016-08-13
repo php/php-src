@@ -596,8 +596,8 @@ char * php_sha256_crypt(const char *key, const char *salt)
 	password.  We can compute an upper bound for the size of the
 	result in advance and so we can prepare the buffer we pass to
 	`sha256_crypt_r'.  */
-	static char *buffer;
-	static int buflen;
+	ZEND_TLS char *buffer;
+	ZEND_TLS int buflen = 0;
 	int needed = (sizeof(sha256_salt_prefix) - 1
 			+ sizeof(sha256_rounds_prefix) + 9 + 1
 			+ (int)strlen(salt) + 1 + 43 + 1);

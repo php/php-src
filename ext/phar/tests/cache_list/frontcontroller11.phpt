@@ -15,7 +15,7 @@ files/frontcontroller5.phar
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
 --EXPECTF--
-Fatal error: Uncaught exception 'PharException' with message 'Key of MIME type overrides array must be a file extension, was "0"' in %sfrontcontroller11.php:2
+Fatal error: Uncaught PharException: Key of MIME type overrides array must be a file extension, was "0" in %sfrontcontroller11.php:2
 Stack trace:
 #0 %sfrontcontroller11.php(2): Phar::webPhar('whatever', 'index.php', '', Array)
 #1 {main}

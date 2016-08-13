@@ -165,11 +165,13 @@ TSRM_API void *tsrm_get_ls_cache(void);
 
 #define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
 #define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_get_ls_cache()
-#define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+#define TSRMG(id, type, element)	(TSRMG_BULK(id, type)->element)
+#define TSRMG_BULK(id, type)	((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 
-#define TSRMG_STATIC(id, type, element)	(((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
-#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE
-#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL
+#define TSRMG_STATIC(id, type, element)	(TSRMG_BULK_STATIC(id, type)->element)
+#define TSRMG_BULK_STATIC(id, type)	((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])
+#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE;
+#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
 #if ZEND_DEBUG
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
 #else
@@ -199,6 +201,8 @@ TSRM_API void *tsrm_get_ls_cache(void);
 #define TSRMLS_CACHE_DEFINE()
 #define TSRMLS_CACHE_UPDATE()
 #define TSRMLS_CACHE
+
+#define TSRM_TLS
 
 /* BC only */
 #define TSRMLS_D	void

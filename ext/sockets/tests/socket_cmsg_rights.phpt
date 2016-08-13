@@ -8,6 +8,9 @@ die('skip sockets extension not available.');
 if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
 die('skip not for Microsoft Windows');
 }
+if (strtolower(substr(PHP_OS, 0, 3)) == 'aix') {
+die('skip not for AIX');
+}
 --CLEAN--
 <?php
 $path = __DIR__ . "/unix_sock";
@@ -49,7 +52,7 @@ checktimeout($s, 500);
 $data = [
     "name" => [],
     "buffer_size" => 2000,
-    "controllen" => socket_cmsg_space(SOL_SOCKET, SCM_RIGHTS, 3)
+    "controllen" => socket_cmsg_space(SOL_SOCKET, SCM_RIGHTS, 4)
 ];
 var_dump($data);
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
@@ -68,7 +71,7 @@ array(3) {
   ["buffer_size"]=>
   int(2000)
   ["controllen"]=>
-  int(32)
+  int(%d)
 }
 Array
 (

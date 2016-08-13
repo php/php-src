@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,7 +111,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	size_t key_len;
 	const char *p;
 	int i;
-	int n;
+	size_t n;
 
 	key_len = strlen(key);
 	if (key_len <= data->dirdepth ||
@@ -222,30 +222,47 @@ static void ps_files_open(ps_files *data, const char *key)
 
 static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 {
-	zend_long n;
+	size_t n = 0;
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
        data->lastkey and reopen when it is needed. */
-	ps_files_open(data, key->val);
+	ps_files_open(data, ZSTR_VAL(key));
 	if (data->fd < 0) {
 		return FAILURE;
 	}
 
 	/* Truncate file if the amount of new data is smaller than the existing data set. */
-	if (val->len < (int)data->st_size) {
+	if (ZSTR_LEN(val) < data->st_size) {
 		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
 #if defined(HAVE_PWRITE)
-	n = pwrite(data->fd, val->val, val->len, 0);
+	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
-	n = write(data->fd, val->val, val->len);
+#ifdef PHP_WIN32
+	{
+		unsigned int to_write = ZSTR_LEN(val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(val);
+		char *buf = ZSTR_VAL(val);
+		int wrote;
+
+		do {
+			wrote = _write(data->fd, buf, to_write);
+
+			n += wrote;
+			buf = wrote > -1 ? buf + wrote : 0;
+			to_write = wrote > -1 ? (ZSTR_LEN(val) - n > UINT_MAX ? UINT_MAX : (unsigned int)(ZSTR_LEN(val) - n)): 0;
+
+		} while(wrote > 0);
+	}
+#else
+	n = write(data->fd, ZSTR_VAL(val), ZSTR_LEN(val));
+#endif
 #endif
 
-	if (n != val->len) {
-		if (n == -1) {
+	if (n != ZSTR_LEN(val)) {
+		if (n == (size_t)-1) {
 			php_error_docref(NULL, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
 		} else {
 			php_error_docref(NULL, E_WARNING, "write wrote less bytes than requested");
@@ -256,7 +273,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 	return SUCCESS;
 }
 
-static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
+static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 {
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
@@ -276,6 +293,11 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 	time(&now);
 
 	dirname_len = strlen(dirname);
+
+	if (dirname_len >= MAXPATHLEN) {
+		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", dirname);
+		return (0);
+	}
 
 	/* Prepare buffer (dirname never changes) */
 	memcpy(buf, dirname, dirname_len);
@@ -378,7 +400,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 2) {
 		errno = 0;
-		filemode = ZEND_STRTOL(argv[1], NULL, 8);
+		filemode = (int)ZEND_STRTOL(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;
@@ -421,11 +443,12 @@ PS_CLOSE_FUNC(files)
 
 	if (data->lastkey) {
 		efree(data->lastkey);
+		data->lastkey = NULL;
 	}
 
 	efree(data->basedir);
 	efree(data);
-	*mod_data = NULL;
+	PS_SET_MOD_DATA(NULL);
 
 	return SUCCESS;
 }
@@ -443,11 +466,11 @@ PS_CLOSE_FUNC(files)
  */
 PS_READ_FUNC(files)
 {
-	zend_long n;
+	zend_long n = 0;
 	zend_stat_t sbuf;
 	PS_FILES_DATA;
 
-	ps_files_open(data, key->val);
+	ps_files_open(data, ZSTR_VAL(key));
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -459,30 +482,49 @@ PS_READ_FUNC(files)
 	data->st_size = sbuf.st_size;
 
 	if (sbuf.st_size == 0) {
-		*val = STR_EMPTY_ALLOC();
+		*val = ZSTR_EMPTY_ALLOC();
 		return SUCCESS;
 	}
 
 	*val = zend_string_alloc(sbuf.st_size, 0);
 
 #if defined(HAVE_PREAD)
-	n = pread(data->fd, (*val)->val, (*val)->len, 0);
+	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
-	n = read(data->fd, (*val)->val, (*val)->len);
+#ifdef PHP_WIN32
+	{
+		unsigned int to_read = ZSTR_LEN(*val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(*val);
+		char *buf = ZSTR_VAL(*val);
+		int read_in;
+
+		do {
+			read_in = _read(data->fd, buf, to_read);
+
+			n += read_in;
+			buf = read_in > -1 ? buf + read_in : 0;
+			to_read = read_in > -1 ? (ZSTR_LEN(*val) - n > UINT_MAX ? UINT_MAX : (unsigned int)(ZSTR_LEN(*val) - n)): 0;
+
+		} while(read_in > 0);
+
+	}
+#else
+	n = read(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val));
+#endif
 #endif
 
-	if (n != sbuf.st_size) {
+	if (n != (zend_long)sbuf.st_size) {
 		if (n == -1) {
 			php_error_docref(NULL, E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
 		} else {
 			php_error_docref(NULL, E_WARNING, "read returned less bytes than requested");
 		}
 		zend_string_release(*val);
-		*val =  STR_EMPTY_ALLOC();
+		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}
 
+	ZSTR_VAL(*val)[ZSTR_LEN(*val)] = '\0';
 	return SUCCESS;
 }
 
@@ -525,7 +567,7 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	int ret;
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key->val)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
 		return FAILURE;
 	}
 
@@ -560,7 +602,7 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key->val)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
 		return FAILURE;
 	}
 
@@ -637,7 +679,7 @@ PS_CREATE_SID_FUNC(files)
 		}
 		/* Check collision */
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
-		if (data && ps_files_key_exists(data, sid->val) == SUCCESS) {
+		if (data && ps_files_key_exists(data, ZSTR_VAL(sid)) == SUCCESS) {
 			if (sid) {
 				zend_string_release(sid);
 				sid = NULL;
@@ -665,7 +707,7 @@ PS_VALIDATE_SID_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	return ps_files_key_exists(data, key->val);
+	return ps_files_key_exists(data, ZSTR_VAL(key));
 }
 
 /*

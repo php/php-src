@@ -68,11 +68,11 @@ function recurse($path)
 
 		// always include the config.h file
 		$content    = file_get_contents($newfile);
-		$newcontent = preg_replace('/#\s*ifdef HAVE_CONFIG_H\s*(.+)\s*#\s*endif/', '$1', $content);
+		//$newcontent = preg_replace('/#\s*ifdef HAVE_CONFIG_H\s*(.+)\s*#\s*endif/', '$1', $content);
 
-		if ($content !== $newcontent) {
-			file_put_contents($file, $newcontent);
-		}
+		//if ($content !== $newcontent) {
+		//	file_put_contents($file, $newcontent);
+		//}
 
 		echo "OK\n";
 	}

@@ -8,7 +8,7 @@ class C {
 }
 
 class B {
-	public function B() {
+	public function __construct() {
 		$isCallable = is_callable(array(new C, 'f'));
 		var_dump($isCallable);
 	}

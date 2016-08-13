@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -53,10 +53,6 @@
 #  undef EWOULDBLOCK
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
 #endif
 
 /* This functions transforms the first char to 'w' if it's not 'r', 'a' or 'w'

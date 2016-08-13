@@ -8,7 +8,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPComplexTypeComplexType {
-    function SOAPComplexTypeComplexType($s, $i, $f, $c) {
+    function __construct($s, $i, $f, $c) {
         $this->varString = $s;
         $this->varInt = $i;
         $this->varFloat = $f;

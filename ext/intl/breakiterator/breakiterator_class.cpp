@@ -120,7 +120,7 @@ static zend_object *BreakIterator_clone_obj(zval *object)
 			intl_errors_set_custom_msg(BREAKITER_ERROR_P(bio_orig),
 				"Could not clone BreakIterator", 0);
 			err_msg = intl_error_get_message(BREAKITER_ERROR_P(bio_orig));
-			zend_throw_exception(NULL, err_msg->val, 0);
+			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
 			zend_string_free(err_msg);
 		} else {
 			bio_new->biter = new_biter;
@@ -181,13 +181,6 @@ static void breakiterator_object_init(BreakIterator_object *bio)
 	intl_error_init(BREAKITER_ERROR_P(bio));
 	bio->biter = NULL;
 	ZVAL_UNDEF(&bio->text);
-}
-/* }}} */
-
-/* {{{ BreakIterator_objects_dtor */
-static void BreakIterator_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
 }
 /* }}} */
 
@@ -332,7 +325,6 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	BreakIterator_handlers.compare_objects = BreakIterator_compare_objects;
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
-	BreakIterator_handlers.dtor_obj = BreakIterator_objects_dtor;
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;
 
 	zend_class_implements(BreakIterator_ce_ptr, 1,

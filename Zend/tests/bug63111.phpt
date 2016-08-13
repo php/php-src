@@ -23,7 +23,6 @@ Bar::foo();
 Foo::bar();
 ?>
 --EXPECTF--
-Strict Standards: Static function Foo::bar() should not be abstract in %sbug63111.php on line 3
 bool(false)
 bool(false)
 bool(false)
@@ -32,5 +31,8 @@ bool(true)
 bool(true)
 ok
 
-Fatal error: Cannot call abstract method Foo::bar() in %sbug63111.php on line 20
+Fatal error: Uncaught Error: Cannot call abstract method Foo::bar() in %sbug63111.php:20
+Stack trace:
+#0 {main}
+  thrown in %sbug63111.php on line 20
 

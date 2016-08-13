@@ -10,26 +10,17 @@
 #define NTDDI_VERSION  0x06000100
 
 /* Default PHP / PEAR directories */
-#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
+#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot")?getenv("SystemRoot"):"")
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define PEAR_INSTALLDIR "@PREFIX@\\pear"
 #define PHP_BINDIR "@PREFIX@"
 #define PHP_DATADIR "@PREFIX@"
-#define PHP_EXTENSION_DIR "@PREFIX@"
+#define PHP_EXTENSION_DIR "@PREFIX@\\ext"
 #define PHP_INCLUDE_PATH	".;@PREFIX@\\pear"
 #define PHP_LIBDIR "@PREFIX@"
 #define PHP_LOCALSTATEDIR "@PREFIX@"
 #define PHP_PREFIX "@PREFIX@"
 #define PHP_SYSCONFDIR "@PREFIX@"
-
-/* Enable / Disable crypt() function (default: enabled) */
-#define HAVE_CRYPT 1
-#define PHP_STD_DES_CRYPT 1
-#define PHP_EXT_DES_CRYPT 1
-#define PHP_MD5_CRYPT 1
-#define PHP_BLOWFISH_CRYPT 1
-#define PHP_SHA512_CRYPT 1
-#define PHP_SHA256_CRYPT 1
 
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
@@ -179,3 +170,8 @@
 #define HAVE_MBRLEN 1
 #define HAVE_MBSTATE_T 1
 
+#define HAVE_HUGE_VAL_INF 1
+
+#define HAVE_GETRUSAGE
+
+#define HAVE_FTOK 1

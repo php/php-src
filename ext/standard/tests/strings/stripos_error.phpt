@@ -16,6 +16,13 @@ var_dump( stripos("String") );
 
 echo "\n-- With more than expected number of arguments --";
 var_dump( stripos("string", "String", 1, 'extra_arg') );
+
+echo "\n-- Offset beyond the end of the string --";
+var_dump( stripos("Hello World", "o", 12) );
+
+echo "\n-- Offset before the start of the string --";
+var_dump( stripos("Hello World", "o", -12) );
+
 echo "*** Done ***";
 ?>
 --EXPECTF--
@@ -32,4 +39,12 @@ NULL
 -- With more than expected number of arguments --
 Warning: stripos() expects at most 3 parameters, 4 given in %s on line %d
 NULL
+
+-- Offset beyond the end of the string --
+Warning: stripos(): Offset not contained in string in %s on line %d
+bool(false)
+
+-- Offset before the start of the string --
+Warning: stripos(): Offset not contained in string in %s on line %d
+bool(false)
 *** Done ***

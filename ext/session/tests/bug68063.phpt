@@ -3,18 +3,22 @@ Bug #68063 (Empty session IDs do still start sessions)
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
+session.use_strict_mode=0
+session.sid_length=40
+session.sid_bits_per_character=4
 --FILE--
 <?php
+// Empty session ID may happen by browser bugs
+
 // Could also be set with a cookie like "PHPSESSID=; path=/"
 session_id('');
 
-// Will still start the session and return true
+// Start the session with empty string should result in new session ID
 var_dump(session_start());
 
-// Returns an empty string
+// Returns newly created session ID
 var_dump(session_id());
 ?>
 --EXPECTF--
-Warning: session_start(): Cannot start session with empty session ID in %s on line %d
-bool(false)
-string(0) ""
+bool(true)
+string(40) "%s"

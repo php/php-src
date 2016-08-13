@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,12 +64,12 @@ PHPAPI extern const char php_sig_png[8];
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
 
+#include "php_version.h"
+#define PHP_GD_VERSION PHP_VERSION
+
 /* gd.c functions */
 PHP_MINFO_FUNCTION(gd);
 PHP_MINIT_FUNCTION(gd);
-#if HAVE_LIBT1
-PHP_MSHUTDOWN_FUNCTION(gd);
-#endif
 #if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 PHP_RSHUTDOWN_FUNCTION(gd);
 #endif
@@ -185,16 +185,6 @@ PHP_FUNCTION(imagesy);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
-PHP_FUNCTION(imagepsloadfont);
-/*
-PHP_FUNCTION(imagepscopyfont);
-*/
-PHP_FUNCTION(imagepsfreefont);
-PHP_FUNCTION(imagepsencodefont);
-PHP_FUNCTION(imagepsextendfont);
-PHP_FUNCTION(imagepsslantfont);
-PHP_FUNCTION(imagepstext);
-PHP_FUNCTION(imagepsbbox);
 
 PHP_FUNCTION(jpeg2wbmp);
 PHP_FUNCTION(png2wbmp);

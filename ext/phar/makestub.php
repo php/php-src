@@ -50,7 +50,7 @@ $stub = '/*
 
 /* $Id$ */
 
-static inline void phar_get_stub(const char *index_php, const char *web, size_t *len, char **stub, const int name_len, const int web_len TSRMLS_DC)
+static inline void phar_get_stub(const char *index_php, const char *web, size_t *len, char **stub, const int name_len, const int web_len)
 {
 ';
 $s1split = str_split($s1, 2046);

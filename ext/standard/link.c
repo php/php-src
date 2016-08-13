@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,7 +59,7 @@ PHP_FUNCTION(readlink)
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
 		return;
 	}
 

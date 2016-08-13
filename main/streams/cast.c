@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,7 @@ static int stream_cookie_closer(void *cookie)
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
-	return php_stream_close(stream);
+	return php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC);
 }
 #elif defined(HAVE_FOPENCOOKIE)
 static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
@@ -128,7 +128,7 @@ static int stream_cookie_closer(void *cookie)
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
-	return php_stream_close(stream);
+	return php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC);
 }
 #endif /* elif defined(HAVE_FOPENCOOKIE) */
 
@@ -342,7 +342,7 @@ exit_success:
 /* }}} */
 
 /* {{{ php_stream_open_wrapper_as_file */
-PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, char **opened_path STREAMS_DC)
+PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, zend_string **opened_path STREAMS_DC)
 {
 	FILE *fp = NULL;
 	php_stream *stream = NULL;
@@ -356,7 +356,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE, (void**)&fp, REPORT_ERRORS) == FAILURE) {
 		php_stream_close(stream);
 		if (opened_path && *opened_path) {
-			efree(*opened_path);
+			zend_string_release(*opened_path);
 		}
 		return NULL;
 	}

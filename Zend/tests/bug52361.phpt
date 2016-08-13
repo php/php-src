@@ -23,12 +23,12 @@ try {
 }
 ?>
 --EXPECTF--
-1. exception 'Exception' with message 'aaa' in %sbug52361.php:5
+1. Exception: aaa in %sbug52361.php:5
 Stack trace:
 #0 %sbug52361.php(13): aaa->__destruct()
 #1 %sbug52361.php(16): bbb()
 #2 {main}
-2. exception 'Exception' with message 'bbb' in %sbug52361.php:13
+2. Exception: bbb in %sbug52361.php:13
 Stack trace:
 #0 %sbug52361.php(16): bbb()
 #1 {main}

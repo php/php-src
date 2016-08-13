@@ -41,7 +41,7 @@ ob_end_flush();
 string(%d) "%s"
 string(4) "user"
 
-Warning: Uncaught exception 'Exception' with message 'Stop...!' in %s:%d
+Warning: Uncaught Exception: Stop...! in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
 #1 %s(%d): session_start()

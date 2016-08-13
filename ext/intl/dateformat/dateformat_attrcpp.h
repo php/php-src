@@ -19,8 +19,6 @@
 
 PHP_FUNCTION(datefmt_get_timezone_id);
 
-PHP_FUNCTION(datefmt_set_timezone_id);
-
 PHP_FUNCTION(datefmt_get_timezone);
 
 PHP_FUNCTION(datefmt_set_timezone);

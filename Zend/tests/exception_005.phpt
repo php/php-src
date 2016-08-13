@@ -9,4 +9,7 @@ throw new a();
 
 ?>
 --EXPECTF--
-Fatal error: Cannot instantiate interface a in %s on line %d
+Fatal error: Uncaught Error: Cannot instantiate interface a in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

@@ -8,5 +8,5 @@ return array(
 	'ENV' => array(
 			'PDOTEST_DSN' => 'sqlite::memory:'
 		),
-	'TESTS' => 'ext/pdo/tests'
+	'TESTS' => __DIR__ . '/ext/pdo/tests'
 	);

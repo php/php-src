@@ -55,5 +55,5 @@ if test "$PHP_MCRYPT" != "no"; then
   PHP_ADD_INCLUDE($MCRYPT_DIR/include)
 
   PHP_SUBST(MCRYPT_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(mcrypt, mcrypt.c mcrypt_filter.c, $ext_shared)
+  PHP_NEW_EXTENSION(mcrypt, mcrypt.c mcrypt_filter.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi

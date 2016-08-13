@@ -11,7 +11,7 @@ $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE DATABASE odbcTEST');
 
-odbc_exec($conn, 'CREATE TABLE FOO (TEST INT)');
+odbc_exec($conn, 'CREATE TABLE FOO (TEST INT NOT NULL)');
 odbc_exec($conn, 'ALTER TABLE FOO ADD PRIMARY KEY (TEST)');
 
 odbc_exec($conn, 'INSERT INTO FOO VALUES (1)');

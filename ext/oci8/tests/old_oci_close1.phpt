@@ -20,6 +20,6 @@ echo "Done\n";
 resource(%d) of type (oci8 connection)
 bool(true)
 
-Warning: oci_parse() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+Warning: oci_parse(): supplied resource is not a valid oci8 connection resource in %sold_oci_close1.php on line %d
+bool(false)
 Done

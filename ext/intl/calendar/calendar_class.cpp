@@ -101,7 +101,7 @@ static zend_object *Calendar_clone_obj(zval *object)
 			intl_errors_set_custom_msg(CALENDAR_ERROR_P(co_orig),
 				"Could not clone IntlCalendar", 0);
 			err_msg = intl_error_get_message(CALENDAR_ERROR_P(co_orig));
-			zend_throw_exception(NULL, err_msg->val, 0);
+			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
 			zend_string_free(err_msg);
 		} else {
 			co_new->ucal = newCalendar;
@@ -177,7 +177,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 		HashTable	   *debug_info_tz;
 
 		timezone_object_construct(&cal->getTimeZone(), &ztz , 0);
-		debug_info = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
+		debug_info_tz = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
 		assert(is_tmp == 1);
 
 		array_init(&ztz_debug);
@@ -231,13 +231,6 @@ static void calendar_object_init(Calendar_object *co)
 }
 /* }}} */
 
-/* {{{ Calendar_objects_dtor */
-static void Calendar_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
-}
-/* }}} */
-
 /* {{{ Calendar_objects_free */
 static void Calendar_objects_free(zend_object *object)
 {
@@ -261,7 +254,7 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
 	intern = (Calendar_object*)ecalloc(1, sizeof(Calendar_object) + sizeof(zval) * (ce->default_properties_count - 1));
 
 	zend_object_std_init(&intern->zo, ce);
-    object_properties_init((zend_object*) intern, ce);
+    object_properties_init(&intern->zo, ce);
 	calendar_object_init(intern);
 
 
@@ -474,7 +467,6 @@ void calendar_register_IntlCalendar_class(void)
 	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
-	Calendar_handlers.dtor_obj = Calendar_objects_dtor;
 	Calendar_handlers.free_obj = Calendar_objects_free;
 
 	/* Create and register 'IntlGregorianCalendar' class. */
@@ -503,8 +495,6 @@ void calendar_register_IntlCalendar_class(void)
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK",			UCAL_DAY_OF_WEEK);
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK_IN_MONTH",	UCAL_DAY_OF_WEEK_IN_MONTH);
 	CALENDAR_DECL_LONG_CONST("FIELD_AM_PM",					UCAL_AM_PM);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_MINUTE",				UCAL_MINUTE);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -207,7 +207,7 @@ php_stream_ops  php_glob_stream_ops = {
 
  /* {{{ php_glob_stream_opener */
 static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const char *path, const char *mode,
-		int options, char **opened_path, php_stream_context *context STREAMS_DC)
+		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	glob_s_t *pglob;
 	int ret;
@@ -220,7 +220,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
 		path += sizeof("glob://")-1;
 		if (opened_path) {
-			*opened_path = estrdup(path);
+			*opened_path = zend_string_init(path, strlen(path), 0);
 		}
 	}
 
@@ -268,6 +268,7 @@ static php_stream_wrapper_ops  php_glob_stream_wrapper_ops = {
 	NULL,
 	php_glob_stream_opener,
 	"glob",
+	NULL,
 	NULL,
 	NULL,
 	NULL,

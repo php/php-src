@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,6 @@ PHP_FUNCTION(headers_list);
 PHP_FUNCTION(http_response_code);
 
 PHPAPI int php_header(void);
-PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_len, time_t expires, char *path, size_t path_len, char *domain, size_t domain_len, int secure, int url_encode, int httponly);
+PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int url_encode, int httponly);
 
 #endif

@@ -50,7 +50,7 @@ bool(true)
 int(4)
 bool(true)
 
-Warning: OCI-Lob::write(): %d is not a valid oci8 descriptor resource in %slob_014.php on line %d
+Warning: OCI-Lob::write(): %s is not a valid oci8 descriptor resource in %slob_014.php on line %d
 bool(false)
 array(1) {
   [0]=>

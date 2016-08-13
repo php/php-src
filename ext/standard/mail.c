@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -118,11 +118,11 @@ PHP_FUNCTION(mail)
 	MAIL_ASCIIZ_CHECK(subject, subject_len);
 	MAIL_ASCIIZ_CHECK(message, message_len);
 	if (headers) {
-		MAIL_ASCIIZ_CHECK(headers->val, headers->len);
+		MAIL_ASCIIZ_CHECK(ZSTR_VAL(headers), ZSTR_LEN(headers));
 		headers_trimmed = php_trim(headers, NULL, 0, 2);
 	}
 	if (extra_cmd) {
-		MAIL_ASCIIZ_CHECK(extra_cmd->val, extra_cmd->len);
+		MAIL_ASCIIZ_CHECK(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
 	}
 
 	if (to_len > 0) {
@@ -168,10 +168,10 @@ PHP_FUNCTION(mail)
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
-		extra_cmd = php_escape_shell_cmd(extra_cmd->val);
+		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
 
-	if (php_mail(to_r, subject_r, message, headers_trimmed ? headers_trimmed->val : NULL, extra_cmd ? extra_cmd->val : NULL)) {
+	if (php_mail(to_r, subject_r, message, headers_trimmed ? ZSTR_VAL(headers_trimmed) : NULL, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -224,6 +224,43 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 }
 
 
+static int php_mail_detect_multiple_crlf(char *hdr) {
+	/* This function detects multiple/malformed multiple newlines. */
+
+	if (!hdr || !strlen(hdr)) {
+		return 0;
+	}
+
+	/* Should not have any newlines at the beginning. */
+	/* RFC 2822 2.2. Header Fields */
+	if (*hdr < 33 || *hdr > 126 || *hdr == ':') {
+		return 1;
+	}
+
+	while(*hdr) {
+		if (*hdr == '\r') {
+			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\0' || *(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
+				/* Malformed or multiple newlines. */
+				return 1;
+			} else {
+				hdr += 2;
+			}
+		} else if (*hdr == '\n') {
+			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || *(hdr+1) == '\n') {
+				/* Malformed or multiple newlines. */
+				return 1;
+			} else {
+				hdr += 2;
+			}
+		} else {
+			hdr++;
+		}
+	}
+
+	return 0;
+}
+
+
 /* {{{ php_mail
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
@@ -257,7 +294,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		time(&curtime);
 		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 
-		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", date_str->val, zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
+		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
 
 		zend_string_free(date_str);
 
@@ -278,18 +315,24 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 		efree(tmp);
 	}
+
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename();
 		zend_string *f;
 
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
-		if (headers != NULL) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), f->val, headers);
+		if (headers != NULL && *headers) {
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), ZSTR_VAL(f), headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), f->val);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
 		zend_string_release(f);
+	}
+
+	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
+		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
+		MAIL_RET(0);
 	}
 
 	if (!sendmail_path) {

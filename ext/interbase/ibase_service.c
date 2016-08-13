@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -162,8 +162,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 				user_flags[i], (char)args_len[i], (char)(args_len[i] >> 8), args[i]);
 
 			if ((spb_len + chunk) > sizeof(buf) || chunk <= 0) {
-				_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)"
-					TSRMLS_CC, spb_len);
+				_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)", spb_len);
 				RETURN_FALSE;
 			}
 			spb_len += chunk;
@@ -211,7 +210,7 @@ PHP_FUNCTION(ibase_service_attach)
 	size_t hlen, ulen, plen, spb_len;
 	ibase_service *svm;
 	char buf[128], *host, *user, *pass, *loc;
-	isc_svc_handle handle = NULL;
+	isc_svc_handle handle = 0;
 
 	RESET_ERRMSG;
 
@@ -227,7 +226,7 @@ PHP_FUNCTION(ibase_service_attach)
 		user, isc_spb_password, (char)plen, pass, host);
 
 	if (spb_len > sizeof(buf) || spb_len == -1) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)", spb_len);
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%zd)", spb_len);
 		RETURN_FALSE;
 	}
 
@@ -275,7 +274,7 @@ static void _php_ibase_service_query(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 	static char spb[] = { isc_info_svc_timeout, 10, 0, 0, 0 };
 
 	char res_buf[400], *result, *heap_buf = NULL, *heap_p;
-	long heap_buf_size = 200, line_len;
+	zend_long heap_buf_size = 200, line_len;
 
 	/* info about users requires an action first */
 	if (info_action == isc_info_svc_get_users) {
@@ -313,7 +312,7 @@ query_loop:
 					}
 				}
 				if (!heap_buf || (heap_p - heap_buf + line_len +2) > heap_buf_size) {
-					long res_size = heap_buf ? heap_p - heap_buf : 0;
+					zend_long res_size = heap_buf ? heap_p - heap_buf : 0;
 
 					while (heap_buf_size < (res_size + line_len +2)) {
 						heap_buf_size *= 2;
@@ -426,7 +425,7 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	zval *res;
 	char *db, *bk, buf[200];
 	size_t dblen, bklen, spb_len;
-	long opts = 0;
+	zend_long opts = 0;
 	zend_bool verbose = 0;
 	ibase_service *svm;
 
@@ -451,7 +450,7 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	}
 
 	if (spb_len > sizeof(buf) || spb_len <= 0) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)", spb_len);
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%zd)", spb_len);
 		RETURN_FALSE;
 	}
 
@@ -489,8 +488,9 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 {
 	zval *res;
 	char buf[128], *db;
-	int dblen, spb_len;
-	long action, argument = 0;
+	size_t dblen;
+	int spb_len;
+	zend_long action, argument = 0;
 	ibase_service *svm;
 
 	RESET_ERRMSG;
@@ -520,7 +520,7 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 		switch (action) {
 			default:
 unknown_option:
-				_php_ibase_module_error("Unrecognised option (%ld)", action);
+				_php_ibase_module_error("Unrecognised option (" ZEND_LONG_FMT ")", action);
 				RETURN_FALSE;
 
 			case isc_spb_rpr_check_db:
@@ -597,7 +597,7 @@ PHP_FUNCTION(ibase_db_info)
 PHP_FUNCTION(ibase_server_info)
 {
 	zval *res;
-	long action;
+	zend_long action;
 	ibase_service *svm;
 
 	RESET_ERRMSG;

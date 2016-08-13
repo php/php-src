@@ -4837,4 +4837,8 @@
 '\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
 
+/(?(?!)a|b)/
+    bbb
+    aaa 
+
 /-- End of testinput8 --/

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,9 @@
 
 #include "lib/timelib.h"
 #include "Zend/zend_hash.h"
+
+#include "php_version.h"
+#define PHP_DATE_VERSION PHP_VERSION
 
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
@@ -199,11 +202,7 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 	int                     timezone_valid;
 ZEND_END_MODULE_GLOBALS(date)
 
-#ifdef ZTS
-#define DATEG(v) ZEND_TSRMG(date_globals_id, zend_date_globals *, v)
-#else
-#define DATEG(v) (date_globals.v)
-#endif
+#define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
 
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(char *string, zend_long *now);
@@ -221,6 +220,8 @@ PHPAPI timelib_tzinfo *get_timezone_info(void);
 
 /* Grabbing CE's so that other exts can use the date objects too */
 PHPAPI zend_class_entry *php_date_get_date_ce(void);
+PHPAPI zend_class_entry *php_date_get_immutable_ce(void);
+PHPAPI zend_class_entry *php_date_get_interface_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */

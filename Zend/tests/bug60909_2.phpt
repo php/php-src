@@ -14,7 +14,7 @@ class Bad {
 $bad = new Bad();
 echo "$bad";
 --EXPECTF--
-Fatal error: Method Bad::__toString() must not throw an exception in %sbug60909_2.php on line 0
+Fatal error: Method Bad::__toString() must not throw an exception, caught Exception: Oops, I cannot do this in %sbug60909_2.php on line %d
 
 
 !!!shutdown!!!

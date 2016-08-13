@@ -940,7 +940,7 @@ dnl PHP_NEW_EXTENSION(extname, sources [, shared [, sapi_class [, extra-cflags [
 dnl
 dnl Includes an extension in the build.
 dnl
-dnl "extname" is the name of the ext/ subdir where the extension resides.
+dnl "extname" is the name of the extension.
 dnl "sources" is a list of files relative to the subdir which are used
 dnl to build the extension.
 dnl "shared" can be set to "shared" or "yes" to build the extension as
@@ -953,22 +953,23 @@ dnl "zend_ext" indicates a zend extension.
 AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
+  ext_dir=[]PHP_EXT_DIR($1)
 
   ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
-    PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
-    EXT_STATIC="$EXT_STATIC $1"
+    PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+    EXT_STATIC="$EXT_STATIC $1;$ext_dir"
     if test "$3" != "nocli"; then
-      EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
+      EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
     fi
   else
     if test "$3" = "shared" || test "$3" = "yes"; then
 dnl ---------------------------------------------- Shared module
       [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=yes
-      PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
+      PHP_ADD_SOURCES_X($ext_dir,$2,$ac_extra,shared_objects_$1,yes)
       case $host_alias in
         *netware*[)]
           PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6, $7)
@@ -986,14 +987,14 @@ dnl ---------------------------------------------- CLI static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     case "$PHP_SAPI" in
       cgi|embed[)]
-        PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
-        EXT_STATIC="$EXT_STATIC $1"
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+        EXT_STATIC="$EXT_STATIC $1;$ext_dir"
         ;;
       *[)]
-        PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,cli)
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,cli)
         ;;
     esac
-    EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
+    EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
   fi
   PHP_ADD_BUILD_DIR($ext_builddir)
 
@@ -2333,13 +2334,13 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
 
   dnl If pkg-config is found try using it
   if test "$PHP_OPENSSL_DIR" = "yes" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists openssl; then
-    if $PKG_CONFIG --atleast-version=0.9.6 openssl; then
+    if $PKG_CONFIG --atleast-version=1.0.1 openssl; then
       found_openssl=yes
       OPENSSL_LIBS=`$PKG_CONFIG --libs openssl`
       OPENSSL_INCS=`$PKG_CONFIG --cflags-only-I openssl`
       OPENSSL_INCDIR=`$PKG_CONFIG --variable=includedir openssl`
     else
-      AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
+      AC_MSG_ERROR([OpenSSL version 1.0.1 or greater required.])
     fi
 
     if test -n "$OPENSSL_LIBS"; then
@@ -2380,13 +2381,13 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     AC_MSG_CHECKING([for OpenSSL version])
     AC_EGREP_CPP(yes,[
 #include <openssl/opensslv.h>
-#if OPENSSL_VERSION_NUMBER >= 0x0090600fL
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
   yes
 #endif
     ],[
-      AC_MSG_RESULT([>= 0.9.6])
+      AC_MSG_RESULT([>= 1.0.1])
     ],[
-      AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
+      AC_MSG_ERROR([OpenSSL version 1.0.1 or greater required.])
     ])
     CPPFLAGS=$old_CPPFLAGS
 
@@ -2684,20 +2685,27 @@ EOF
   else 
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]0"
   fi
-  for arg in $ac_configure_args; do
-    if test `expr -- $arg : "'.*"` = 0; then
-      if test `expr -- $arg : "-.*"` = 0 && test `expr -- $arg : ".*=.*"` = 0; then
-        continue;
-      fi
-      echo "'[$]arg' \\" >> $1
-      CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '[$]arg'"
-    else
-      if test `expr -- $arg : "'-.*"` = 0 && test `expr -- $arg : "'.*=.*"` = 0; then
-        continue;
-      fi
-      echo "[$]arg \\" >> $1
-      CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS [$]arg"
-    fi
+  CONFIGURE_ARGS="$ac_configure_args"
+  while test "X$CONFIGURE_ARGS" != "X";
+  do
+   if CURRENT_ARG=`expr "X$CONFIGURE_ARGS" : "X *\('[[^']]*'\)"`
+   then
+     CONFIGURE_ARGS=`expr "X$CONFIGURE_ARGS" : "X *'[[^']]*' \(.*\)"`
+   elif CURRENT_ARG=`expr "X$CONFIGURE_ARGS" : "X *\([[^ ]]*\)"`
+   then
+     CONFIGURE_ARGS=`expr "X$CONFIGURE_ARGS" : "X *[[^ ]]* \(.*\)"`
+     CURRENT_ARG="'$CURRENT_ARG'"
+   else
+    break
+   fi
+   for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do
+    if test `expr "X$CURRENT_ARG" : "X.*${var}.*"` != 0;
+	then
+      continue 2
+	fi
+   done
+   $as_echo "$CURRENT_ARG \\" >>$1
+   CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS $CURRENT_ARG"
   done
   echo '"[$]@"' >> $1
   chmod +x $1
@@ -3030,4 +3038,196 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
 #endif
   ])
   AC_DEFINE([PHP_HAVE_STDINT_TYPES], [1], [Checked for stdint types])
+])
+
+dnl PHP_CHECK_BUILTIN_EXPECT
+AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
+  AC_MSG_CHECKING([for __builtin_expect])
+
+  AC_TRY_LINK(, [
+    return __builtin_expect(1,1) ? 1 : 0;
+  ], [
+    have_builtin_expect=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_expect=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
+
+])
+
+dnl PHP_CHECK_BUILTIN_CLZ
+AC_DEFUN([PHP_CHECK_BUILTIN_CLZ], [
+  AC_MSG_CHECKING([for __builtin_clz])
+
+  AC_TRY_LINK(, [
+    return __builtin_clz(1) ? 1 : 0;
+  ], [
+    have_builtin_clz=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_clz=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CLZ], [$have_builtin_clz], [Whether the compiler supports __builtin_clz])
+
+])
+
+dnl PHP_CHECK_BUILTIN_CTZL
+AC_DEFUN([PHP_CHECK_BUILTIN_CTZL], [
+  AC_MSG_CHECKING([for __builtin_ctzl])
+
+  AC_TRY_LINK(, [
+    return __builtin_ctzl(2L) ? 1 : 0;
+  ], [
+    have_builtin_ctzl=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ctzl=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CTZL], [$have_builtin_ctzl], [Whether the compiler supports __builtin_ctzl])
+
+])
+
+dnl PHP_CHECK_BUILTIN_CTZLL
+AC_DEFUN([PHP_CHECK_BUILTIN_CTZLL], [
+  AC_MSG_CHECKING([for __builtin_ctzll])
+
+  AC_TRY_LINK(, [
+    return __builtin_ctzll(2LL) ? 1 : 0;
+  ], [
+    have_builtin_ctzll=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ctzll=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CTZLL], [$have_builtin_ctzll], [Whether the compiler supports __builtin_ctzll])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SMULL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SMULL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_smull_overflow])
+
+  AC_TRY_LINK(, [
+    long tmpvar;
+    return __builtin_smull_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_smull_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_smull_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SMULL_OVERFLOW],
+   [$have_builtin_smull_overflow], [Whether the compiler supports __builtin_smull_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SMULLL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_smulll_overflow])
+
+  AC_TRY_LINK(, [
+    long long tmpvar;
+    return __builtin_smulll_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_smulll_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_smulll_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SMULLL_OVERFLOW],
+   [$have_builtin_smulll_overflow], [Whether the compiler supports __builtin_smulll_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SADDL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SADDL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_saddl_overflow])
+
+  AC_TRY_LINK(, [
+    long tmpvar;
+    return __builtin_saddl_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_saddl_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_saddl_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SADDL_OVERFLOW],
+   [$have_builtin_saddl_overflow], [Whether the compiler supports __builtin_saddl_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SADDLL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_saddll_overflow])
+
+  AC_TRY_LINK(, [
+    long long tmpvar;
+    return __builtin_saddll_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_saddll_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_saddll_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SADDLL_OVERFLOW],
+   [$have_builtin_saddll_overflow], [Whether the compiler supports __builtin_saddll_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SSUBL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_ssubl_overflow])
+
+  AC_TRY_LINK(, [
+    long tmpvar;
+    return __builtin_ssubl_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_ssubl_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ssubl_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SSUBL_OVERFLOW],
+   [$have_builtin_ssubl_overflow], [Whether the compiler supports __builtin_ssubl_overflow])
+
+])
+
+dnl PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_ssubll_overflow])
+
+  AC_TRY_LINK(, [
+    long long tmpvar;
+    return __builtin_ssubll_overflow(3, 7, &tmpvar);
+  ], [
+    have_builtin_ssubll_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ssubll_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW],
+   [$have_builtin_ssubll_overflow], [Whether the compiler supports __builtin_ssubll_overflow])
+
 ])

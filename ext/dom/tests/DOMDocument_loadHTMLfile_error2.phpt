@@ -13,6 +13,11 @@ assert.bail=true
 $doc = new DOMDocument();
 $result = $doc->loadHTMLFile("");
 assert('$result === false');
+$doc = new DOMDocument();
+$result = $doc->loadHTMLFile("text.html\0something");
+assert('$result === false');
 ?>
 --EXPECTF--
 %r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): Empty string supplied as input %s
+
+%r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): Invalid file source %s

@@ -60,8 +60,6 @@ fclose($row[0]);
 $db->exec("DROP TABLE test_one_blob");
 
 ?>
---XFAIL--
-Corrupts memory
 --EXPECTF--
 array(2) {
   ["blob1"]=>

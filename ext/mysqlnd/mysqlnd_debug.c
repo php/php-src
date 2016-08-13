@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,10 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "mysqlnd.h"
@@ -440,7 +437,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 						"   min_own=%5llu  max_own=%7llu  avg_own=%7llu   "
 						"   min_in_calls=%5llu  max_in_calls=%7llu  avg_in_calls=%7llu"
 						"   min_total=%5llu  max_total=%7llu  avg_total=%7llu"
-						,string_key->val
+						,ZSTR_VAL(string_key)
 						,(uint64_t) f_profile->calls
 						,(uint64_t) f_profile->own_underporm_calls
 						,(uint64_t) f_profile->in_calls_underporm_calls
@@ -460,7 +457,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 		}
 #endif
 
-		php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE);
+		php_stream_close(self->stream);
 		self->stream = NULL;
 	}
 	/* no DBG_RETURN please */
@@ -723,8 +720,8 @@ mysqlnd_debug_init(const char * skip_functions[])
 /* }}} */
 
 
-/* {{{ _mysqlnd_debug */
-PHPAPI void _mysqlnd_debug(const char * mode)
+/* {{{ mysqlnd_debug */
+PHPAPI void mysqlnd_debug(const char * mode)
 {
 #if PHP_DEBUG
 	MYSQLND_DEBUG * dbg = MYSQLND_G(dbg);
@@ -759,9 +756,9 @@ static struct st_mysqlnd_plugin_trace_log mysqlnd_plugin_trace_log_plugin =
 		MYSQLND_PLUGIN_API_VERSION,
 		"debug_trace",
 		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
+		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
-		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
+		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
 			NULL, /* no statistics */

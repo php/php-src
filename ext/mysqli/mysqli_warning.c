@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@
 #include "mysqli_priv.h"
 
 /* Define these in the PHP7 tree to make merging easy process */
-#define Zzend_string_dupLICATE (1<<0)
+#define ZSTR_DUPLICATE (1<<0)
 #define ZSTR_AUTOFREE  (1<<1)
 
 #define ZVAL_UTF8_STRING(z, s, flags)          ZVAL_STRING((z), (char*)(s))
@@ -59,9 +59,9 @@ MYSQLI_WARNING *php_new_warning(const char *reason, int errorno)
 
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
-	ZVAL_UTF8_STRING(&(w->reason), reason, Zzend_string_dupLICATE);
+	ZVAL_UTF8_STRING(&(w->reason), reason, ZSTR_DUPLICATE);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  Zzend_string_dupLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
 
@@ -99,18 +99,16 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
 #else
 /* {{{ MYSQLI_WARNING *php_new_warning */
 static
-MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno)
+MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
 {
 	MYSQLI_WARNING *w;
 
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
-	ZVAL_DUP(&w->reason, (zval *)reason);
+	ZVAL_COPY(&w->reason, reason);
 	convert_to_string(&w->reason);
 
-	//????ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);
-
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  Zzend_string_dupLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
 
@@ -317,7 +315,7 @@ PHP_METHOD(mysqli_warning, __construct)
 const zend_function_entry mysqli_warning_methods[] = {
 	PHP_ME(mysqli_warning, __construct,		NULL, ZEND_ACC_PROTECTED)
 	PHP_ME(mysqli_warning, next, 			NULL, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

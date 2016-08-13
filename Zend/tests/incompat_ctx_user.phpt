@@ -1,7 +1,5 @@
 --TEST--
 Incompatible context call (non-internal function)
---INI--
-error_reporting=E_ALL
 --FILE--
 <?php
 
@@ -12,9 +10,12 @@ class B {
 	   function bar() { A::foo(); }
 }
 $b = new B;
-$b->bar();
-
+try {
+	$b->bar();
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 ?>
 --EXPECTF--
-Deprecated: Non-static method A::foo() should not be called statically, assuming $this from incompatible context in %s on line %d
-string(1) "B"
+Deprecated: Non-static method A::foo() should not be called statically in %s on line %d
+Exception: Using $this when not in object context

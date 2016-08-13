@@ -28,6 +28,9 @@ hash_hmac_file('crc32', $file, $key, TRUE, $extra_arg);
 echo "\n-- Testing hash_hmac_file() function with invalid hash algorithm --\n";
 hash_hmac_file('foo', $file, $key, TRUE);
 
+echo "\n-- Testing hash_hmac_file() function with bad path --\n";
+hash_hmac_file('crc32', $file.chr(0).$file, $key, TRUE);
+
 ?>
 ===Done===
 --EXPECTF--
@@ -51,4 +54,8 @@ Warning: hash_hmac_file() expects at most 4 parameters, 5 given in %s on line %d
 -- Testing hash_hmac_file() function with invalid hash algorithm --
 
 Warning: hash_hmac_file(): Unknown hashing algorithm: foo in %s on line %d
+
+-- Testing hash_hmac_file() function with bad path --
+
+Warning: hash_hmac_file(): Invalid path in %s on line %d
 ===Done===

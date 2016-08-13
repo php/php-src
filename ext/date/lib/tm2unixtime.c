@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 
@@ -148,9 +152,17 @@ static void do_adjust_for_weekday(timelib_time* time)
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	if (time->relative.weekday_behavior == 2)
 	{
-		if (time->relative.weekday == 0) {
+		/* To make "this week" work, where the current DOW is a "sunday" */
+		if (current_dow == 0 && time->relative.weekday != 0) {
+			time->relative.weekday = -6;
+		}
+
+		/* To make "sunday this week" work, where the current DOW is not a
+		 * "sunday" */
+		if (time->relative.weekday == 0 && current_dow != 0) {
 			time->relative.weekday = 7;
 		}
+
 		time->d -= current_dow;
 		time->d += time->relative.weekday;
 		return;
@@ -205,15 +217,17 @@ static void do_adjust_relative(timelib_time* time)
 		time->m += time->relative.m;
 		time->y += time->relative.y;
 	}
+
 	switch (time->relative.first_last_day_of) {
-		case 1: /* first */
+		case TIMELIB_SPECIAL_FIRST_DAY_OF_MONTH: /* first */
 			time->d = 1;
 			break;
-		case 2: /* last */
+		case TIMELIB_SPECIAL_LAST_DAY_OF_MONTH: /* last */
 			time->d = 0;
 			time->m++;
 			break;
 	}
+
 	timelib_do_normalize(time);
 }
 
@@ -295,6 +309,15 @@ static void do_adjust_special_early(timelib_time* time)
 				time->relative.m = 0;
 				break;
 		}
+	}
+	switch (time->relative.first_last_day_of) {
+		case TIMELIB_SPECIAL_FIRST_DAY_OF_MONTH: /* first */
+			time->d = 1;
+			break;
+		case TIMELIB_SPECIAL_LAST_DAY_OF_MONTH: /* last */
+			time->d = 0;
+			time->m++;
+			break;
 	}
 	timelib_do_normalize(time);
 }
@@ -412,9 +435,9 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 
 					tz->dst = gmt_offset->is_dst;
 					if (tz->tz_abbr) {
-						free(tz->tz_abbr);
+						timelib_free(tz->tz_abbr);
 					}
-					tz->tz_abbr = strdup(gmt_offset->abbr);
+					tz->tz_abbr = timelib_strdup(gmt_offset->abbr);
 					timelib_time_offset_dtor(gmt_offset);
 				}
 				return tmp;

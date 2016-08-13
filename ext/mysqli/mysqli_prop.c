@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Georg Richter <georg@php.net>                                |
   |         Andrey Hristov <andrey@php.net>                              |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -41,7 +39,7 @@
 #define MYSQLI_GET_MYSQL(statusval) \
 MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
+	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
 	ZVAL_NULL(retval);\
 	return retval; \
 } else { \
@@ -52,7 +50,7 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 #define MYSQLI_GET_RESULT(statusval) \
 MYSQL_RES *p; \
 if (!obj->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
+	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
 	ZVAL_NULL(retval);\
 	return retval; \
 } else { \
@@ -64,7 +62,7 @@ if (!obj->ptr) { \
 #define MYSQLI_GET_STMT(statusval) \
 MYSQL_STMT *p; \
 if (!obj->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
+	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
 	ZVAL_NULL(retval);\
 	return retval; \
 } else { \
@@ -289,7 +287,11 @@ static zval *result_type_read(mysqli_object *obj, zval *retval)
 static zval *result_lengths_read(mysqli_object *obj, zval *retval)
 {
 	MYSQL_RES *p;
-	zend_ulong *ret;
+#if defined(MYSQLI_USE_MYSQLND)
+	const size_t *ret;
+#else
+	const zend_ulong *ret;
+#endif
 	uint field_count;
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);

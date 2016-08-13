@@ -24,7 +24,7 @@ phpinfo(INFO_MODULES);
 ===DONE===
 --EXPECTF--
 %a
-<h2><a name="module_Phar">Phar</a></h2>
+<h2><a name="module_phar">Phar</a></h2>
 <table>
 <tr class="h"><th>Phar: PHP Archive support</th><th>enabled</th></tr>
 <tr><td class="e">Phar EXT version </td><td class="v">%s </td></tr>
@@ -48,7 +48,7 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 <tr><td class="e">phar.require_hash</td><td class="v">Off</td><td class="v">Off</td></tr>
 </table>
 %a
-<h2><a name="module_Phar">Phar</a></h2>
+<h2><a name="module_phar">Phar</a></h2>
 <table>
 <tr class="h"><th>Phar: PHP Archive support</th><th>enabled</th></tr>
 <tr><td class="e">Phar EXT version </td><td class="v">%s </td></tr>

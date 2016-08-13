@@ -11,6 +11,7 @@ class bar extends foo {
 ReflectionClass::export("bar");
 ?>
 --EXPECTF--
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; foo has a deprecated constructor in %s on line %d
 Class [ <user> class bar extends foo ] {
   @@ %sbug38942.php 6-7
 

@@ -34,8 +34,6 @@ int32_t grapheme_split_string(const UChar *text, int32_t text_length, int bounda
 
 int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len);
 
-inline void *grapheme_memrchr_grapheme(const void *s, int c, int32_t n);
-
 int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
 UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );

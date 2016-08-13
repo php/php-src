@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -78,10 +78,6 @@ extern void php_mysqli_report_error(const char *sqlstate, int errorno, const cha
 extern void php_mysqli_report_index(const char *query, unsigned int status);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);
 
-#ifdef HAVE_SPL
-extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
-#endif
-
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 
 PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *);
@@ -146,6 +142,6 @@ if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_stmt_errno(stmt)) { \
 
 void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor);
 
-void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS);
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method);
 
 #endif /* MYSQLI_PRIV_H */

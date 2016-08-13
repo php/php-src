@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -437,13 +437,13 @@ php_xml_compat_handlers = {
 	NULL
 };
 
-PHPAPI XML_Parser
+PHP_XML_API XML_Parser
 XML_ParserCreate(const XML_Char *encoding)
 {
 	return XML_ParserCreate_MM(encoding, NULL, NULL);
 }
 
-PHPAPI XML_Parser
+PHP_XML_API XML_Parser
 XML_ParserCreateNS(const XML_Char *encoding, const XML_Char sep)
 {
 	XML_Char tmp[2];
@@ -452,7 +452,7 @@ XML_ParserCreateNS(const XML_Char *encoding, const XML_Char sep)
 	return XML_ParserCreate_MM(encoding, NULL, tmp);
 }
 
-PHPAPI XML_Parser
+PHP_XML_API XML_Parser
 XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *memsuite, const XML_Char *sep)
 {
 	XML_Parser parser;
@@ -491,80 +491,80 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	return parser;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetUserData(XML_Parser parser, void *user)
 {
 	parser->user = user;
 }
 
-PHPAPI void *
+PHP_XML_API void *
 XML_GetUserData(XML_Parser parser)
 {
 	return parser->user;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetElementHandler(XML_Parser parser, XML_StartElementHandler start, XML_EndElementHandler end)
 {
 	parser->h_start_element = start;
 	parser->h_end_element = end;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetCharacterDataHandler(XML_Parser parser, XML_CharacterDataHandler cdata)
 {
 	parser->h_cdata = cdata;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetProcessingInstructionHandler(XML_Parser parser, XML_ProcessingInstructionHandler pi)
 {
 	parser->h_pi = pi;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetCommentHandler(XML_Parser parser, XML_CommentHandler comment)
 {
 	parser->h_comment = comment;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetDefaultHandler(XML_Parser parser, XML_DefaultHandler d)
 {
 	parser->h_default = d;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetUnparsedEntityDeclHandler(XML_Parser parser, XML_UnparsedEntityDeclHandler unparsed_decl)
 {
 	parser->h_unparsed_entity_decl = unparsed_decl;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetNotationDeclHandler(XML_Parser parser, XML_NotationDeclHandler notation_decl)
 {
 	parser->h_notation_decl = notation_decl;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetExternalEntityRefHandler(XML_Parser parser, XML_ExternalEntityRefHandler ext_entity)
 {
 	parser->h_external_entity_ref = ext_entity;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetStartNamespaceDeclHandler(XML_Parser parser, XML_StartNamespaceDeclHandler start_ns)
 {
 	parser->h_start_ns = start_ns;
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_SetEndNamespaceDeclHandler(XML_Parser parser, XML_EndNamespaceDeclHandler end_ns)
 {
 	parser->h_end_ns = end_ns;
 }
 
-PHPAPI int
+PHP_XML_API int
 XML_Parse(XML_Parser parser, const XML_Char *data, int data_len, int is_final)
 {
 	int error;
@@ -603,7 +603,7 @@ has been defined and none can be detected */
 	}
 }
 
-PHPAPI int
+PHP_XML_API int
 XML_GetErrorCode(XML_Parser parser)
 {
 	return parser->parser->errNo;
@@ -715,7 +715,7 @@ static const XML_Char *const error_mapping[] = {
 	(const XML_Char *)"Missing encoding in text declaration" /* 101 */
 };
 
-PHPAPI const XML_Char *
+PHP_XML_API const XML_Char *
 XML_ErrorString(int code)
 {
 	if (code < 0 || code >= (int)(sizeof(error_mapping) / sizeof(error_mapping[0]))) {
@@ -724,26 +724,26 @@ XML_ErrorString(int code)
 	return error_mapping[code];
 }
 
-PHPAPI int
+PHP_XML_API int
 XML_GetCurrentLineNumber(XML_Parser parser)
 {
 	return parser->parser->input->line;
 }
 
-PHPAPI int
+PHP_XML_API int
 XML_GetCurrentColumnNumber(XML_Parser parser)
 {
 	return parser->parser->input->col;
 }
 
-PHPAPI int
+PHP_XML_API int
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
 	return parser->parser->input->consumed +
 			(parser->parser->input->cur - parser->parser->input->base);
 }
 
-PHPAPI int
+PHP_XML_API int
 XML_GetCurrentByteCount(XML_Parser parser)
 {
 	/* WARNING: this is identical to ByteIndex; it should probably
@@ -752,12 +752,12 @@ XML_GetCurrentByteCount(XML_Parser parser)
 			(parser->parser->input->cur - parser->parser->input->base);
 }
 
-PHPAPI const XML_Char *XML_ExpatVersion(void)
+PHP_XML_API const XML_Char *XML_ExpatVersion(void)
 {
 	return (const XML_Char *) "1.0";
 }
 
-PHPAPI void
+PHP_XML_API void
 XML_ParserFree(XML_Parser parser)
 {
 	if (parser->use_namespace) {

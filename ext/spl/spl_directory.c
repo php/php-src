@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,9 +108,9 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 			}
 			*/
 			if (!intern->u.file.stream->is_persistent) {
-				php_stream_free(intern->u.file.stream, PHP_STREAM_FREE_CLOSE);
+				php_stream_close(intern->u.file.stream);
 			} else {
-				php_stream_free(intern->u.file.stream, PHP_STREAM_FREE_CLOSE_PERSISTENT);
+				php_stream_pclose(intern->u.file.stream);
 			}
 			if (intern->u.file.open_mode) {
 				efree(intern->u.file.open_mode);
@@ -121,10 +121,6 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 		}
 		spl_filesystem_file_free_line(intern);
 		break;
-	}
-
-	if (intern->it) {
-		//????zend_iterator_dtor(&intern->it->intern);
 	}
 } /* }}} */
 
@@ -192,18 +188,21 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 {
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
-	if (!intern->file_name) {
-		switch (intern->type) {
+	switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
-			php_error_docref(NULL, E_ERROR, "Object not initialized");
+			if (!intern->file_name) {
+				php_error_docref(NULL, E_ERROR, "Object not initialized");
+			}
 			break;
 		case SPL_FS_DIR:
+			if (intern->file_name) {
+				efree(intern->file_name);
+			}
 			intern->file_name_len = (int)spprintf(&intern->file_name, 0, "%s%c%s",
 			                                 spl_filesystem_object_get_path(intern, NULL),
 			                                 slash, intern->u.dir.entry.d_name);
 			break;
-		}
 	}
 } /* }}} */
 
@@ -316,7 +315,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 } /* }}} */
 
 /* {{{ spl_filesystem_object_clone */
-/* Local zend_object_value creation (on stack)
+/* Local zend_object creation (on stack)
    Load the 'other' object
    Create a new empty object (See spl_filesystem_object_new_ex)
    Open the directory
@@ -356,8 +355,8 @@ static zend_object *spl_filesystem_object_clone(zval *zobject)
 			intern->u.dir.index = index;
 			break;
 		case SPL_FS_FILE:
-			php_error_docref(NULL, E_ERROR, "An object of class %s cannot be cloned", old_object->ce->name->val);
-			break;
+			zend_throw_error(NULL, "An object of class %s cannot be cloned", ZSTR_VAL(old_object->ce->name));
+			return NULL;
 	}
 
 	intern->file_class = source->file_class;
@@ -477,7 +476,9 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 		case SPL_FS_INFO:
 			ce = ce ? ce : source->info_class;
 
-			zend_update_class_constants(ce);
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+				break;
+			}
 
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
 			ZVAL_OBJ(return_value, &intern->std);
@@ -497,7 +498,9 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 		case SPL_FS_FILE:
 			ce = ce ? ce : source->file_class;
 
-			zend_update_class_constants(ce);
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+				break;
+			}
 
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
 
@@ -654,7 +657,7 @@ zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend
 {
 	spl_filesystem_object *fsobj = spl_filesystem_from_obj(*object);
 
-	if (fsobj->u.dir.entry.d_name[0] == '\0' && fsobj->orig_path == NULL) {
+	if (fsobj->u.dir.dirp == NULL && fsobj->orig_path == NULL) {
 		zend_function *func;
 		zend_string *tmp = zend_string_init("_bad_state_ex", sizeof("_bad_state_ex") - 1, 0);
 		func = zend_get_std_object_handlers()->get_method(object, tmp, NULL);
@@ -673,7 +676,8 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 {
 	spl_filesystem_object *intern;
 	char *path;
-	size_t parsed, len;
+	int parsed;
+	size_t len;
 	zend_long flags;
 	zend_error_handling error_handling;
 
@@ -779,7 +783,8 @@ SPL_METHOD(DirectoryIterator, current)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_ZVAL(getThis(), 1, 0);
+	ZVAL_OBJ(return_value, Z_OBJ_P(getThis()));
+	Z_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -830,7 +835,8 @@ SPL_METHOD(DirectoryIterator, seek)
 			zval_ptr_dtor(&retval);
 		}
 		if (!valid) {
-			break;
+			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
+			return;
 		}
 		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_next, "next", NULL);
 	}
@@ -930,11 +936,10 @@ SPL_METHOD(SplFileInfo, getExtension)
 
 	ret = php_basename(fname, flen, NULL, 0);
 
-	p = zend_memrchr(ret->val, '.', ret->len);
+	p = zend_memrchr(ZSTR_VAL(ret), '.', ZSTR_LEN(ret));
 	if (p) {
-		assert(p > ret->val);
-		idx = (int)(p - ret->val);
-		RETVAL_STRINGL(ret->val + idx + 1, ret->len - idx - 1);
+		idx = (int)(p - ZSTR_VAL(ret));
+		RETVAL_STRINGL(ZSTR_VAL(ret) + idx + 1, ZSTR_LEN(ret) - idx - 1);
 		zend_string_release(ret);
 		return;
 	} else {
@@ -959,10 +964,10 @@ SPL_METHOD(DirectoryIterator, getExtension)
 
 	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0);
 
-	p = zend_memrchr(fname->val, '.', fname->len);
+	p = zend_memrchr(ZSTR_VAL(fname), '.', ZSTR_LEN(fname));
 	if (p) {
-		idx = (int)(p - fname->val);
-		RETVAL_STRINGL(fname->val + idx + 1, fname->len - idx - 1);
+		idx = (int)(p - ZSTR_VAL(fname));
+		RETVAL_STRINGL(ZSTR_VAL(fname) + idx + 1, ZSTR_LEN(fname) - idx - 1);
 		zend_string_release(fname);
 	} else {
 		zend_string_release(fname);
@@ -971,7 +976,7 @@ SPL_METHOD(DirectoryIterator, getExtension)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getBasename([string $suffix]) U
+/* {{{ proto string SplFileInfo::getBasename([string $suffix])
    Returns filename component of path */
 SPL_METHOD(SplFileInfo, getBasename)
 {
@@ -998,7 +1003,7 @@ SPL_METHOD(SplFileInfo, getBasename)
 }
 /* }}}*/
 
-/* {{{ proto string DirectoryIterator::getBasename([string $suffix]) U
+/* {{{ proto string DirectoryIterator::getBasename([string $suffix])
    Returns filename component of current dir entry */
 SPL_METHOD(DirectoryIterator, getBasename)
 {
@@ -1073,7 +1078,8 @@ SPL_METHOD(FilesystemIterator, current)
 		spl_filesystem_object_get_file_name(intern);
 		spl_filesystem_object_create_type(0, intern, SPL_FS_INFO, NULL, return_value);
 	} else {
-		RETURN_ZVAL(getThis(), 1, 0);
+		ZVAL_OBJ(return_value, Z_OBJ_P(getThis()));
+		Z_ADDREF_P(return_value);
 		/*RETURN_STRING(intern->u.dir.entry.d_name, 1);*/
 	}
 }
@@ -1095,11 +1101,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 
 /* {{{ proto void SplFileInfo::__construct(string file_name)
  Cronstructs a new SplFileInfo from a path. */
-/* zend_replace_error_handling() is used to throw exceptions in case
-   the constructor fails. Here we use this to ensure the object
-   has a valid directory resource.
-
-   When the constructor gets called the object is already created
+/* When the constructor gets called the object is already created
    by the engine, so we must only call 'additional' initializations.
  */
 SPL_METHOD(SplFileInfo, __construct)
@@ -1107,20 +1109,14 @@ SPL_METHOD(SplFileInfo, __construct)
 	spl_filesystem_object *intern;
 	char *path;
 	size_t len;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &path, &len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &path, &len) == FAILURE) {
 		return;
 	}
 
 	intern = Z_SPLFILESYSTEM_P(getThis());
 
 	spl_filesystem_info_set_filename(intern, path, len, 1);
-
-	zend_restore_error_handling(&error_handling);
 
 	/* intern->type = SPL_FS_INFO; already set */
 }
@@ -1218,7 +1214,7 @@ FileInfoFunction(isDir, FS_IS_DIR)
 FileInfoFunction(isLink, FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getLinkTarget() U
+/* {{{ proto string SplFileInfo::getLinkTarget()
    Return the target of a symbolic link */
 SPL_METHOD(SplFileInfo, getLinkTarget)
 {
@@ -1547,8 +1543,6 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	char *sub_name;
-	size_t len;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1556,9 +1550,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 	}
 
 	if (intern->u.dir.sub_path) {
-		len = spprintf(&sub_name, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
-		RETVAL_STRINGL(sub_name, len);
-		efree(sub_name);
+		RETURN_NEW_STR(strpprintf(0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name));
 	} else {
 		RETURN_STRING(intern->u.dir.entry.d_name);
 	}
@@ -1617,7 +1609,8 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 	spl_filesystem_dir_it_current_data,
 	spl_filesystem_dir_it_current_key,
 	spl_filesystem_dir_it_move_forward,
-	spl_filesystem_dir_it_rewind
+	spl_filesystem_dir_it_rewind,
+	NULL
 };
 /* }}} */
 
@@ -1652,8 +1645,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter)
 		zval_ptr_dtor(object);
 	}
 	/* Otherwise we were called from the owning object free storage handler as
-	 * it sets
-	 * iterator->intern.data to NULL.
+	 * it sets iterator->intern.data to IS_UNDEF.
 	 * We don't even need to destroy iterator->current as we didn't add a
 	 * reference to it in move_forward or get_iterator */
 }
@@ -1816,7 +1808,8 @@ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_current_data,
 	spl_filesystem_tree_it_current_key,
 	spl_filesystem_tree_it_move_forward,
-	spl_filesystem_tree_it_rewind
+	spl_filesystem_tree_it_rewind,
+	NULL
 };
 /* }}} */
 
@@ -1857,8 +1850,8 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 				zval *retval_ptr = &retval;
 
 				ZVAL_STRINGL(retval_ptr, intern->file_name, intern->file_name_len);
-				zval_dtor(readobj);
-				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+				zval_ptr_dtor(readobj);
+				ZVAL_NEW_STR(writeobj, Z_STR_P(retval_ptr));
 			} else {
 				ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len);
 			}
@@ -1869,8 +1862,8 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 				zval *retval_ptr = &retval;
 
 				ZVAL_STRING(retval_ptr, intern->u.dir.entry.d_name);
-				zval_dtor(readobj);
-				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+				zval_ptr_dtor(readobj);
+				ZVAL_NEW_STR(writeobj, Z_STR_P(retval_ptr));
 			} else {
 				ZVAL_STRING(writeobj, intern->u.dir.entry.d_name);
 			}
@@ -1881,7 +1874,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 		return SUCCESS;
 	}
 	if (readobj == writeobj) {
-		zval_dtor(readobj);
+		zval_ptr_dtor(readobj);
 	}
 	ZVAL_NULL(writeobj);
 	return FAILURE;
@@ -2034,7 +2027,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 
 	if (intern->u.file.max_line_len > 0) {
 		buf = safe_emalloc((intern->u.file.max_line_len + 1), sizeof(char), 0);
-		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len, &line_len) == NULL) {
+		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len + 1, &line_len) == NULL) {
 			efree(buf);
 			buf = NULL;
 		} else {
@@ -2085,13 +2078,11 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	ZVAL_UNDEF(&retval);
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = num_args;
 	fci.params = params;
 	fci.no_separation = 1;
-	fci.symbol_table = NULL;
 	ZVAL_STR(&fci.function_name, func_ptr->common.function_name);
 
 	fcic.initialized = 1;
@@ -2126,6 +2117,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, char escape, zval *return_value) /* {{{ */
 {
 	int ret = SUCCESS;
+	zval *value;
 
 	do {
 		ret = spl_filesystem_file_read(intern, 1);
@@ -2142,11 +2134,10 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 
 		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
 		if (return_value) {
-			if (Z_TYPE_P(return_value) != IS_NULL) {
-				zval_dtor(return_value);
-				ZVAL_NULL(return_value);
-			}
-			ZVAL_ZVAL(return_value, &intern->u.file.current_zval, 1, 0);
+			zval_ptr_dtor(return_value);
+			value = &intern->u.file.current_zval;
+			ZVAL_DEREF(value);
+			ZVAL_COPY(return_value, value);
 		}
 	}
 	return ret;
@@ -2180,7 +2171,10 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 				intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
 				intern->u.file.current_line_len = Z_STRLEN(retval);
 			} else {
-				ZVAL_ZVAL(&intern->u.file.current_zval, &retval, 1, 0);
+				zval *value = &retval;
+
+				ZVAL_DEREF(value);
+				ZVAL_COPY(&intern->u.file.current_zval, value);
 			}
 			zval_ptr_dtor(&retval);
 			return SUCCESS;
@@ -2265,18 +2259,15 @@ SPL_METHOD(SplFileObject, __construct)
 	size_t   tmp_path_len;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
-
 	intern->u.file.open_mode = NULL;
 	intern->u.file.open_mode_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|sbr!",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "p|sbr!",
 			&intern->file_name, &intern->file_name_len,
 			&intern->u.file.open_mode, &intern->u.file.open_mode_len,
 			&use_include_path, &intern->u.file.zcontext) == FAILURE) {
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
-		zend_restore_error_handling(&error_handling);
 		return;
 	}
 
@@ -2284,6 +2275,8 @@ SPL_METHOD(SplFileObject, __construct)
 		intern->u.file.open_mode = "r";
 		intern->u.file.open_mode_len = 1;
 	}
+
+	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
 	if (spl_filesystem_file_open(intern, use_include_path, 0) == SUCCESS) {
 		tmp_path_len = strlen(intern->u.file.stream->orig_path);
@@ -2324,10 +2317,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &max_memory) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|l", &max_memory) == FAILURE) {
 		return;
 	}
 
@@ -2335,7 +2325,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 		intern->file_name = "php://memory";
 		intern->file_name_len = 12;
 	} else if (ZEND_NUM_ARGS()) {
-		intern->file_name_len = slprintf(tmp_fname, sizeof(tmp_fname), "php://temp/maxmemory:%pd", max_memory);
+		intern->file_name_len = slprintf(tmp_fname, sizeof(tmp_fname), "php://temp/maxmemory:" ZEND_LONG_FMT, max_memory);
 		intern->file_name = tmp_fname;
 	} else {
 		intern->file_name = "php://temp";
@@ -2344,6 +2334,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 	intern->u.file.open_mode = "wb";
 	intern->u.file.open_mode_len = 1;
 
+	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 	if (spl_filesystem_file_open(intern, 0, 0) == SUCCESS) {
 		intern->_path_len = 0;
 		intern->_path = estrndup("", 0);
@@ -2444,7 +2435,11 @@ SPL_METHOD(SplFileObject, current)
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
-		RETURN_ZVAL(&intern->u.file.current_zval, 1, 0);
+		zval *value = &intern->u.file.current_zval;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
+		return;
 	}
 	RETURN_FALSE;
 } /* }}} */
@@ -2662,8 +2657,8 @@ SPL_METHOD(SplFileObject, fputcsv)
 }
 /* }}} */
 
-/* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"' [, string escape = '\\']]])
-   Set the delimiter and enclosure character used in fgetcsv */
+/* {{{ proto void SplFileObject::setCsvControl([string delimiter [, string enclosure [, string escape ]]])
+   Set the delimiter, enclosure and escape character used in fgetcsv */
 SPL_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
@@ -2706,11 +2701,11 @@ SPL_METHOD(SplFileObject, setCsvControl)
 /* }}} */
 
 /* {{{ proto array SplFileObject::getCsvControl()
-   Get the delimiter and enclosure character used in fgetcsv */
+   Get the delimiter, enclosure and escape character used in fgetcsv */
 SPL_METHOD(SplFileObject, getCsvControl)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	char delimiter[2], enclosure[2];
+	char delimiter[2], enclosure[2], escape[2];
 
 	array_init(return_value);
 
@@ -2718,9 +2713,12 @@ SPL_METHOD(SplFileObject, getCsvControl)
 	delimiter[1] = '\0';
 	enclosure[0] = intern->u.file.enclosure;
 	enclosure[1] = '\0';
+	escape[0] = intern->u.file.escape;
+	escape[1] = '\0';
 
 	add_next_index_string(return_value, delimiter);
 	add_next_index_string(return_value, enclosure);
+	add_next_index_string(return_value, escape);
 }
 /* }}} */
 
@@ -2890,7 +2888,7 @@ SPL_METHOD(SplFileObject, fwrite)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		if (length >= 0) {
-			str_len = MAX(0, MIN((size_t)length, str_len));
+			str_len = MIN((size_t)length, str_len);
 		} else {
 			/* Negative length given, nothing to write */
 			str_len = 0;
@@ -2974,7 +2972,7 @@ SPL_METHOD(SplFileObject, seek)
 	}
 
 	if (line_pos < 0) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line %pd", intern->file_name, line_pos);
+		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line " ZEND_LONG_FMT, intern->file_name, line_pos);
 		RETURN_FALSE;
 	}
 

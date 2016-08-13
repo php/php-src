@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -318,7 +318,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		if (NULL == (fdat->ce = zend_lookup_class(fdat->classname))) {
 			php_error_docref(NULL, E_WARNING,
 					"user-filter \"%s\" requires class \"%s\", but that class is not defined",
-					filtername, fdat->classname->val);
+					filtername, ZSTR_VAL(fdat->classname));
 			return NULL;
 		}
 	}
@@ -452,7 +452,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}
-		if ((int)bucket->buflen != Z_STRLEN_P(pzdata)) {
+		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
 			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
 			bucket->buflen = Z_STRLEN_P(pzdata);
 		}
@@ -473,7 +473,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_prepend(resource brigade, resource bucket)
+/* {{{ proto void stream_bucket_prepend(resource brigade, object bucket)
    Prepend bucket to brigade */
 PHP_FUNCTION(stream_bucket_prepend)
 {
@@ -481,7 +481,7 @@ PHP_FUNCTION(stream_bucket_prepend)
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_append(resource brigade, resource bucket)
+/* {{{ proto void stream_bucket_append(resource brigade, object bucket)
    Append bucket to brigade */
 PHP_FUNCTION(stream_bucket_append)
 {
@@ -567,12 +567,12 @@ PHP_FUNCTION(stream_filter_register)
 
 	RETVAL_FALSE;
 
-	if (!filtername->len) {
+	if (!ZSTR_LEN(filtername)) {
 		php_error_docref(NULL, E_WARNING, "Filter name cannot be empty");
 		return;
 	}
 
-	if (!classname->len) {
+	if (!ZSTR_LEN(classname)) {
 		php_error_docref(NULL, E_WARNING, "Class name cannot be empty");
 		return;
 	}
@@ -586,7 +586,7 @@ PHP_FUNCTION(stream_filter_register)
 	fdat->classname = zend_string_copy(classname);
 
 	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(filtername->val, &user_filter_factory) == SUCCESS) {
+			php_stream_filter_register_factory_volatile(ZSTR_VAL(filtername), &user_filter_factory) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		zend_string_release(classname);

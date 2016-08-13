@@ -18,5 +18,5 @@ $b->foo();
 
 ?>
 --EXPECTF--
-Strict Standards: Declaration of B::foo() should be compatible with A::foo($arg = 1) in %s on line %d
+Warning: Declaration of B::foo() should be compatible with A::foo($arg = 1) in %s on line %d
 foo

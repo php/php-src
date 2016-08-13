@@ -7,7 +7,7 @@ if (!extension_loaded("com_dotnet")){ echo "skip COM/.Net support not present"; 
 try {
 	new COM("word.application", NULL, CP_UTF8); 
 } catch (Exception $e) {
-	die('skip ' . $e->getMessage();
+	die('skip ' . $e->getMessage());
 }
 
 ?>

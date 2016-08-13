@@ -13,7 +13,7 @@ throw new a;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'a' in :%d
+Fatal error: Uncaught a in :%d
 Stack trace:
 #0 {main}
   thrown in Unknown on line %d

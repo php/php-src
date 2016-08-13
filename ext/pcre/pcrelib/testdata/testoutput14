@@ -527,4 +527,6 @@ Failed: character value in \u.... sequence is too large at offset 6
         End
 ------------------------------------------------------------------
 
+/(?'ABC'[bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar](*THEN:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))/
+
 /-- End of testinput14 --/

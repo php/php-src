@@ -8,7 +8,7 @@ rmdir($tempdir);
 <?php
 if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 $support = gd_info();
-if (!isset($support['WEBP Support']) || $support['WEBP Support'] === false) {
+if (!isset($support['WebP Support']) || $support['WebP Support'] === false) {
 	print 'skip webp support not available';
 }
 ?>
@@ -30,9 +30,9 @@ imagewebp($image, $temp);
 var_dump(file_exists($tempdir. "/test1"));
 var_dump(file_exists($tempdir. "/test1.tmp"));
 foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
-
+?>
 --EXPECTF--
-imagewbmp TEST
+imagewebp TEST
 
 Warning: imagewebp(): Invalid 2nd parameter, filename must not contain null bytes in %s on line %d
 bool(false)

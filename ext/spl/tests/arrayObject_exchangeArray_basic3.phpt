@@ -98,9 +98,7 @@ object(C)#3 (2) {
   ["addedToOriginal"]=>
   string(17) "added To Original"
 }
-array(2) {
-  ["pub1"]=>
-  string(7) "public1"
+array(1) {
   ["addedToCopy"]=>
   string(13) "added To Copy"
 }

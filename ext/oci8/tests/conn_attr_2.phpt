@@ -71,7 +71,7 @@ if (!$sys_c1) {
 } else {
 	set_attr($sys_c1,'ACTION',10);
 	get_sys_attr($sys_c1,'ACTION');
-	get_attr($pc2,'ACTION');
+	get_attr($sys_c1,'ACTION');
 	oci_close($sys_c1);
 }
 

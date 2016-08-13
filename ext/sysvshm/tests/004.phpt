@@ -1,7 +1,10 @@
 --TEST--
 shm_put_var() tests
 --SKIPIF--
-<?php if (!extension_loaded("sysvshm")) print "skip"; ?>
+<?php
+if (!extension_loaded("sysvshm")){ print 'skip'; }
+if (!function_exists('ftok')){ print 'skip'; }
+?>
 --FILE--
 <?php
 

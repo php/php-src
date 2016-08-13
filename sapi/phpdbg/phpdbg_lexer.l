@@ -14,6 +14,7 @@
 #define YYGETCONDITION() LEX(state)
 #define YYCURSOR LEX(cursor)
 #define YYMARKER LEX(marker)
+#define YYCTXMARKER LEX(ctxmarker)
 #define yyleng LEX(len)
 #define yytext ((char*) LEX(text))
 #undef YYDEBUG
@@ -25,7 +26,7 @@
 #define RAW 2
 #define INITIAL 3
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 	PHPDBG_G(parser_stack) = stack;
@@ -34,6 +35,25 @@ void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 
 	LEX(text) = YYCURSOR = (unsigned char *) input;
 	LEX(len) = strlen(input);
+}
+
+static int unescape_string(char *s) {
+	switch (*s) {
+		case '\'':
+		case '\"': {
+			char start = *s;
+			size_t off = 1;
+			do {
+				if (s[off] == '\\') {
+					off++;
+				}
+				*s = s[off];
+			} while ((++s)[off] != start);
+			return off + 1;
+		}
+	}
+
+	return 0;
 }
 
 int phpdbg_lex (phpdbg_param_t* yylval) {
@@ -56,20 +76,21 @@ T_SHELL     'sh'
 T_IF        'if'
 T_RUN       'run'
 T_RUN_SHORT "r"
-WS          [ \r\n\t]+
+WS          [ \r\t]+
 DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
+GENERIC_ID  ([^ \r\n\t:#\000"']|":\\")+|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+[']
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
-INPUT       [^\n\000]+
+INPUT       ([^\n\000#"']|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+['])+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
-<*>{WS}?[\n\000] {
+<*>[\n\000] {
 	return 0;
 }
 
-<PRE_RAW, NORMAL>[-][r]{WS}?{DIGITS} {
+<PRE_RAW, NORMAL>"-r"{WS}?{DIGITS} {
 	char *text = yytext + 2;
 	while (*++text < '0');
 	yylval->num = atoi(text);
@@ -82,29 +103,37 @@ INPUT       [^\n\000]+
 	return T_IF;
 }
 
-<NORMAL>{ID}[:]{1}[//]{2} {
-	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
-	yylval->len = yyleng;
-	return T_PROTO;
-}
-<NORMAL>[#]{1} {
+<NORMAL>"#"/{DIGITS} {
 	return T_POUND;
 }
-<NORMAL>[:]{2} {
+
+<*>"#" {
+	YYSETCONDITION(INITIAL);
+	return T_SEPARATOR;
+}
+
+<NORMAL>"::" {
 	return T_DCOLON;
 }
-<NORMAL>[:]{1} {
+
+<NORMAL>":"/[^\\] {
 	return T_COLON;
 }
 
-<NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE}){WS} {
+<NORMAL>{ID}"://" {
+	phpdbg_init_param(yylval, STR_PARAM);
+	yylval->str = estrndup(yytext, yyleng);
+	yylval->len = yyleng;
+	return T_PROTO;
+}
+
+<NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE})/[ \r\t\n\000] {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 1;
 	return T_TRUTHY;
 }
 
-<NORMAL>({T_NO}|{T_OFF}|{T_DISABLED}|{T_FALSE}){WS} {
+<NORMAL>({T_NO}|{T_OFF}|{T_DISABLED}|{T_FALSE})/[ \r\t\n\000] {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 0;
 	return T_FALSY;
@@ -124,21 +153,21 @@ INPUT       [^\n\000]+
 
 <NORMAL>{OPCODE} {
 	phpdbg_init_param(yylval, OP_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_OPCODE;
 }
 
-<NORMAL>{ID} {
+<NORMAL>{GENERIC_ID} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_ID;
 }
 
 <RAW>{INPUT} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_INPUT;
 }
@@ -154,25 +183,27 @@ INPUT       [^\n\000]+
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_EVAL;
 }
+
 <INITIAL>{T_SHELL}{WS} {
 	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_SHELL;
 }
+
 <INITIAL>({T_RUN}|{T_RUN_SHORT}){WS} {
 	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_RUN;
 }
 
-<PRE_RAW>. {
+<PRE_RAW>[^ ] {
 	YYSETCONDITION(RAW);
 
 	YYCURSOR = LEX(text);
 	goto restart;
 }
 
-<INITIAL>. {
+<INITIAL>[^ ] {
 	YYSETCONDITION(NORMAL);
 
 	YYCURSOR = LEX(text);

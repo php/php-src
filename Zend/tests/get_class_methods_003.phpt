@@ -3,13 +3,13 @@ get_class_methods(): Testing scope
 --FILE--
 <?php
 
-interface A { 
+interface I { 
 	function aa();
 	function bb();
 	static function cc();
 }
 
-class C {
+class X {
 	public function a() { }
 	protected function b() { }
 	private function c() { }
@@ -19,22 +19,22 @@ class C {
 	static private function static_c() { }
 }
 
-class B extends C implements A {
+class Y extends X implements I {
 	public function aa() { }
 	public function bb() { }
 	
 	static function cc() { }
 	
 	public function __construct() {
-		var_dump(get_class_methods('A'));
-		var_dump(get_class_methods('B'));
-		var_dump(get_class_methods('C'));
+		var_dump(get_class_methods('I'));
+		var_dump(get_class_methods('Y'));
+		var_dump(get_class_methods('X'));
 	}
 	
 	public function __destruct() { }
 }
 
-new B;
+new Y;
 
 ?>
 --EXPECT--

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,7 +78,8 @@ static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 		return;
 	}
 	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1, &rv);
-	RETURN_ZVAL(res, 1, 0);
+	ZVAL_DEREF(res);
+	ZVAL_COPY(return_value, res);
 }
 
 static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)

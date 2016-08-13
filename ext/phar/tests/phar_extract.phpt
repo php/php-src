@@ -138,7 +138,7 @@ string(3) "hi2"
 bool(false)
 Invalid argument, expected a filename (string) or array of filenames
 
-Warning: Phar::extractTo() expects parameter 1 to be %string, array given in %sphar_extract.php on line %d
+Warning: Phar::extractTo() expects parameter 1 to be a valid path, array given in %sphar_extract.php on line %d
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory
 Invalid argument, array of filenames to extract contains non-string value

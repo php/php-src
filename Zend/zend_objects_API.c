@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -42,17 +43,17 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 {
-	uint32_t i;
-
-	for (i = 1; i < objects->top ; i++) {
-		zend_object *obj = objects->object_buckets[i];
-
-		if (IS_OBJ_VALID(obj)) {
-			if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
-				GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-				GC_REFCOUNT(obj)++;
-				obj->handlers->dtor_obj(obj);
-				GC_REFCOUNT(obj)--;
+	if (objects->top > 1) {
+		uint32_t i;
+		for (i = 1; i < objects->top; i++) {
+			zend_object *obj = objects->object_buckets[i];
+			if (IS_OBJ_VALID(obj)) {
+				if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+					GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+					GC_REFCOUNT(obj)++;
+					obj->handlers->dtor_obj(obj);
+					GC_REFCOUNT(obj)--;
+				}
 			}
 		}
 	}
@@ -60,28 +61,36 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 
 ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects)
 {
-	uint32_t i;
+	if (objects->object_buckets && objects->top > 1) {
+		zend_object **obj_ptr = objects->object_buckets + 1;
+		zend_object **end = objects->object_buckets + objects->top;
 
-	if (!objects->object_buckets) {
-		return;
-	}
-	for (i = 1; i < objects->top ; i++) {
-		zend_object *obj = objects->object_buckets[i];
+		do {
+			zend_object *obj = *obj_ptr;
 
-		if (IS_OBJ_VALID(obj)) {
-			GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-		}
+			if (IS_OBJ_VALID(obj)) {
+				GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+			}
+			obj_ptr++;
+		} while (obj_ptr != end);
 	}
 }
 
 ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects)
 {
-	uint32_t i;
+	zend_object **obj_ptr, **end, *obj;
 
-	/* Free object properties but don't free object their selves */
-	for (i = objects->top - 1; i > 0 ; i--) {
-		zend_object *obj = objects->object_buckets[i];
+	if (objects->top <= 1) {
+		return;
+	}
 
+	/* Free object contents, but don't free objects themselves, so they show up as leaks */
+	end = objects->object_buckets + 1;
+	obj_ptr = objects->object_buckets + objects->top;
+
+	do {
+		obj_ptr--;
+		obj = *obj_ptr;
 		if (IS_OBJ_VALID(obj)) {
 			if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 				GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
@@ -92,19 +101,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 				}
 			}
 		}
-	}
-
-	/* Now free objects theirselves */
-	for (i = 1; i < objects->top ; i++) {
-		zend_object *obj = objects->object_buckets[i];
-
-		if (IS_OBJ_VALID(obj)) {
-			/* Not adding to free list as we are shutting down anyway */
-			void *ptr = ((char*)obj) - obj->handlers->offset;
-			GC_REMOVE_FROM_BUFFER(obj);
-			efree(ptr);
-		}
-	}
+	} while (obj_ptr != end);
 }
 
 

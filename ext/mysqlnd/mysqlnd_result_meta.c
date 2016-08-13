@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,15 +12,15 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #include "php.h"
 #include "mysqlnd.h"
+#include "mysqlnd_connection.h"
+#include "mysqlnd_ps.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_result.h"
 #include "mysqlnd_wireprotocol.h"
@@ -57,9 +57,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
-	field_packet = conn->protocol->m.get_result_field_packet(conn->protocol, FALSE);
+	field_packet = conn->payload_decoder_factory->m.get_result_field_packet(conn->payload_decoder_factory, FALSE);
 	if (!field_packet) {
-		SET_OOM_ERROR(*conn->error_info);
+		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(FAIL);
 	}
 	field_packet->persistent_alloc = meta->persistent;
@@ -73,29 +73,20 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		}
 
 		field_packet->metadata = &(meta->fields[i]);
-		if (FAIL == PACKET_READ(field_packet, conn)) {
+		if (FAIL == PACKET_READ(field_packet)) {
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
 		if (field_packet->error_info.error_no) {
-			COPY_CLIENT_ERROR(*conn->error_info, field_packet->error_info);
+			COPY_CLIENT_ERROR(conn->error_info, field_packet->error_info);
 			/* Return back from CONN_QUERY_SENT */
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
 
-		if (field_packet->stupid_list_fields_eof == TRUE) {
-			meta->field_count = i;
-			break;
-		}
-
 		if (mysqlnd_ps_fetch_functions[meta->fields[i].type].func == NULL) {
-			DBG_ERR_FMT("Unknown type %u sent by the server.  Please send a report to the developers",
-						meta->fields[i].type);
-			php_error_docref(NULL, E_WARNING,
-							 "Unknown type %u sent by the server. "
-							 "Please send a report to the developers",
-							 meta->fields[i].type);
+			DBG_ERR_FMT("Unknown type %u sent by the server.  Please send a report to the developers", meta->fields[i].type);
+			php_error_docref(NULL, E_WARNING, "Unknown type %u sent by the server. Please send a report to the developers", meta->fields[i].type);
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
@@ -180,7 +171,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta)
 
 /* {{{ mysqlnd_res::clone_metadata */
 static MYSQLND_RES_METADATA *
-MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta, const zend_bool persistent)
 {
 	unsigned int i;
 	/* +1 is to have empty marker at the end */
@@ -227,8 +218,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 
 		if (orig_fields[i].sname) {
 			new_fields[i].sname = zend_string_copy(orig_fields[i].sname);
-			new_fields[i].name = new_fields[i].sname->val;
-			new_fields[i].name_length = new_fields[i].sname->len;
+			new_fields[i].name = ZSTR_VAL(new_fields[i].sname);
+			new_fields[i].name_length = ZSTR_LEN(new_fields[i].sname);
 		}
 
 		if (orig_fields[i].org_name && orig_fields[i].org_name != mysqlnd_empty_string) {

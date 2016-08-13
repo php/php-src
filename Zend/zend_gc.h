@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,29 +49,16 @@
 
 #define GC_ADDRESS(v) \
 	((v) & ~GC_COLOR)
-#define GC_SET_ADDRESS(v, a) \
-	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
-#define GC_GET_COLOR(v) \
+#define GC_INFO_GET_COLOR(v) \
 	(((zend_uintptr_t)(v)) & GC_COLOR)
-#define GC_SET_COLOR(v, c) \
+#define GC_INFO_SET_ADDRESS(v, a) \
+	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
+#define GC_INFO_SET_COLOR(v, c) \
 	do {(v) = ((v) & ~GC_COLOR) | (c);} while (0)
-#define GC_SET_BLACK(v) \
+#define GC_INFO_SET_BLACK(v) \
 	do {(v) = (v) & ~GC_COLOR;} while (0)
-#define GC_SET_PURPLE(v) \
+#define GC_INFO_SET_PURPLE(v) \
 	do {(v) = (v) | GC_COLOR;} while (0)
-
-#define GC_ZVAL_ADDRESS(v) \
-	GC_ADDRESS(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_ADDRESS(v, a) \
-	GC_SET_ADDRESS(Z_GC_INFO_P(v), (a))
-#define GC_ZVAL_GET_COLOR(v) \
-	GC_GET_COLOR(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_COLOR(v, c) \
-	GC_SET_COLOR(Z_GC_INFO_P(v), (c))
-#define GC_ZVAL_SET_BLACK(v) \
-	GC_SET_BLACK(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_PURPLE(v) \
-	GC_SET_PURPLE(Z_GC_INFO_P(v))
 
 typedef struct _gc_root_buffer {
 	zend_refcounted          *ref;
@@ -121,8 +108,8 @@ extern ZEND_API zend_gc_globals gc_globals;
 BEGIN_EXTERN_C()
 ZEND_API extern int (*gc_collect_cycles)(void);
 
-ZEND_API void gc_possible_root(zend_refcounted *ref);
-ZEND_API void gc_remove_from_buffer(zend_refcounted *ref);
+ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
+ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref);
 ZEND_API void gc_globals_ctor(void);
 ZEND_API void gc_globals_dtor(void);
 ZEND_API void gc_init(void);

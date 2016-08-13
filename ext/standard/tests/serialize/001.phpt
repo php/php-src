@@ -6,7 +6,7 @@ serialize_precision=100
 <?php 
 class t
 {
-	function t()
+	function __construct()
 	{
 		$this->a = "hallo";
 	}
@@ -18,7 +18,7 @@ class s
 	public $b;
 	public $c;
 
-	function s()
+	function __construct()
 	{
 		$this->a = "hallo";
 		$this->b = "php";

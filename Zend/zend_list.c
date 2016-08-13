@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,24 +65,26 @@ ZEND_API int zend_list_free(zend_resource *res)
 static void zend_resource_dtor(zend_resource *res)
 {
 	zend_rsrc_list_dtors_entry *ld;
+	zend_resource r = *res;
 
-	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
+	res->type = -1;
+	res->ptr = NULL;
+
+	ld = zend_hash_index_find_ptr(&list_destructors, r.type);
 	if (ld) {
 		if (ld->list_dtor_ex) {
-			ld->list_dtor_ex(res);
+			ld->list_dtor_ex(&r);
 		}
 	} else {
-		zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
+		zend_error(E_WARNING, "Unknown list entry type (%d)", r.type);
 	}
-	res->ptr = NULL;
-	res->type = -1;
 }
 
 
 ZEND_API int zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
-		return zend_list_delete(res);
+		return zend_list_free(res);
 	} else if (res->type >= 0) {
 		zend_resource_dtor(res);
 	}
@@ -100,12 +102,14 @@ ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type
 
 ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int resource_type1, int resource_type2)
 {
-	if (resource_type1 == res->type) {
-		return res->ptr;
-	}
+	if (res) {
+		if (resource_type1 == res->type) {
+			return res->ptr;
+		}
 
-	if (resource_type2 == res->type) {
-		return res->ptr;
+		if (resource_type2 == res->type) {
+			return res->ptr;
+		}
 	}
 
 	if (resource_type_name) {
@@ -178,8 +182,8 @@ void list_entry_destructor(zval *zv)
 {
 	zend_resource *res = Z_RES_P(zv);
 
+	ZVAL_UNDEF(zv);
 	if (res->type >= 0) {
-
 		zend_resource_dtor(res);
 	}
 	efree_size(res, sizeof(zend_resource));

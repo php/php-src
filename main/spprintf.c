@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,20 +145,16 @@
 		((smart_string *)(xbuf))->len += (count); \
 	} else { \
 		smart_str_alloc(((smart_str *)(xbuf)), (count), 0); \
-		memset(((smart_str *)(xbuf))->s->val + ((smart_str *)(xbuf))->s->len, (ch), (count)); \
-		((smart_str *)(xbuf))->s->len += (count); \
+		memset(ZSTR_VAL(((smart_str *)(xbuf))->s) + ZSTR_LEN(((smart_str *)(xbuf))->s), (ch), (count)); \
+		ZSTR_LEN(((smart_str *)(xbuf))->s) += (count); \
 	} \
 } while (0);
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
- *
- * XXX: this is a magic number; do not decrease it
- * Emax = 1023
- * NDIG = 320
- * NUM_BUF_SIZE >= strlen("-") + Emax + strlrn(".") + NDIG + strlen("E+1023") + 1;
+ * which can be at most max length of double
  */
-#define NUM_BUF_SIZE		2048
+#define NUM_BUF_SIZE PHP_DOUBLE_MAX_LENGTH
 
 #define NUM(c) (c - '0')
 
@@ -182,7 +178,7 @@
  */
 #define FIX_PRECISION(adjust, precision, s, s_len) do {	\
     if (adjust)					                    	\
-		while (s_len < precision) {                 	\
+		while (s_len < (size_t)precision) {				\
 			*--s = '0';                             	\
 			s_len++;                                	\
 		}												\
@@ -306,8 +302,8 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					} else if (*fmt == '*') {
 						precision = va_arg(ap, int);
 						fmt++;
-						if (precision < 0)
-							precision = 0;
+						if (precision < -1)
+							precision = -1;
 					} else
 						precision = 0;
 
@@ -417,7 +413,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					}
 					s_len = Z_STRLEN_P(zvp);
 					s = Z_STRVAL_P(zvp);
-					if (adjust_precision && precision < s_len) {
+					if (adjust_precision && (size_t)precision < s_len) {
 						s_len = precision;
 					}
 					break;
@@ -741,7 +737,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
 
 				case 'n':
-					*(va_arg(ap, int *)) = is_char? (int)((smart_string *)xbuf)->len : (int)((smart_str *)xbuf)->s->len;
+					*(va_arg(ap, int *)) = is_char? (int)((smart_string *)xbuf)->len : (int)ZSTR_LEN(((smart_str *)xbuf)->s);
 					goto skip_output;
 
 					/*
@@ -803,7 +799,7 @@ fmt_error:
 				*--s = prefix_char;
 				s_len++;
 			}
-			if (adjust_width && adjust == RIGHT && min_width > s_len) {
+			if (adjust_width && adjust == RIGHT && (size_t)min_width > s_len) {
 				if (pad_char == '0' && prefix_char != NUL) {
 					INS_CHAR(xbuf, *s, is_char);
 					s++;
@@ -817,7 +813,7 @@ fmt_error:
 			 */
 			INS_STRING(xbuf, s, s_len, is_char);
 
-			if (adjust_width && adjust == LEFT && min_width > s_len) {
+			if (adjust_width && adjust == LEFT && (size_t)min_width > s_len) {
 				PAD_CHAR(xbuf, pad_char, min_width - s_len, is_char);
 			}
 
@@ -838,7 +834,6 @@ skip_output:
 PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_string buf = {0};
-	size_t result;
 
 	/* since there are places where (v)spprintf called without checking for null,
 	   a bit of defensive coding here */
@@ -855,13 +850,11 @@ PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list
 
 	if (buf.c) {
 		*pbuf = buf.c;
-		result = buf.len;
+		return buf.len;
 	} else {
-		*pbuf = NULL;
-		result = 0;
+		*pbuf = estrndup("", 0);
+		return 0;
 	}
-
-	return result;
 }
 /* }}} */
 
@@ -883,11 +876,15 @@ PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) 
 
 	xbuf_format_converter(&buf, 0, format, ap);
 
-	if (max_len && buf.s && buf.s->len > max_len) {
-		buf.s->len = max_len;
+	if (!buf.s) {
+		return ZSTR_EMPTY_ALLOC();
 	}
-	smart_str_0(&buf);
 
+	if (max_len && ZSTR_LEN(buf.s) > max_len) {
+		ZSTR_LEN(buf.s) = max_len;
+	}
+
+	smart_str_0(&buf);
 	return buf.s;
 }
 /* }}} */

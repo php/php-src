@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -101,7 +101,6 @@ PHP_FUNCTION(settype)
 	}
 
 	ZVAL_DEREF(var);
-	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
 		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {
@@ -155,8 +154,11 @@ PHP_FUNCTION(intval)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETVAL_ZVAL(num, 1, 0);
-	convert_to_long_base(return_value, (int)base);
+	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
+		RETVAL_LONG(zval_get_long(num));
+	} else {
+		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
+	}
 }
 /* }}} */
 
@@ -170,8 +172,7 @@ PHP_FUNCTION(floatval)
 		return;
 	}
 
-	RETVAL_ZVAL(num, 1, 0);
-	convert_to_double(return_value);
+	RETURN_DOUBLE(zval_get_double(num));
 }
 /* }}} */
 
@@ -227,8 +228,8 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce = Z_OBJCE_P(arg);
-			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1
-					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
+			if (ZSTR_LEN(ce->name) == sizeof(INCOMPLETE_CLASS) - 1
+					&& !memcmp(ZSTR_VAL(ce->name), INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1)) {
 				RETURN_FALSE;
 			}
 		} else if (type == IS_RESOURCE) {
@@ -415,8 +416,8 @@ PHP_FUNCTION(is_callable)
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)
-		if (UNEXPECTED(name->len) != strlen(name->val)) {
-			ZVAL_STRINGL(callable_name, name->val, strlen(name->val));
+		if (UNEXPECTED(ZSTR_LEN(name) != strlen(ZSTR_VAL(name)))) {
+			ZVAL_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
 			zend_string_release(name);
 		} else {
 			ZVAL_STR(callable_name, name);
@@ -430,6 +431,20 @@ PHP_FUNCTION(is_callable)
 	}
 
 	RETURN_BOOL(retval);
+}
+/* }}} */
+
+/* {{{ proto bool is_iterable(mixed var)
+   Returns true if var is iterable (array or instance of Traversable). */
+PHP_FUNCTION(is_iterable)
+{
+	zval *var;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &var) == FAILURE) {
+		return;
+	}
+	
+	RETURN_BOOL(zend_is_iterable(var));
 }
 /* }}} */
 

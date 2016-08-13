@@ -35,7 +35,5 @@ var_dump(property_exists('TraitsTest2', 'foo'));
 --EXPECTF--	
 PRE-CLASS-GUARD-TraitsTest
 PRE-CLASS-GUARD-TraitsTest2
-
-Strict Standards: THello1 and THello2 define the same property ($foo) in the composition of TraitsTest2. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed in %s on line %d
 bool(true)
 bool(true)

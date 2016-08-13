@@ -397,7 +397,7 @@ class PharCommand extends CLICommand
 	 */
 	static function cli_arg_typ_privkey($arg, $cfg, $key)
 	{
-		$arg = self::cli_arg_typ_string($arg, $cfg, $key);
+		$arg = self::cli_arg_typ_filecont($arg, $cfg, $key);
 
 		$hash_avail = Phar::getSupportedSignatures();
 		if ($arg && !in_array('OpenSSL', $hash_avail))

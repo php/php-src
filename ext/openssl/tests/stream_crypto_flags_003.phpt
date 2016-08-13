@@ -13,7 +13,7 @@ $serverCode = <<<'CODE'
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => __DIR__ . '/bug54992.pem',
 
-        // Only accept SSLv3 and TLSv1.2 connections
+        // Only accept TLSv1.2 connections
         'crypto_method' => STREAM_CRYPTO_METHOD_SSLv3_SERVER  | STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
     ]]);
 
@@ -40,9 +40,6 @@ $clientCode = <<<'CODE'
     stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 
-    stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_SSLv3_CLIENT);
-    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
-
     stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT);
     var_dump(@stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 
@@ -53,7 +50,6 @@ CODE;
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
-resource(%d) of type (stream)
 resource(%d) of type (stream)
 bool(false)
 bool(false)
