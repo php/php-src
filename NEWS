@@ -47,6 +47,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
     Kenttä)
+  . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
 
 - Stream: 
   . Fixed bug #72743 (Out-of-bound read in php_stream_filter_create).
