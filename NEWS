@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #72823 (strtr out-of-bound access). (cmb)
+  . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
 
 18 Aug 2016, PHP 5.6.25
 
