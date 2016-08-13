@@ -3007,7 +3007,7 @@ static zend_string *reflection_type_name(type_reference *param) {
 		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
 		case IS_OBJECT:
 			if (((zend_internal_arg_info*)param->arg_info)->class_name == NULL) {
-				RETURN_STRINGL("object", sizeof("object") - 1);
+				return zend_string_init("object", sizeof("object") - 1, 0);
 			}
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
 				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
