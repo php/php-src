@@ -10,7 +10,7 @@ a(new A());
 a(123);
 --EXPECTF--
 
-Fatal error: Uncaught TypeError: Argument 1 passed to a() must be of the type object, integer given, called in /home/mbrzuchalski/Workspace/php-src/Zend/tests/object_types/type_hint_in_function.php on line 7 and defined in %s:4
+Fatal error: Uncaught TypeError: Argument 1 passed to a() must be of the type object, integer given, called in %s.php on line 7 and defined in %s:4
 Stack trace:
 #0 %s(7): a(123)
 #1 {main}
