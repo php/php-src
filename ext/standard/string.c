@@ -2989,7 +2989,7 @@ static PPRES *php_strtr_array_prepare(STR *text, PATNREPL *patterns, int patnum,
 			res->m = L(&patterns[i].pat);
 		}
 	}
-	assert(res->m > 0);
+	assert(res->m > 0 && res->m != (STRLEN)-1);
 	res->B	= B		= MIN(B, res->m);
 	res->Bp	= Bp	= MIN(Bp, res->m);
 
@@ -3130,6 +3130,12 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 	patterns = php_strtr_array_prepare_repls(slen, pats, &allocs, &patterns_len);
 	if (patterns == NULL) {
 		RETURN_FALSE;
+	}
+	if (patterns_len == 0) {
+		efree(patterns);
+		zend_llist_destroy(allocs);
+		efree(allocs);
+		RETURN_STRINGL(str, slen, 1);
 	}
 	data = php_strtr_array_prepare(&text, patterns, patterns_len, 2, 2);
 	efree(patterns);
