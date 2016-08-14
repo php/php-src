@@ -704,6 +704,12 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 		RETURN_NULL();
 	}
 
+	if (depth > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be lower than %d", INT_MAX);
+		efree(utf16);
+		RETURN_NULL();
+	}
+
 	ALLOC_INIT_ZVAL(z);
 	jp = new_JSON_parser(depth);
 	if (parse_JSON_ex(jp, z, utf16, utf16_len, options TSRMLS_CC)) {

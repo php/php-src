@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
     require_ssl_reuse). (Benedict Singer)
 
+- JSON:
+  . Fixed bug #72787 (json_decode reads out of bounds). (Jakub Zelenka)
+
 - MSSQL:
   . Fixed bug #72039 (Use of uninitialised value on mssql_guid_string). (Kalle)
 
