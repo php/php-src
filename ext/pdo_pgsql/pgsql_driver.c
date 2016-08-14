@@ -360,8 +360,15 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	char *id = NULL;
 	PGresult *res;
 	ExecStatusType status;
+	zend_bool savepoint = 0;
 
 	if (name == NULL) {
+		savepoint = pgsql_handle_in_transaction(dbh);
+
+		if (savepoint) {
+			/* The savepoint is overwritten every time. */
+			(void)PQexec(H->server, "SAVEPOINT _php_lastid_savepoint");
+		}
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
 		const char *q[1];
@@ -375,8 +382,15 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		id = estrdup((char *)PQgetvalue(res, 0, 0));
 		*len = PQgetlength(res, 0, 0);
 	} else {
+		if (savepoint) {
+			(void)PQexec(H->server, "ROLLBACK TO SAVEPOINT _php_lastid_savepoint");
+		}
 		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
 		*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
+	}
+
+	if (savepoint) {
+		(void)PQexec(H->server, "RELEASE SAVEPOINT _php_lastid_savepoint");
 	}
 
 	if (res) {
