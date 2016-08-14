@@ -44,6 +44,8 @@
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
 
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh);
+
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
 	register int i = strlen(message)-1;
