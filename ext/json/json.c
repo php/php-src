@@ -258,6 +258,16 @@ static PHP_FUNCTION(json_decode)
 		RETURN_NULL();
 	}
 
+	if (depth <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be greater than zero");
+		RETURN_NULL();
+	}
+
+	if (depth > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be lower than %d", INT_MAX);
+		RETURN_NULL();
+	}
+
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */
 	if (assoc) {
 		options |=  PHP_JSON_OBJECT_AS_ARRAY;
