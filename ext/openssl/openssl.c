@@ -4060,11 +4060,8 @@ zend_bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, pub_key);
 	OPENSSL_PKEY_SET_BN(data, priv_key);
-	if (priv_key || pub_key) {
-		return 1;
-	}
-	if (!DSA_set0_key(dsa, pub_key, priv_key)) {
-		return 0;
+	if (pub_key) {
+		return DSA_set0_key(dsa, pub_key, priv_key);
 	}
 
 	/* generate key */
@@ -4099,11 +4096,8 @@ zend_bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, priv_key);
 	OPENSSL_PKEY_SET_BN(data, pub_key);
-	if (priv_key || pub_key) {
-		return 1;
-	}
-	if (!DH_set0_key(dh, pub_key, priv_key)) {
-		return 0;
+	if (pub_key) {
+		return DH_set0_key(dh, pub_key, priv_key);
 	}
 
 	/* generate key */
