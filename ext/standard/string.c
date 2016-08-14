@@ -64,6 +64,8 @@
 
 /* For str_getcsv() support */
 #include "ext/standard/file.h"
+/* For ord() support */
+#include "ext/standard/html.h"
 
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
@@ -167,7 +169,7 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		int is_letter = ((unsigned int) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(unsigned int) - 1);
 		unsigned char d;
 
-		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */ 
+		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
 			d = (l - 0x10 - 0x27 * is_letter) << 4;
 		} else {
@@ -2751,25 +2753,43 @@ PHP_FUNCTION(quotemeta)
 }
 /* }}} */
 
-/* {{{ proto int ord(string character)
-   Returns ASCII value of character
+/* {{{ proto int ord(string character[, string encoding])
+   Returns code point of character
    Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
 PHP_FUNCTION(ord)
 {
-	char   *str;
-	size_t str_len;
+  char   *str;
+  size_t str_len;
+  char   *enc = NULL;
+  size_t enc_len;
+  enum entity_charset charset;
+  long cp = 0;
+  size_t pos = 0;
+  int status;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
-		return;
-	}
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
+    return;
+  }
 #else
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(str, str_len)
-	ZEND_PARSE_PARAMETERS_END();
+  ZEND_PARSE_PARAMETERS_START(1, 2)
+    Z_PARAM_STRING(str, str_len)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_STRING(enc, enc_len)
+  ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETURN_LONG((unsigned char) str[0]);
+  charset = enc == NULL ? cs_8859_1 : determine_charset(enc);
+
+  cp = get_next_char(
+    charset, (const unsigned char*) str, str_len, &pos, &status
+  );
+
+  if (status == FAILURE) {
+    cp = charset == cs_utf_8 ? 0xfffd : 0x3f;
+  }
+
+  RETURN_LONG(cp);
 }
 /* }}} */
 
@@ -2934,7 +2954,7 @@ PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size
 		for (i = 0; i < trlen; i++) {
 			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
 		}
-		
+
 		for (i = 0; i < len; i++) {
 			str[i] = xlat[(size_t)(unsigned char) str[i]];
 		}
@@ -3326,7 +3346,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, char *lc_haystack
 				zend_string_release(lc_needle);
 				goto nothing_todo;
 			}
-			
+
 			if (str_len > ZSTR_LEN(lc_needle)) {
 				new_str = zend_string_safe_alloc(count, str_len - ZSTR_LEN(lc_needle), ZSTR_LEN(haystack), 0);
 			} else {
@@ -3495,7 +3515,7 @@ PHP_FUNCTION(strtr)
 					ZVAL_LONG(&tmp, num_key);
 					convert_to_string(&tmp);
 					str_key = Z_STR(tmp);
-				}		
+				}
 				replace = zval_get_string(entry);
 				if (ZSTR_LEN(str_key) < 1) {
 					RETVAL_STR_COPY(str);
@@ -4064,7 +4084,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 						zend_string_release(lc_subject_str);
 						lc_subject_str = NULL;
 					}
-				}				
+				}
 			}
 
 			zend_string_release(search_str);
