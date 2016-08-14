@@ -2793,34 +2793,112 @@ PHP_FUNCTION(ord)
 }
 /* }}} */
 
-/* {{{ proto string chr(int ascii)
-   Converts ASCII code to a character
+/* {{{ proto string chr(int codepoint[, string encoding])
+   Converts codepoint to a character
    Warning: This function is special-cased by zend_compile.c and so is bypassed for constant integer argument */
 PHP_FUNCTION(chr)
 {
-	zend_long c;
+  zend_long c;
+  zend_string* enc = NULL;
+	enum entity_charset charset;
+	zend_string* buf;
+  unsigned int cp;
+	size_t pos = 0;
+	int status;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
+  if (1 > ZEND_NUM_ARGS()) {
+    WRONG_PARAM_COUNT;
+  }
+
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "l", &c) == FAILURE) {
-		c = 0;
-	}
+  if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "l|S", &c, &enc) == FAILURE) {
+    c = 0;
+  }
 #else
-	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
-		Z_PARAM_LONG(c)
-	ZEND_PARSE_PARAMETERS_END_EX(c = 0);
+  ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 2)
+    Z_PARAM_LONG(c)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_STR(enc)
+  ZEND_PARSE_PARAMETERS_END_EX(c = 0);
 #endif
 
-	c &= 0xff;
-	if (CG(one_char_string)[c]) {
-		ZVAL_INTERNED_STR(return_value, CG(one_char_string)[c]);
+	charset = (enc == NULL) ? cs_8859_1 : determine_charset(enc->val);
+
+  if (charset == cs_8859_1) {
+		c &= 0xff;
+		if (CG(one_char_string)[c]) {
+			ZVAL_INTERNED_STR(return_value, CG(one_char_string)[c]);
+		} else {
+			ZVAL_NEW_STR(return_value, zend_string_alloc(1, 0));
+			Z_STRVAL_P(return_value)[0] = (char) c;
+      Z_STRVAL_P(return_value)[1] = '\0';
+		}
+	} else if (charset == cs_utf_8) {
+
+		if (c < 0 || c > 0x10ffff || (c > 0xd7ff && 0xe000 > c)) {
+			c = 0xfffd;
+    }
+
+		if (c < 0x80) {
+			ZVAL_NEW_STR(return_value, zend_string_alloc(1, 0));
+			Z_STRVAL_P(return_value)[0] = (char) c;
+			Z_STRVAL_P(return_value)[1] = '\0';
+		} else if (c < 0x800) {
+			ZVAL_NEW_STR(return_value, zend_string_alloc(2, 0));
+			Z_STRVAL_P(return_value)[0] = 0xc0 | (c >> 6);
+			Z_STRVAL_P(return_value)[1] = 0x80 | (c & 0x3f);
+			Z_STRVAL_P(return_value)[2] = '\0';
+		} else if (c < 0x10000) {
+			ZVAL_NEW_STR(return_value, zend_string_alloc(3, 0));
+			Z_STRVAL_P(return_value)[0] = 0xe0 | (c >> 12);
+			Z_STRVAL_P(return_value)[1] = 0x80 | ((c >> 6) & 0x3f);
+			Z_STRVAL_P(return_value)[2] = 0x80 | (c & 0x3f);
+			Z_STRVAL_P(return_value)[3] = '\0';
+		} else {
+			ZVAL_NEW_STR(return_value, zend_string_alloc(4, 0));
+			Z_STRVAL_P(return_value)[0] = 0xf0 | (c >> 18);
+			Z_STRVAL_P(return_value)[1] = 0x80 | ((c >> 12) & 0x3f);
+			Z_STRVAL_P(return_value)[2] = 0x80 | ((c >> 6) & 0x3f);
+			Z_STRVAL_P(return_value)[3] = 0x80 | (c & 0x3f);
+			Z_STRVAL_P(return_value)[4] = '\0';
+		}
 	} else {
-		ZVAL_NEW_STR(return_value, zend_string_alloc(1, 0));
-		Z_STRVAL_P(return_value)[0] = (char)c;
-		Z_STRVAL_P(return_value)[1] = '\0';
+		if (c < 0 || c >= 0x1000000) {
+			c = 0x3f;
+    }
+
+		if (c < 0x100) {
+			buf = zend_string_alloc(1, 0);
+			buf->val[0] = c;
+			buf->val[1] = 0;
+		} else if (c < 0x10000) {
+			buf = zend_string_alloc(2, 0);
+			buf->val[0] = c >> 8;
+			buf->val[1] = c & 0xff;
+			buf->val[2] = '\0';
+		} else {
+			buf = zend_string_alloc(3, 0);
+			buf->val[0] = c >> 16;
+			buf->val[1] = (c >> 8) & 0xff;
+			buf->val[2] = c & 0xff;
+			buf->val[3] = '\0';
+		}
+
+		cp = get_next_char(
+			charset, (const unsigned char*) buf->val, buf->len,	&pos, &status
+		);
+
+		if (status == FAILURE) {
+			cp = 0x3f;
+			ZVAL_NEW_STR(return_value, zend_string_alloc(1, 0));
+			Z_STRVAL_P(return_value)[0] = c;
+      Z_STRVAL_P(return_value)[1] = '\0';
+		} else {
+      ZVAL_NEW_STR(return_value, zend_string_dup(buf, 0));
+		}
+
+		zend_string_release(buf);
 	}
 }
 /* }}} */
