@@ -44,6 +44,8 @@
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
 
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC);
+
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
 	register int i = strlen(message)-1;
@@ -363,7 +365,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	zend_bool savepoint = 0;
 
 	if (name == NULL) {
-		savepoint = pgsql_handle_in_transaction(dbh);
+		savepoint = pgsql_handle_in_transaction(dbh TSRMLS_CC);
 
 		if (savepoint) {
 			/* The savepoint is overwritten every time. */
