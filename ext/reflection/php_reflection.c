@@ -4407,6 +4407,7 @@ ZEND_METHOD(reflection_class, getConstants)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
 	ZEND_HASH_FOREACH_VAL(&ce->constants_table, val) {
+		ZVAL_DEREF(val);
 		if (UNEXPECTED(zval_update_constant_ex(val, 1, ce) != SUCCESS)) {
 			return;
 		}
@@ -4431,6 +4432,7 @@ ZEND_METHOD(reflection_class, getConstant)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	ZEND_HASH_FOREACH_VAL(&ce->constants_table, value) {
+		ZVAL_DEREF(value);
 		if (UNEXPECTED(zval_update_constant_ex(value, 1, ce) != SUCCESS)) {
 			return;
 		}

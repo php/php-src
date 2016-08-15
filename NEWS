@@ -30,6 +30,10 @@ PHP                                                                        NEWS
     specifying a sequence). (Pablo Santiago Sánchez, Matteo)
   . Fixed bug #72759 (Regression in pgo_pgsql). (Anatol)
 
+- Reflection:
+  . Fixed bug #72846 (getConstant for a array constant with constant values
+    returns NULL/NFC/UKNOWN). (Laruence)
+
 - Session:
   . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
 
