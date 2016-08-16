@@ -535,7 +535,8 @@ static zval *xml_call_handler(xml_parser *parser, zval *handler, zend_function *
 
 			if (Z_TYPE_P(handler) == IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(handler));
-			} else if (zend_hash_index_find(Z_ARRVAL_P(handler), 0, (void **) &obj) == SUCCESS &&
+			} else if (Z_TYPE_P(handler) == IS_ARRAY &&
+					   zend_hash_index_find(Z_ARRVAL_P(handler), 0, (void **) &obj) == SUCCESS &&
 					   zend_hash_index_find(Z_ARRVAL_P(handler), 1, (void **) &method) == SUCCESS &&
 					   Z_TYPE_PP(obj) == IS_OBJECT &&
 					   Z_TYPE_PP(method) == IS_STRING) {
