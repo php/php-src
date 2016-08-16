@@ -25,4 +25,4 @@ Warning: imagetruecolortopalette() expects parameter 3 to be long, resource give
 
 Warning: imagetruecolortopalette() expects parameter 3 to be long, array given in %s on line %d
 
-Warning: imagetruecolortopalette(): Number of colors has to be greater than zero in %s on line %d
+Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s on line %d
