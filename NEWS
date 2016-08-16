@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #72813 (Segfault with __get returned by ref). (Laruence)
   . Fixed bug #72767 (PHP Segfaults when trying to expand an infinite operator).
     (Nikita)
+  . Fixed bug #72854 (PHP Crashes on duplicate destructor call). (Nikita)
 
 - FTP:
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
