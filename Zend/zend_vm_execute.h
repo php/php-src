@@ -1418,14 +1418,16 @@ send_array:
 		promote_refs = ((opline->op1_type & (IS_VAR|IS_CV)) != 0);
 		if (promote_refs && Z_REFCOUNT_P(args) > 1) {
 			ht = Z_ARRVAL_P(args);
-			for (arg_num = 1; arg_num < zend_hash_num_elements(ht) + 1; arg_num++) {
+			arg_num = 1;
+			ZEND_HASH_FOREACH_VAL(ht, arg) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 					if (UNEXPECTED(!Z_ISREF_P(arg))) {
 						SEPARATE_ARRAY(args);
 						break;
 					}
 				}
-			}
+				arg_num++;
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		ht = Z_ARRVAL_P(args);
