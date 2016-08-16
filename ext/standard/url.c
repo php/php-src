@@ -520,6 +520,12 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 			*to++ = c;
 		}
 	}
+
+	if ((to-start) > INT_MAX) {
+		/* E_ERROR since most clients won't check for error, and this is rather rare condition */
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "String overflow, max length is %d", INT_MAX);
+	}
+
 	*to = 0;
 	if (new_length) {
 		*new_length = to - start;
