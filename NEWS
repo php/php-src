@@ -62,6 +62,9 @@ PHP                                                                        NEWS
     with IIS FTP 7.5, 8.5). (vhuk)
   . Fixed bug #72810 (Missing SKIP_ONLINE_TESTS checks). (vhuk)
 
+- XML:
+  . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
+
 04 Aug 2016, PHP 7.1.0beta2
 
 - Core:
