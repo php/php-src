@@ -517,6 +517,10 @@ Other
 - Stream:
   . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
 
+- XML:
+  . xml_set_object() now requires to manually unset the $parser when finished,
+    to avoid memory leaks.
+
 - XSL:
   . Removed xsl.security_prefs ini option. Use XsltProcessor::setSecurityPrefs()
     instead.

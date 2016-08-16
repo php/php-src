@@ -197,11 +197,7 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{
 
 	   it should return whether the call was successful or not
 	*/
-	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
-
 	zend_call_method_with_1_params(object, ce, &ce->__get, ZEND_GET_FUNC_NAME, retval, member);
-
-	zval_ptr_dtor(member);
 }
 /* }}} */
 
@@ -211,9 +207,6 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
-	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
-	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-
 	/* __set handler is called with two arguments:
 	     property name
 	     value to be set
@@ -221,9 +214,6 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	   it should return whether the call was successful or not
 	*/
 	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
-
-	zval_ptr_dtor(member);
-	zval_ptr_dtor(value);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		result = i_zend_is_true(&retval) ? SUCCESS : FAILURE;

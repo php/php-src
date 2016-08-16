@@ -25,10 +25,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -63,7 +59,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 			/* these three are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown descriptor type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unknown descriptor type " ZEND_LONG_FMT, type);
 			return NULL;
 			break;
 	}
@@ -630,7 +626,7 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, zend_long flush_flag)
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid flag value: %pd", flush_flag);
+			php_error_docref(NULL, E_WARNING, "Invalid flag value: " ZEND_LONG_FMT, flush_flag);
 			return 1;
 			break;
 	}
@@ -716,12 +712,7 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename)
 	ub4 offset = 1;
 	sword errstatus;
 	
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
-	/* Safe mode has been removed in PHP 5.4 */
 	if (php_check_open_basedir(filename)) {
-#else
-	if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename)) {
-#endif
 		return 1;
 	}
 	
@@ -914,7 +905,7 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, zend_long type, char 
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid temporary lob type: %pd", type);
+			php_error_docref(NULL, E_WARNING, "Invalid temporary lob type: " ZEND_LONG_FMT, type);
 			return 1;
 			break;
 	}

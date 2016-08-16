@@ -1,7 +1,3 @@
-dnl
-dnl $Id$
-dnl
-
 if test -z "$SED"; then
   PHP_OCI8_SED="sed";
 else
