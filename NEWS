@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     (Nikita)
   . TypeError messages for arg_info type checks will now say "must be ...
     or null" where the parameter or return type accepts null. (Andrea)
+  . Fixed bug #72857 (stream_socket_recvfrom read access violation). (Anatol)
 
 - EXIF:
   . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
