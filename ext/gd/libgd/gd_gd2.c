@@ -340,12 +340,16 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 					for (x = xlo; x < xhi; x++) {
 						if (im->trueColor) {
 							if (!gdGetInt(&im->tpixels[y][x], in)) {
-								im->tpixels[y][x] = 0;
+								php_gd_error("gd2: EOF while reading\n");
+								gdImageDestroy(im);
+								return NULL;
 							}
 						} else {
 							int ch;
 							if (!gdGetByte(&ch, in)) {
-								ch = 0;
+								php_gd_error("gd2: EOF while reading\n");
+								gdImageDestroy(im);
+								return NULL;
 							}
 							im->pixels[y][x] = ch;
 						}
