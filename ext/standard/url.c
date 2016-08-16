@@ -522,6 +522,7 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 	}
 
 	if ((to-start) > INT_MAX) {
+		TSRMLS_FETCH();
 		/* E_ERROR since most clients won't check for error, and this is rather rare condition */
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "String overflow, max length is %d", INT_MAX);
 	}
