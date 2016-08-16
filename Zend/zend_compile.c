@@ -5140,6 +5140,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->allow_null = has_null_default || is_explicitly_nullable;
 
+			type_ast->attr &= ~ZEND_TYPE_NULLABLE;
 			zend_compile_typename(type_ast, arg_info);
 
 			if (arg_info->type_hint == IS_VOID) {
