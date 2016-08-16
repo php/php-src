@@ -36,11 +36,11 @@ foreach ($callables as $callable) {
 
 ?>
 --EXPECTF--
-Bar
+\Bar
 int
-Bar
+\Bar
 int
-Bar
+\Bar
 int
-Bar
+\Bar
 int
