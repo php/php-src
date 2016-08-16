@@ -37,11 +37,11 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(3)
+    int(1)
     [1]=>
     int(2)
     [2]=>
-    int(1)
+    int(3)
   }
 }
 array(3) {
@@ -56,11 +56,11 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(3)
+    int(1)
     [1]=>
     int(2)
     [2]=>
-    int(1)
+    int(3)
   }
 }
 array(3) {

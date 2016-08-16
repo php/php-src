@@ -700,7 +700,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, function_name)
-	ZEND_ARG_INFO(0, parameters) /* ARRAY_INFO(0, parameters, 1) */
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, parameters) /* ARRAY_INFO(0, parameters, 1) */
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call, 0, 0, 1)
@@ -4831,6 +4831,7 @@ PHP_FUNCTION(call_user_func_array)
 	zval *params, retval;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zend_function *func;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "fa/", &fci, &fci_cache, &params) == FAILURE) {
@@ -4843,7 +4844,11 @@ PHP_FUNCTION(call_user_func_array)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	zend_fcall_info_args(&fci, params);
+	func = NULL;
+	if (Z_ISREF_P(ZEND_CALL_ARG(execute_data, 2)) && fci_cache.initialized) {
+		func = fci_cache.function_handler;
+	}
+	zend_fcall_info_args_ex(&fci, func, params);
 	fci.retval = &retval;
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {

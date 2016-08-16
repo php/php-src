@@ -16,7 +16,12 @@ $arg = array('original');
 call_user_func_array('by_val', $arg);
 var_dump($arg);
 
-echo "------ Calling by_ref() with unreferenced argument ------\n";
+echo "------ Calling by_ref() with unreferenced argument (warning) ------\n";
+$arg = array('original');
+call_user_func_array('by_ref', (array)$arg);
+var_dump($arg);
+
+echo "------ Calling by_ref() with unreferenced argument (convert to ref) ------\n";
 $arg = array('original');
 call_user_func_array('by_ref', $arg);
 var_dump($arg);
@@ -40,12 +45,17 @@ array(1) {
   [0]=>
   string(8) "original"
 }
------- Calling by_ref() with unreferenced argument ------
+------ Calling by_ref() with unreferenced argument (warning) ------
 
 Warning: Parameter 1 to by_ref() expected to be a reference, value given in %s on line %d
 array(1) {
   [0]=>
   string(8) "original"
+}
+------ Calling by_ref() with unreferenced argument (convert to ref) ------
+array(1) {
+  [0]=>
+  string(7) "changed"
 }
 ------ Calling by_val() with referenced argument ------
 array(1) {

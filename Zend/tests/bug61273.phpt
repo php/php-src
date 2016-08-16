@@ -8,7 +8,7 @@ Bug #61273 (call_user_func_array with more than 16333 arguments leaks / crashes)
  * we should trick EG(argument_stack) into growing
  */
 $args = array_fill(0, 64 * 1024 - 64, 0);
-call_user_func_array(function(&$a) {}, $args);
+call_user_func_array(function(&$a) {}, (array)$args);
 echo strval("okey");
 --EXPECTF--
 Warning: Parameter 1 to {closure}() expected to be a reference, value given in %sbug61273.php on line %d

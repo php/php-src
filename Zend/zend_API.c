@@ -3485,10 +3485,9 @@ ZEND_API int zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, 
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), arg) {
 		if (func && !Z_ISREF_P(arg) && ARG_SHOULD_BE_SENT_BY_REF(func, n)) {
-			ZVAL_NEW_REF(params, arg);
-			if (Z_REFCOUNTED_P(arg)) {
-				Z_ADDREF_P(arg);
-			}
+			ZVAL_NEW_REF(arg, arg);
+			Z_ADDREF_P(arg);
+			ZVAL_REF(params, Z_REF_P(arg));
 		} else {
 			ZVAL_COPY(params, arg);
 		}

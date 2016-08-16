@@ -4615,8 +4615,22 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 		uint32_t arg_num;
 		HashTable *ht;
 		zval *arg, *param;
+		zend_bool promote_refs;
 
 ZEND_VM_C_LABEL(send_array):
+		promote_refs = ((OP1_TYPE & (IS_VAR|IS_CV)) != 0);
+		if (promote_refs && Z_REFCOUNT_P(args) > 1) {
+			ht = Z_ARRVAL_P(args);
+			for (arg_num = 1; arg_num < zend_hash_num_elements(ht) + 1; arg_num++) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+					if (UNEXPECTED(!Z_ISREF_P(arg))) {
+						SEPARATE_ARRAY(args);
+						break;
+					}
+				}
+			}
+		}
+
 		ht = Z_ARRVAL_P(args);
 		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
 
@@ -4625,7 +4639,9 @@ ZEND_VM_C_LABEL(send_array):
 		ZEND_HASH_FOREACH_VAL(ht, arg) {
 			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 				if (UNEXPECTED(!Z_ISREF_P(arg))) {
-					if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+					if (promote_refs) {
+						ZVAL_NEW_REF(arg, arg);
+					} else if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 
 						zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 							arg_num,
