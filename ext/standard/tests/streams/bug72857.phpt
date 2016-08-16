@@ -15,6 +15,6 @@ Bug #72857 stream_socket_recvfrom read access violation
 ?>
 ==DONE==
 --EXPECT--
-string(0) ""
+bool(false)
 NULL
 ==DONE==
