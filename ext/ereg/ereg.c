@@ -743,6 +743,11 @@ PHP_EREG_API PHP_FUNCTION(sql_regcase)
 	
 	for (i = j = 0; i < string_len; i++) {
 		c = (unsigned char) string[i];
+		if ( j >= INT_MAX - 1 || (isalpha(c) && j >= INT_MAX - 4)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long, max length is %d", INT_MAX);
+			efree(tmp);
+			RETURN_FALSE;
+		}
 		if (isalpha(c)) {
 			tmp[j++] = '[';
 			tmp[j++] = toupper(c);
