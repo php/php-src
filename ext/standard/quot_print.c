@@ -144,7 +144,7 @@ PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t len
 /* }}} */
 
 #define PHP_QPRINT_MAXL 75
- 
+
 PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t length, size_t *ret_length) /* {{{ */
 {
 	unsigned long lp = 0;
@@ -162,9 +162,9 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 			lp = 0;
 		} else {
 			if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') || ((c == ' ') && (*str == '\015'))) {
-				if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f)) 
-            || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL)) 
-            || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL)) 
+				if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f))
+            || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL))
+            || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL))
             || ((c > 0xef) && (c <= 0xf4) && ((lp + 9) > PHP_QPRINT_MAXL))) {
 					*d++ = '=';
 					*d++ = '\015';
@@ -208,7 +208,7 @@ PHP_FUNCTION(quoted_printable_decode)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
 		return;
 	}
-    
+
 	if (arg1_len == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
@@ -219,11 +219,11 @@ PHP_FUNCTION(quoted_printable_decode)
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':
-			if (str_in[i + 1] && str_in[i + 2] && 
-				isxdigit((int) str_in[i + 1]) && 
+			if (str_in[i + 1] && str_in[i + 2] &&
+				isxdigit((int) str_in[i + 1]) &&
 				isxdigit((int) str_in[i + 2]))
 			{
-				str_out[j++] = (php_hex2int((int) str_in[i + 1]) << 4) 
+				str_out[j++] = (php_hex2int((int) str_in[i + 1]) << 4)
 						+ php_hex2int((int) str_in[i + 2]);
 				i += 3;
 			} else  /* check for soft line break according to RFC 2045*/ {
@@ -254,7 +254,7 @@ PHP_FUNCTION(quoted_printable_decode)
 		}
 	}
 	str_out[j] = '\0';
-    
+
 	RETVAL_STRINGL(str_out, j, 0);
 }
 /* }}} */
@@ -275,6 +275,11 @@ PHP_FUNCTION(quoted_printable_encode)
 	}
 
 	new_str = (char *)php_quot_print_encode((unsigned char *)str, (size_t)str_len, &new_str_len);
+	if (new_str_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long, max length is %d", INT_MAX);
+		efree(new_str);
+		RETURN_FALSE;
+	}
 	RETURN_STRINGL(new_str, new_str_len, 0);
 }
 /* }}} */
