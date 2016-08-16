@@ -567,6 +567,7 @@ static inline zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, zend_execu
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr)
 {
 	zend_reference *ref;
+	zval garbage;
 
 	if (EXPECTED(!Z_ISREF_P(value_ptr))) {
 		ZVAL_NEW_REF(value_ptr, value_ptr);
@@ -576,8 +577,9 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 
 	ref = Z_REF_P(value_ptr);
 	GC_REFCOUNT(ref)++;
-	zval_ptr_dtor(variable_ptr);
+	ZVAL_COPY_VALUE(&garbage, variable_ptr);
 	ZVAL_REF(variable_ptr, ref);
+	zval_ptr_dtor(&garbage);
 }
 
 /* this should modify object only if it's empty */
