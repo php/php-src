@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #72767 (PHP Segfaults when trying to expand an infinite operator).
     (Nikita)
   . Fixed bug #72854 (PHP Crashes on duplicate destructor call). (Nikita)
+  . Fixed bug #72857 (stream_socket_recvfrom read access violation). (Anatol)
 
 - FTP:
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
