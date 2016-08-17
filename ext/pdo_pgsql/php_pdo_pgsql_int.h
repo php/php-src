@@ -29,8 +29,6 @@
 
 #define PHP_PDO_PGSQL_CONNECTION_FAILURE_SQLSTATE "08006"
 
-#define PHP_PDO_PGSQL_LASTVAL_PG_VERSION 80100
-
 typedef struct {
 	const char *file;
 	int line;

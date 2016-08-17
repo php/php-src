@@ -118,6 +118,32 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	const char *bash = NULL;
 	const char *sep = "?";
 
+	/*
+	 * Don't modify "//example.com" full path, unless
+	 * HTTP_HOST matches.
+	 */
+	if (ZSTR_VAL(url->s)[0] == '/' && ZSTR_VAL(url->s)[1] == '/') {
+		zval *tmp = NULL, *http_host = NULL;
+		size_t target_len, host_len;
+		if ((!(tmp = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))))
+			|| Z_TYPE_P(tmp) != IS_ARRAY
+			|| !(http_host = zend_hash_str_find(HASH_OF(tmp), ZEND_STRL("HTTP_HOST")))
+			|| Z_TYPE_P(http_host) != IS_STRING) {
+			smart_str_append_smart_str(dest, url);
+			return;
+		}
+		/* HTTP_HOST could be "example.com:8888", etc. */
+		/* Need to find end of URL in buffer */
+		host_len   = strcspn(Z_STRVAL_P(http_host), ":");
+		target_len = strcspn(ZSTR_VAL(url->s)+2, "/\"'?>\r\n");
+		if (host_len
+			&& host_len == target_len
+			&& strncasecmp(Z_STRVAL_P(http_host), ZSTR_VAL(url->s)+2, host_len)) {
+			smart_str_append_smart_str(dest, url);
+			return;
+		}
+	}
+
 	q = (p = ZSTR_VAL(url->s)) + ZSTR_LEN(url->s);
 
 scan:

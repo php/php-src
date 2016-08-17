@@ -2,11 +2,32 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.11
 
+- Core:
+  . Fixed bug #72767 (PHP Segfaults when trying to expand an infinite operator).
+    (Nikita)
+
 - GD:
   . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
 
+- OCI8
+  . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
+  . Fixed bug #72524 (Binding null values triggers ORA-24816 error). (Chris Jones)
+
+- PDO:
+  . Fixed bug #72788 (Invalid memory access when using persistent PDO
+    connection). (Keyur)
+  . Fixed bug #72791 (Memory leak in PDO persistent connection handling). (Keyur)
+
 - Session:
   . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
+
+- Standard:
+  . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
+    Kenttä)
+
+- Streams:
+  . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
+    with IIS FTP 7.5, 8.5). (vhuk)
 
 
 ?? ??? 2016 PHP 7.0.10
@@ -49,6 +70,9 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
+
+- EXIF:
+  . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
 
 - Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
@@ -93,7 +117,7 @@ PHP                                                                        NEWS
 - PDO_pgsql:
   . Fixed bug #70313 (PDO statement fails to throw exception). (Matteo)
   . Implemented FR #72633 (Postgres PDO lastInsertId() should work without
-    specifying a sequence). (Pablo Santiago Sánchez)
+    specifying a sequence). (Pablo Santiago Sánchez, Matteo)
 
 - Reflection:
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
