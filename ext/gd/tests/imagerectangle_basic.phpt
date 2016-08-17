@@ -16,7 +16,7 @@ $image = imagecreatetruecolor( 100, 100 );
 imagerectangle( $image, 0, 0, 50, 50, imagecolorallocate($image, 255, 255, 255) );
 
 ob_start(); 
-imagepng( $image, null, 9 ); 
+imagegd( $image );
 $img = ob_get_contents(); 
 ob_end_clean();
 
@@ -24,4 +24,4 @@ echo md5(base64_encode($img));
 
 ?> 
 --EXPECT-- 
-282aaecfdd50091821d63093d9bb1bb9
+e7f8ca8c63fb08b248f3ed6435983aed

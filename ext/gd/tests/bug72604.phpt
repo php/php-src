@@ -11,9 +11,9 @@ $im = imagecreatetruecolor(100, 100);
 imagesetthickness($im, 5);
 imagearc($im, 50, 50, 90, 90, 0, 360, 0xffffff);
 ob_start();
-imagepng($im);
+imagegd($im);
 $imagestring = ob_get_clean();
 echo md5($imagestring);
 ?>
 --EXPECT--
-2ffa6afb915afbdf870cf6459477bc8a
+4f5080080a774efe4fc8d55cd4a5849c

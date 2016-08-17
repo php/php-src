@@ -22,7 +22,7 @@ imageellipse( $image, 50, 50, 50, 50, imagecolorallocate( $image, 0, 0, 0 ) );
 imagefilltoborder( $image, 50, 50, imagecolorallocate( $image, 0, 0, 0 ), imagecolorallocate( $image, 255, 0, 0 ) );
 
 ob_start(); 
-imagepng( $image, null, 9 ); 
+imagegd( $image);
 $img = ob_get_contents(); 
 ob_end_clean();
 
@@ -30,4 +30,4 @@ echo md5(base64_encode($img));
 
 ?> 
 --EXPECT-- 
-847ec236f1c4d14c465306c8408550fc
+8185a06ccff03c2abeb99d5e3ed60e45
