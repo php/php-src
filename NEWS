@@ -55,6 +55,7 @@ PHP                                                                        NEWS
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
 
 - Stream: 
+  . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
   . Fixed bug #72743 (Out-of-bound read in php_stream_filter_create).
     (Loianhtuan)
   . Implemented FR #27814 (Multiple small packets send for HTTP request).
