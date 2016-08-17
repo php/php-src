@@ -31,6 +31,5 @@ XML;
 $array = wddx_deserialize($xml);
 var_dump($array);
 ?>
---EXPECTF--
-Notice: Undefined variable: array in %s%ebug72790.php on line %d
+--EXPECT--
 NULL
