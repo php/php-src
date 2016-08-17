@@ -851,7 +851,19 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			data->is_pipe_blocking = value;
 			return PHP_STREAM_OPTION_RETURN_OK;
 #endif
+		case PHP_STREAM_OPTION_META_DATA_API:
+			if (fd == -1)
+				return -1;
+#ifdef O_NONBLOCK
+			flags = fcntl(fd, F_GETFL, 0);
 
+			add_assoc_bool((zval*)ptrparam, "timed_out", 0);
+			add_assoc_bool((zval*)ptrparam, "blocked", (flags & O_NONBLOCK)? 0 : 1);
+			add_assoc_bool((zval*)ptrparam, "eof", stream->eof);
+
+			return PHP_STREAM_OPTION_RETURN_OK;
+#endif
+			return -1;
 		default:
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
