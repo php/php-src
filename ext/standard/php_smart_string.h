@@ -52,19 +52,22 @@
 #define SMART_STRING_DO_REALLOC(d, what) \
 	(d)->c = SMART_STRING_REALLOC((d)->c, (d)->a + 1, (what))
 
-#define smart_string_alloc4(d, n, what, newlen) do {					\
+#define smart_string_alloc4(d, n, what, newlen) do {				\
 	if (!(d)->c) {													\
 		(d)->len = 0;												\
 		newlen = (n);												\
-		(d)->a = newlen < SMART_STRING_START_SIZE 						\
-				? SMART_STRING_START_SIZE 								\
-				: newlen + SMART_STRING_PREALLOC;						\
-		SMART_STRING_DO_REALLOC(d, what);								\
+		(d)->a = newlen < SMART_STRING_START_SIZE 					\
+				? SMART_STRING_START_SIZE 							\
+				: newlen + SMART_STRING_PREALLOC;					\
+		SMART_STRING_DO_REALLOC(d, what);							\
 	} else {														\
+		if(UNEXPECTED(n > SIZE_MAX - (d)->len)) {					\
+			zend_error(E_ERROR, "String size overflow");			\
+		}															\
 		newlen = (d)->len + (n);									\
 		if (newlen >= (d)->a) {										\
-			(d)->a = newlen + SMART_STRING_PREALLOC;					\
-			SMART_STRING_DO_REALLOC(d, what);							\
+			(d)->a = newlen + SMART_STRING_PREALLOC;				\
+			SMART_STRING_DO_REALLOC(d, what);						\
 		}															\
 	}																\
 } while (0)

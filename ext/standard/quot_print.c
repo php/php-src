@@ -275,7 +275,7 @@ PHP_FUNCTION(quoted_printable_encode)
 		RETURN_EMPTY_STRING();
 	}
 
-	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), (size_t)ZSTR_LEN(str));
+	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str));
 	RETURN_STR(new_str);
 }
 /* }}} */

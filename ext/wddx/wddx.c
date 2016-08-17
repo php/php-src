@@ -886,10 +886,10 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		if (Z_TYPE(ent1->data) == IS_UNDEF) {
 			if (stack->top > 1) {
 				stack->top--;
+				efree(ent1);
 			} else {
 				stack->done = 1;
 			}
-			efree(ent1);
 			return;
 		}
 
@@ -897,7 +897,11 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 			zend_string *new_str = php_base64_decode(
 				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
 			zval_ptr_dtor(&ent1->data);
-			ZVAL_STR(&ent1->data, new_str);
+			if (new_str) {
+				ZVAL_STR(&ent1->data, new_str);
+			} else {
+				ZVAL_EMPTY_STRING(&ent1->data);
+			}
 		}
 
 		/* Call __wakeup() method on the object. */
@@ -917,7 +921,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 			wddx_stack_top(stack, (void**)&ent2);
 
 			/* if non-existent field */
-			if (ent2->type == ST_FIELD && Z_ISUNDEF(ent2->data)) {
+			if (Z_ISUNDEF(ent2->data)) {
 				zval_ptr_dtor(&ent1->data);
 				efree(ent1);
 				return;
@@ -1030,16 +1034,23 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 			case ST_DATETIME: {
 				char *tmp;
 
-				tmp = emalloc(len + 1);
-				memcpy(tmp, (char *)s, len);
+				if (Z_TYPE(ent->data) == IS_STRING) {
+					tmp = safe_emalloc(Z_STRLEN(ent->data), 1, (size_t)len + 1);
+					memcpy(tmp, Z_STRVAL(ent->data), Z_STRLEN(ent->data));
+					memcpy(tmp + Z_STRLEN(ent->data), s, len);
+					len += Z_STRLEN(ent->data);
+					zval_dtor(&ent->data);
+				} else {
+					tmp = emalloc(len + 1);
+					memcpy(tmp, (char *)s, len);
+				}
 				tmp[len] = '\0';
 
-				Z_LVAL(ent->data) = php_parse_date(tmp, NULL);
+				ZVAL_LONG(&ent->data, php_parse_date(tmp, NULL));
 				/* date out of range < 1969 or > 2038 */
 				if (Z_LVAL(ent->data) == -1) {
-					ZVAL_STRINGL(&ent->data, (char *)s, len);
+					ZVAL_STRINGL(&ent->data, (char *)tmp, len);
 				}
-				efree(tmp);
 			}
 				break;
 
@@ -1073,8 +1084,12 @@ int php_wddx_deserialize_ex(const char *value, size_t vallen, zval *return_value
 
 	if (stack.top == 1) {
 		wddx_stack_top(&stack, (void**)&ent);
-		ZVAL_COPY(return_value, &ent->data);
-		retval = SUCCESS;
+		if (Z_ISUNDEF(ent->data)) {
+			retval = FAILURE;
+		} else {
+			ZVAL_COPY(return_value, &ent->data);
+			retval = SUCCESS;
+		}
 	} else {
 		retval = FAILURE;
 	}
