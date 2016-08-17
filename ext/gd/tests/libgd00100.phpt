@@ -107,7 +107,7 @@ $points = array(
 imagefilledpolygon($im, $points, 5, $black);
 
 ob_start();
-imagepng($im);
+imagegd($im);
 $png = ob_get_contents();
 ob_end_clean();
 
@@ -116,4 +116,4 @@ echo md5($png);
 imagedestroy($im);
 ?>
 --EXPECTF--
-2e6cf558bb4dadf60c8b608d5f8cda4e
+df7253c765280396f303166f10ba9283

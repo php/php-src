@@ -15,9 +15,9 @@ $color = imagecolorallocatealpha($im, 0, 255, 0, 100);
 imagefilledarc($im, 49, 49, 99,99, 0 , 360, $color, IMG_ARC_PIE);
 
 ob_start();
-imagepng($im);
+imagegd($im);
 echo md5(ob_get_clean());
 imagedestroy($im);
 ?>
 --EXPECT--
-3d82e4525f19790ae1055366e2a36917
+2400a58cd7570b5472c25264715321cd

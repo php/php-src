@@ -24,11 +24,11 @@ imagesetthickness($image, 5);
 imagerectangle($image, 14, 14, 185, 85, $black);
 
 ob_start();
-imagepng($image, null, 9);
+imagegd($image);
 $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-93c3077f1bdc372cd0b0db96db282985
+1a6bc882772310d2e9b32cca2574236c
