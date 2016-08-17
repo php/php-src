@@ -2620,7 +2620,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				} else {
 					zend_string *class_name = object->handlers->get_class_name(object);
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, class_name);
-					zend_string_release(class_name);
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
 					zval zv;

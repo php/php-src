@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #72813 (Segfault with __get returned by ref). (Laruence)
   . Fixed bug #72767 (PHP Segfaults when trying to expand an infinite operator).
     (Nikita)
+  . Fixed bug #72854 (PHP Crashes on duplicate destructor call). (Nikita)
+  . Fixed bug #72857 (stream_socket_recvfrom read access violation). (Anatol)
 
 - FTP:
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
@@ -46,6 +48,8 @@ PHP                                                                        NEWS
   . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
     with IIS FTP 7.5, 8.5). (vhuk)
 
+- XML:
+  . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
 
 ?? ??? 2016 PHP 7.0.10
 
