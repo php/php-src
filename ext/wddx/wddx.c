@@ -1044,7 +1044,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 					str = zend_string_init((char *)s, len, 0);
 				}
 
-				ZVAL_LONG(&ent->data, php_parse_date(str, NULL));
+				ZVAL_LONG(&ent->data, php_parse_date(ZSTR_VAL(str), NULL));
 				/* date out of range < 1969 or > 2038 */
 				if (Z_LVAL(ent->data) == -1) {
 					ZVAL_STR_COPY(&ent->data, str);
