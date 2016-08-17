@@ -1051,6 +1051,8 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				if (Z_LVAL(ent->data) == -1) {
 					ZVAL_STRINGL(&ent->data, (char *)tmp, len);
 				}
+
+				efree(tmp);
 			}
 				break;
 
