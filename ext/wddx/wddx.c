@@ -1036,27 +1036,25 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				break;
 
 			case ST_DATETIME: {
-				char *tmp;
+				zend_string *str;
 
 				if (Z_TYPE(ent->data) == IS_STRING) {
-					tmp = safe_emalloc(Z_STRLEN(ent->data), 1, (size_t)len + 1);
-					memcpy(tmp, Z_STRVAL(ent->data), Z_STRLEN(ent->data));
-					memcpy(tmp + Z_STRLEN(ent->data), s, len);
-					len += Z_STRLEN(ent->data);
+					str = zend_string_safe_alloc(Z_STRLEN(ent->data), 1, len, 0);
+					memcpy(ZSTR_VAL(str), Z_STRVAL(ent->data), Z_STRLEN(ent->data));
+					memcpy(ZSTR_VAL(str) + Z_STRLEN(ent->data), s, len);
+					ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 					zval_dtor(&ent->data);
 				} else {
-					tmp = emalloc(len + 1);
-					memcpy(tmp, (char *)s, len);
+					str = zend_string_init((char *)s, len, 0);
 				}
-				tmp[len] = '\0';
 
-				ZVAL_LONG(&ent->data, php_parse_date(tmp, NULL));
+				ZVAL_LONG(&ent->data, php_parse_date(str, NULL));
 				/* date out of range < 1969 or > 2038 */
 				if (Z_LVAL(ent->data) == -1) {
-					ZVAL_STRINGL(&ent->data, (char *)tmp, len);
+					ZVAL_STR_COPY(&ent->data, str);
 				}
 
-				efree(tmp);
+				zend_string_release(str);
 			}
 				break;
 
