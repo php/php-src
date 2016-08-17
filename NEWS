@@ -45,6 +45,7 @@ PHP                                                                        NEWS
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
 
 - Streams:
+  . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
   . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
     with IIS FTP 7.5, 8.5). (vhuk)
 
