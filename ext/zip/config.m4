@@ -148,6 +148,9 @@ AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([off_t])
+if test "$ac_cv_sizeof_off_t" = "0" ; then
+  AC_MSG_ERROR(off_t undefined; check your library configuration)
+fi
 AC_CHECK_SIZEOF([size_t])
 
 AC_PATH_PROG([TOUCH], [touch])
