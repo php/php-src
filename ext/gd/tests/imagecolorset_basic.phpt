@@ -25,11 +25,11 @@ imagecolorset($im, $bg, 0, 0, 255);
 
 // Get output and generate md5 hash
 ob_start();
-imagepng($im, null, 9);
+imagegd($im);
 $result_image = ob_get_contents();
 ob_end_clean();
 echo md5(base64_encode($result_image));
 imagedestroy($im);
 ?>
 --EXPECT--
-6f2002aafb57b2d275fad6a6258d7476
+85e406abd0a975c97b3403cad5d078c9

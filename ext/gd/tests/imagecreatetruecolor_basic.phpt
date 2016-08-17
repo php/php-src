@@ -12,11 +12,11 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 $image = imagecreatetruecolor(180, 30);
 
 ob_start();
-imagepng($image, null, 9);
+imagegd($image);
 $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-5a8fe9864cbd20e5dbe730c77f30db95
+da884f488a851e0267a316ad232aee86
