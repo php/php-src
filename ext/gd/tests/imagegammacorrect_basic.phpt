@@ -21,7 +21,7 @@ $gamma = imagegammacorrect($image, 1, 5);
 
 if ($gamma){
 	ob_start();
-	imagepng($image, null, 9);
+	imagegd($image);
 	$img = ob_get_contents();
 	ob_end_clean();
 }
@@ -29,4 +29,4 @@ if ($gamma){
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-e79553115df689ea5df18a4636380569
+1f625723f9d27251a1f15b83a6a4bf55
