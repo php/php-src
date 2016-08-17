@@ -48,6 +48,7 @@ struct php_unserialize_data {
 	void *last;
 	void *first_dtor;
 	void *last_dtor;
+	// In php 7.0, additional properties (if php_unserialize_data was passed) are found in a struct wrapping a pointer to this.
 };
 
 typedef struct php_serialize_data *php_serialize_data_t;
