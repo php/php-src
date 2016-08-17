@@ -1537,11 +1537,11 @@ PHP_FUNCTION(imagetruecolortopalette)
 		RETURN_FALSE;
 	}
 
-	if (ncolors <= 0) {
-		php_error_docref(NULL, E_WARNING, "Number of colors has to be greater than zero");
+	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
+		php_error_docref(NULL, E_WARNING, "Number of colors has to be greater than zero and no more than %d", INT_MAX);
 		RETURN_FALSE;
 	}
-	gdImageTrueColorToPalette(im, dither, ncolors);
+	gdImageTrueColorToPalette(im, dither, (int)ncolors);
 
 	RETURN_TRUE;
 }
@@ -3037,6 +3037,11 @@ PHP_FUNCTION(imagegammacorrect)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rdd", &IM, &input, &output) == FAILURE) {
 		return;
+	}
+
+	if ( input <= 0.0 || output <= 0.0 ) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Gamma values should be positive");
+		RETURN_FALSE;
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
