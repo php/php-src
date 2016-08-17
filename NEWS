@@ -52,6 +52,9 @@ PHP                                                                        NEWS
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
 
+- ZIP:
+  . Fixed bug #68302 (impossible to compile php with zip support). (cmb)
+
 ?? ??? 2016 PHP 7.0.10
 
 - Core:
