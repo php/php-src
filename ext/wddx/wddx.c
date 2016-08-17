@@ -921,7 +921,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 			wddx_stack_top(stack, (void**)&ent2);
 
 			/* if non-existent field */
-			if (ent2->type == ST_FIELD && Z_ISUNDEF(ent2->data)) {
+			if (Z_ISUNDEF(ent2->data)) {
 				zval_ptr_dtor(&ent1->data);
 				efree(ent1);
 				return;
@@ -1055,7 +1055,6 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				if (Z_LVAL(ent->data) == -1) {
 					ZVAL_STRINGL(&ent->data, (char *)tmp, len);
 				}
-				efree(tmp);
 			}
 				break;
 
@@ -1089,8 +1088,12 @@ int php_wddx_deserialize_ex(const char *value, size_t vallen, zval *return_value
 
 	if (stack.top == 1) {
 		wddx_stack_top(&stack, (void**)&ent);
-		ZVAL_COPY(return_value, &ent->data);
-		retval = SUCCESS;
+		if (IS_UNDEF(ent->data)) {
+			retval = FAILURE;
+		} else {
+			ZVAL_COPY(return_value, &ent->data);
+			retval = SUCCESS;
+		}
 	} else {
 		retval = FAILURE;
 	}

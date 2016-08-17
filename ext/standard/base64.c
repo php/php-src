@@ -59,7 +59,7 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) /
 	unsigned char *p;
 	zend_string *result;
 
-	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
+	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
 	p = (unsigned char *)ZSTR_VAL(result);
 
 	while (length > 2) { /* keep going until we have less than 24 bits */
