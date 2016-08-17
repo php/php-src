@@ -625,8 +625,8 @@ static ZEND_COLD void zend_verify_type_error_common(
 		const char **need_msg, const char **need_kind, const char **need_or_null,
 		const char **given_msg, const char **given_kind)
 {
-	*fname = ZSTR_VAL(zf->common.function_name);
 	zend_bool is_interface = 0;
+	*fname = ZSTR_VAL(zf->common.function_name);
 
 	if (zf->common.scope) {
 		*fsep =  "::";

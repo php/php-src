@@ -5112,6 +5112,7 @@ PHP_FUNCTION(array_rand)
 	zend_bitset bitset;
 	int negative_bitset = 0;
 	uint32_t bitset_len;
+	ALLOCA_FLAG(use_heap)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|l", &input, &num_req) == FAILURE) {
 		return;
@@ -5165,7 +5166,6 @@ PHP_FUNCTION(array_rand)
 		num_req = num_avail - num_req;
 	}
 
-	ALLOCA_FLAG(use_heap);
 	bitset_len = zend_bitset_len(num_avail);
 	bitset = ZEND_BITSET_ALLOCA(bitset_len, use_heap);
 	zend_bitset_clear(bitset, bitset_len);
