@@ -1115,7 +1115,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 				PS_ADD_VARL(name);
 			}
 		}
-skip:
 		zend_string_release(name);
 
 		p = q;
