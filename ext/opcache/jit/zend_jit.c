@@ -105,22 +105,22 @@ static void *jit_alloc(size_t size, int shared)
 
 # ifdef MAP_HUGETLB
 	p = mmap(NULL, size,
-//???#  ifdef HAVE_MPROTECT
-//???			PROT_NONE,
-//???#  else
+#  ifdef HAVE_MPROTECT
+			PROT_NONE,
+#  else
 			PROT_EXEC | PROT_READ | PROT_WRITE,
-//???#  endif
+#  endif
 			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
     if (p != MAP_FAILED) {
     	return (void*)p;
 	}
 # endif
 	p = mmap(NULL, size,
-//???#  ifdef HAVE_MPROTECT
-//???			PROT_NONE,
-//???#  else
+#  ifdef HAVE_MPROTECT
+			PROT_NONE,
+#  else
 			PROT_EXEC | PROT_READ | PROT_WRITE,
-//???#  endif
+#  endif
 			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS, -1, 0);
     if (p == MAP_FAILED) {
     	return NULL;
@@ -353,6 +353,20 @@ jit_failure:
 	return FAILURE;
 }
 
+ZEND_API void zend_jit_unprotect(void)
+{
+#ifdef HAVE_MPROTECT
+	mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE);
+#endif
+}
+
+ZEND_API void zend_jit_protect(void)
+{
+#ifdef HAVE_MPROTECT
+	mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC);
+#endif
+}
+
 ZEND_API int zend_jit_startup(size_t size)
 {
 	size_t page_size = jit_page_size();
@@ -390,6 +404,14 @@ ZEND_API void zend_jit_shutdown(void)
 ZEND_API int zend_jit(zend_op_array *op_array, zend_persistent_script* main_persistent_script)
 {
 	return FAILURE;
+}
+
+ZEND_API void zend_jit_unprotect(void)
+{
+}
+
+ZEND_API void zend_jit_protect(void)
+{
 }
 
 ZEND_API int zend_jit_startup(size_t size)

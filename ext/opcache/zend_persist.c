@@ -856,9 +856,17 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	script->arena_mem = ZCG(arena_mem) = ZCG(mem);
 	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
 
+#ifdef HAVE_JIT
+	zend_jit_unprotect();
+#endif
+
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table, zend_persist_op_array);
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+
+#ifdef HAVE_JIT
+	zend_jit_protect();
+#endif
 
 	return script;
 }
