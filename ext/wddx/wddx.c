@@ -886,10 +886,10 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		if (Z_TYPE(ent1->data) == IS_UNDEF) {
 			if (stack->top > 1) {
 				stack->top--;
+				efree(ent1);
 			} else {
 				stack->done = 1;
 			}
-			efree(ent1);
 			return;
 		}
 
@@ -897,7 +897,11 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 			zend_string *new_str = php_base64_decode(
 				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
 			zval_ptr_dtor(&ent1->data);
-			ZVAL_STR(&ent1->data, new_str);
+			if (new_str) {
+				ZVAL_STR(&ent1->data, new_str);
+			} else {
+				ZVAL_EMPTY_STRING(&ent1->data);
+			}
 		}
 
 		/* Call __wakeup() method on the object. */
@@ -917,7 +921,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 			wddx_stack_top(stack, (void**)&ent2);
 
 			/* if non-existent field */
-			if (ent2->type == ST_FIELD && Z_ISUNDEF(ent2->data)) {
+			if (Z_ISUNDEF(ent2->data)) {
 				zval_ptr_dtor(&ent1->data);
 				efree(ent1);
 				return;
@@ -1028,18 +1032,25 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				break;
 
 			case ST_DATETIME: {
-				char *tmp;
+				zend_string *str;
 
-				tmp = emalloc(len + 1);
-				memcpy(tmp, (char *)s, len);
-				tmp[len] = '\0';
+				if (Z_TYPE(ent->data) == IS_STRING) {
+					str = zend_string_safe_alloc(Z_STRLEN(ent->data), 1, len, 0);
+					memcpy(ZSTR_VAL(str), Z_STRVAL(ent->data), Z_STRLEN(ent->data));
+					memcpy(ZSTR_VAL(str) + Z_STRLEN(ent->data), s, len);
+					ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
+					zval_dtor(&ent->data);
+				} else {
+					str = zend_string_init((char *)s, len, 0);
+				}
 
-				Z_LVAL(ent->data) = php_parse_date(tmp, NULL);
+				ZVAL_LONG(&ent->data, php_parse_date(ZSTR_VAL(str), NULL));
 				/* date out of range < 1969 or > 2038 */
 				if (Z_LVAL(ent->data) == -1) {
-					ZVAL_STRINGL(&ent->data, (char *)s, len);
+					ZVAL_STR_COPY(&ent->data, str);
 				}
-				efree(tmp);
+
+				zend_string_release(str);
 			}
 				break;
 
@@ -1073,8 +1084,12 @@ int php_wddx_deserialize_ex(const char *value, size_t vallen, zval *return_value
 
 	if (stack.top == 1) {
 		wddx_stack_top(&stack, (void**)&ent);
-		ZVAL_COPY(return_value, &ent->data);
-		retval = SUCCESS;
+		if (Z_ISUNDEF(ent->data)) {
+			retval = FAILURE;
+		} else {
+			ZVAL_COPY(return_value, &ent->data);
+			retval = SUCCESS;
+		}
 	} else {
 		retval = FAILURE;
 	}

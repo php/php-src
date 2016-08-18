@@ -633,6 +633,10 @@ PHP_FUNCTION(mcrypt_generic)
 		RETURN_FALSE
 	}
 
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Data size too large, %d maximum", INT_MAX);
+		RETURN_FALSE;
+	}
 	/* Check blocksize */
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
@@ -645,10 +649,6 @@ PHP_FUNCTION(mcrypt_generic)
 		memset(ZSTR_VAL(data_str), 0, data_size);
 		memcpy(ZSTR_VAL(data_str), data, data_len);
 	} else { /* It's not a block algorithm */
-		if (data_len > INT_MAX) {
-			php_error_docref(NULL, E_WARNING, "Data size too large, %d maximum", INT_MAX);
-			RETURN_FALSE;
-		}
 		data_size = (int)data_len;
 		data_str = zend_string_alloc(data_size, 0);
 		memset(ZSTR_VAL(data_str), 0, data_size);
@@ -688,6 +688,10 @@ PHP_FUNCTION(mdecrypt_generic)
 	}
 
 	/* Check blocksize */
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Data size too large, %d maximum", INT_MAX);
+		RETURN_FALSE;
+	}
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
 		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
@@ -699,10 +703,6 @@ PHP_FUNCTION(mdecrypt_generic)
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
 	} else { /* It's not a block algorithm */
-		if (data_len > INT_MAX) {
-			php_error_docref(NULL, E_WARNING, "Data size too large, %d maximum", INT_MAX);
-			RETURN_FALSE;
-		}
 		data_size = (int)data_len;
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);

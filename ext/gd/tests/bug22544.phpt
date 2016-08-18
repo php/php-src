@@ -15,9 +15,9 @@ Bug #22544 (TrueColor transparency in PNG images).
 	$red = imageColorAllocate($image, 255, 50, 50);
 	imageColorTransparent($image, $transparent);
 	imageFilledRectangle($image, 0, 0, 640-1, 100-1, $transparent);
-	imagePng($image, $dest);
+	imagegd($image, $dest);
 	echo md5_file($dest) . "\n";
 	@unlink($dest);
 ?>
 --EXPECT--
-10a57d09a2c63fad87b85b38d6b258d6
+7643ef115f642a79c2de6e411f485ddd

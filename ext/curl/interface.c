@@ -3530,7 +3530,7 @@ PHP_FUNCTION(curl_reset)
 PHP_FUNCTION(curl_escape)
 {
 	char       *str = NULL, *res = NULL;
-	size_t        str_len = 0;
+	size_t     str_len = 0;
 	zval       *zid;
 	php_curl   *ch;
 
@@ -3539,6 +3539,10 @@ PHP_FUNCTION(curl_escape)
 	}
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_SIZE_T_INT_OVFL(str_len)) {
 		RETURN_FALSE;
 	}
 
@@ -3569,7 +3573,7 @@ PHP_FUNCTION(curl_unescape)
 		RETURN_FALSE;
 	}
 
-	if (str_len > INT_MAX) {
+	if (ZEND_SIZE_T_INT_OVFL(str_len)) {
 		RETURN_FALSE;
 	}
 
