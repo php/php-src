@@ -63,17 +63,7 @@ static void *dasm_link_and_encode(dasm_State **dasm_state)
 		return NULL;
 	}
 
-#ifdef HAVE_MPROTECT
-//	mprotect(dasm_ptr, size, PROT_READ | PROT_WRITE);
-//???	mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE);
-#endif
-
 	ret = dasm_encode(dasm_state, dasm_ptr);
-
-#ifdef HAVE_MPROTECT
-//	mprotect(dasm_ptr, size, PROT_READ | PROT_EXEC);
-//???	mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC);
-#endif
 
 	if (ret != DASM_S_OK) {
 		// TODO: dasm_encode() failed ???
