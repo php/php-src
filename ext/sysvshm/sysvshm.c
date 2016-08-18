@@ -182,7 +182,7 @@ PHP_FUNCTION(shm_attach)
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_LONG_FMT ": %s", shm_key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
 		efree(shm_list_ptr);
 		RETURN_FALSE;
 	}
