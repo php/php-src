@@ -64,6 +64,9 @@ PHP                                                                        NEWS
     with IIS FTP 7.5, 8.5). (vhuk)
   . Fixed bug #72810 (Missing SKIP_ONLINE_TESTS checks). (vhuk)
 
+- sysvshm:
+  . Fixed bug #72858 (shm_attach null dereference). (Anatol)
+
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
 
