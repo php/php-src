@@ -1,0 +1,204 @@
+/*
+ *  +----------------------------------------------------------------------+
+ *  | Zend OPcache                                                         |
+ *  +----------------------------------------------------------------------+
+ *  | Copyright (c) 1998-2016 The PHP Group                                |
+ *  +----------------------------------------------------------------------+
+ *  | This source file is subject to version 3.01 of the PHP license,      |
+ *  | that is bundled with this package in the file LICENSE, and is        |
+ *  | available through the world-wide-web at the following url:           |
+ *  | http://www.php.net/license/3_01.txt                                  |
+ *  | If you did not receive a copy of the PHP license and are unable to   |
+ *  | obtain it through the world-wide-web, please send a note to          |
+ *  | license@php.net so we can mail you a copy immediately.               |
+ *  +----------------------------------------------------------------------+
+ *  | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+ *  +----------------------------------------------------------------------+
+ */
+
+|.if X64
+ |.arch x64
+|.else
+ |.arch x86
+|.endif
+
+|.if X64
+ |.define FP,  r14
+ |.define IP,  r15
+ |.define IPl, r15d
+|.else
+ |.define FP,  esi
+ |.define IP,  edi
+ |.define IPl, edi
+|.endif
+
+|.actionlist dasm_actions
+
+|.globals lbl_
+static void* dasm_labels[lbl__MAX];
+
+|.section code
+
+static int zend_jit_align_func(dasm_State **Dst)
+{
+	|.align 16
+	return 1;
+}
+
+static int zend_jit_prologue(dasm_State **Dst)
+{
+	|.if X64
+	| //add rsp, 8 // stack alignment
+	|.endif
+	return 1;
+}
+
+static int zend_jit_label(dasm_State **Dst, unsigned int label)
+{
+	|=>label:
+	return 1;
+}
+
+static int zend_jit_check_timeout(dasm_State **Dst)
+{
+	// ???
+	| cmp byte [&EG(vm_interrupt)], 0
+	| jne extern zend_timeout
+	return 1;
+}
+
+static int zend_jit_check_exception(dasm_State **Dst)
+{
+	const void *handler = EG(exception_op)->handler;
+
+	| cmp aword [&EG(exception)], 0
+	| jne &handler
+	return 1;
+}
+
+static int zend_jit_handler(dasm_State **Dst, zend_op *opline)
+{
+	const void *handler = opline->handler;
+
+	|.if X64
+	| mov64 rax, ((ptrdiff_t)handler)
+	| call rax
+	|.else
+	| call aword &handler
+	|.endif
+	zend_jit_check_exception(Dst);
+	return 1;
+}
+
+static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
+{
+	const void *handler = opline->handler;
+
+	|.if X64
+	| //sub rsp, 8 // stack alignment
+	| mov64 rax, ((ptrdiff_t)handler)
+	| jmp rax
+	|.else
+	| jmp aword &handler
+	|.endif
+	return 1;
+}
+
+static int zend_jit_skip_handler(dasm_State **Dst)
+{
+	| add IP, sizeof(zend_op)
+	return 1;
+}
+
+static int zend_jit_set_opline(dasm_State **Dst, zend_op *target_opline)
+{
+	|.if X64
+	| mov64 IP, ((ptrdiff_t)target_opline)
+	|.else
+	| mov IP, target_opline
+	|.endif
+	return 1;
+}
+
+static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
+{
+	| jmp =>target_label
+	return 1;
+}
+
+static int zend_jit_cond_jmp(dasm_State **Dst, zend_op *next_opline, unsigned int target_label)
+{
+    | cmp IPl, next_opline
+    | jnz =>target_label
+	return 1;
+}
+
+static int zend_jit_smart_branch(dasm_State **Dst, zend_op *opline, unsigned int next_label, unsigned int target_label)
+{
+    zend_op *next_opline = opline + 1;
+    zend_op *target_opline = OP_JMP_ADDR(opline, opline->op2);
+
+    | cmp IPl, next_opline
+    | jz =>next_label
+    | cmp IPl, target_opline
+    | jz =>target_label
+	return 1;
+}
+
+static int zend_jit_recv(dasm_State **Dst, zend_op *opline)
+{
+    | cmp IPl, opline
+	| jnz >1
+	zend_jit_handler(Dst, opline);
+	|1:
+	return 1;
+}
+
+#ifdef CONTEXT_THREDED_JIT
+static int zend_jit_context_threaded_call(dasm_State **Dst, zend_op *opline)
+{
+	if (!zend_jit_handler(Dst, opline)) return 0;
+	if (opline->opcode == ZEND_DO_UCALL) {
+		| call aword [IP]
+	} else {
+	    zend_op *next_opline = opline + 1;
+
+	    | cmp IPl, next_opline
+	    | jz >1
+		| call aword [IP]
+		|1:
+	}
+	return 1;
+}
+#endif
+
+static int zend_jit_call(dasm_State **Dst, zend_op *opline)
+{
+#ifdef CONTEXT_THREDED_JIT
+	return zend_jit_context_threaded_call(Dst, opline);
+#else
+	return zend_jit_tail_handler(Dst, opline);
+#endif
+}
+
+static int zend_jit_new(dasm_State **Dst, zend_op *opline)
+{
+	if (!zend_jit_handler(Dst, opline)) return 0;
+	if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
+	    zend_op *next_opline = opline + 1;
+
+	    | cmp IPl, next_opline
+	    | jnz >1
+		zend_jit_call(Dst, next_opline);
+		|1:
+	}
+	return 1;
+}
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

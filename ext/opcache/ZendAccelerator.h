@@ -208,6 +208,10 @@ typedef struct _zend_accel_directives {
 #ifdef HAVE_HUGE_CODE_PAGES
 	zend_bool      huge_code_pages;
 #endif
+#ifdef HAVE_JIT
+	zend_long      jit_buffer_size;
+	zend_long      jit_debug;
+#endif
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {

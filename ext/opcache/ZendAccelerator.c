@@ -46,6 +46,10 @@
 # include "zend_file_cache.h"
 #endif
 
+#ifdef HAVE_JIT
+# include "jit/zend_jit.h"
+#endif
+
 #ifndef ZEND_WIN32
 #include  <netdb.h>
 #endif
@@ -2764,6 +2768,11 @@ static int accel_startup(zend_extension *extension)
 		zend_accel_init_auto_globals();
 
 		zend_shared_alloc_lock();
+#ifdef HAVE_JIT
+		if (ZCG(accel_directives).jit_buffer_size) {
+			zend_jit_startup(ZCG(accel_directives).jit_buffer_size);
+		}
+#endif
 		zend_shared_alloc_save_state();
 		zend_shared_alloc_unlock();
 
@@ -2846,6 +2855,10 @@ void accel_shutdown(void)
 {
 	zend_ini_entry *ini_entry;
 	zend_bool file_cache_only = 0;
+
+#ifdef HAVE_JIT
+	zend_jit_shutdown();
+#endif
 
 	zend_optimizer_shutdown();
 

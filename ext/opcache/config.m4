@@ -12,6 +12,9 @@ PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HU
 [  --disable-huge-code-pages
                           Disable copying PHP CODE pages into HUGE PAGES], yes, no)
 
+PHP_ARG_ENABLE(opcache-jit, whether to enable JIT,
+[  --disable-opcache-jit  Disable JIT], yes)
+
 if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_FILE" = "yes"; then
@@ -20,6 +23,10 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
+  fi
+
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
+    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
   fi
 
   AC_CHECK_FUNC(mprotect,[
@@ -410,9 +417,13 @@ fi
 	Optimizer/zend_inference.c \
 	Optimizer/zend_func_info.c \
 	Optimizer/zend_call_graph.c \
-	Optimizer/zend_dump.c,
+	Optimizer/zend_dump.c \
+	jit/zend_jit.c,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
+  PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
+
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi
