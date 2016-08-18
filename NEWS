@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - MSSQL:
   . Fixed bug #72039 (Use of uninitialised value on mssql_guid_string). (Kalle)
 
+- OCI8:
+  . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
+
 - PDO:
   . Fixed bug #60665 (call to empty() on NULL result using PDO::FETCH_LAZY
     returns false). (cmb)
@@ -113,9 +116,6 @@ PHP                                                                        NEWS
   . Fixed bug #72710 (`mb_ereg` causes buffer overflow on regexp compile error).
     (ju1ius)
 
-- OCI8:
-  . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
-
 - PCRE:
   . Fixed bug #72688 (preg_match missing group names in matches). (cmb)
 
@@ -137,6 +137,7 @@ PHP                                                                        NEWS
   . Fixed bug #72848 (integer overflow in quoted_printable_encode). (Stas)
   . Fixed bug #72849 (integer overflow in urlencode). (Stas)
   . Fixed bug #72850 (integer overflow in php_uuencode). (Stas)
+  . Fixed bug #72716 (initialize buffer before read). (Stas)
 
 - Streams:
   . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
