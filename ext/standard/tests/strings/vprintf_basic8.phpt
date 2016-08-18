@@ -16,7 +16,7 @@ $format2 = "%o %o";
 $format3 = "%o %o %o";
 $arg1 = array(021);
 $arg2 = array(021,0347);
-$arg3 = array(021,0347,05678);
+$arg3 = array(021,0347,0567);
 
 $result = vprintf($format1,$arg1);
 echo "\n";

@@ -45,7 +45,7 @@ float(-0.8462204042)
 float(-0.9937407102)
 float(-0.9937407102)
 
-Warning: sin() expects parameter 1 to be double, string given in %s on line %d
+Warning: sin() expects parameter 1 to be float, string given in %s on line %d
 NULL
 float(0.8268795405)
 

@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter_kr.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -128,23 +128,23 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 				w = uhc1_ucs_table[w];
 			} else {
 				w = 0;
-			}			
+			}
 		} else if ( c1 >= 0xa1 && c1 <= 0xc6){
-			w = (c1 - 0xa1)*190 + (c - 0x41);			
+			w = (c1 - 0xa1)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc2_ucs_table_size) {
 				flag = 2;
 				w = uhc2_ucs_table[w];
 			} else {
 				w = 0;
-			}			
+			}
 		} else if ( c1 >= 0xc7 && c1 <= 0xfe){
-			w = (c1 - 0xc7)*94 + (c - 0xa1);		
+			w = (c1 - 0xc7)*94 + (c - 0xa1);
 			if (w >= 0 && w < uhc3_ucs_table_size) {
 				flag = 3;
 				w = uhc3_ucs_table[w];
 			} else {
 				w = 0;
-			}			
+			}
 		}
 		if (flag > 0){
 			if (w <= 0) {
@@ -238,7 +238,7 @@ static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter)
 		    filter->status= 3;
 		} else { /* bad */
 			filter->flag = 1;
-		}		
+		}
 
 	case 1:
 	case 2:

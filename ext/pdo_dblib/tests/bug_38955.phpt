@@ -37,21 +37,21 @@ array(4) {
   [0]=>
   array(1) {
     ["val"]=>
-    string(1) "1"
+    int(1)
   }
   [1]=>
   array(1) {
     ["val"]=>
-    string(1) "2"
+    int(2)
   }
   [2]=>
   array(1) {
     ["val"]=>
-    string(1) "3"
+    int(3)
   }
   [3]=>
   array(1) {
     ["val"]=>
-    string(1) "4"
+    int(4)
   }
 }

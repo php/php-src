@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -37,6 +37,7 @@ union _phpdbg_btree_branch {
 typedef struct {
 	zend_ulong count;
 	zend_ulong depth;
+	zend_bool persistent;
 	phpdbg_btree_branch *branch;
 } phpdbg_btree;
 
@@ -47,6 +48,7 @@ typedef struct {
 } phpdbg_btree_position;
 
 void phpdbg_btree_init(phpdbg_btree *tree, zend_ulong depth);
+void phpdbg_btree_clean(phpdbg_btree *tree);
 phpdbg_btree_result *phpdbg_btree_find(phpdbg_btree *tree, zend_ulong idx);
 phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong idx);
 phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong higher_idx);
@@ -61,5 +63,10 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 #define phpdbg_btree_insert(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_INSERT)
 #define phpdbg_btree_update(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_UPDATE)
 #define phpdbg_btree_overwrite(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_OWERWRITE)
+
+
+/* debugging functions */
+void phpdbg_btree_branch_dump(phpdbg_btree_branch *branch, zend_ulong depth);
+void phpdbg_btree_dump(phpdbg_btree *tree);
 
 #endif

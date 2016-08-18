@@ -101,8 +101,8 @@ dnl configure options
 dnl
 
 PHP_ARG_WITH(odbcver,,
-[  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0300.
-                             Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0300)
+[  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0350.
+                             Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0350)
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(adabas,,
@@ -550,7 +550,7 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST_OLD(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
 
-  PHP_NEW_EXTENSION(odbc, php_odbc.c, $ext_shared,, $ODBC_INCLUDE)
+  PHP_NEW_EXTENSION(odbc, php_odbc.c, $ext_shared,, [$ODBC_INCLUDE -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 else
   AC_MSG_CHECKING([for any ODBC driver support])
   AC_MSG_RESULT(no)

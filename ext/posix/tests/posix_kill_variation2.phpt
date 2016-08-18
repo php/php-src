@@ -2,6 +2,7 @@
 Test posix_kill() function : usage variations  - second parameter type
 --SKIPIF--
 <?php 
+    PHP_INT_SIZE == 4 or die("skip - 32-bit only");
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
 ?>
 --FILE--
@@ -89,6 +90,8 @@ Arg value -10.5
 bool(false)
 
 Arg value 101234567000 
+
+Warning: posix_kill() expects parameter 2 to be integer, float given in %s on line %d
 bool(false)
 
 Arg value 1.07654321E-9 
@@ -101,35 +104,35 @@ Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Arg value  
@@ -152,22 +155,22 @@ bool(false)
 
 Arg value  
 
-Warning: posix_kill() expects parameter 2 to be long, string given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 Arg value  
 
-Warning: posix_kill() expects parameter 2 to be long, string given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 Arg value string 
 
-Warning: posix_kill() expects parameter 2 to be long, string given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 Arg value string 
 
-Warning: posix_kill() expects parameter 2 to be long, string given in %s on line %d
+Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 Arg value  

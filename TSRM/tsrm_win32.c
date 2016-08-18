@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -33,6 +33,7 @@
 #include <Sddl.h>
 #include "tsrm_win32.h"
 #include "zend_virtual_cwd.h"
+#include "win32/ioutil.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
@@ -40,16 +41,19 @@ static ts_rsrc_id win32_globals_id;
 static tsrm_win32_globals win32_globals;
 #endif
 
-static void tsrm_win32_ctor(tsrm_win32_globals *globals TSRMLS_DC)
+static void tsrm_win32_ctor(tsrm_win32_globals *globals)
 {
+#ifdef ZTS
+TSRMLS_CACHE_UPDATE();
+#endif
 	globals->process = NULL;
 	globals->shm	 = NULL;
 	globals->process_size = 0;
 	globals->shm_size	  = 0;
-	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
+	globals->comspec = _strdup("cmd.exe");
 
 	/* Set it to INVALID_HANDLE_VALUE
-	 * It will be initialized correctly in tsrm_win32_access or set to 
+	 * It will be initialized correctly in tsrm_win32_access or set to
 	 * NULL if no impersonation has been done.
 	 * the impersonated token can't be set here as the impersonation
 	 * will happen later, in fcgi_accept_request (or whatever is the
@@ -59,7 +63,7 @@ static void tsrm_win32_ctor(tsrm_win32_globals *globals TSRMLS_DC)
 	globals->impersonation_token_sid = NULL;
 }
 
-static void tsrm_win32_dtor(tsrm_win32_globals *globals TSRMLS_DC)
+static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 {
 	shm_pair *ptr;
 
@@ -92,30 +96,32 @@ TSRM_API void tsrm_win32_startup(void)
 #ifdef ZTS
 	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
 #else
-	tsrm_win32_ctor(&win32_globals TSRMLS_CC);
+	tsrm_win32_ctor(&win32_globals);
 #endif
 }
 
 TSRM_API void tsrm_win32_shutdown(void)
 {
 #ifndef ZTS
-	tsrm_win32_dtor(&win32_globals TSRMLS_CC);
+	tsrm_win32_dtor(&win32_globals);
 #endif
 }
 
-char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
+char * tsrm_win32_get_path_sid_key(const char *pathname)
 {
 	PSID pSid = TWG(impersonation_token_sid);
-	DWORD sid_len = pSid ? GetLengthSid(pSid) : 0;
 	TCHAR *ptcSid = NULL;
 	char *bucket_key = NULL;
+	size_t ptc_sid_len, pathname_len;
+
+	pathname_len = strlen(pathname);
 
 	if (!pSid) {
-		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname) + 1);
+		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + 1);
 		if (!bucket_key) {
 			return NULL;
 		}
-		memcpy(bucket_key, pathname, strlen(pathname));
+		memcpy(bucket_key, pathname, pathname_len);
 		return bucket_key;
 	}
 
@@ -123,14 +129,16 @@ char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
 		return NULL;
 	}
 
-	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname) + strlen(ptcSid) + 1);
+
+	ptc_sid_len = strlen(ptcSid);
+	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + ptc_sid_len + 1);
 	if (!bucket_key) {
 		LocalFree(ptcSid);
 		return NULL;
 	}
 
-	memcpy(bucket_key, ptcSid, strlen(ptcSid));
-	memcpy(bucket_key + strlen(ptcSid), pathname, strlen(pathname) + 1);
+	memcpy(bucket_key, ptcSid, ptc_sid_len);
+	memcpy(bucket_key + ptc_sid_len, pathname, pathname_len + 1);
 
 	LocalFree(ptcSid);
 	return bucket_key;
@@ -139,11 +147,8 @@ char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
 
 PSID tsrm_win32_get_token_sid(HANDLE hToken)
 {
-	BOOL bSuccess = FALSE;
 	DWORD dwLength = 0;
 	PTOKEN_USER pTokenUser = NULL;
-	PSID sid;
-	PSID *ppsid = &sid;
 	DWORD sid_len;
 	PSID pResultSid = NULL;
 
@@ -190,7 +195,7 @@ Finished:
 	return NULL;
 }
 
-TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
+TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 {
 	time_t t;
 	HANDLE thread_token = NULL;
@@ -204,29 +209,42 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 	BYTE * psec_desc = NULL;
 	BOOL fAccess = FALSE;
 
-	BOOL bucket_key_alloc = FALSE;
 	realpath_cache_bucket * bucket = NULL;
 	char * real_path = NULL;
 
+	PHP_WIN32_IOUTIL_INIT_W(pathname)
+	if (!pathw) {
+		return -1;
+	}
+
 	if (mode == 1 /*X_OK*/) {
 		DWORD type;
-		return GetBinaryType(pathname, &type) ? 0 : -1;
+		int ret;
+
+		ret = GetBinaryTypeW(pathw, &type) ? 0 : -1;
+
+		PHP_WIN32_IOUTIL_CLEANUP_W()
+
+		return ret;
 	} else {
 		if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
-			real_path = (char *)malloc(MAX_PATH);
-			if(tsrm_realpath(pathname, real_path TSRMLS_CC) == NULL) {
+			real_path = (char *)malloc(MAXPATHLEN);
+			if(tsrm_realpath(pathname, real_path) == NULL) {
 				goto Finished;
 			}
 			pathname = real_path;
+			PHP_WIN32_IOUTIL_REINIT_W(pathname);
  		}
 
-		if(access(pathname, mode)) {
+		if(php_win32_ioutil_access(pathname, mode)) {
+			PHP_WIN32_IOUTIL_CLEANUP_W()
 			free(real_path);
 			return errno;
 		}
 
  		/* If only existence check is made, return now */
  		if (mode == 0) {
+			PHP_WIN32_IOUTIL_CLEANUP_W()
 			free(real_path);
 			return 0;
 		}
@@ -242,7 +260,6 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 		 was impersonating already, this function uses that impersonation context.
 		*/
 		if(!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &thread_token)) {
-			DWORD err = GetLastError();
 			if (GetLastError() == ERROR_NO_TOKEN) {
 				if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &thread_token)) {
 					 TWG(impersonation_token) = NULL;
@@ -279,14 +296,15 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 
 		if (CWDG(realpath_cache_size_limit)) {
 			t = time(0);
-			bucket = realpath_cache_lookup(pathname, strlen(pathname), t TSRMLS_CC);
+			bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
 			if(bucket == NULL && real_path == NULL) {
 				/* We used the pathname directly. Call tsrm_realpath */
 				/* so that entry is created in realpath cache */
-				real_path = (char *)malloc(MAX_PATH);
-				if(tsrm_realpath(pathname, real_path TSRMLS_CC) != NULL) {
+				real_path = (char *)malloc(MAXPATHLEN);
+				if(tsrm_realpath(pathname, real_path) != NULL) {
 					pathname = real_path;
-					bucket = realpath_cache_lookup(pathname, strlen(pathname), t TSRMLS_CC);
+					bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
+					PHP_WIN32_IOUTIL_REINIT_W(pathname);
 				}
 			}
  		}
@@ -323,13 +341,13 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 		}
 
 		/* Get size of security buffer. Call is expected to fail */
-		if(GetFileSecurity(pathname, sec_info, NULL, 0, &sec_desc_length)) {
+		if(GetFileSecurityW(pathw, sec_info, NULL, 0, &sec_desc_length)) {
 			goto Finished;
 		}
 
 		psec_desc = (BYTE *)malloc(sec_desc_length);
 		if(psec_desc == NULL ||
-			 !GetFileSecurity(pathname, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
+			 !GetFileSecurityW(pathw, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
 			goto Finished;
 		}
 
@@ -371,6 +389,7 @@ Finished:
 			real_path = NULL;
 		}
 
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		if(fAccess == FALSE) {
 			errno = EACCES;
 			return errno;
@@ -381,7 +400,7 @@ Finished:
 }
 
 
-static process_pair *process_get(FILE *stream TSRMLS_DC)
+static process_pair *process_get(FILE *stream)
 {
 	process_pair *ptr;
 	process_pair *newptr;
@@ -411,7 +430,6 @@ static shm_pair *shm_get(int key, void *addr)
 {
 	shm_pair *ptr;
 	shm_pair *newptr;
-	TSRMLS_FETCH();
 
 	for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
 		if (!ptr->descriptor) {
@@ -436,6 +454,7 @@ static shm_pair *shm_get(int key, void *addr)
 	TWG(shm) = newptr;
 	ptr = newptr + TWG(shm_size);
 	TWG(shm_size)++;
+	memset(ptr, 0, sizeof(*ptr));
 	return ptr;
 }
 
@@ -449,23 +468,23 @@ static HANDLE dupHandle(HANDLE fh, BOOL inherit) {
 
 TSRM_API FILE *popen(const char *command, const char *type)
 {
-	TSRMLS_FETCH();
 
-	return popen_ex(command, type, NULL, NULL TSRMLS_CC);
+	return popen_ex(command, type, NULL, NULL);
 }
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC)
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
 {
 	FILE *stream = NULL;
-	int fno, type_len = strlen(type), read, mode;
-	STARTUPINFO startup;
+	int fno, type_len, read, mode;
+	STARTUPINFOW startup;
 	PROCESS_INFORMATION process;
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
 	DWORD dwCreateFlags = 0;
 	BOOL res;
 	process_pair *proc;
-	char *cmd;
+	char *cmd = NULL;
+	wchar_t *cmdw = NULL, *cwdw = NULL, *envw = NULL;
 	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
@@ -477,7 +496,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	}
 
 	/*The following two checks can be removed once we drop XP support */
-	type_len = strlen(type);
+	type_len = (int)strlen(type);
 	if (type_len <1 || type_len > 2) {
 		return NULL;
 	}
@@ -489,18 +508,42 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		ptype++;
 	}
 
+	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
+	if (!cmd) {
+		return NULL;
+	}
+
+	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
+	cmdw = php_win32_cp_any_to_w(cmd);
+	if (!cmdw) {
+		free(cmd);
+		return NULL;
+	}
+
+	if (cwd) {
+		cwdw = php_win32_ioutil_any_to_w(cwd);
+		if (!cwdw) {
+			free(cmd);
+			free(cmdw);
+			return NULL;
+		}
+	}
+
 	security.nLength				= sizeof(SECURITY_ATTRIBUTES);
 	security.bInheritHandle			= TRUE;
 	security.lpSecurityDescriptor	= NULL;
 
 	if (!type_len || !CreatePipe(&in, &out, &security, 2048L)) {
+		free(cmdw);
+		free(cwdw);
+		free(cmd);
 		return NULL;
 	}
 
-	memset(&startup, 0, sizeof(STARTUPINFO));
+	memset(&startup, 0, sizeof(STARTUPINFOW));
 	memset(&process, 0, sizeof(PROCESS_INFORMATION));
 
-	startup.cb			= sizeof(STARTUPINFO);
+	startup.cb			= sizeof(STARTUPINFOW);
 	startup.dwFlags		= STARTF_USESTDHANDLES;
 	startup.hStdError	= GetStdHandle(STD_ERROR_HANDLE);
 
@@ -532,26 +575,35 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		}
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
-	if (!cmd) {
-		return NULL;
+	envw = php_win32_cp_env_any_to_w(env);
+	if (envw) {
+		dwCreateFlags |= CREATE_UNICODE_ENVIRONMENT;
+	} else {
+		if (env) {
+			free(cmd);
+			free(cmdw);
+			free(cwdw);
+			return NULL;
+		}
 	}
 
-	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
 	if (asuser) {
-		res = CreateProcessAsUser(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, envw, cwdw, &startup, &process);
 		CloseHandle(token_user);
 	} else {
-		res = CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, envw, cwdw, &startup, &process);
 	}
 	free(cmd);
+	free(cmdw);
+	free(cwdw);
+	free(envw);
 
 	if (!res) {
 		return NULL;
 	}
 
 	CloseHandle(process.hThread);
-	proc = process_get(NULL TSRMLS_CC);
+	proc = process_get(NULL);
 
 	if (read) {
 		fno = _open_osfhandle((tsrm_intptr_t)in, _O_RDONLY | mode);
@@ -571,9 +623,8 @@ TSRM_API int pclose(FILE *stream)
 {
 	DWORD termstat = 0;
 	process_pair *process;
-	TSRMLS_FETCH();
 
-	if ((process = process_get(stream TSRMLS_CC)) == NULL) {
+	if ((process = process_get(stream)) == NULL) {
 		return 0;
 	}
 
@@ -599,19 +650,25 @@ TSRM_API int shmget(int key, int size, int flags)
 		return -1;
 	}
 
-	sprintf(shm_segment, "TSRM_SHM_SEGMENT:%d", key);
-	sprintf(shm_info, "TSRM_SHM_DESCRIPTOR:%d", key);
+	snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
+	snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
 
 	shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
 	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
 
-	if ((!shm_handle && !info_handle)) {
+	if (!shm_handle && !info_handle) {
 		if (flags & IPC_CREAT) {
 			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm_segment);
 			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
 			created		= TRUE;
 		}
-		if ((!shm_handle || !info_handle)) {
+		if (!shm_handle || !info_handle) {
+			if (shm_handle) {
+				CloseHandle(shm_handle);
+			}
+			if (info_handle) {
+				CloseHandle(info_handle);
+			}
 			return -1;
 		}
 	} else {
@@ -621,6 +678,11 @@ TSRM_API int shmget(int key, int size, int flags)
 	}
 
 	shm = shm_get(key, NULL);
+	if (!shm) {
+		CloseHandle(shm_handle);
+		CloseHandle(info_handle);
+		return -1;
+	}
 	shm->segment = shm_handle;
 	shm->info	 = info_handle;
 	shm->descriptor = MapViewOfFileEx(shm->info, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
@@ -722,4 +784,59 @@ TSRM_API char *realpath(char *orig_path, char *buffer)
 	return buffer;
 }
 
+#if HAVE_UTIME
+static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
+{
+	// Note that LONGLONG is a 64-bit value
+	LONGLONG ll;
+
+	ll = Int32x32To64(t, 10000000) + 116444736000000000;
+	pft->dwLowDateTime = (DWORD)ll;
+	pft->dwHighDateTime = ll >> 32;
+}
+/* }}} */
+
+TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
+{
+	FILETIME mtime, atime;
+	HANDLE hFile;
+	PHP_WIN32_IOUTIL_INIT_W(filename)
+
+	if (!pathw) {
+		return -1;
+	}
+
+	hFile = CreateFileW(pathw, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+
+	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but
+	   the CreateFile operation succeeds */
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		SetLastError(0);
+	}
+
+	if ( hFile == INVALID_HANDLE_VALUE ) {
+		return -1;
+	}
+
+	if (!buf) {
+		SYSTEMTIME st;
+		GetSystemTime(&st);
+		SystemTimeToFileTime(&st, &mtime);
+		atime = mtime;
+	} else {
+		UnixTimeToFileTime(buf->modtime, &mtime);
+		UnixTimeToFileTime(buf->actime, &atime);
+	}
+	if (!SetFileTime(hFile, NULL, &atime, &mtime)) {
+		CloseHandle(hFile);
+		return -1;
+	}
+	CloseHandle(hFile);
+	return 1;
+}
+/* }}} */
+#endif
 #endif

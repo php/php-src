@@ -9,7 +9,7 @@ $fixed_array->setSize(array());
 var_dump($fixed_array);
 ?>
 --EXPECTF--
-Warning: SplFixedArray::setSize() expects parameter 1 to be long, array given in %s on line %d
+Warning: SplFixedArray::setSize() expects parameter 1 to be integer, array given in %s on line %d
 object(SplFixedArray)#1 (2) {
   [0]=>
   NULL

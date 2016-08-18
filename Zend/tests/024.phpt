@@ -11,7 +11,7 @@ var_dump($a++);
 var_dump(++$b);
 var_dump($a->$b);
 var_dump($a->$b);
-var_dump($a->$b->$c[1]);
+var_dump($a->$b->{$c[1]});
 
 ?>
 --EXPECTF--

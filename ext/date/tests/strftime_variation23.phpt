@@ -1,5 +1,7 @@
 --TEST--
 Test strftime() function : usage variation - Checking large positive and negative float values to timestamp.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
@@ -25,12 +27,16 @@ var_dump( strftime($format, $timestamp) );
 
 ?>
 ===DONE===
---EXPECTREGEX--
-\*\*\* Testing strftime\(\) : usage variation \*\*\*
+--EXPECTF--
+*** Testing strftime() : usage variation ***
 
--- Testing strftime\(\) function with float 12.3456789000e10 to timestamp --
-string\(\d*\)\s"Mar\s(26|11)\s(1935|5882)\s(04|00):(50|30):(16|00)"
+-- Testing strftime() function with float 12.3456789000e10 to timestamp --
 
--- Testing strftime\(\) function with float -12.3456789000e10 to timestamp --
-string\(\d*\)\s"(Oct|Dec)\s(08|13|22)\s(2004|1901|-1943)\s(19|20|23):(09|45|30):(44|52|00)"
+Warning: strftime() expects parameter 2 to be integer, float given in %s on line %d
+bool(false)
+
+-- Testing strftime() function with float -12.3456789000e10 to timestamp --
+
+Warning: strftime() expects parameter 2 to be integer, float given in %s on line %d
+bool(false)
 ===DONE===

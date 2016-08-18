@@ -10,4 +10,4 @@ final final class test {
 echo "Done\n";
 ?>
 --EXPECTF--	
-Parse error: %s error,%sexpecting %s in %s on line %d
+Fatal error: Multiple final modifiers are not allowed in %s on line %d

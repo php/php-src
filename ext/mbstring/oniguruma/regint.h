@@ -4,7 +4,7 @@
   regint.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2013  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -227,17 +227,21 @@
 } while(0)
 
 /* sizeof(OnigCodePoint) */
-#define WORD_ALIGNMENT_SIZE     SIZEOF_LONG
+#ifdef SIZEOF_SIZE_T
+# define WORD_ALIGNMENT_SIZE     SIZEOF_SIZE_T
+#else
+# define WORD_ALIGNMENT_SIZE     SIZEOF_LONG
+#endif
 
 #define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
   (pad_size) = WORD_ALIGNMENT_SIZE \
-               - ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
+               - ((size_t)(addr) % WORD_ALIGNMENT_SIZE);\
   if ((pad_size) == WORD_ALIGNMENT_SIZE) (pad_size) = 0;\
 } while (0)
 
 #define ALIGNMENT_RIGHT(addr) do {\
   (addr) += (WORD_ALIGNMENT_SIZE - 1);\
-  (addr) -= ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
+  (addr) -= ((size_t)(addr) % WORD_ALIGNMENT_SIZE);\
 } while (0)
 
 #endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
@@ -688,7 +692,11 @@ typedef struct {
   BBuf*  mbuf;   /* multi-byte info or NULL */
 } CClassNode;
 
+#ifdef _WIN64
+typedef __int64 OnigStackIndex;
+#else
 typedef long OnigStackIndex;
+#endif
 
 typedef struct _OnigStackType {
   unsigned int type;
@@ -750,6 +758,14 @@ typedef struct {
 #define IS_CODE_SB_WORD(enc,code) \
   (ONIGENC_IS_CODE_ASCII(code) && ONIGENC_IS_CODE_WORD(enc,code))
 
+typedef struct OnigEndCallListItem {
+  struct OnigEndCallListItem* next;
+  void (*func)(void);
+} OnigEndCallListItemType;
+
+extern void onig_add_end_call(void (*func)(void));
+
+
 #ifdef ONIG_DEBUG
 
 typedef struct {
@@ -759,6 +775,7 @@ typedef struct {
 } OnigOpInfoType;
 
 extern OnigOpInfoType OnigOpInfo[];
+
 
 extern void onig_print_compiled_byte_code P_((FILE* f, UChar* bp, UChar** nextp, OnigEncoding enc));
 
@@ -780,7 +797,12 @@ extern int  onig_is_code_in_cc_len P_((int enclen, OnigCodePoint code, CClassNod
 
 /* strend hash */
 typedef void hash_table_type;
+#ifdef _WIN32
+# include <windows.h>
+typedef ULONG_PTR hash_data_type;
+#else
 typedef unsigned long hash_data_type;
+#endif
 
 extern hash_table_type* onig_st_init_strend_table_with_size P_((int size));
 extern int onig_st_lookup_strend P_((hash_table_type* table, const UChar* str_key, const UChar* end_key, hash_data_type *value));

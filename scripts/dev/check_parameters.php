@@ -1,7 +1,7 @@
 <?php
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -20,8 +20,8 @@
 /* $Id$ */
 
 
-define('REPORT_LEVEL', 2); // 0 reports less false-positives. up to level 5.
-define('VERSION', '5.2');  // minimum is 5.2
+define('REPORT_LEVEL', 1); // 0 reports less false-positives. up to level 5.
+define('VERSION', '7.0');  // minimum is 7.0
 define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
 
 
@@ -33,30 +33,24 @@ ini_set('pcre.backtrack_limit', 10000000);
 
 
 $API_params = array(
-	'a' => array('zval**'), // array as zval*
+	'a' => array('zval**'), // array
+	'A' => array('zval**'), // array or object
 	'b' => array('zend_bool*'), // boolean
-	'C' => array('zend_class_entry**'), // class
 	'd' => array('double*'), // double
 	'f' => array('zend_fcall_info*', 'zend_fcall_info_cache*'), // function
 	'h' => array('HashTable**'), // array as an HashTable*
-	'l' => array('long*'), // long
+	'H' => array('HashTable**'), // array or HASH_OF(object)
+	'l' => array('zend_long*'), // long
+	//TODO 'L' => array('zend_long*, '), // long
 	'o' => array('zval**'), //object
 	'O' => array('zval**', 'zend_class_entry*'), // object of given type
+	'P' => array('zend_string**'), // valid path
 	'r' => array('zval**'), // resource
-	's' => array('char**', 'int*'), // string
+	'S' => array('zend_string**'), // string
 	'z' => array('zval**'), // zval*
 	'Z' => array('zval***') // zval**
+	// 's', 'p', 'C' handled separately
 );
-
-// specific to PHP >= 6
-if (version_compare(VERSION, '6', 'ge')) {
-	$API_params['S'] = $API_params['s']; // binary string
-	$API_params['t'] = array('zstr*', 'int*', 'zend_uchar*'); // text
-	$API_params['T'] = $API_params['t'];
-	$API_params['u'] = array('UChar**', 'int*'); // unicode
-	$API_params['U'] = $API_params['u'];
-}
-
 
 /** reports an error, according to its level */
 function error($str, $level = 0)
@@ -65,7 +59,7 @@ function error($str, $level = 0)
 
 	if ($level <= REPORT_LEVEL) {
 		if (strpos($current_file,PHPDIR) === 0) {
-			$filename = substr($current_file, strlen(PHPDIR)+1); 
+			$filename = substr($current_file, strlen(PHPDIR)+1);
 		} else {
 			$filename = $current_file;
 		}
@@ -135,7 +129,7 @@ function get_vars($txt)
 
 
 /** run diagnostic checks against one var. */
-function check_param($db, $idx, $exp, $optional)
+function check_param($db, $idx, $exp, $optional, $allow_uninit = false)
 {
 	global $error_few_vars_given;
 
@@ -153,14 +147,13 @@ function check_param($db, $idx, $exp, $optional)
 		error("{$db[$idx][0]}: expected '$exp' but got '{$db[$idx][1]}' [".($idx+1).']');
 	}
 
-	if ($optional && !$db[$idx][2]) {
-		error("optional var not initialized: {$db[$idx][0]} [".($idx+1).']', 1);
-
-	} elseif (!$optional && $db[$idx][2]) {
+	if (!$optional && $db[$idx][2]) {
 		error("not optional var is initialized: {$db[$idx][0]} [".($idx+1).']', 2);
 	}
+	if (!$allow_uninit && $optional && !$db[$idx][2]) {
+		error("optional var not initialized: {$db[$idx][0]} [".($idx+1).']', 1);
+	}
 }
-
 
 /** fetch params passed to zend_parse_params*() */
 function get_params($vars, $str)
@@ -200,7 +193,15 @@ function check_function($name, $txt, $offset)
 {
 	global $API_params;
 
-	if (preg_match_all('/zend_parse_parameters(?:_ex\s*\([^,]+,[^,]+|\s*\([^,]+),\s*"([^"]*)"\s*,\s*([^{;]*)/S', $txt, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+	$regex = '/
+		(?: zend_parse_parameters(?:_throw)?               \s*\([^,]+
+		|   zend_parse_(?:parameters_ex|method_parameters) \s*\([^,]+,[^,]+
+		|   zend_parse_method_parameters_ex                \s*\([^,]+,[^,]+,[^,+]
+		)
+		,\s*"([^"]*)"\s*
+		,\s*([^{;]*)
+	/Sx';
+	if (preg_match_all($regex, $txt, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
 
 		$GLOBALS['current_function'] = $name;
 
@@ -211,12 +212,14 @@ function check_function($name, $txt, $offset)
 			$vars = get_vars(substr($txt, 0, $m[0][1])); // limit var search to current location
 			$params = get_params($vars, $m[2][0]);
 			$optional = $varargs = false;
-			$last_last_char = $last_char = '';
+			$last_char = '';
 			$j = -1;
-			$len = strlen($m[1][0]);
 
+			$spec = $m[1][0];
+			$len = strlen($spec);
 			for ($i = 0; $i < $len; ++$i) {
-				switch($char = $m[1][0][$i]) {
+				$char = $spec[$i];
+				switch ($char = $spec[$i]) {
 					// separator for optional parameters
 					case '|':
 						if ($optional) {
@@ -231,57 +234,60 @@ function check_function($name, $txt, $offset)
 
 					// separate_zval_if_not_ref
 					case '/':
-						if (!in_array($last_char, array('r', 'z'))) {
-							error("the '/' specifier cannot be applied to '$last_char'");
+						if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
+							error("the '/' specifier should not be applied to '$last_char'");
 						}
 					break;
 
 					// nullable arguments
 					case '!':
-						if (!in_array($last_char, array('a', 'C', 'f', 'h', 'o', 'O', 'r', 's', 't', 'z', 'Z'))) {
-							error("the '!' specifier cannot be applied to '$last_char'");
+						if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
+							check_param($params, ++$j, 'zend_bool*', $optional);
 						}
 					break;
 
-					case '&':
-						if (version_compare(VERSION, '6', 'ge')) {
-							if ($last_char == 's' || ($last_last_char == 's' && $last_char == '!')) {
-								check_param($params, ++$j, 'UConverter*', $optional);
-
-							} else {
-								error("the '&' specifier cannot be applied to '$last_char'");
-							}
-						} else {
-							error("unknown char ('&') at column $i");
-						}
-					break;
-
+					// variadic arguments
 					case '+':
 					case '*':
-						if (version_compare(VERSION, '6', 'ge')) {
-							if ($varargs) {
-								error("A varargs specifier can only be used once. repeated char at column $i");
-							} else {
-								check_param($params, ++$j, 'zval****', $optional);
-								check_param($params, ++$j, 'int*', $optional);
-								$varargs = true;
-							}
+						if ($varargs) {
+							error("A varargs specifier can only be used once. repeated char at column $i");
 						} else {
-							error("unknown char ('$char') at column $i");
+							check_param($params, ++$j, 'zval**', $optional);
+							check_param($params, ++$j, 'int*', $optional);
+							$varargs = true;
 						}
+					break;
+
+					case 's':
+					case 'p':
+						check_param($params, ++$j, 'char**', $optional, $allow_uninit=true);
+						check_param($params, ++$j, 'size_t*', $optional, $allow_uninit=true);
+						if ($optional && !$params[$j-1][2] && !$params[$j][2]
+								&& $params[$j-1][0] !== '**dummy**' && $params[$j][0] !== '**dummy**') {
+							error("one of optional vars {$params[$j-1][0]} or {$params[$j][0]} must be initialized", 1);
+						}
+					break;
+
+					case 'C':
+						// C must always be initialized, independently of whether it's optional
+						check_param($params, ++$j, 'zend_class_entry**', false);
 					break;
 
 					default:
-						if (isset($API_params[$char])) {
-							foreach($API_params[$char] as $exp) {
-								check_param($params, ++$j, $exp, $optional);
-							}
-						} else {
+						if (!isset($API_params[$char])) {
 							error("unknown char ('$char') at column $i");
+						}
+
+						// If an is_null flag is in use, only that flag is required to be
+						// initialized
+						$allow_uninit = $i+1 < $len && $spec[$i+1] === '!'
+								&& in_array($char, array('l', 'L', 'd', 'b'));
+
+						foreach ($API_params[$char] as $exp) {
+							check_param($params, ++$j, $exp, $optional, $allow_uninit);
 						}
 				}
 
-				$last_last_char = $last_char;
 				$last_char = $char;
 			}
 		}
@@ -306,8 +312,10 @@ function recurse($path)
 
 		$txt = file_get_contents($file);
 		// remove comments (but preserve the number of lines)
-		$txt = preg_replace(array('@//.*@S', '@/\*.*\*/@SsUe'), array('', 'preg_replace("/[^\r\n]+/S", "", \'$0\')'), $txt);
-
+		$txt = preg_replace('@//.*@S', '', $txt);
+		$txt = preg_replace_callback('@/\*.*\*/@SsU', function($matches) {
+			return preg_replace("/[^\r\n]+/S", "", $matches[0]);
+		}, $txt);
 
 		$split = preg_split('/PHP_(?:NAMED_)?(?:FUNCTION|METHOD)\s*\((\w+(?:,\s*\w+)?)\)/S', $txt, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE);
 
@@ -352,7 +360,7 @@ HELP;
 	for ($i = 1; $i < $argc; $i++) {
 		$dirs[] = $argv[$i];
 	}
-} else { 
+} else {
 	$dirs[] = PHPDIR;
 }
 

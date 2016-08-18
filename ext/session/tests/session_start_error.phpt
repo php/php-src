@@ -97,99 +97,194 @@ ob_end_flush();
 *** Testing session_start() : error functionality ***
 
 -- Iteration 1 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, integer given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 2 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, integer given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 3 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, integer given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 4 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, integer given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 5 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, float given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 6 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, float given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 7 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, float given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 8 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, float given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 9 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, float given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 10 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, null given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 11 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, null given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 12 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, boolean given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 13 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, boolean given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 14 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, boolean given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 15 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, boolean given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 16 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, string given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 17 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, string given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 18 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, string given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 19 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, string given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 20 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, string given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 21 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, object given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 22 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, null given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 23 --
-bool(true)
-bool(true)
+
+Warning: session_start() expects parameter 1 to be array, null given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 
 -- Iteration 24 --
-bool(true)
-bool(true)
-Done
 
+Warning: session_start() expects parameter 1 to be array, resource given in %s on line %d
+bool(false)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
+Done

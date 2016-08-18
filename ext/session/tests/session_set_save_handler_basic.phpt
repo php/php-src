@@ -29,6 +29,7 @@ session_save_path($path);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 
 session_start();
+$session_id = session_id();
 $_SESSION["Blah"] = "Hello World!";
 $_SESSION["Foo"] = FALSE;
 $_SESSION["Guff"] = 1234567890;
@@ -45,6 +46,11 @@ session_start();
 var_dump($_SESSION);
 $_SESSION['Bar'] = 'Foo';
 session_write_close();
+
+echo "Cleanup..\n";
+session_id($session_id);
+session_start();
+session_destroy();
 
 ob_end_flush();
 ?>
@@ -93,4 +99,9 @@ array(3) {
   int(1234567890)
 }
 Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
+Close [%s,PHPSESSID]
+Cleanup..
+Open [%s,PHPSESSID]
+Read [%s,%s]
+Destroy [%s,%s]
 Close [%s,PHPSESSID]

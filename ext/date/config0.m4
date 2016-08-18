@@ -4,7 +4,7 @@ dnl config.m4 for date extension
 sinclude(ext/date/lib/timelib.m4)
 sinclude(lib/timelib.m4)
 
-PHP_DATE_CFLAGS="-I@ext_builddir@/lib -D HAVE_TIMELIB_CONFIG_H=1"
+PHP_DATE_CFLAGS="-I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DHAVE_TIMELIB_CONFIG_H=1"
 timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c 
                  lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c lib/parse_iso_intervals.c lib/interval.c"
 
@@ -25,4 +25,12 @@ cat > $ext_builddir/lib/timelib_config.h <<EOF
 #endif
 #include <php_stdint.h>
 #define TIMELIB_OMIT_STDINT 1
+
+#include "zend.h"
+
+#define timelib_malloc  emalloc
+#define timelib_realloc erealloc
+#define timelib_calloc  ecalloc
+#define timelib_strdup  estrdup
+#define timelib_free    efree
 EOF

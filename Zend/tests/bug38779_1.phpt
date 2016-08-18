@@ -20,10 +20,10 @@ class Loader {
 		return $this->position >= strlen($this->data);
 	}
 	function stream_flush() {
-		@unlink(dirname(__FILE__)."/bug38779.txt");
 		var_dump("flush!");
 	}
 	function stream_close() {
+		@unlink(dirname(__FILE__)."/bug38779.txt");
 		var_dump("close!");
 	}
 }
@@ -39,7 +39,14 @@ include $filename;
 
 echo "Done\n";
 ?>
+--CLEAN--
+<?php
+
+$filename = dirname(__FILE__)."/bug38779.txt";
+if (file_exists($filename)) {
+	@unlink(dirname(__FILE__)."/bug38779.txt");
+}
+?>
 --EXPECTF--	
 Parse error: %s error%sin %s on line %d
-string(6) "flush!"
 string(6) "close!"

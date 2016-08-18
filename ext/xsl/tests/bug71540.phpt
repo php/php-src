@@ -56,6 +56,8 @@ Warning: XSLTProcessor::transformToXml(): Stack usage errror in %sbug71540.php o
 
 Warning: XSLTProcessor::transformToXml(): Stack usage errror in %sbug71540.php on line %d
 
+Warning: XSLTProcessor::transformToXml(): Handler name must be a string in %sbug71540.php on line %d
+
 Warning: XSLTProcessor::transformToXml(): xmlXPathCompiledEval: 2 objects left on the stack. in %sbug71540.php on line %d
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line 13 element value-of in %sbug71540.php on line %d

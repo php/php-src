@@ -17,7 +17,7 @@ var_dump(json_last_error(), json_last_error_msg());
 
 ?>
 --EXPECTF--
-resource(5) of type (stream)
+resource(%d) of type (stream)
 bool(false)
 int(8)
 string(21) "Type is not supported"

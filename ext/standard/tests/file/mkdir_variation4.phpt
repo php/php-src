@@ -140,19 +140,19 @@ Error: 2 - mkdir() expects parameter 4 to be resource, integer given, %s(%d)
 Error: 2 - mkdir() expects parameter 4 to be resource, integer given, %s(%d)
 
 --float 10.5--
-Error: 2 - mkdir() expects parameter 4 to be resource, double given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, float given, %s(%d)
 
 --float -10.5--
-Error: 2 - mkdir() expects parameter 4 to be resource, double given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, float given, %s(%d)
 
 --float 12.3456789000e10--
-Error: 2 - mkdir() expects parameter 4 to be resource, double given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, float given, %s(%d)
 
 --float -12.3456789000e10--
-Error: 2 - mkdir() expects parameter 4 to be resource, double given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, float given, %s(%d)
 
 --float .5--
-Error: 2 - mkdir() expects parameter 4 to be resource, double given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, float given, %s(%d)
 
 --empty array--
 Error: 2 - mkdir() expects parameter 4 to be resource, array given, %s(%d)

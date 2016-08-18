@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.81 2013/11/29 15:42:51 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.91 2014/12/16 23:18:40 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -81,7 +81,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.81 2013/11/29 15:42:51 christos Exp $")
 #endif
 
 private void close_and_restore(const struct magic_set *, const char *, int,
-    const struct stat *);
+    const zend_stat_t *);
 private int unreadable_info(struct magic_set *, mode_t, const char *);
 #if 0
 private const char* get_default_magic(void);
@@ -233,13 +233,15 @@ magic_open(int flags)
 private int
 unreadable_info(struct magic_set *ms, mode_t md, const char *file)
 {
-	/* We cannot open it, but we were able to stat it. */
-	if (access(file, W_OK) == 0)
-		if (file_printf(ms, "writable, ") == -1)
-			return -1;
-	if (access(file, X_OK) == 0)
-		if (file_printf(ms, "executable, ") == -1)
-			return -1;
+	if (file) {
+		/* We cannot open it, but we were able to stat it. */
+		if (access(file, W_OK) == 0)
+			if (file_printf(ms, "writable, ") == -1)
+				return -1;
+		if (access(file, X_OK) == 0)
+			if (file_printf(ms, "executable, ") == -1)
+				return -1;
+	}
 	if (S_ISREG(md))
 		if (file_printf(ms, "regular file, ") == -1)
 			return -1;
@@ -286,7 +288,7 @@ magic_list(struct magic_set *ms, const char *magicfile)
 
 private void
 close_and_restore(const struct magic_set *ms, const char *name, int fd,
-    const struct stat *sb)
+    const zend_stat_t *sb)
 {
 
 	if ((ms->flags & MAGIC_PRESERVE_ATIME) != 0) {
@@ -350,10 +352,9 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 {
 	int	rv = -1;
 	unsigned char *buf;
-	struct stat	sb;
+	zend_stat_t   sb;
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
 	int no_in_stream = 0;
-	TSRMLS_FETCH();
 
 	if (!inname && !stream) {
 		return NULL;
@@ -471,4 +472,54 @@ public int
 magic_version(void)
 {
 	return MAGIC_VERSION;
+}
+
+public int
+magic_setparam(struct magic_set *ms, int param, const void *val)
+{
+	switch (param) {
+	case MAGIC_PARAM_INDIR_MAX:
+		ms->indir_max = (uint16_t)*(const size_t *)val;
+		return 0;
+	case MAGIC_PARAM_NAME_MAX:
+		ms->name_max = (uint16_t)*(const size_t *)val;
+		return 0;
+	case MAGIC_PARAM_ELF_PHNUM_MAX:
+		ms->elf_phnum_max = (uint16_t)*(const size_t *)val;
+		return 0;
+	case MAGIC_PARAM_ELF_SHNUM_MAX:
+		ms->elf_shnum_max = (uint16_t)*(const size_t *)val;
+		return 0;
+	case MAGIC_PARAM_ELF_NOTES_MAX:
+		ms->elf_notes_max = (uint16_t)*(const size_t *)val;
+		return 0;
+	default:
+		errno = EINVAL;
+		return -1;
+	}
+}
+
+public int
+magic_getparam(struct magic_set *ms, int param, void *val)
+{
+	switch (param) {
+	case MAGIC_PARAM_INDIR_MAX:
+		*(size_t *)val = ms->indir_max;
+		return 0;
+	case MAGIC_PARAM_NAME_MAX:
+		*(size_t *)val = ms->name_max;
+		return 0;
+	case MAGIC_PARAM_ELF_PHNUM_MAX:
+		*(size_t *)val = ms->elf_phnum_max;
+		return 0;
+	case MAGIC_PARAM_ELF_SHNUM_MAX:
+		*(size_t *)val = ms->elf_shnum_max;
+		return 0;
+	case MAGIC_PARAM_ELF_NOTES_MAX:
+		*(size_t *)val = ms->elf_notes_max;
+		return 0;
+	default:
+		errno = EINVAL;
+		return -1;
+	}
 }

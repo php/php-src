@@ -31,7 +31,7 @@ object(stdClass)#%d (0) {
 object(DateTime)#%d (0) {
 }
 
-Fatal error: Uncaught exception 'ReflectionException' with message 'Class Generator is an internal class marked as final that cannot be instantiated without invoking its constructor' in %sReflectionClass_newInstanceWithoutConstructor.php:%d
+Fatal error: Uncaught ReflectionException: Class Generator is an internal class marked as final that cannot be instantiated without invoking its constructor in %sReflectionClass_newInstanceWithoutConstructor.php:%d
 Stack trace:
 #0 %sReflectionClass_newInstanceWithoutConstructor.php(%d): ReflectionClass->newInstanceWithoutConstructor()
 #1 {main}

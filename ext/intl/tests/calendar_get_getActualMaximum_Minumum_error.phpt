@@ -53,17 +53,17 @@ bool(false)
 Warning: IntlCalendar::getActualMinimum(): intlcal_get_actual_minimum: invalid field in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::get() expects parameter 1 to be long, string given in %s on line %d
+Warning: IntlCalendar::get() expects parameter 1 to be integer, string given in %s on line %d
 
 Warning: IntlCalendar::get(): intlcal_get: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::getActualMaximum() expects parameter 1 to be long, string given in %s on line %d
+Warning: IntlCalendar::getActualMaximum() expects parameter 1 to be integer, string given in %s on line %d
 
 Warning: IntlCalendar::getActualMaximum(): intlcal_get_actual_maximum: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::getActualMinimum() expects parameter 1 to be long, string given in %s on line %d
+Warning: IntlCalendar::getActualMinimum() expects parameter 1 to be integer, string given in %s on line %d
 
 Warning: IntlCalendar::getActualMinimum(): intlcal_get_actual_minimum: bad arguments in %s on line %d
 bool(false)

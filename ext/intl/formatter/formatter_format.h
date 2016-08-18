@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@ PHP_FUNCTION( numfmt_format_currency );
 
 #define FORMAT_TYPE_DEFAULT	0
 #define FORMAT_TYPE_INT32	1
-#define FORMAT_TYPE_INT64	2 
+#define FORMAT_TYPE_INT64	2
 #define FORMAT_TYPE_DOUBLE	3
 #define FORMAT_TYPE_CURRENCY	4
 

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,20 +12,18 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Johannes Schlüter <johannes@php.net>                        |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef MYSQLND_RESULT_META_H
 #define MYSQLND_RESULT_META_H
 
-PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_DC);
+PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent);
 PHPAPI struct st_mysqlnd_res_meta_methods * mysqlnd_result_metadata_get_methods();
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * meta, unsigned int plugin_id TSRMLS_DC);
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * meta, unsigned int plugin_id);
 
 #endif /* MYSQLND_RESULT_META_H */
 

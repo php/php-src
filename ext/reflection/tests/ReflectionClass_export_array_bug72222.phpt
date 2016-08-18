@@ -13,8 +13,8 @@ Class [ <user> class A ] {
   @@ %s 2-5
 
   - Constants [2] {
-    Constant [ integer A ] { 8 }
-    Constant [ array B ] { Array }
+    Constant [ public integer A ] { 8 }
+    Constant [ public array B ] { Array }
   }
 
   - Static properties [0] {

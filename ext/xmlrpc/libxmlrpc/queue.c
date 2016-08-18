@@ -1,6 +1,6 @@
 static const char rcsid[] = "#(@) $Id$";
 
-/* 
+/*
  * Date last modified: Jan 2001
  * Modifications by Dan Libby (dan@libby.com), including:
  *  - various fixes, null checks, etc
@@ -508,7 +508,7 @@ void *Q_Previous(queue *q)
 {
    if(!q)
       return NULL;
-   
+
    if(q->cursor->prev == NULL)
       return NULL;
 

@@ -27,7 +27,7 @@ $nonstaticScoped(); echo "\n";
 echo "After binding, no instance", "\n";
 $d = $nonstaticUnscoped->bindTo(null, "static"); $d(); echo "\n";
 $d = $nonstaticScoped->bindTo(null, "static"); $d(); echo "\n";
-//$d should have been turned to static
+// $d is still non-static
 $d->bindTo($d);
 
 echo "After binding, with same-class instance for the bound one", "\n";
@@ -54,8 +54,6 @@ bool(false)
 bool(true)
 bool(false)
 
-
-Warning: Cannot bind an instance to a static closure in %s on line %d
 After binding, with same-class instance for the bound one
 bool(false)
 bool(true)

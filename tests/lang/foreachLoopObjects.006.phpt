@@ -70,16 +70,12 @@ var_dump($obj);
 
 ?>
 --EXPECTF--
-
 Substituting the iterated object for a different object.
 string(10) "Original a"
 string(10) "Original b"
-string(5) "new a"
-string(5) "new b"
-string(5) "new c"
-string(5) "new d"
-string(5) "new e"
-string(5) "new f"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 object(stdClass)#%d (6) {
   ["a"]=>
   string(5) "new a"
@@ -98,14 +94,9 @@ object(stdClass)#%d (6) {
 Substituting the iterated object for an array.
 string(10) "Original a"
 string(10) "Original b"
-int(1)
-int(2)
-int(3)
-int(4)
-int(5)
-int(6)
-int(7)
-int(8)
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 array(8) {
   [0]=>
   int(1)
@@ -128,11 +119,12 @@ array(8) {
 Substituting the iterated array for an object.
 int(1)
 int(2)
-string(10) "Original a"
-string(10) "Original b"
-string(10) "Original c"
-string(10) "Original d"
-string(10) "Original e"
+int(3)
+int(4)
+int(5)
+int(6)
+int(7)
+int(8)
 object(C)#%d (5) {
   ["a"]=>
   string(10) "Original a"

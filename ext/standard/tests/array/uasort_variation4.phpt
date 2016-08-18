@@ -42,7 +42,7 @@ var_dump( uasort($int_values, 'cmp_function') );  // expecting: bool(true)
 var_dump($int_values);
 
 // Octal array
-$octal_values = array(0 => 056, 1 => 023, 2 => 090, 3 => 015, 4 => -045, 5 => 01, 6 => -078);
+$octal_values = array(0 => 056, 1 => 023, 2 => 00, 3 => 015, 4 => -045, 5 => 01, 6 => -07);
 echo "-- Sorting Octal array --\n";
 var_dump( uasort($octal_values, 'cmp_function') );  // expecting: bool(true)
 var_dump($octal_values);

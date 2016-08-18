@@ -42,9 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting internal functions that are not used by other modules. */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #define NLBLOCK cd             /* Block containing newline information */
 #define PSSTART start_pattern  /* Field containing pattern start */
@@ -5772,7 +5770,7 @@ for (;; ptr++)
     /* If previous was a character type match (\d or similar), abolish it and
     create a suitable repeat item. The code is shared with single-character
     repeats by setting op_type to add a suitable offset into repeat_type. Note
-    the the Unicode property types will be present only when SUPPORT_UCP is
+    that the Unicode property types will be present only when SUPPORT_UCP is
     defined, but we don't wrap the little bits of code here because it just
     makes it horribly messy. */
 

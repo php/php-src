@@ -3,10 +3,12 @@ Testing each() with array and object
 --FILE--
 <?php
 
-$foo = each(new stdClass);
+$a = new stdClass;
+$foo = each($a);
 var_dump($foo);
 
-var_dump(each(new stdClass));
+$a = new stdClass;
+var_dump(each($a));
 
 $a = array(new stdClass);
 var_dump(each($a));

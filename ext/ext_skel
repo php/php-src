@@ -166,7 +166,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION($extname, $extname.c, \$ext_shared)
+  PHP_NEW_EXTENSION($extname, $extname.c, \$ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
 eof
 
@@ -182,7 +182,7 @@ cat >config.w32 <<eof
 // ARG_ENABLE("$extname", "enable $extname support", "no");
 
 if (PHP_$EXTNAME != "no") {
-	EXTENSION("$extname", "$extname.c");
+	EXTENSION("$extname", "$extname.c", PHP_EXTNAME_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 }
 
 eof
@@ -299,12 +299,12 @@ if test -n "$proto"; then
     warning="
 NOTE! Because some arguments to functions were resources, the code generated
 cannot yet be compiled without editing. Please consider this to be step 4.5
-in the instructions above. 
+in the instructions above.
 "
   fi
 fi
 
-find . -type f | xargs chmod 644 
+find . -type f | xargs chmod 644
 find . -type d | xargs chmod 755
 fi
 

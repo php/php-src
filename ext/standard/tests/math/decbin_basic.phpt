@@ -5,7 +5,7 @@ Test decbin() - basic function test
 $values = array(10,
 				3950.5,
 				3.9505e3,
-				039,
+				03,
 				0x5F,	
 				"10",
 				"3950.5",
@@ -31,7 +31,7 @@ string(2) "11"
 string(7) "1011111"
 string(4) "1010"
 string(12) "111101101110"
-string(2) "11"
+string(12) "111101101110"
 string(6) "100111"
 string(1) "0"
 string(1) "1"

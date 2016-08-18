@@ -223,13 +223,13 @@ NULL
 
 Notice: Use of undefined constant ABCD - assumed 'ABCD' in %s on line %d
 
-Warning: count() expects parameter 2 to be long, %s given in %s on line %d
+Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
 NULL
 
-Warning: count() expects parameter 2 to be long, %s given in %s on line %d
+Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
 NULL
 
-Warning: count() expects parameter 2 to be long, %s given in %s on line %d
+Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
 NULL
 
 Done

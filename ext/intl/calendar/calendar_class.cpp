@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,7 +41,7 @@ zend_object_handlers Calendar_handlers;
 /* }}} */
 
 U_CFUNC	void calendar_object_create(zval *object,
-									Calendar *calendar TSRMLS_DC)
+									Calendar *calendar)
 {
 	UClassID classId = calendar->getDynamicClassID();
 	zend_class_entry *ce;
@@ -54,19 +54,18 @@ U_CFUNC	void calendar_object_create(zval *object,
 	}
 
 	object_init_ex(object, ce);
-	calendar_object_construct(object, calendar TSRMLS_CC);
+	calendar_object_construct(object, calendar);
 }
 
-U_CFUNC Calendar *calendar_fetch_native_calendar(zval *object TSRMLS_DC)
+U_CFUNC Calendar *calendar_fetch_native_calendar(zval *object)
 {
-	Calendar_object *co = (Calendar_object*)
-			zend_object_store_get_object(object TSRMLS_CC);
+	Calendar_object *co = Z_INTL_CALENDAR_P(object);
 
 	return co->ucal;
 }
 
 U_CFUNC void calendar_object_construct(zval *object,
-									   Calendar *calendar TSRMLS_DC)
+									   Calendar *calendar)
 {
 	Calendar_object *co;
 
@@ -76,40 +75,39 @@ U_CFUNC void calendar_object_construct(zval *object,
 }
 
 /* {{{ clone handler for Calendar */
-static zend_object_value Calendar_clone_obj(zval *object TSRMLS_DC)
+static zend_object *Calendar_clone_obj(zval *object)
 {
 	Calendar_object		*co_orig,
 						*co_new;
-	zend_object_value   ret_val;
-	intl_error_reset(NULL TSRMLS_CC);
+	zend_object 	    *ret_val;
+	intl_error_reset(NULL);
 
-	co_orig = (Calendar_object*)zend_object_store_get_object(object TSRMLS_CC);
-	intl_error_reset(INTL_DATA_ERROR_P(co_orig) TSRMLS_CC);
+	co_orig = Z_INTL_CALENDAR_P(object);
+	intl_error_reset(INTL_DATA_ERROR_P(co_orig));
 
-	ret_val = Calendar_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
-	co_new  = (Calendar_object*)zend_object_store_get_object_by_handle(ret_val.handle TSRMLS_CC);
+	ret_val = Calendar_ce_ptr->create_object(Z_OBJCE_P(object));
+	co_new  = php_intl_calendar_fetch_object(ret_val);
 
-	zend_objects_clone_members(&co_new->zo, ret_val,
-		&co_orig->zo, Z_OBJ_HANDLE_P(object) TSRMLS_CC);
+	zend_objects_clone_members(&co_new->zo, &co_orig->zo);
 
 	if (co_orig->ucal != NULL) {
 		Calendar	*newCalendar;
 
 		newCalendar = co_orig->ucal->clone();
 		if (!newCalendar) {
-			char *err_msg;
+			zend_string *err_msg;
 			intl_errors_set_code(CALENDAR_ERROR_P(co_orig),
-				U_MEMORY_ALLOCATION_ERROR TSRMLS_CC);
+				U_MEMORY_ALLOCATION_ERROR);
 			intl_errors_set_custom_msg(CALENDAR_ERROR_P(co_orig),
-				"Could not clone IntlCalendar", 0 TSRMLS_CC);
-			err_msg = intl_error_get_message(CALENDAR_ERROR_P(co_orig) TSRMLS_CC);
-			zend_throw_exception(NULL, err_msg, 0 TSRMLS_CC);
-			efree(err_msg);
+				"Could not clone IntlCalendar", 0);
+			err_msg = intl_error_get_message(CALENDAR_ERROR_P(co_orig));
+			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
+			zend_string_free(err_msg);
 		} else {
 			co_new->ucal = newCalendar;
 		}
 	} else {
-		zend_throw_exception(NULL, "Cannot clone unconstructed IntlCalendar", 0 TSRMLS_CC);
+		zend_throw_exception(NULL, "Cannot clone unconstructed IntlCalendar", 0);
 	}
 
 	return ret_val;
@@ -146,141 +144,123 @@ static const struct {
 };
 
 /* {{{ get_debug_info handler for Calendar */
-static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
+static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 {
-	zval			zv = zval_used_for_init,
-					*zfields;
+	zval			zv,
+					zfields;
 	Calendar_object	*co;
 	const Calendar	*cal;
-	
+	HashTable		*debug_info;
+
 	*is_temp = 1;
 
-	array_init_size(&zv, 8);
+	ALLOC_HASHTABLE(debug_info);
+	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
-	co  = (Calendar_object*)zend_object_store_get_object(object TSRMLS_CC);
+	co  = Z_INTL_CALENDAR_P(object);
 	cal = co->ucal;
 
 	if (cal == NULL) {
-		add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 0);
-		return Z_ARRVAL(zv);
+		ZVAL_FALSE(&zv);
+		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+		return debug_info;
 	}
+	ZVAL_TRUE(&zv);
+	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
 
-	add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 1);
-
-	add_assoc_string_ex(&zv, "type", sizeof("type"),
-		const_cast<char*>(cal->getType()), 1);
-
+	ZVAL_STRING(&zv, const_cast<char*>(cal->getType()));
+	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &zv);
 	{
-		zval		   ztz = zval_used_for_init,
-					   *ztz_debug;
+		zval		   ztz,
+					   ztz_debug;
 		int			   is_tmp;
-		HashTable	   *debug_info;
+		HashTable	   *debug_info_tz;
 
-		timezone_object_construct(&cal->getTimeZone(), &ztz , 0 TSRMLS_CC);
-		debug_info = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp TSRMLS_CC);
+		timezone_object_construct(&cal->getTimeZone(), &ztz , 0);
+		debug_info_tz = Z_OBJ_HANDLER(ztz, get_debug_info)(&ztz, &is_tmp);
 		assert(is_tmp == 1);
 
-		ALLOC_INIT_ZVAL(ztz_debug);
-		Z_TYPE_P(ztz_debug) = IS_ARRAY;
-		Z_ARRVAL_P(ztz_debug) = debug_info;
-		add_assoc_zval_ex(&zv, "timeZone", sizeof("timeZone"), ztz_debug);
+		array_init(&ztz_debug);
+		zend_hash_copy(Z_ARRVAL(ztz_debug), debug_info_tz, zval_add_ref);
+		zend_hash_destroy(debug_info_tz);
+		FREE_HASHTABLE(debug_info_tz);
+
+		zend_hash_str_update(debug_info, "timeZone", sizeof("timeZone") - 1, &ztz_debug);
 	}
 
 	{
 		UErrorCode	uec		= U_ZERO_ERROR;
 		Locale		locale	= cal->getLocale(ULOC_VALID_LOCALE, uec);
 		if (U_SUCCESS(uec)) {
-			add_assoc_string_ex(&zv, "locale", sizeof("locale"),
-				const_cast<char*>(locale.getName()), 1);
+			ZVAL_STRING(&zv, const_cast<char*>(locale.getName()));
+			zend_hash_str_update(debug_info, "locale", sizeof("locale") - 1, &zv);
 		} else {
-			add_assoc_string_ex(&zv, "locale", sizeof("locale"),
-				const_cast<char*>(u_errorName(uec)), 1);
+			ZVAL_STRING(&zv, const_cast<char*>(u_errorName(uec)));
+			zend_hash_str_update(debug_info, "locale", sizeof("locale") - 1, &zv);
 		}
 	}
 
-	ALLOC_INIT_ZVAL(zfields);
-	array_init_size(zfields, UCAL_FIELD_COUNT);
+	array_init_size(&zfields, UCAL_FIELD_COUNT);
 
 	for (int i = 0;
 			 i < sizeof(debug_info_fields) / sizeof(*debug_info_fields);
 			 i++) {
 		UErrorCode	uec		= U_ZERO_ERROR;
-		const char	*name	= debug_info_fields[i].name; 
+		const char	*name	= debug_info_fields[i].name;
 		int32_t		res		= cal->get(debug_info_fields[i].field, uec);
 		if (U_SUCCESS(uec)) {
-			add_assoc_long(zfields, name, (long)res);
+			add_assoc_long(&zfields, name, (zend_long)res);
 		} else {
-			add_assoc_string(zfields, name, const_cast<char*>(u_errorName(uec)), 1);
+			add_assoc_string(&zfields, name, const_cast<char*>(u_errorName(uec)));
 		}
 	}
 
-	add_assoc_zval_ex(&zv, "fields", sizeof("fields"), zfields);
+	zend_hash_str_update(debug_info, "fields", sizeof("fields") - 1, &zfields);
 
-	return Z_ARRVAL(zv);
+	return debug_info;
 }
 /* }}} */
 
 /* {{{ void calendar_object_init(Calendar_object* to)
  * Initialize internals of Calendar_object not specific to zend standard objects.
  */
-static void calendar_object_init(Calendar_object *co TSRMLS_DC)
+static void calendar_object_init(Calendar_object *co)
 {
-	intl_error_init(CALENDAR_ERROR_P(co) TSRMLS_CC);
+	intl_error_init(CALENDAR_ERROR_P(co));
 	co->ucal = NULL;
 }
 /* }}} */
 
-/* {{{ Calendar_objects_dtor */
-static void Calendar_objects_dtor(void *object,
-								  zend_object_handle handle TSRMLS_DC)
-{
-	zend_objects_destroy_object((zend_object*)object, handle TSRMLS_CC);
-}
-/* }}} */
-
 /* {{{ Calendar_objects_free */
-static void Calendar_objects_free(zend_object *object TSRMLS_DC)
+static void Calendar_objects_free(zend_object *object)
 {
-	Calendar_object* co = (Calendar_object*) object;
+	Calendar_object* co = php_intl_calendar_fetch_object(object);
 
 	if (co->ucal) {
 		delete co->ucal;
 		co->ucal = NULL;
 	}
-	intl_error_reset(CALENDAR_ERROR_P(co) TSRMLS_CC);
+	intl_error_reset(CALENDAR_ERROR_P(co));
 
-	zend_object_std_dtor(&co->zo TSRMLS_CC);
-
-	efree(co);
+	zend_object_std_dtor(&co->zo);
 }
 /* }}} */
 
 /* {{{ Calendar_object_create */
-static zend_object_value Calendar_object_create(zend_class_entry *ce TSRMLS_DC)
+static zend_object *Calendar_object_create(zend_class_entry *ce)
 {
-	zend_object_value   retval;
 	Calendar_object*	intern;
 
-	intern = (Calendar_object*)ecalloc(1, sizeof(Calendar_object));
-	
-	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
-#if PHP_VERSION_ID < 50399
-    zend_hash_copy(intern->zo.properties, &(ce->default_properties),
-        (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
-#else
-    object_properties_init((zend_object*) intern, ce);
-#endif
-	calendar_object_init(intern TSRMLS_CC);
+	intern = (Calendar_object*)ecalloc(1, sizeof(Calendar_object) + sizeof(zval) * (ce->default_properties_count - 1));
 
-	retval.handle = zend_objects_store_put(
-		intern,
-		Calendar_objects_dtor,
-		(zend_objects_free_object_storage_t) Calendar_objects_free,
-		NULL TSRMLS_CC);
+	zend_object_std_init(&intern->zo, ce);
+    object_properties_init(&intern->zo, ce);
+	calendar_object_init(intern);
 
-	retval.handlers = &Calendar_handlers;
 
-	return retval;
+	intern->zo.handlers = &Calendar_handlers;
+
+	return &intern->zo;
 }
 /* }}} */
 
@@ -468,32 +448,34 @@ static const zend_function_entry GregorianCalendar_class_functions[] = {
 /* {{{ calendar_register_IntlCalendar_class
  * Initialize 'IntlCalendar' class
  */
-void calendar_register_IntlCalendar_class(TSRMLS_D)
+void calendar_register_IntlCalendar_class(void)
 {
 	zend_class_entry ce;
 
 	/* Create and register 'IntlCalendar' class. */
 	INIT_CLASS_ENTRY(ce, "IntlCalendar", Calendar_class_functions);
 	ce.create_object = Calendar_object_create;
-	Calendar_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
+	Calendar_ce_ptr = zend_register_internal_class(&ce);
 	if (!Calendar_ce_ptr) {
 		//can't happen now without bigger problems before
-		php_error_docref0(NULL TSRMLS_CC, E_ERROR,
+		php_error_docref0(NULL, E_ERROR,
 			"IntlCalendar: class registration has failed.");
 		return;
 	}
 	memcpy( &Calendar_handlers, zend_get_std_object_handlers(),
 		sizeof Calendar_handlers);
+	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
+	Calendar_handlers.free_obj = Calendar_objects_free;
 
 	/* Create and register 'IntlGregorianCalendar' class. */
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
 	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
-		Calendar_ce_ptr, NULL TSRMLS_CC);
+		Calendar_ce_ptr);
 	if (!GregorianCalendar_ce_ptr) {
 		//can't happen know without bigger problems before
-		php_error_docref0(NULL TSRMLS_CC, E_ERROR,
+		php_error_docref0(NULL, E_ERROR,
 			"IntlGregorianCalendar: class registration has failed.");
 		return;
 	}
@@ -501,7 +483,7 @@ void calendar_register_IntlCalendar_class(TSRMLS_D)
 	/* Declare 'IntlCalendar' class constants */
 #define CALENDAR_DECL_LONG_CONST(name, val) \
 	zend_declare_class_constant_long(Calendar_ce_ptr, name, sizeof(name) - 1, \
-		val TSRMLS_CC)
+		val)
 
 	CALENDAR_DECL_LONG_CONST("FIELD_ERA",					UCAL_ERA);
 	CALENDAR_DECL_LONG_CONST("FIELD_YEAR",					UCAL_YEAR);
@@ -513,8 +495,6 @@ void calendar_register_IntlCalendar_class(TSRMLS_D)
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK",			UCAL_DAY_OF_WEEK);
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK_IN_MONTH",	UCAL_DAY_OF_WEEK_IN_MONTH);
 	CALENDAR_DECL_LONG_CONST("FIELD_AM_PM",					UCAL_AM_PM);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_MINUTE",				UCAL_MINUTE);

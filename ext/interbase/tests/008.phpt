@@ -6,7 +6,7 @@ if (PHP_OS == "WINNT") echo "skip";
 include("skipif.inc"); 
 ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
 require("interbase.inc");
 

@@ -63,7 +63,7 @@ string(6) "double"
 string(4) "NULL"
 string(7) "boolean"
 string(6) "string"
-string(12) "unknown type"
+string(17) "resource (closed)"
 string(8) "resource"
 string(6) "object"
 bool(true)
@@ -131,7 +131,7 @@ bool(true)
 float(%d)
 bool(true)
 float(%d)
-string(57) "Object of class stdClass could not be converted to double"
+string(56) "Object of class stdClass could not be converted to float"
 bool(true)
 float(%d)
 bool(true)
@@ -345,7 +345,6 @@ string(14) "Resource id #%d"
 bool(true)
 string(14) "Resource id #%d"
 string(57) "Object of class stdClass could not be converted to string"
-string(45) "Object of class stdClass to string conversion"
 bool(true)
 string(6) "Object"
 Done

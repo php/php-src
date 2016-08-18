@@ -47,7 +47,8 @@
 # include <sys/cdefs.h>
 #endif
 
-struct stat;
+#include "Zend/zend_stream.h"
+
 typedef struct {
 	int gl_pathc;		/* Count of total paths so far. */
 	int gl_matchc;		/* Count of paths matching pattern. */
@@ -63,10 +64,10 @@ typedef struct {
 	 * and lstat(2).
 	 */
 	void (*gl_closedir)(void *);
-	struct dirent *(*gl_readdir)(void *);	
+	struct dirent *(*gl_readdir)(void *);
 	void *(*gl_opendir)(const char *);
-	int (*gl_lstat)(const char *, struct stat *);
-	int (*gl_stat)(const char *, struct stat *);
+	int (*gl_lstat)(const char *, zend_stat_t *);
+	int (*gl_stat)(const char *, zend_stat_t *);
 } glob_t;
 
 /* Flags */

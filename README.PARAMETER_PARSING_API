@@ -13,8 +13,8 @@ meaningful error messages.
 Prototypes
 ----------
 /* Implemented. */
-int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...);
-int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...);
+int zend_parse_parameters(int num_args, char *type_spec, ...);
+int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...);
 
 The zend_parse_parameters() function takes the number of parameters
 passed to the extension function, the type specifier string, and the
@@ -30,7 +30,7 @@ resources cannot be auto-converted.
 
 PHP 5.5 includes a new function:
 
-int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, const char *spec, ...);
+int zend_parse_parameter(int flags, int arg_num, zval **arg, const char *spec, ...);
 
 This function behaves like zend_parse_parameters_ex() except that instead of
 reading the arguments from the stack, it receives a single zval to convert
@@ -50,7 +50,7 @@ Type specifiers
  instance of that class.
 
  a  - array (zval*)
- A  - array or object (zval *)
+ A  - array or object (zval*)
  b  - boolean (zend_bool)
  C  - class (zend_class_entry*)
  d  - double (double)
@@ -58,15 +58,16 @@ Type specifiers
       zend_fcall_info and zend_fcall_info_cache)
  h  - array (returned as HashTable*)
  H  - array or HASH_OF(object) (returned as HashTable*)
- l  - long (long)
- L  - long, limits out-of-range numbers to LONG_MAX/LONG_MIN (long)
+ l  - long (zend_long)
+ L  - long, limits out-of-range numbers to LONG_MAX/LONG_MIN (zend_long, ZEND_LONG_MAX/ZEND_LONG_MIN)
  o  - object of any type (zval*)
  O  - object of specific type given by class entry (zval*, zend_class_entry)
- p  - valid path (string without null bytes in the middle) and its length (char*, int)
+ p  - valid path (string without null bytes in the middle) and its length (char*, size_t)
+ P  - valid path (string without null bytes in the middle) as zend_string (zend_string*)
  r  - resource (zval*)
- s  - string (with possible null bytes) and its length (char*, int)
+ s  - string (with possible null bytes) and its length (char*, size_t)
+ S  - string (with possible null bytes) as zend_string (zend_string*)
  z  - the actual zval (zval*)
- Z  - the actual zval (zval**)
  *  - variable arguments list (0 or more)
  +  - variable arguments list (1 or more)
 
@@ -80,29 +81,27 @@ Type specifiers
 		passed and the output for such type is a pointer, then the output
 		pointer is set to a native NULL pointer.
 		For 'b', 'l' and 'd', an extra argument of type zend_bool* must be
-		passed after the corresponding bool*, long* or double* arguments,
-		respectively. A non-zero value will be written to the zend_bool iif a
+		passed after the corresponding bool*, zend_long* or double* arguments,
+		respectively. A non-zero value will be written to the zend_bool if a
 		PHP NULL is passed.
 
 
 Note on 64bit compatibility
 ---------------------------
-Please do not forget that int and long are two different things on 64bit 
-OSes (int is 4 bytes and long is 8 bytes), so make sure you pass longs to "l" 
-and ints to strings length (i.e. for "s" you need to pass char * and int), 
+Please note that since version 7 PHP uses zend_long as integer type and 
+zend_string with size_t as length, so make sure you pass zend_longs to "l" 
+and size_t to strings length (i.e. for "s" you need to pass char * and size_t), 
 not the other way round!
-Remember: "l" is the only case when you need to pass long (and that's why 
-it's "l", not "i" btw).
 
-Both mistakes cause memory corruptions and segfaults on 64bit OSes:
+Both mistakes might cause memory corruptions and segfaults:
 1)
   char *str;
-  long str_len; /* XXX THIS IS WRONG!! Use int instead. */
-  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len)
+  long str_len; /* XXX THIS IS WRONG!! Use size_t instead. */
+  zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len)
 
 2)
-  int num; /* XXX THIS IS WRONG!! Use long instead. */
-  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num)
+  int num; /* XXX THIS IS WRONG!! Use zend_long instead. */
+  zend_parse_parameters(ZEND_NUM_ARGS(), "l", &num)
 
 If you're in doubt, use check_parameters.php script to the parameters 
 and their types (it can be found in ./scripts/dev/ directory of PHP sources):
@@ -113,11 +112,11 @@ and their types (it can be found in ./scripts/dev/ directory of PHP sources):
 Examples
 --------
 /* Gets a long, a string and its length, and a zval */
-long l;
+zend_long l;
 char *s;
-int s_len;
+size_t s_len;
 zval *param;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "lsz",
                           &l, &s, &s_len, &param) == FAILURE) {
     return;
 }
@@ -127,7 +126,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
 zval *obj;
 double d = 0.5;
 zend_class_entry *my_ce;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|d",
                           &obj, my_ce, &d) == FAILURE) {
     return;
 }
@@ -137,7 +136,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
    If null is passed for object, obj will be set to NULL. */
 zval *obj;
 zval *arr;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!a",
                           &obj, &arr) == FAILURE) {
     return;
 }
@@ -145,27 +144,27 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a",
 
 /* Gets a separated array which can also be null. */
 zval *arr;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/!",
                           &arr) == FAILURE) {
     return;
 }
 
 /* Get either a set of 3 longs or a string. */
-long l1, l2, l3;
+zend_long l1, l2, l3;
 char *s;
 /* 
- * The function expects a pointer to a integer in this case, not a long
+ * The function expects a pointer to a size_t in this case, not a long
  * or any other type.  If you specify a type which is larger
- * than a 'int', the upper bits might not be initialized
+ * than a 'size_t', the upper bits might not be initialized
  * properly, leading to random crashes on platforms like
  * Tru64 or Linux/Alpha.
  */
-int length;
+size_t length;
 
-if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
                              "lll", &l1, &l2, &l3) == SUCCESS) {
     /* manipulate longs */
-} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
                                     "s", &s, &length) == SUCCESS) {
     /* manipulate string */
 } else {
@@ -178,10 +177,10 @@ if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 /* Function that accepts only varargs (0 or more) */
 
 int i, num_varargs;
-zval ***varargs = NULL;
+zval *varargs = NULL;
 
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &varargs, &num_varargs) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &varargs, &num_varargs) == FAILURE) {
     return;
 }
 
@@ -197,38 +196,28 @@ if (varargs) {
 /* Function that accepts a string, followed by varargs (1 or more) */
 
 char *str;
-int str_len;
+size_t str_len;
 int i, num_varargs;
-zval ***varargs = NULL;
+zval *varargs = NULL;
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
     return;
 }
 
 for (i = 0; i < num_varargs; i++) {
     /* do something with varargs[i] */
 }
-
-if (varargs) {
-    efree(varargs);
-}
-
 
 /* Function that takes an array, followed by varargs, and ending with a long */
-long num;
+zend_long num;
 zval *array;
 int i, num_varargs;
-zval ***varargs = NULL;
+zval *varargs = NULL;
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS(), "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
     return;
 }
 
 for (i = 0; i < num_varargs; i++) {
     /* do something with varargs[i] */
 }
-
-if (varargs) {
-    efree(varargs);
-}
-

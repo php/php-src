@@ -38,10 +38,10 @@ var_dump( mb_stristr($haystack) );
 -- Testing mb_stristr() function with more than expected no. of arguments --
 
 Warning: mb_stristr() expects at most 4 parameters, 5 given in %s on line %d
-bool(false)
+NULL
 
 -- Testing mb_stristr() function with less than expected no. of arguments --
 
 Warning: mb_stristr() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
+NULL
 ===DONE===

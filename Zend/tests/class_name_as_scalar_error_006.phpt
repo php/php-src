@@ -7,4 +7,7 @@ $x = parent::class;
 
 ?>
 --EXPECTF--
-Fatal error: Cannot access parent::class when no class scope is active in %s on line %d
+Fatal error: Uncaught Error: Cannot use "parent" when no class scope is active in %s:3
+Stack trace:
+#0 {main}
+  thrown in %s on line 3

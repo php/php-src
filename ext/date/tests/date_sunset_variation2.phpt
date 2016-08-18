@@ -1,5 +1,7 @@
 --TEST--
 Test date_sunset() function : usage variation - Passing unexpected values to second argument format.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
@@ -114,12 +116,12 @@ bool(false)
 
 --float 12.3456789000e10--
 
-Warning: date_sunset(): Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, float given in %s on line %d
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: date_sunset(): Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, float given in %s on line %d
 bool(false)
 
 --float .5--
@@ -127,22 +129,22 @@ int(1218199253)
 
 --empty array--
 
-Warning: date_sunset() expects parameter 2 to be long, array given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: date_sunset() expects parameter 2 to be long, array given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: date_sunset() expects parameter 2 to be long, array given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: date_sunset() expects parameter 2 to be long, array given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -165,42 +167,42 @@ int(1218199253)
 
 --empty string DQ--
 
-Warning: date_sunset() expects parameter 2 to be long, string given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunset() expects parameter 2 to be long, string given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunset() expects parameter 2 to be long, string given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunset() expects parameter 2 to be long, string given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunset() expects parameter 2 to be long, string given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunset() expects parameter 2 to be long, string given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: date_sunset() expects parameter 2 to be long, object given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: date_sunset() expects parameter 2 to be long, object given in %s on line %d
+Warning: date_sunset() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 --undefined var--

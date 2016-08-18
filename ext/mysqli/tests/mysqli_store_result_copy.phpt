@@ -75,7 +75,7 @@ mysqlnd.fetch_data_copy=0
 	printf("No result: %d\n", $no_result);
 
 	/* implicit free, implicit store */
-	/* meta and fetch lenghts code */
+	/* meta and fetch lengths code */
 	if (!$res = mysqli_query($link, "SELECT CONCAT(id, id) AS _c, label FROM test ORDER BY id DESC LIMIT 2"))
 		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 

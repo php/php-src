@@ -23,4 +23,4 @@ class derived extends implem
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of derived::__construct() must be compatible with constr::__construct() in %s on line %d
+Fatal error: Declaration of derived::__construct($a) must be compatible with constr::__construct() in %s on line %d

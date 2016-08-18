@@ -67,7 +67,7 @@ Array
             [type] => application/octet-stream
             [tmp_name] => %s
             [error] => 0
-            [size] => 21
+            [size] => 19
         )
 
 )

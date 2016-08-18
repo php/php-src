@@ -12,4 +12,4 @@ trait Foo extends Base {
 echo 'DONE';
 ?>
 --EXPECTF--
-Fatal error: A trait (Foo) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error in %s on line %d
+Parse error: syntax error, unexpected 'extends' (T_EXTENDS), expecting '{' in %s on line %d

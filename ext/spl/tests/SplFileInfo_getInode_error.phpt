@@ -21,7 +21,7 @@ var_dump($fileInfo->getInode());
 ?>
 
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' with message 'SplFileInfo::getInode(): stat failed for not_existing' in %s
+Fatal error: Uncaught RuntimeException: SplFileInfo::getInode(): stat failed for not_existing in %s
 Stack trace:
 #0 %s: SplFileInfo->getInode()
 #1 {main}

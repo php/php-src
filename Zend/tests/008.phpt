@@ -41,11 +41,9 @@ bool(true)
 
 Notice: Constant test const already defined in %s on line %d
 bool(false)
+bool(true)
 
-Warning: Constants may only evaluate to scalar values in %s on line %d
-bool(false)
-
-Warning: Constants may only evaluate to scalar values in %s on line %d
+Warning: Constants may only evaluate to scalar values or arrays in %s on line %d
 bool(false)
 int(1)
 int(2)

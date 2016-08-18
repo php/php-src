@@ -130,22 +130,22 @@ string(3) "UTC"
 
 -- empty array --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -168,42 +168,42 @@ string(3) "UTC"
 
 -- empty string DQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, object given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, object given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -214,6 +214,6 @@ string(3) "UTC"
 
 -- resource --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, resource given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, resource given in %s on line %d
 bool(false)
 ===DONE===

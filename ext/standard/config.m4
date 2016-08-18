@@ -242,7 +242,7 @@ int main() {
 dnl
 dnl If one of them is missing, use our own implementation, portable code is then possible
 dnl
-if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "x$php_crypt_r" = "x0"; then
+if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "x$php_crypt_r" = "x0"; then
 
   dnl
   dnl Check for __alignof__ support in the compiler
@@ -260,93 +260,34 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
     AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
   fi
 
-  dnl 
-  dnl Check for __attribute__ ((__aligned__)) support in the compiler
-  dnl
-  AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
-  AC_TRY_COMPILE([
-  ],[
-    unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
-  ],[
-    ac_cv_attribute_aligned=yes
-  ],[
-    ac_cv_attribute_aligned=no
-  ])])
-  if test "$ac_cv_attribute_aligned" = "yes"; then
-    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
-  fi
-    
-
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
-  AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, 1, [Whether the system supports standard DES salt])
-  AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, 1, [Whether the system supports BlowFish salt])
-  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, 1, [Whether the system supports extended DES salt])
-  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, 1, [Whether the system supports MD5 salt])
-  AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, 1, [Whether the system supports SHA512 salt])
-  AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, 1, [Whether the system supports SHA256 salt])
 
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
 else
-  if test "$ac_cv_crypt_des" = "yes"; then
-    ac_result=1
-    ac_crypt_des=1
-  else
-    ac_result=0
-    ac_crypt_des=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, $ac_result, [Whether the system supports standard DES salt])
-
-  if test "$ac_cv_crypt_blowfish" = "yes"; then
-    ac_result=1
-    ac_crypt_blowfish=1
-  else
-    ac_result=0
-    ac_crypt_blowfish=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
-
-  if test "$ac_cv_crypt_ext_des" = "yes"; then
-    ac_result=1
-    ac_crypt_edes=1
-  else
-    ac_result=0
-    ac_crypt_edes=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
-
-  if test "$ac_cv_crypt_md5" = "yes"; then
-    ac_result=1
-    ac_crypt_md5=1
-  else
-    ac_result=0
-    ac_crypt_md5=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, $ac_result, [Whether the system supports MD5 salt])  
-  
-  if test "$ac_cv_crypt_sha512" = "yes"; then
-    ac_result=1
-    ac_crypt_sha512=1
-  else
-    ac_result=0
-    ac_crypt_sha512=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, $ac_result, [Whether the system supports SHA512 salt])
-
-  if test "$ac_cv_crypt_sha256" = "yes"; then
-    ac_result=1
-    ac_crypt_sha256=1
-  else
-    ac_result=0
-    ac_crypt_sha256=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, $ac_result, [Whether the system supports SHA256 salt])
-
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
+fi
+
+dnl 
+dnl Check for __attribute__ ((__aligned__)) support in the compiler
+dnl
+AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
+AC_TRY_COMPILE([
+],[
+  unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
+],[
+  ac_cv_attribute_aligned=yes
+],[
+  ac_cv_attribute_aligned=no
+])])
+if test "$ac_cv_attribute_aligned" = "yes"; then
+  AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
 fi
 
 dnl
 dnl Check for available functions
 dnl
+dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
+dnl as soon as we support C99.
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
 AC_FUNC_FNMATCH	
 
@@ -600,19 +541,31 @@ dnl
 AC_CHECK_HEADERS([atomic.h])
 
 dnl
+dnl Check for arc4random on BSD systems
+dnl
+AC_CHECK_DECLS([arc4random_buf])
+
+dnl
+dnl Check for getrandom on newer Linux kernels
+dnl
+AC_CHECK_DECLS([getrandom])
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
                             cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
                             flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
                             info.c iptc.c lcg.c link.c mail.c math.c md5.c metaphone.c \
-                            microtime.c pack.c pageinfo.c quot_print.c rand.c \
+                            microtime.c pack.c pageinfo.c quot_print.c rand.c mt_rand.c \
                             soundex.c string.c scanf.c syslog.c type.c uniqid.c url.c \
                             var.c versioning.c assert.c strnatcmp.c levenshtein.c \
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
-                            filters.c proc_open.c streamsfuncs.c http.c password.c)
+                            filters.c proc_open.c streamsfuncs.c http.c password.c \
+                            random.c,,,
+			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])

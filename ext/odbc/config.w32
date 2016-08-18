@@ -1,14 +1,14 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("odbc", "ODBC support", "yes");
-ARG_WITH("odbcver", "Force support for the passed ODBC version. A hex number is expected, default 0x0300. Use the special value of 0 to prevent an explicit ODBCVER to be defined.", "0x0300");
+ARG_ENABLE("odbc", "ODBC support", "no");
+ARG_WITH("odbcver", "Force support for the passed ODBC version. A hex number is expected, default 0x0350. Use the special value of 0 to prevent an explicit ODBCVER to be defined.", "0x0350");
 
 if (PHP_ODBC == "yes") {
 	if (CHECK_LIB("odbc32.lib", "odbc") && CHECK_LIB("odbccp32.lib", "odbc")
 	&& CHECK_HEADER_ADD_INCLUDE("sql.h", "CFLAGS_ODBC")
 	&& CHECK_HEADER_ADD_INCLUDE("sqlext.h", "CFLAGS_ODBC")) {
-		EXTENSION("odbc", "php_odbc.c");
+		EXTENSION("odbc", "php_odbc.c", PHP_ODBC_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE("HAVE_UODBC", 1, "ODBC support");
 		if ("no" == PHP_ODBCVER) {
 			AC_DEFINE("ODBCVER", "0x0300", "The highest supported ODBC version", false);

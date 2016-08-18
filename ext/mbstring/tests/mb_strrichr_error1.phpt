@@ -38,10 +38,10 @@ var_dump( mb_strrichr($haystack) );
 -- Testing mb_strrichr() function with more than expected no. of arguments --
 
 Warning: mb_strrichr() expects at most 4 parameters, 5 given in %s on line %d
-bool(false)
+NULL
 
 -- Testing mb_strrichr() function with less than expected no. of arguments --
 
 Warning: mb_strrichr() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
+NULL
 ===DONE===

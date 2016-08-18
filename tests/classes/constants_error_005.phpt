@@ -8,5 +8,4 @@ Error case: class constant as an encapsed containing a variable
   }
 ?>
 --EXPECTF--
-
-Parse error: %s in %s on line %d
+Fatal error: Constant expression contains invalid operations in %s on line %d

@@ -16,7 +16,7 @@ array_splice(X::getArr(), 1, 1);
 print_r(X::getArr());
 ?>
 --EXPECTF--
-Strict Standards: Only variables should be passed by reference in %sbug33257.php on line 10
+Notice: Only variables should be passed by reference in %sbug33257.php on line 10
 Array
 (
     [0] => a

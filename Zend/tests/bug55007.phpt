@@ -4,7 +4,7 @@ Bug #55007 (compiler fail after previous fail)
 <?php
 
 function __autoload($classname) {
-  if ('CompileErrorClass'==$classname) eval('class CompileErrorClass { function foo() { $a[] } }');
+  if ('CompileErrorClass'==$classname) eval('class CompileErrorClass { function foo() { $a[]; } }');
   if ('MyErrorHandler'==$classname) eval('class MyErrorHandler { function __construct() { print "My error handler runs.\n"; } }');
 }
 

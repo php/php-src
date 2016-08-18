@@ -24,7 +24,7 @@ Warning: IntlTimeZone::getDisplayName() expects parameter 1 to be boolean, array
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlTimeZone::getDisplayName() expects parameter 2 to be long, array given in %s on line %d
+Warning: IntlTimeZone::getDisplayName() expects parameter 2 to be integer, array given in %s on line %d
 
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d
 bool(false)
@@ -42,4 +42,8 @@ Warning: IntlTimeZone::getDisplayName() expects at most 3 parameters, 4 given in
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intltz_get_display_name() must be an instance of IntlTimeZone, null given in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_display_name() must be an instance of IntlTimeZone, null given in %s:%d
+Stack trace:
+#0 %s(%d): intltz_get_display_name(NULL, 1, false, 'pt_PT')
+#1 {main}
+  thrown in %s on line %d

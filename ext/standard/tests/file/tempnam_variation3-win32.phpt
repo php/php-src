@@ -99,12 +99,14 @@ OK
 -- Iteration 4 --
 OK
 -- Iteration 5 --
+
+Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation3-win32.php on line %d
 Failed, not created in the correct directory %s vs %s
 0
 -- Iteration 6 --
 
-Warning: tempnam() expects parameter 2 to be a valid path, string given in %stempnam_variation3-win32.php on line %d
-Failed, not created in the correct directory %s vs %stempnamVar3
+Warning: tempnam() expects parameter 2 to be a valid path, string given in %stempnam_variation3-win32.php on line 54
+Failed, not created in the correct directory %s vs %sext\standard\tests\file\tempnamVar3
 0
 -- Iteration 7 --
 

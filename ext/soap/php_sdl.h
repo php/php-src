@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -77,7 +77,7 @@ typedef struct sdlCtx {
 	HashTable *attributes;       /* array of sdlAttributePtr */
 	HashTable *attributeGroups;  /* array of sdlTypesPtr */
 	php_stream_context *context;
-	zval               *old_header;
+	zval               old_header;
 } sdlCtx;
 
 struct _sdlBinding {
@@ -254,19 +254,19 @@ struct _sdlAttribute {
 };
 
 
-sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC);
+sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const xmlChar *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
 encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len);
 
-sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
+sdlBindingPtr get_binding_from_type(sdlPtr sdl, sdlBindingType type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
 void delete_sdl(void *handle);
 void delete_sdl_impl(void *handle);
 
-void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC);
-void sdl_restore_uri_credentials(sdlCtx *ctx TSRMLS_DC);
+void sdl_set_uri_credentials(sdlCtx *ctx, char *uri);
+void sdl_restore_uri_credentials(sdlCtx *ctx);
 
 #endif

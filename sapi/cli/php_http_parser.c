@@ -92,6 +92,7 @@ static const char *method_strings[] =
   , "MKCALENDAR"
   , "PROPFIND"
   , "PROPPATCH"
+  , "SEARCH"
   , "UNLOCK"
   , "REPORT"
   , "MKACTIVITY"
@@ -326,7 +327,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
                             const char *data,
                             size_t len)
 {
-  char c, ch;
+  char ch;
+  signed char c;
   const char *p = data, *pe;
   size_t to_read;
 
@@ -589,7 +591,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
           case 'R': parser->method = PHP_HTTP_REPORT; break;
-          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; break;
+          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; /* or SEARCH */ break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;
           case 'U': parser->method = PHP_HTTP_UNLOCK; /* or UNSUBSCRIBE */ break;
           default: parser->method = PHP_HTTP_NOT_IMPLEMENTED; break;
@@ -597,7 +599,6 @@ size_t php_http_parser_execute (php_http_parser *parser,
         state = s_req_method;
         break;
       }
-
       case s_req_method:
       {
         const char *matcher;
@@ -640,6 +641,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
           parser->method = PHP_HTTP_PUT;
         } else if (index == 1 && parser->method == PHP_HTTP_POST && ch == 'A') {
           parser->method = PHP_HTTP_PATCH;
+        } else if (index == 1 && parser->method == PHP_HTTP_SUBSCRIBE && ch == 'E') {
+          parser->method = PHP_HTTP_SEARCH;
         } else if (index == 2 && parser->method == PHP_HTTP_UNLOCK && ch == 'S') {
           parser->method = PHP_HTTP_UNSUBSCRIBE;
         } else if (index == 4 && parser->method == PHP_HTTP_PROPFIND && ch == 'P') {
@@ -1441,7 +1444,9 @@ size_t php_http_parser_execute (php_http_parser *parser,
       }
 
       case s_body_identity:
-        to_read = MIN(pe - p, (size_t)parser->content_length);
+        assert(pe >= p);
+
+        to_read = MIN((size_t)(pe - p), (size_t)parser->content_length);
         if (to_read > 0) {
           if (settings->on_body) settings->on_body(parser, p, to_read);
           p += to_read - 1;
@@ -1525,15 +1530,16 @@ size_t php_http_parser_execute (php_http_parser *parser,
       case s_chunk_data:
       {
         assert(parser->flags & F_CHUNKED);
+        assert(pe >= p);
 
-        to_read = MIN(pe - p, (size_t)(parser->content_length));
+        to_read = MIN((size_t)(pe - p), (size_t)(parser->content_length));
 
         if (to_read > 0) {
           if (settings->on_body) settings->on_body(parser, p, to_read);
           p += to_read - 1;
         }
 
-        if (to_read == parser->content_length) {
+        if (to_read == (size_t)parser->content_length) {
           state = s_chunk_data_almost_done;
         }
 

@@ -1,5 +1,5 @@
 --TEST--
-Variadic arguments enforce typehints
+Variadic arguments enforce types
 --FILE--
 <?php
 
@@ -33,4 +33,8 @@ array(3) {
   }
 }
 
-Catchable fatal error: Argument 3 passed to test() must be of the type array, integer given, called in %s on line %d
+Fatal error: Uncaught TypeError: Argument 3 passed to test() must be of the type array, integer given, called in %s:%d
+Stack trace:
+#0 %s(%d): test(Array, Array, 2)
+#1 {main}
+  thrown in %s on line %d

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -39,24 +39,18 @@ const zend_function_entry pdo_dblib_functions[] = {
 	PHP_FE_END
 };
 
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 
 #if PDO_DBLIB_IS_MSSQL
 zend_module_entry pdo_mssql_module_entry = {
 #else
 zend_module_entry pdo_dblib_module_entry = {
 #endif
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_dblib_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 #if PDO_DBLIB_IS_MSSQL
 	"pdo_mssql",
 #elif defined(PHP_WIN32)
@@ -70,7 +64,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
-	"1.0.1",
+	PHP_PDO_DBLIB_VERSION,
 	PHP_MODULE_GLOBALS(dblib),
 	PHP_GINIT(dblib),
 	NULL,
@@ -86,23 +80,23 @@ ZEND_GET_MODULE(pdo_dblib)
 #endif
 #endif
 
-int error_handler(DBPROCESS *dbproc, int severity, int dberr,
+int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr)
 {
 	pdo_dblib_err *einfo;
 	char *state = "HY000";
-	TSRMLS_FETCH();
 
 	if(dbproc) {
 		einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);
 		if (!einfo) einfo = &DBLIB_G(err);
 	} else {
 		einfo = &DBLIB_G(err);
-	}	
+	}
 
 	einfo->severity = severity;
 	einfo->oserr = oserr;
 	einfo->dberr = dberr;
+
 	if (einfo->oserrstr) {
 		efree(einfo->oserrstr);
 	}
@@ -128,20 +122,13 @@ int error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	}
 	strcpy(einfo->sqlstate, state);
 
-#if 0
-	php_error_docref(NULL TSRMLS_CC, E_WARNING,
-		"dblib error: %d %s (severity %d)",
-		dberr, dberrstr, severity);	
-#endif
-
 	return INT_CANCEL;
 }
 
-int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
+int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line)
 {
 	pdo_dblib_err *einfo;
-	TSRMLS_FETCH();
 
 	if (severity) {
 		einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);
@@ -155,10 +142,6 @@ int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 
 		einfo->lastmsg = estrdup(msgtext);
 	}
-
-#if 0
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "dblib message: %s (severity %d)", msgtext, severity);
-#endif
 
 	return 0;
 }
@@ -188,26 +171,20 @@ PHP_RSHUTDOWN_FUNCTION(pdo_dblib)
 
 PHP_MINIT_FUNCTION(pdo_dblib)
 {
+	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_CONNECTION_TIMEOUT", (long) PDO_DBLIB_ATTR_CONNECTION_TIMEOUT);
+	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_QUERY_TIMEOUT", (long) PDO_DBLIB_ATTR_QUERY_TIMEOUT);
+
 	if (FAIL == dbinit()) {
 		return FAILURE;
 	}
-	
+
 	if (FAILURE == php_pdo_register_driver(&pdo_dblib_driver)) {
 		return FAILURE;
 	}
-	
-	/* TODO: 
-	
-	dbsetifile()
-	dbsetmaxprocs()
-	dbsetlogintime()
-	dbsettime()
-	
-	 */
 
 #if !PHP_DBLIB_IS_MSSQL
-	dberrhandle(error_handler);
-	dbmsghandle(msg_handler);
+	dberrhandle((EHANDLEFUNC) pdo_dblib_error_handler);
+	dbmsghandle((MHANDLEFUNC) pdo_dblib_msg_handler);
 #endif
 
 	return SUCCESS;

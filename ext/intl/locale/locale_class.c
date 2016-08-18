@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,14 +92,14 @@ zend_function_entry Locale_class_functions[] = {
 /* {{{ locale_register_Locale_class
  * Initialize 'Locale' class
  */
-void locale_register_Locale_class( TSRMLS_D )
+void locale_register_Locale_class( void )
 {
 	zend_class_entry ce;
 
 	/* Create and register 'Locale' class. */
 	INIT_CLASS_ENTRY( ce, "Locale", Locale_class_functions );
 	ce.create_object = NULL;
-	Locale_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+	Locale_ce_ptr = zend_register_internal_class( &ce );
 
 	/* Declare 'Locale' class properties. */
 	if( !Locale_ce_ptr )

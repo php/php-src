@@ -22,7 +22,7 @@ var_dump( posix_getsid(-1) );
 Warning: posix_getsid() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: posix_getsid() expects parameter 1 to be long, array given in %s on line %d
+Warning: posix_getsid() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 bool(false)
 ===DONE===

@@ -34,14 +34,14 @@ int fpm_log_open(int reopen) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	int ret = 1;
-	
+
 	int fd;
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (!wp->config->access_log) {
 			continue;
 		}
 		ret = 0;
-		
+
 		fd = open(wp->config->access_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 		if (0 > fd) {
 			zlog(ZLOG_SYSERROR, "failed to open access log (%s)", wp->config->access_log);
@@ -97,7 +97,7 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 }
 /* }}} */
 
-int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
+int fpm_log_write(char *log_format) /* {{{ */
 {
 	char *s, *b;
 	char buffer[FPM_LOG_BUFFER+1];
@@ -267,13 +267,13 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 					/* kilobytes */
 					} else if (!strcasecmp(format, "kilobytes") || !strcasecmp(format, "kilo")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", proc.memory / 1024);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.memory / 1024);
 						}
 
 					/* megabytes */
 					} else if (!strcasecmp(format, "megabytes") || !strcasecmp(format, "mega")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", proc.memory / 1024 / 1024);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.memory / 1024 / 1024);
 						}
 
 					} else {
@@ -410,7 +410,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 					{
 						char *start;
 						size_t l;
-						
+
 						start = ++s;
 
 						while (*s != '\0') {

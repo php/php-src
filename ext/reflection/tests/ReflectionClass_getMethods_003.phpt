@@ -43,28 +43,28 @@ No methods:array(0) {
 }
 Public methods:array(4) {
   [0]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(5) "pubf1"
     ["class"]=>
     string(1) "C"
   }
   [1]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(5) "pubf2"
     ["class"]=>
     string(1) "C"
   }
   [2]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "pubsf1"
     ["class"]=>
     string(1) "C"
   }
   [3]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "pubsf2"
     ["class"]=>
@@ -73,28 +73,28 @@ Public methods:array(4) {
 }
 Private methods:array(4) {
   [0]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "privf1"
     ["class"]=>
     string(1) "C"
   }
   [1]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "privf2"
     ["class"]=>
     string(1) "C"
   }
   [2]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(7) "privsf1"
     ["class"]=>
     string(1) "C"
   }
   [3]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(7) "privsf2"
     ["class"]=>
@@ -103,42 +103,42 @@ Private methods:array(4) {
 }
 Public or static methods:array(6) {
   [0]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(5) "pubf1"
     ["class"]=>
     string(1) "C"
   }
   [1]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(5) "pubf2"
     ["class"]=>
     string(1) "C"
   }
   [2]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "pubsf1"
     ["class"]=>
     string(1) "C"
   }
   [3]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "pubsf2"
     ["class"]=>
     string(1) "C"
   }
   [4]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(7) "privsf1"
     ["class"]=>
     string(1) "C"
   }
   [5]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(7) "privsf2"
     ["class"]=>
@@ -147,42 +147,42 @@ Public or static methods:array(6) {
 }
 Private or static methods:array(6) {
   [0]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "privf1"
     ["class"]=>
     string(1) "C"
   }
   [1]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "privf2"
     ["class"]=>
     string(1) "C"
   }
   [2]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "pubsf1"
     ["class"]=>
     string(1) "C"
   }
   [3]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(6) "pubsf2"
     ["class"]=>
     string(1) "C"
   }
   [4]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(7) "privsf1"
     ["class"]=>
     string(1) "C"
   }
   [5]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(7) "privsf2"
     ["class"]=>

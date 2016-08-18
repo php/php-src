@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,13 +25,13 @@
 
 /* SHA1 context. */
 typedef struct {
-	php_uint32 state[5];		/* state (ABCD) */
-	php_uint32 count[2];		/* number of bits, modulo 2^64 (lsb first) */
+	uint32_t state[5];		/* state (ABCD) */
+	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA1_CTX;
 
 PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX *);
-PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, unsigned int);
+PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, size_t);
 PHPAPI void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
 PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest);
 

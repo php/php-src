@@ -112,7 +112,7 @@ int gdAlphaBlend(int dest, int src);
 
  *  GD_BELL				 - Bell
  *  GD_BESSEL			 - Bessel
- *  GD_BILINEAR_FIXED 	 - fixed point bilinear 
+ *  GD_BILINEAR_FIXED 	 - fixed point bilinear
  *  GD_BICUBIC 			 - Bicubic
  *  GD_BICUBIC_FIXED 	 - fixed point bicubic integer
  *  GD_BLACKMAN			 - Blackman

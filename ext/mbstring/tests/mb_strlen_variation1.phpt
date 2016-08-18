@@ -176,5 +176,5 @@ int(0)
 -- Iteration 24 --
 
 Warning: mb_strlen() expects parameter 1 to be string, resource given in %s on line %d
-bool(false)
+NULL
 Done

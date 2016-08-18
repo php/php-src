@@ -1,5 +1,7 @@
 --TEST--
 Test count() function : usage variations - Pass different data types as $mode arg
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : int count(mixed $var [, int $mode])
@@ -146,32 +148,32 @@ int(3)
 
 -- Iteration 16 --
 
-Warning: count() expects parameter 2 to be long, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: count() expects parameter 2 to be long, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: count() expects parameter 2 to be long, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: count() expects parameter 2 to be long, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: count() expects parameter 2 to be long, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: count() expects parameter 2 to be long, object given in %s on line %d
+Warning: count() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 22 --
@@ -182,6 +184,6 @@ int(3)
 
 -- Iteration 24 --
 
-Warning: count() expects parameter 2 to be long, resource given in %s on line %d
+Warning: count() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 Done

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Martin Jansen <mj@php.net>                                   | 
+  | Author: Martin Jansen <mj@php.net>                                   |
   +----------------------------------------------------------------------+
 */
 
@@ -22,14 +22,14 @@
 #define PHP_HASH_JOAAT_H
 
 typedef struct {
-	php_hash_uint32 state;
+	uint32_t state;
 } PHP_JOAAT_CTX;
 
 PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context);
 PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, unsigned int inputLen);
 PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[16], PHP_JOAAT_CTX * context);
 
-static php_hash_uint32 joaat_buf(void *buf, size_t len, php_hash_uint32 hval);
+static uint32_t joaat_buf(void *buf, size_t len, uint32_t hval);
 
 #endif
 

@@ -2,7 +2,7 @@
   unicode.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2013  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10891,6 +10891,21 @@ static st_table* Unfold2Table;
 static st_table* Unfold3Table;
 static int CaseFoldInited = 0;
 
+
+extern void onigenc_end_unicode(void)
+{
+  THREAD_ATOMIC_START;
+
+  if (FoldTable    != 0) st_free_table(FoldTable);
+  if (Unfold1Table != 0) st_free_table(Unfold1Table);
+  if (Unfold2Table != 0) st_free_table(Unfold2Table);
+  if (Unfold3Table != 0) st_free_table(Unfold3Table);
+
+  CaseFoldInited = 0;
+
+  THREAD_ATOMIC_END;
+}
+
 static int init_case_fold_table(void)
 {
   const CaseFold_11_Type   *p;
@@ -10951,6 +10966,9 @@ static int init_case_fold_table(void)
     p3 = &CaseUnfold_13[i];
     st_add_direct(Unfold3Table, (st_data_t )p3->from, (st_data_t )(&p3->to));
   }
+
+
+  onig_add_end_call(onigenc_end_unicode);
 
   CaseFoldInited = 1;
   THREAD_ATOMIC_END;

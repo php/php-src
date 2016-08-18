@@ -119,27 +119,27 @@ NULL
 
 -- Iteration 5 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, float given in %s on line 85
 NULL
 
 -- Iteration 6 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, float given in %s on line 85
 NULL
 
 -- Iteration 7 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, float given in %s on line 85
 NULL
 
 -- Iteration 8 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, float given in %s on line 85
 NULL
 
 -- Iteration 9 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, float given in %s on line 85
 NULL
 
 -- Iteration 10 --

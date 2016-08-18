@@ -125,15 +125,15 @@ string
 string
 -- Iteration 10 --
 
-Warning: money_format() expects parameter 2 to be double, array given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: money_format() expects parameter 2 to be double, array given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: money_format() expects parameter 2 to be double, array given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, array given in %s on line %d
 NULL
 -- Iteration 13 --
 string
@@ -149,29 +149,31 @@ string
 string
 -- Iteration 19 --
 
-Warning: money_format() expects parameter 2 to be double, string given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: money_format() expects parameter 2 to be double, string given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, string given in %s on line %d
 NULL
 -- Iteration 21 --
+
+Notice: A non well formed numeric value encountered in %s on line %d
 string
 -- Iteration 22 --
 
-Warning: money_format() expects parameter 2 to be double, string given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, string given in %s on line %d
 NULL
 -- Iteration 23 --
 
-Warning: money_format() expects parameter 2 to be double, object given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, object given in %s on line %d
 NULL
 -- Iteration 24 --
 
-Warning: money_format() expects parameter 2 to be double, object given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, object given in %s on line %d
 NULL
 -- Iteration 25 --
 
-Warning: money_format() expects parameter 2 to be double, resource given in %s on line %d
+Warning: money_format() expects parameter 2 to be float, resource given in %s on line %d
 NULL
 -- Iteration 26 --
 string

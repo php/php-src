@@ -75,10 +75,10 @@ string(5) "query"
 6:
 7:
 8:
-9:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-10:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-11:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-12:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-13:Error: file_put_contents(phar:///%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+9:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+10:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+11:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+12:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+13:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 Error: Phar::offsetSet() expects parameter 1 to be a valid path, string given===DONE===
 

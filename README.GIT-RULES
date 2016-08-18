@@ -79,7 +79,7 @@ The next few rules are more of a technical nature::
       should be noted in both PHP-5.4/NEWS and PHP-5.5/NEWS but
       not master, which is not a public released version yet.
 
-   3. Do not commit multiple file and dump all messages in one commit. If you
+   3. Do not commit multiple files and dump all messages in one commit. If you
       modified several unrelated files, commit each group separately and
       provide a nice commit message for each one. See example below.
 
@@ -114,9 +114,9 @@ If you fix some bugs, you should note the bug ID numbers in your
 commit message. Bug ID should be prefixed by "#" for easier access to
 bug report when developers are browsing CVS via LXR or Bonsai.
 
-Example::
+Example:
 
-  Fixed bug #14016 (pgsql notice handler double free crash bug.)
+Fixed bug #14016 (pgsql notice handler double free crash bug.)
 
 When you change the NEWS file for a bug fix, then please keep the bugs
 sorted in decreasing order under the fixed version.

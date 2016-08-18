@@ -17,7 +17,7 @@ NULL
 Warning: ReflectionClass::isSubclassOf() expects exactly 1 parameter, 2 given in %s on line 6
 NULL
 
-Fatal error: Uncaught exception 'ReflectionException' with message 'Class X does not exist' in %s:7
+Fatal error: Uncaught ReflectionException: Class X does not exist in %s:7
 Stack trace:
 #0 %s(7): ReflectionClass->isSubclassOf('X')
 #1 {main}

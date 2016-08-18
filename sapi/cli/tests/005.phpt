@@ -40,7 +40,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1418) "Class [ <internal:Core> class Exception ] {
+string(1607) "Class [ <internal:Core> class Exception implements Throwable ] {
 
   - Constants [0] {
   }
@@ -77,28 +77,28 @@ string(1418) "Class [ <internal:Core> class Exception ] {
     Method [ <internal:Core> public method __wakeup ] {
     }
 
-    Method [ <internal:Core> final public method getMessage ] {
+    Method [ <internal:Core, prototype Throwable> final public method getMessage ] {
     }
 
-    Method [ <internal:Core> final public method getCode ] {
+    Method [ <internal:Core, prototype Throwable> final public method getCode ] {
     }
 
-    Method [ <internal:Core> final public method getFile ] {
+    Method [ <internal:Core, prototype Throwable> final public method getFile ] {
     }
 
-    Method [ <internal:Core> final public method getLine ] {
+    Method [ <internal:Core, prototype Throwable> final public method getLine ] {
     }
 
-    Method [ <internal:Core> final public method getTrace ] {
+    Method [ <internal:Core, prototype Throwable> final public method getTrace ] {
     }
 
-    Method [ <internal:Core> final public method getPrevious ] {
+    Method [ <internal:Core, prototype Throwable> final public method getPrevious ] {
     }
 
-    Method [ <internal:Core> final public method getTraceAsString ] {
+    Method [ <internal:Core, prototype Throwable> final public method getTraceAsString ] {
     }
 
-    Method [ <internal:Core> public method __toString ] {
+    Method [ <internal:Core, prototype Throwable> public method __toString ] {
     }
   }
 }

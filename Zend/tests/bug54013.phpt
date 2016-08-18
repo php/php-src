@@ -1,5 +1,5 @@
 --TEST--
-Bug #54013 (ReflectionParam for duplicate parameter contains garbage)
+Bug #54013 (ReflectionParam for duplicate parameter contains garbage) (PHP7)
 --FILE--
 <?php
 
@@ -21,11 +21,4 @@ var_dump($params[0], $params[1]);
 
 ?>
 --EXPECTF--
-object(ReflectionParameter)#%d (1) {
-  ["name"]=>
-  string(8) "aaaaaaaa"
-}
-object(ReflectionParameter)#%d (1) {
-  ["name"]=>
-  string(8) "aaaaaaaa"
-}
+Fatal error: Redefinition of parameter $aaaaaaaa in %sbug54013.php on line 5

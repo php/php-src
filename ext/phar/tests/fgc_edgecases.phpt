@@ -3,7 +3,7 @@ Phar: test edge cases of file_get_contents() function interception
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 ?>
 --INI--
 phar.readonly=0

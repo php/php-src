@@ -119,7 +119,7 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('result_set_queries', $new_info, $info, $test_counter);
 
 	/* we need to skip this test in unicode - we send set names utf8 during mysql_connect */
-	if (!(version_compare(PHP_VERSION, '5.9.9', '>') == 1))
+	if (!(version_compare(PHP_VERSION, '6.0', '==') == 1))
 		mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('buffered_sets', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('unbuffered_sets', $new_info, $info, $test_counter);
@@ -958,7 +958,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(161) {
+array(163) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1125,9 +1125,13 @@ array(161) {
   %unicode|string%(1) "0"
   [%u|b%"mem_strndup_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_estndup_count"]=>
+  [%u|b%"mem_estrdup_count"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_strdup_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_edupl_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_dupl_count"]=>
   %unicode|string%(1) "0"
   [%u|b%"proto_text_fetched_null"]=>
   %unicode|string%(1) "0"

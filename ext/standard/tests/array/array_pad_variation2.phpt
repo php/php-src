@@ -1,5 +1,7 @@
 --TEST--
 Test array_pad() function : usage variations - unexpected values for 'pad_size' argument(Bug#43482)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
@@ -159,23 +161,23 @@ array(2) {
 }
 -- Iteration 7 --
 
-Warning: array_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: array_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: array_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: array_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: array_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 12 --
 array(2) {
@@ -221,23 +223,23 @@ array(2) {
 }
 -- Iteration 18 --
 
-Warning: array_pad() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_pad() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: array_pad() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: array_pad() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 22 --
 
-Warning: array_pad() expects parameter 2 to be long, object given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 -- Iteration 23 --
 array(2) {

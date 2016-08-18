@@ -70,7 +70,7 @@ NULL
 Warning: fscanf() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: fscanf(): %d is not a valid File-Handle resource in %s on line %d
+Warning: fscanf(): supplied resource is not a valid File-Handle resource in %s on line %d
 bool(false)
 
 Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d

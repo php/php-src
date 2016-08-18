@@ -36,14 +36,14 @@
 
 PHPAPI int TSendMail(char *smtpaddr, int *returnerror, char **error_message,
 			  char *RPath, char *Subject, char *mailTo, char *data,
-			  char *mailCc, char *mailBcc, char *mailRPath TSRMLS_DC);
+			  char *mailCc, char *mailBcc, char *mailRPath);
 PHPAPI void TSMClose(void);
-static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
-			 char *headers, char *headers_lc, char **error_message TSRMLS_DC);
+static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data,
+			 char *headers, char *headers_lc, char **error_message);
 PHPAPI char *GetSMErrorText(int index);
 
 static int MailConnect();
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders TSRMLS_DC);
+static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders);
 static int Post(LPCSTR msg);
 static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);

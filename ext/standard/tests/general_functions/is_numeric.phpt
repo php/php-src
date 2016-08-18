@@ -60,7 +60,7 @@ $numerics = array(
   +0x6698319,
   01000000000000000000000, 
   0123,
-  0345900,
+  0345,
   -0200001,  
   -0200001.7,  
   0200001.7,  
@@ -80,8 +80,6 @@ $numerics = array(
   ' 1',
   '2974394749328742328432',
   '-1e-2',
-  "0xff",
-  '0xff',
   "0123",
   '0123',
   "-0123",
@@ -109,6 +107,7 @@ unset ($unset_var);
 
 // other types in a array 
 $not_numerics = array(
+  "0x80001",
   "-0x80001", 
   "+0x80001", 
   "-0x80001.5",
@@ -314,10 +313,6 @@ bool(true)
 bool(true)
 -- Iteration 76 --
 bool(true)
--- Iteration 77 --
-bool(true)
--- Iteration 78 --
-bool(true)
 
 *** Testing is_numeric() on non numeric types ***
 -- Iteration 1 --
@@ -375,6 +370,8 @@ bool(false)
 -- Iteration 27 --
 bool(false)
 -- Iteration 28 --
+bool(false)
+-- Iteration 29 --
 bool(false)
 
 *** Testing error conditions ***

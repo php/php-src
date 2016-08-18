@@ -3,8 +3,8 @@
  *
  * This file is a portion of "streamable kanji code filter and converter"
  * library, which is distributed under GNU Lesser General Public License
- * version 2.1.  
- * 
+ * version 2.1.
+ *
  */
 
 #ifndef MBFL_MBFILTER_ISO8859_16_H

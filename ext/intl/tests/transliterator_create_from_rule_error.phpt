@@ -37,7 +37,7 @@ Warning: Transliterator::createFromRules() expects at least 1 parameter, 0 given
 Warning: Transliterator::createFromRules(): transliterator_create_from_rules: bad arguments in %s on line %d
 transliterator_create_from_rules: bad arguments: U_ILLEGAL_ARGUMENT_ERROR
 
-Warning: Transliterator::createFromRules() expects parameter 2 to be long, string given in %s on line %d
+Warning: Transliterator::createFromRules() expects parameter 2 to be integer, string given in %s on line %d
 
 Warning: Transliterator::createFromRules(): transliterator_create_from_rules: bad arguments in %s on line %d
 transliterator_create_from_rules: bad arguments: U_ILLEGAL_ARGUMENT_ERROR

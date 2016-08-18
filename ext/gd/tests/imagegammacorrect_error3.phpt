@@ -14,4 +14,4 @@ $gamma = imagegammacorrect($image, 'string', 5);
 
 ?>
 --EXPECTF--
-Warning: imagegammacorrect() expects parameter 2 to be double, %s given in %s on line %d
+Warning: imagegammacorrect() expects parameter 2 to be float, %s given in %s on line %d

@@ -1,6 +1,6 @@
 /*
   zip_source_open.c -- open zip_source (prepare for reading)
-  Copyright (C) 2009-2015 Dieter Baron and Thomas Klausner
+  Copyright (C) 2009-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,46 +31,43 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include "zipint.h"
 
-
-
-int
-zip_source_open(struct zip_source *src)
+ZIP_EXTERN int
+zip_source_open(zip_source_t *src)
 {
-    zip_int64_t ret;
-
-    if (src->is_open) {
-	src->error_source = ZIP_LES_INVAL;
+    if (src->source_closed) {
+        return -1;
+    }
+    if (src->write_state == ZIP_SOURCE_WRITE_REMOVED) {
+        zip_error_set(&src->error, ZIP_ER_DELETED, 0);
 	return -1;
     }
 
-    if (src->src == NULL) {
-	if (src->cb.f(src->ud, NULL, 0, ZIP_SOURCE_OPEN) < 0)
+    if (ZIP_SOURCE_IS_OPEN_READING(src)) {
+	if ((zip_source_supports(src) & ZIP_SOURCE_MAKE_COMMAND_BITMASK(ZIP_SOURCE_SEEK)) == 0) {
+	    zip_error_set(&src->error, ZIP_ER_INUSE, 0);
 	    return -1;
+	}
     }
     else {
-	if (zip_source_open(src->src) < 0) {
-	    src->error_source = ZIP_LES_LOWER;
-	    return -1;
+	if (ZIP_SOURCE_IS_LAYERED(src)) {
+	    if (zip_source_open(src->src) < 0) {
+		_zip_error_set_from_source(&src->error, src->src);
+		return -1;
+	    }
 	}
-
-	ret = src->cb.l(src->src, src->ud, NULL, 0, ZIP_SOURCE_OPEN);
 	
-	if (ret < 0) {
-	    zip_source_close(src->src);
-	    
-	    if (ret == ZIP_SOURCE_ERR_LOWER)
-		src->error_source = ZIP_LES_LOWER;
-	    else
-		src->error_source = ZIP_LES_UPPER;
+	if (_zip_source_call(src, NULL, 0, ZIP_SOURCE_OPEN) < 0) {
+	    if (ZIP_SOURCE_IS_LAYERED(src)) {
+		zip_source_close(src->src);
+	    }
 	    return -1;
 	}
     }
 
-    src->is_open = 1;
+    src->open_count++;
     
     return 0;
 }

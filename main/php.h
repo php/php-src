@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -26,14 +26,14 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20131106
+#define PHP_API_VERSION 20160731
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
 
 #include "php_version.h"
 #include "zend.h"
-#include "zend_qsort.h"
+#include "zend_sort.h"
 #include "php_compat.h"
 
 #include "zend_API.h"
@@ -231,6 +231,14 @@ char *strerror(int);
 #define INT_MIN (- INT_MAX - 1)
 #endif
 
+/* double limits */
+#include <float.h>
+#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
+#define PHP_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
+#else
+#define PHP_DOUBLE_MAX_LENGTH 1080
+#endif
+
 #define PHP_GCC_VERSION ZEND_GCC_VERSION
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
 #define PHP_ATTRIBUTE_FORMAT ZEND_ATTRIBUTE_FORMAT
@@ -248,7 +256,10 @@ END_EXTERN_C()
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-# ifdef PATH_MAX
+# if PHP_WIN32
+#  include "win32/ioutil.h"
+#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
+# elif PATH_MAX
 #  define MAXPATHLEN PATH_MAX
 # elif defined(MAX_PATH)
 #  define MAXPATHLEN MAX_PATH
@@ -257,11 +268,7 @@ END_EXTERN_C()
 # endif
 #endif
 
-#if defined(__GNUC__) && __GNUC__ >= 4
-# define php_ignore_value(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
-#else
-# define php_ignore_value(x) ((void) (x))
-#endif
+#define php_ignore_value(x) ZEND_IGNORE_VALUE(x)
 
 /* global variables */
 #if !defined(PHP_WIN32)
@@ -280,11 +287,17 @@ ssize_t pread(int, void *, size_t, off64_t);
 
 BEGIN_EXTERN_C()
 void phperror(char *error);
-PHPAPI int php_write(void *buf, uint size TSRMLS_DC);
-PHPAPI int php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
+PHPAPI size_t php_write(void *buf, size_t size);
+PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
 		2);
 PHPAPI int php_get_module_initialized(void);
-PHPAPI void php_log_err(char *log_message TSRMLS_DC);
+#ifdef HAVE_SYSLOG_H
+#include "php_syslog.h"
+#define php_log_err(msg) php_log_err_with_severity(msg, LOG_NOTICE)
+#else
+#define php_log_err(msg) php_log_err_with_severity(msg, 5)
+#endif
+PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int);
 int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 int cfgparse(void);
 END_EXTERN_C()
@@ -293,29 +306,23 @@ END_EXTERN_C()
 #define error_handling_t zend_error_handling_t
 
 BEGIN_EXTERN_C()
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC)
+static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class)
 {
-	zend_replace_error_handling(error_handling, exception_class, NULL TSRMLS_CC);
+	zend_replace_error_handling(error_handling, exception_class, NULL);
 }
 static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 
-PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
-
-#ifdef ZTS
-#define PHP_ATTR_FMT_OFFSET 1
-#else
-#define PHP_ATTR_FMT_OFFSET 0
-#endif
+PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 3, PHP_ATTR_FMT_OFFSET + 4);
-PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
-PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 5, PHP_ATTR_FMT_OFFSET + 6);
+PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
+PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 #ifdef PHP_WIN32
-PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2 TSRMLS_DC);
+PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 END_EXTERN_C()
 
@@ -332,12 +339,12 @@ END_EXTERN_C()
 
 /* functions */
 BEGIN_EXTERN_C()
-PHPAPI extern int (*php_register_internal_extensions_func)(TSRMLS_D);
-PHPAPI int php_register_internal_extensions(TSRMLS_D);
-PHPAPI int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
+PHPAPI extern int (*php_register_internal_extensions_func)(void);
+PHPAPI int php_register_internal_extensions(void);
+PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
-PHPAPI void php_com_initialize(TSRMLS_D);
-PHPAPI char *php_get_current_user(TSRMLS_D);
+PHPAPI void php_com_initialize(void);
+PHPAPI char *php_get_current_user(void);
 END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */
@@ -387,7 +394,7 @@ END_EXTERN_C()
 #define PHP_MINFO_FUNCTION		ZEND_MODULE_INFO_D
 #define PHP_GINIT_FUNCTION		ZEND_GINIT_FUNCTION
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
- 
+
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
 
 
@@ -434,7 +441,7 @@ END_EXTERN_C()
 #else /* ! (CRAY || __arm) */
 
 #define XtOffset(p_type, field) \
-    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
 #endif /* ! XtOffset */

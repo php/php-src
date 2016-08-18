@@ -4,6 +4,7 @@ Test touch() function : usage variation - different types for time
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip.. only for Windows');
 }
@@ -125,19 +126,19 @@ bool(true)
 bool(true)
 
 --empty array--
-Error: 2 - touch() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - touch() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - touch() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - touch() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -159,35 +160,35 @@ bool(true)
 bool(true)
 
 --empty string DQ--
-Error: 2 - touch() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - touch() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - touch() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - touch() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - touch() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - touch() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 --instance of classWithToString--
-Error: 2 - touch() expects parameter 2 to be long, object given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, object given, %s(%d)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - touch() expects parameter 2 to be long, object given, %s(%d)
+Error: 2 - touch() expects parameter 2 to be integer, object given, %s(%d)
 NULL
 
 --undefined var--

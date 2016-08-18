@@ -13,4 +13,8 @@ foreach(gen(new stdClass()) as $value)
 --EXPECTF--
 foo
 
-Fatal error: Call to undefined method stdClass::fatalError() in %sbug63066.php on line 5
+Fatal error: Uncaught Error: Call to undefined method stdClass::fatalError() in %sbug63066.php:5
+Stack trace:
+#0 %s(%d): gen(Object(stdClass))
+#1 {main}
+  thrown in %sbug63066.php on line 5

@@ -1,5 +1,7 @@
 --TEST--
 preg_split() 2nd test
+--INI--
+pcre.jit=0
 --FILE--
 <?php
 

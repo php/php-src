@@ -1,5 +1,5 @@
 /*
-  $Id$ 
+  $Id$
 */
 /*
  * This version is derived from the original implementation of FreeSec
@@ -218,7 +218,6 @@ _crypt_extended_init(void)
 	uint32_t *p, *il, *ir, *fl, *fr;
 	uint32_t *bits28, *bits24;
 	u_char inv_key_perm[64];
-	u_char u_key_perm[56];
 	u_char inv_comp_perm[56];
 	u_char init_perm[64], final_perm[64];
 	u_char u_sbox[8][64];
@@ -260,7 +259,6 @@ _crypt_extended_init(void)
 	 * compression permutation.
 	 */
 	for (i = 0; i < 56; i++) {
-		u_key_perm[i] = key_perm[i] - 1;
 		inv_key_perm[key_perm[i] - 1] = i;
 		inv_comp_perm[i] = 255;
 	}
@@ -582,7 +580,7 @@ static int
 des_cipher(const char *in, char *out, uint32_t salt, int count,
 	struct php_crypt_extended_data *data)
 {
-	uint32_t	l_out, r_out, rawl, rawr;
+	uint32_t	l_out = 0, r_out = 0, rawl, rawr;
 	int	retval;
 
 	setup_salt(salt, data);
@@ -628,12 +626,12 @@ _crypt_extended_r(const char *key, const char *setting,
 	 * and padding with zeros.
 	 */
 	q = (u_char *) keybuf;
-	while (q - (u_char *) keybuf < sizeof(keybuf)) {
+	while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf)) {
 		*q++ = *key << 1;
 		if (*key)
 			key++;
 	}
-	if (des_setkey((u_char *) keybuf, data))
+	if (des_setkey((char *) keybuf, data))
 		return(NULL);
 
 	if (*setting == _PASSWORD_EFMT1) {
@@ -662,17 +660,17 @@ _crypt_extended_r(const char *key, const char *setting,
 			/*
 			 * Encrypt the key with itself.
 			 */
-			if (des_cipher((u_char *) keybuf, (u_char *) keybuf,
+			if (des_cipher((char *) keybuf, (char *) keybuf,
 			    0, 1, data))
 				return(NULL);
 			/*
 			 * And XOR with the next 8 characters of the key.
 			 */
 			q = (u_char *) keybuf;
-			while (q - (u_char *) keybuf < sizeof(keybuf) && *key)
+			while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf) && *key)
 				*q++ ^= *key++ << 1;
 
-			if (des_setkey((u_char *) keybuf, data))
+			if (des_setkey((char *) keybuf, data))
 				return(NULL);
 		}
 		memcpy(data->output, setting, 9);

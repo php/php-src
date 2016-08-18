@@ -19,7 +19,7 @@ var_dump( token_get_all());
 echo "-- Testing token_get_all() function with more than expected no. of arguments --\n";
 $source = '<?php ?>';
 $extra_arg = 10;
-var_dump( token_get_all($source, $extra_arg));
+var_dump( token_get_all($source, true, $extra_arg));
 
 echo "Done"
 ?>
@@ -28,10 +28,10 @@ echo "Done"
 
 -- Testing token_get_all() function with zero arguments --
 
-Warning: token_get_all() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: token_get_all() expects at least 1 parameter, 0 given in %s on line 11
 NULL
 -- Testing token_get_all() function with more than expected no. of arguments --
 
-Warning: token_get_all() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: token_get_all() expects at most 2 parameters, 3 given in %s on line 17
 NULL
 Done

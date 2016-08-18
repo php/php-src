@@ -54,13 +54,13 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
   int i, hiteof = 0;
   int offset = 0;
   int olen;
-  
+
   olen = 0;
-  
+
   buffer_new(b);
-  
+
   /*	Fill dtable with character encodings.  */
-  
+
   for (i = 0; i < 26; i++) {
     dtable[i] = 'A' + i;
     dtable[26 + i] = 'a' + i;
@@ -70,11 +70,11 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
   }
   dtable[62] = '+';
   dtable[63] = '/';
-  
+
   while (!hiteof) {
     unsigned char igroup[3], ogroup[4];
     int c, n;
-    
+
     igroup[0] = igroup[1] = igroup[2] = 0;
     for (n = 0; n < 3; n++) {
       c = *(source++);
@@ -90,11 +90,11 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
       ogroup[1] = dtable[((igroup[0] & 3) << 4) | (igroup[1] >> 4)];
       ogroup[2] = dtable[((igroup[1] & 0xF) << 2) | (igroup[2] >> 6)];
       ogroup[3] = dtable[igroup[2] & 0x3F];
-      
+
       /* Replace characters in output stream with "=" pad
 	 characters if fewer than three characters were
 	 read from the end of the input stream. */
-      
+
       if (n < 3) {
 	ogroup[3] = '=';
 	if (n < 2) {

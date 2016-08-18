@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -24,16 +24,13 @@
 #include "php.h"
 
 #define PHP_HASH_EXTNAME	"hash"
-#define PHP_HASH_EXTVER		"1.0"
+#define PHP_HASH_VERSION	"1.0"
+#define PHP_MHASH_VERSION	"1.0"
 #define PHP_HASH_RESNAME	"Hash Context"
 
 #define PHP_HASH_HMAC		0x0001
 
 #define L64 INT64_C
-#define php_hash_int32  int32_t
-#define php_hash_uint32 uint32_t
-#define php_hash_int64  int64_t
-#define php_hash_uint64 uint64_t
 
 typedef void (*php_hash_init_func_t)(void *context);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
@@ -55,7 +52,7 @@ typedef struct _php_hash_data {
 	const php_hash_ops *ops;
 	void *context;
 
-	long options;
+	zend_long options;
 	unsigned char *key;
 } php_hash_data;
 
@@ -67,6 +64,12 @@ extern const php_hash_ops php_hash_sha224_ops;
 extern const php_hash_ops php_hash_sha256_ops;
 extern const php_hash_ops php_hash_sha384_ops;
 extern const php_hash_ops php_hash_sha512_ops;
+extern const php_hash_ops php_hash_sha512_256_ops;
+extern const php_hash_ops php_hash_sha512_224_ops;
+extern const php_hash_ops php_hash_sha3_224_ops;
+extern const php_hash_ops php_hash_sha3_256_ops;
+extern const php_hash_ops php_hash_sha3_384_ops;
+extern const php_hash_ops php_hash_sha3_512_ops;
 extern const php_hash_ops php_hash_ripemd128_ops;
 extern const php_hash_ops php_hash_ripemd160_ops;
 extern const php_hash_ops php_hash_ripemd256_ops;
@@ -138,7 +141,7 @@ PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
 PHP_FUNCTION(hash_equals);
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 

@@ -19,7 +19,7 @@ if (PHP_MBSTRING != "no") {
 		ADD_FLAG("CFLAGS_MBSTRING", get_define("CFLAGS_LIBMBFL") +
 			" /I ext/mbstring/oniguruma /D NOT_RUBY=1 \
 		          /D HAVE_STDARG_PROTOTYPES=1 /D HAVE_STDLIB_H \
-		          /D HAVE_STRICMP /D EXPORT");
+		          /D HAVE_STRICMP /D EXPORT /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 		PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h oniguruma/oniguruma.h php_mbregex.h php_onig_compat.h");
 	} else {
@@ -28,7 +28,7 @@ if (PHP_MBSTRING != "no") {
 		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
 			-Iext/mbstring/oniguruma /D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
 		        /D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H /D HAVE_STDLIB_H \
-		        /D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /D EXPORT")
+		        /D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /D EXPORT /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
 		FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.w32",
 		   	"ext\\mbstring\\libmbfl\\config.h", true);

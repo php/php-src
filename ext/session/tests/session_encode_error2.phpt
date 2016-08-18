@@ -243,7 +243,7 @@ bool(true)
 -- Iteration 24 --
 bool(true)
 
-Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Notice: session_encode(): Skipping numeric key %d in %s on line %d
 bool(false)

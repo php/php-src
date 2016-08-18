@@ -27,7 +27,6 @@ $values = array(0,
 				"3.95E3",
 				"-3.95E3",
 				"039",
-				"0x5F",
 				true,
 				false,
 				null, 
@@ -93,9 +92,6 @@ float(-3950)
 
 -- floor 039 --
 float(39)
-
--- floor 0x5F --
-float(95)
 
 -- floor 1 --
 float(1)

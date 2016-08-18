@@ -50,8 +50,8 @@ Interoperability Support" (ID 207303.1) for details.
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.12</release>
-   <api>2.0.12</api>
+   <release>2.1.2</release>
+   <api>2.1.2</api>
   </version>
   <stability>
    <release>stable</release>
@@ -59,7 +59,9 @@ Interoperability Support" (ID 207303.1) for details.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
+This version is for PHP 7 only.
 Fixed invalid handle error with Implicit Result Sets
+Fixed bug #72524 (Binding null values triggers ORA-24816 error)
   </notes>
  <contents>
   <dir name="/">
@@ -116,6 +118,7 @@ Fixed invalid handle error with Implicit Result Sets
     <file name="bind_sqltchr_2.phpt" role="test" />
     <file name="bind_sqltint.phpt" role="test" />
     <file name="bind_sqltnum.phpt" role="test" />
+    <file name="bind_sqltnum_11g.phpt" role="test" />
     <file name="bind_unsupported_1.phpt" role="test" />
     <file name="bind_unsupported_2.phpt" role="test" />
     <file name="bind_unsupported_3.phpt" role="test" />
@@ -160,6 +163,8 @@ Fixed invalid handle error with Implicit Result Sets
     <file name="bug51291_2.phpt" role="test" />
     <file name="bug68298.phpt" role="test" />
     <file name="bug71422.phpt" role="test" />
+    <file name="bug71600.phpt" role="test" />
+    <file name="bug72524.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
@@ -263,6 +268,7 @@ Fixed invalid handle error with Implicit Result Sets
     <file name="drcp_scope4.phpt" role="test" />
     <file name="drcp_scope5.phpt" role="test" />
     <file name="driver_name.phpt" role="test" />
+    <file name="driver_name_11gR2.phpt" role="test" />
     <file name="drop_table.inc" role="test" />
     <file name="drop_type.inc" role="test" />
     <file name="dupcolnames.phpt" role="test" />
@@ -444,15 +450,13 @@ Fixed invalid handle error with Implicit Result Sets
    <file name="oci8_statement.c" role="src" />
    <file name="php_oci8.h" role="src" />
    <file name="php_oci8_int.h" role="src" />
-   <file name="oci8.dsp" role="src" />
    <file name="README" role="doc" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
   <required>
    <php>
-    <min>5.2.0</min>
-    <max>5.6.99</max>
+    <min>7.0.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -467,8 +471,8 @@ Fixed invalid handle error with Implicit Result Sets
 
 <release>
   <version>
-   <release>2.0.11</release>
-   <api>2.0.11</api>
+   <release>2.1.1</release>
+   <api>2.1.1</api>
   </version>
   <stability>
    <release>stable</release>
@@ -476,7 +480,24 @@ Fixed invalid handle error with Implicit Result Sets
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Fixed bug #71422 (Fix ORA-01438: value larger than specified precision allowed for this column)
+This version is for PHP 7 only.
+Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
+  </notes>
+</release>
+   
+<release>
+  <version>
+   <release>2.1.0</release>
+   <api>2.1.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Updated driver name format.    
   </notes>
 </release>
 

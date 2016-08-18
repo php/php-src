@@ -15,8 +15,8 @@ var_dump($c);
 
 ?>
 --EXPECTF--
-Warning: Cannot bind internal method SplDoublyLinkedList::count() to object of class cls in %s on line %d
+Warning: Cannot bind method SplDoublyLinkedList::count() to object of class cls in %s on line %d
 NULL
 
-Warning: Cannot bind function SplDoublyLinkedList::count to scope class cls in %s on line %d
+Warning: Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure() in %s on line %d
 NULL

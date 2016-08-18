@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -41,28 +41,22 @@
 
 /* {{{ pdo_pgsql_functions[] */
 const zend_function_entry pdo_pgsql_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
 /* {{{ pdo_sqlite_deps
  */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_pgsql_module_entry */
 zend_module_entry pdo_pgsql_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_pgsql_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"pdo_pgsql",
 	pdo_pgsql_functions,
 	PHP_MINIT(pdo_pgsql),
@@ -70,7 +64,7 @@ zend_module_entry pdo_pgsql_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_pgsql),
-	"1.0.2",
+	PHP_PDO_PGSQL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -85,13 +79,12 @@ ZEND_GET_MODULE(pdo_pgsql)
  */
 PHP_MINIT_FUNCTION(pdo_pgsql)
 {
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT", PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_DISABLE_PREPARES", PDO_PGSQL_ATTR_DISABLE_PREPARES);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_IDLE", (long)PGSQL_TRANSACTION_IDLE);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_ACTIVE", (long)PGSQL_TRANSACTION_ACTIVE);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INTRANS", (long)PGSQL_TRANSACTION_INTRANS);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (long)PGSQL_TRANSACTION_INERROR);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (long)PGSQL_TRANSACTION_UNKNOWN);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_IDLE", (zend_long)PGSQL_TRANSACTION_IDLE);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_ACTIVE", (zend_long)PGSQL_TRANSACTION_ACTIVE);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INTRANS", (zend_long)PGSQL_TRANSACTION_INTRANS);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
 
 	php_pdo_register_driver(&pdo_pgsql_driver);
 	return SUCCESS;
@@ -113,9 +106,9 @@ PHP_MINFO_FUNCTION(pdo_pgsql)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO Driver for PostgreSQL", "enabled");
-#ifdef HAVE_PG_CONFIG_H	
+#ifdef HAVE_PG_CONFIG_H
 	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
-#endif	
+#endif
 	php_info_print_table_row(2, "Module version", pdo_pgsql_module_entry.version);
 	php_info_print_table_row(2, "Revision", " $Id$ ");
 

@@ -39,10 +39,10 @@ foreach ( $variation_array as $var ) {
 bool(false)
 bool(false)
 
-Warning: posix_seteuid() expects parameter 1 to be long, string given in %s on line 22
+Warning: posix_seteuid() expects parameter 1 to be integer, string given in %s on line 22
 bool(false)
 
-Warning: posix_seteuid() expects parameter 1 to be long, string given in %s on line 22
+Warning: posix_seteuid() expects parameter 1 to be integer, string given in %s on line 22
 bool(false)
 bool(false)
 bool(false)

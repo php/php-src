@@ -41,6 +41,6 @@
 #endif
 
 /* for private applications */
-#define ZEND_BUILD_EXTRA 
+#define ZEND_BUILD_EXTRA
 
 #endif

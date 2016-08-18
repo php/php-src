@@ -1,6 +1,6 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,18 +24,18 @@
 #include "ext/standard/basic_functions.h"
 
 typedef struct {
-	php_int32 s1;
-	php_int32 s2;
+	int32_t s1;
+	int32_t s2;
 	int seeded;
 } php_lcg_globals;
 
-PHPAPI double php_combined_lcg(TSRMLS_D);
+PHPAPI double php_combined_lcg(void);
 PHP_FUNCTION(lcg_value);
 
 PHP_MINIT_FUNCTION(lcg);
 
 #ifdef ZTS
-#define LCG(v) TSRMG(lcg_globals_id, php_lcg_globals *, v)
+#define LCG(v) ZEND_TSRMG(lcg_globals_id, php_lcg_globals *, v)
 #else
 #define LCG(v) (lcg_globals.v)
 #endif

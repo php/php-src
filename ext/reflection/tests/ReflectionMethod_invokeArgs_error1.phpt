@@ -25,12 +25,9 @@ var_dump($methodWithArgs->invokeArgs($testClassInstance, array()));
 --EXPECTF--
 Method with args:
 
-Warning: Missing argument 1 for TestClass::methodWithArgs() in %s on line %d
-
-Warning: Missing argument 2 for TestClass::methodWithArgs() in %s on line %d
-
-Notice: Undefined variable: a in %s on line %d
-
-Notice: Undefined variable: b in %s on line %d
-Called methodWithArgs(, )
-NULL
+Fatal error: Uncaught Error: Too few arguments to function TestClass::methodWithArgs(), 0 passed and exactly 2 expected in %sReflectionMethod_invokeArgs_error1.php:5
+Stack trace:
+#0 [internal function]: TestClass->methodWithArgs()
+#1 %sReflectionMethod_invokeArgs_error1.php(19): ReflectionMethod->invokeArgs(Object(TestClass), Array)
+#2 {main}
+  thrown in %sReflectionMethod_invokeArgs_error1.php on line 5

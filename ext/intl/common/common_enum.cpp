@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,18 +33,18 @@ extern "C" {
 zend_class_entry *IntlIterator_ce_ptr;
 zend_object_handlers IntlIterator_handlers;
 
-void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
+void zoi_with_current_dtor(zend_object_iterator *iter)
 {
 	zoi_with_current *zoiwc = (zoi_with_current*)iter;
-	
-	if (zoiwc->wrapping_obj) {
+
+	if (!Z_ISUNDEF(zoiwc->wrapping_obj)) {
 		/* we have to copy the pointer because zoiwc->wrapping_obj may be
 		 * changed midway the execution of zval_ptr_dtor() */
-		zval *zwo = zoiwc->wrapping_obj;
-		
+		zval *zwo = &zoiwc->wrapping_obj;
+
 		/* object is still here, we can rely on it to call this again and
 		 * destroy this object */
-		zval_ptr_dtor(&zwo);
+		zval_ptr_dtor(zwo);
 	} else {
 		/* Object not here anymore (we've been called by the object free handler)
 		 * Note that the iterator wrapper objects (that also depend on this
@@ -52,81 +52,79 @@ void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
 		 * precedes the object free phase. Therefore there's no risk on this
 		 * function being called by the iterator wrapper destructor function and
 		 * not finding the memory of this iterator allocated anymore. */
-		iter->funcs->invalidate_current(iter TSRMLS_CC);
-		zoiwc->destroy_it(iter TSRMLS_CC);
-		efree(iter);
+		iter->funcs->invalidate_current(iter);
+		zoiwc->destroy_it(iter);
 	}
 }
 
-U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter TSRMLS_DC)
+U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter)
 {
-	return ((zoi_with_current*)iter)->current != NULL ? SUCCESS : FAILURE;
+	return Z_ISUNDEF(((zoi_with_current*)iter)->current)? FAILURE : SUCCESS;
 }
 
-U_CFUNC void zoi_with_current_get_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter)
 {
-	*data = &((zoi_with_current*)iter)->current;
+	return &((zoi_with_current*)iter)->current;
 }
 
-U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter TSRMLS_DC)
+U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter)
 {
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
-	if (zoi_iter->current) {
+	if (!Z_ISUNDEF(zoi_iter->current)) {
 		zval_ptr_dtor(&zoi_iter->current);
-		zoi_iter->current = NULL; //valid would return FAILURE now
+		ZVAL_UNDEF(&zoi_iter->current); //valid would return FAILURE now
 	}
 }
 
-static void string_enum_current_move_forward(zend_object_iterator *iter TSRMLS_DC)
+static void string_enum_current_move_forward(zend_object_iterator *iter)
 {
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	iter->funcs->invalidate_current(iter TSRMLS_CC);
+	iter->funcs->invalidate_current(iter);
 
-	object = zoi_iter->wrapping_obj;
+	object = &zoi_iter->wrapping_obj;
 	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	int32_t result_length;
-	const char *result = ((StringEnumeration*)iter->data)->next(
+	const char *result = ((StringEnumeration*)Z_PTR(iter->data))->next(
 		&result_length, INTLITERATOR_ERROR_CODE(ii));
 
-	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii) TSRMLS_CC);
+	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
 		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error fetching next iteration element", 0 TSRMLS_CC);
+			"Error fetching next iteration element", 0);
 	} else if (result) {
-		MAKE_STD_ZVAL(zoi_iter->current);
-		ZVAL_STRINGL(zoi_iter->current, result, result_length, 1);
+		ZVAL_STRINGL(&zoi_iter->current, result, result_length);
 	} //else we've reached the end of the enum, nothing more is required
 }
 
-static void string_enum_rewind(zend_object_iterator *iter TSRMLS_DC)
+static void string_enum_rewind(zend_object_iterator *iter)
 {
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zoi_iter->current) {
-		iter->funcs->invalidate_current(iter TSRMLS_CC);
+	if (!Z_ISUNDEF(zoi_iter->current)) {
+		iter->funcs->invalidate_current(iter);
 	}
 
-	object = zoi_iter->wrapping_obj;
+	object = &zoi_iter->wrapping_obj;
 	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK;
 
-	((StringEnumeration*)iter->data)->reset(INTLITERATOR_ERROR_CODE(ii));
+	((StringEnumeration*)Z_PTR(iter->data))->reset(INTLITERATOR_ERROR_CODE(ii));
 
-	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii) TSRMLS_CC);
+	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
 		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error resetting enumeration", 0 TSRMLS_CC);
+			"Error resetting enumeration", 0);
 	} else {
-		iter->funcs->move_forward(iter TSRMLS_CC);
+		iter->funcs->move_forward(iter);
 	}
 }
 
-static void string_enum_destroy_it(zend_object_iterator *iter TSRMLS_DC)
+static void string_enum_destroy_it(zend_object_iterator *iter)
 {
-	delete (StringEnumeration*)iter->data;
+	delete (StringEnumeration*)Z_PTR(iter->data);
 }
 
 static zend_object_iterator_funcs string_enum_object_iterator_funcs = {
@@ -139,102 +137,90 @@ static zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	zoi_with_current_invalidate_current
 };
 
-U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object TSRMLS_DC)
+U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)
 {
 	IntlIterator_object *ii;
 	object_init_ex(object, IntlIterator_ce_ptr);
-	ii = (IntlIterator_object*)zend_object_store_get_object(object TSRMLS_CC);
+	ii = Z_INTL_ITERATOR_P(object);
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_with_current));
-	ii->iterator->data = (void*)se;
+	zend_iterator_init(ii->iterator);
+	ZVAL_PTR(&ii->iterator->data, se);
 	ii->iterator->funcs = &string_enum_object_iterator_funcs;
 	ii->iterator->index = 0;
 	((zoi_with_current*)ii->iterator)->destroy_it = string_enum_destroy_it;
-	((zoi_with_current*)ii->iterator)->wrapping_obj = object;
-	((zoi_with_current*)ii->iterator)->current = NULL;
+	ZVAL_COPY_VALUE(&((zoi_with_current*)ii->iterator)->wrapping_obj, object);
+	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 }
 
-static void IntlIterator_objects_free(zend_object *object TSRMLS_DC)
+static void IntlIterator_objects_free(zend_object *object)
 {
-	IntlIterator_object	*ii = (IntlIterator_object*) object;
+	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
 
 	if (ii->iterator) {
-		zval **wrapping_objp = &((zoi_with_current*)ii->iterator)->wrapping_obj;
-		*wrapping_objp = NULL;
-		ii->iterator->funcs->dtor(ii->iterator TSRMLS_CC);
+		zval *wrapping_objp = &((zoi_with_current*)ii->iterator)->wrapping_obj;
+		ZVAL_UNDEF(wrapping_objp);
+		zend_iterator_dtor(ii->iterator);
 	}
-	intl_error_reset(INTLITERATOR_ERROR_P(ii) TSRMLS_CC);
+	intl_error_reset(INTLITERATOR_ERROR_P(ii));
 
-	zend_object_std_dtor(&ii->zo TSRMLS_CC);
-
-	efree(ii);
+	zend_object_std_dtor(&ii->zo);
 }
 
 static zend_object_iterator *IntlIterator_get_iterator(
-	zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+	zend_class_entry *ce, zval *object, int by_ref)
 {
 	if (by_ref) {
 		zend_throw_exception(NULL,
-			"Iteration by reference is not supported", 0 TSRMLS_CC);
+			"Iteration by reference is not supported", 0);
 		return NULL;
 	}
 
-	IntlIterator_object *ii = (IntlIterator_object*)
-		zend_object_store_get_object(object TSRMLS_CC);
+	IntlIterator_object *ii = Z_INTL_ITERATOR_P(object);
 
 	if (ii->iterator == NULL) {
 		zend_throw_exception(NULL,
-			"The IntlIterator is not properly constructed", 0 TSRMLS_CC);
+			"The IntlIterator is not properly constructed", 0);
 		return NULL;
 	}
 
-	zval_add_ref(&object);
+	++GC_REFCOUNT(&ii->iterator->std);
 
 	return ii->iterator;
 }
 
-static zend_object_value IntlIterator_object_create(zend_class_entry *ce TSRMLS_DC)
+static zend_object *IntlIterator_object_create(zend_class_entry *ce)
 {
-	zend_object_value	retval;
 	IntlIterator_object	*intern;
 
-	intern = (IntlIterator_object*)ecalloc(1, sizeof(IntlIterator_object));
-	
-	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
-#if PHP_VERSION_ID < 50399
-    zend_hash_copy(intern->zo.properties, &(ce->default_properties),
-        (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
-#else
-    object_properties_init((zend_object*) intern, ce);
-#endif
-	intl_error_init(INTLITERATOR_ERROR_P(intern) TSRMLS_CC);
+	intern = (IntlIterator_object*)ecalloc(1, sizeof(IntlIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+
+	zend_object_std_init(&intern->zo, ce);
+    object_properties_init(&intern->zo, ce);
+	intl_error_init(INTLITERATOR_ERROR_P(intern));
+
 	intern->iterator = NULL;
 
-	retval.handle = zend_objects_store_put(
-		intern,
-		(zend_objects_store_dtor_t)zend_objects_destroy_object,
-		(zend_objects_free_object_storage_t)IntlIterator_objects_free,
-		NULL TSRMLS_CC);
+	intern->zo.handlers = &IntlIterator_handlers;
 
-	retval.handlers = &IntlIterator_handlers;
-
-	return retval;
+	return &intern->zo;
 }
 
 static PHP_METHOD(IntlIterator, current)
 {
-	zval **data;
+	zval *data;
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::current: bad arguments", 0 TSRMLS_CC);
+			"IntlIterator::current: bad arguments", 0);
 		return;
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
-	ii->iterator->funcs->get_current_data(ii->iterator, &data TSRMLS_CC);
-	if (data && *data) {
-		RETURN_ZVAL(*data, 1, 0);
+	data = ii->iterator->funcs->get_current_data(ii->iterator);
+	if (data) {
+		ZVAL_DEREF(data);
+		ZVAL_COPY(return_value, data);
 	}
 }
 
@@ -244,14 +230,14 @@ static PHP_METHOD(IntlIterator, key)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::key: bad arguments", 0 TSRMLS_CC);
+			"IntlIterator::key: bad arguments", 0);
 		return;
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
 	if (ii->iterator->funcs->get_current_key) {
-		ii->iterator->funcs->get_current_key(ii->iterator, return_value TSRMLS_CC);
+		ii->iterator->funcs->get_current_key(ii->iterator, return_value);
 	} else {
 		RETURN_LONG(ii->iterator->index);
 	}
@@ -263,12 +249,12 @@ static PHP_METHOD(IntlIterator, next)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::next: bad arguments", 0 TSRMLS_CC);
+			"IntlIterator::next: bad arguments", 0);
 		return;
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
-	ii->iterator->funcs->move_forward(ii->iterator TSRMLS_CC);
+	ii->iterator->funcs->move_forward(ii->iterator);
 	/* foreach also advances the index after the last iteration,
 	 * so I see no problem in incrementing the index here unconditionally */
 	ii->iterator->index++;
@@ -280,16 +266,16 @@ static PHP_METHOD(IntlIterator, rewind)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::rewind: bad arguments", 0 TSRMLS_CC);
+			"IntlIterator::rewind: bad arguments", 0);
 		return;
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	if (ii->iterator->funcs->rewind) {
-		ii->iterator->funcs->rewind(ii->iterator TSRMLS_CC);
+		ii->iterator->funcs->rewind(ii->iterator);
 	} else {
 		intl_errors_set(INTLITERATOR_ERROR_P(ii), U_UNSUPPORTED_ERROR,
-			"IntlIterator::rewind: rewind not supported", 0 TSRMLS_CC);
+			"IntlIterator::rewind: rewind not supported", 0);
 	}
 }
 
@@ -299,12 +285,12 @@ static PHP_METHOD(IntlIterator, valid)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::valid: bad arguments", 0 TSRMLS_CC);
+			"IntlIterator::valid: bad arguments", 0);
 		return;
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
-	RETURN_BOOL(ii->iterator->funcs->valid(ii->iterator TSRMLS_CC) == SUCCESS);
+	RETURN_BOOL(ii->iterator->funcs->valid(ii->iterator) == SUCCESS);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_se_void, 0, 0, 0)
@@ -323,20 +309,23 @@ static zend_function_entry IntlIterator_class_functions[] = {
 /* {{{ intl_register_IntlIterator_class
  * Initialize 'IntlIterator' class
  */
-U_CFUNC void intl_register_IntlIterator_class(TSRMLS_D)
+U_CFUNC void intl_register_IntlIterator_class(void)
 {
 	zend_class_entry ce;
 
 	/* Create and register 'IntlIterator' class. */
 	INIT_CLASS_ENTRY(ce, "IntlIterator", IntlIterator_class_functions);
 	ce.create_object = IntlIterator_object_create;
-	IntlIterator_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
+	IntlIterator_ce_ptr = zend_register_internal_class(&ce);
 	IntlIterator_ce_ptr->get_iterator = IntlIterator_get_iterator;
-	zend_class_implements(IntlIterator_ce_ptr TSRMLS_CC, 1,
+	zend_class_implements(IntlIterator_ce_ptr, 1,
 		zend_ce_iterator);
 
 	memcpy(&IntlIterator_handlers, zend_get_std_object_handlers(),
 		sizeof IntlIterator_handlers);
+	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
+	IntlIterator_handlers.dtor_obj = zend_objects_destroy_object;
+	IntlIterator_handlers.free_obj = IntlIterator_objects_free;
 
 }

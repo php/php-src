@@ -29,7 +29,7 @@ symlink("$file_path/lstat_stat_variation20.tmp", "$file_path/lstat_stat_variatio
 echo "*** Testing lstat() with linkname stored inside an object/array ***\n";
 class names {
   public $var_name;
-  public function names($name) {
+  public function __construct($name) {
     $this->var_name = $name;
   }
 }

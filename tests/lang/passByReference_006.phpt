@@ -91,7 +91,7 @@ object(stdClass)#%d (1) {
 
  ---- Pass uninitialised arrays & objects by ref: static method call ---
 
-Strict Standards: Non-static method C::refs() should not be called statically in %s on line 39
+Deprecated: Non-static method C::refs() should not be called statically in %s on line 39
 array(1) {
   [0]=>
   string(12) "Ref1 changed"

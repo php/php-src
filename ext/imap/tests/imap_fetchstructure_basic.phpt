@@ -1,5 +1,5 @@
 --TEST--
-imap_fetchstructure() function : basic functionality 
+imap_fetchstructure() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--
@@ -34,12 +34,13 @@ var_dump($z->type);
 var_dump($z->encoding);
 var_dump($z->bytes);
 var_dump($z->lines);
-var_dump(is_object($z->parameters));
+var_dump($z->ifparameters);
+var_dump(is_object($z->parameters[0]));
 
 imap_close($stream_id);
 ?>
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--
@@ -67,4 +68,5 @@ int(%d)
 int(%d)
 int(%d)
 int(%d)
+int(1)
 bool(true)

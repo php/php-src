@@ -138,7 +138,7 @@ SAPI_INPUT_FILTER_FUNC(my_sapi_input_filter)
     strcpy(raw_var, "RAW_");
     strlcat(raw_var,var,var_len+5);
 
-    php_register_variable_ex(raw_var, &new_var, array_ptr TSRMLS_DC);
+    php_register_variable_ex(raw_var, &new_var, array_ptr);
 
     php_strip_tags(*val, val_len, NULL, NULL, 0);
 
@@ -154,7 +154,7 @@ PHP_FUNCTION(my_get_raw)
     zval **tmp;
     zval *array_ptr = NULL;
 
-    if(zend_parse_parameters(2 TSRMLS_CC, "ls", &arg, &var, &var_len) == FAILURE) {
+    if(zend_parse_parameters(2, "ls", &arg, &var, &var_len) == FAILURE) {
         return;
     }
 
@@ -181,4 +181,3 @@ PHP_FUNCTION(my_get_raw)
         RETVAL_FALSE;
     }
 }
-

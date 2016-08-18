@@ -16,6 +16,7 @@ function open($save_path, $session_name) {
 
 function close() {
 	echo "close: goodbye cruel world\n";
+	return true;
 }
 
 function read($id) {
@@ -44,7 +45,7 @@ echo "um, hi\n";
 --EXPECTF--
 write: goodbye cruel world
 
-Fatal error: Uncaught exception 'Exception' in %s
+Fatal error: Uncaught Exception in %s
 Stack trace:
 #0 [internal function]: write('%s', '')
 #1 %s(%d): session_write_close()

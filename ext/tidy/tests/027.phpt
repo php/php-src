@@ -10,7 +10,7 @@ Bug: tidy segfaults with markup=false
 abstract class BaseClass {
         private static $tidyconfig;
 
-        public function BaseClass() {
+        public function __construct() {
                 $this->tidyconfig = array(
                         'indent'                        => false,
                         'clean'                         => true,
@@ -38,7 +38,7 @@ abstract class BaseClass {
 }
 
 class ChildClass extends BaseClass {
-        public function ChildClass() {
+        public function __construct() {
                 parent::__construct();
         }
 

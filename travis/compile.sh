@@ -15,15 +15,15 @@ fi
 --quiet \
 $DEBUG \
 $TS \
+--enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
---with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
 --enable-intl \
---with-pear \
+--without-pear \
 --with-gd \
 --with-jpeg-dir=/usr \
 --with-png-dir=/usr \
@@ -51,13 +51,14 @@ $TS \
 --with-openssl \
 --with-gmp \
 --enable-bcmath \
---enable-phpdbg \
 --enable-calendar \
 --enable-ftp \
 --with-pspell=/usr \
---with-recode=/usr \
 --with-enchant=/usr \
 --enable-wddx \
+--with-freetype-dir=/usr \
+--with-xpm-dir=/usr \
+--with-kerberos \
 --enable-sysvmsg 
 make -j2 --quiet
 make install

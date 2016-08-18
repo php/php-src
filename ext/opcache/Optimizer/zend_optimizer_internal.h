@@ -22,65 +22,92 @@
 #ifndef ZEND_OPTIMIZER_INTERNAL_H
 #define ZEND_OPTIMIZER_INTERNAL_H
 
-#include "ZendAccelerator.h"
+#include "zend_ssa.h"
 
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-# define VAR_NUM(v) ((zend_uint)(EX_TMP_VAR_NUM(0, 0) - EX_TMP_VAR(0, v)))
-# define NUM_VAR(v) ((zend_uint)(zend_uintptr_t)EX_TMP_VAR_NUM(0, v))
-#elif ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
-# define VAR_NUM(v) ((v)/ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
-# define NUM_VAR(v) ((v)*ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
-#else
-# define VAR_NUM(v) ((v)/(sizeof(temp_variable)))
-# define NUM_VAR(v) ((v)*(sizeof(temp_variable)))
-#endif
+#define ZEND_RESULT_TYPE(opline)		(opline)->result_type
+#define ZEND_RESULT(opline)				(opline)->result
+#define ZEND_OP1_TYPE(opline)			(opline)->op1_type
+#define ZEND_OP1(opline)				(opline)->op1
+#define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
+#define ZEND_OP1_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op1)
+#define ZEND_OP2_TYPE(opline)			(opline)->op2_type
+#define ZEND_OP2(opline)				(opline)->op2
+#define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
+#define ZEND_OP2_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op2)
+
+#define VAR_NUM(v) EX_VAR_TO_NUM(v)
+#define NUM_VAR(v) ((uint32_t)(zend_uintptr_t)ZEND_CALL_VAR_NUM(0, v))
 
 #define INV_COND(op)       ((op) == ZEND_JMPZ    ? ZEND_JMPNZ    : ZEND_JMPZ)
 #define INV_EX_COND(op)    ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ    : ZEND_JMPZ)
 #define INV_COND_EX(op)    ((op) == ZEND_JMPZ    ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 #define INV_EX_COND_EX(op) ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-# define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(opline->result)); memset(&opline->op1,0,sizeof(opline->op1)); memset(&opline->op2,0,sizeof(opline->op2)); opline->result_type=opline->op1_type=opline->op2_type=IS_UNUSED; opline->handler = zend_opcode_handlers[ZEND_NOP]; }
-# define RESULT_USED(op)	(((op->result_type & IS_VAR) && !(op->result_type & EXT_TYPE_UNUSED)) || op->result_type == IS_TMP_VAR)
-# define RESULT_UNUSED(op)	((op->result_type & EXT_TYPE_UNUSED) != 0)
-# define SAME_VAR(op1, op2) ((((op1 ## _type & IS_VAR) && (op2 ## _type & IS_VAR)) || (op1 ## _type == IS_TMP_VAR && op2 ## _type == IS_TMP_VAR)) && op1.var == op2.var)
-#else
-# define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(znode)); memset(&opline->op1,0,sizeof(znode)); memset(&opline->op2,0,sizeof(znode)); opline->result.op_type=opline->op1.op_type=opline->op2.op_type=IS_UNUSED; opline->handler = zend_opcode_handlers[ZEND_NOP]; }
-# define RESULT_USED(op)	((op->result.op_type == IS_VAR && (op->result.u.EA.type & EXT_TYPE_UNUSED) == 0) || (op->result.op_type == IS_TMP_VAR))
-# define RESULT_UNUSED(op)	((op->result.op_type == IS_VAR) && (op->result.u.EA.type == EXT_TYPE_UNUSED))
-# define SAME_VAR(op1, op2) 	(((op1.op_type == IS_VAR && op2.op_type == IS_VAR) || (op1.op_type == IS_TMP_VAR && op2.op_type == IS_TMP_VAR)) && op1.u.var == op2.u.var)
-#endif
+#define RESULT_UNUSED(op)	(op->result_type == IS_UNUSED)
+#define SAME_VAR(op1, op2)  (op1 ## _type == op2 ## _type && op1.var == op2.var)
 
-typedef struct _zend_code_block zend_code_block;
-typedef struct _zend_block_source zend_block_source;
+typedef struct _zend_optimizer_ctx {
+	zend_arena             *arena;
+	zend_script            *script;
+	HashTable              *constants;
+	zend_long               optimization_level;
+	zend_long               debug_level;
+} zend_optimizer_ctx;
 
-struct _zend_code_block {
-	int                 access;
-	zend_op            *start_opline;
-	int                 start_opline_no;
-	int                 len;
-	zend_code_block    *op1_to;
-	zend_code_block    *op2_to;
-	zend_code_block    *ext_to;
-	zend_code_block    *follow_to;
-	zend_code_block    *next;
-	zend_block_source  *sources;
-	zend_bool           protected; /* don't merge this block with others */
-};
+#define LITERAL_LONG(op, val) do { \
+		zval _c; \
+		ZVAL_LONG(&_c, val); \
+		op.constant = zend_optimizer_add_literal(op_array, &_c); \
+	} while (0)
 
-typedef struct _zend_cfg {
-	zend_code_block    *blocks;
-	zend_code_block   **try;
-	zend_code_block   **catch;
-	zend_code_block   **loop_start;
-	zend_code_block   **loop_cont;
-	zend_code_block   **loop_brk;
-} zend_cfg;
+#define LITERAL_BOOL(op, val) do { \
+		zval _c; \
+		ZVAL_BOOL(&_c, val); \
+		op.constant = zend_optimizer_add_literal(op_array, &_c); \
+	} while (0)
 
-struct _zend_block_source {
-	zend_code_block    *from;
-	zend_block_source  *next;
-};
+#define literal_dtor(zv) do { \
+		zval_dtor(zv); \
+		ZVAL_NULL(zv); \
+	} while (0)
+
+#define COPY_NODE(target, src) do { \
+		target ## _type = src ## _type; \
+		target = src; \
+	} while (0)
+
+int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv);
+int  zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
+void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
+int  zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value);
+int  zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name);
+int zend_optimizer_update_op1_const(zend_op_array *op_array,
+                                    zend_op       *opline,
+                                    zval          *val);
+int zend_optimizer_update_op2_const(zend_op_array *op_array,
+                                    zend_op       *opline,
+                                    zval          *val);
+int  zend_optimizer_replace_by_const(zend_op_array *op_array,
+                                     zend_op       *opline,
+                                     zend_uchar     type,
+                                     uint32_t       var,
+                                     zval          *val);
+
+void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var);
+void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void zend_optimizer_pass2(zend_op_array *op_array);
+void zend_optimizer_pass3(zend_op_array *op_array);
+void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+int  zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, uint32_t *flags);
+void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa);
+void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void zend_optimizer_nop_removal(zend_op_array *op_array);
+void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+int zend_optimizer_is_disabled_func(const char *name, size_t len);
+zend_function *zend_optimizer_get_called_func(
+		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants);
+uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args);
 
 #endif

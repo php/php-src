@@ -21,7 +21,7 @@ Warning: IntlBreakIterator::next() expects exactly 1 parameter, 2 given in %s on
 Warning: IntlBreakIterator::next(): breakiter_next: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlBreakIterator::next() expects parameter 1 to be long, array given in %s on line %d
+Warning: IntlBreakIterator::next() expects parameter 1 to be integer, array given in %s on line %d
 
 Warning: IntlBreakIterator::next(): breakiter_next: bad arguments in %s on line %d
 bool(false)

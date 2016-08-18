@@ -21,7 +21,7 @@ var_dump( unserialize() );
 
 //Test serialize with one more than the expected number of arguments
 var_dump( serialize(1,2) );
-var_dump( unserialize(1,2) );
+var_dump( unserialize(1,2,3) );
 
 echo "Done";
 ?>
@@ -31,12 +31,12 @@ echo "Done";
 Warning: serialize() expects exactly 1 parameter, 0 given in %s on line 16
 NULL
 
-Warning: unserialize() expects exactly 1 parameter, 0 given in %s on line 17
+Warning: unserialize() expects at least 1 parameter, 0 given in %s on line 17
 bool(false)
 
 Warning: serialize() expects exactly 1 parameter, 2 given in %s on line 20
 NULL
 
-Warning: unserialize() expects exactly 1 parameter, 2 given in %s on line 21
+Warning: unserialize() expects at most 2 parameters, 3 given in %s on line 21
 bool(false)
 Done

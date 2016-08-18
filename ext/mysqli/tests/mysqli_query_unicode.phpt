@@ -88,7 +88,7 @@ mysqli_close($link);
 	/*
 	Trying to test what Ramil suggests in http://bugs.mysql.com/bug.php?id=29576
 	However, this won't work, because we're lacking MYSQLI_SET_CHARSET_NAME.
-	if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1)) {
+	if ((version_compare(PHP_VERSION, '6.0', '==') == 1)) {
 		if (mysqli_get_server_version() > 50002) {
 			@mysqli_query($link, "DROP USER IF EXISTS 'тест'@'%'");
 			if (TRUE !== mysqli_query($link, "CREATE USER 'тест'@'%'")) {

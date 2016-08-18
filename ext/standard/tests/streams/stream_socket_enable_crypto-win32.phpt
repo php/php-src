@@ -4,9 +4,10 @@ mixed stream_socket_enable_crypto(resource $stream , bool $enable [, int $crypto
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
 <?php
-if (phpversion() < "5.3.0") { die('SKIP php version so lower.'); }
-if (!extension_loaded('openssl')) { die('skip ext/openssl required'); }
-if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+if (!extension_loaded('openssl')) {
+	die('skip ext openssl required');
+}
+if (substr(PHP_OS, 0, 3) != 'WIN' ) {
 	die('skip windows only test');
 }
 ?>
@@ -42,6 +43,8 @@ bool(false)
 
 Warning: stream_socket_enable_crypto(): When enabling encryption you must specify the crypto type in %s on line %d
 bool(false)
+
+Warning: stream_socket_enable_crypto(): SSLv2 unavailable in this PHP version in %s on line %d
 bool(false)
 
 Warning: stream_socket_enable_crypto(): SSL: A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied.

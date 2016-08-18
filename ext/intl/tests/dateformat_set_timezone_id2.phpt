@@ -5,7 +5,7 @@ date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
 
@@ -60,9 +60,9 @@ ut_run();
 ?>
 --EXPECTF--
 
-Warning: IntlDateFormatter::setTimeZoneId(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
+Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
 
-Warning: datefmt_set_timezone_id(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
+Warning: datefmt_set_timezone(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
 
 After creation of the dateformatter :  timezone_id= US/Pacific
 -----------

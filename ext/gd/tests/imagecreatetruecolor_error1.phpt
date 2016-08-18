@@ -13,6 +13,6 @@ $image = imagecreatetruecolor('s', 30);
 $image = imagecreatetruecolor(30, 's');
 ?>
 --EXPECTF--
-Warning: imagecreatetruecolor() expects parameter 1 to be long, %s given in %s on line %d
+Warning: imagecreatetruecolor() expects parameter 1 to be integer, %s given in %s on line %d
 
-Warning: imagecreatetruecolor() expects parameter 2 to be long, %s given in %s on line %d
+Warning: imagecreatetruecolor() expects parameter 2 to be integer, %s given in %s on line %d

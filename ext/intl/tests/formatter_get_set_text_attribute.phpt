@@ -1,5 +1,5 @@
 --TEST--
-numfmt_get/set_text_attribute()
+numfmt_get/set_text_attribute() ICU < 56.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '56.1') >=  0) die('skip for ICU < 56.1'); ?>

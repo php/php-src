@@ -59,18 +59,25 @@ require_once('skipifconnectfailure.inc');
 
 	}
 
-	$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array());
+	try {
+		$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array());
+		if (($obj->ID !== "3") || ($obj->label !== "c") || ($obj->a !== NULL) || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
+			printf("[006] Object seems wrong. [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			var_dump($obj);
+		}
+	} catch (Throwable $e) {
+		echo "Exception: " . $e->getMessage() . "\n";
+	}	
 
-	if (($obj->ID !== "3") || ($obj->label !== "c") || ($obj->a !== NULL) || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
-		printf("[006] Object seems wrong. [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-		var_dump($obj);
-	}
-
-	$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a'));
-	if (($obj->ID !== "4") || ($obj->label !== "d") || ($obj->a !== 'a') || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
-		printf("[007] Object seems wrong. [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-		var_dump($obj);
-	}
+	try {
+		$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a'));
+		if (($obj->ID !== "4") || ($obj->label !== "d") || ($obj->a !== 'a') || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
+			printf("[007] Object seems wrong. [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			var_dump($obj);
+		}
+	} catch (Throwable $e) {
+		echo "Exception: " . $e->getMessage() . "\n";
+	}	
 
 	$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a', 'b'));
 	if (($obj->ID !== "5") || ($obj->label !== "e") || ($obj->a !== 'a') || ($obj->b !== 'b') || (get_class($obj) != 'mysqli_fetch_object_construct')) {
@@ -101,8 +108,8 @@ require_once('skipifconnectfailure.inc');
 	try {
 		if (false !== ($obj = @mysqli_fetch_object($res, 'mysqli_fetch_object_construct', 'a')))
 			printf("[011] Should have failed\n");
-	} catch (Exception $e) {
-		printf("%s\n", $e->getMessage());
+	} catch (Error $e) {
+		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
 	mysqli_free_result($res);
@@ -140,17 +147,12 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 [E_WARNING] mysqli_fetch_object() expects at least 1 parameter, 0 given in %s on line %d
 [E_WARNING] mysqli_fetch_object() expects parameter 1 to be mysqli_result, null given in %s on line %d
-[E_WARNING] Missing argument 1 for mysqli_fetch_object_construct::__construct() in %s on line %d
-[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
-[E_NOTICE] Undefined variable: a in %s on line %d
-[E_NOTICE] Undefined variable: b in %s on line %d
-[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
-[E_NOTICE] Undefined variable: b in %s on line %d
+Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 0 passed and exactly 2 expected
+Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL
 NULL
 [E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 NULL
-[E_RECOVERABLE_ERROR] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
-Parameter ctor_params must be an array
+[0] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

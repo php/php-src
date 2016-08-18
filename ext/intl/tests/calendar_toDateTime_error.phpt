@@ -38,4 +38,8 @@ bool(false)
 Warning: IntlCalendar::toDateTime(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
 string(77) "exception: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Catchable fatal error: Argument 1 passed to intlcal_to_date_time() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_to_date_time() must be an instance of IntlCalendar, integer given in %s:%d
+Stack trace:
+#0 %s(%d): intlcal_to_date_time(3)
+#1 {main}
+  thrown in %s on line %d

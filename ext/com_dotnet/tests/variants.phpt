@@ -2,7 +2,8 @@
 COM: General variant tests
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
+if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
+if (4 != PHP_INT_SIZE) print "skip x86 only"; ?>
 --FILE--
 <?php // $Id$
 error_reporting(E_ALL);

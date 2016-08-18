@@ -1,6 +1,6 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,8 +35,8 @@ PHP_FUNCTION(proc_nice);
 PHP_MINIT_FUNCTION(proc_open);
 PHP_MINIT_FUNCTION(exec);
 
-PHPAPI char *php_escape_shell_cmd(char *);
-PHPAPI char *php_escape_shell_arg(char *);
-PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC);
+PHPAPI zend_string *php_escape_shell_cmd(char *);
+PHPAPI zend_string *php_escape_shell_arg(char *);
+PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value);
 
 #endif /* EXEC_H */

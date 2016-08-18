@@ -13,4 +13,4 @@ assert(0);
 --EXPECTF--
 Hello World!
 
-Warning: assert(): Assertion failed in %s on line %d
+Warning: assert(): assert(0) failed in %s on line %d

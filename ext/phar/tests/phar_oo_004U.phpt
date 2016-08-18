@@ -4,7 +4,7 @@ Phar and DirectoryIterator
 <?php
 if (!extension_loaded("phar")) die("skip");
 if (!extension_loaded("spl")) die("skip SPL not available");
-if (version_compare(PHP_VERSION, "6.0", "<")) die("skip requires Unicode support");
+if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip requires Unicode support");
 ?>
 --INI--
 phar.require_hash=0

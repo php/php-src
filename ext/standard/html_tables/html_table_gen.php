@@ -1,7 +1,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,7 +23,7 @@
 $t = <<<CODE
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-%s The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -62,42 +62,42 @@ enum entity_charset { cs_utf_8, cs_8859_1, cs_cp1252, cs_8859_15, cs_cp1251,
 
 static const struct {
 	const char *codeset;
+	uint32_t codeset_len;
 	enum entity_charset charset;
 } charset_map[] = {
-	{ "ISO-8859-1",		cs_8859_1 },
-	{ "ISO8859-1",		cs_8859_1 },
-	{ "ISO-8859-15",	cs_8859_15 },
-	{ "ISO8859-15",		cs_8859_15 },
-	{ "utf-8",			cs_utf_8 },
-	{ "cp1252", 		cs_cp1252 },
-	{ "Windows-1252",	cs_cp1252 },
-	{ "1252",			cs_cp1252 }, 
-	{ "BIG5",			cs_big5 },
-	{ "950",			cs_big5 },
-	{ "GB2312",			cs_gb2312 },
-	{ "936",			cs_gb2312 },
-	{ "BIG5-HKSCS",		cs_big5hkscs },
-	{ "Shift_JIS",		cs_sjis },
-	{ "SJIS",			cs_sjis },
-	{ "932",			cs_sjis },
-	{ "SJIS-win",		cs_sjis },
-	{ "CP932",			cs_sjis },
-	{ "EUCJP",			cs_eucjp },
-	{ "EUC-JP",			cs_eucjp },
-	{ "eucJP-win",		cs_eucjp },
-	{ "KOI8-R",			cs_koi8r },
-	{ "koi8-ru",		cs_koi8r },
-	{ "koi8r",			cs_koi8r },
-	{ "cp1251",			cs_cp1251 },
-	{ "Windows-1251",	cs_cp1251 },
-	{ "win-1251",		cs_cp1251 },
-	{ "iso8859-5",		cs_8859_5 },
-	{ "iso-8859-5",		cs_8859_5 },
-	{ "cp866",			cs_cp866 },
-	{ "866",			cs_cp866 },    
-	{ "ibm866",			cs_cp866 },
-	{ "MacRoman",		cs_macroman },
-	{ NULL }
+	{ "ISO-8859-1",		sizeof("ISO-8859-1")-1,		cs_8859_1 },
+	{ "ISO8859-1",		sizeof("ISO8859-1")-1,		cs_8859_1 },
+	{ "ISO-8859-15",	sizeof("ISO-8859-15")-1,	cs_8859_15 },
+	{ "ISO8859-15",		sizeof("ISO8859-15")-1,		cs_8859_15 },
+	{ "utf-8",			sizeof("utf-8")-1,			cs_utf_8 },
+	{ "cp1252", 		sizeof("cp1252")-1, 		cs_cp1252 },
+	{ "Windows-1252",	sizeof("Windows-1252")-1,	cs_cp1252 },
+	{ "1252",			sizeof("1252")-1,			cs_cp1252 },
+	{ "BIG5",			sizeof("BIG5")-1,			cs_big5 },
+	{ "950",			sizeof("950")-1,			cs_big5 },
+	{ "GB2312",			sizeof("GB2312")-1,			cs_gb2312 },
+	{ "936",			sizeof("936")-1,			cs_gb2312 },
+	{ "BIG5-HKSCS",		sizeof("BIG5-HKSCS")-1,		cs_big5hkscs },
+	{ "Shift_JIS",		sizeof("Shift_JIS")-1,		cs_sjis },
+	{ "SJIS",			sizeof("SJIS")-1,			cs_sjis },
+	{ "932",			sizeof("932")-1,			cs_sjis },
+	{ "SJIS-win",		sizeof("SJIS-win")-1,		cs_sjis },
+	{ "CP932",			sizeof("CP932")-1,			cs_sjis },
+	{ "EUCJP",			sizeof("EUCJP")-1,			cs_eucjp },
+	{ "EUC-JP",			sizeof("EUC-JP")-1,			cs_eucjp },
+	{ "eucJP-win",		sizeof("eucJP-win")-1,		cs_eucjp },
+	{ "KOI8-R",			sizeof("KOI8-R")-1,			cs_koi8r },
+	{ "koi8-ru",		sizeof("koi8-ru")-1,		cs_koi8r },
+	{ "koi8r",			sizeof("koi8r")-1,			cs_koi8r },
+	{ "cp1251",			sizeof("cp1251")-1,			cs_cp1251 },
+	{ "Windows-1251",	sizeof("Windows-1251")-1,	cs_cp1251 },
+	{ "win-1251",		sizeof("win-1251")-1,		cs_cp1251 },
+	{ "iso8859-5",		sizeof("iso8859-5")-1,		cs_8859_5 },
+	{ "iso-8859-5",		sizeof("iso-8859-5")-1,		cs_8859_5 },
+	{ "cp866",			sizeof("cp866")-1,			cs_cp866 },
+	{ "866",			sizeof("866")-1,			cs_cp866 },
+	{ "ibm866",			sizeof("ibm866")-1,			cs_cp866 },
+	{ "MacRoman",		sizeof("MacRoman")-1,		cs_macroman }
 };
 
 /* longest entity name length excluding & and ; */
@@ -371,18 +371,17 @@ $t = <<<'CODE'
 #define ENT_STAGE3_INDEX(k) ((k) & 0x3F)
 #define ENT_CODE_POINT_FROM_STAGES(i,j,k) (((i) << 12) | ((j) << 6) | (k))
 
-/* Table should be organized with a leading row telling the size of
- * the table and the default entity (maybe NULL) and the rest being
- * normal rows ordered by code point so that we can do a binary search */
+/* The default entity may be NULL. Binary search is still possible while
+   is senseless as there are just two rows (see also find_entity_for_char()). */
 typedef union {
 	struct {
-		unsigned size; /* number of remaining entries in the table */
 		const char *default_entity;
+		unsigned size; /* number of remaining entries in the table */
 		unsigned short default_entity_len;
 	} leading_entry;
 	struct {
-		unsigned second_cp; /* second code point */
 		const char *entity;
+		unsigned second_cp; /* second code point */
 		unsigned short entity_len;
 	} normal_entry;
 } entity_multicodepoint_row;
@@ -407,7 +406,7 @@ typedef const entity_stage3_row *const *entity_stage1_row; /* 64 elements */
 
 /* For stage 1, Calculate k & 0xFFF000 >> 3*4.
  * If larger than 1D, we have no mapping. Otherwise lookup that index */
- 
+
 typedef struct {
 	const entity_stage1_row *ms_table;
 	/* for tables with only basic entities, this member is to be accessed
@@ -475,16 +474,16 @@ foreach ($multicp_rows as $k => $v) {
 	if (key_exists("default", $v)) {
         if ($v['default'] == 'GT') /* hack to make > translate to &gt; not GT; */
             $v['default'] = "gt";
-		echo "\t{ {", sprintf("%02d", count($v) - 1),
-			",\t\t", sprintf("\"%-21s", $v["default"].'",'), "\t",
+		echo "\t{ {", sprintf("\"%-21s", $v["default"].'",'),
+			"\t", sprintf("%02d", (count($v) - 1)), ",\t\t",
             sprintf("% 2d", strlen($v["default"])), '} },', "\n"; 
 	} else {
-		echo "\t{ {", sprintf("%02d", count($v)),
-			",\t\t", sprintf("%-22s", 'NULL'), ",\t0} },\n"; 
+		echo "\t{ {", sprintf("%-22s", 'NULL,'),
+			"\t", sprintf("%02d", count($v)), ",\t\t0} },\n";
 	}
 	unset($v["default"]);
 	foreach ($v as $l => $w) {
-		echo "\t{ {", sprintf("0x%05s", $l), ",\t", sprintf("\"%-21s", $w.'",'), "\t",
+		echo "\t{ {", sprintf("\"%-21s", $w.'",'), "\t", sprintf("0x%05s", $l), ",\t",
             sprintf("% 2d", strlen($w)), '} },', "\n"; 
 	}
 	echo "};\n";
@@ -561,7 +560,7 @@ for ($i = 0; $i < 0x1E; $i++) {
 					echo "{0, { {\"$z\", ", strlen($z), "} } },";
 				else
 					echo "{1, { {(void *)", sprintf("multi_cp_{$ident}_%05X",
-						($i << 12) | ($k << 6) | $y ), "} } },";
+						($i << 12) | ($k << 6) | $y ), ", 0} } },";
 				
 			}
 			echo "\n};\n\n";

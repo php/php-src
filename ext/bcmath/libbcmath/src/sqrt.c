@@ -26,7 +26,7 @@
                 Computer Science Department, 9062
                 Western Washington University
                 Bellingham, WA 98226-9062
-       
+
 *************************************************************************/
 
 #include <config.h>
@@ -42,7 +42,7 @@
    after the decimal place. */
 
 int
-bc_sqrt (bc_num *num, int scale TSRMLS_DC)
+bc_sqrt (bc_num *num, int scale)
 {
   int rscale, cmp_res, done;
   int cscale;
@@ -71,9 +71,9 @@ bc_sqrt (bc_num *num, int scale TSRMLS_DC)
 
   /* Initialize the variables. */
   rscale = MAX (scale, (*num)->n_scale);
-  bc_init_num(&guess TSRMLS_CC);
-  bc_init_num(&guess1 TSRMLS_CC);
-  bc_init_num(&diff TSRMLS_CC);
+  bc_init_num(&guess);
+  bc_init_num(&guess1);
+  bc_init_num(&diff);
   point5 = bc_new_num (1,1);
   point5->n_value[1] = 5;
 
@@ -91,9 +91,9 @@ bc_sqrt (bc_num *num, int scale TSRMLS_DC)
       bc_int2num (&guess,10);
 
       bc_int2num (&guess1,(*num)->n_len);
-      bc_multiply (guess1, point5, &guess1, 0 TSRMLS_CC);
+      bc_multiply (guess1, point5, &guess1, 0);
       guess1->n_scale = 0;
-      bc_raise (guess, guess1, &guess, 0 TSRMLS_CC);
+      bc_raise (guess, guess1, &guess, 0);
       bc_free_num (&guess1);
       cscale = 3;
     }
@@ -104,9 +104,9 @@ bc_sqrt (bc_num *num, int scale TSRMLS_DC)
     {
       bc_free_num (&guess1);
       guess1 = bc_copy_num (guess);
-      bc_divide (*num, guess, &guess, cscale TSRMLS_CC);
+      bc_divide (*num, guess, &guess, cscale);
       bc_add (guess, guess1, &guess, 0);
-      bc_multiply (guess, point5, &guess, cscale TSRMLS_CC);
+      bc_multiply (guess, point5, &guess, cscale);
       bc_sub (guess, guess1, &diff, cscale+1);
       if (bc_is_near_zero (diff, cscale))
 	{
@@ -119,7 +119,7 @@ bc_sqrt (bc_num *num, int scale TSRMLS_DC)
 
   /* Assign the number and clean up. */
   bc_free_num (num);
-  bc_divide (guess,BCG(_one_),num,rscale TSRMLS_CC);
+  bc_divide (guess,BCG(_one_),num,rscale);
   bc_free_num (&guess);
   bc_free_num (&guess1);
   bc_free_num (&point5);

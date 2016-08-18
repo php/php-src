@@ -22,7 +22,7 @@ $format2 = "%o %o";
 $format3 = "%o %o %o";
 $arg1 = 021;
 $arg2 = -0347;
-$arg3 = 05678;
+$arg3 = 0567;
 
 // Calling sprintf() with default arguments
 var_dump( sprintf($format) );

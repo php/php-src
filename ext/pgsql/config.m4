@@ -105,7 +105,7 @@ if test "$PHP_PGSQL" != "no"; then
 
   PHP_ADD_INCLUDE($PGSQL_INCLUDE)
 
-  PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared)
+  PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
 
 

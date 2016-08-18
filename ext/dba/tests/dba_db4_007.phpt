@@ -35,7 +35,5 @@ require(dirname(__FILE__) .'/clean.inc');
 database handler: db4
 int(14)
 
-Notice: dba_popen(): %stest0.dbm: unexpected file type or format in %sdba_db4_007.php on line %d
-
 Warning: dba_popen(%stest0.dbm,c): Driver initialization failed for handler: db4: Invalid argument in %sdba_db4_007.php on line %d
 Error creating %stest0.dbm

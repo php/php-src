@@ -34,14 +34,14 @@ $st = $db->query('SELECT * FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
 
 class foo { 
-	public function foo($x) {
+	public function method($x) {
 		return "--- $x ---";
 	}
 }
 class bar extends foo {
 	public function __construct($db) {
 		$st = $db->query('SELECT * FROM testing');
-		var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::foo')));
+		var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
 	}
 	
 	static public function test($x, $y) {
@@ -102,7 +102,7 @@ bool(false)
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
 bool(false)
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: cannot access self:: when no class scope is active in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'PDOStatement' does not have a method 'foo' in %s on line %d
 bool(false)
 array(2) {
   [0]=>

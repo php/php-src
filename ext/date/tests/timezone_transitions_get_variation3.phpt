@@ -143,25 +143,25 @@ int(1)
 
 -- empty array --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, array given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, array given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- int indexed array --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, array given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, array given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- associative array --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, array given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, array given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- nested arrays --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, array given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, array given in %s on line %d
 string(7) "boolean"
 int(1)
 
@@ -191,49 +191,49 @@ int(1)
 
 -- empty string DQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, string given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- empty string SQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, string given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- string DQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, string given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- string SQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, string given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- mixed case string --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, string given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- heredoc --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, string given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- instance of classWithToString --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, object given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, object given in %s on line %d
 string(7) "boolean"
 int(1)
 
 -- instance of classWithoutToString --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, object given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, object given in %s on line %d
 string(7) "boolean"
 int(1)
 
@@ -247,7 +247,7 @@ int(1)
 
 -- resource --
 
-Warning: timezone_transitions_get() expects parameter 3 to be long, resource given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer, resource given in %s on line %d
 string(7) "boolean"
 int(1)
 ===DONE===

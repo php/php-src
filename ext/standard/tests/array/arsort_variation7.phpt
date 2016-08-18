@@ -47,52 +47,52 @@ echo "Done\n";
 -- Testing arsort() by supplying bool value array, 'flag' value is defualt --
 bool(true)
 array(4) {
-  [3]=>
-  bool(true)
   [1]=>
   bool(true)
-  [4]=>
-  bool(false)
+  [3]=>
+  bool(true)
   [2]=>
+  bool(false)
+  [4]=>
   bool(false)
 }
 
 -- Testing arsort() by supplying bool value array, 'flag' value is SORT_REGULAR --
 bool(true)
 array(4) {
-  [3]=>
-  bool(true)
   [1]=>
   bool(true)
-  [4]=>
-  bool(false)
+  [3]=>
+  bool(true)
   [2]=>
+  bool(false)
+  [4]=>
   bool(false)
 }
 
 -- Testing arsort() by supplying bool value array, 'flag' value is SORT_NUMERIC  --
 bool(true)
 array(4) {
-  [3]=>
-  bool(true)
   [1]=>
   bool(true)
-  [4]=>
-  bool(false)
+  [3]=>
+  bool(true)
   [2]=>
+  bool(false)
+  [4]=>
   bool(false)
 }
 
 -- Testing arsort() by supplying bool value array, 'flag' value is SORT_STRING --
 bool(true)
 array(4) {
-  [3]=>
-  bool(true)
   [1]=>
   bool(true)
-  [4]=>
-  bool(false)
+  [3]=>
+  bool(true)
   [2]=>
+  bool(false)
+  [4]=>
   bool(false)
 }
 Done

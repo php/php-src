@@ -24,7 +24,7 @@ var_dump(socket_create_pair(AF_INET, 31337, 0, $sockets));
 Warning: socket_create_pair() expects exactly 4 parameters, 3 given in %s on line %d
 NULL
 
-Warning: socket_create_pair() expects parameter 1 to be long, %unicode_string_optional% given in %s on line %d
+Warning: socket_create_pair() expects parameter 1 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 
 Warning: socket_create_pair(): unable to create socket pair [%d]: %s not supported in %s on line %d

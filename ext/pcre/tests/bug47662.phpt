@@ -4,9 +4,10 @@ Bug #47662 (support more than 127 named subpatterns)
 <?php
 
 $regex = '@';
-for($bar=0; $bar<1027; $bar++) {
+for($bar=0; $bar<129; $bar++) {
 	$regex .= '((?P<x'.$bar.'>))';
 }
+
 $regex .= 'fo+bar@';
 
 var_dump(preg_match($regex, 'foobar'));

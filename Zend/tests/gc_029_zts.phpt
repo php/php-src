@@ -34,4 +34,4 @@ unset($bar);
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-int(3)
+int(6)

@@ -1,7 +1,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -47,14 +47,6 @@ define('PCRE_MISSING_ERROR',
 | enabled. To enable this extension either compile your PHP |
 | with --with-pcre-regex or if you have compiled pcre as a  |
 | shared module load it via php.ini.                        |
-+-----------------------------------------------------------+');
-define('SAFE_MODE_WARNING',
-'+-----------------------------------------------------------+
-|                       ! WARNING !                         |
-| You are running the test-suite with "safe_mode" ENABLED ! |
-|                                                           |
-| Chances are high that no test will work at all,           |
-| depending on how you configured "safe_mode" !             |
 +-----------------------------------------------------------+');
 define('TMP_MISSING',
 '+-----------------------------------------------------------+
@@ -456,7 +448,6 @@ class testHarness {
 			'output_handler'=>'',
 			'zlib.output_compression'=>'Off',
 			'open_basedir'=>'',
-			'safe_mode'=>'0',
 			'disable_functions'=>'',
 			'output_buffering'=>'Off',
 			'error_reporting'=>'4095',
@@ -472,7 +463,6 @@ class testHarness {
 			'error_append_string'=>'',
 			'auto_prepend_file'=>'',
 			'auto_append_file'=>'',
-			'magic_quotes_runtime'=>'0',
 		);	
 	public $env = array();
 	public $info_params = array();
@@ -737,7 +727,7 @@ class testHarness {
 	}
 
 	function checkRequirements() {
-		if (version_compare(phpversion(), "5.0") < 0) {
+		if (version_compare(phpversion(), "5.4") < 0) {
 			$this->writemsg(REQ_PHP_VERSION);
 			exit;
 		}
@@ -753,9 +743,6 @@ class testHarness {
 		if (!extension_loaded("pcre")) {
 			$this->writemsg(PCRE_MISSING_ERROR);
 			exit;
-		}
-		if (ini_get('safe_mode')) {
-			$this->writemsg(SAFE_MODE_WARNING);
 		}
 	}
 	

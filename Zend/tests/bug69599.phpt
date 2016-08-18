@@ -13,7 +13,7 @@ iterator_to_array(crash());
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' in %s:%d
+Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 [internal function]: crash()
 #1 %s(%d): iterator_to_array(Object(Generator))

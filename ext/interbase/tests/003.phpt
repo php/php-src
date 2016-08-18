@@ -3,7 +3,7 @@ InterBase: misc sql types (may take a while)
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
     require("interbase.inc");
     ibase_connect($test_base);

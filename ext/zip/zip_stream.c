@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -21,7 +21,6 @@
 #endif
 #include "php.h"
 #if HAVE_ZIP
-#ifdef ZEND_ENGINE_2
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
@@ -43,7 +42,7 @@ struct php_zip_stream_data_t {
 
 
 /* {{{ php_zip_ops_read */
-static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 {
 	ssize_t n = 0;
 	STREAM_DATA_FROM_STREAM();
@@ -51,10 +50,18 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 	if (self->za && self->zf) {
 		n = zip_fread(self->zf, buf, count);
 		if (n < 0) {
+#if LIBZIP_VERSION_MAJOR < 1
 			int ze, se;
 			zip_file_error_get(self->zf, &ze, &se);
 			stream->eof = 1;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zip stream error: %s", zip_file_strerror(self->zf));
+			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_file_strerror(self->zf));
+#else
+			zip_error_t *err;
+			err = zip_file_get_error(self->zf);
+			stream->eof = 1;
+			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
+			zip_error_fini(err);
+#endif
 			return 0;
 		}
 		/* cast count to signed value to avoid possibly negative n
@@ -70,7 +77,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 /* }}} */
 
 /* {{{ php_zip_ops_write */
-static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count)
 {
 	if (!stream) {
 		return 0;
@@ -81,7 +88,7 @@ static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t coun
 /* }}} */
 
 /* {{{ php_zip_ops_close */
-static int php_zip_ops_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int php_zip_ops_close(php_stream *stream, int close_handle)
 {
 	STREAM_DATA_FROM_STREAM();
 	if (close_handle) {
@@ -102,7 +109,7 @@ static int php_zip_ops_close(php_stream *stream, int close_handle TSRMLS_DC)
 /* }}} */
 
 /* {{{ php_zip_ops_flush */
-static int php_zip_ops_flush(php_stream *stream TSRMLS_DC)
+static int php_zip_ops_flush(php_stream *stream)
 {
 	if (!stream) {
 		return 0;
@@ -112,18 +119,17 @@ static int php_zip_ops_flush(php_stream *stream TSRMLS_DC)
 }
 /* }}} */
 
-static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
+static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
 {
 	struct zip_stat sb;
 	const char *path = stream->orig_path;
 	size_t path_len = strlen(stream->orig_path);
-	char *file_basename;
-	size_t file_basename_len;
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
 	char *fragment;
 	size_t fragment_len;
 	int err;
+	zend_string *file_basename;
 
 	fragment = strchr(path, '#');
 	if (!fragment) {
@@ -148,11 +154,11 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	memcpy(file_dirname, path, path_len - fragment_len);
 	file_dirname[path_len - fragment_len] = '\0';
 
-	php_basename((char *)path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+	file_basename = php_basename((char *)path, path_len - fragment_len, NULL, 0);
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		efree(file_basename);
+		zend_string_release(file_basename);
 		return -1;
 	}
 
@@ -160,7 +166,8 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	if (za) {
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
-			efree(file_basename);
+			zip_close(za);
+			zend_string_release(file_basename);
 			return -1;
 		}
 		zip_close(za);
@@ -184,7 +191,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 #endif
 		ssb->sb.st_ino = -1;
 	}
-	efree(file_basename);
+	zend_string_release(file_basename);
 	return 0;
 }
 /* }}} */
@@ -200,7 +207,7 @@ php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC)
 {
 	struct zip_file *zf = NULL;
 	int err = 0;
@@ -253,13 +260,12 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 											const char *path,
 											const char *mode,
 											int options,
-											char **opened_path,
-											php_stream_context *context STREAMS_DC TSRMLS_DC)
+											zend_string **opened_path,
+											php_stream_context *context STREAMS_DC)
 {
 	size_t path_len;
 
-	char *file_basename;
-	size_t file_basename_len;
+	zend_string *file_basename;
 	char file_dirname[MAXPATHLEN];
 
 	struct zip *za;
@@ -293,11 +299,11 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	memcpy(file_dirname, path, path_len - fragment_len);
 	file_dirname[path_len - fragment_len] = '\0';
 
-	php_basename(path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+	file_basename = php_basename(path, path_len - fragment_len, NULL, 0);
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		efree(file_basename);
+		zend_string_release(file_basename);
 		return NULL;
 	}
 
@@ -314,14 +320,14 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
 
 			if (opened_path) {
-				*opened_path = estrdup(path);
+				*opened_path = zend_string_init(path, strlen(path), 0);
 			}
 		} else {
 			zip_close(za);
 		}
 	}
 
-	efree(file_basename);
+	zend_string_release(file_basename);
 
 	if (!stream) {
 		return NULL;
@@ -341,7 +347,8 @@ static php_stream_wrapper_ops zip_stream_wops = {
 	NULL,	/* unlink */
 	NULL,	/* rename */
 	NULL,	/* mkdir */
-	NULL	/* rmdir */
+	NULL,	/* rmdir */
+	NULL
 };
 
 php_stream_wrapper php_stream_zip_wrapper = {
@@ -349,5 +356,4 @@ php_stream_wrapper php_stream_zip_wrapper = {
 	NULL,
 	0 /* is_url */
 };
-#endif /* ZEND_ENGINE_2 */
 #endif /* HAVE_ZIP */

@@ -35,7 +35,7 @@ object(ArrayObject)#%d (1) {
   }
 }
 
-Warning: ksort() expects parameter 2 to be long, string given in %sarrayObject_ksort_basic1.php on line %d
+Warning: ksort() expects parameter 2 to be integer, string given in %sarrayObject_ksort_basic1.php on line %d
 bool(false)
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>

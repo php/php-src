@@ -21,7 +21,7 @@ var_dump(phpinfo(INFO_LICENSE));
 %a</html>bool(true)
 --
 
-Warning: phpinfo() expects parameter 1 to be long, array given in %sphpinfo2.php on line 5
+Warning: phpinfo() expects parameter 1 to be integer, array given in %sphpinfo2.php on line 5
 NULL
 --
 <!DOCTYPE %s>

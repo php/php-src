@@ -18,19 +18,19 @@ catch (Exception $e) {
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'Another' in %sexception_007.php:%d
+Fatal error: Uncaught Exception: Another in %sexception_007.php:%d
 Stack trace:
 #0 {main}
 
-Next exception 'Exception' with message 'First' in %sexception_007.php:%d
+Next Exception: First in %sexception_007.php:%d
 Stack trace:
 #0 {main}
 
-Next exception 'Exception' with message 'Second' in %sexception_007.php:%d
+Next Exception: Second in %sexception_007.php:%d
 Stack trace:
 #0 {main}
 
-Next exception 'Exception' with message 'Third' in %sexception_007.php:%d
+Next Exception: Third in %sexception_007.php:%d
 Stack trace:
 #0 {main}
   thrown in %sexception_007.php on line %d

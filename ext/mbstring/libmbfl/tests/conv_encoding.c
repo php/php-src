@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 		mbfl_string_clear(&string);
 	} while (!final);
 
-	mbfl_buffer_converter_delete(convd);	
+	mbfl_buffer_converter_delete(convd);
 
 	return EXIT_SUCCESS;
 }

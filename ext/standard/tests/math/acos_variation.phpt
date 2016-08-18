@@ -45,7 +45,7 @@ float(NAN)
 float(NAN)
 float(NAN)
 
-Warning: acos() expects parameter 1 to be double, string given in %s on line %d
+Warning: acos() expects parameter 1 to be float, string given in %s on line %d
 NULL
 float(NAN)
 

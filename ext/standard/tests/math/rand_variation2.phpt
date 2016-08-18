@@ -1,5 +1,7 @@
 --TEST--
 Test rand() function : usage variations - different data types as $max argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : int rand  ([ int $min  , int $max ] )
@@ -89,96 +91,128 @@ fclose($fp);
 *** Testing rand) : usage variations ***
 
 -- Iteration 1 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 2 --
-int(%i)
+
+Warning: rand(): max(1) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 3 --
 int(%i)
 
 -- Iteration 4 --
-int(%i)
+
+Warning: rand(): max(-2345) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 5 --
 int(%i)
 
 -- Iteration 6 --
-int(%i)
+
+Warning: rand(): max(10) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 7 --
-int(%i)
+
+Warning: rand(): max(-10) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 8 --
-int(%i)
+
+Warning: rand() expects parameter 2 to be integer, float given in %s on line %d
+NULL
 
 -- Iteration 9 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 10 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 11 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 12 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 13 --
-int(%i)
+
+Warning: rand(): max(1) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 14 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 15 --
-int(%i)
+
+Warning: rand(): max(1) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 16 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 17 --
 
-Warning: rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: rand() expects parameter 2 to be long, array given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: rand() expects parameter 2 to be long, object given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 25 --
-int(%i)
+
+Warning: rand(): max(0) is smaller than min(100) in %s on line %d
+bool(false)
 
 -- Iteration 26 --
 
-Warning: rand() expects parameter 2 to be long, resource given in %s on line %d
+Warning: rand() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 ===Done===

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -61,10 +61,10 @@ static const unsigned char PADDING[64] =
 };
 
 /* {{{ Encode
-   Encodes input (php_hash_uint32) into output (unsigned char). Assumes len is
+   Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
-static void Encode(unsigned char *output, php_hash_uint32 *input, unsigned int len)
+static void Encode(unsigned char *output, uint32_t *input, unsigned int len)
 {
 	unsigned int i, j;
 
@@ -78,16 +78,16 @@ static void Encode(unsigned char *output, php_hash_uint32 *input, unsigned int l
 /* }}} */
 
 /* {{{ Decode
-   Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
+   Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
-static void Decode(php_hash_uint32 *output, const unsigned char *input, unsigned int len)
+static void Decode(uint32_t *output, const unsigned char *input, unsigned int len)
 {
 	unsigned int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j += 4)
-		output[i] = ((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) |
-			(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
+		output[i] = ((uint32_t) input[j]) | (((uint32_t) input[j + 1]) << 8) |
+			(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 }
 /* }}} */
 
@@ -106,25 +106,25 @@ PHP_HASH_API void make_digest(char *md5str, unsigned char *digest)
 PHP_NAMED_FUNCTION(php_if_md5)
 {
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-	
+
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 
 }
@@ -135,7 +135,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
-	int           arg_len;
+	size_t        arg_len;
 	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
@@ -144,10 +144,10 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-	
+
 	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
 	if (!stream) {
 		RETURN_FALSE;
@@ -168,10 +168,10 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 }
 /* }}} */
@@ -224,7 +224,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 #define S43 15
 #define S44 21
 
-static void MD5Transform(php_hash_uint32[4], const unsigned char[64]);
+static void MD5Transform(uint32_t[4], const unsigned char[64]);
 
 /* F, G, H and I are basic MD5 functions.
  */
@@ -241,22 +241,22 @@ static void MD5Transform(php_hash_uint32[4], const unsigned char[64]);
    Rotation is separate from addition to prevent recomputation.
  */
 #define FF(a, b, c, d, x, s, ac) { \
- (a) += F ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
+ (a) += F ((b), (c), (d)) + (x) + (uint32_t)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
 #define GG(a, b, c, d, x, s, ac) { \
- (a) += G ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
+ (a) += G ((b), (c), (d)) + (x) + (uint32_t)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
 #define HH(a, b, c, d, x, s, ac) { \
- (a) += H ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
+ (a) += H ((b), (c), (d)) + (x) + (uint32_t)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
 #define II(a, b, c, d, x, s, ac) { \
- (a) += I ((b), (c), (d)) + (x) + (php_hash_uint32)(ac); \
+ (a) += I ((b), (c), (d)) + (x) + (uint32_t)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
@@ -290,10 +290,10 @@ PHP_HASH_API void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *inpu
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_hash_uint32) inputLen << 3))
-		< ((php_hash_uint32) inputLen << 3))
+	if ((context->count[0] += ((uint32_t) inputLen << 3))
+		< ((uint32_t) inputLen << 3))
 		context->count[1]++;
-	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+	context->count[1] += ((uint32_t) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -344,7 +344,7 @@ PHP_HASH_API void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -352,10 +352,10 @@ PHP_HASH_API void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
  * MD5 basic transformation. Transforms state based on block.
  */
 static void MD5Transform(state, block)
-php_hash_uint32 state[4];
+uint32_t state[4];
 const unsigned char block[64];
 {
-	php_hash_uint32 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
+	uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
 	Decode(x, block, 64);
 
@@ -437,7 +437,7 @@ const unsigned char block[64];
 	state[3] += d;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -455,9 +455,9 @@ const unsigned char block[64];
 #define MD4_R2(a,b,c,d,k,s)		a = ROTL32(s, a + MD4_G(b,c,d) + x[k] + 0x5A827999)
 #define MD4_R3(a,b,c,d,k,s)		a = ROTL32(s, a + MD4_H(b,c,d) + x[k] + 0x6ED9EBA1)
 
-static void MD4Transform(php_hash_uint32 state[4], const unsigned char block[64])
+static void MD4Transform(uint32_t state[4], const unsigned char block[64])
 {
-	php_hash_uint32 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
+	uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
 	Decode(x, block, 64);
 
@@ -549,10 +549,10 @@ PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *inpu
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_hash_uint32) inputLen << 3))
-		< ((php_hash_uint32) inputLen << 3))
+	if ((context->count[0] += ((uint32_t) inputLen << 3))
+		< ((uint32_t) inputLen << 3))
 		context->count[1]++;
-	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+	context->count[1] += ((uint32_t) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -602,7 +602,7 @@ PHP_HASH_API void PHP_MD4Final(unsigned char digest[16], PHP_MD4_CTX * context)
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 

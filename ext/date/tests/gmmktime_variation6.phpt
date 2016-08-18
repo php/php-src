@@ -106,22 +106,22 @@ int(965722088)
 
 --empty array--
 
-Warning: gmmktime() expects parameter 6 to be long, array given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: gmmktime() expects parameter 6 to be long, array given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: gmmktime() expects parameter 6 to be long, array given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: gmmktime() expects parameter 6 to be long, array given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -144,42 +144,42 @@ int(965722088)
 
 --empty string DQ--
 
-Warning: gmmktime() expects parameter 6 to be long, string given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: gmmktime() expects parameter 6 to be long, string given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: gmmktime() expects parameter 6 to be long, string given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: gmmktime() expects parameter 6 to be long, string given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: gmmktime() expects parameter 6 to be long, string given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: gmmktime() expects parameter 6 to be long, string given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: gmmktime() expects parameter 6 to be long, object given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: gmmktime() expects parameter 6 to be long, object given in %s on line %d
+Warning: gmmktime() expects parameter 6 to be integer, object given in %s on line %d
 bool(false)
 
 --undefined var--

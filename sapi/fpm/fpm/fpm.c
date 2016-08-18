@@ -24,7 +24,7 @@
 #include "zlog.h"
 
 struct fpm_globals_s fpm_globals = {
-	.parent_pid = 0, 
+	.parent_pid = 0,
 	.argc = 0,
 	.argv = NULL,
 	.config = NULL,

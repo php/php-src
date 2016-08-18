@@ -14,4 +14,4 @@ fwrite($sock, "3");
 int(%d)
 int(%d)
 
-Warning: fwrite(): %d is not a valid stream resource in %s on line %d
+Warning: fwrite(): supplied resource is not a valid stream resource in %s on line %d

@@ -143,7 +143,7 @@
 ;   Development Value: 1000
 ;   Production Value: 1000
 
-; session.hash_bits_per_character
+; session.sid_bits_per_character
 ;   Default Value: 4
 ;   Development Value: 5
 ;   Production Value: 5
@@ -157,11 +157,6 @@
 ;   Default Value: Off
 ;   Development Value: On
 ;   Production Value: Off
-
-; url_rewriter.tags
-;   Default Value: "a=href,area=href,frame=src,form=,fieldset="
-;   Development Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-;   Production Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 ; variables_order
 ;   Default Value: "EGPCS"
@@ -200,10 +195,6 @@ engine = On
 ; Production Value: Off
 ; http://php.net/short-open-tag
 short_open_tag = Off
-
-; Allow ASP-style <% %> tags.
-; http://php.net/asp-tags
-asp_tags = Off
 
 ; The number of significant digits displayed in floating point numbers.
 ; http://php.net/precision
@@ -248,6 +239,23 @@ output_buffering = 4096
 ; http://php.net/output-handler
 ;output_handler =
 
+; URL rewriter function rewrites URL on the fly by using
+; output buffer. You can set target tags by this configuration.
+; "form" tag is special tag. It will add hidden input tag to pass values.
+; Refer to session.trans_sid_tags for usage.
+; Default Value: "form="
+; Development Value: "form="
+; Production Value: "form="
+;url_rewriter.tags
+
+; URL rewriter will not rewrites absolute URL nor form by default. To enable
+; absolute URL rewrite, allowed hosts must be defined at RUNTIME.
+; Refer to session.trans_sid_hosts for more details.
+; Default Value: ""
+; Development Value: ""
+; Production Value: ""
+;url_rewriter.hosts
+
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
@@ -289,7 +297,10 @@ unserialize_callback_func =
 ; When floats & doubles are serialized store serialize_precision significant
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
-serialize_precision = 17
+; The value is also used for json_encode when encoding double values.
+; If -1 is used, then dtoa mode 0 is used which automatically select the best
+; precision.
+serialize_precision = -1
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
@@ -694,13 +705,6 @@ default_charset = "UTF-8"
 ; http://php.net/output-encoding
 ;output_encoding =
 
-; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
-; to disable this feature and it will be removed in a future version.
-; If post reading is disabled through enable_post_data_reading,
-; $HTTP_RAW_POST_DATA is *NOT* populated.
-; http://php.net/always-populate-raw-post-data
-;always_populate_raw_post_data = -1
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -854,28 +858,29 @@ default_socket_timeout = 60
 ;
 ; For example, on Windows:
 ;
-;   extension=msql.dll
+;   extension=mysqli.dll
 ;
 ; ... or under UNIX:
 ;
-;   extension=msql.so
+;   extension=mysqli.so
 ;
 ; ... or with a path:
 ;
-;   extension=/path/to/extension/msql.so
+;   extension=/path/to/extension/mysqli.so
 ;
 ; If you only provide the name of the extension, PHP will look for it in its
 ; default extension directory.
 ;
 ; Windows Extensions
 ; Note that ODBC support is built in, so no dll is needed for it.
-; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5)
-; extension folders as well as the separate PECL DLL download (PHP 5).
+; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5+)
+; extension folders as well as the separate PECL DLL download (PHP 5+).
 ; Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=php_bz2.dll
 ;extension=php_curl.dll
 ;extension=php_fileinfo.dll
+;extension=php_ftp.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
 ;extension=php_gmp.dll
@@ -885,7 +890,6 @@ default_socket_timeout = 60
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
 ;extension=php_exif.dll      ; Must be after mbstring as it depends on it
-;extension=php_mysql.dll
 ;extension=php_mysqli.dll
 ;extension=php_oci8_12c.dll  ; Use with Oracle Database 12c Instant Client
 ;extension=php_openssl.dll
@@ -898,14 +902,13 @@ default_socket_timeout = 60
 ;extension=php_pgsql.dll
 ;extension=php_shmop.dll
 
-; The MIBS data available in the PHP distribution must be installed. 
-; See http://www.php.net/manual/en/snmp.installation.php 
+; The MIBS data available in the PHP distribution must be installed.
+; See http://www.php.net/manual/en/snmp.installation.php
 ;extension=php_snmp.dll
 
 ;extension=php_soap.dll
 ;extension=php_sockets.dll
 ;extension=php_sqlite3.dll
-;extension=php_sybase_ct.dll
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
@@ -983,6 +986,10 @@ cli_server.color = On
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
 
+;Enables or disables JIT compilation of patterns. This requires the PCRE
+;library to be compiled with JIT support.
+;pcre.jit=1
+
 [Pdo]
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
 ; http://php.net/pdo-odbc.connection-pooling
@@ -1037,10 +1044,6 @@ mail.add_x_header = On
 ;mail.log =
 ; Log mail to syslog (Event Log on Windows).
 ;mail.log = syslog
-
-[SQL]
-; http://php.net/sql.safe-mode
-sql.safe_mode = Off
 
 [ODBC]
 ; http://php.net/odbc.default-db
@@ -1115,64 +1118,6 @@ ibase.dateformat = "%Y-%m-%d"
 
 ; Default time format.
 ibase.timeformat = "%H:%M:%S"
-
-[MySQL]
-; Allow accessing, from PHP's perspective, local files with LOAD DATA statements
-; http://php.net/mysql.allow_local_infile
-mysql.allow_local_infile = On
-
-; Allow or prevent persistent links.
-; http://php.net/mysql.allow-persistent
-mysql.allow_persistent = On
-
-; If mysqlnd is used: Number of cache slots for the internal result set cache
-; http://php.net/mysql.cache_size
-mysql.cache_size = 2000
-
-; Maximum number of persistent links.  -1 means no limit.
-; http://php.net/mysql.max-persistent
-mysql.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://php.net/mysql.max-links
-mysql.max_links = -1
-
-; Default port number for mysql_connect().  If unset, mysql_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
-; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-; at MYSQL_PORT.
-; http://php.net/mysql.default-port
-mysql.default_port =
-
-; Default socket name for local MySQL connects.  If empty, uses the built-in
-; MySQL defaults.
-; http://php.net/mysql.default-socket
-mysql.default_socket =
-
-; Default host for mysql_connect() (doesn't apply in safe mode).
-; http://php.net/mysql.default-host
-mysql.default_host =
-
-; Default user for mysql_connect() (doesn't apply in safe mode).
-; http://php.net/mysql.default-user
-mysql.default_user =
-
-; Default password for mysql_connect() (doesn't apply in safe mode).
-; Note that this is generally a *bad* idea to store passwords in this file.
-; *Any* user with PHP access can run 'echo get_cfg_var("mysql.default_password")
-; and reveal this password!  And of course, any users with read access to this
-; file will be able to reveal the password as well.
-; http://php.net/mysql.default-password
-mysql.default_password =
-
-; Maximum time (in seconds) for connect timeout. -1 means no limit
-; http://php.net/mysql.connect-timeout
-mysql.connect_timeout = 60
-
-; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
-; SQL-Errors will be displayed.
-; http://php.net/mysql.trace-mode
-mysql.trace_mode = Off
 
 [MySQLi]
 
@@ -1328,45 +1273,6 @@ pgsql.ignore_notice = 0
 ; http://php.net/pgsql.log-notice
 pgsql.log_notice = 0
 
-[Sybase-CT]
-; Allow or prevent persistent links.
-; http://php.net/sybct.allow-persistent
-sybct.allow_persistent = On
-
-; Maximum number of persistent links.  -1 means no limit.
-; http://php.net/sybct.max-persistent
-sybct.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://php.net/sybct.max-links
-sybct.max_links = -1
-
-; Minimum server message severity to display.
-; http://php.net/sybct.min-server-severity
-sybct.min_server_severity = 10
-
-; Minimum client message severity to display.
-; http://php.net/sybct.min-client-severity
-sybct.min_client_severity = 10
-
-; Set per-context timeout
-; http://php.net/sybct.timeout
-;sybct.timeout=
-
-;sybct.packet_size
-
-; The maximum time in seconds to wait for a connection attempt to succeed before returning failure.
-; Default: one minute
-;sybct.login_timeout=
-
-; The name of the host you claim to be connecting from, for display by sp_who.
-; Default: none
-;sybct.hostname=
-
-; Allows you to define how often deadlocks are to be retried. -1 means "forever".
-; Default: 0
-;sybct.deadlock_retry_count=
-
 [bcmath]
 ; Number of decimal digits for all bcmath functions.
 ; http://php.net/bcmath.scale
@@ -1505,19 +1411,6 @@ session.gc_maxlifetime = 1440
 ; http://php.net/session.referer-check
 session.referer_check =
 
-; How many bytes to read from the file.
-; http://php.net/session.entropy-length
-;session.entropy_length = 32
-
-; Specified here to create the session id.
-; http://php.net/session.entropy-file
-; Defaults to /dev/urandom
-; On systems that don't have /dev/urandom but do have /dev/arandom, this will default to /dev/arandom
-; If neither are found at compile time, the default is no entropy file.
-; On windows, setting the entropy_length setting will activate the
-; Windows random source (using the CryptoAPI)
-;session.entropy_file = /dev/urandom
-
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
 ; http://php.net/session.cache-limiter
@@ -1539,15 +1432,39 @@ session.cache_expire = 180
 ; http://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
-; Select a hash function for use in generating session ids.
-; Possible Values
-;   0  (MD5 128 bits)
-;   1  (SHA-1 160 bits)
-; This option may also be set to the name of any hash function supported by
-; the hash extension. A list of available hashes is returned by the hash_algos()
-; function.
-; http://php.net/session.hash-function
-session.hash_function = 0
+; Set session ID character length. This value could be between 22 to 256.
+; Shorter length than default is supported only for compatibility reason.
+; Users should use 32 or more chars.
+; http://php.net/session.sid_length
+; Default Value: 32
+; Development Value: 26
+; Production Value: 26
+session.sid_length = 26
+
+; The URL rewriter will look for URLs in a defined set of HTML tags.
+; <form> is special; if you include them here, the rewriter will
+; add a hidden <input> field with the info which is otherwise appended
+; to URLs. <form> tag's action attribute URL will not be modified
+; unless it is specified.
+; Note that all valid entries require a "=", even if no value follows.
+; Default Value: "a=href,area=href,frame=src,form="
+; Development Value: "a=href,area=href,frame=src,form="
+; Production Value: "a=href,area=href,frame=src,form="
+; http://php.net/url-rewriter.tags
+session.trans_sid_tags = "a=href,area=href,frame=src,form="
+
+; URL rewriter does not rewrite absolute URLs by default.
+; To enable rewrites for absolute pathes, target hosts must be specified
+; at RUNTIME. i.e. use ini_set()
+; <form> tags is special. PHP will check action attribute's URL regardless
+; of session.trans_sid_tags setting.
+; If no host is defined, HTTP_HOST will be used for allowed host.
+; Example value: php.net,www.php.net,wiki.php.net
+; Use "," for multiple hosts. No spaces are allowed.
+; Default Value: ""
+; Development Value: ""
+; Production Value: ""
+;session.trans_sid_hosts=""
 
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.
@@ -1559,18 +1476,7 @@ session.hash_function = 0
 ; Development Value: 5
 ; Production Value: 5
 ; http://php.net/session.hash-bits-per-character
-session.hash_bits_per_character = 5
-
-; The URL rewriter will look for URLs in a defined set of HTML tags.
-; form/fieldset are special; if you include them here, the rewriter will
-; add a hidden <input> field with the info which is otherwise appended
-; to URLs.  If you want XHTML conformity, remove the form entry.
-; Note that all valid entries require a "=", even if no value follows.
-; Default Value: "a=href,area=href,frame=src,form=,fieldset="
-; Development Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-; Production Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-; http://php.net/url-rewriter.tags
-url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
+session.sid_bits_per_character = 5
 
 ; Enable upload progress tracking in $_SESSION
 ; Default Value: On
@@ -1617,64 +1523,31 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ; http://php.net/session.upload-progress.min-freq
 ;session.upload_progress.min_freq = "1"
 
-[MSSQL]
-; Allow or prevent persistent links.
-mssql.allow_persistent = On
-
-; Maximum number of persistent links.  -1 means no limit.
-mssql.max_persistent = -1
-
-; Maximum number of links (persistent+non persistent).  -1 means no limit.
-mssql.max_links = -1
-
-; Minimum error severity to display.
-mssql.min_error_severity = 10
-
-; Minimum message severity to display.
-mssql.min_message_severity = 10
-
-; Compatibility mode with old versions of PHP 3.0.
-mssql.compatibility_mode = Off
-
-; Connect timeout
-;mssql.connect_timeout = 5
-
-; Query timeout
-;mssql.timeout = 60
-
-; Valid range 0 - 2147483647.  Default = 4096.
-;mssql.textlimit = 4096
-
-; Valid range 0 - 2147483647.  Default = 4096.
-;mssql.textsize = 4096
-
-; Limits the number of records in each batch.  0 = all records in one batch.
-;mssql.batchsize = 0
-
-; Specify how datetime and datetim4 columns are returned
-; On => Returns data converted to SQL server settings
-; Off => Returns values as YYYY-MM-DD hh:mm:ss
-;mssql.datetimeconvert = On
-
-; Use NT authentication when connecting to the server
-mssql.secure_connection = Off
-
-; Specify max number of processes. -1 = library default
-; msdlib defaults to 25
-; FreeTDS defaults to 4096
-;mssql.max_procs = -1
-
-; Specify client character set.
-; If empty or not set the client charset from freetds.conf is used
-; This is only used when compiled with FreeTDS
-;mssql.charset = "ISO-8859-1"
+; Only write session data when session data is changed. Enabled by default.
+; http://php.net/session.lazy-write
+;session.lazy_write = On
 
 [Assertion]
+; Switch whether to compile assertions at all (to have no overhead at run-time)
+; -1: Do not compile at all
+;  0: Jump over assertion at run-time
+;  1: Execute assertions
+; Changing from or to a negative value is only possible in php.ini! (For turning assertions on and off at run-time, see assert.active, when zend.assertions = 1)
+; Default Value: 1
+; Development Value: 1
+; Production Value: -1
+; http://php.net/zend.assertions
+zend.assertions = -1
+
 ; Assert(expr); active by default.
 ; http://php.net/assert.active
 ;assert.active = On
 
-; Issue a PHP warning for each failed assertion.
+; Throw an AssertationException on failed assertions
+; http://php.net/assert.exception
+;assert.exception = On
+
+; Issue a PHP warning for each failed assertion. (Overridden by assert.exception if active)
 ; http://php.net/assert.warning
 ;assert.warning = On
 
@@ -1718,7 +1591,7 @@ mssql.secure_connection = Off
 
 [mbstring]
 ; language for internal character representation.
-; This affects mb_send_mail() and mbstrig.detect_order.
+; This affects mb_send_mail() and mbstring.detect_order.
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
@@ -1790,7 +1663,7 @@ mssql.secure_connection = Off
 ; a gd image. The warning will then be displayed as notices
 ; disabled by default
 ; http://php.net/gd.jpeg-ignore-warning
-;gd.jpeg_ignore_warning = 0
+;gd.jpeg_ignore_warning = 1
 
 [exif]
 ; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.
@@ -1908,11 +1781,6 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
-; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
-; may be always stored (save_comments=1), but not loaded by applications
-; that don't need them anyway.
-;opcache.load_comments=1
-
 ; If enabled, a fast shutdown sequence is used for the accelerated code
 ;opcache.fast_shutdown=0
 
@@ -1961,6 +1829,36 @@ ldap.max_links = -1
 ; Protect the shared memory from unexpected writing during script execution.
 ; Useful for internal debugging only.
 ;opcache.protect_memory=0
+
+; Allows calling OPcache API functions only from PHP scripts which path is
+; started from specified string. The default "" means no restriction
+;opcache.restrict_api=
+
+; Mapping base of shared memory segments (for Windows only). All the PHP
+; processes have to map shared memory into the same address space. This
+; directive allows to manually fix the "Unable to reattach to base address"
+; errors.
+;opcache.mmap_base=
+
+; Enables and sets the second level cache directory.
+; It should improve performance when SHM memory is full, at server restart or
+; SHM reset. The default "" disables file based caching.
+;opcache.file_cache=
+
+; Enables or disables opcode caching in shared memory.
+;opcache.file_cache_only=0
+
+; Enables or disables checksum validation when script loaded from file cache.
+;opcache.file_cache_consistency_checks=1
+
+; Implies opcache.file_cache_only=1 for a certain process that failed to
+; reattach to the shared memory (for Windows only). Explicitly enabled file
+; cache is required.
+;opcache.file_cache_fallback=1
+
+; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
+; This should improve performance, but requires appropriate OS configuration.
+;opcache.huge_code_pages=1
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

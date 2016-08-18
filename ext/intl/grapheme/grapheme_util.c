@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 /* {{{ grapheme_close_global_iterator - clean up */
 void
-grapheme_close_global_iterator( TSRMLS_D )
+grapheme_close_global_iterator( void )
 {
 	UBreakIterator *global_break_iterator = INTL_G( grapheme_iterator );
 
@@ -49,25 +49,27 @@ grapheme_close_global_iterator( TSRMLS_D )
 /* }}} */
 
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char **sub_str, int *sub_str_len)
+void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len)
 {
+	int32_t str_len2 = (int32_t)str_len; /* in order to avoid signed/unsigned problems */
     *sub_str = NULL;
 
-    if (argc > 2) {
-        if ((l < 0 && -l > str_len)) {
-            return;
-        } else if (l > str_len) {
-            l = str_len;
-        }
-    } else {
-        l = str_len;
+    if(str_len > INT32_MAX) {
+    	/* We can not return long strings from ICU functions, so we won't here too */
+    	return;
     }
 
-    if (f > str_len || (f < 0 && -f > str_len)) {
+    if ((l < 0 && -l > str_len2)) {
+        return;
+    } else if (l > 0 && l > str_len2) {
+        l = str_len2;
+    }
+
+    if (f > str_len2 || (f < 0 && -f > str_len2)) {
         return;
     }
 
-    if (l < 0 && (l + str_len - f) < 0) {
+    if (l < 0 && str_len2 < f - l) {
         return;
     }
 
@@ -75,7 +77,7 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
      * of the string
      */
     if (f < 0) {
-        f = str_len + f;
+        f = str_len2 + f;
         if (f < 0) {
             f = 0;
         }
@@ -86,17 +88,17 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
      * needed to stop that many chars from the end of the string
      */
     if (l < 0) {
-        l = (str_len - f) + l;
+        l = (str_len2 - f) + l;
         if (l < 0) {
             l = 0;
         }
     }
 
-    if (f >= str_len) {
+    if (f >= str_len2) {
         return;
     }
 
-    if ((f + l) > str_len) {
+    if ((f + l) > str_len2) {
         l = str_len - f;
     }
 
@@ -109,8 +111,8 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
 
 #define STRPOS_CHECK_STATUS(status, error) 							\
 	if ( U_FAILURE( (status) ) ) { 									\
-		intl_error_set_code( NULL, (status) TSRMLS_CC ); 			\
-		intl_error_set_custom_msg( NULL, (error), 0 TSRMLS_CC ); 	\
+		intl_error_set_code( NULL, (status) ); 			\
+		intl_error_set_custom_msg( NULL, (error), 0 ); 	\
 		if (uhaystack) { 											\
 			efree( uhaystack ); 									\
 		} 															\
@@ -128,7 +130,7 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
 
 
 /* {{{ grapheme_strpos_utf16 - strrpos using utf16*/
-int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last TSRMLS_DC)
+int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
 	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
@@ -144,16 +146,16 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 	/* convert the strings to UTF-16. */
 
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&uhaystack, &uhaystack_len, (char *) haystack, haystack_len, &status );
+	intl_convert_utf8_to_utf16(&uhaystack, &uhaystack_len, haystack, haystack_len, &status );
 	STRPOS_CHECK_STATUS(status, "Error converting input string to UTF-16");
 
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&uneedle, &uneedle_len, (char *) needle, needle_len, &status );
-	STRPOS_CHECK_STATUS(status, "Error converting input string to UTF-16");
+	intl_convert_utf8_to_utf16(&uneedle, &uneedle_len, needle, needle_len, &status );
+	STRPOS_CHECK_STATUS(status, "Error converting needle string to UTF-16");
 
 	/* get a pointer to the haystack taking into account the offset */
 	status = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status TSRMLS_CC );
+	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status );
 	STRPOS_CHECK_STATUS(status, "Failed to get iterator");
 	status = U_ZERO_ERROR;
 	ubrk_setText(bi, uhaystack, uhaystack_len, &status);
@@ -175,10 +177,10 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 		offset_pos = grapheme_get_haystack_offset(bi, offset);
 		if(offset_pos == -1) {
 			status = U_ILLEGAL_ARGUMENT_ERROR;
-			STRPOS_CHECK_STATUS(status, "Invalid search offset");	
+			STRPOS_CHECK_STATUS(status, "Invalid search offset");
 		}
 		status = U_ZERO_ERROR;
-		usearch_setOffset(src, offset_pos, &status);	
+		usearch_setOffset(src, offset_pos, &status);
 		STRPOS_CHECK_STATUS(status, "Invalid search offset");
 	}
 
@@ -217,7 +219,7 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 /* }}} */
 
 /* {{{ grapheme_ascii_check: ASCII check */
-int grapheme_ascii_check(const unsigned char *day, int32_t len)
+zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 {
 	int ret_len = len;
 	while ( len-- ) {
@@ -231,29 +233,29 @@ int grapheme_ascii_check(const unsigned char *day, int32_t len)
 /* }}} */
 
 /* {{{ grapheme_split_string: find and optionally return grapheme boundaries */
-int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len TSRMLS_DC )
+int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len )
 {
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UErrorCode		status = U_ZERO_ERROR;
 	int ret_len, pos;
 	UBreakIterator* bi;
 
-	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &status TSRMLS_CC );
+	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &status );
 
 	if( U_FAILURE(status) ) {
 		return -1;
 	}
-	
+
 	ubrk_setText(bi, text, text_length,	&status);
 
 	pos = 0;
-	
+
 	for ( ret_len = 0; pos != UBRK_DONE; ) {
-	
+
 		pos = ubrk_next(bi);
-		
+
 		if ( pos != UBRK_DONE ) {
-		
+
 			if ( NULL != boundary_array && ret_len < boundary_array_len ) {
 				boundary_array[ret_len] = pos;
 			}
@@ -261,9 +263,9 @@ int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_a
 			ret_len++;
 		}
 	}
-	 		
+
 	ubrk_close(bi);
-	
+
 	return ret_len;
 }
 /* }}} */
@@ -274,26 +276,26 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 	int ret_len = 0;
 	int pos = 0;
 	UErrorCode		status = U_ZERO_ERROR;
-	
+
 	ubrk_setText(bi, string, string_len, &status);
 
 	do {
-	
+
 		pos = ubrk_next(bi);
-		
+
 		if ( UBRK_DONE != pos ) {
 			ret_len++;
 		}
-		
+
 	} while ( UBRK_DONE != pos );
-	
+
 	return ret_len;
 }
 /* }}} */
 
 
 /* {{{ 	grapheme_get_haystack_offset - bump the haystack pointer based on the grapheme count offset */
-int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
+int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 {
 	int32_t pos;
 	int32_t (*iter_op)(UBreakIterator* bi);
@@ -302,7 +304,7 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 	if ( 0 == offset ) {
 		return 0;
 	}
-	
+
 	if ( offset < 0 ) {
 		iter_op = ubrk_previous;
 		ubrk_last(bi); /* one past the end */
@@ -312,13 +314,13 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 		iter_op = ubrk_next;
 		iter_incr = -1;
 	}
-	
+
 	pos = 0;
-	
+
 	while ( pos != UBRK_DONE && offset != 0 ) {
-	
+
 		pos = iter_op(bi);
-		
+
 		if ( UBRK_DONE != pos ) {
 			offset += iter_incr;
 		}
@@ -327,23 +329,23 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 	if ( offset != 0 ) {
 		return -1;
 	}
-	
+
 	return pos;
 }
 /* }}} */
 
 /* {{{ grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
- int32_t
-grapheme_strrpos_ascii(unsigned char *haystack, int32_t haystack_len, unsigned char *needle, int32_t needle_len, int32_t offset)
+ zend_long
+grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
 {
-	unsigned char *p, *e;
+	char *p, *e;
 
 	if (offset >= 0) {
 		p = haystack + offset;
 		e = haystack + haystack_len - needle_len;
 	} else {
 		p = haystack;
-		if (needle_len > -offset) {
+		if (needle_len > (size_t)-offset) {
 			e = haystack + haystack_len - needle_len;
 		} else {
 			e = haystack + haystack_len + offset;
@@ -374,7 +376,7 @@ grapheme_strrpos_ascii(unsigned char *haystack, int32_t haystack_len, unsigned c
 /* }}} */
 
 /* {{{ grapheme_get_break_iterator: get a clone of the global character break iterator */
-UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC )
+UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status )
 {
 	int32_t buffer_size;
 
@@ -382,7 +384,7 @@ UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *stat
 
 	if ( NULL == global_break_iterator ) {
 
-		global_break_iterator = ubrk_open(UBRK_CHARACTER, 
+		global_break_iterator = ubrk_open(UBRK_CHARACTER,
 											NULL,	/* icu default locale - locale has no effect on this iterator */
 											NULL,	/* text not set in global iterator */
 											0,		/* text length = 0 */

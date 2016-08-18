@@ -11,7 +11,7 @@ opcache.file_update_protection=0
 
 $file_c = __DIR__ . "/bug67215.c.php";
 $file_p = __DIR__ . "/bug67215.p.php";
-file_put_contents($file_c, "<?php require \"$file_p\"; class c extends p {} ?>");
+file_put_contents($file_c, "<?php require '$file_p'; class c extends p {} ?>");
 file_put_contents($file_p, '<?php class p { protected $var = ""; } ?>');
 require $file_c;
 $a = new c();
@@ -25,4 +25,4 @@ unlink($file_c);
 unlink($file_p);
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare class c in %sbug67215.c.php on line %d
+Fatal error: Cannot declare class c, because the name is already in use in %sbug67215.c.php on line %d

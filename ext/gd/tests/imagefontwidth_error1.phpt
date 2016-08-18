@@ -12,4 +12,4 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 imagefontwidth('string');
 ?>
 --EXPECTF--
-Warning: imagefontwidth() expects parameter 1 to be long, %s given in %s on line %d
+Warning: imagefontwidth() expects parameter 1 to be integer, %s given in %s on line %d

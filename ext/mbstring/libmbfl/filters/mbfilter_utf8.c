@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -101,6 +101,7 @@ int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
 	filter->status = 0;
 	filter->cache = 0;
 	CK((*filter->output_function)(w, filter->data));
+	return 0;
 }
 
 
@@ -109,7 +110,7 @@ int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
  */
 int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 {
-	int s, c1, w = 0, flag = 0;
+	int s, c1;
 
 retry:
 	switch (filter->status & 0xff) {
@@ -126,7 +127,7 @@ retry:
 			filter->status = 0x30;
 			filter->cache = c & 0x7;
 		} else {
-			mbfl_filt_put_invalid_char(c, filter);
+			CK(mbfl_filt_put_invalid_char(c, filter));
 		}
 		break;
 	case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
@@ -134,18 +135,18 @@ retry:
 	case 0x32: /* 4byte code 4th char: 0x80-0xbf */
 		filter->status = 0;
 		if (c >= 0x80 && c <= 0xbf) {
-			s = (filter->cache<<6) | (c & 0x3f);			
+			s = (filter->cache<<6) | (c & 0x3f);
 			filter->cache = 0;
-			CK((*filter->output_function)(s, filter->data));			
+			CK((*filter->output_function)(s, filter->data));
 		} else {
-			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;			
+			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			goto retry;
 		}
 		break;
 	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
 		s = (filter->cache<<6) | (c & 0x3f);
 		c1 = filter->cache & 0xf;
-		
+
 		if ((c >= 0x80 && c <= 0xbf) &&
 			((c1 == 0x0 && c >= 0xa0) ||
 			 (c1 == 0xd && c < 0xa0) ||
@@ -153,14 +154,14 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
-			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;						
+			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			goto retry;
 		}
 		break;
 	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
 		s = (filter->cache<<6) | (c & 0x3f);
 		c1 = filter->cache & 0x7;
-		
+
 		if ((c >= 0x80 && c <= 0xbf) &&
 			((c1 == 0x0 && c >= 0x90) ||
 			 (c1 == 0x4 && c < 0x90) ||
@@ -168,8 +169,8 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
-			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;						
+			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			goto retry;
 		}
 		break;
 	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
@@ -177,8 +178,8 @@ retry:
 			filter->cache = (filter->cache<<6) | (c & 0x3f);
 			filter->status++;
 		} else {
-			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;						
+			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
+			goto retry;
 		}
 		break;
 	default:
@@ -200,7 +201,7 @@ int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 	filter->cache = 0;
 
 	if (status != 0) {
-		mbfl_filt_put_invalid_char(cache, filter);
+		CK(mbfl_filt_put_invalid_char(cache, filter));
 	}
 
 	if (filter->flush_function != NULL) {
@@ -247,7 +248,7 @@ int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 	filter->status &= 0xff;
 
 	if (c < 0x80) {
-		if (c < 0) { 
+		if (c < 0) {
 			filter->flag = 1;	/* bad */
 		} else if (filter->status) {
 			filter->flag = 1;	/* bad */
@@ -256,23 +257,23 @@ int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 	} else if (c < 0xc0) {
 		switch (filter->status) {
 		case 0x20: /* 3 byte code 2nd char */
-			if ((c1 == 0x0 && c >= 0xa0) || 
-				(c1 == 0xd && c < 0xa0) || 
+			if ((c1 == 0x0 && c >= 0xa0) ||
+				(c1 == 0xd && c < 0xa0) ||
 				(c1 > 0x0 && c1 != 0xd)) {
 				filter->status++;
 			} else {
 				filter->flag = 1;	/* bad */
-				filter->status = 0;				
+				filter->status = 0;
 			}
 			break;
 		case 0x30: /* 4 byte code 2nd char */
-			if ((c1 == 0x0 && c >= 0x90) || 
-				(c1 > 0x0 && c1 < 0x4) || 
+			if ((c1 == 0x0 && c >= 0x90) ||
+				(c1 > 0x0 && c1 < 0x4) ||
 				(c1 == 0x4 && c < 0x90)) {
 				filter->status++;
 			} else {
 				filter->flag = 1;	/* bad */
-				filter->status = 0;				
+				filter->status = 0;
 			}
 			break;
 		case 0x31: /* 4 byte code 3rd char */

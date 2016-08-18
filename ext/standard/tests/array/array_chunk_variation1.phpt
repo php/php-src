@@ -127,57 +127,57 @@ NULL
 
 -- Iteration 5 --
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_chunk() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 10 --

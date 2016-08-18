@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter_iso2022_jp_ms.h
  * by Rui Hirokawa <hirokawa@php.net> on 25 July 2011.
- * 
+ *
  */
 
 #ifndef MBFL_MBFILTER_ISO2022_JP_MOBILE_H
@@ -36,7 +36,7 @@ extern const mbfl_encoding mbfl_encoding_2022jp_kddi;
 extern const struct mbfl_identify_vtbl vtbl_identify_2022jp_kddi;
 extern const struct mbfl_convert_vtbl vtbl_2022jp_kddi_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi;
- 
+
 int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter);
 

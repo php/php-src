@@ -72,7 +72,7 @@ Test 2 - implicit statement close
 test data
 object(OCI-Lob)#%d (1) {
   ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
+  resource(%d) of type (Unknown)
 }
 
 Test 3 - no preallocated descriptor

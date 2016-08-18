@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -84,7 +84,7 @@
 	key[6] = ((w[1] & 0x00ff0000) >> 16) | ((w[3] & 0x00ff0000) >> 8) | \
 		(w[5] & 0x00ff0000) | ((w[7] & 0x00ff0000) << 8); \
 	key[7] = ((w[1] & 0xff000000) >> 24) | ((w[3] & 0xff000000) >> 16) | \
-		((w[5] & 0xff000000) >> 8) | (w[7] & 0xff000000);  
+		((w[5] & 0xff000000) >> 8) | (w[7] & 0xff000000);
 
 #define A(x, l, r) \
 	l = x[0] ^ x[2]; \
@@ -207,14 +207,14 @@
 		AA(v, l, r); \
 	}
 
-static inline void Gost(PHP_GOST_CTX *context, php_hash_uint32 data[8])
+static inline void Gost(PHP_GOST_CTX *context, uint32_t data[8])
 {
 	int i;
-	php_hash_uint32 l, r, t, key[8], u[8], v[8], w[8], s[8], *h = context->state, *m = data;
-	
+	uint32_t l, r, t, key[8], u[8], v[8], w[8], s[8], *h = context->state, *m = data;
+
 	memcpy(u, context->state, sizeof(u));
 	memcpy(v, data, sizeof(v));
-	
+
 	for (i = 0; i < 8; i += 2) {
 		PASS(*context->tables);
 	}
@@ -227,16 +227,16 @@ static inline void Gost(PHP_GOST_CTX *context, php_hash_uint32 data[8])
 static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char input[32])
 {
 	int i, j;
-	php_hash_uint32 data[8], temp = 0, save = 0;
-	
+	uint32_t data[8], temp = 0, save = 0;
+
 	for (i = 0, j = 0; i < 8; ++i, j += 4) {
-		data[i] =	((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) | 
-					(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
+		data[i] =	((uint32_t) input[j]) | (((uint32_t) input[j + 1]) << 8) |
+					(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 		save = context->state[i + 8];
 		context->state[i + 8] += data[i] + temp;
-		temp = ((context->state[i + 8] < data[i]) || (context->state[i + 8] < save)) ? 1 : 0;     
+		temp = ((context->state[i + 8] < data[i]) || (context->state[i + 8] < save)) ? 1 : 0;
 	}
-	
+
 	Gost(context, data);
 }
 
@@ -252,7 +252,7 @@ PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context)
 	context->tables = &tables_crypto;
 }
 
-static const php_hash_uint32 MAX32 = 0xffffffffLU;
+static const uint32_t MAX32 = 0xffffffffLU;
 
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *input, size_t len)
 {
@@ -263,50 +263,50 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 	} else {
 		context->count[0] += len * 8;
 	}
-	
+
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
 		context->length += len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 32;
-		
+
 		if (context->length) {
 			i = 32 - context->length;
 			memcpy(&context->buffer[context->length], input, i);
 			GostTransform(context, context->buffer);
 		}
-		
+
 		for (; i + 32 <= len; i += 32) {
 			GostTransform(context, input + i);
 		}
-		
+
 		memcpy(context->buffer, input + i, r);
-		memset(&context->buffer[r], 0, 32 - r);
+		ZEND_SECURE_ZERO(&context->buffer[r], 32 - r);
 		context->length = r;
 	}
 }
 
 PHP_HASH_API void PHP_GOSTFinal(unsigned char digest[32], PHP_GOST_CTX *context)
 {
-	php_hash_uint32 i, j, l[8] = {0};
-	
+	uint32_t i, j, l[8] = {0};
+
 	if (context->length) {
 		GostTransform(context, context->buffer);
 	}
-	
+
 	memcpy(l, context->count, sizeof(context->count));
 	Gost(context, l);
 	memcpy(l, &context->state[8], sizeof(l));
 	Gost(context, l);
-	
+
 	for (i = 0, j = 0; j < 32; i++, j += 4) {
 		digest[j] = (unsigned char) (context->state[i] & 0xff);
 		digest[j + 1] = (unsigned char) ((context->state[i] >> 8) & 0xff);
 		digest[j + 2] = (unsigned char) ((context->state[i] >> 16) & 0xff);
 		digest[j + 3] = (unsigned char) ((context->state[i] >> 24) & 0xff);
 	}
-	
-	memset(context, 0, sizeof(*context));
+
+	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 const php_hash_ops php_hash_gost_ops = {

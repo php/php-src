@@ -1,5 +1,7 @@
 --TEST--
 Testing each() with recursion
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 

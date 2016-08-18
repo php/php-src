@@ -1,77 +1,52 @@
+#ifdef HAVE_LIBWEBP
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
-
-
-#ifdef HAVE_LIBVPX
-#include "webpimg.h"
 #include "gdhelpers.h"
+#include "webp/decode.h"
+#include "webp/encode.h"
 
-extern void gd_YUV420toRGBA(uint8* Y,
-                  uint8* U,
-                  uint8* V,
-                  gdImagePtr im);
-
-extern void gd_RGBAToYUV420(gdImagePtr im2,
-                  uint8* Y,
-                  uint8* U,
-                  uint8* V);
-
-const char * gdWebpGetVersionString()
-{
-	return "not defined";
-}
+#define GD_WEBP_ALLOC_STEP (4*1024)
 
 gdImagePtr gdImageCreateFromWebp (FILE * inFile)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewFileCtx(inFile);
+	if (!in)
+		return 0;
 	im = gdImageCreateFromWebpCtx(in);
 	in->gd_free(in);
 
 	return im;
 }
 
+
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data)
 {
-	int    width, height, ret;
- 	unsigned char   *Y = NULL;
-	unsigned char   *U = NULL;
-	unsigned char   *V = NULL;
 	gdImagePtr im;
-
-	ret = WebPDecode(data, size, &Y, &U, &V, &width, &height);
-	if (ret != webp_success) {
-		if (Y) free(Y);
-		if (U) free(U);
-		if (V) free(V);
-		php_gd_error("WebP decode: fail to decode input data");
-		return NULL;
-	}
-	im = gdImageCreateTrueColor(width, height);
-	if (!im) {
-		return NULL;
-	}
-	gd_YUV420toRGBA(Y, U, V, im);
+	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
+	if (!in)
+		return 0;
+	im = gdImageCreateFromWebpCtx(in);
+	in->gd_free(in);
 	return im;
 }
 
-#define GD_WEBP_ALLOC_STEP (4*1024)
-
 gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 {
-	int    width, height, ret;
-	unsigned char   *filedata = NULL;
-	unsigned char   *read, *temp;
-	unsigned char   *Y = NULL;
-	unsigned char   *U = NULL;
-	unsigned char   *V = NULL;
+	int    width, height;
+	uint8_t   *filedata = NULL;
+	uint8_t    *argb = NULL;
 	size_t size = 0, n;
 	gdImagePtr im;
+	int x, y;
+	uint8_t *p;
 
 	do {
+		unsigned char *read, *temp;
+
 		temp = gdRealloc(filedata, size+GD_WEBP_ALLOC_STEP);
 		if (temp) {
 			filedata = temp;
@@ -80,29 +55,103 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 			if (filedata) {
 				gdFree(filedata);
 			}
-			php_gd_error("WebP decode: realloc failed");
+			zend_error(E_ERROR, "WebP decode: realloc failed");
 			return NULL;
 		}
 
 		n = gdGetBuf(read, GD_WEBP_ALLOC_STEP, infile);
-		/* differs from upstream where gdGetBuf return 0 instead of EOF */
 		if (n>0 && n!=EOF) {
 			size += n;
 		}
 	} while (n>0 && n!=EOF);
 
-	ret = WebPDecode(filedata, size, &Y, &U, &V, &width, &height);
-	gdFree(filedata);
-	if (ret != webp_success) {
-		if (Y) free(Y);
-		if (U) free(U);
-		if (V) free(V);
-		php_gd_error("WebP decode: fail to decode input data");
+	if (WebPGetInfo(filedata,size, &width, &height) == 0) {
+		zend_error(E_ERROR, "gd-webp cannot get webp info");
+		gdFree(filedata);
 		return NULL;
 	}
+
 	im = gdImageCreateTrueColor(width, height);
-	gd_YUV420toRGBA(Y, U, V, im);
+	if (!im) {
+		gdFree(filedata);
+		return NULL;
+	}
+	argb = WebPDecodeARGB(filedata, size, &width, &height);
+	if (!argb) {
+		zend_error(E_ERROR, "gd-webp cannot allocate temporary buffer");
+		gdFree(filedata);
+		gdImageDestroy(im);
+		return NULL;
+	}
+	for (y = 0, p = argb;  y < height; y++) {
+		for (x = 0; x < width; x++) {
+			register uint8_t a = gdAlphaMax - (*(p++) >> 1);
+			register uint8_t r = *(p++);
+			register uint8_t g = *(p++);
+			register uint8_t b = *(p++);
+			im->tpixels[y][x] = gdTrueColorAlpha(r, g, b, a);
+		}
+	}
+	gdFree(filedata);
+	/* do not use gdFree here, in case gdFree/alloc is mapped to something else than libc */
+	free(argb);
+	im->saveAlphaFlag = 1;
 	return im;
+}
+
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
+{
+	uint8_t *argb;
+	int x, y;
+	uint8_t *p;
+	uint8_t *out;
+	size_t out_size;
+
+	if (im == NULL) {
+		return;
+	}
+
+	if (!gdImageTrueColor(im)) {
+		zend_error(E_ERROR, "Paletter image not supported by webp");
+		return;
+	}
+
+	if (quantization == -1) {
+		quantization = 80;
+	}
+
+	argb = (uint8_t *)gdMalloc(gdImageSX(im) * 4 * gdImageSY(im));
+	if (!argb) {
+		return;
+	}
+	p = argb;
+	for (y = 0; y < gdImageSY(im); y++) {
+		for (x = 0; x < gdImageSX(im); x++) {
+			register int c;
+			register char a;
+			c = im->tpixels[y][x];
+			a = gdTrueColorGetAlpha(c);
+			if (a == 127) {
+				a = 0;
+			} else {
+				a = 255 - ((a << 1) + (a >> 6));
+			}
+			*(p++) = gdTrueColorGetRed(c);
+			*(p++) = gdTrueColorGetGreen(c);
+			*(p++) = gdTrueColorGetBlue(c); 
+			*(p++) = a;
+		}
+	}
+	out_size = WebPEncodeRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, quantization, &out);
+	if (out_size == 0) {
+		zend_error(E_ERROR, "gd-webp encoding failed");
+		goto freeargb;
+	}
+	gdPutBuf(out, out_size, outfile);
+	free(out);
+
+freeargb:
+	gdFree(argb);
 }
 
 void gdImageWebpEx (gdImagePtr im, FILE * outFile, int quantization)
@@ -115,7 +164,7 @@ void gdImageWebpEx (gdImagePtr im, FILE * outFile, int quantization)
 void gdImageWebp (gdImagePtr im, FILE * outFile)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-  	gdImageWebpCtx(im, out, -1);
+	gdImageWebpCtx(im, out, -1);
 	out->gd_free(out);
 }
 
@@ -139,74 +188,4 @@ void * gdImageWebpPtrEx (gdImagePtr im, int *size, int quantization)
 	out->gd_free(out);
 	return rv;
 }
-
-/*
- * Maps normalized QP (quality) to VP8 QP
- */
-int mapQualityToVP8QP(int quality) {
-#define MIN_QUALITY 0
-#define MAX_QUALITY 100
-#define MIN_VP8QP 1
-#define MAX_VP8QP 63
-	const float scale = MAX_VP8QP - MIN_VP8QP;
-	const float vp8qp =
-	scale * (MAX_QUALITY - quality) / (MAX_QUALITY - MIN_QUALITY) + MIN_VP8QP;
-	if (quality < MIN_QUALITY || quality > MAX_QUALITY) {
-		php_gd_error("Wrong quality value %d.", quality);
-		return -1;
-	}
-
-	return (int)(vp8qp + 0.5);
-}
-
-/* This routine is based in part on code from Dale Lutz (Safe Software Inc.)
- *  and in part on demo code from Chapter 15 of "PNG: The Definitive Guide"
- *  (http://www.cdrom.com/pub/png/pngbook.html).
- */
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
-{
-	int width = im->sx;
-	int height = im->sy;
-	int colors = im->colorsTotal;
-	int *open = im->open;
-
-	int  yuv_width, yuv_height, yuv_nbytes, ret;
-	int vp8_quality;
-	unsigned char *Y = NULL,
-				  *U = NULL,
-				  *V = NULL;
-	unsigned char *filedata = NULL;
-
-	/* Conversion to Y,U,V buffer */
-    yuv_width = (width + 1) >> 1;
-    yuv_height = (height + 1) >> 1;
-    yuv_nbytes = width * height + 2 * yuv_width * yuv_height;
-
-    if ((Y = (unsigned char *)gdCalloc(yuv_nbytes, sizeof(unsigned char))) == NULL) {
-    	php_gd_error("gd-webp error: cannot allocate Y buffer");
-        return;
-    }
-	vp8_quality = mapQualityToVP8QP(quantization);
-
-    U = Y + width * height;
-    V = U + yuv_width * yuv_height;
-    gd_RGBAToYUV420(im, Y, U, V);
-
-	/* Encode Y,U,V and write data to file */
-    ret = WebPEncode(Y, U, V, width, height, width, yuv_width, yuv_height, yuv_width,
-                     vp8_quality, &filedata, &yuv_nbytes, NULL);
-	gdFree(Y);
-
-    if (ret != webp_success) {
-    	if (filedata) {
-    		free(filedata);
-		}
-		php_gd_error("gd-webp error: WebP Encoder failed");
-		return;
-    }
-
-    gdPutBuf (filedata, yuv_nbytes, outfile);
-    free(filedata);
-}
-
-#endif /* HAVE_LIBVPX */
+#endif /* HAVE_LIBWEBP */

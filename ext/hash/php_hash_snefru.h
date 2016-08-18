@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -22,15 +22,15 @@
 #define PHP_HASH_SNEFRU_H
 
 /* SNEFRU-2.5a with 8 passes and 256 bit hash output
- * AKA "Xerox Secure Hash Function" 
+ * AKA "Xerox Secure Hash Function"
  */
 
 #include "ext/standard/basic_functions.h"
 
 /* SNEFRU context */
 typedef struct {
-	php_hash_uint32 state[16];
-	php_hash_uint32 count[2];
+	uint32_t state[16];
+	uint32_t count[2];
 	unsigned char length;
 	unsigned char buffer[32];
 } PHP_SNEFRU_CTX;

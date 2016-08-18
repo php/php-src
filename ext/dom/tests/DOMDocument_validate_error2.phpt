@@ -12,4 +12,7 @@ require_once dirname(__FILE__) .'/skipif.inc';
 DOMDocument::validate();
 ?>
 --EXPECTF--
-Fatal error: Non-static method DOMDocument::validate() cannot be called statically in %s on line %d
+Fatal error: Uncaught Error: Non-static method DOMDocument::validate() cannot be called statically in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

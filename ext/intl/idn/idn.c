@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 2009 The PHP Group                                     |
    +----------------------------------------------------------------------+
@@ -111,15 +111,15 @@ enum {
 };
 
 /* like INTL_CHECK_STATUS, but as a function and varying the name of the func */
-static int php_intl_idn_check_status(UErrorCode err, const char *msg, int mode TSRMLS_DC)
+static int php_intl_idn_check_status(UErrorCode err, const char *msg, int mode)
 {
-	intl_error_set_code(NULL, err TSRMLS_CC);
+	intl_error_set_code(NULL, err);
 	if (U_FAILURE(err)) {
 		char *buff;
 		spprintf(&buff, 0, "%s: %s",
 			mode == INTL_IDN_TO_ASCII ? "idn_to_ascii" : "idn_to_utf8",
 			msg);
-		intl_error_set_custom_msg(NULL, buff, 1 TSRMLS_CC);
+		intl_error_set_custom_msg(NULL, buff, 1);
 		efree(buff);
 		return FAILURE;
 	}
@@ -127,48 +127,49 @@ static int php_intl_idn_check_status(UErrorCode err, const char *msg, int mode T
 	return SUCCESS;
 }
 
-static inline void php_intl_bad_args(const char *msg, int mode TSRMLS_DC)
+static inline void php_intl_bad_args(const char *msg, int mode)
 {
-	php_intl_idn_check_status(U_ILLEGAL_ARGUMENT_ERROR, msg, mode TSRMLS_CC);
+	php_intl_idn_check_status(U_ILLEGAL_ARGUMENT_ERROR, msg, mode);
 }
 
 #ifdef HAVE_46_API
 static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, int domain_len, uint32_t option, int mode, zval *idna_info)
+		const char *domain, int32_t domain_len, uint32_t option, int mode, zval *idna_info)
 {
 	UErrorCode	  status = U_ZERO_ERROR;
 	UIDNA		  *uts46;
 	int32_t		  len;
 	int32_t		  buffer_capac = 255; /* no domain name may exceed this */
-	char		  *buffer = emalloc(buffer_capac);
+	zend_string	  *buffer = zend_string_alloc(buffer_capac, 0);
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 	int			  buffer_used = 0;
-	
+
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance",
-			mode TSRMLS_CC) == FAILURE) {
-		efree(buffer);
+			mode) == FAILURE) {
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 
 	if (mode == INTL_IDN_TO_ASCII) {
-		len = uidna_nameToASCII_UTF8(uts46, domain, (int32_t)domain_len,
-				buffer, buffer_capac, &info, &status);
+		len = uidna_nameToASCII_UTF8(uts46, domain, domain_len,
+				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	} else {
-		len = uidna_nameToUnicodeUTF8(uts46, domain, (int32_t)domain_len,
-				buffer, buffer_capac, &info, &status);
+		len = uidna_nameToUnicodeUTF8(uts46, domain, domain_len,
+				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	}
 	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name",
-			mode TSRMLS_CC) == FAILURE) {
+			mode) == FAILURE) {
 		uidna_close(uts46);
-		efree(buffer);
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 
-	buffer[len] = '\0';
+	ZSTR_VAL(buffer)[len] = '\0';
+	ZSTR_LEN(buffer) = len;
 
 	if (info.errors == 0) {
-		RETVAL_STRINGL(buffer, len, 0);
+		RETVAL_STR(buffer);
 		buffer_used = 1;
 	} else {
 		RETVAL_FALSE;
@@ -177,21 +178,20 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	if (idna_info) {
 		if (buffer_used) { /* used in return_value then */
 			zval_addref_p(return_value);
-			add_assoc_zval_ex(idna_info, "result", sizeof("result"), return_value);
+			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, return_value);
 		} else {
-			zval *zv;
-			ALLOC_INIT_ZVAL(zv);
-			ZVAL_STRINGL(zv, buffer, len, 0);
+			zval zv;
+			ZVAL_NEW_STR(&zv, buffer);
 			buffer_used = 1;
-			add_assoc_zval_ex(idna_info, "result", sizeof("result"), zv);
+			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, &zv);
 		}
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
-				sizeof("isTransitionalDifferent"), info.isTransitionalDifferent);
-		add_assoc_long_ex(idna_info, "errors", sizeof("errors"), (long)info.errors);
+				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
+		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
 	if (!buffer_used) {
-		efree(buffer);
+		zend_string_free(buffer);
 	}
 
 	uidna_close(uts46);
@@ -199,13 +199,12 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 #endif
 
 static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, int domain_len, uint32_t option, int mode)
+		const char *domain, int32_t domain_len, uint32_t option, int mode)
 {
 	UChar* ustring = NULL;
 	int ustring_len = 0;
 	UErrorCode status;
-	char     *converted_utf8;
-	int32_t   converted_utf8_len;
+	zend_string *u8str;
 	UChar     converted[MAXPATHLEN];
 	int32_t   converted_ret_len;
 
@@ -214,10 +213,10 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 	intl_convert_utf8_to_utf16(&ustring, &ustring_len, domain, domain_len, &status);
 
 	if (U_FAILURE(status)) {
-		intl_error_set_code(NULL, status TSRMLS_CC);
+		intl_error_set_code(NULL, status);
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
 		if (ustring) {
 			efree(ustring);
 		}
@@ -234,72 +233,71 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		efree(ustring);
 
 		if (U_FAILURE(status)) {
-			intl_error_set( NULL, status, "idn_to_ascii: cannot convert to ASCII", 0 TSRMLS_CC );
+			intl_error_set( NULL, status, "idn_to_ascii: cannot convert to ASCII", 0 );
 			RETURN_FALSE;
 		}
 
 		status = U_ZERO_ERROR;
-		intl_convert_utf16_to_utf8(&converted_utf8, &converted_utf8_len, converted, converted_ret_len, &status);
+		u8str = intl_convert_utf16_to_utf8(converted, converted_ret_len, &status);
 
-		if (U_FAILURE(status)) {
+		if (!u8str) {
 			/* Set global error code. */
-			intl_error_set_code(NULL, status TSRMLS_CC);
+			intl_error_set_code(NULL, status);
 
 			/* Set error messages. */
-			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 TSRMLS_CC );
-			efree(converted_utf8);
+			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 );
 			RETURN_FALSE;
 		}
 	}
 
 	/* return the allocated string, not a duplicate */
-	RETURN_STRINGL(((char *)converted_utf8), converted_utf8_len, 0);
+	RETVAL_NEW_STR(u8str);
 }
 
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *domain;
-	int domain_len;
-	long option = 0,
+	size_t domain_len;
+	zend_long option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;
 
-	intl_error_reset(NULL TSRMLS_CC);
+	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|llz/",
 			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
-		php_intl_bad_args("bad arguments", mode TSRMLS_CC);
+		php_intl_bad_args("bad arguments", mode);
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
 	}
 
 #ifdef HAVE_46_API
 	if (variant != INTL_IDN_VARIANT_2003 && variant != INTL_IDN_VARIANT_UTS46) {
 		php_intl_bad_args("invalid variant, must be one of {"
-			"INTL_IDNA_VARIANT_2003, INTL_IDNA_VARIANT_UTS46}", mode TSRMLS_CC);
+			"INTL_IDNA_VARIANT_2003, INTL_IDNA_VARIANT_UTS46}", mode);
 		RETURN_FALSE;
 	}
 #else
 	if (variant != INTL_IDN_VARIANT_2003) {
 		php_intl_bad_args("invalid variant, PHP was compiled against "
 			"an old version of ICU and only supports INTL_IDN_VARIANT_2003",
-			mode TSRMLS_CC);
+			mode);
 		RETURN_FALSE;
 	}
 #endif
 
 	if (domain_len < 1) {
-		php_intl_bad_args("empty domain name", mode TSRMLS_CC);
+		php_intl_bad_args("empty domain name", mode);
 		RETURN_FALSE;
 	}
 	if (domain_len > INT32_MAX - 1) {
-		php_intl_bad_args("domain name too large", mode TSRMLS_CC);
+		php_intl_bad_args("domain name too large", mode);
 		RETURN_FALSE;
 	}
 	/* don't check options; it wasn't checked before */
 
 	if (idna_info != NULL) {
 		if (variant == INTL_IDN_VARIANT_2003) {
-			php_error_docref0(NULL TSRMLS_CC, E_NOTICE,
+			php_error_docref0(NULL, E_NOTICE,
 				"4 arguments were provided, but INTL_IDNA_VARIANT_2003 only "
 				"takes 3 - extra argument ignored");
 		} else {
@@ -307,14 +305,14 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			array_init(idna_info);
 		}
 	}
-	
+
 	if (variant == INTL_IDN_VARIANT_2003) {
 		php_intl_idn_to(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-				domain, domain_len, (uint32_t)option, mode);
+				domain, (int32_t)domain_len, (uint32_t)option, mode);
 	}
 #ifdef HAVE_46_API
 	else {
-		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, domain_len,
+		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (int32_t)domain_len,
 				(uint32_t)option, mode, idna_info);
 	}
 #endif

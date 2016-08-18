@@ -11,4 +11,4 @@ $nano = time_nanosleep(2, 'B');
 
 ?>
 --EXPECTF--
-Warning: time_nanosleep() expects parameter 2 to be long, %unicode_string_optional% given in %s.php on line %d
+Warning: time_nanosleep() expects parameter 2 to be integer, %unicode_string_optional% given in %s.php on line %d

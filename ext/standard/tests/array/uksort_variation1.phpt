@@ -119,27 +119,27 @@ NULL
 
 --float 10.5--
 
-Warning: uksort() expects parameter 1 to be array, double given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, float given in %suksort_variation1.php on line %d
 NULL
 
 --float -10.5--
 
-Warning: uksort() expects parameter 1 to be array, double given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, float given in %suksort_variation1.php on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: uksort() expects parameter 1 to be array, double given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, float given in %suksort_variation1.php on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: uksort() expects parameter 1 to be array, double given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, float given in %suksort_variation1.php on line %d
 NULL
 
 --float .5--
 
-Warning: uksort() expects parameter 1 to be array, double given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, float given in %suksort_variation1.php on line %d
 NULL
 
 --uppercase NULL--

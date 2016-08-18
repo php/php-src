@@ -52,7 +52,7 @@ checktimeout($s, 500);
 $data = [
     "name" => [],
     "buffer_size" => 2000,
-    "controllen" => socket_cmsg_space(SOL_SOCKET, SCM_RIGHTS, 3)
+    "controllen" => socket_cmsg_space(SOL_SOCKET, SCM_RIGHTS, 4)
 ];
 var_dump($data);
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
@@ -71,7 +71,7 @@ array(3) {
   ["buffer_size"]=>
   int(2000)
   ["controllen"]=>
-  int(32)
+  int(%d)
 }
 Array
 (

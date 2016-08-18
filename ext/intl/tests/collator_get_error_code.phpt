@@ -6,7 +6,7 @@ get_error_code()
 <?php
 
 /*
- * Retreive error code.
+ * Retrieve error code.
  */
 
 

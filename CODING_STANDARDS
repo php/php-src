@@ -18,6 +18,7 @@ Code Implementation
 
 For instance, ``function int mail(char *to, char *from)`` should NOT free
 to and/or from.
+
 Exceptions:
 
 - The function's designated behavior is freeing that resource.  E.g. efree()
@@ -112,6 +113,7 @@ User Functions/Methods Naming Conventions
     of ``parent_*``::
 
     A family of 'foo' functions, for example:
+    
     Good:
     'foo_select_bar'
     'foo_insert_baz'
@@ -163,7 +165,7 @@ User Functions/Methods Naming Conventions
     'foobar'
     'foo_bar'
 
-Internal Function Naming Convensions
+Internal Function Naming Conventions
 ----------------------
 
 1.  Functions that are part of the external API should be named
@@ -176,7 +178,7 @@ Internal Function Naming Convensions
     Unexposed module function should be static and should not be defined in
     'php_modulename.h'.
 
-    static int php_session_destroy(TSRMLS_D)
+    static int php_session_destroy()
 
 2.  Main module source file must be named 'modulename.c'.
 

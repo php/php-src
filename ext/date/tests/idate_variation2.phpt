@@ -107,22 +107,22 @@ int(1970)
 
 --empty array--
 
-Warning: idate() expects parameter 2 to be long, array given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: idate() expects parameter 2 to be long, array given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: idate() expects parameter 2 to be long, array given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: idate() expects parameter 2 to be long, array given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -145,42 +145,42 @@ int(1970)
 
 --empty string DQ--
 
-Warning: idate() expects parameter 2 to be long, string given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: idate() expects parameter 2 to be long, string given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: idate() expects parameter 2 to be long, string given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: idate() expects parameter 2 to be long, string given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: idate() expects parameter 2 to be long, string given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: idate() expects parameter 2 to be long, string given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: idate() expects parameter 2 to be long, object given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: idate() expects parameter 2 to be long, object given in %s on line %d
+Warning: idate() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 --undefined var--

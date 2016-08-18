@@ -39,7 +39,6 @@ http://pear.php.net/dtd/package-2.0.xsd">
    <file name="php_shmop.h" role="src" />
    <file name="README" role="doc" />
    <file name="shmop.c" role="src" />
-   <file name="shmop.dsp" role="src" />
   </dir> <!-- / -->
  </contents>
  <dependencies>

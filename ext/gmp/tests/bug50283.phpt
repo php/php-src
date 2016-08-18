@@ -2,7 +2,6 @@
 Feature Request #50283 (allow base in gmp_strval to use full range: 2 to 62, and -2 to -36)
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip"; ?>
-<?php if (version_compare(GMP_VERSION, "4.2.0", "<")) print "skip"; ?>
 --FILE--
 <?php
 $a = gmp_init("0x41682179fbf5");

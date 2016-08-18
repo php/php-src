@@ -102,5 +102,4 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
-[001] Call to PDO::setAttribute(int attribute, mixed value) has changed the type of value from integer to boolean, test will not work properly
 done!

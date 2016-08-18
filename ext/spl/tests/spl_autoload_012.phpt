@@ -49,14 +49,14 @@ first
 autoload_first
 autoload_second
 
-Fatal error: Uncaught exception 'Exception' with message 'first' in %sspl_autoload_012.php:%d
+Fatal error: Uncaught Exception: first in %sspl_autoload_012.php:%d
 Stack trace:
 #0 [internal function]: autoload_first('ThisClassDoesNo...')
 #1 [internal function]: spl_autoload_call('ThisClassDoesNo...')
 #2 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
 #3 {main}
 
-Next exception 'Exception' with message 'second' in %sspl_autoload_012.php:%d
+Next Exception: second in %sspl_autoload_012.php:%d
 Stack trace:
 #0 [internal function]: autoload_second('ThisClassDoesNo...')
 #1 [internal function]: spl_autoload_call('ThisClassDoesNo...')
