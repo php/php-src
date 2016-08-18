@@ -73,6 +73,9 @@ PHP 7.1 UPGRADE NOTES
        and listed under hosts whitelist.
      . <fieldset> is no longer considered as a special tag. <form> is the
        only tag considered special.
+  . Calling a function with less arguments than mandatory declared ones in
+    signature now issues a Fatal Error (Error Exception) instead of a Warning.
+    (RFC https://wiki.php.net/rfc/too_few_args).
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
