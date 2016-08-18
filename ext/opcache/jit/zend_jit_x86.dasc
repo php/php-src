@@ -48,7 +48,7 @@ static int zend_jit_align_func(dasm_State **Dst)
 static int zend_jit_prologue(dasm_State **Dst)
 {
 	|.if X64
-	| //add rsp, 8 // stack alignment
+	| sub rsp, 8 // stack alignment
 	|.endif
 	return 1;
 }
@@ -95,7 +95,7 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 	const void *handler = opline->handler;
 
 	|.if X64
-	| //sub rsp, 8 // stack alignment
+	| add rsp, 8 // stack alignment
 	| mov64 rax, ((ptrdiff_t)handler)
 	| jmp rax
 	|.else
