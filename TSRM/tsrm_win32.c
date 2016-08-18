@@ -729,10 +729,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 
 	err = GetLastError();
 	if (err) {
-		/* Catch more errors */
-		if (ERROR_NOT_ENOUGH_MEMORY == err) {
-			_set_errno(ENOMEM);
-		}
+		SET_ERRNO_FROM_WIN32_CODE(err);
 		return (void*)-1;
 	}
 
