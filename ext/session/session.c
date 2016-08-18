@@ -830,12 +830,10 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 	int namelen;
 	zend_string *name;
 	php_unserialize_data_t var_hash;
-	int skip = 0;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	for (p = val; p < endptr; ) {
-		skip = 0;
 		namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
 		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -854,9 +852,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 			current = var_tmp_var(&var_hash);
 			if (php_var_unserialize(current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash)) {
 				ZVAL_PTR(&rv, current);
-				if (!skip) {
-					php_set_session_var(name, &rv, &var_hash);
-				}
+				php_set_session_var(name, &rv, &var_hash);
 			} else {
 				zend_string_release(name);
 				php_session_normalize_vars();
@@ -918,7 +914,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	zend_string *name;
 	int has_value, retval = SUCCESS;
 	php_unserialize_data_t var_hash;
-	int skip = 0;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
@@ -926,7 +921,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 
 	while (p < endptr) {
 		q = p;
-		skip = 0;
 		while (*q != PS_DELIMITER) {
 			if (++q >= endptr) goto break_outer_loop;
 		}
@@ -946,18 +940,14 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 			current = var_tmp_var(&var_hash);
 			if (php_var_unserialize(current, (const unsigned char **)&q, (const unsigned char *)endptr, &var_hash)) {
 				ZVAL_PTR(&rv, current);
-				if (!skip) {
-					php_set_session_var(name, &rv, &var_hash);
-				}
+				php_set_session_var(name, &rv, &var_hash);
 			} else {
 				zend_string_release(name);
 				retval = FAILURE;
 				goto break_outer_loop;
 			}
 		} else {
-			if(!skip) {
-				PS_ADD_VARL(name);
-			}
+			PS_ADD_VARL(name);
 		}
 		zend_string_release(name);
 
