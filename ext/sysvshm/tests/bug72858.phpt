@@ -4,7 +4,7 @@ Bug #72858 shm_attach null dereference
 <?php
 if (!extension_loaded("sysvshm")){ print 'skip'; }
 if (4 < PHP_INT_SIZE) { print "skip 32-bit only"; }
-if( substr(PHP_OS, 0, 3) != "WIN" ) { print "skip windows only" }
+if (substr(PHP_OS, 0, 3) != "WIN") { print "skip windows only"; }
 ?>
 --FILE--
 <?php
