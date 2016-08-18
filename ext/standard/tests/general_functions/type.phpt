@@ -63,7 +63,7 @@ string(6) "double"
 string(4) "NULL"
 string(7) "boolean"
 string(6) "string"
-string(12) "unknown type"
+string(17) "resource (closed)"
 string(8) "resource"
 string(6) "object"
 bool(true)

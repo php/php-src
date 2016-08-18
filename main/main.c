@@ -546,7 +546,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
-	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
@@ -2137,6 +2136,11 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
+	/* Check that we actually got the requested WSA version */
+	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 0) {
+		php_printf("\nwinsock.dll unusable. Requested version: %d.%d, got %d.%d", LOBYTE(wVersionRequested), HIBYTE(wVersionRequested), LOBYTE(wsaData.wVersion), HIBYTE(wsaData.wVersion));
+		return FAILURE;
+	}
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
@@ -2387,11 +2391,6 @@ void php_module_shutdown(void)
 	ts_free_worker_threads();
 #endif
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
-	/*close winsock */
-	WSACleanup();
-#endif
-
 #ifdef PHP_WIN32
 	php_win32_free_rng_lock();
 #endif
@@ -2399,6 +2398,11 @@ void php_module_shutdown(void)
 	sapi_flush();
 
 	zend_shutdown();
+
+#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+	/*close winsock */
+	WSACleanup();
+#endif
 
 	/* Destroys filter & transport registries too */
 	php_shutdown_stream_wrappers(module_number);

@@ -1891,10 +1891,7 @@ PHP_FUNCTION(imagegrabwindow)
 	HDC memDC;
 	HBITMAP memBM;
 	HBITMAP hOld;
-	HINSTANCE handle;
 	zend_long lwindow_handle;
-	typedef BOOL (WINAPI *tPrintWindow)(HWND, HDC,UINT);
-	tPrintWindow pPrintWindow = 0;
 	gdImagePtr im = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &lwindow_handle, &client_area) == FAILURE) {
@@ -1926,21 +1923,7 @@ PHP_FUNCTION(imagegrabwindow)
 	memBM	= CreateCompatibleBitmap(hdc, Width, Height);
 	hOld	= (HBITMAP) SelectObject (memDC, memBM);
 
-
-	handle = LoadLibrary("User32.dll");
-	if ( handle == 0 ) {
-		goto clean;
-	}
-	pPrintWindow = (tPrintWindow) GetProcAddress(handle, "PrintWindow");
-
-	if ( pPrintWindow )  {
-		pPrintWindow(window, memDC, (UINT) client_area);
-	} else {
-		php_error_docref(NULL, E_WARNING, "Windows API too old");
-		goto clean;
-	}
-
-	FreeLibrary(handle);
+	PrintWindow(window, memDC, (UINT) client_area);
 
 	im = gdImageCreateTrueColor(Width, Height);
 	if (im) {
@@ -1953,7 +1936,6 @@ PHP_FUNCTION(imagegrabwindow)
 		}
 	}
 
-clean:
 	SelectObject(memDC,hOld);
 	DeleteObject(memBM);
 	DeleteDC(memDC);

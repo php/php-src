@@ -208,6 +208,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	DWORD sec_desc_length = 0, desired_access = 0, granted_access = 0;
 	BYTE * psec_desc = NULL;
 	BOOL fAccess = FALSE;
+
 	realpath_cache_bucket * bucket = NULL;
 	char * real_path = NULL;
 
