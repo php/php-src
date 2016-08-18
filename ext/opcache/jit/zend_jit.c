@@ -17,6 +17,7 @@
 */
 
 #include <ZendAccelerator.h>
+#include "Zend/zend_execute.h"
 #include "jit/zend_jit.h"
 
 #ifdef HAVE_JIT
@@ -372,6 +373,8 @@ ZEND_API int zend_jit_startup(size_t size)
 	size_t page_size = jit_page_size();
 	int shared = 1;
 	void *buf;
+	dasm_State* dasm_state = NULL;
+	int ret;
 
 	/* Round up to the page size, which should be a power of two.  */
 	page_size = jit_page_size();
@@ -388,6 +391,20 @@ ZEND_API int zend_jit_startup(size_t size)
 
 	dasm_buf = dasm_ptr = buf;
 	dasm_end = (void*)(((char*)dasm_buf)+size);
+
+	zend_jit_unprotect();
+
+	dasm_init(&dasm_state, DASM_MAXSECTION);
+	dasm_setupglobal(&dasm_state, dasm_labels, lbl__MAX);
+	dasm_setup(&dasm_state, dasm_actions);
+	ret = zend_jit_stubs(&dasm_state) && dasm_link_and_encode(&dasm_state);
+	dasm_free(&dasm_state);
+
+	zend_jit_protect();
+
+	if (!ret) {
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }

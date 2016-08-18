@@ -39,6 +39,34 @@ static void* dasm_labels[lbl__MAX];
 
 |.section code
 
+static int zend_jit_stubs(dasm_State **Dst)
+{
+	// TODO: check interrupt_handler ???
+	|.align 16
+	|->interrupt_handler:
+	|.if X64
+	| add rsp, 8 // stack alignment
+	| mov64 rax, ((ptrdiff_t)zend_timeout)
+	| jmp rax
+	|.else
+	| add esp, 12 // stack alignment
+	| jmp extern zend_timeout
+	|.endif
+	|
+	|.align 16
+	|->exception_handler:
+	|.if X64
+	| add rsp, 8 // stack alignment
+	| mov64 rax, ((ptrdiff_t)EG(exception_op)->handler)
+	| jmp rax
+	|.else
+	| add esp, 12 // stack alignment
+	| jmp &(EG(exception_op)->handler)
+	|.endif
+
+	return 1;
+}
+
 static int zend_jit_align_func(dasm_State **Dst)
 {
 	|.align 16
@@ -49,6 +77,8 @@ static int zend_jit_prologue(dasm_State **Dst)
 {
 	|.if X64
 	| sub rsp, 8 // stack alignment
+	|.else
+	| sub esp, 12 // stack alignment
 	|.endif
 	return 1;
 }
@@ -61,18 +91,15 @@ static int zend_jit_label(dasm_State **Dst, unsigned int label)
 
 static int zend_jit_check_timeout(dasm_State **Dst)
 {
-	// ???
 	| cmp byte [&EG(vm_interrupt)], 0
-	| jne extern zend_timeout
+	| jne ->interrupt_handler
 	return 1;
 }
 
 static int zend_jit_check_exception(dasm_State **Dst)
 {
-	const void *handler = EG(exception_op)->handler;
-
 	| cmp aword [&EG(exception)], 0
-	| jne &handler
+	| jne ->exception_handler
 	return 1;
 }
 
@@ -99,6 +126,7 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 	| mov64 rax, ((ptrdiff_t)handler)
 	| jmp rax
 	|.else
+	| add esp, 12 // stack alignment
 	| jmp aword &handler
 	|.endif
 	return 1;
