@@ -40,7 +40,7 @@ do {
 	}
 	if ($handler != 'cdb') {
 		$db_writer = dba_open($db_filename, 'c'.$lock_flag, $handler);
-		if (($dba_reader = @dba_open($db_filename, 'r'.$lock_flag.($lock_flag ? 't' : ''), $handler))===false) {
+		if (($dba_reader = @dba_open($db_filename, 'r'.$lock_flag.'t', $handler))===false) {
 			echo "Read during write: not allowed\n";
 		} else {
 			echo "Read during write: allowed\n";
