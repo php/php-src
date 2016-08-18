@@ -835,7 +835,6 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	for (p = val; p < endptr; ) {
-		zval *tmp;
 		skip = 0;
 		namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
@@ -849,13 +848,6 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 		name = zend_string_init(p + 1, namelen, 0);
 
 		p += namelen + 1;
-
-		if ((tmp = zend_hash_find(&EG(symbol_table), name))) {
-			if ((Z_TYPE_P(tmp) == IS_ARRAY &&
-				Z_ARRVAL_P(tmp) == &EG(symbol_table)) || tmp == &PS(http_session_vars)) {
-				skip = 1;
-			}
-		}
 
 		if (has_value) {
 			zval *current, rv;
@@ -933,7 +925,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	p = val;
 
 	while (p < endptr) {
-		zval *tmp;
 		q = p;
 		skip = 0;
 		while (*q != PS_DELIMITER) {
@@ -949,13 +940,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		namelen = q - p;
 		name = zend_string_init(p, namelen, 0);
 		q++;
-
-		if ((tmp = zend_hash_find(&EG(symbol_table), name))) {
-			if ((Z_TYPE_P(tmp) == IS_ARRAY &&
-				Z_ARRVAL_P(tmp) == &EG(symbol_table)) || tmp == &PS(http_session_vars)) {
-				skip = 1;
-			}
-		}
 
 		if (has_value) {
 			zval *current, rv;
