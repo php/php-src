@@ -132,7 +132,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_oci
-PRIMARY MAINTAINER:  Unknown
+PRIMARY MAINTAINER:  Christopher Jones <sixd@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
