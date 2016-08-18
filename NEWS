@@ -1,15 +1,24 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-04 Aug 2016, PHP 5.6.25RC1
+18 Aug 2016, PHP 5.6.25
+
+- Bz2:
+  . Fixed bug #72837 (integer overflow in bzdecompress caused heap
+    corruption). (Stas)
 
 - Core:
+  . Fixed bug #70436 (Use After Free Vulnerability in unserialize()).
+    (Taoguang Chen)
+  . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
   . Fixed bug #72581 (previous property undefined in Exception after
     deserialization). (Laruence)
-  . Fixed bug #72024 (microtime() leaks memory). (maroszek at gmx dot net)
   . Implemented FR #72614 (Support "nmake test" on building extensions by
     phpize). (Yuji Uchiyama)
   . Fixed bug #72641 (phpize (on Windows) ignores PHP_PREFIX).
     (Yuji Uchiyama)
+  . Fixed bug #72663 (Create an Unexpected Object and Don't Invoke
+    __wakeup() in Deserialization). (Stas)
+  . Fixed bug #72681 (PHP Session Data Injection Vulnerability). (Stas)
 
 - Calendar:
   . Fixed bug #67976 (cal_days_month() fails for final month of the French
@@ -22,11 +31,18 @@ PHP                                                                        NEWS
     (maroszek at gmx dot net)
   . Fixed bug #71929 (Certification information (CERTINFO) data parsing error).
     (Pierrick)
+  . Fixed bug #72807 (integer overflow in curl_escape caused heap
+    corruption). (Stas)
 
 - DOM:
   . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
 
+- Ereg:
+  . Fixed bug #72838 (Integer overflow lead to heap corruption in
+    sql_regcase). (Stas)
+
 - EXIF:
+  . Fixed bug #72627 (Memory Leakage In exif_process_IFD_in_TIFF). (Stas)
   . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
 
 - Filter:
@@ -38,14 +54,16 @@ PHP                                                                        NEWS
     (gooh)
 
 - GD:
-  . Fixed bug #72596 (imagetypes function won't advertise WEBP support). (cmb)
-  . Fixed bug #72604 (imagearc() ignores thickness for full arcs). (cmb)
-  . Fixed bug #70315 (500 Server Error but page is fully rendered). (cmb)
   . Fixed bug #43828 (broken transparency of imagearc for truecolor in
     blendingmode). (cmb)
   . Fixed bug #66555 (Always false condition in ext/gd/libgd/gdkanji.c). (cmb)
   . Fixed bug #68712 (suspicious if-else statements). (cmb)
+  . Fixed bug #70315 (500 Server Error but page is fully rendered). (cmb)
+  . Fixed bug #72596 (imagetypes function won't advertise WEBP support). (cmb)
+  . Fixed bug #72604 (imagearc() ignores thickness for full arcs). (cmb)
+  . Fixed bug #72697 (select_colors write out-of-bounds). (Stas)
   . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
+  . Fixed bug #72730 (imagegammacorrect allows arbitrary write access). (Stas)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
@@ -71,23 +89,34 @@ PHP                                                                        NEWS
   . Fixed bug #72222 (ReflectionClass::export doesn't handle array constants).
     (Nikita Nefedov)
 
+- SNMP:
+  . Fixed bug #72708 (php_snmp_parse_oid integer overflow in memory
+    allocation). (djodjo at gmail dot com)
+
 - Standard:
   . Fixed bug #72330 (CSV fields incorrectly split if escape char followed by
     UTF chars). (cmb)
-
-- SPL:
-  . Fixed bug #72684 (AppendIterator segfault with closed generator). (Pierrick)
+  . Fixed bug #72836 (integer overflow in base64_decode). (Stas)
+  . Fixed bug #72848 (integer overflow in quoted_printable_encode). (Stas)
+  . Fixed bug #72849 (integer overflow in urlencode). (Stas)
+  . Fixed bug #72850 (integer overflow in php_uuencode). (Stas)
+  . Fixed bug #72716 (initialize buffer before read). (Stas)
 
 - Streams:
   . Fixed bug #41021 (Problems with the ftps wrapper). (vhuk)
   . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
   . Fixed bug #72667 (opendir() with ftp:// attempts to open data stream for
     non-existent directories). (vhuk)
+  . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
+    with IIS FTP 7.5, 8.5). (vhuk)
+  . Fixed bug #72771 (ftps:// wrapper is vulnerable to protocol downgrade
+    attack). (Stas)
 
 - SPL:
   . Fixed bug #72122 (IteratorIterator breaks '@' error suppression). (kinglozzer)
   . Fixed bug #72646 (SplFileObject::getCsvControl does not return the escape
     character). (cmb)
+  . Fixed bug #72684 (AppendIterator segfault with closed generator). (Pierrick)
 
 - SQLite3:
   . Implemented FR #72653 (SQLite should allow opening with empty filename).
@@ -96,6 +125,12 @@ PHP                                                                        NEWS
 - Wddx:
   . Fixed bug #72142 (WDDX Packet Injection Vulnerability in
     wddx_serialize_value()). (Taoguang Chen)
+  . Fixed bug #72749 (wddx_deserialize allows illegal memory access) (Stas)
+  . Fixed bug #72750 (wddx_deserialize null dereference). (Stas)
+  . Fixed bug #72790 (wddx_deserialize null dereference with invalid xml).
+    (Stas)
+  . Fixed bug #72799 (wddx_deserialize null dereference in
+    php_wddx_pop_element). (Stas)
 
 21 Jul 2016, PHP 5.6.24
 
