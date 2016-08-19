@@ -1,5 +1,5 @@
 --TEST--
-opendir() with 'ftps://' stream. 
+Bug #72771. FTPS to FTP downgrade not allowed when server doesn't support AUTH TLS or AUTH SSL.
 --SKIPIF--
 <?php
 if (array_search('ftp',stream_get_wrappers()) === FALSE) die("skip ftp wrapper not available.");
