@@ -16,25 +16,27 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id:$ */
+#define HAVE_PERFTOOLS 1
 
-#ifndef HAVE_JIT_H
-#define HAVE_JIT_H
+#include <stdio.h>
+#include <unistd.h>
 
-#define ZEND_JIT_DEBUG_ASM       (1<<0)
+static void zend_jit_perf_dump(const char *name, void *start, size_t size)
+{
+	static FILE *fp = NULL;
 
-#define ZEND_JIT_DEBUG_GDB       (1<<4)
-#define ZEND_JIT_DEBUG_PERF      (1<<5)
-#define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
+	if (!fp) {
+		char filename[64];
 
-
-ZEND_API int  zend_jit(zend_op_array *op_array, zend_script *script);
-ZEND_API void zend_jit_unprotect(void);
-ZEND_API void zend_jit_protect(void);
-ZEND_API int  zend_jit_startup(size_t size);
-ZEND_API void zend_jit_shutdown(void);
-
-#endif /* HAVE_JIT_H */
+		sprintf(filename, "/tmp/perf-%d.map", getpid());
+		fp = fopen(filename, "w");
+		if (!fp) {
+			return;
+		}
+	    setlinebuf(fp);
+	}
+	fprintf(fp, "%lx %x %s\n", start, size, name);
+}
 
 /*
  * Local variables:

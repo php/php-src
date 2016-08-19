@@ -35,7 +35,7 @@ struct _gdb_jit_descriptor {
 };
 
 struct _gdb_jit_descriptor __jit_debug_descriptor = {
-	1, GDBJIT_NOACTION, NULL, NULL
+	1, GDB_JIT_NOACTION, NULL, NULL
 };
 
 zend_never_inline void __jit_debug_register_code()

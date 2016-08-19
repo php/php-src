@@ -53,20 +53,13 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
 	return NULL;
 }
 
-static int zend_jit_disasm(zend_op_array *op_array,
-                           const void    *start,
-                           const void    *end)
+static int zend_jit_disasm(const char *name,
+                           const char *filename,
+                           const void *start,
+                           const void *end)
 {
-	if (op_array) {
-		if (op_array->function_name) {
-			if (op_array->scope) {
-				fprintf(stderr, "$_%s::%s: ; (%s)\n", ZSTR_VAL(op_array->scope->name), ZSTR_VAL(op_array->function_name), op_array->filename ? ZSTR_VAL(op_array->filename) : "unknown");
-			} else {
-				fprintf(stderr, "$_%s: ; (%s)\n", ZSTR_VAL(op_array->function_name), ZSTR_VAL(op_array->filename), op_array->filename ? ZSTR_VAL(op_array->filename) : "unknown");
-			}
-		} else if (op_array->filename) {
-			fprintf(stderr, "$_: ; (%s)\n", ZSTR_VAL(op_array->filename));
-		}
+	if (name) {
+		fprintf(stderr, "%s: ; (%s)\n", name, filename ? filename : "unknown");
 	}
 
 	ud_set_input_buffer(&ud, (uint8_t*)start, (uint8_t*)end - (uint8_t*)start);

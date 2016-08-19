@@ -18,6 +18,7 @@
 
 #include <ZendAccelerator.h>
 #include "Zend/zend_execute.h"
+#include "zend_smart_str.h"
 #include "jit/zend_jit.h"
 
 #ifdef HAVE_JIT
@@ -30,6 +31,11 @@
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.c"
 #include "jit/zend_jit_disasm_x86.c"
+#include "jit/zend_jit_gdb.c"
+#include "jit/zend_jit_perf_dump.c"
+#ifdef HAVE_OPROFILE
+# include "jit/zend_jit_oprofile.c"
+#endif
 
 #if _WIN32
 # include <Windows.h>
@@ -45,6 +51,34 @@
 static void *dasm_buf = NULL;
 static void *dasm_ptr = NULL;
 static void *dasm_end = NULL;
+
+static zend_string *zend_jit_func_name(zend_op_array *op_array)
+{
+	smart_str buf = {0};
+
+	if (op_array->function_name) {
+		if (op_array->scope) {
+			smart_str_appends(&buf, "JIT$");
+			smart_str_appendl(&buf, ZSTR_VAL(op_array->scope->name), ZSTR_LEN(op_array->scope->name));
+			smart_str_appends(&buf, "::");
+			smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
+			smart_str_0(&buf);
+			return buf.s;
+		} else {
+			smart_str_appends(&buf, "JIT$");
+			smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
+			smart_str_0(&buf);
+			return buf.s;
+		}
+	} else if (op_array->filename) {
+		smart_str_appends(&buf, "JIT$");
+		smart_str_appendl(&buf, ZSTR_VAL(op_array->filename), ZSTR_LEN(op_array->filename));
+		smart_str_0(&buf);
+		return buf.s;
+	} else {
+		return NULL;
+	}
+}
 
 static void *dasm_link_and_encode(dasm_State **dasm_state)
 {
@@ -337,7 +371,43 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
-		zend_jit_disasm(op_array, handler, dasm_ptr);
+		zend_string *name = zend_jit_func_name(op_array);
+
+		zend_jit_disasm(
+			name ? ZSTR_VAL(name) : NULL,
+			op_array->filename ? ZSTR_VAL(op_array->filename) : NULL,
+			handler, dasm_ptr);
+		if (name) {
+			zend_string_release(name);
+		}
+	}
+#endif
+
+#ifdef HAVE_OPROFILE
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
+		zend_string *name = zend_jit_func_name(op_array);
+
+		zend_jit_oprofile_register(
+			name ? ZSTR_VAL(name) : NULL,
+			handler,
+			(char*)dasm_ptr - (char*)handler);
+		if (name) {
+			zend_string_release(name);
+		}
+	}
+#endif
+
+#ifdef HAVE_PERFTOOLS
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_PERF) {
+		zend_string *name = zend_jit_func_name(op_array);
+
+		if (name) {
+			zend_jit_perf_dump(
+				ZSTR_VAL(name),
+				handler,
+				(char*)dasm_ptr - (char*)handler);
+			zend_string_release(name);
+		}
 	}
 #endif
 
@@ -374,6 +444,12 @@ ZEND_API int zend_jit_startup(size_t size)
 	dasm_State* dasm_state = NULL;
 	int ret;
 
+#ifdef HAVE_OPROFILE
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
+		shared = 0;
+	}
+#endif
+
 	/* Round up to the page size, which should be a power of two.  */
 	page_size = jit_page_size();
 	if (!page_size || (page_size & (page_size - 1))) {
@@ -398,6 +474,14 @@ ZEND_API int zend_jit_startup(size_t size)
 		}
 	}
 #endif
+#ifdef HAVE_OPROFILE
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
+		if (!zend_jit_oprofile_startup()) {
+			// TODO: error reporting and cleanup ???
+			return FAILURE;
+		}
+	}
+#endif
 
 	zend_jit_unprotect();
 
@@ -412,7 +496,7 @@ ZEND_API int zend_jit_startup(size_t size)
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
 		if (dasm_buf != dasm_ptr) {
-			zend_jit_disasm(NULL, dasm_buf, dasm_ptr);
+			zend_jit_disasm(NULL, NULL, dasm_buf, dasm_ptr);
 		}
 	}
 #endif
@@ -427,6 +511,11 @@ ZEND_API int zend_jit_startup(size_t size)
 
 ZEND_API void zend_jit_shutdown(void)
 {
+#ifdef HAVE_OPROFILE
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
+		zend_jit_oprofile_shutdown();
+	}
+#endif
 	if (dasm_buf) {
 		jit_free(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf));
 	}

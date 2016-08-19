@@ -16,25 +16,38 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id:$ */
+#define HAVE_OPROFILE 1
 
-#ifndef HAVE_JIT_H
-#define HAVE_JIT_H
+#include <opagent.h>
 
-#define ZEND_JIT_DEBUG_ASM       (1<<0)
+static op_agent_t op_agent = NULL;
 
-#define ZEND_JIT_DEBUG_GDB       (1<<4)
-#define ZEND_JIT_DEBUG_PERF      (1<<5)
-#define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
+static void zend_jit_oprofile_register(const char *name,
+                                       const void *start,
+                                       size_t      size)
+{
+	if (op_agent) {
+		op_write_native_code(op_agent, name, (uint64_t)(zend_uintptr_t)start, start, size);
+	}
+}
 
+static int zend_jit_oprofile_startup(void)
+{
+	op_agent = op_open_agent();
+	if (!op_agent) {
+		fprintf(stderr, "OpAgent initialization failed [%d]!\n", errno);
+		return 0;
+	}
+	return 1;
+}
 
-ZEND_API int  zend_jit(zend_op_array *op_array, zend_script *script);
-ZEND_API void zend_jit_unprotect(void);
-ZEND_API void zend_jit_protect(void);
-ZEND_API int  zend_jit_startup(size_t size);
-ZEND_API void zend_jit_shutdown(void);
-
-#endif /* HAVE_JIT_H */
+static void zend_jit_oprofile_shutdown(void)
+{
+	if (op_agent) {
+//???		sleep(60);
+		op_close_agent(op_agent);
+	}
+}
 
 /*
  * Local variables:

@@ -17,6 +17,9 @@ PHP_ARG_ENABLE(opcache-jit, whether to enable JIT,
 
 if test "$PHP_OPCACHE" != "no"; then
 
+  dnl Always build as shared extension
+  ext_shared=yes
+
   if test "$PHP_OPCACHE_FILE" = "yes"; then
     AC_DEFINE(HAVE_OPCACHE_FILE_CACHE, 1, [Define to enable file based caching (experimental)])
   fi
@@ -28,7 +31,8 @@ if test "$PHP_OPCACHE" != "no"; then
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     ZEND_JIT_SRC=jit/zend_jit.c
-    # Find out which ABI we are using.
+
+    dnl Find out which ABI we are using.
     echo 'int i;' > conftest.$ac_ext
     if AC_TRY_EVAL(ac_compile); then
       case `/usr/bin/file conftest.o` in
@@ -39,6 +43,31 @@ if test "$PHP_OPCACHE" != "no"; then
       esac
     fi
     rm -rf conftest*
+
+    AC_MSG_CHECKING(for opagent in default path)
+    for i in /usr/local /usr; do
+      if test -r $i/include/opagent.h; then
+        OPAGENT_DIR=$i
+        AC_MSG_RESULT(found in $i)
+        break
+      fi
+    done
+    if test -z "$OPAGENT_DIR"; then
+      AC_MSG_RESULT(not found)
+    else
+      PHP_CHECK_LIBRARY(opagent, op_write_native_code,
+      [
+        AC_DEFINE(HAVE_OPROFILE,1,[ ])
+        PHP_ADD_INCLUDE($OPAGENT_DIR/include)
+        PHP_ADD_LIBRARY_WITH_PATH(opagent, $OPAGENT_DIR/$PHP_LIBDIR/oprofile, OPCACHE_SHARED_LIBADD)
+        PHP_SUBST(OPCACHE_SHARED_LIBADD)
+      ],[
+        AC_MSG_RESULT(not found)
+      ],[
+        -L$OPAGENT_DIR/$PHP_LIBDIR/oprofile
+      ])
+    fi
+
   fi
 
   AC_CHECK_FUNC(mprotect,[
@@ -367,12 +396,12 @@ AC_MSG_CHECKING("whether flock struct is linux ordered")
 AC_TRY_RUN([
   #include <fcntl.h>
   struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
+  int main() {
     if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 3 && lock.l_len == 4) {
 		return 0;
     }
     return 1;
-  } 
+  }
 ], [
 	flock_type=linux
     AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
@@ -383,15 +412,15 @@ AC_MSG_CHECKING("whether flock struct is BSD ordered")
 AC_TRY_RUN([
   #include <fcntl.h>
   struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
+  int main() {
     if(lock.l_start == 1 && lock.l_len == 2 && lock.l_type == 4 && lock.l_whence == 5) {
 		return 0;
     }
     return 1;
-  } 
+  }
 ], [
 	flock_type=bsd
-    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type]) 
+    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type])
     AC_MSG_RESULT("yes")
 ], AC_MSG_RESULT("no") )
 
