@@ -56,7 +56,7 @@ static void *dasm_link_and_encode(dasm_State **dasm_state)
 		// TODO: dasm_link() failed ???
 		return NULL;
 	}
-	
+
 	size = ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT);
 
 	if ((void*)((char*)dasm_ptr + size) > dasm_end) {
@@ -70,10 +70,10 @@ static void *dasm_link_and_encode(dasm_State **dasm_state)
 		// TODO: dasm_encode() failed ???
 		return NULL;
 	}
-	
+
 	entry = dasm_ptr;
 	dasm_ptr = (void*)((char*)dasm_ptr + size);
-	
+
 	return entry;
 }
 
@@ -88,7 +88,7 @@ static size_t jit_page_size(void)
 #endif
 }
 
-static void *jit_alloc(size_t size, int shared) 
+static void *jit_alloc(size_t size, int shared)
 {
 #ifdef _WIN32
 	return VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
@@ -104,7 +104,7 @@ static void *jit_alloc(size_t size, int shared)
 #  endif
 			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
     if (p != MAP_FAILED) {
-    	return (void*)p;
+		return (void*)p;
 	}
 # endif
 	p = mmap(NULL, size,
@@ -115,7 +115,7 @@ static void *jit_alloc(size_t size, int shared)
 #  endif
 			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS, -1, 0);
     if (p == MAP_FAILED) {
-    	return NULL;
+		return NULL;
 	}
 
     return (void*)p;
@@ -125,14 +125,14 @@ static void *jit_alloc(size_t size, int shared)
 static void jit_free(void *p, size_t size)
 {
 #ifdef _WIN32
-    VirtualFree(p, 0, MEM_RELEASE); 
+    VirtualFree(p, 0, MEM_RELEASE);
 #else
 	munmap(p, size);
 #endif
 }
-  
+
 ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
-{	
+{
 	uint32_t flags;
 	zend_ssa ssa;
 	void *checkpoint;
@@ -273,8 +273,8 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 						    /* smart branch */
 							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
 								goto jit_failure;
-			            	}
-			            	break;
+							}
+							break;
 						}
 					}
 					/* break missing intentionally */
@@ -333,7 +333,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 				dasm_getpclabel(&dasm_state, ssa.cfg.blocks_count + b));
 		}
 	}
-	dasm_free(&dasm_state);	
+	dasm_free(&dasm_state);
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {

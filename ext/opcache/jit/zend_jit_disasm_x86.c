@@ -37,12 +37,12 @@
 
 static struct ud ud;
 
-static const char* zend_jit_disasm_resolver(struct ud *ud, 
+static const char* zend_jit_disasm_resolver(struct ud *ud,
                                             uint64_t   addr,
                                             int64_t   *offset)
 {
 	void *a = (void*)(zend_uintptr_t)(addr);
-	Dl_info info;	
+	Dl_info info;
 
 	if (dladdr(a, &info)
 	 && info.dli_sname != NULL
@@ -68,7 +68,7 @@ static int zend_jit_disasm(zend_op_array *op_array,
 			fprintf(stderr, "$_: ; (%s)\n", ZSTR_VAL(op_array->filename));
 		}
 	}
-				
+
 	ud_set_input_buffer(&ud, (uint8_t*)start, (uint8_t*)end - (uint8_t*)start);
 	ud_set_pc(&ud, (uint64_t)(uintptr_t)start);
 
