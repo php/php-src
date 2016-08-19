@@ -383,6 +383,20 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 	}
 #endif
 
+#ifdef HAVE_GDB
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
+		zend_string *name = zend_jit_func_name(op_array);
+
+		if (name) {
+			zend_jit_perf_dump(
+				ZSTR_VAL(name),
+				handler,
+				(char*)dasm_ptr - (char*)handler);
+			zend_string_release(name);
+		}
+	}
+#endif
+
 #ifdef HAVE_OPROFILE
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
 		zend_string *name = zend_jit_func_name(op_array);
