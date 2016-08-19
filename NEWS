@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #72852 (imap_mail null dereference). (Anatol)
 
+- Intl:
+  . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
+    sequence). (cmb)
+
 - JSON:
   . Fixed bug #72787 (json_decode reads out of bounds). (Jakub Zelenka)
 
