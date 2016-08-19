@@ -561,7 +561,8 @@ static PHP_FUNCTION(bzcompress)
    Decompresses BZip2 compressed data */
 static PHP_FUNCTION(bzdecompress)
 {
-	char *source, *dest;
+	char *source;
+	zend_string *dest;
 	size_t source_len;
 	int error;
 	zend_long small = 0;
@@ -588,34 +589,40 @@ static PHP_FUNCTION(bzdecompress)
 
 	/* in most cases bz2 offers at least 2:1 compression, so we use that as our base */
 	bzs.avail_out = source_len * 2;
-	bzs.next_out = dest = emalloc(bzs.avail_out + 1);
+	dest = zend_string_alloc(bzs.avail_out + 1, 0);
+	bzs.next_out = ZSTR_VAL(dest);
 
 	while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
+#if !ZEND_ENABLE_ZVAL_LONG64
 		if (size > SIZE_MAX) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-		dest = safe_erealloc(dest, 1, bzs.avail_out+1, (size_t) size );
-		bzs.next_out = dest + size;
+#endif
+		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
+		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-		if (size > SIZE_MAX) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
-			efree(dest);
+#if !ZEND_ENABLE_ZVAL_LONG64
+		if (UNEXPECTED(size > SIZE_MAX)) {
+			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
+			zend_string_free(dest);
 			RETVAL_LONG(BZ_MEM_ERROR);
-		} else {
-			dest = safe_erealloc(dest, 1, (size_t) size, 1);
-			dest[size] = '\0';
-			RETVAL_STRINGL(dest, (size_t) size);
-			efree(dest);
+		} else
+#endif
+		{
+			dest = zend_string_safe_realloc(dest, 1, (size_t)size, 1, 0);
+			ZSTR_LEN(dest) = (size_t)size;
+			ZSTR_VAL(dest)[(size_t)size] = '\0';
+			RETVAL_STR(dest);
 		}
 	} else { /* real error */
-		efree(dest);
+		zend_string_free(dest);
 		RETVAL_LONG(error);
 	}
 
