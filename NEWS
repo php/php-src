@@ -62,6 +62,9 @@ PHP                                                                        NEWS
   . Implemented RFC: Session ID without hashing. (Yasuo)
     https://wiki.php.net/rfc/session-id-without-hashing
 
+- SPL:
+  . Fixed bug #72888 (Segfault on clone on splFileObject). (Laruence)
+
 - SQLite3:
   . Updated to SQLite3 3.14.0. (cmb)
 
