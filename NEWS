@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC1
 
+- IMAP:
+  . Fixed bug #72852 (imap_mail null dereference). (Anatol)
 
 
 18 Aug 2016, PHP 7.1.0beta3
