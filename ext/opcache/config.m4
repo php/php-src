@@ -27,6 +27,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
+    ZEND_JIT_SRC=jit/zend_jit.c
     # Find out which ABI we are using.
     echo 'int i;' > conftest.$ac_ext
     if AC_TRY_EVAL(ac_compile); then
@@ -429,12 +430,14 @@ fi
 	Optimizer/zend_func_info.c \
 	Optimizer/zend_call_graph.c \
 	Optimizer/zend_dump.c \
-	jit/zend_jit.c,
+	$ZEND_JIT_SRC,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
-  PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
-  PHP_ADD_MAKEFILE_FRAGMENT
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
+    PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
+  fi
 fi

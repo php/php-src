@@ -571,7 +571,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 #ifdef HAVE_JIT
 	if (do_jit && ZCG(accel_directives).jit_buffer_size) {
-		zend_jit(op_array, main_persistent_script TSRMLS_CC);
+		zend_jit(op_array, &main_persistent_script->script);
 	}
 #endif
 }

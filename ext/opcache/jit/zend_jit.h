@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Zend OPcache                                                         |
+   | Zend JIT                                                             |
    +----------------------------------------------------------------------+
    | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,9 @@
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
 
-ZEND_API int  zend_jit(zend_op_array *op_array, zend_persistent_script* main_persistent_script);
+#define ZEND_JIT_DEBUG_ASM  (1<<0)
+
+ZEND_API int  zend_jit(zend_op_array *op_array, zend_script *script);
 ZEND_API void zend_jit_unprotect(void);
 ZEND_API void zend_jit_protect(void);
 ZEND_API int  zend_jit_startup(size_t size);

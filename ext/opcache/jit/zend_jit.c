@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Zend OPcache                                                         |
+   | Zend JIT                                                             |
    +----------------------------------------------------------------------+
    | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,6 +29,7 @@
 #include "dynasm/dasm_proto.h"
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.c"
+#include "jit/zend_jit_disasm_x86.c"
 
 #if _WIN32
 # include <Windows.h>
@@ -130,7 +131,7 @@ static void jit_free(void *p, size_t size)
 #endif
 }
   
-ZEND_API int zend_jit(zend_op_array *op_array, zend_persistent_script* main_persistent_script)
+ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 {	
 	uint32_t flags;
 	zend_ssa ssa;
@@ -333,6 +334,13 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_persistent_script* main_pers
 		}
 	}
 	dasm_free(&dasm_state);	
+
+#ifdef HAVE_DISASM
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+		zend_jit_disasm(op_array, handler, dasm_ptr);
+	}
+#endif
+
 	zend_arena_release(&CG(arena), checkpoint);
 	return SUCCESS;
 
@@ -382,6 +390,15 @@ ZEND_API int zend_jit_startup(size_t size)
 	dasm_buf = dasm_ptr = buf;
 	dasm_end = (void*)(((char*)dasm_buf)+size);
 
+#ifdef HAVE_DISASM
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+		if (!zend_jit_disasm_init()) {
+			// TODO: error reporting and cleanup ???
+			return FAILURE;
+		}
+	}
+#endif
+
 	zend_jit_unprotect();
 
 	dasm_init(&dasm_state, DASM_MAXSECTION);
@@ -392,7 +409,16 @@ ZEND_API int zend_jit_startup(size_t size)
 
 	zend_jit_protect();
 
+#ifdef HAVE_DISASM
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+		if (dasm_buf != dasm_ptr) {
+			zend_jit_disasm(NULL, dasm_buf, dasm_ptr);
+		}
+	}
+#endif
+
 	if (!ret) {
+		// TODO: error reporting and cleanup ???
 		return FAILURE;
 	}
 
@@ -408,7 +434,7 @@ ZEND_API void zend_jit_shutdown(void)
 
 #else /* HAVE_JIT */
 
-ZEND_API int zend_jit(zend_op_array *op_array, zend_persistent_script* main_persistent_script)
+ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 {
 	return FAILURE;
 }
