@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0beta3
+?? ??? 2016, PHP 7.1.0RC1
+
+
+
+18 Aug 2016, PHP 7.1.0beta3
 
 - Core:
   . Fixed bug #72813 (Segfault with __get returned by ref). (Laruence)
