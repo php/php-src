@@ -69,6 +69,8 @@ static int zend_jit_disasm(const char *name,
 		fprintf(stderr, "0x%" PRIx64 ":\t%s\n", ud_insn_off(&ud), ud_insn_asm(&ud));
 	}
 	fprintf(stderr, "\n");
+
+	return 1;
 }
 
 static int zend_jit_disasm_init(void)

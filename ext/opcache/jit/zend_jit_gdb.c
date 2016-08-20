@@ -118,7 +118,7 @@ static const struct _elf_header template = {
 	.eendian     = 1,
 #endif
 	.eversion    = 1,
-#if deined(Linux)
+#if defined(Linux)
 	.eosabi      = 0,  /* Nope, it's not 3. ??? */
 #elif defined(__FreeBSD__)
 	.eosabi      = 9,
@@ -136,7 +136,7 @@ static const struct _elf_header template = {
 	.eabiversion = 0,
 	.epad        = { 0, 0, 0, 0, 0, 0, 0 },
 	.type        = 1,
-#if defind(__i386__)
+#if defined(__i386__)
 	.machine     = 3,
 #elif defined(__x86_64__)
 	.machine     = 62,
