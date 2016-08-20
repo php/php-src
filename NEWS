@@ -57,6 +57,7 @@ PHP                                                                        NEWS
 
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
+  . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
 
 - ZIP:
   . Fixed bug #68302 (impossible to compile php with zip support). (cmb)
