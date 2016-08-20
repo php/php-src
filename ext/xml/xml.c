@@ -67,7 +67,7 @@ ZEND_GET_MODULE(xml)
 /* }}} */
 
 
-#define SKIP_TAGSTART(str) ((str) + (parser->toffset > strlen(str) ? strlen(str) : + parser->toffset))
+#define SKIP_TAGSTART(str) ((str) + (parser->toffset > strlen(str) ? strlen(str) : parser->toffset))
 
 
 /* {{{ function prototypes */
@@ -1638,7 +1638,7 @@ PHP_FUNCTION(xml_parser_set_option)
 			convert_to_long_ex(val);
 			parser->toffset = Z_LVAL_PP(val);
 			if (parser->toffset < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "tagstart ignored");
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "tagstart ignored, because it is out of range");
 				parser->toffset = 0;
 			}
 			break;
