@@ -2,12 +2,17 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC1
 
-- IMAP:
-  . Fixed bug #72852 (imap_mail null dereference). (Anatol)
+- Reflection:
+  . Reverted prepending \ for class names and ? for nullable types returned
+    from ReflectionType::__toString(). (Trowski)
 
 - Intl:
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
+
+- Reflection:
+  . Reverted prepending \ for class names and ? for nullable types returned
+    from ReflectionType::__toString(). (Trowski)
 
 - XML:
   . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
@@ -67,8 +72,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Implemented request #38992 (invoke() and invokeArgs() static method calls
     should match). (cmb).
-  . Add ReflectionNamedType::getName() and return leading "?" for nullable types
-    from ReflectionType::__toString(). (Trowski)
+  . Add ReflectionNamedType::getName(). This method should be used instead of
+    ReflectionType::__toString()
 
 - Session:
   . Implemented RFC: Session ID without hashing. (Yasuo)

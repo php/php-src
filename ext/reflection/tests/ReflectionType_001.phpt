@@ -94,7 +94,7 @@ string(8) "callable"
 bool(true)
 bool(true)
 bool(false)
-string(9) "?stdClass"
+string(8) "stdClass"
 ** Function 0 - Parameter 4
 bool(false)
 ** Function 0 - Parameter 5
