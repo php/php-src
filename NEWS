@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #72852 (imap_mail null dereference). (Anatol)
 
+- Intl:
+  . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
+    sequence). (cmb)
+
 - OCI8
   . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
   . Fixed bug #72524 (Binding null values triggers ORA-24816 error). (Chris Jones)
