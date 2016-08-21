@@ -2266,26 +2266,6 @@ void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, 
 		return;
 	}
 
-	/* Destination is palette based */
-	if (src->trueColor) { /* But source is truecolor (Ouch!) */
-		toy = dstY;
-		for (y = srcY; (y < (srcY + h)); y++) {
-			tox = dstX;
-			for (x = srcX; x < (srcX + w); x++) {
-				int nc;
-				c = gdImageGetPixel (src, x, y);
-
-				/* Get best match possible. */
-				nc = gdImageColorResolveAlpha(dst, gdTrueColorGetRed(c), gdTrueColorGetGreen(c), gdTrueColorGetBlue(c), gdTrueColorGetAlpha(c));
-
-				gdImageSetPixel(dst, tox, toy, nc);
-				tox++;
-			}
-			toy++;
-		}
-		return;
-	}
-
 	/* Palette based to palette based */
 	for (i = 0; i < gdMaxColors; i++) {
 		colorMap[i] = (-1);
