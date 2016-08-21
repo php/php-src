@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 -GD:
   . Fixed bug #66005 (imagecopy does not support 1bit transparency on truecolor
     images). (cmb)
+  . Fixed bug #72913 (imagecopy() loses single-color transparency on palette
+    images). (cmb)
 
 - Reflection:
   . Reverted prepending \ for class names and ? for nullable types returned
