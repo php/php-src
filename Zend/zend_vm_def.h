@@ -1817,11 +1817,14 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	if ((OP2_TYPE == IS_VAR && UNEXPECTED(value_ptr_ptr == NULL)) ||
 	    (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr_ptr == NULL))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-	}
-	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
-
-	if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_PP(variable_ptr_ptr);
+	} else if ((OP2_TYPE == IS_VAR && UNEXPECTED(*value_ptr_ptr == &EG(error_zval))) ||
+		(OP1_TYPE == IS_VAR && UNEXPECTED(*variable_ptr_ptr == &EG(error_zval)))) {
+		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+		if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+			Z_DELREF_PP(variable_ptr_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {

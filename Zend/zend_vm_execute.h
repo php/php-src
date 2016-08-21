@@ -20408,11 +20408,14 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	if ((IS_VAR == IS_VAR && UNEXPECTED(value_ptr_ptr == NULL)) ||
 	    (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr_ptr == NULL))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-	}
-	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
-
-	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_PP(variable_ptr_ptr);
+	} else if ((IS_VAR == IS_VAR && UNEXPECTED(*value_ptr_ptr == &EG(error_zval))) ||
+		(IS_VAR == IS_VAR && UNEXPECTED(*variable_ptr_ptr == &EG(error_zval)))) {
+		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+		if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+			Z_DELREF_PP(variable_ptr_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -23903,11 +23906,14 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	if ((IS_CV == IS_VAR && UNEXPECTED(value_ptr_ptr == NULL)) ||
 	    (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr_ptr == NULL))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-	}
-	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
-
-	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_PP(variable_ptr_ptr);
+	} else if ((IS_CV == IS_VAR && UNEXPECTED(*value_ptr_ptr == &EG(error_zval))) ||
+		(IS_VAR == IS_VAR && UNEXPECTED(*variable_ptr_ptr == &EG(error_zval)))) {
+		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+		if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+			Z_DELREF_PP(variable_ptr_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -37721,11 +37727,14 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	if ((IS_VAR == IS_VAR && UNEXPECTED(value_ptr_ptr == NULL)) ||
 	    (IS_CV == IS_VAR && UNEXPECTED(variable_ptr_ptr == NULL))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-	}
-	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
-
-	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_PP(variable_ptr_ptr);
+	} else if ((IS_VAR == IS_VAR && UNEXPECTED(*value_ptr_ptr == &EG(error_zval))) ||
+		(IS_CV == IS_VAR && UNEXPECTED(*variable_ptr_ptr == &EG(error_zval)))) {
+		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+		if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+			Z_DELREF_PP(variable_ptr_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -40929,11 +40938,14 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	if ((IS_CV == IS_VAR && UNEXPECTED(value_ptr_ptr == NULL)) ||
 	    (IS_CV == IS_VAR && UNEXPECTED(variable_ptr_ptr == NULL))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-	}
-	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
-
-	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_PP(variable_ptr_ptr);
+	} else if ((IS_CV == IS_VAR && UNEXPECTED(*value_ptr_ptr == &EG(error_zval))) ||
+		(IS_CV == IS_VAR && UNEXPECTED(*variable_ptr_ptr == &EG(error_zval)))) {
+		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+		if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+			Z_DELREF_PP(variable_ptr_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {

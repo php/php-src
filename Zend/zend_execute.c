@@ -522,9 +522,7 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 	zval *variable_ptr = *variable_ptr_ptr;
 	zval *value_ptr = *value_ptr_ptr;
 
-	if (variable_ptr == &EG(error_zval) || value_ptr == &EG(error_zval)) {
-		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
-	} else if (variable_ptr != value_ptr) {
+	if (variable_ptr != value_ptr) {
 		if (!PZVAL_IS_REF(value_ptr)) {
 			/* break it away */
 			Z_DELREF_P(value_ptr);
