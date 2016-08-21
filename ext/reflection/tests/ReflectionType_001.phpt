@@ -79,7 +79,7 @@ foreach ([
 bool(true)
 bool(false)
 bool(false)
-string(9) "\stdClass"
+string(8) "stdClass"
 ** Function 0 - Parameter 1
 bool(true)
 bool(false)
@@ -94,7 +94,7 @@ string(8) "callable"
 bool(true)
 bool(true)
 bool(false)
-string(10) "?\stdClass"
+string(8) "stdClass"
 ** Function 0 - Parameter 4
 bool(false)
 ** Function 0 - Parameter 5
@@ -121,19 +121,19 @@ string(5) "float"
 bool(true)
 bool(false)
 bool(false)
-string(12) "\NotExisting"
+string(11) "NotExisting"
 ** Function 1 - Parameter 0
 bool(true)
 bool(false)
 bool(false)
-string(5) "\Test"
+string(4) "Test"
 
 *** methods
 ** Method 0 - parameter 0
 bool(true)
 bool(false)
 bool(false)
-string(11) "\SplSubject"
+string(10) "SplSubject"
 ** Method 1 - parameter 0
 bool(true)
 bool(false)
@@ -148,7 +148,7 @@ string(6) "parent"
 bool(true)
 bool(false)
 bool(false)
-string(5) "\Test"
+string(4) "Test"
 
 *** return types
 ** Function/method return type 0
@@ -157,7 +157,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
-string(9) "\stdClass"
+string(8) "stdClass"
 ** Function/method return type 2
 bool(true)
 bool(false)
@@ -177,9 +177,9 @@ string(6) "parent"
 bool(true)
 bool(false)
 bool(false)
-string(5) "\Test"
+string(4) "Test"
 ** Function/method return type 6
 bool(true)
 bool(false)
 bool(false)
-string(5) "\Test"
+string(4) "Test"
