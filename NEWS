@@ -20,6 +20,7 @@ PHP                                                                        NEWS
     images). (cmb)
   . Fixed bug #72913 (imagecopy() loses single-color transparency on palette
     images). (cmb)
+  . Fixed bug #68716 (possible resource leaks in _php_image_convert()). (cmb)
 
 - IMAP:
   . Fixed bug #72852 (imap_mail null dereference). (Anatol)
