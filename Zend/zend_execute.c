@@ -586,7 +586,9 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 static inline int make_real_object(zval *object)
 {
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
+		if (UNEXPECTED(object == &EG(error_zval))) {
+			return 0;
+		} else if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
 			/* nothing to destroy */
 		} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 			zval_ptr_dtor_nogc(object);
