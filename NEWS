@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     images). (cmb)
   . Fixed bug #72913 (imagecopy() loses single-color transparency on palette
     images). (cmb)
+  . Fixed bug #68716 (possible resource leaks in _php_image_convert()). (cmb)
 
 - Reflection:
   . Reverted prepending \ for class names and ? for nullable types returned
