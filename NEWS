@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC1
 
+-GD:
+  . Fixed bug #66005 (imagecopy does not support 1bit transparency on truecolor
+    images). (cmb)
+
 - Reflection:
   . Reverted prepending \ for class names and ? for nullable types returned
     from ReflectionType::__toString(). (Trowski)
