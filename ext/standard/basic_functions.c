@@ -328,6 +328,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_search, 0, 0, 2)
 	ZEND_ARG_INFO(0, needle)
 	ZEND_ARG_INFO(0, haystack) /* ARRAY_INFO(0, haystack, 0) */
 	ZEND_ARG_INFO(0, strict)
+	ZEND_ARG_INFO(0, all)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extract, 0, 0, 1)

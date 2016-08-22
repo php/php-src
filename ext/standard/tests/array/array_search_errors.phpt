@@ -14,7 +14,7 @@ var_dump( array_search() );
 
 /* unexpected no.of arguments in array_search() */
 $var = array("mon", "tues", "wed", "thurs");
-var_dump( array_search(1, $var, 0, "test") );
+var_dump( array_search(1, $var, 0, "test", "foo") );
 var_dump( array_search("test") );
 
 /* unexpected second argument in array_search() */
@@ -30,7 +30,7 @@ echo "Done\n";
 Warning: array_search() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_search() expects at most 3 parameters, 4 given in %s on line %d
+Warning: array_search() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: array_search() expects at least 2 parameters, 1 given in %s on line %d
