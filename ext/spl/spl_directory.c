@@ -255,6 +255,9 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 	intern->u.dir.index = 0;
 
 	if (EG(exception) || intern->u.dir.dirp == NULL) {
+		if (intern->_path_len > 0) {
+			efree(intern->_path);
+		}
 		intern->u.dir.entry.d_name[0] = '\0';
 		if (!EG(exception)) {
 			/* open failed w/out notice (turned to exception due to EH_THROW) */
@@ -290,6 +293,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		if (!EG(exception)) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot open file '%s'", intern->file_name_len ? intern->file_name : "");
 		}
+		intern->_path = NULL;
 		intern->file_name = NULL; /* until here it is not a copy */
 		intern->u.file.open_mode = NULL;
 		return FAILURE;
@@ -675,9 +679,11 @@ zend_function *spl_filesystem_object_get_method_check(zval **object_ptr, char *m
 void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_flags) /* {{{ */
 {
 	spl_filesystem_object *intern;
-	char *path;
+	char *path, *orig_path, *orig_intern_path;
 	int parsed, len;
 	long flags;
+	php_stream *orig_stream;
+	php_stream_dirent orig_dirent;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
@@ -707,6 +713,13 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_fla
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	intern->flags = flags;
+
+	/* backup state for later recovery in case of exception thrown when double construct */
+	orig_path = intern->_path;
+	orig_intern_path = intern->orig_path;
+	orig_stream = intern->u.dir.dirp;
+	orig_dirent = intern->u.dir.entry;
+
 #ifdef HAVE_GLOB
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && strstr(path, "glob://") != path) {
 		spprintf(&path, 0, "glob://%s", path);
@@ -716,10 +729,24 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_fla
 #endif
 	{
 		spl_filesystem_dir_open(intern, path TSRMLS_CC);
-
 	}
 
-	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
+	if (!EG(exception)) {
+		intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
+	}
+
+	if (orig_path) {
+		if (EG(exception)) {
+			intern->_path = orig_path;
+			intern->_path_len = strlen(orig_path);
+			intern->u.dir.dirp = orig_stream;
+			intern->u.dir.entry = orig_dirent;
+			intern->orig_path = orig_intern_path;
+		} else {
+			php_stream_close(orig_stream);
+			efree(orig_path);
+		}
+	}
 
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
@@ -2285,11 +2312,19 @@ SPL_METHOD(SplFileObject, __construct)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zend_bool use_include_path = 0;
 	char *p1, *p2;
-	char *tmp_path;
+	char *tmp_path, *orig_path, *orig_file_name, *orig_intern_path, *orig_open_mode;
 	int   tmp_path_len;
+	php_stream *orig_stream;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
+
+	/* backup state for later recovery in case of exception thrown when double construct */
+	orig_stream = intern->u.file.stream;
+	orig_path = intern->_path;
+	orig_intern_path = intern->orig_path;
+	orig_file_name = intern->file_name;
+	orig_open_mode = intern->u.file.open_mode;
 
 	intern->u.file.open_mode = NULL;
 	intern->u.file.open_mode_len = 0;
@@ -2335,6 +2370,25 @@ SPL_METHOD(SplFileObject, __construct)
 		intern->_path = estrndup(intern->u.file.stream->orig_path, intern->_path_len);
 	}
 
+	if (orig_path) {
+		if (EG(exception)) {
+			intern->u.file.stream = orig_stream;
+			intern->_path = orig_path;
+			intern->_path_len = strlen(orig_path);
+			intern->file_name = orig_file_name;
+			intern->file_name_len = strlen(orig_file_name);
+			intern->orig_path = orig_intern_path;
+			intern->u.file.open_mode = orig_open_mode;
+			intern->u.file.open_mode_len = strlen(orig_open_mode);
+		} else {
+			php_stream_close(orig_stream);
+			efree(orig_path);
+			efree(orig_file_name);
+			efree(orig_intern_path);
+			efree(orig_open_mode);
+		}
+	}
+
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 } /* }}} */
@@ -2353,6 +2407,14 @@ SPL_METHOD(SplTempFileObject, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &max_memory) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
+	}
+
+	if (intern->_path) {
+		php_stream_close(intern->u.dir.dirp);
+		efree(intern->_path);
+		efree(intern->file_name);
+		efree(intern->orig_path);
+		efree(intern->u.file.open_mode);
 	}
 
 	if (max_memory < 0) {
