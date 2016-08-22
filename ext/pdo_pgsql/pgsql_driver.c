@@ -15,6 +15,7 @@
   | Authors: Edin Kadribasic <edink@emini.dk>                            |
   |          Ilia Alshanestsky <ilia@prohost.org>                        |
   |          Wez Furlong <wez@php.net>                                   |
+  |          Pablo Santiago Sánchez <phackwer@gmail.com>                 |
   +----------------------------------------------------------------------+
 */
 
@@ -361,6 +362,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
+	char *version = NULL;
 
 	if (name == NULL) {
 		if (H->pgoid == InvalidOid) {
@@ -369,10 +371,25 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
 	} else {
 		PGresult *res;
+		PGresult *vres;
+		int int_version;
 		ExecStatusType status;
 		const char *q[1];
 		q[0] = name;
-		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
+
+		/**
+		 * When PostgreSQL version is higher than 8.1, fixes the message
+		 * "Object not in prerequisite state: 7 ERROR:  currval of sequence sequence_name is not yet defined in this session"
+		 */
+		vres = PQexec(H->server, "SELECT VERSION()");
+		version = estrdup((char *)PQgetvalue(vres, 0, 0));
+		int_version = atoi(version);
+
+		if (PHP_PDO_PGSQL_LASTVAL_PG_VERSION <= int_version) {
+			res = PQexec(H->server, "SELECT LASTVAL()");
+		} else {
+			res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
+		}
 		status = PQresultStatus(res);
 
 		if (res && (status == PGRES_TUPLES_OK)) {
