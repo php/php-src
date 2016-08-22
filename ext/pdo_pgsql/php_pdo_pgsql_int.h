@@ -15,6 +15,7 @@
   | Authors: Edin Kadribasic <edink@emini.dk>                            |
   |          Ilia Alshanestsky <ilia@prohost.org>                        |
   |          Wez Furlong <wez@php.net>                                   |
+  |          Pablo Santiago Sánchez <phackwer@gmail.com>                 |
   +----------------------------------------------------------------------+
 */
 
@@ -28,6 +29,8 @@
 #include <php.h>
 
 #define PHP_PDO_PGSQL_CONNECTION_FAILURE_SQLSTATE "08006"
+
+#define PHP_PDO_PGSQL_LASTVAL_PG_VERSION 80100
 
 typedef struct {
 	const char *file;
