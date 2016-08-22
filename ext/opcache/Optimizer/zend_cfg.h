@@ -87,6 +87,7 @@ typedef struct _zend_cfg {
 	int              *predecessors;
 	uint32_t         *map;
 	unsigned int      split_at_live_ranges : 1;
+	unsigned int      split_at_calls : 1;
 } zend_cfg;
 
 /* Build Flags */
