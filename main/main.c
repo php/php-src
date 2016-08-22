@@ -2043,22 +2043,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	php_output_startup();
 
-	zuf.error_function = php_error_cb;
-	zuf.printf_function = php_printf;
-	zuf.write_function = php_output_wrapper;
-	zuf.fopen_function = php_fopen_wrapper_for_zend;
-	zuf.message_handler = php_message_handler_for_zend;
-	zuf.block_interruptions = sapi_module.block_interruptions;
-	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
-	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
-	zuf.ticks_function = php_run_ticks;
-	zuf.on_timeout = php_on_timeout;
-	zuf.stream_open_function = php_stream_open_for_zend;
-	zuf.vspprintf_function = vspprintf;
-	zuf.getenv_function = sapi_getenv;
-	zuf.resolve_path_function = php_resolve_path_for_zend;
-	zend_startup(&zuf, NULL TSRMLS_CC);
-
 #ifdef ZTS
 	executor_globals = ts_resource(executor_globals_id);
 	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
@@ -2083,25 +2067,37 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		}
 	}
 #endif
-	EG(bailout) = NULL;
-	EG(error_reporting) = E_ALL & ~E_NOTICE;
-	EG(active_symbol_table) = NULL;
-	PG(header_is_being_sent) = 0;
+
 	SG(request_info).headers_only = 0;
 	SG(request_info).argv0 = NULL;
 	SG(request_info).argc=0;
 	SG(request_info).argv=(char **)NULL;
+
+	PG(header_is_being_sent) = 0;
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 	PG(during_request_startup) = 0;
 	PG(last_error_message) = NULL;
 	PG(last_error_file) = NULL;
 	PG(last_error_lineno) = 0;
-	EG(error_handling)  = EH_NORMAL;
-	EG(exception_class) = NULL;
 	PG(disable_functions) = NULL;
 	PG(disable_classes) = NULL;
-	EG(exception) = NULL;
-	EG(objects_store).object_buckets = NULL;
+
+	zuf.error_function = php_error_cb;
+	zuf.printf_function = php_printf;
+	zuf.write_function = php_output_wrapper;
+	zuf.fopen_function = php_fopen_wrapper_for_zend;
+	zuf.message_handler = php_message_handler_for_zend;
+	zuf.block_interruptions = sapi_module.block_interruptions;
+	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
+	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
+	zuf.ticks_function = php_run_ticks;
+	zuf.on_timeout = php_on_timeout;
+	zuf.stream_open_function = php_stream_open_for_zend;
+	zuf.vspprintf_function = vspprintf;
+	zuf.getenv_function = sapi_getenv;
+	zuf.resolve_path_function = php_resolve_path_for_zend;
+
+	zend_startup(&zuf, NULL TSRMLS_CC);
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");

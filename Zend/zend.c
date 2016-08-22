@@ -741,6 +741,14 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	EG(user_exception_handler) = NULL;
 #endif
 
+	EG(bailout) = NULL;
+	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	EG(active_symbol_table) = NULL;
+	EG(error_handling)  = EH_NORMAL;
+	EG(exception_class) = NULL;
+	EG(exception) = NULL;
+	EG(objects_store).object_buckets = NULL;
+
 	zend_interned_strings_init(TSRMLS_C);
 	zend_startup_builtin_functions(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
