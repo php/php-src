@@ -283,10 +283,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	 */	
 	function current()
 	{
-		if (is_null($this->line))
-		{
-			$this->line = getCurrentLine();
-		}
+		$this->line = getCurrentLine();
 		return $this->line;
 	}
 
