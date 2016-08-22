@@ -217,8 +217,6 @@ static int spl_filesystem_dir_read(spl_filesystem_object *intern) /* {{{ */
 }
 /* }}} */
 
-#define IS_SLASH_AT(zs, pos) (IS_SLASH(zs[pos]))
-
 static inline int spl_filesystem_is_dot(const char * d_name) /* {{{ */
 {
 	return !strcmp(d_name, ".") || !strcmp(d_name, "..");
@@ -235,7 +233,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path)
 	intern->_path_len = (int)strlen(path);
 	intern->u.dir.dirp = php_stream_opendir(path, REPORT_ERRORS, FG(default_context));
 
-	if (intern->_path_len > 1 && IS_SLASH_AT(path, intern->_path_len-1)) {
+	if (intern->_path_len > 1 && IS_SLASH_AT(path, intern->_path_len, intern->_path_len-1)) {
 		intern->_path = estrndup(path, --intern->_path_len);
 	} else {
 		intern->_path = estrndup(path, intern->_path_len);
@@ -290,7 +288,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	}
 	*/
 
-	if (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
+	if (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len, intern->file_name_len-1)) {
 		intern->file_name_len--;
 	}
 
@@ -385,7 +383,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	intern->file_name = use_copy ? estrndup(path, len) : path;
 	intern->file_name_len = (int)len;
 
-	while (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
+	while (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len, intern->file_name_len-1)) {
 		intern->file_name[intern->file_name_len-1] = 0;
 		intern->file_name_len--;
 	}
@@ -2281,7 +2279,7 @@ SPL_METHOD(SplFileObject, __construct)
 	if (spl_filesystem_file_open(intern, use_include_path, 0) == SUCCESS) {
 		tmp_path_len = strlen(intern->u.file.stream->orig_path);
 
-		if (tmp_path_len > 1 && IS_SLASH_AT(intern->u.file.stream->orig_path, tmp_path_len-1)) {
+		if (tmp_path_len > 1 && IS_SLASH_AT(intern->u.file.stream->orig_path, tmp_path_len, tmp_path_len-1)) {
 			tmp_path_len--;
 		}
 

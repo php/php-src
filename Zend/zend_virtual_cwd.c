@@ -217,6 +217,35 @@ static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 	return (time_t)UnixTime;
 }
 
+CWD_API BOOL cwd_is_slash_at(const char* psz, size_t length, size_t index) { /* {{{ */
+	size_t charLen = 0;
+	size_t pos = 0;
+	mbstate_t mbState = { 0 };
+
+	if (IS_SLASH(psz[index])) {
+		do {
+			charLen = mbrlen(psz + pos, length - pos, &mbState);
+			switch (charLen) {
+			case -2:
+			case -1:
+				return TRUE;
+			case 0:
+				return FALSE;
+			case 1:
+				if (pos == index) {
+					return TRUE;
+				}
+			// fall through
+			default:
+				pos += charLen;
+				break;
+			}
+		} while (pos <= index);
+	}
+	return FALSE;
+}
+/* }}} */
+
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){ /* {{{ */
 	HANDLE hFile;
 	DWORD dwRet;
@@ -824,7 +853,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		}
 
 		i = len;
-		while (i > start && !IS_SLASH(path[i-1])) {
+		while (i > start && !IS_SLASH_AT(path, len, i - 1)) {
 			i--;
 		}
 
@@ -846,7 +875,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, 1, NULL);
 			if (j > start) {
 				j--;
-				while (j > start && !IS_SLASH(path[j])) {
+				while (j > start && !IS_SLASH_AT(path, len, j)) {
 					j--;
 				}
 				if (!start) {
@@ -1283,18 +1312,18 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 				} else if (IS_UNC_PATH(state->cwd, state->cwd_length)) {
 					/* Copy only the share name */
 					state_cwd_length = 2;
-					while (IS_SLASH(state->cwd[state_cwd_length])) {
+					while (IS_SLASH_AT(state->cwd, state->cwd_length, state_cwd_length)) {
 						state_cwd_length++;
 					}
 					while (state->cwd[state_cwd_length] &&
-							!IS_SLASH(state->cwd[state_cwd_length])) {
+							!IS_SLASH_AT(state->cwd, state->cwd_length, state_cwd_length)) {
 						state_cwd_length++;
 					}
-					while (IS_SLASH(state->cwd[state_cwd_length])) {
+					while (IS_SLASH_AT(state->cwd, state->cwd_length, state_cwd_length)) {
 						state_cwd_length++;
 					}
 					while (state->cwd[state_cwd_length] &&
-							!IS_SLASH(state->cwd[state_cwd_length])) {
+							!IS_SLASH_AT(state->cwd, state->cwd_length, state_cwd_length)) {
 						state_cwd_length++;
 					}
 				}
@@ -1339,7 +1368,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		resolved_path[0] = DEFAULT_SLASH;
 		resolved_path[1] = DEFAULT_SLASH;
 		start = 2;
-		while (!IS_SLASH(resolved_path[start])) {
+		while (!IS_SLASH_AT(resolved_path, path_length, start)) {
 			if (resolved_path[start] == 0) {
 				goto verify;
 			}
@@ -1347,7 +1376,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			start++;
 		}
 		resolved_path[start++] = DEFAULT_SLASH;
-		while (!IS_SLASH(resolved_path[start])) {
+		while (!IS_SLASH_AT(resolved_path, path_length, start)) {
 			if (resolved_path[start] == 0) {
 				goto verify;
 			}
@@ -1370,12 +1399,12 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			start++;
 		}
 		start++;
-		if (!IS_SLASH(resolved_path[start])) return -1;
+		if (!IS_SLASH_AT(resolved_path, path_length, start)) return -1;
 		resolved_path[start++] = DEFAULT_SLASH;
 	}
 #endif
 
-	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
+	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH_AT(resolved_path, path_length, path_length - 1);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
 
@@ -1387,7 +1416,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	if (!start && !path_length) {
 		resolved_path[path_length++] = '.';
 	}
-	if (add_slash && path_length && !IS_SLASH(resolved_path[path_length-1])) {
+	if (add_slash && path_length && !IS_SLASH_AT(resolved_path, path_length, path_length - 1)) {
 		if (path_length >= MAXPATHLEN-1) {
 			return -1;
 		}
@@ -1452,7 +1481,8 @@ CWD_API int virtual_chdir(const char *path) /* {{{ */
 
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path)) /* {{{ */
 {
-	int length = (int)strlen(path);
+	const int length = (int)strlen(path);
+	int len = length;
 	char *temp;
 	int retval;
 	ALLOCA_FLAG(use_heap)
@@ -1460,21 +1490,21 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	if (length == 0) {
 		return 1; /* Can't cd to empty string */
 	}
-	while(--length >= 0 && !IS_SLASH(path[length])) {
+	while(--len >= 0 && !IS_SLASH_AT(path, length, len)) {
 	}
 
-	if (length == -1) {
+	if (len == -1) {
 		/* No directory only file name */
 		errno = ENOENT;
 		return -1;
 	}
 
-	if (length == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
-		length++;
+	if (len == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, len+1)) { /* Also use trailing slash if this is absolute */
+		len++;
 	}
-	temp = (char *) do_alloca(length+1, use_heap);
-	memcpy(temp, path, length);
-	temp[length] = 0;
+	temp = (char *) do_alloca(len+1, use_heap);
+	memcpy(temp, path, len);
+	temp[len] = 0;
 #if VIRTUAL_CWD_DEBUG
 	fprintf (stderr, "Changing directory to %s\n", temp);
 #endif
