@@ -15,11 +15,11 @@ $white = imagecolorallocate($image, 255,255,255);
 $result = imagestring($image, 1, 5, 5, 'String Text', $white);
 
 ob_start();
-imagepng($image, null, 9);
+imagegd($image);
 $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-d0d2fe757400cb7846b36a8c34b41e4a
+7f146e3cdcaf89c6b9d68ccbb44cf94e

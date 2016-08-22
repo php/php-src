@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.11
 
 - Core:
+  . Fixed bug #72911 (Memleak in zend_binary_assign_op_obj_helper). (Laruence)
   . Fixed bug #72813 (Segfault with __get returned by ref). (Laruence)
   . Fixed bug #72767 (PHP Segfaults when trying to expand an infinite operator).
     (Nikita)
@@ -15,6 +16,18 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
+  . Fixed bug #66005 (imagecopy does not support 1bit transparency on truecolor
+    images). (cmb)
+  . Fixed bug #72913 (imagecopy() loses single-color transparency on palette
+    images). (cmb)
+  . Fixed bug #68716 (possible resource leaks in _php_image_convert()). (cmb)
+
+- IMAP:
+  . Fixed bug #72852 (imap_mail null dereference). (Anatol)
+
+- Intl:
+  . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
+    sequence). (cmb)
 
 - OCI8
   . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
@@ -45,13 +58,21 @@ PHP                                                                        NEWS
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
 
 - Streams:
+  . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
   . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
     with IIS FTP 7.5, 8.5). (vhuk)
 
+- Sysvshm:
+  . Fixed bug #72858 (shm_attach null dereference). (Anatol)
+
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
+  . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
 
-?? ??? 2016 PHP 7.0.10
+- ZIP:
+  . Fixed bug #68302 (impossible to compile php with zip support). (cmb)
+
+18 Aug 2016 PHP 7.0.10
 
 - Core:
   . Fixed bug #72629 (Caught exception assignment to variables ignores
@@ -73,7 +94,16 @@ PHP                                                                        NEWS
     (Yuji Uchiyama)
   . Fixed potential segfault in object storage freeing in shutdown sequence.
     (Bob)
+  . Fixed bug #72663 (Create an Unexpected Object and Don't Invoke
+   __wakeup() in Deserialization). (Stas)
+  . Fixed bug #72681 (PHP Session Data Injection Vulnerability). (Stas)
   . Fixed bug #72683 (getmxrr broken). (Anatol)
+  . Fixed bug #72742 (memory allocator fails to realloc small block to large
+    one). (Stas)
+
+- Bz2:
+  . Fixed bug #72837 (integer overflow in bzdecompress caused heap
+    corruption). (Stas)
 
 - Calendar:
   . Fixed bug #67976 (cal_days_month() fails for final month of the French
@@ -88,12 +118,14 @@ PHP                                                                        NEWS
   . Fixed bug #71709 (curl_setopt segfault with empty CURLOPT_HTTPHEADER).
     (Pierrick)
   . Fixed bug #71929 (CURLINFO_CERTINFO data parsing error). (Pierrick)
+  . Fixed bug #72674 (Heap overflow in curl_escape). (Stas)
 
 - DOM:
   . Fixed bug #66502 (DOM document dangling reference). (Sean Heelan, cmb)
 
 - EXIF:
   . Fixed bug #72735 (Samsung picture thumb not read (zero size)). (Kalle, Remi)
+  . Fixed bug #72627 (Memory Leakage In exif_process_IFD_in_TIFF). (Stas)
 
 - Filter:
   . Fixed bug #71745 (FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8
@@ -111,6 +143,8 @@ PHP                                                                        NEWS
     blendingmode). (cmb)
   . Fixed bug #66555 (Always false condition in ext/gd/libgd/gdkanji.c). (cmb)
   . Fixed bug #68712 (suspicious if-else statements). (cmb)
+  . Fixed bug #72697 (select_colors write out-of-bounds). (Stas)
+  . Fixed bug #72730 (imagegammacorrect allows arbitrary write access). (Stas)
 
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
@@ -127,6 +161,9 @@ PHP                                                                        NEWS
     position). (cmb)
   . Fixed bug #72710 (`mb_ereg` causes buffer overflow on regexp compile error).
     (ju1ius)
+
+- Mcrypt:
+  . Fixed bug #72782 (Heap Overflow due to integer overflows). (Stas)
 
 - Opcache:
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
@@ -145,6 +182,10 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Fixed bug #72588 (Using global var doesn't work while accessing SimpleXML
     element). (Laruence)
+
+- SNMP:
+  . Fixed bug #72708 (php_snmp_parse_oid integer overflow in memory
+    allocation). (djodjo at gmail dot com)
 
 - SPL:
   . Fixed bug #55701 (GlobIterator throws LogicException). (Valentin VĂLCIU)
@@ -177,6 +218,8 @@ PHP                                                                        NEWS
   . Fixed bug #54431 (opendir() does not work with ftps:// wrapper). (vhuk)
   . Fixed bug #72667 (opendir() with ftp:// attempts to open data stream for
     non-existent directories). (vhuk)
+  . Fixed bug #72771 (ftps:// wrapper is vulnerable to protocol downgrade
+    attack). (Stas)
 
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
@@ -186,7 +229,12 @@ PHP                                                                        NEWS
   . Fixed bug #72564 (boolean always deserialized as "true") (Remi)
   . Fixed bug #72142 (WDDX Packet Injection Vulnerability in
     wddx_serialize_value()). (Taoguang Chen)
-
+  . Fixed bug #72749 (wddx_deserialize allows illegal memory access) (Stas)
+  . Fixed bug #72750 (wddx_deserialize null dereference). (Stas)
+  . Fixed bug #72790 (wddx_deserialize null dereference with invalid xml).
+    (Stas)
+  . Fixed bug #72799 (wddx_deserialize null dereference in
+    php_wddx_pop_element). (Stas)
 
 - Zip:
   . Fixed bug #72660 (NULL Pointer dereference in zend_virtual_cwd).

@@ -1548,21 +1548,21 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (info & ZEND_MM_IS_SRUN) {
-			int old_bin_num, bin_num;
-
-			old_bin_num = ZEND_MM_SRUN_BIN_NUM(info);
+			int old_bin_num = ZEND_MM_SRUN_BIN_NUM(info);
 			old_size = bin_data_size[old_bin_num];
-			bin_num = ZEND_MM_SMALL_SIZE_TO_BIN(size);
-			if (old_bin_num == bin_num) {
+			if (size <= ZEND_MM_MAX_SMALL_SIZE) {
+				int bin_num = ZEND_MM_SMALL_SIZE_TO_BIN(size);
+				if (old_bin_num == bin_num) {
 #if ZEND_DEBUG
-				dbg = zend_mm_get_debug_info(heap, ptr);
-				dbg->size = real_size;
-				dbg->filename = __zend_filename;
-				dbg->orig_filename = __zend_orig_filename;
-				dbg->lineno = __zend_lineno;
-				dbg->orig_lineno = __zend_orig_lineno;
+					dbg = zend_mm_get_debug_info(heap, ptr);
+					dbg->size = real_size;
+					dbg->filename = __zend_filename;
+					dbg->orig_filename = __zend_orig_filename;
+					dbg->lineno = __zend_lineno;
+					dbg->orig_lineno = __zend_orig_lineno;
 #endif
-				return ptr;
+					return ptr;
+				}
 			}
 		} else /* if (info & ZEND_MM_IS_LARGE_RUN) */ {
 			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted");
