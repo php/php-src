@@ -49,6 +49,9 @@ typedef struct _zend_objects_store {
 
 /* Global store handling functions */
 BEGIN_EXTERN_C()
+ZEND_API extern uint32_t (*zend_objects_store_get_handle_ex)();
+ZEND_API extern void (*zend_objects_store_add_to_free_list_ex)(uint32_t handle);
+
 ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init_size);
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects);
 ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects);
