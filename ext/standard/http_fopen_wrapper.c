@@ -141,6 +141,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
+	smart_str header_buf = {0};
 
 	tmp_line[0] = '\0';
 
@@ -423,8 +424,7 @@ finish:
 		strlcat(scratch, " HTTP/1.0\r\n", scratch_len);
 	}
 
-	/* send it */
-	php_stream_write(stream, scratch, strlen(scratch));
+	smart_str_appends(&header_buf,scratch);
 
 	if (context && php_stream_context_get_option(context, "http", "header", &tmpzval) == SUCCESS) {
 		tmp = NULL;
@@ -549,7 +549,7 @@ finish:
 		tmp = (char*)php_base64_encode((unsigned char*)scratch, strlen(scratch), NULL);
 
 		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", tmp) > 0) {
-			php_stream_write(stream, scratch, strlen(scratch));
+			smart_str_appends(&header_buf, scratch);
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 		}
 
@@ -560,7 +560,7 @@ finish:
 	/* if the user has configured who they are, send a From: line */
 	if (((have_header & HTTP_HEADER_FROM) == 0) && FG(from_address)) {
 		if (snprintf(scratch, scratch_len, "From: %s\r\n", FG(from_address)) > 0)
-			php_stream_write(stream, scratch, strlen(scratch));
+			smart_str_appends(&header_buf, scratch);
 	}
 
 	/* Send Host: header so name-based virtual hosts work */
@@ -568,10 +568,10 @@ finish:
 		if ((use_ssl && resource->port != 443 && resource->port != 0) ||
 			(!use_ssl && resource->port != 80 && resource->port != 0)) {
 			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0)
-				php_stream_write(stream, scratch, strlen(scratch));
+				smart_str_appends(&header_buf, scratch);
 		} else {
 			if (snprintf(scratch, scratch_len, "Host: %s\r\n", resource->host) > 0) {
-				php_stream_write(stream, scratch, strlen(scratch));
+				smart_str_appends(&header_buf, scratch);
 			}
 		}
 	}
@@ -583,7 +583,7 @@ finish:
 	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
 	 * keep-alive response, which is the preferred response type. */
 	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
-		php_stream_write_string(stream, "Connection: close\r\n");
+		smart_str_appends(&header_buf,"Connection: close\r\n");
 	}
 
 	if (context &&
@@ -606,7 +606,7 @@ finish:
 			ua = emalloc(ua_len + 1);
 			if ((ua_len = slprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
 				ua[ua_len] = 0;
-				php_stream_write(stream, ua, ua_len);
+				smart_str_appendl(&header_buf, ua, ua_len);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot construct User-agent header");
 			}
@@ -629,12 +629,12 @@ finish:
 				Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0
 		) {
 			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
-			php_stream_write(stream, scratch, scratch_len);
+			smart_str_appendl(&header_buf, scratch, scratch_len);
 			have_header |= HTTP_HEADER_CONTENT_LENGTH;
 		}
 
-		php_stream_write(stream, user_headers, strlen(user_headers));
-		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
+		smart_str_appends(&header_buf, user_headers);
+		smart_str_appends(&header_buf, "\r\n");
 		efree(user_headers);
 	}
 
@@ -644,18 +644,21 @@ finish:
 		Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
 			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
-			php_stream_write(stream, scratch, scratch_len);
+			smart_str_appendl(&header_buf, scratch, scratch_len);
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
-			php_stream_write(stream, "Content-Type: application/x-www-form-urlencoded\r\n",
-				sizeof("Content-Type: application/x-www-form-urlencoded\r\n") - 1);
+			smart_str_appends(&header_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
 		}
-		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
-		php_stream_write(stream, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
+		smart_str_appends(&header_buf, "\r\n");
+		smart_str_appendl(&header_buf, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
 	} else {
-		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
+		smart_str_appends(&header_buf, "\r\n");
 	}
+
+	/* send it */
+
+	php_stream_write(stream, header_buf.c, strlen(header_buf.c));
 
 	location[0] = '\0';
 
@@ -902,6 +905,9 @@ finish:
 		}
 	}
 out:
+
+	smart_str_free(&header_buf);
+
 	if (protocol_version) {
 		efree(protocol_version);
 	}
