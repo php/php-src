@@ -1239,7 +1239,7 @@ static void php_session_remove_cookie(TSRMLS_D) {
 
 static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 {
-	smart_str ncookie = {0};
+	smart_str ncookie = {0}, dcookie = {0};
 	char *date_fmt = NULL;
 	char *e_session_name, *e_id;
 
@@ -1254,6 +1254,39 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 		}
 		return;
 	}
+
+	/* Try to remove offensive cookie to prevent DoS */
+	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)), NULL);
+	smart_str_appends(&dcookie, COOKIE_SET_COOKIE);
+	smart_str_appends(&dcookie, e_session_name);
+	smart_str_appends(&dcookie, "[]=");
+	date_fmt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
+	smart_str_appends(&dcookie, COOKIE_EXPIRES);
+	smart_str_appends(&dcookie, date_fmt);
+	efree(date_fmt);
+
+
+	if (PS(cookie_path)[0]) {
+		smart_str_appends(&dcookie, COOKIE_PATH);
+		smart_str_appends(&dcookie, PS(cookie_path));
+	}
+
+	if (PS(cookie_domain)[0]) {
+		smart_str_appends(&dcookie, COOKIE_DOMAIN);
+		smart_str_appends(&dcookie, PS(cookie_domain));
+	}
+
+	if (PS(cookie_secure)) {
+		smart_str_appends(&dcookie, COOKIE_SECURE);
+	}
+
+	if (PS(cookie_httponly)) {
+		smart_str_appends(&dcookie, COOKIE_HTTPONLY);
+	}
+
+	smart_str_0(&dcookie);
+	efree(e_session_name);
+	sapi_add_header_ex(dcookie.c, dcookie.len, 0, 0 TSRMLS_CC);
 
 	/* URL encode session_name and id because they might be user supplied */
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)), NULL);
