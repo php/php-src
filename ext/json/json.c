@@ -571,9 +571,14 @@ static PHP_FUNCTION(json_encode)
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 
-	ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
-
-	smart_str_free(&buf);
+	/* If an error is still present we must return false as per the documented behavior */
+	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE) {
+		smart_str_free(&buf);
+		RETURN_FALSE;
+	} else { /* Otherwise we can safely return the json */
+		RETVAL_STRINGL(buf.c, buf.len, 1);
+		smart_str_free(&buf);
+	}
 }
 /* }}} */
 
