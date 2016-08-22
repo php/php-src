@@ -903,6 +903,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	if (EG(exception)) {
 		zend_throw_exception_internal(NULL);
+		return FAILURE;
 	}
 	return SUCCESS;
 }
