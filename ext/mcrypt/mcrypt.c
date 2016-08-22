@@ -1321,6 +1321,8 @@ PHP_FUNCTION(mcrypt_ecb)
 	convert_to_long_ex(mode);
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, ZEND_NUM_ARGS(), Z_LVAL_PP(mode), return_value TSRMLS_CC);
+
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mcrypt_generic() or mdecrypt_generic() instead");
 }
 /* }}} */
 
