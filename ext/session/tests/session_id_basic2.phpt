@@ -16,7 +16,7 @@ ob_start();
 echo "*** Testing session_id() : basic functionality ***\n";
 
 ini_set('session.sid_bits_per_chracter', 6);
-ini_set('session.sid_length', 240);
+ini_set('session.sid_length', 120);
 session_start();
 var_dump(session_id());
 session_commit();
@@ -32,7 +32,7 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing session_id() : basic functionality ***
-string(240) "%s"
+string(120) "%s"
 string(22) "%s"
 Done
 
