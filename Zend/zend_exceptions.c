@@ -105,6 +105,11 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 			return;
 		}
 	}
+
+	if (zend_throw_exception_hook) {
+		zend_throw_exception_hook(exception TSRMLS_CC);
+	}
+
 	if (!EG(current_execute_data)) {
 		if(EG(exception)) {
 			zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
@@ -112,9 +117,6 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		zend_error(E_ERROR, "Exception thrown without a stack frame");
 	}
 
-	if (zend_throw_exception_hook) {
-		zend_throw_exception_hook(exception TSRMLS_CC);
-	}
 
 	if (EG(current_execute_data)->opline == NULL ||
 	    (EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
