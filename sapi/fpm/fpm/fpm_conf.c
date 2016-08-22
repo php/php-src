@@ -99,6 +99,8 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
 	{ "rlimit_files",                &fpm_conf_set_integer,         GO(rlimit_files) },
 	{ "rlimit_core",                 &fpm_conf_set_rlimit_core,     GO(rlimit_core) },
+	{ "rlimit_cpu",                  &fpm_conf_set_rlimit_core,     GO(rlimit_cpu) },
+	{ "rlimit_as",                   &fpm_conf_set_rlimit_core,     GO(rlimit_as) },
 	{ "events.mechanism",            &fpm_conf_set_string,          GO(events_mechanism) },
 	{ 0, 0, 0 }
 };
@@ -134,6 +136,8 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "request_terminate_timeout", &fpm_conf_set_time,        WPO(request_terminate_timeout) },
 	{ "rlimit_files",              &fpm_conf_set_integer,     WPO(rlimit_files) },
 	{ "rlimit_core",               &fpm_conf_set_rlimit_core, WPO(rlimit_core) },
+	{ "rlimit_cpu",                &fpm_conf_set_rlimit_core, WPO(rlimit_cpu) },
+	{ "rlimit_as",                 &fpm_conf_set_rlimit_core, WPO(rlimit_as) },
 	{ "chroot",                    &fpm_conf_set_string,      WPO(chroot) },
 	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
 	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
@@ -1539,6 +1543,8 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
 	zlog(ZLOG_NOTICE, "\trlimit_core = %d",                 fpm_global_config.rlimit_core);
+	zlog(ZLOG_NOTICE, "\trlimit_cpu = %d",                  fpm_global_config.rlimit_cpu);
+	zlog(ZLOG_NOTICE, "\trlimit_as = %d",                   fpm_global_config.rlimit_as);
 	zlog(ZLOG_NOTICE, "\tevents.mechanism = %s",            fpm_event_machanism_name());
 	zlog(ZLOG_NOTICE, " ");
 
@@ -1577,6 +1583,8 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\trequest_terminate_timeout = %ds", wp->config->request_terminate_timeout);
 		zlog(ZLOG_NOTICE, "\trlimit_files = %d",               wp->config->rlimit_files);
 		zlog(ZLOG_NOTICE, "\trlimit_core = %d",                wp->config->rlimit_core);
+		zlog(ZLOG_NOTICE, "\trlimit_cpu = %d",                 wp->config->rlimit_cpu);
+		zlog(ZLOG_NOTICE, "\trlimit_as = %d",                  wp->config->rlimit_as);
 		zlog(ZLOG_NOTICE, "\tchroot = %s",                     STR2STR(wp->config->chroot));
 		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
 		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));

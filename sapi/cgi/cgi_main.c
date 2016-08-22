@@ -117,6 +117,10 @@ static int exit_signal = 0;
 /* Is Parent waiting for children to exit */
 static int parent_waiting = 0;
 
+/* CPU seconds and memory limits for worker processes */
+static int rlimit_cpu = 0;
+static int rlimit_as  = 0;
+
 /**
  * Process group
  */
@@ -1470,6 +1474,22 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+void set_worker_rlimits(void)
+{
+	struct rlimit rlim;
+
+	if (rlimit_cpu > 0) {
+		rlim.rlim_cur = rlimit_cpu;
+		rlim.rlim_max = rlimit_cpu;
+		setrlimit(RLIMIT_CPU, &rlim);
+	}
+	if (rlimit_as > 0) {
+		rlim.rlim_cur = rlimit_as;
+		rlim.rlim_max = rlimit_as;
+		setrlimit(RLIMIT_AS, &rlim);
+	}
+}
+
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -1711,6 +1731,22 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 		}
 
+		if (getenv("PHP_FCGI_RLIMIT_CPU")) {
+			rlimit_cpu = atoi(getenv("PHP_FCGI_RLIMIT_CPU"));
+			if (rlimit_cpu < 0) {
+				fprintf(stderr, "PHP_FCGI_RLIMIT_CPU is not valid\n");
+				return FAILURE;
+			}
+		}
+
+		if (getenv("PHP_FCGI_RLIMIT_AS")) {
+			rlimit_as = atoi(getenv("PHP_FCGI_RLIMIT_AS"));
+			if (rlimit_as < 0) {
+				fprintf(stderr, "PHP_FCGI_RLIMIT_AS is not valid\n");
+				return FAILURE;
+			}
+		}
+
 		/* make php call us to get _ENV vars */
 		php_php_import_environment_variables = php_import_environment_variables;
 		php_import_environment_variables = cgi_php_import_environment_variables;
@@ -1779,6 +1815,7 @@ consult the installation file that came with this distribution, or visit \n\
 					sigaction(SIGTERM, &old_term, 0);
 					sigaction(SIGQUIT, &old_quit, 0);
 					sigaction(SIGINT,  &old_int,  0);
+					set_worker_rlimits();
 					break;
 				case -1:
 					perror("php (pre-forking)");

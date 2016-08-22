@@ -169,6 +169,26 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		}
 	}
 
+	if (wp->config->rlimit_cpu) {
+		struct rlimit r;
+
+		r.rlim_max = r.rlim_cur = wp->config->rlimit_cpu == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) wp->config->rlimit_cpu;
+
+		if (0 > setrlimit(RLIMIT_CPU, &r)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to set rlimit_cpu for this pool. Please check your system limits or decrease rlimit_cpu. setrlimit(RLIMIT_CPU, %d)", wp->config->name, wp->config->rlimit_cpu);
+		}
+	}
+
+	if (wp->config->rlimit_as) {
+		struct rlimit r;
+
+		r.rlim_max = r.rlim_cur = wp->config->rlimit_as == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) wp->config->rlimit_as;
+
+		if (0 > setrlimit(RLIMIT_AS, &r)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to set rlimit_as for this pool. Please check your system limits or decrease rlimit_as. setrlimit(RLIMIT_AS, %d)", wp->config->name, wp->config->rlimit_as);
+		}
+	}
+
 	if (is_root && wp->config->chroot && *wp->config->chroot) {
 		if (0 > chroot(wp->config->chroot)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to chroot(%s)",  wp->config->name, wp->config->chroot);

@@ -39,6 +39,8 @@ struct fpm_global_config_s {
 	int daemonize;
 	int rlimit_files;
 	int rlimit_core;
+	int rlimit_cpu;
+	int rlimit_as;
 	char *events_mechanism;
 };
 
@@ -76,6 +78,8 @@ struct fpm_worker_pool_config_s {
 	int request_terminate_timeout;
 	int rlimit_files;
 	int rlimit_core;
+	int rlimit_cpu;
+	int rlimit_as;
 	char *chroot;
 	char *chdir;
 	int catch_workers_output;

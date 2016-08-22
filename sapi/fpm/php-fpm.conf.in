@@ -97,6 +97,16 @@
 ; Default Value: system defined value
 ;rlimit_core = 0
 
+; Set max CPU usage in seconds; (see setrlimit(2))
+; Possible Values: 'unlimited' or an integer greater or equal to 0
+; Default Value: system defined value
+;rlimit_cpu = unlimited
+
+; Set max memory usage in bytes; (see setrlimit(2))
+; Possible Values: 'unlimited' or an integer greater or equal to 0
+; Default Value: system defined value
+;rlimit_as = unlimited
+
 ; Specify the event mechanism FPM will use. The following is available:
 ; - select     (any POSIX os)
 ; - poll       (any POSIX os)
