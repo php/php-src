@@ -789,6 +789,14 @@ PHP_CONFIGURE_PART(General settings)
 
 PHP_HELP_SEPARATOR([General settings:])
 
+PHP_ARG_ENABLE(gc-debug, whether to enable gc debug
+[  --enable-gc-debug           Enable garbage collection debug mode - FOR DEVELOPERS ONLY!!], no, no)
+
+if test "$PHP_GC_DEBUG" = "yes"; then
+  AC_DEFINE(ZEND_GC_DEBUG, 1, [Whether you enabled garbage collection debug mode])
+fi
+
+
 PHP_ARG_ENABLE(gcov,  whether to include gcov symbols,
 [  --enable-gcov           Enable GCOV code coverage (requires LTP) - FOR DEVELOPERS ONLY!!], no, no)
 
