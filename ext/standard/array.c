@@ -1314,6 +1314,70 @@ PHP_FUNCTION(key)
 }
 /* }}} */
 
+/* {{{ proto array array_last_key(array input)
+   Returns last key in the array */
+PHP_FUNCTION(array_last_key)
+{
+	HashTable *array;
+	char *string_key;
+	uint string_key_len;
+	ulong num_key;
+	Bucket *bucket;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
+		return;
+	}
+
+	bucket = array->pListTail;
+	if (bucket) {
+		string_key_len = bucket->nKeyLength;
+		/* if the key length > 0, it's a hashed string, else numeric key */
+		if (string_key_len > 0) {
+			string_key = bucket->arKey;
+			/* length - 1 because null-terminated... */
+			RETVAL_STRINGL(string_key, string_key_len - 1, 1);
+		} else {
+			num_key = bucket->h;
+			RETVAL_LONG(num_key);
+		}
+	} else {
+		return; /* empty array */
+	}
+}
+/* }}} */
+
+/* {{{ proto array array_first_key(array input)
+   Returns last key in the array */
+PHP_FUNCTION(array_first_key)
+{
+	HashTable *array;
+	char *string_key;
+	uint string_key_len;
+	ulong num_key;
+	Bucket *bucket;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
+		return;
+	}
+
+	bucket = array->pListHead;
+	if (bucket) {
+		string_key_len = bucket->nKeyLength;
+		/* if the key length > 0, it's a hashed string, else numeric key */
+		if (string_key_len > 0) {
+			string_key = bucket->arKey;
+			/* length - 1 because null-terminated... */
+			RETVAL_STRINGL(string_key, string_key_len - 1, 1);
+		} else {
+			num_key = bucket->h;
+			RETVAL_LONG(num_key);
+		}
+	} else {
+		return; /* empty array */
+	}
+}
+/* }}} */
+
 /* {{{ proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
    Return the lowest value in an array or a series of arguments */
 PHP_FUNCTION(min)

@@ -298,6 +298,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_key, 0)
 	ZEND_ARG_INFO(0, arg)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_array_last_key, 0)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_array_first_key, 0)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_min, 0, 0, 1)
 	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
@@ -3299,6 +3307,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(reset,															arginfo_reset)
 	PHP_FE(current,															arginfo_current)
 	PHP_FE(key,																arginfo_key)
+	PHP_FE(array_last_key,													arginfo_array_last_key)
+	PHP_FE(array_first_key,													arginfo_array_first_key)
 	PHP_FE(min,																arginfo_min)
 	PHP_FE(max,																arginfo_max)
 	PHP_FE(in_array,														arginfo_in_array)
