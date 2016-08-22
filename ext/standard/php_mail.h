@@ -21,10 +21,19 @@
 #ifndef PHP_MAIL_H
 #define PHP_MAIL_H
 
+typedef struct mail_module_struct {
+	const char *name;
+	int (*send)(char *to, char *subject, char *message, char *hdr, char *extra_cmd);
+} mail_module;
+
 PHP_FUNCTION(mail);
 PHP_MINFO_FUNCTION(mail);
+PHP_MINIT_FUNCTION(mail);
 
 PHP_FUNCTION(ezmlm_hash);
 PHPAPI extern int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd);
+
+PHPAPI int php_mail_register_module(mail_module *);
+PHPAPI mail_module *_php_find_mail_module(char *name);
 
 #endif /* PHP_MAIL_H */
