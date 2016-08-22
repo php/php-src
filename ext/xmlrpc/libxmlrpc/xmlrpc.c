@@ -969,7 +969,7 @@ const char *XMLRPC_SetValueString(XMLRPC_VALUE value, const char* val, int len) 
  * NAME
  *   XMLRPC_SetValueInt
  * SYNOPSIS
- *   void XMLRPC_SetValueInt(XMLRPC_VALUE value, int val)
+ *   void XMLRPC_SetValueInt(XMLRPC_VALUE value, long val)
  * FUNCTION
  *   Assign an int value to an XMLRPC_VALUE, and set it to type xmlrpc_int
  * INPUTS
@@ -982,7 +982,7 @@ const char *XMLRPC_SetValueString(XMLRPC_VALUE value, const char* val, int len) 
  *   XMLRPC_VALUE_TYPE
  * SOURCE
  */
-void XMLRPC_SetValueInt(XMLRPC_VALUE value, int val) {
+void XMLRPC_SetValueInt(XMLRPC_VALUE value, long val) {
    if(value) {
       value->type = xmlrpc_int;
       value->i = val;
@@ -1354,7 +1354,7 @@ XMLRPC_VALUE XMLRPC_CreateValueString(const char* id, const char* val, int len) 
  * NAME
  *   XMLRPC_CreateValueInt
  * SYNOPSIS
- *   XMLRPC_VALUE XMLRPC_CreateValueInt(const char* id, int i)
+ *   XMLRPC_VALUE XMLRPC_CreateValueInt(const char* id, long i)
  * FUNCTION
  *   Create an XMLRPC_VALUE, and assign an int to it
  * INPUTS
@@ -1369,7 +1369,7 @@ XMLRPC_VALUE XMLRPC_CreateValueString(const char* id, const char* val, int len) 
  *   XMLRPC_VALUE_TYPE
  * SOURCE
  */
-XMLRPC_VALUE XMLRPC_CreateValueInt(const char* id, int i) {
+XMLRPC_VALUE XMLRPC_CreateValueInt(const char* id, long i) {
    XMLRPC_VALUE val = XMLRPC_CreateValueEmpty();
    if(val) {
       XMLRPC_SetValueInt(val, i);
@@ -1950,7 +1950,7 @@ int XMLRPC_GetValueStringLen(XMLRPC_VALUE value) {
  * NAME
  *   XMLRPC_GetValueInt
  * SYNOPSIS
- *   int XMLRPC_GetValueInt(XMLRPC_VALUE value)
+ *   long XMLRPC_GetValueInt(XMLRPC_VALUE value)
  * FUNCTION
  *   retrieve integer value.
  * INPUTS
@@ -1964,7 +1964,7 @@ int XMLRPC_GetValueStringLen(XMLRPC_VALUE value) {
  *   XMLRPC_CreateValueInt ()
  * SOURCE
  */
-int XMLRPC_GetValueInt(XMLRPC_VALUE value) {
+long XMLRPC_GetValueInt(XMLRPC_VALUE value) {
     return ((value && value->type == xmlrpc_int) ? value->i : 0);
 }
 

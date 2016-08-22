@@ -91,7 +91,7 @@ XMLRPC_VALUE xml_element_to_DANDARPC_REQUEST_worker(XMLRPC_REQUEST request, XMLR
             XMLRPC_SetValueString(xCurrent, el->text.str, el->text.len);
          }
          else if(!strcmp(type, ATTR_INT)) {
-            XMLRPC_SetValueInt(xCurrent, atoi(el->text.str));
+            XMLRPC_SetValueInt(xCurrent, atol(el->text.str));
          }
          else if(!strcmp(type, ATTR_BOOLEAN)) {
             XMLRPC_SetValueBoolean(xCurrent, atoi(el->text.str));
@@ -206,7 +206,7 @@ xml_element* DANDARPC_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE
             break;
          case xmlrpc_int:
             pAttrType = ATTR_INT;
-            snprintf(buf, BUF_SIZE, "%i", XMLRPC_GetValueInt(node));
+            snprintf(buf, BUF_SIZE, "%ld", XMLRPC_GetValueInt(node));
             simplestring_add(&elem_val->text, buf);
             break;
          case xmlrpc_boolean:
