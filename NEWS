@@ -29,5 +29,9 @@ PHP                                                                        NEWS
   . Implemented request #69086 (enhancement for mb_convert_encoding() that
     handles multibyte replacement char nicely) (Masakielastic, Yasuo)
 
+- Reflection:
+  . Reverted prepending \ for class names and ? for nullable types returned
+    from ReflectionType::__toString(). (Trowski)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
 

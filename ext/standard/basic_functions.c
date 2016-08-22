@@ -3484,6 +3484,12 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	memset(&BG(url_adapt_session_ex), 0, sizeof(BG(url_adapt_session_ex)));
 	memset(&BG(url_adapt_output_ex), 0, sizeof(BG(url_adapt_output_ex)));
 
+	BG(url_adapt_session_ex).type = 1;
+	BG(url_adapt_output_ex).type  = 0;
+
+	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
+	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
+
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
@@ -3504,6 +3510,9 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 		zend_hash_destroy(basic_globals_p->url_adapt_output_ex.tags);
 		free(basic_globals_p->url_adapt_output_ex.tags);
 	}
+
+	zend_hash_destroy(&basic_globals_p->url_adapt_session_hosts_ht);
+	zend_hash_destroy(&basic_globals_p->url_adapt_output_hosts_ht);
 }
 /* }}} */
 

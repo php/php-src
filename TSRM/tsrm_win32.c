@@ -716,16 +716,23 @@ TSRM_API int shmget(int key, int size, int flags)
 TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {
 	shm_pair *shm = shm_get(key, NULL);
+	int err;
 
 	if (!shm->segment) {
+		return (void*)-1;
+	}
+
+	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+
+	err = GetLastError();
+	if (err) {
+		SET_ERRNO_FROM_WIN32_CODE(err);
 		return (void*)-1;
 	}
 
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
-
-	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 
 	return shm->addr;
 }
