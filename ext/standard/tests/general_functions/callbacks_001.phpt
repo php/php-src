@@ -78,6 +78,21 @@ echo "===FOREIGN===\n";
 $o = new P;
 $o->test();
 
+echo "===WITHOUT SCOPE===\n";
+function call($cb) {
+	echo join('|', $cb) . "\n";
+	call_user_func($cb);
+}
+call(array($o, 'who'));
+call(array($o, 'O::who'));
+call(array($o, 'P::who'));
+call(array($o, 'B::who'));
+call(array($o, 'parent::who'));
+ 
+call(array('parent', 'who'));
+call(array('C', 'parent::who'));
+call(array('C', 'who'));
+
 ?>
 ===DONE===
 --EXPECTF--
@@ -105,4 +120,23 @@ O
 $this|B::who
 
 Warning: call_user_func() expects parameter 1 to be a valid callback, class 'P' is not a subclass of 'B' in %s on line %d
+===WITHOUT SCOPE===
+$this|who
+P
+$this|O::who
+O
+$this|P::who
+P
+$this|B::who
+
+Warning: call_user_func() expects parameter 1 to be a valid callback, class 'P' is not a subclass of 'B' in %s on line %d
+$this|parent::who
+O
+parent|who
+
+Warning: call_user_func() expects parameter 1 to be a valid callback, cannot access parent:: when no class scope is active in %s on line %d
+C|parent::who
+B
+C|who
+B
 ===DONE===

@@ -3054,9 +3054,10 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 							return 0;
 						}
 
-						fcc->calling_scope = Z_OBJCE_PP(obj); /* TBFixed: what if it's overloaded? */
-
 						fcc->object_ptr = *obj;
+						fcc->calling_scope = instanceof_function(Z_OBJCE_PP(obj), EG(scope) TSRMLS_CC)
+							? EG(scope)
+							: Z_OBJCE_PP(obj);
 
 						if (callable_name) {
 							char *ptr;
@@ -3112,7 +3113,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object_ptr TSRMLS_CC) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
 				if (callable_name) {
-					zend_class_entry *ce = Z_OBJCE_P(callable); /* TBFixed: what if it's overloaded? */
+					zend_class_entry *ce = Z_OBJCE_P(callable);
 
 					*callable_name_len = ce->name_length + sizeof("::__invoke") - 1;
 					*callable_name = emalloc(*callable_name_len + 1);
