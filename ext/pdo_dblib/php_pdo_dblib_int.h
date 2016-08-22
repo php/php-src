@@ -118,6 +118,7 @@ typedef struct {
 typedef struct {
 	pdo_dblib_db_handle *H;
 	pdo_dblib_err err;
+	unsigned int computed_column_name_count;
 } pdo_dblib_stmt;
 
 typedef struct {
