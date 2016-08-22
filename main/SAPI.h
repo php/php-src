@@ -212,6 +212,7 @@ SAPI_API int sapi_get_target_uid(uid_t * TSRMLS_DC);
 SAPI_API int sapi_get_target_gid(gid_t * TSRMLS_DC);
 SAPI_API double sapi_get_request_time(TSRMLS_D);
 SAPI_API void sapi_terminate_process(TSRMLS_D);
+SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC);
 END_EXTERN_C()
 
 struct _sapi_module_struct {

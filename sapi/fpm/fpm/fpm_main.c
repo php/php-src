@@ -115,6 +115,8 @@ struct sigaction act, old_term, old_quit, old_int;
 
 static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
 
+typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC);
+
 #ifndef PHP_WIN32
 /* these globals used for forking children on unix systems */
 
@@ -1544,8 +1546,41 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
+static inline void fcgi_hash_apply(HashTable *h, fcgi_apply_func func, void *arg TSRMLS_DC) /* {{{ */
+{
+	Bucket *p	= h->pListHead;
+
+	while (p) {
+		if (EXPECTED(p->arKey != NULL)) {
+			/* Since request->env already has the terminating char, -1 to var_len */
+			func((char*)p->arKey, p->nKeyLength-1, *(char**)p->pData, strlen(*(char**)p->pData), arg TSRMLS_CC);
+		}
+		p = p->pListNext;
+	}
+} /* }}} */
+
+PHP_FUNCTION(apache_request_headers) /* {{{ */
+{
+	fcgi_request *request;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	if ((request = (fcgi_request*) SG(server_context))) {
+		fcgi_hash_apply(request->env, sapi_add_request_header, return_value TSRMLS_CC);
+	}
+} /* }}} */
+
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,              NULL)
+	PHP_FE(fastcgi_finish_request,              cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(apache_request_headers,                       cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(getallheaders, apache_request_headers, cgi_fcgi_sapi_no_arginfo)
 	{NULL, NULL, NULL}
 };
 
