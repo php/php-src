@@ -12,6 +12,6 @@ unset($rm, $rp);
 var_dump((string) $rt, (string) $rrt);
 
 --EXPECT--
-string(5) "\Test"
-string(6) "\Test2"
+string(4) "Test"
+string(5) "Test2"
 

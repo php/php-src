@@ -1444,17 +1444,6 @@ PHPAPI int php_url_scanner_reset_var(zend_string *name, int encode)
 
 PHP_MINIT_FUNCTION(url_scanner)
 {
-	BG(url_adapt_session_ex).tags = NULL;
-	BG(url_adapt_session_ex).form_app.s = BG(url_adapt_session_ex).url_app.s = NULL;
-	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
-
-	BG(url_adapt_output_ex).tags = NULL;
-	BG(url_adapt_output_ex).form_app.s = BG(url_adapt_output_ex).url_app.s = NULL;
-	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
-
-	BG(url_adapt_session_ex).type = 1;
-	BG(url_adapt_output_ex).type  = 0;
-
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }

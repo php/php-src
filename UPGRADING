@@ -25,6 +25,11 @@ PHP 7.1 UPGRADE NOTES
   . is_object() will now return true for objects of class
     __PHP_Incomplete_Class.
 
+- Reflection:
+  . ReflectionNamedType will be returned from ReflectionParameter::getType()
+    and ReflectionFunctionAbstract::getReturnType(). This class includes a
+    getName() method that returns the type name as a string.
+
 ========================================
 2. New Features
 ========================================

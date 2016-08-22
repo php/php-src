@@ -4053,6 +4053,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	dest = VCWD_FOPEN(fn_dest, "wb");
 	if (!dest) {
 		php_error_docref(NULL, E_WARNING, "Unable to open '%s' for writing", fn_dest);
+        fclose(org);
 		RETURN_FALSE;
 	}
 
@@ -4061,6 +4062,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 			im_org = gdImageCreateFromGif(org);
 			if (im_org == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to open '%s' Not a valid GIF file", fn_dest);
+                fclose(org);
+                fclose(dest);
 				RETURN_FALSE;
 			}
 			break;
@@ -4071,6 +4074,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 			im_org = gdImageCreateFromJpegEx(org, ignore_warning);
 			if (im_org == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to open '%s' Not a valid JPEG file", fn_dest);
+                fclose(org);
+                fclose(dest);
 				RETURN_FALSE;
 			}
 			break;
@@ -4081,6 +4086,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 			im_org = gdImageCreateFromPng(org);
 			if (im_org == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to open '%s' Not a valid PNG file", fn_dest);
+                fclose(org);
+                fclose(dest);
 				RETURN_FALSE;
 			}
 			break;
@@ -4088,9 +4095,13 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 		default:
 			php_error_docref(NULL, E_WARNING, "Format not supported");
+            fclose(org);
+            fclose(dest);
 			RETURN_FALSE;
 			break;
 	}
+
+	fclose(org);
 
 	org_width  = gdImageSX (im_org);
 	org_height = gdImageSY (im_org);
@@ -4122,6 +4133,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	im_tmp = gdImageCreate (dest_width, dest_height);
 	if (im_tmp == NULL ) {
 		php_error_docref(NULL, E_WARNING, "Unable to allocate temporary buffer");
+        fclose(dest);
+        gdImageDestroy(im_org);
 		RETURN_FALSE;
 	}
 
@@ -4129,23 +4142,29 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 	gdImageDestroy(im_org);
 
-	fclose(org);
-
 	im_dest = gdImageCreate(dest_width, dest_height);
 	if (im_dest == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to allocate destination buffer");
+        fclose(dest);
+        gdImageDestroy(im_tmp);
 		RETURN_FALSE;
 	}
 
 	white = gdImageColorAllocate(im_dest, 255, 255, 255);
 	if (white == -1) {
 		php_error_docref(NULL, E_WARNING, "Unable to allocate the colors for the destination buffer");
+        fclose(dest);
+        gdImageDestroy(im_tmp);
+        gdImageDestroy(im_dest);
 		RETURN_FALSE;
 	}
 
 	black = gdImageColorAllocate(im_dest, 0, 0, 0);
 	if (black == -1) {
 		php_error_docref(NULL, E_WARNING, "Unable to allocate the colors for the destination buffer");
+        fclose(dest);
+        gdImageDestroy(im_tmp);
+        gdImageDestroy(im_dest);
 		RETURN_FALSE;
 	}
 
