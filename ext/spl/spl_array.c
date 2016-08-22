@@ -1453,6 +1453,9 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	ZVAL_ARR(Z_REFVAL(params[0]), aht);
 	GC_REFCOUNT(aht)++;
 
+	/* Reference should have refcount>1 so it is a "real" reference */
+	Z_ADDREF(params[0]);
+
 	if (!use_arg) {
 		intern->nApplyCount++;
 		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 1, params, 1, NULL);
