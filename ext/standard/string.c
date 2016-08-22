@@ -93,6 +93,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PATHINFO_BASENAME", PHP_PATHINFO_BASENAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_FILENAME", PHP_PATHINFO_FILENAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("HEX2BIN_PARTIAL_OUTPUT_ON_ERROR", PHP_HEX2BIN_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_LOCALECONV
 	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
@@ -154,7 +155,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 
 /* {{{ php_hex2bin
  */
-static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *newlen)
+static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *newlen, int options TSRMLS_DC)
 {
 	size_t target_length = oldlen >> 1;
 	register unsigned char *str = (unsigned char *)safe_emalloc(target_length, sizeof(char), 1);
@@ -260,24 +261,24 @@ PHP_FUNCTION(bin2hex)
 }
 /* }}} */
 
-/* {{{ proto string hex2bin(string data)
+/* {{{ proto string hex2bin(string data, [int options])
    Converts the hex representation of data to binary */
 PHP_FUNCTION(hex2bin)
 {
 	char *result, *data;
 	size_t newlen;
-	int datalen;
+	int datalen, options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &datalen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &datalen, &options) == FAILURE) {
 		return;
 	}
 
-	if (datalen % 2 != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hexadecimal input string must have an even length");
+	if ((datalen % 2 != 0 || datalen == 0) && options ^ PHP_HEX2BIN_PARTIAL_OUTPUT_ON_ERROR) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hexadecimal input string must have an even length and cannot be empty");
 		RETURN_FALSE;
 	}
 
-	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
+	result = php_hex2bin((unsigned char *)data, datalen, &newlen, options TSRMLS_CC);
 
 	if (!result) {
 		RETURN_FALSE;
