@@ -19,6 +19,10 @@
 
 /* $Id$ */
 
+
+
+#include "zend.h"
+
 #ifndef PHP_OPENSSL_H
 #define PHP_OPENSSL_H
 /* HAVE_OPENSSL would include SSL MySQL stuff */
@@ -33,6 +37,7 @@ php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
+PHP_RSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
 
 PHP_FUNCTION(openssl_pkey_get_private);
@@ -86,7 +91,29 @@ PHP_FUNCTION(openssl_csr_get_public_key);
 #endif
 
 #endif
+typedef struct php_ssl_error{
+	 char *err_str;
+	 struct php_ssl_error* next;
+}PHP_SSL_ERROR_QUEUE ;
 
+
+typedef struct php_ssl_error_context{
+	struct php_ssl_error* current;
+}PHP_SSL_ERROR_CONTEXT;
+
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
+ZEND_BEGIN_MODULE_GLOBALS(openssl)
+	PHP_SSL_ERROR_CONTEXT *ssl_error_glogal_context;
+ZEND_END_MODULE_GLOBALS(openssl)
+
+#ifdef ZTS
+#define OPENSSL_G(v) TSRMG(openssl_globals_id, zend_openssl_globals *, v)
+#else
+#define OPENSSL_G(v) (openssl_globals.v)
+#endif
 /*
  * Local variables:
  * tab-width: 4
