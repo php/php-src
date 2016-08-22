@@ -1,5 +1,7 @@
 --TEST--
 Bug#60106 (stream_socket_server silently truncates long unix socket paths)
+--INI--
+log_errors_max_len=4200
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == "WIN" )
