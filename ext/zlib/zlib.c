@@ -205,10 +205,14 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 		if (SUCCESS == php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS, &flags TSRMLS_CC)) {
 			/* only run this once */
 			if (!(flags & PHP_OUTPUT_HANDLER_STARTED)) {
+				sapi_header_line cl_header = {ZEND_STRL("Content-Length"), 0};
+
 				if (SG(headers_sent) || !ZLIBG(output_compression)) {
 					deflateEnd(&ctx->Z);
 					return FAILURE;
 				}
+
+				sapi_header_op(SAPI_HEADER_DELETE, &cl_header);
 				switch (ZLIBG(compression_coding)) {
 					case PHP_ZLIB_ENCODING_GZIP:
 						sapi_add_header_ex(ZEND_STRL("Content-Encoding: gzip"), 1, 1 TSRMLS_CC);
