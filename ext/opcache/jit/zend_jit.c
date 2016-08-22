@@ -388,6 +388,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		zend_string *name = zend_jit_func_name(op_array);
 
 		if (name) {
+			/* TODO: register gdb as a whole file? */
 			zend_jit_perf_dump(
 				ZSTR_VAL(name),
 				handler,

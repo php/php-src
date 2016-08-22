@@ -35,7 +35,7 @@ static void zend_jit_perf_dump(const char *name, void *start, size_t size)
 		}
 	    setlinebuf(fp);
 	}
-	fprintf(fp, "%lx %x %s\n", start, size, name);
+	fprintf(fp, "%lx %lx %s\n", (size_t)start, size, name);
 }
 
 /*
