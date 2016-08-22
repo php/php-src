@@ -113,7 +113,7 @@ typedef struct {
 	DBPROCESS	*link;
 
 	pdo_dblib_err err;
-	zend_bool stringify_uniqueidentifier;
+	unsigned stringify_uniqueidentifier:1;
 } pdo_dblib_db_handle;
 
 typedef struct {
