@@ -863,3 +863,12 @@ g. New Hash algorithms
   - fnv132
   - fnv164
   - joaat
+
+=====================
+12.1 New in PHP 5.4.2
+=====================
+
+  New functions
+  - pgsql
+    - pg_escape_identifier()
+    - pg_escape_literal()
