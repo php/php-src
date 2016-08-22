@@ -24,6 +24,13 @@
 #ifdef HAVE_JIT
 
 #include "Optimizer/zend_ssa.h"
+#include "Optimizer/zend_inference.h"
+#include "Optimizer/zend_dump.h"
+
+#define ZEND_JIT_LEVEL 3 // 0 - no JIT
+                         // 1 - minimal JIT (subroutine threading)
+                         // 2 - selective inline threading
+                         // 3 - optimized JIT based on Type-Inference
 
 // TODO: define DASM_M_GROW and DASM_M_FREE to use CG(arena) ???
 
@@ -200,6 +207,28 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 	/* Identify reducible and irreducible loops */
 	if (zend_cfg_identify_loops(op_array, &ssa.cfg, &flags) != SUCCESS) {
 		goto jit_failure;
+	}
+
+	if (ZEND_JIT_LEVEL >= 3) {
+		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa, &flags) != SUCCESS) {
+			goto jit_failure;
+		}
+
+		if (zend_ssa_compute_use_def_chains(&CG(arena), op_array, &ssa) != SUCCESS) {
+			goto jit_failure;
+		}
+
+		if (zend_ssa_find_false_dependencies(op_array, &ssa) != SUCCESS) {
+			goto jit_failure;
+		}
+
+		if (zend_ssa_inference(&CG(arena), op_array, script, &ssa) != SUCCESS) {
+			goto jit_failure;
+		}
+
+		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
+			zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
+		}
 	}
 
 	dasm_init(&dasm_state, DASM_MAXSECTION);
