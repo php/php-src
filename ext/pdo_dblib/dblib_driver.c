@@ -280,10 +280,14 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	switch(attr) {
 		case PDO_ATTR_TIMEOUT:
 			return 0;
+
+		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
+			((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier = (zend_bool)(zval_get_long(val) ? 1 : 0);
+			return 1;
+
 		default:
 			return 1;
 	}
-
 }
 
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
@@ -347,10 +351,15 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
+	zend_bool stringify_uniqueidentifier = 0;
+
 	if (driver_options) {
 		int connect_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_CONNECTION_TIMEOUT, -1);
 		int query_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_QUERY_TIMEOUT, -1);
 		int timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
+		stringify_uniqueidentifier = (zend_bool)(pdo_attr_lval(driver_options,
+			(enum pdo_attribute_type) PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0) ? 1 : 0
+		);
 
 		if (connect_timeout == -1) {
 			connect_timeout = timeout;
@@ -366,6 +375,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
 	H->err.sqlstate = dbh->error_code;
+	H->stringify_uniqueidentifier = stringify_uniqueidentifier;
 
 	if (!H->login) {
 		goto cleanup;

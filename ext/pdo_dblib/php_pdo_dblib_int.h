@@ -113,6 +113,7 @@ typedef struct {
 	DBPROCESS	*link;
 
 	pdo_dblib_err err;
+	zend_bool stringify_uniqueidentifier;
 } pdo_dblib_db_handle;
 
 typedef struct {
@@ -142,7 +143,8 @@ ZEND_EXTERN_MODULE_GLOBALS(dblib)
 
 enum {
 	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
-	PDO_DBLIB_ATTR_QUERY_TIMEOUT
+	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
+	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
 };
 
 #endif
