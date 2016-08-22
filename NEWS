@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Reverted prepending \ for class names and ? for nullable types returned
     from ReflectionType::__toString(). (Trowski)
 
+- Standard:
+  . Fixed bug #72920 (Accessing a private constant using constant() creates
+    an exception AND warning). (Laruence)
+
 - XML:
   . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
 
