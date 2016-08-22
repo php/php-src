@@ -2563,6 +2563,121 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
+/* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
+   Return the values from a single column in the input array, identified by the
+   value_key and optionally indexed by the index_key */
+PHP_FUNCTION(array_column)
+{
+	zval *zarray, *zcolumn, *zkey = NULL, **data, **zcolval, **zkeyval;
+	HashTable *arr_hash;
+	HashPosition pointer;
+	ulong column_idx = 0, key_idx = 0;
+	char *column = NULL, *key = NULL, *keyval = NULL;
+	int column_len = 0, key_len = 0, keyval_idx = -1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az|z", &zarray, &zcolumn, &zkey) == FAILURE) {
+		return;
+	}
+
+	switch (Z_TYPE_P(zcolumn)) {
+		case IS_NULL:
+			column_idx = 0;
+			break;
+		case IS_LONG:
+			column_idx = Z_LVAL_P(zcolumn);
+			break;
+		case IS_STRING:
+			column = Z_STRVAL_P(zcolumn);
+			column_len = Z_STRLEN_P(zcolumn);
+			break;
+		case IS_OBJECT:
+			convert_to_string(zcolumn);
+			column = Z_STRVAL_P(zcolumn);
+			column_len = Z_STRLEN_P(zcolumn);
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The column key should be either a string or an integer");
+			RETURN_FALSE;
+	}
+
+	if (zkey) {
+		switch (Z_TYPE_P(zkey)) {
+			case IS_NULL:
+				key_idx = 0;
+				break;
+			case IS_LONG:
+				key_idx = Z_LVAL_P(zkey);
+				break;
+			case IS_STRING:
+				key = Z_STRVAL_P(zkey);
+				key_len = Z_STRLEN_P(zkey);
+				break;
+			case IS_OBJECT:
+				convert_to_string(zkey);
+				key = Z_STRVAL_P(zkey);
+				key_len = Z_STRLEN_P(zkey);
+				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The index key should be either a string or an integer");
+				RETURN_FALSE;
+		}
+	}
+
+	arr_hash = Z_ARRVAL_P(zarray);
+	array_init(return_value);
+
+	for (zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
+			zend_hash_get_current_data_ex(arr_hash, (void**)&data, &pointer) == SUCCESS;
+			zend_hash_move_forward_ex(arr_hash, &pointer)) {
+
+		if (Z_TYPE_PP(data) == IS_ARRAY) {
+			if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval) == FAILURE) {
+				continue;
+			} else if (!column && zend_hash_index_find(Z_ARRVAL_PP(data), column_idx, (void**)&zcolval) == FAILURE) {
+				continue;
+			}
+
+			Z_ADDREF_PP(zcolval);
+
+			keyval = NULL;
+			keyval_idx = -1;
+
+			if (zkey) {
+				if (key && zend_hash_find(Z_ARRVAL_PP(data), key, key_len + 1, (void**)&zkeyval) == FAILURE) {
+					keyval_idx = -1;
+				} else if (!key && zend_hash_index_find(Z_ARRVAL_PP(data), key_idx, (void**)&zkeyval) == FAILURE) {
+					keyval_idx = -1;
+				} else {
+					switch (Z_TYPE_PP(zkeyval)) {
+						case IS_LONG:
+							keyval_idx = Z_LVAL_PP(zkeyval);
+							break;
+						case IS_STRING:
+							keyval = Z_STRVAL_PP(zkeyval);
+							break;
+						case IS_OBJECT:
+							convert_to_string(*zkeyval);
+							keyval = Z_STRVAL_PP(zkeyval);
+							break;
+						default:
+							keyval_idx = -1;
+					}
+				}
+			}
+
+			if (keyval) {
+				add_assoc_zval(return_value, keyval, *zcolval);
+			} else if (keyval_idx != -1) {
+				add_index_zval(return_value, keyval_idx, *zcolval);
+			} else {
+				add_next_index_zval(return_value, *zcolval);
+			}
+		}
+
+	}
+}
+/* }}} */
+
 /* {{{ proto array array_reverse(array input [, bool preserve keys])
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
