@@ -433,6 +433,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_count_values, 0)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_column, 0, 0, 2)
+	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_reverse, 0, 0, 1)
 	ZEND_ARG_INFO(0, input) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_INFO(0, preserve_keys)
@@ -3299,6 +3304,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_keys,														arginfo_array_keys)
 	PHP_FE(array_values,													arginfo_array_values)
 	PHP_FE(array_count_values,												arginfo_array_count_values)
+	PHP_FE(array_column,													arginfo_array_column)
 	PHP_FE(array_reverse,													arginfo_array_reverse)
 	PHP_FE(array_reduce,													arginfo_array_reduce)
 	PHP_FE(array_pad,														arginfo_array_pad)
