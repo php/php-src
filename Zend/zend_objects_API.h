@@ -83,9 +83,7 @@ static zend_always_inline void zend_object_release(zend_object *obj)
 
 static zend_always_inline size_t zend_object_properties_size(zend_class_entry *ce)
 {
-	return sizeof(zval) *
-		(ce->default_properties_count -
-			((ce->ce_flags & ZEND_ACC_USE_GUARDS) ? 0 : 1));
+	return sizeof(zval) * ce->default_properties_count;
 }
 
 #endif /* ZEND_OBJECTS_H */
