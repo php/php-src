@@ -24,6 +24,29 @@
 # undef ELF64
 #endif
 
+#if defined(__x86_64)
+#define CFRAME_OFS_ERRF     (15*4)
+#define CFRAME_OFS_NRES     (14*4)
+#define CFRAME_OFS_PREV     (13*4)
+#define CFRAME_OFS_L        (12*4)
+#define CFRAME_OFS_PC       (6*4)
+#define CFRAME_OFS_MULTRES  (5*4)
+#define CFRAME_SIZE         (12*4)
+#define CFRAME_SHIFT_MULTRES    0
+#elif defined(__i386__)
+#define CFRAME_OFS_PREV     (4*8)
+#define CFRAME_OFS_PC       (7*4)
+#define CFRAME_OFS_L        (6*4)
+#define CFRAME_OFS_ERRF     (5*4)
+#define CFRAME_OFS_NRES     (4*4)
+#define CFRAME_OFS_MULTRES  (1*4)
+#define CFRAME_SIZE         (10*8)
+#define CFRAME_SIZE_JIT     (CFRAME_SIZE + 16)
+#define CFRAME_SHIFT_MULTRES    0
+#endif
+
+#define CFRAME_SIZE_JIT CFRAME_SIZE
+
 typedef struct _zend_elf_header {
 	uint8_t   emagic[4];
 	uint8_t   eclass;
@@ -372,6 +395,12 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 	sym = &ctx->obj.sym[GDBJIT_SYM_FUNC];
 	sym->name = zend_gdbjit_strz(ctx, "JIT_FUNC_");
 	ctx->p--;
+	if (ctx->op_array->scope) {
+		zend_gdbjit_strz(ctx, ZSTR_VAL(ctx->op_array->scope->name));
+		ctx->p--;
+		zend_gdbjit_strz(ctx, "::");
+		ctx->p--;
+	}
 	zend_gdbjit_strz(ctx,
 			ctx->op_array->function_name? ZSTR_VAL(ctx->op_array->function_name) : "main");
 	sym->sectidx = GDBJIT_SECT_text;
@@ -580,6 +609,12 @@ static int zend_jit_gdb_register(zend_op_array *op_array,
 	ctx.op_array = op_array;
 	ctx.mcaddr = (uintptr_t)start;
 	ctx.szmcode = (uint32_t)size;
+#if defined(__x86_64__)
+	ctx.spadjp = CFRAME_SIZE_JIT + 8;
+#elif defined(__i386__)
+	ctx.spadjp = CFRAME_SIZE_JIT + 12;
+#endif
+	ctx.spadj =  CFRAME_SIZE_JIT;
 	ctx.filename = ZSTR_VAL(op_array->filename);
 	ctx.lineno = op_array->line_start;
 
@@ -607,16 +642,24 @@ static int zend_jit_gdb_register(zend_op_array *op_array,
 
 static int zend_jit_gdb_unregister()
 {
-	zend_gdbjit_code_entry *entry, *next;
+	zend_gdbjit_code_entry *entry;
 
 	/* TODO: release entry earlier */
-	for (entry = __jit_debug_descriptor.first_entry; entry;) {
-		next = entry->next_entry;
+	while ((entry = __jit_debug_descriptor.first_entry)) {
+		if (entry->prev_entry) {
+			entry->prev_entry->next_entry = entry->next_entry;
+		} else {
+			__jit_debug_descriptor.first_entry = entry->next_entry;
+		}
+		if (entry->next_entry) {
+			entry->next_entry->prev_entry = entry->prev_entry;
+		}
 		__jit_debug_descriptor.relevant_entry = entry;
 		__jit_debug_descriptor.action_flag = GDBJIT_UNREGISTER;
 		__jit_debug_register_code();
-		entry = next;
+		free(entry);
 	}
+
 	return 1;
 }
 
