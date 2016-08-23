@@ -24,6 +24,7 @@
 
 #ifdef HAVE_JIT
 
+#include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_ssa.h"
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/zend_dump.h"
@@ -215,7 +216,8 @@ static int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		goto jit_failure;
 	}
 
-	if (ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL) {
+	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL)
+	 && !(flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa, &flags) != SUCCESS) {
 			goto jit_failure;
 		}
