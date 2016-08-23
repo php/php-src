@@ -568,20 +568,22 @@ static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx) {
 	ZEND_ASSERT(ctx->objsize < sizeof(zend_gdbjit_obj));
 }
 
-static int zend_jit_gdb_register(const char *name,
+static int zend_jit_gdb_register(zend_op_array *op_array,
+                                 const char *name,
                                  const void *start,
                                  size_t      size)
 {
-	zend_gdbjit_ctx ctx;
+	zend_gdbjit_ctx ctx = {0};
 	zend_gdbjit_code_entry *entry;
 
 	ctx.mcaddr = (uintptr_t)start;
 	ctx.szmcode = (uint32_t)size;
 	ctx.filename = name;
+	ctx.lineno = op_array->line_start;
 
 	zend_gdbjit_buildobj(&ctx);
 
-	entry = emalloc(sizeof(zend_gdbjit_code_entry) + ctx.objsize);
+	entry = malloc(sizeof(zend_gdbjit_code_entry) + ctx.objsize);
 	entry->symfile_addr = ((char*)entry) + sizeof(zend_gdbjit_code_entry);
 	entry->symfile_size = ctx.objsize;
 
@@ -611,7 +613,6 @@ static int zend_jit_gdb_unregister()
 		__jit_debug_descriptor.relevant_entry = entry;
 		__jit_debug_descriptor.action_flag = GDBJIT_UNREGISTER;
 		__jit_debug_register_code();
-		efree(entry);
 		entry = next;
 	}
 	return 1;

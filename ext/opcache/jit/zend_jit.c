@@ -440,6 +440,7 @@ static int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		if (name) {
 			zend_jit_gdb_register(
+				op_array,
 				ZSTR_VAL(name),
 				handler,
 				(char*)dasm_ptr - (char*)handler);
@@ -620,7 +621,7 @@ ZEND_API void zend_jit_shutdown(void)
 
 #ifdef HAVE_GDB
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
-			zend_jit_gdb_unregister();
+		zend_jit_gdb_unregister();
 	}
 #endif
 }
