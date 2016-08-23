@@ -27,10 +27,13 @@
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/zend_dump.h"
 
-#define ZEND_JIT_LEVEL 3 // 0 - no JIT
-                         // 1 - minimal JIT (subroutine threading)
-                         // 2 - selective inline threading
-                         // 3 - optimized JIT based on Type-Inference
+
+#define ZEND_JIT_LEVEL_NONE   0     /* no JIT */
+#define ZEND_JIT_LEVEL_MINI   1     /* minimal JIT (subroutine threading) */
+#define ZEND_JIT_LEVEL_INLINE 2     /* selective inline threading */
+#define ZEND_JIT_LEVEL_FULL   3     /* optimized JIT based on Type-Inference */
+
+#define ZEND_JIT_LEVEL  ZEND_JIT_LEVEL_FULL
 
 // TODO: define DASM_M_GROW and DASM_M_FREE to use CG(arena) ???
 
@@ -209,7 +212,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		goto jit_failure;
 	}
 
-	if (ZEND_JIT_LEVEL >= 3) {
+	if (ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL) {
 		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa, &flags) != SUCCESS) {
 			goto jit_failure;
 		}
