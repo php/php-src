@@ -947,10 +947,13 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info && func_info->ssa.var_info) {
 				zend_redo_pass_two_ex(call_graph.op_arrays[i], &func_info->ssa);
-				ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 			} else {
 				zend_redo_pass_two(call_graph.op_arrays[i]);
 			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 		}
 
 		zend_arena_release(&ctx.arena, checkpoint);
