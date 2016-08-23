@@ -29,7 +29,7 @@
 #define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
 
 
-ZEND_API int  zend_jit(zend_script *script);
+ZEND_API int  zend_jit(zend_op_array *op_array, zend_script *script);
 ZEND_API void zend_jit_unprotect(void);
 ZEND_API void zend_jit_protect(void);
 ZEND_API int  zend_jit_startup(size_t size);
