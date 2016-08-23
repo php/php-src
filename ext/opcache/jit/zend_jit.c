@@ -178,7 +178,7 @@ static void jit_free(void *p, size_t size)
 
 ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 {
-	uint32_t flags;
+	uint32_t flags = 0;
 	zend_ssa ssa;
 	void *checkpoint;
 	int b, i, end;
