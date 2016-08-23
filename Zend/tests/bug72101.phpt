@@ -8,7 +8,7 @@ class PHPUnit_Framework_MockObject_Stub_ReturnCallback {
         $this->callback = $callback;
     }
     public function invoke($invocation) {
-        return call_user_func_array($this->callback, $invocation->parameters);
+        return call_user_func_array($this->callback, (array)$invocation->parameters);
     }
 }
 

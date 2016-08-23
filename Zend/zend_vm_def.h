@@ -4585,14 +4585,18 @@ ZEND_VM_C_LABEL(send_again):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
+ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *args;
 
 	SAVE_OPLINE();
-	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	if (OP1_TYPE & (IS_VAR|IS_CV)) {
+		args = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
+	} else {
+		args = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(args) != IS_ARRAY)) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(args)) {
@@ -4617,6 +4621,20 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 		zval *arg, *param;
 
 ZEND_VM_C_LABEL(send_array):
+		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_REFCOUNT_P(args) > 1) {
+			ht = Z_ARRVAL_P(args);
+			arg_num = 1;
+			ZEND_HASH_FOREACH_VAL(ht, arg) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+					if (UNEXPECTED(!Z_ISREF_P(arg))) {
+						SEPARATE_ARRAY(args);
+						break;
+					}
+				}
+				arg_num++;
+			} ZEND_HASH_FOREACH_END();
+		}
+
 		ht = Z_ARRVAL_P(args);
 		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
 
@@ -4625,7 +4643,9 @@ ZEND_VM_C_LABEL(send_array):
 		ZEND_HASH_FOREACH_VAL(ht, arg) {
 			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 				if (UNEXPECTED(!Z_ISREF_P(arg))) {
-					if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+					if (OP1_TYPE & (IS_VAR|IS_CV)) {
+						ZVAL_NEW_REF(arg, arg);
+					} else if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 
 						zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 							arg_num,
@@ -4658,7 +4678,11 @@ ZEND_VM_C_LABEL(send_array):
 			param++;
 		} ZEND_HASH_FOREACH_END();
 	}
-	FREE_OP1();
+	if (OP1_TYPE & (IS_VAR|IS_CV)) {
+		FREE_OP1_VAR_PTR();
+	} else {
+		FREE_OP1();
+	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 

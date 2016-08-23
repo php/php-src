@@ -3519,7 +3519,11 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 	}
 
 	zend_compile_init_user_func(args->child[0], 0, lcname);
-	zend_compile_expr(&arg_node, args->child[1]);
+	if (zend_is_variable(args->child[1]) && !zend_is_call(args->child[1])) {
+		zend_compile_var(&arg_node, args->child[1], BP_VAR_W);
+	} else {
+		zend_compile_expr(&arg_node, args->child[1]);
+	}
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 
