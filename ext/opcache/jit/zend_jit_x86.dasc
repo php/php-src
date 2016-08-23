@@ -132,9 +132,9 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 	return 1;
 }
 
-static int zend_jit_skip_handler(dasm_State **Dst)
+static int zend_jit_skip_handler(dasm_State **Dst, uint32_t skip)
 {
-	| add IP, sizeof(zend_op)
+	| add IP, sizeof(zend_op) * skip
 	return 1;
 }
 

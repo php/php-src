@@ -284,8 +284,15 @@ static int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 					}
 					break;
 				case ZEND_NOP:
-					if (!zend_jit_skip_handler(&dasm_state)) {
-						goto jit_failure;
+					{
+						uint32_t skip = 1;
+						while (i < end && (opline + skip)->opcode == ZEND_NOP) {
+							i++;
+							skip++;
+						}
+						if (!zend_jit_skip_handler(&dasm_state, skip)) {
+							goto jit_failure;
+						}
 					}
 					break;
 				case ZEND_OP_DATA:
@@ -322,7 +329,7 @@ static int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
-					if (opline != 0) {
+					if (i != 0) {
 						if ((opline-1)->opcode == ZEND_IS_EQUAL ||
 						    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
 						    (opline-1)->opcode == ZEND_IS_SMALLER ||
