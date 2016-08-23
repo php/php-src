@@ -12,17 +12,12 @@ PHP                                                                        NEWS
     images). (cmb)
   . Fixed bug #68716 (possible resource leaks in _php_image_convert()). (cmb)
 
-- Reflection:
-  . Reverted prepending \ for class names and ? for nullable types returned
-    from ReflectionType::__toString(). (Trowski)
-
 - Intl:
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
 
 - Reflection:
-  . Reverted prepending \ for class names and ? for nullable types returned
-    from ReflectionType::__toString(). (Trowski)
+  . Reverted prepending \ for class names. (Trowski)
 
 - Standard:
   . Fixed bug #72920 (Accessing a private constant using constant() creates
@@ -88,6 +83,8 @@ PHP                                                                        NEWS
     should match). (cmb).
   . Add ReflectionNamedType::getName(). This method should be used instead of
     ReflectionType::__toString()
+  . Prepend \ for class names and ? for nullable types returned from
+    ReflectionType::__toString(). (Trowski)
 
 - Session:
   . Implemented RFC: Session ID without hashing. (Yasuo)
