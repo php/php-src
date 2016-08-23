@@ -501,7 +501,7 @@ static void place_essa_pis(
 				   (opline-1)->op2_type == IS_CONST) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 			zend_string *lcname = Z_STR_P(CRT_CONSTANT((opline-1)->op2) + 1);
-			zend_class_entry *ce = zend_hash_find_ptr(&script->class_table, lcname);
+			zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
 			if (!ce) {
 				ce = zend_hash_find_ptr(CG(class_table), lcname);
 				if (!ce || ce->type != ZEND_INTERNAL_CLASS) {
