@@ -113,7 +113,7 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline)
 	|.else
 	| call aword &handler
 	|.endif
-	zend_jit_check_exception(Dst);
+	zend_jit_check_timeout(Dst);
 	return 1;
 }
 
