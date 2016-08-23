@@ -266,17 +266,18 @@ typedef struct _zend_gdbjit_descriptor {
 
 /* Context for generating the ELF object for the GDB JIT API. */
 typedef struct _zend_gdbjit_ctx {
-	uint8_t *p;           /* Pointer to next address in obj.space. */
-	uint8_t *startp;      /* Pointer to start address in obj.space. */
-	void    *T;           /* Generate symbols for this trace. */
-	uintptr_t mcaddr;     /* Machine code address. */
-	uint32_t szmcode;     /* Size of machine code. */
-	uint32_t spadjp;      /* Stack adjustment for parent trace or interpreter. */
-	uint32_t spadj;       /* Stack adjustment for trace itself. */
-	int32_t  lineno;      /* Starting line number. */
-	const char *filename; /* Starting file name. */
-	size_t objsize;       /* Final size of ELF object. */
-	zend_gdbjit_obj obj;  /* In-memory ELF object. */
+	zend_op_array *op_array; /* Pointer to op_array */
+	uint8_t *p;              /* Pointer to next address in obj.space. */
+	uint8_t *startp;         /* Pointer to start address in obj.space. */
+	void    *T;              /* Generate symbols for this trace. */
+	uintptr_t mcaddr;        /* Machine code address. */
+	uint32_t szmcode;        /* Size of machine code. */
+	uint32_t spadjp;         /* Stack adjustment for parent trace or interpreter. */
+	uint32_t spadj;          /* Stack adjustment for trace itself. */
+	int32_t  lineno;         /* Starting line number. */
+	const char *filename;    /* Starting file name. */
+	size_t objsize;          /* Final size of ELF object. */
+	zend_gdbjit_obj obj;     /* In-memory ELF object. */
 } zend_gdbjit_ctx;
 
 zend_gdbjit_descriptor __jit_debug_descriptor = {
@@ -369,9 +370,10 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 	sym->info = ELFSYM_TYPE_FILE|ELFSYM_BIND_LOCAL;
 
 	sym = &ctx->obj.sym[GDBJIT_SYM_FUNC];
-	sym->name = zend_gdbjit_strz(ctx, "JIT_FUNC_"); ctx->p--;
-	/* filename actually is function name */
-	zend_gdbjit_strz(ctx, ctx->filename);
+	sym->name = zend_gdbjit_strz(ctx, "JIT_FUNC_");
+	ctx->p--;
+	zend_gdbjit_strz(ctx,
+			ctx->op_array->function_name? ZSTR_VAL(ctx->op_array->function_name) : "main");
 	sym->sectidx = GDBJIT_SECT_text;
 	sym->value = 0;
 	sym->size = ctx->szmcode;
@@ -569,16 +571,16 @@ static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx) {
 }
 
 static int zend_jit_gdb_register(zend_op_array *op_array,
-                                 const char *name,
                                  const void *start,
                                  size_t      size)
 {
 	zend_gdbjit_ctx ctx = {0};
 	zend_gdbjit_code_entry *entry;
 
+	ctx.op_array = op_array;
 	ctx.mcaddr = (uintptr_t)start;
 	ctx.szmcode = (uint32_t)size;
-	ctx.filename = name;
+	ctx.filename = ZSTR_VAL(op_array->filename);
 	ctx.lineno = op_array->line_start;
 
 	zend_gdbjit_buildobj(&ctx);

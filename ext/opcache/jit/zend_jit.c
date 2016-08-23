@@ -436,16 +436,10 @@ static int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 #ifdef HAVE_GDB
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
-		zend_string *name = zend_jit_func_name(op_array);
-
-		if (name) {
-			zend_jit_gdb_register(
+		zend_jit_gdb_register(
 				op_array,
-				ZSTR_VAL(name),
 				handler,
 				(char*)dasm_ptr - (char*)handler);
-			zend_string_release(name);
-		}
 	}
 #endif
 
