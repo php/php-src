@@ -32,10 +32,10 @@ var_dump((string) $return);
 ?>
 --EXPECTF--
 string(11) "Traversable"
-string(11) "Traversable"
+string(12) "?Traversable"
 string(6) "string"
-string(6) "string"
+string(7) "?string"
 string(4) "Test"
+string(5) "?Test"
 string(4) "Test"
-string(4) "Test"
-string(4) "Test"
+string(5) "?Test"

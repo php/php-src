@@ -3028,13 +3028,23 @@ ZEND_METHOD(reflection_type, __toString)
 {
 	reflection_object *intern;
 	type_reference *param;
+	zend_string *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 	
-	RETURN_STR(reflection_type_name(param));
+	str = reflection_type_name(param);
+	
+	if (param->arg_info->allow_null) {
+		size_t orig_len = ZSTR_LEN(str);
+		str = zend_string_extend(str, orig_len + 1, 0);
+		memmove(ZSTR_VAL(str) + 1, ZSTR_VAL(str), orig_len + 1);
+		ZSTR_VAL(str)[0] = '?';
+	}
+	
+	RETURN_STR(str);
 }
 /* }}} */
 
