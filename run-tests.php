@@ -269,7 +269,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	@unlink($info_file);
 
 	// load list of enabled extensions
-	save_text($info_file, '<?php echo join(",", get_loaded_extensions()); ?>');
+	save_text($info_file, '<?php echo str_replace("Zend OPcache", "opcache", join(",", get_loaded_extensions())); ?>');
 	$exts_to_test = explode(',',`$php $pass_options $info_params $no_file_cache "$info_file"`);
 	// check for extensions that need special handling and regenerate
 	$info_params_ex = array(
