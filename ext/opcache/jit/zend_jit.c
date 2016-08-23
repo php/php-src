@@ -19,6 +19,7 @@
 #include <ZendAccelerator.h>
 #include "Zend/zend_execute.h"
 #include "zend_smart_str.h"
+#include "zend_shared_alloc.h"
 #include "jit/zend_jit.h"
 
 #ifdef HAVE_JIT
@@ -175,7 +176,7 @@ static void jit_free(void *p, size_t size)
 #endif
 }
 
-ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
+static int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	uint32_t flags;
 	zend_ssa ssa;
@@ -185,9 +186,11 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 	dasm_State* dasm_state = NULL;
 	void *handler;
 
-	if (!dasm_buf) {
-		return FAILURE;
+	if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
+		return SUCCESS;
 	}
+
+	zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array->opcodes);
 
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
@@ -475,6 +478,39 @@ jit_failure:
     }
 	zend_arena_release(&CG(arena), checkpoint);
 	return FAILURE;
+}
+
+static int zend_jit_func_table(zval *zv, void *arg) {
+	zend_op_array *op_array = (zend_op_array*)Z_PTR_P(zv);
+	zend_script *script = (zend_script *)arg;
+
+	zend_jit_op_array(op_array, script);
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static int zend_jit_class_table(zval *zv, void *arg) {
+	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(zv);
+	zend_script *script = (zend_script *)arg;
+
+	zend_hash_apply_with_argument(&ce->function_table, zend_jit_func_table, script);
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+ZEND_API int zend_jit(zend_script *script) {
+	if (!dasm_buf) {
+		return FAILURE;
+	}
+
+	/* xlat table is initialized already */
+	zend_shared_alloc_clear_xlat_table();
+
+	zend_hash_apply_with_argument(&script->class_table, zend_jit_class_table, script);
+	zend_hash_apply_with_argument(&script->function_table, zend_jit_func_table, script);
+	zend_jit_op_array(&script->main_op_array, script);
+
+	return SUCCESS;
 }
 
 ZEND_API void zend_jit_unprotect(void)

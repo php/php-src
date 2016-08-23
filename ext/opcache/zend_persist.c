@@ -336,9 +336,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	int already_stored = 0;
 	zend_op *persist_ptr;
 	zval *orig_literals = NULL;
-#ifdef HAVE_JIT
-	int do_jit = 1;
-#endif
 
 	if (op_array->type != ZEND_USER_FUNCTION) {
 		return;
@@ -405,9 +402,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
 		ZEND_ASSERT(persist_ptr != NULL);
 		op_array->opcodes = persist_ptr;
-#ifdef HAVE_JIT
-		do_jit = 0;
-#endif
 	} else {
 		zend_op *new_opcodes = zend_accel_memdup(op_array->opcodes, sizeof(zend_op) * op_array->last);
 #if ZEND_USE_ABS_CONST_ADDR || ZEND_USE_ABS_JMP_ADDR
@@ -568,12 +562,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
-
-#ifdef HAVE_JIT
-	if (do_jit && ZCG(accel_directives).jit_buffer_size) {
-		zend_jit(op_array, &main_persistent_script->script);
-	}
-#endif
 }
 
 static void zend_persist_op_array(zval *zv)
@@ -865,6 +853,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
 
 #ifdef HAVE_JIT
+	if (ZCG(accel_directives).jit_buffer_size) {
+		zend_jit(&script->script);
+	}
 	zend_jit_protect();
 #endif
 
