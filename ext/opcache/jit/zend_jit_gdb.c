@@ -171,7 +171,7 @@ enum {
 enum {
 	GDBJIT_NOACTION,
 	GDBJIT_REGISTER,
-	GDBJIT_UNREGISTYER
+	GDBJIT_UNREGISTER
 };
 
 enum {
@@ -402,13 +402,13 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
 
   /* Emit DWARF EH CIE. */
   DSECT(CIE,
-    DU32(0);			/* Offset to CIE itself. */
+    DU32(0);			                /* Offset to CIE itself. */
     DB(DW_CIE_VERSION);
-    DSTR("zR");			/* Augmentation. */
-    DUV(1);			/* Code alignment factor. */
-    DSV(-(int32_t)sizeof(uintptr_t));  /* Data alignment factor. */
-    DB(DW_REG_RA);		/* Return address register. */
-    DB(1); DB(DW_EH_PE_textrel|DW_EH_PE_udata4);  /* Augmentation data. */
+    DSTR("zR");			                /* Augmentation. */
+    DUV(1);			                    /* Code alignment factor. */
+    DSV(-(int32_t)sizeof(uintptr_t));   /* Data alignment factor. */
+    DB(DW_REG_RA);		                           /* Return address register. */
+    DB(1); DB(DW_EH_PE_textrel|DW_EH_PE_udata4);   /* Augmentation data. */
     DB(DW_CFA_def_cfa); DUV(DW_REG_SP); DUV(sizeof(uintptr_t));
     DB(DW_CFA_offset|DW_REG_RA); DUV(1);
     DALIGNNOP(sizeof(uintptr_t));
@@ -417,9 +417,9 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
   /* Emit DWARF EH FDE. */
   DSECT(FDE,
     DU32((uint32_t)(p-framep));	/* Offset to CIE. */
-    DU32(0);			/* Machine code offset relative to .text. */
-    DU32(ctx->szmcode);		/* Machine code length. */
-    DB(0);			/* Augmentation data. */
+    DU32(0);			        /* Machine code offset relative to .text. */
+    DU32(ctx->szmcode);		    /* Machine code length. */
+    DB(0);			            /* Augmentation data. */
     /* Registers saved in CFRAME. */
 #if defined(__i386__)
     DB(DW_CFA_offset|DW_REG_BP); DUV(2);
@@ -470,13 +470,19 @@ static void zend_gdbjit_debugabbrev(zend_gdbjit_ctx *ctx)
 	uint8_t *p = ctx->p;
 
 	/* Abbrev #1: DW_TAG_compile_unit. */
-	DUV(1); DUV(DW_TAG_compile_unit);
+	DUV(1);
+	DUV(DW_TAG_compile_unit);
 	DB(DW_children_no);
-	DUV(DW_AT_name);  DUV(DW_FORM_string);
-	DUV(DW_AT_low_pc);    DUV(DW_FORM_addr);
-	DUV(DW_AT_high_pc);   DUV(DW_FORM_addr);
-	DUV(DW_AT_stmt_list); DUV(DW_FORM_data4);
-	DB(0); DB(0);
+	DUV(DW_AT_name);
+	DUV(DW_FORM_string);
+	DUV(DW_AT_low_pc);
+	DUV(DW_FORM_addr);
+	DUV(DW_AT_high_pc);
+	DUV(DW_FORM_addr);
+	DUV(DW_AT_stmt_list);
+	DUV(DW_FORM_data4);
+	DB(0);
+	DB(0);
 
 	ctx->p = p;
 }
@@ -593,10 +599,19 @@ static int zend_jit_gdb_register(const char *name,
 	return 1;
 }
 
-static int zend_jit_gdb_unregister(const char *name,
-                                 const void *start,
-                                 size_t      size)
+static int zend_jit_gdb_unregister()
 {
+	zend_gdbjit_code_entry *entry, *next;
+
+	/* TODO: release entry earlier */
+	for (entry = __jit_debug_descriptor.first_entry; entry;) {
+		next = entry->next_entry;
+		__jit_debug_descriptor.relevant_entry = entry;
+		__jit_debug_descriptor.action_flag = GDBJIT_UNREGISTER;
+		__jit_debug_register_code();
+		efree(entry);
+		entry = next;
+	}
 	return 1;
 }
 

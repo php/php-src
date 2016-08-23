@@ -617,6 +617,12 @@ ZEND_API void zend_jit_shutdown(void)
 	if (dasm_buf) {
 		jit_free(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf));
 	}
+
+#ifdef HAVE_GDB
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
+			zend_jit_gdb_unregister();
+	}
+#endif
 }
 
 #else /* HAVE_JIT */
