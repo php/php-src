@@ -3887,7 +3887,9 @@ PHP_FUNCTION(constant)
 			}
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
+		}
 		RETURN_NULL();
 	}
 }
