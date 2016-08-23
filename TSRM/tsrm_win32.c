@@ -426,7 +426,7 @@ static process_pair *process_get(FILE *stream)
 	return ptr;
 }
 
-static shm_pair *shm_get(int key, void *addr)
+static shm_pair *shm_get(key_t key, void *addr)
 {
 	shm_pair *ptr;
 	shm_pair *newptr;
@@ -639,16 +639,12 @@ TSRM_API int pclose(FILE *stream)
 	return termstat;
 }
 
-TSRM_API int shmget(int key, int size, int flags)
+TSRM_API int shmget(key_t key, size_t size, int flags)
 {
 	shm_pair *shm;
 	char shm_segment[26], shm_info[29];
 	HANDLE shm_handle, info_handle;
 	BOOL created = FALSE;
-
-	if (size < 0) {
-		return -1;
-	}
 
 	snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
 	snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
@@ -658,7 +654,14 @@ TSRM_API int shmget(int key, int size, int flags)
 
 	if (!shm_handle && !info_handle) {
 		if (flags & IPC_CREAT) {
-			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm_segment);
+#if SIZEOF_SIZE_T == 8
+			DWORD high = size >> 32;
+			DWORD low = (DWORD)size;
+#else
+			DWORD high = 0;
+			DWORD low = size;
+#endif
+			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, shm_segment);
 			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
 			created		= TRUE;
 		}
