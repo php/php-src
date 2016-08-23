@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC1
 
+- Core:
+  . Fixed bug #72598 (Reference is lost after array_slice()) (Nikita)
+
 -GD:
   . Fixed bug #66005 (imagecopy does not support 1bit transparency on truecolor
     images). (cmb)
