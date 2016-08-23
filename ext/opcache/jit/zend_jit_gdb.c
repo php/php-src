@@ -364,12 +364,14 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 	*ctx->p++ = '\0';
 
 	sym = &ctx->obj.sym[GDBJIT_SYM_FILE];
-	sym->name = zend_gdbjit_strz(ctx, "JIT mcode");
+	sym->name = zend_gdbjit_strz(ctx, "JIT code");
 	sym->sectidx = ELFSECT_IDX_ABS;
 	sym->info = ELFSYM_TYPE_FILE|ELFSYM_BIND_LOCAL;
 
 	sym = &ctx->obj.sym[GDBJIT_SYM_FUNC];
-	sym->name = zend_gdbjit_strz(ctx, "JIT_FUNC"); ctx->p--;
+	sym->name = zend_gdbjit_strz(ctx, "JIT_FUNC_"); ctx->p--;
+	/* filename actually is function name */
+	zend_gdbjit_strz(ctx, ctx->filename);
 	sym->sectidx = GDBJIT_SECT_text;
 	sym->value = 0;
 	sym->size = ctx->szmcode;
