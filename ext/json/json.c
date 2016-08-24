@@ -186,9 +186,7 @@ static PHP_MINFO_FUNCTION(json)
 
 PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	php_json_encode_zval(buf, val, options);
-
-	return JSON_G(error_code) > 0 ? FAILURE : SUCCESS;
+	return php_json_encode_zval(buf, val, options);
 }
 /* }}} */
 
