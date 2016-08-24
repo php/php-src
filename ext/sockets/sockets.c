@@ -2533,7 +2533,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 				if (strcmp(ZSTR_VAL(key), "ai_flags") == 0) {
 					hints.ai_flags = Z_LVAL_P(hint);
 				} else if (strcmp(ZSTR_VAL(key), "ai_socktype") == 0) {
-					hints.ai_socktype= Z_LVAL_P(hint);
+					hints.ai_socktype = Z_LVAL_P(hint);
 				} else if (strcmp(ZSTR_VAL(key), "ai_protocol") == 0) {
 					hints.ai_protocol = Z_LVAL_P(hint);
 				} else if (strcmp(ZSTR_VAL(key), "ai_family") == 0) {
@@ -2556,8 +2556,8 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 			res = emalloc(sizeof(struct addrinfo));
 			memcpy(res, rp, sizeof(struct addrinfo));
 
-			res->ai_addr = emalloc(sizeof(struct sockaddr));
-			memcpy(res->ai_addr, rp->ai_addr, sizeof(struct sockaddr));
+			res->ai_addr = emalloc(rp->ai_addrlen);
+			memcpy(res->ai_addr, rp->ai_addr, rp->ai_addrlen);
 
 			if (rp->ai_canonname != NULL) {
 				res->ai_canonname = estrdup(rp->ai_canonname);
@@ -2723,7 +2723,7 @@ PHP_FUNCTION(socket_addrinfo_explain)
 	}
 
 	array_init(&sockaddr);
-	switch(ai->ai_addr->sa_family) {
+	switch(ai->ai_family) {
 		case AF_INET:
 			{
 				struct sockaddr_in *sa = (struct sockaddr_in *) ai->ai_addr;
