@@ -14,10 +14,10 @@ $stmt->execute();
 var_dump($stmt->getColumnMeta(0));
 $stmt = null;
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   ["max_length"]=>
-  int(255)
+  int(%d)
   ["precision"]=>
   int(0)
   ["scale"]=>
@@ -29,7 +29,7 @@ array(8) {
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>
-  int(255)
+  int(%d)
   ["pdo_type"]=>
   int(2)
 }
