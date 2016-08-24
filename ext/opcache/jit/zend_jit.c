@@ -514,6 +514,10 @@ ZEND_API int zend_jit_startup(size_t size)
 	dasm_State* dasm_state = NULL;
 	int ret;
 
+#ifdef HAVE_GDB
+	zend_jit_gdb_init();
+#endif
+
 #ifdef HAVE_OPROFILE
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
 		shared = 0;

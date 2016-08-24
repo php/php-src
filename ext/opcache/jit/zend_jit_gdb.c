@@ -582,6 +582,15 @@ static int zend_jit_gdb_unregister(void)
 	return 1;
 }
 
+static void zend_jit_gdb_init(void)
+{
+#if 1
+	if (zend_gdb_present()) {
+		ZCG(accel_directives).jit_debug |= ZEND_JIT_DEBUG_GDB;
+	}
+#endif
+}
+
 /*
  * Local variables:
  * tab-width: 4

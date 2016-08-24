@@ -20,6 +20,11 @@
 #include "zend.h"
 #include "zend_gdb.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 enum {
 	ZEND_GDBJIT_NOACTION,
 	ZEND_GDBJIT_REGISTER,
@@ -97,6 +102,43 @@ ZEND_API void zend_gdb_unregister_all(void)
 
 		free(entry);
 	}
+}
+
+ZEND_API int zend_gdb_present(void)
+{
+	int ret = 0;
+	int fd = open("/proc/self/status", O_RDONLY);
+
+	if (fd > 0) {
+		char buf[1024];
+		ssize_t n = read(fd, buf, sizeof(buf) - 1);
+		char *s;
+		pid_t pid;
+
+		if (n > 0) {
+			buf[n] = 0;
+			s = strstr(buf, "TracerPid:");
+			if (s) {
+				s += sizeof("TracerPid:") - 1;
+				while (*s == ' ' || *s == '\t') {
+					s++;
+				}
+				pid = atoi(s);
+				if (pid) {
+					sprintf(buf, "/proc/%d/exe", (int)pid);
+					if (readlink(buf, buf, sizeof(buf) - 1) > 0) {
+						if (strstr(buf, "gdb")) {
+							ret = 1;
+						}
+					}
+				}
+			}
+		}
+
+		close(fd);
+	}
+
+	return ret;
 }
 
 /*
