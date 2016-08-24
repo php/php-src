@@ -139,25 +139,26 @@ static void *jit_alloc(size_t size, int shared)
 	return VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 #else
 	void *p;
+	int prot;
+
+# ifdef HAVE_MPROTECT
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
+		prot = PROT_EXEC | PROT_READ | PROT_WRITE;
+	} else {
+		prot = PROT_NONE;
+	}
+# else
+	prot = PROT_EXEC | PROT_READ | PROT_WRITE;
+# endif
 
 # ifdef MAP_HUGETLB
-	p = mmap(NULL, size,
-#  ifdef HAVE_MPROTECT
-			PROT_NONE,
-#  else
-			PROT_EXEC | PROT_READ | PROT_WRITE,
-#  endif
+	p = mmap(NULL, size, prot,
 			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
     if (p != MAP_FAILED) {
 		return (void*)p;
 	}
 # endif
-	p = mmap(NULL, size,
-#  ifdef HAVE_MPROTECT
-			PROT_NONE,
-#  else
-			PROT_EXEC | PROT_READ | PROT_WRITE,
-#  endif
+	p = mmap(NULL, size, prot,
 			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS, -1, 0);
     if (p == MAP_FAILED) {
 		return NULL;
@@ -484,14 +485,18 @@ jit_failure:
 ZEND_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
-	mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE);
+	if (!(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB)) {
+		mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE);
+	}
 #endif
 }
 
 ZEND_API void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
-	mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC);
+	if (!(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB)) {
+		mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC);
+	}
 #endif
 }
 
