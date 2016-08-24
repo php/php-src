@@ -638,6 +638,7 @@ static int zend_jit_gdb_unregister()
 {
 	zend_gdbjit_code_entry *entry;
 
+	__jit_debug_descriptor.action_flag = GDBJIT_UNREGISTER;
 	while ((entry = __jit_debug_descriptor.relevant_entry)) {
 		if (entry->prev_entry) {
 			entry->prev_entry->next_entry = NULL;
@@ -645,7 +646,6 @@ static int zend_jit_gdb_unregister()
 			__jit_debug_descriptor.first_entry = NULL;
 		}
 
-		__jit_debug_descriptor.action_flag = GDBJIT_UNREGISTER;
 		__jit_debug_register_code();
 
 		__jit_debug_descriptor.relevant_entry = entry->prev_entry;

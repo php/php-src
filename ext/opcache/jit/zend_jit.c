@@ -511,10 +511,12 @@ ZEND_API int zend_jit_startup(size_t size)
 
 	/* Round up to the page size, which should be a power of two.  */
 	page_size = jit_page_size();
+
 	if (!page_size || (page_size & (page_size - 1))) {
 		abort();
 	}
-	size = (size + page_size - 1) & ~(page_size - 1);
+
+	size = ZEND_MM_ALIGNED_SIZE_EX(size, page_size);
 
 	buf = jit_alloc(size, shared);
 
@@ -523,7 +525,7 @@ ZEND_API int zend_jit_startup(size_t size)
 	}
 
 	dasm_buf = dasm_ptr = buf;
-	dasm_end = (void*)(((char*)dasm_buf)+size);
+	dasm_end = (void*)(((char*)dasm_buf) + size);
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
