@@ -557,7 +557,6 @@ static int zend_jit_gdb_register(const char *name,
                                  size_t      size)
 {
 	zend_gdbjit_ctx ctx;
-	zend_gdbjit_code_entry *entry;
 
 	ctx.op_array = op_array;
 	ctx.mcaddr = (uintptr_t)start;
@@ -574,51 +573,12 @@ static int zend_jit_gdb_register(const char *name,
 
 	zend_gdbjit_buildobj(&ctx);
 
-	entry = malloc(sizeof(zend_gdbjit_code_entry) + ctx.objsize);
-	if (entry == NULL) {
-		return 0;
-	}
-
-	entry->symfile_addr = ((char*)entry) + sizeof(zend_gdbjit_code_entry);
-	entry->symfile_size = ctx.objsize;
-
-	memcpy((char *)entry->symfile_addr, &ctx.obj, ctx.objsize);
-
-	entry->next_entry = NULL;
-	entry->prev_entry = __jit_debug_descriptor.relevant_entry;
-
-	if (entry->prev_entry) {
-		entry->prev_entry->next_entry = entry;
-	} else {
-		__jit_debug_descriptor.first_entry = entry;
-	}
-	__jit_debug_descriptor.relevant_entry = entry;
-
-	__jit_debug_descriptor.action_flag = ZEND_GDBJIT_REGISTER;
-	__jit_debug_register_code();
-
-	return 1;
+	return zend_gdb_register_code(&ctx.obj, ctx.objsize);
 }
 
-static int zend_jit_gdb_unregister()
+static int zend_jit_gdb_unregister(void)
 {
-	zend_gdbjit_code_entry *entry;
-
-	__jit_debug_descriptor.action_flag = ZEND_GDBJIT_UNREGISTER;
-	while ((entry = __jit_debug_descriptor.relevant_entry)) {
-		if (entry->prev_entry) {
-			entry->prev_entry->next_entry = NULL;
-		} else {
-			__jit_debug_descriptor.first_entry = NULL;
-		}
-
-		__jit_debug_register_code();
-
-		__jit_debug_descriptor.relevant_entry = entry->prev_entry;
-
-		free(entry);
-	}
-
+	zend_gdb_unregister_all();
 	return 1;
 }
 

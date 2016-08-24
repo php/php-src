@@ -19,29 +19,8 @@
 
 #ifndef ZEND_GDB
 
-enum {
-	ZEND_GDBJIT_NOACTION,
-	ZEND_GDBJIT_REGISTER,
-	ZEND_GDBJIT_UNREGISTER
-};
-
-typedef struct _zend_gdbjit_code_entry {
-	struct _zend_gdbjit_code_entry *next_entry;
-	struct _zend_gdbjit_code_entry *prev_entry;
-	const char                     *symfile_addr;
-	uint64_t                        symfile_size;
-} zend_gdbjit_code_entry;
-
-typedef struct _zend_gdbjit_descriptor {
-	uint32_t                         version;
-	uint32_t                         action_flag;
-	struct _zend_gdbjit_code_entry *relevant_entry;
-	struct _zend_gdbjit_code_entry *first_entry;
-} zend_gdbjit_descriptor;
-
-extern ZEND_API zend_gdbjit_descriptor __jit_debug_descriptor;
-
-ZEND_API zend_never_inline void __jit_debug_register_code();
+ZEND_API int  zend_gdb_register_code(const void *object, size_t size);
+ZEND_API void zend_gdb_unregister_all(void);
 
 #endif
 
