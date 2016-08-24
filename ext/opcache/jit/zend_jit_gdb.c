@@ -19,8 +19,6 @@
 
 #define HAVE_GDB
 
-#include "zend_gdb.h"
-
 #if SIZEOF_SIZE_T == 8
 # define ELF64
 #else
@@ -182,6 +180,12 @@ enum {
 };
 
 enum {
+	GDBJIT_NOACTION,
+	GDBJIT_REGISTER,
+	GDBJIT_UNREGISTER
+};
+
+enum {
 	GDBJIT_SECT_NULL,
 	GDBJIT_SECT_text,
 	GDBJIT_SECT_eh_frame,
@@ -257,6 +261,20 @@ static const zend_elf_header zend_elfhdr_template = {
 	.shstridx    = GDBJIT_SECT_shstrtab
 };
 
+typedef struct _zend_gdbjit_code_entry {
+	struct _zend_gdbjit_code_entry *next_entry;
+	struct _zend_gdbjit_code_entry *prev_entry;
+	const char                 *symfile_addr;
+	uint64_t                    symfile_size;
+} zend_gdbjit_code_entry;
+
+typedef struct _zend_gdbjit_descriptor {
+	uint32_t                    version;
+	uint32_t                    action_flag;
+	struct _zend_gdbjit_code_entry *relevant_entry;
+	struct _zend_gdbjit_code_entry *first_entry;
+} zend_gdbjit_descriptor;
+
 /* Context for generating the ELF object for the GDB JIT API. */
 typedef struct _zend_gdbjit_ctx {
 	zend_op_array *op_array; /* Pointer to op_array */
@@ -272,6 +290,15 @@ typedef struct _zend_gdbjit_ctx {
 	size_t objsize;          /* Final size of ELF object. */
 	zend_gdbjit_obj obj;     /* In-memory ELF object. */
 } zend_gdbjit_ctx;
+
+zend_gdbjit_descriptor __jit_debug_descriptor = {
+	1, GDBJIT_NOACTION, NULL, NULL
+};
+
+zend_never_inline void __jit_debug_register_code()
+{
+	__asm__ __volatile__("");
+}
 
 /* Add a zero-terminated string */
 static uint32_t zend_gdbjit_strz(zend_gdbjit_ctx *ctx, const char *str)
@@ -594,7 +621,7 @@ static int zend_jit_gdb_register(const char *name,
 	}
 	__jit_debug_descriptor.relevant_entry = entry;
 
-	__jit_debug_descriptor.action_flag = ZEND_GDBJIT_REGISTER;
+	__jit_debug_descriptor.action_flag = GDBJIT_REGISTER;
 	__jit_debug_register_code();
 
 	return 1;
@@ -604,7 +631,7 @@ static int zend_jit_gdb_unregister()
 {
 	zend_gdbjit_code_entry *entry;
 
-	__jit_debug_descriptor.action_flag = ZEND_GDBJIT_UNREGISTER;
+	__jit_debug_descriptor.action_flag = GDBJIT_UNREGISTER;
 	while ((entry = __jit_debug_descriptor.relevant_entry)) {
 		if (entry->prev_entry) {
 			entry->prev_entry->next_entry = NULL;
