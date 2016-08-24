@@ -56,8 +56,9 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
 static int zend_jit_disasm(const char *name,
                            const char *filename,
                            const void *start,
-                           const void *end)
+                           size_t      size)
 {
+	const void *end = (void *)((char *)start + size);
 	if (name) {
 		fprintf(stderr, "%s: ; (%s)\n", name, filename ? filename : "unknown");
 	}

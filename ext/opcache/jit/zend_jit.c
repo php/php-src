@@ -89,18 +89,18 @@ static zend_string *zend_jit_func_name(zend_op_array *op_array)
 	}
 }
 
-static void *dasm_link_and_encode(dasm_State **dasm_state)
+static void *dasm_link_and_encode(dasm_State **dasm_state, size_t *len)
 {
 	size_t size;
 	int ret;
 	void *entry;
 
-	if (dasm_link(dasm_state, &size) != DASM_S_OK) {
+	if (dasm_link(dasm_state, len) != DASM_S_OK) {
 		// TODO: dasm_link() failed ???
 		return NULL;
 	}
 
-	size = ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT);
+	size = ZEND_MM_ALIGNED_SIZE_EX(*len, DASM_ALIGNMENT);
 
 	if ((void*)((char*)dasm_ptr + size) > dasm_end) {
 		// TODO: jit_buffer_size overflow ???
@@ -184,6 +184,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 	zend_op *opline;
 	dasm_State* dasm_state = NULL;
 	void *handler;
+	size_t size;
 
 	if (!dasm_buf) {
 		return FAILURE;
@@ -399,7 +400,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		}
 	}
 
-	handler = dasm_link_and_encode(&dasm_state);
+	handler = dasm_link_and_encode(&dasm_state, &size);
 	if (!handler) {
 		goto jit_failure;
 	}
@@ -425,7 +426,8 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		zend_jit_disasm(
 			name ? ZSTR_VAL(name) : NULL,
 			op_array->filename ? ZSTR_VAL(op_array->filename) : NULL,
-			handler, dasm_ptr);
+			handler,
+			size);
 		if (name) {
 			zend_string_release(name);
 		}
@@ -440,7 +442,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 					ZSTR_VAL(name),
 					op_array,
 					handler,
-					(char*)dasm_ptr - (char*)handler);
+					size);
 			zend_string_release(name);
 		}
 	}
@@ -453,7 +455,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		zend_jit_oprofile_register(
 			name ? ZSTR_VAL(name) : NULL,
 			handler,
-			(char*)dasm_ptr - (char*)handler);
+			size);
 		if (name) {
 			zend_string_release(name);
 		}
@@ -468,7 +470,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 			zend_jit_perf_dump(
 				ZSTR_VAL(name),
 				handler,
-				(char*)dasm_ptr - (char*)handler);
+				size);
 			zend_string_release(name);
 		}
 	}
@@ -508,6 +510,7 @@ ZEND_API int zend_jit_startup(size_t size)
 	size_t page_size = jit_page_size();
 	int shared = 1;
 	void *buf;
+	size_t buf_len;
 	dasm_State* dasm_state = NULL;
 	int ret;
 
@@ -557,7 +560,7 @@ ZEND_API int zend_jit_startup(size_t size)
 	dasm_init(&dasm_state, DASM_MAXSECTION);
 	dasm_setupglobal(&dasm_state, dasm_labels, lbl__MAX);
 	dasm_setup(&dasm_state, dasm_actions);
-	ret = zend_jit_stubs(&dasm_state) && dasm_link_and_encode(&dasm_state);
+	ret = zend_jit_stubs(&dasm_state) && dasm_link_and_encode(&dasm_state, &buf_len);
 	dasm_free(&dasm_state);
 
 	zend_jit_protect();
@@ -565,7 +568,7 @@ ZEND_API int zend_jit_startup(size_t size)
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
 		if (dasm_buf != dasm_ptr) {
-			zend_jit_disasm(NULL, NULL, dasm_buf, dasm_ptr);
+			zend_jit_disasm(NULL, NULL, dasm_buf, buf_len);
 		}
 	}
 #endif
