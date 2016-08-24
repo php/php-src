@@ -361,10 +361,8 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 	sym->info = ELFSYM_TYPE_FUNC|ELFSYM_BIND_GLOBAL;
 }
 
-
 #define SECTALIGN(p, a) \
 	  ((p) = (uint8_t *)(((uintptr_t)(p) + ((a)-1)) & ~(uintptr_t)((a)-1)))
-
 
 /* Shortcuts to generate DWARF structures. */
 #define DB(x)       (*p++ = (x))

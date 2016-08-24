@@ -68,16 +68,16 @@ ZEND_API int zend_gdb_register_code(const void *object, size_t size)
 
 	memcpy((char *)entry->symfile_addr, object, size);
 
-	entry->next_entry = NULL;
-	entry->prev_entry = __jit_debug_descriptor.relevant_entry;
+	entry->prev_entry = NULL;
+	entry->next_entry = __jit_debug_descriptor.first_entry;
 
-	if (entry->prev_entry) {
-		entry->prev_entry->next_entry = entry;
-	} else {
-		__jit_debug_descriptor.first_entry = entry;
+	if (entry->next_entry) {
+		entry->next_entry->prev_entry = entry;
 	}
-	__jit_debug_descriptor.relevant_entry = entry;
+	__jit_debug_descriptor.first_entry = entry;
 
+	/* Notify GDB */
+	__jit_debug_descriptor.relevant_entry = entry;
 	__jit_debug_descriptor.action_flag = ZEND_GDBJIT_REGISTER;
 	__jit_debug_register_code();
 
@@ -89,16 +89,14 @@ ZEND_API void zend_gdb_unregister_all(void)
 	zend_gdbjit_code_entry *entry;
 
 	__jit_debug_descriptor.action_flag = ZEND_GDBJIT_UNREGISTER;
-	while ((entry = __jit_debug_descriptor.relevant_entry)) {
-		if (entry->prev_entry) {
-			entry->prev_entry->next_entry = NULL;
-		} else {
-			__jit_debug_descriptor.first_entry = NULL;
+	while ((entry = __jit_debug_descriptor.first_entry)) {
+		__jit_debug_descriptor.first_entry = entry->next_entry;
+		if (entry->next_entry) {
+			entry->next_entry->prev_entry = NULL;
 		}
-
+		/* Notify GDB */
+		__jit_debug_descriptor.relevant_entry = entry;
 		__jit_debug_register_code();
-
-		__jit_debug_descriptor.relevant_entry = entry->prev_entry;
 
 		free(entry);
 	}
