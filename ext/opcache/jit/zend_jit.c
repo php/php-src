@@ -82,9 +82,7 @@ static zend_string *zend_jit_func_name(zend_op_array *op_array)
 			return buf.s;
 		}
 	} else if (op_array->filename) {
-		smart_str_appends(&buf, "JIT$");
-		smart_str_appendl(&buf, ZSTR_VAL(op_array->filename), ZSTR_LEN(op_array->filename));
-		smart_str_0(&buf);
+		smart_str_appends(&buf, "JIT$(main)");
 		return buf.s;
 	} else {
 		return NULL;
@@ -436,10 +434,15 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 
 #ifdef HAVE_GDB
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
-		zend_jit_gdb_register(
-				op_array,
-				handler,
-				(char*)dasm_ptr - (char*)handler);
+		zend_string *name = zend_jit_func_name(op_array);
+		if (name) {
+			zend_jit_gdb_register(
+					ZSTR_VAL(name),
+					op_array,
+					handler,
+					(char*)dasm_ptr - (char*)handler);
+			zend_string_release(name);
+		}
 	}
 #endif
 
