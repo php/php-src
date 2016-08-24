@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   |          Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -25,27 +26,14 @@
 #endif
 
 #if defined(__x86_64)
-#define CFRAME_OFS_ERRF     (15*4)
-#define CFRAME_OFS_NRES     (14*4)
-#define CFRAME_OFS_PREV     (13*4)
-#define CFRAME_OFS_L        (12*4)
-#define CFRAME_OFS_PC       (6*4)
-#define CFRAME_OFS_MULTRES  (5*4)
 #define CFRAME_SIZE         (12*4)
-#define CFRAME_SHIFT_MULTRES    0
+#define CFRAME_SIZE_JIT CFRAME_SIZE
 #elif defined(__i386__)
-#define CFRAME_OFS_PREV     (4*8)
-#define CFRAME_OFS_PC       (7*4)
-#define CFRAME_OFS_L        (6*4)
-#define CFRAME_OFS_ERRF     (5*4)
-#define CFRAME_OFS_NRES     (4*4)
-#define CFRAME_OFS_MULTRES  (1*4)
 #define CFRAME_SIZE         (10*8)
 #define CFRAME_SIZE_JIT     (CFRAME_SIZE + 16)
-#define CFRAME_SHIFT_MULTRES    0
+#else
+#error "Unsupported target architecture"
 #endif
-
-#define CFRAME_SIZE_JIT CFRAME_SIZE
 
 typedef struct _zend_elf_header {
 	uint8_t   emagic[4];
@@ -644,7 +632,6 @@ static int zend_jit_gdb_unregister()
 {
 	zend_gdbjit_code_entry *entry;
 
-	/* TODO: release entry earlier */
 	while ((entry = __jit_debug_descriptor.first_entry)) {
 		if (entry->prev_entry) {
 			entry->prev_entry->next_entry = entry->next_entry;
