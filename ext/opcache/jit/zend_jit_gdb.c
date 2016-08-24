@@ -568,8 +568,8 @@ static int zend_jit_gdb_register(const char *name,
 #endif
 	ctx.spadj =  CFRAME_SIZE_JIT;
 	ctx.name = name;
-	ctx.filename = ZSTR_VAL(op_array->filename);
-	ctx.lineno = op_array->line_start;
+	ctx.filename = op_array ? ZSTR_VAL(op_array->filename) : "unknown";
+	ctx.lineno = op_array ? op_array->line_start : 0;
 
 	zend_gdbjit_buildobj(&ctx);
 

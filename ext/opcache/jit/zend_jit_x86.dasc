@@ -39,10 +39,9 @@ static void* dasm_labels[lbl__MAX];
 
 |.section code
 
-static int zend_jit_stubs(dasm_State **Dst)
+static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
 	// TODO: check interrupt_handler ???
-	|.align 16
 	|->interrupt_handler:
 	|.if X64
 	| add rsp, 8 // stack alignment
@@ -52,8 +51,12 @@ static int zend_jit_stubs(dasm_State **Dst)
 	| add esp, 12 // stack alignment
 	| jmp extern zend_timeout
 	|.endif
-	|
-	|.align 16
+
+	return 1;
+}
+
+static int zend_jit_exception_handler_stub(dasm_State **Dst)
+{
 	|->exception_handler:
 	|.if X64
 	| add rsp, 8 // stack alignment
@@ -66,6 +69,11 @@ static int zend_jit_stubs(dasm_State **Dst)
 
 	return 1;
 }
+
+static const zend_jit_stub zend_jit_stubs[] = {
+	JIT_STUB(interrupt_handler),
+	JIT_STUB(exception_handler),
+};
 
 static int zend_jit_align_func(dasm_State **Dst)
 {
