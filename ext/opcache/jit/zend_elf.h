@@ -101,9 +101,7 @@ enum {
 	ELFSYM_BIND_GLOBAL = 1 << 4,
 };
 
-void zend_elf_init(void);
-void zend_elf_shutdown(void);
-const char* zend_elf_resolve_sym(void *addr);
+void zend_elf_load_symbols(void);
 
 #endif
 

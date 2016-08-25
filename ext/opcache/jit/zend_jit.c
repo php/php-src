@@ -59,7 +59,6 @@ typedef struct _zend_jit_stub {
 #ifdef HAVE_OPROFILE
 # include "jit/zend_jit_oprofile.c"
 #endif
-#include "jit/zend_elf.c"
 
 #if _WIN32
 # include <Windows.h>
@@ -148,6 +147,7 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+		zend_jit_disasm_add_symbol(name, (uintptr_t)entry);
 		zend_jit_disasm(
 			name,
 			(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
@@ -589,7 +589,6 @@ ZEND_API int zend_jit_startup(size_t size)
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
-		zend_elf_init();
 		if (!zend_jit_disasm_init()) {
 			// TODO: error reporting and cleanup ???
 			return FAILURE;
@@ -625,7 +624,7 @@ ZEND_API void zend_jit_shutdown(void)
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
-		zend_elf_shutdown();
+		zend_jit_disasm_shutdown();
 	}
 #endif
 

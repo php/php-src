@@ -31,6 +31,11 @@
 #endif
 #include "jit/libudis86/udis86.c"
 
+static void zend_jit_disasm_add_symbol(const char *name,
+                                       uint64_t    addr);
+
+#include "jit/zend_elf.c"
+
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
@@ -38,6 +43,17 @@
 #include <dlfcn.h>
 
 static struct ud ud;
+static HashTable disasm_symbols;
+
+static void zend_jit_disasm_add_symbol(const char *name,
+                                       uint64_t    addr)
+{
+	zval zv;
+	zend_string *str = zend_string_init(name, strlen(name), 1);
+
+	ZVAL_STR(&zv, str);
+	zend_hash_index_add(&disasm_symbols, addr, &zv);
+}
 
 static const char* zend_jit_disasm_resolver(struct ud *ud,
                                             uint64_t   addr,
@@ -45,6 +61,7 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
 {
 	((void)ud);
 	void *a = (void*)(zend_uintptr_t)(addr);
+	zval *zv;
 	Dl_info info;
 
 #ifndef ZTS
@@ -58,13 +75,18 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
 	}
 #endif
 
+	zv = zend_hash_index_find(&disasm_symbols, addr);
+	if (zv) {
+		return Z_STRVAL_P(zv);
+	}
+
 	if (dladdr(a, &info)
 	 && info.dli_sname != NULL
 	 && info.dli_saddr == a) {
 		return info.dli_sname;
 	}
 
-	return zend_elf_resolve_sym((void*)addr);
+	return NULL;
 }
 
 static int zend_jit_disasm(const char *name,
@@ -103,7 +125,15 @@ static int zend_jit_disasm_init(void)
 #endif
 	ud_set_sym_resolver(&ud, zend_jit_disasm_resolver);
 
+	zend_hash_init(&disasm_symbols, 8, NULL, ZVAL_PTR_DTOR, 1);
+	zend_elf_load_symbols();
+
 	return 1;
+}
+
+static void zend_jit_disasm_shutdown(void)
+{
+	zend_hash_destroy(&disasm_symbols);
 }
 
 /*
