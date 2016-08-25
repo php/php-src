@@ -52,7 +52,9 @@ static void zend_jit_disasm_add_symbol(const char *name,
 	zend_string *str = zend_string_init(name, strlen(name), 1);
 
 	ZVAL_STR(&zv, str);
-	zend_hash_index_add(&disasm_symbols, addr, &zv);
+	if (zend_hash_index_add(&disasm_symbols, addr, &zv) == NULL) {
+		zend_string_release(str);
+	}
 }
 
 static const char* zend_jit_disasm_resolver(struct ud *ud,
