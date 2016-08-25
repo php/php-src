@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #72907 (null pointer deref, segfault in gc_remove_zval_from_buffer
     (zend_gc.c:260)). (Laruence)
 
+- Dba:
+  . Fixed bug #71514 (Bad dba_replace condition because of wrong API usage).
+    (cmb)
+
 - Streams:
   . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
 
