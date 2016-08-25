@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #72598 (Reference is lost after array_slice()) (Nikita)
 
+- COM:
+  . Fixed bug #72922 (COM called from PHP does not return out parameters).
+    (Anatol)
+
 -GD:
   . Fixed bug #66005 (imagecopy does not support 1bit transparency on truecolor
     images). (cmb)
