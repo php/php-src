@@ -171,6 +171,20 @@ ud_syn_print_imm(struct ud* u, const struct ud_operand *op)
     default: UD_ASSERT(!"invalid offset"); v = 0; /* keep cc happy */
     }
   }
+#if 1
+    if (u->sym_resolver) {
+      int64_t offset = 0;
+      const char *name = u->sym_resolver(u, v, &offset);
+      if (name) {
+        if (offset) {
+          ud_asmprintf(u, "%s%+" FMT64 "d", name, offset);
+        } else {
+          ud_asmprintf(u, "%s", name);
+        }
+        return;
+      }
+    }
+#endif
   ud_asmprintf(u, "0x%" FMT64 "x", v);
 }
 
@@ -189,6 +203,20 @@ ud_syn_print_mem_disp(struct ud* u, const struct ud_operand *op, int sign)
     case 64: v = op->lval.uqword; break;
     default: UD_ASSERT(!"invalid offset"); v = 0; /* keep cc happy */
     }
+#if 1
+    if (u->sym_resolver) {
+      int64_t offset = 0;
+      const char *name = u->sym_resolver(u, v, &offset);
+      if (name) {
+        if (offset) {
+          ud_asmprintf(u, "%s%+" FMT64 "d", name, offset);
+        } else {
+          ud_asmprintf(u, "%s", name);
+        }
+        return;
+      }
+    }
+#endif
     ud_asmprintf(u, "0x%" FMT64 "x", v);
   } else {
     int64_t v;
@@ -199,6 +227,20 @@ ud_syn_print_mem_disp(struct ud* u, const struct ud_operand *op, int sign)
     case 32: v = op->lval.sdword; break;
     default: UD_ASSERT(!"invalid offset"); v = 0; /* keep cc happy */
     }
+#if 1
+    if (u->sym_resolver) {
+      int64_t offset = 0;
+      const char *name = u->sym_resolver(u, v, &offset);
+      if (name) {
+        if (offset) {
+          ud_asmprintf(u, "%s%+" FMT64 "d", name, offset);
+        } else {
+          ud_asmprintf(u, "%s", name);
+        }
+        return;
+      }
+    }
+#endif
     if (v < 0) {
       ud_asmprintf(u, "-0x%" FMT64 "x", -v);
     } else if (v > 0) {
