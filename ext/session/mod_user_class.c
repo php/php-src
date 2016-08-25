@@ -156,7 +156,9 @@ PHP_METHOD(SessionHandler, gc)
 		return;
 	}
 
-	PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels);
+	if (PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels) == FAILURE) {
+		RETURN_FALSE;
+	}
 	RETURN_LONG(nrdels);
 }
 /* }}} */
