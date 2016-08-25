@@ -987,8 +987,12 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	array_init(&array_members);
 
 	add_assoc_string(array_group, "name", g->gr_name);
-	add_assoc_string(array_group, "passwd", g->gr_passwd);
-	for (count=0; g->gr_mem[count] != NULL; count++) {
+	if (g->gr_passwd) {
+		add_assoc_string(array_group, "passwd", g->gr_passwd);
+	} else {
+		add_assoc_null(array_group, "passwd");
+	}
+	for (count = 0; g->gr_mem[count] != NULL; count++) {
 		add_next_index_string(&array_members, g->gr_mem[count]);
 	}
 	zend_hash_str_update(Z_ARRVAL_P(array_group), "members", sizeof("members")-1, &array_members);

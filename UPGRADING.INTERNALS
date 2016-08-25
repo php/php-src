@@ -1,7 +1,7 @@
 PHP 7.1 INTERNALS UPGRADE NOTES
 
-0. Wiki Examples
 1. Internal API changes
+  a.
 
 2. Build system changes
   a. Unix build system changes
@@ -9,17 +9,11 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 
 3. Module changes
 
-================
-0. Wiki Examples
-================
-
-The wiki contains multiple examples and further explanations of the internal
-changes. See: https://wiki.php.net/phpng-upgrading
-
-
 ========================
 1. Internal API changes
 ========================
+
+  a.
 
 ========================
 2. Build system changes

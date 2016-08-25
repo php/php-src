@@ -144,7 +144,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	char *path_file;
 	int resolved_basedir_len;
 	int resolved_name_len;
-	int path_len;
+	size_t path_len;
 	int nesting_level = 0;
 
 	/* Special case basedir==".": Use script-directory */
@@ -153,7 +153,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		strlcpy(local_open_basedir, basedir, sizeof(local_open_basedir));
 	}
 
-	path_len = (int)strlen(path);
+	path_len = strlen(path);
 	if (path_len > (MAXPATHLEN - 1)) {
 		/* empty and too long paths are invalid */
 		return -1;
@@ -164,7 +164,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		return -1;
 	}
 
-	path_len = (int)strlen(resolved_name);
+	path_len = strlen(resolved_name);
 	memcpy(path_tmp, resolved_name, path_len + 1); /* safe */
 
 	while (VCWD_REALPATH(path_tmp, resolved_name) == NULL) {
@@ -505,6 +505,13 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 	     (IS_SLASH(filename[1]) ||
 	      ((filename[1] == '.') && IS_SLASH(filename[2])))) ||
 	    IS_ABSOLUTE_PATH(filename, filename_length) ||
+#if PHP_WIN32
+		/* This should count as an absolute local path as well, however
+		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+		   might be a big thing to extend, thus just a local handling for
+		   now. */
+		filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+#endif
 	    !path ||
 	    !*path) {
 		if (tsrm_realpath(filename, resolved_path)) {
@@ -640,7 +647,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	if ((*filename == '.')
 	/* Absolute path open */
 	 || IS_ABSOLUTE_PATH(filename, filename_length)
-	 || (!path || (path && !*path))
+	 || (!path || !*path)
 	) {
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}

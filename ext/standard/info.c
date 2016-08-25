@@ -41,10 +41,7 @@
 #include "php_string.h"
 
 #ifdef PHP_WIN32
-typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 # include "winver.h"
-
 #endif
 
 #define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
@@ -229,9 +226,11 @@ static void php_print_gpcse_array(char *name, uint name_length)
 			}
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
+					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
 					php_info_print("<pre>");
-					zend_print_zval_r_ex((zend_write_func_t) php_info_print_html_esc, tmp, 0);
+					php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					php_info_print("</pre>");
+					zend_string_release(str);
 				} else {
 					zend_print_zval_r(tmp, 0);
 				}
@@ -293,19 +292,12 @@ char* php_get_windows_name()
 {
 	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
-	PGNSI pGNSI;
-	PGPI pGPI;
 	DWORD dwType;
 	char *major = NULL, *sub = NULL, *retval;
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
 
-	pGNSI = (PGNSI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
-	if(NULL != pGNSI) {
-		pGNSI(&si);
-	} else {
-		GetSystemInfo(&si);
-	}
+	GetNativeSystemInfo(&si);
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 10) {
 		if (osvi.dwMajorVersion == 10) {
@@ -378,8 +370,8 @@ char* php_get_windows_name()
 				major = "Unknown Windows version";
 			}
 
-			pGPI = (PGPI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetProductInfo");
-			pGPI(6, 0, 0, 0, &dwType);
+			/* No return value check, as it can only fail if the input parameters are broken (which we manually supply) */
+			GetProductInfo(6, 0, 0, 0, &dwType);
 
 			switch (dwType) {
 				case PRODUCT_ULTIMATE:

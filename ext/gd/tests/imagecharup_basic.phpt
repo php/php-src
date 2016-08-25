@@ -15,11 +15,11 @@ $white = imagecolorallocate($image, 255,255,255);
 $result = imagecharup($image, 1, 5, 5, 'C', $white);
 
 ob_start();
-imagepng($image, null, 9);
+imagegd($image);
 $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-79b48d5cef6d489bb68573df0296d775
+c65aad5d78f934dee2a844e7978eabd5

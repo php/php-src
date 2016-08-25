@@ -41,7 +41,7 @@
 
 /* {{{ pdo_pgsql_functions[] */
 const zend_function_entry pdo_pgsql_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

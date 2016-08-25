@@ -325,7 +325,6 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	fake_argc = argc + is_agg;
 
 	fc->fci.size = sizeof(fc->fci);
-	fc->fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
 	fc->fci.object = NULL;
 	fc->fci.retval = &retval;
@@ -475,7 +474,6 @@ static int php_sqlite3_collation_callback(void *context,
 	struct pdo_sqlite_collation *collation = (struct pdo_sqlite_collation*) context;
 
 	collation->fc.fci.size = sizeof(collation->fc.fci);
-	collation->fc.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fc.fci.function_name, &collation->callback);
 	collation->fc.fci.object = NULL;
 	collation->fc.fci.retval = &retval;
@@ -729,7 +727,8 @@ static struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_get_attribute,
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
-	pdo_sqlite_request_shutdown
+	pdo_sqlite_request_shutdown,
+	NULL
 };
 
 static char *make_filename_safe(const char *filename)

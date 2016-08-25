@@ -183,10 +183,9 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	return 1;
 }
 
-zval token_stream;
-
-void on_event(zend_php_scanner_event event, int token, int line)
+void on_event(zend_php_scanner_event event, int token, int line, void *context)
 {
+	zval *token_stream = (zval *) context;
 	zval keyword;
 	HashTable *tokens_ht;
 	zval *token_zv;
@@ -199,13 +198,13 @@ void on_event(zend_php_scanner_event event, int token, int line)
 				add_next_index_long(&keyword, token);
 				add_next_index_stringl(&keyword, (char *)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				add_next_index_long(&keyword, line);
-				add_next_index_zval(&token_stream, &keyword);
+				add_next_index_zval(token_stream, &keyword);
 			} else {
-				add_next_index_stringl(&token_stream, (char *)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+				add_next_index_stringl(token_stream, (char *)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 			}
 			break;
 		case ON_FEEDBACK:
-			tokens_ht = Z_ARRVAL(token_stream);
+			tokens_ht = Z_ARRVAL_P(token_stream);
 			token_zv = zend_hash_index_find(tokens_ht, zend_hash_num_elements(tokens_ht) - 1);
 			if (token_zv && Z_TYPE_P(token_zv) == IS_ARRAY) {
 				ZVAL_LONG(zend_hash_index_find(Z_ARRVAL_P(token_zv), 0), token);
@@ -218,7 +217,7 @@ void on_event(zend_php_scanner_event event, int token, int line)
 				add_next_index_stringl(&keyword,
 					(char *)LANG_SCNG(yy_cursor), LANG_SCNG(yy_limit) - LANG_SCNG(yy_cursor));
 				add_next_index_long(&keyword, CG(zend_lineno));
-				add_next_index_zval(&token_stream, &keyword);
+				add_next_index_zval(token_stream, &keyword);
 			}
 			break;
 	}
@@ -238,12 +237,15 @@ static zend_bool tokenize_parse(zval *return_value, zend_string *source)
 	zend_save_lexical_state(&original_lex_state);
 
 	if ((success = (zend_prepare_string_for_scanning(&source_zval, "") == SUCCESS))) {
+		zval token_stream;
+		array_init(&token_stream);
+
 		CG(ast) = NULL;
 		CG(ast_arena) = zend_arena_create(1024 * 32);
 		LANG_SCNG(yy_state) = yycINITIAL;
 		LANG_SCNG(on_event) = on_event;
+		LANG_SCNG(on_event_context) = &token_stream;
 
-		array_init(&token_stream);
 		if((success = (zendparse() == SUCCESS))) {
 			ZVAL_COPY_VALUE(return_value, &token_stream);
 		} else {

@@ -223,7 +223,7 @@ zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 {
 	int ret_len = len;
 	while ( len-- ) {
-	if ( *day++ > 0x7f )
+	if ( *day++ > 0x7f || (*day == '\n' && *(day - 1) == '\r') )
 		return -1;
 	}
 
@@ -345,7 +345,7 @@ grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t
 		e = haystack + haystack_len - needle_len;
 	} else {
 		p = haystack;
-		if (needle_len > -offset) {
+		if (needle_len > (size_t)-offset) {
 			e = haystack + haystack_len - needle_len;
 		} else {
 			e = haystack + haystack_len + offset;

@@ -23,7 +23,7 @@ $obj = new MyTestClass;
 ===DONE===
 --EXPECTF--
 
-Fatal error: Uncaught TypeError: Argument 1 passed to MyTestClass::__construct() must be an instance of MyObject, none given, called in %sinterfaces_003.php:%d
+Fatal error: Uncaught Error: Too few arguments to function MyTestClass::__construct(), 0 passed in %sinterfaces_003.php on line 17 and exactly 1 expected in %sinterfaces_003.php:12
 Stack trace:
 #0 %s(%d): MyTestClass->__construct()
 #1 {main}

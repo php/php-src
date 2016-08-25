@@ -373,7 +373,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 	}
 
 	if (!IS_SERIALIZED(op_array->opcodes)) {
-#if ZEND_USE_ABS_CONST_ADDR || ZEND_USE_ABS_JMP_ADDR
 		zend_op *opline, *end;
 
 		SERIALIZE_PTR(op_array->opcodes);
@@ -381,15 +380,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
 		while (opline < end) {
-# if ZEND_USE_ABS_CONST_ADDR
+#if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
 			}
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
 			}
-# endif
-# if ZEND_USE_ABS_JMP_ADDR
+#endif
+#if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
@@ -416,13 +415,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					/* relative extended_value don't have to be changed */
 					break;
 			}
-# endif
+#endif
 			zend_serialize_opcode_handler(opline);
 			opline++;
 		}
-#else
-		SERIALIZE_PTR(op_array->opcodes);
-#endif
 
 		if (op_array->arg_info) {
 			zend_arg_info *p, *end;
@@ -795,6 +791,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -808,6 +805,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);

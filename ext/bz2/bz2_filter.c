@@ -379,7 +379,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					/* How much memory to allocate (1 - 9) x 100kb */
 					zend_long blocks = zval_get_long(tmpzval);
 					if (blocks < 1 || blocks > 9) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", blocks);
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate. (" ZEND_LONG_FMT ")", blocks);
 					} else {
 						blockSize100k = (int) blocks;
 					}
@@ -389,7 +389,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					/* Work Factor (0 - 250) */
 					zend_long work = zval_get_long(tmpzval);
 					if (work < 0 || work > 250) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor. (%pd)", work);
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor. (" ZEND_LONG_FMT ")", work);
 					} else {
 						workFactor = (int) work;
 					}

@@ -241,7 +241,11 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
 int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist);
 
+void zend_init_func_return_info(const zend_op_array   *op_array,
+                                const zend_script     *script,
+                                zend_ssa_var_info     *ret);
 void zend_func_return_info(const zend_op_array   *op_array,
+                           const zend_script     *script,
                            int                    recursive,
                            int                    widening,
                            zend_ssa_var_info     *ret);

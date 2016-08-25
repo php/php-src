@@ -18,11 +18,11 @@ $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
 imagearc($image, 50, 50, 30, 30, -90, 0, $white);
 
 ob_start();
-imagepng($image);
+imagegd($image);
 $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-463b4aea9d9acfab30016ee92613c779
+8bd78aa775b5f29e7227eaeebaa84889

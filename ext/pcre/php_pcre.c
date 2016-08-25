@@ -216,7 +216,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
-	if (PCRE_G(jit)) {
+	if (PCRE_G(jit) && jit_stack == NULL) {
 		jit_stack = pcre_jit_stack_alloc(PCRE_JIT_STACK_MIN_SIZE,PCRE_JIT_STACK_MAX_SIZE);
 	}
 
@@ -261,7 +261,7 @@ static char **make_subpats_table(int num_subpats, pcre_cache_entry *pce)
 
 	subpat_names = (char **)ecalloc(num_subpats, sizeof(char *));
 	while (ni++ < name_cnt) {
-		name_idx = 0xff * (unsigned char)name_table[0] + (unsigned char)name_table[1];
+		name_idx = 0x100 * (unsigned char)name_table[0] + (unsigned char)name_table[1];
 		subpat_names[name_idx] = name_table + 2;
 		if (is_numeric_string(subpat_names[name_idx], strlen(subpat_names[name_idx]), NULL, NULL, 0) > 0) {
 			php_error_docref(NULL, E_WARNING, "Numeric named subpatterns are not allowed");
@@ -1030,7 +1030,7 @@ static int preg_get_backref(char **str, int *backref)
 	}
 
 	if (in_brace) {
-		if (*walk == 0 || *walk != '}')
+		if (*walk != '}')
 			return 0;
 		else
 			walk++;
@@ -1119,8 +1119,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	char 			**subpat_names;		/* Array for named subpatterns */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int				 size_offsets;		/* Size of the offsets array */
-	int				 new_len;			/* Length of needed storage */
-	int				 alloc_len;			/* Actual allocated length */
+	size_t			 new_len;			/* Length of needed storage */
+	size_t			 alloc_len;			/* Actual allocated length */
 	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	int				 start_offset;		/* Where the new search starts */
@@ -1331,7 +1331,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 					break;
 				}
 				new_len = result_len + subject_len - start_offset;
-				if (new_len > alloc_len) {
+				if (new_len >= alloc_len) {
 					alloc_len = new_len; /* now we know exactly how long it is */
 					if (NULL != result) {
 						result = zend_string_realloc(result, alloc_len, 0);

@@ -73,6 +73,8 @@ foreach ([
     var_dump((string)$ra);
   }
 }
+
+?>
 --EXPECT--
 *** functions
 ** Function 0 - Parameter 0
@@ -94,7 +96,7 @@ string(8) "callable"
 bool(true)
 bool(true)
 bool(false)
-string(8) "stdClass"
+string(9) "?stdClass"
 ** Function 0 - Parameter 4
 bool(false)
 ** Function 0 - Parameter 5

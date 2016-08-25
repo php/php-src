@@ -22,6 +22,7 @@
 #ifndef PHP_MATH_H
 #define PHP_MATH_H
 
+PHPAPI double _php_math_round(double, int, int);
 PHPAPI zend_string *_php_math_number_format(double, int, char, char);
 PHPAPI zend_string *_php_math_number_format_ex(double, int, char *, size_t, char *, size_t);
 PHPAPI zend_string * _php_math_longtobase(zval *arg, int base);
@@ -45,9 +46,7 @@ PHP_FUNCTION(is_infinite);
 PHP_FUNCTION(is_nan);
 PHP_FUNCTION(pow);
 PHP_FUNCTION(sqrt);
-PHP_FUNCTION(srand);
 PHP_FUNCTION(rand);
-PHP_FUNCTION(getrandmax);
 PHP_FUNCTION(mt_srand);
 PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);

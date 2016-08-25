@@ -180,7 +180,7 @@ static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
 static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 {
 	HashTable *data;
-	int dirlen = strlen(dir);
+	size_t dirlen = strlen(dir);
 	char *entry, *found, *save;
 	zend_string *str_key;
 	uint keylen;

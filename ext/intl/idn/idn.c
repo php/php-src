@@ -158,14 +158,11 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		len = uidna_nameToUnicodeUTF8(uts46, domain, domain_len,
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	}
-	if (php_intl_idn_check_status(status, "failed to convert name",
+	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name",
 			mode) == FAILURE) {
 		uidna_close(uts46);
 		zend_string_free(buffer);
 		RETURN_FALSE;
-	}
-	if (len >= 255) {
-		php_error_docref(NULL, E_ERROR, "ICU returned an unexpected length");
 	}
 
 	ZSTR_VAL(buffer)[len] = '\0';
