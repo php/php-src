@@ -25,7 +25,7 @@
 #include "zend_API.h"
 #include "zend_elf.h"
 
-static zend_array *symbols_table;
+static zend_array *symbols_table = NULL;
 
 static zend_elf_header *zend_elf_read_elfhdr(int fd, void *buf) {
 	if (read(fd, buf, sizeof(zend_elf_header)) == sizeof(zend_elf_header)) {
@@ -72,8 +72,8 @@ static zend_array* zend_elf_load_symbols(int fd, zend_elf_header *hdr) {
 	zend_array *symbols;
 	zend_elf_sectheader *sects;
 
-	symbols = emalloc(sizeof(zend_array));
-	zend_hash_init(symbols, 8, NULL, ZVAL_PTR_DTOR, 0);
+	symbols = malloc(sizeof(zend_array));
+	zend_hash_init(symbols, 8, NULL, ZVAL_PTR_DTOR, 1);
 
 	sects = zend_elf_load_sects(fd, hdr);
 	for (i = 0; i < hdr->shnum; i++) {
