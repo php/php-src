@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Dba:
   . Fixed bug #71514 (Bad dba_replace condition because of wrong API usage).
     (cmb)
+  . Fixed bug #70825 (Cannot fetch multiple values with group in ini file).
+    (cmb)
 
 - Streams:
   . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)

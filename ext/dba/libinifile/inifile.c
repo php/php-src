@@ -250,6 +250,7 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC) {
 	if (skip == -1 && dba->next.key.group && dba->next.key.name && !inifile_key_cmp(&dba->next.key, key TSRMLS_CC)) {
 		/* we got position already from last fetch */
 		php_stream_seek(dba->fp, dba->next.pos, SEEK_SET);
+		ln.key.group = estrdup(dba->next.key.group);
 	} else {
 		/* specific instance or not same key -> restart search */
 		/* the slow way: restart and seacrch */
