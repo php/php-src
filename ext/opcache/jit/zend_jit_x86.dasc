@@ -23,14 +23,35 @@
 |.endif
 
 |.if X64
- |.define FP,  r14
- |.define IP,  r15
- |.define IPl, r15d
+ |.define FP,     r14
+ |.define IP,     r15
+ |.define IPl,    r15d
+ |.define CARG1,  rdi       // x64/POSIX C call arguments.
+ |.define CARG2,  rsi
+ |.define CARG3,  rdx
+ |.define CARG4,  rcx
+ |.define CARG5,  r8
+ |.define CARG6,  r9
+ |.define CARG1d, edi
+ |.define CARG2d, esi
+ |.define CARG3d, edx
+ |.define CARG4d, ecx
+ |.define CARG5d, r8d
+ |.define CARG6d, r9d
+ |.define FCARG1, CARG1d    // Simulate x86 fastcall.
+ |.define FCARG2, CARG2d
+ |.define SPAD,   8
 |.else
- |.define FP,  esi
- |.define IP,  edi
- |.define IPl, edi
+ |.define FP,     esi
+ |.define IP,     edi
+ |.define IPl,    edi
+ |.define FCARG1, ecx       // x86 fastcall arguments.
+ |.define FCARG2, edx
+ |.define SPAD,   12
 |.endif
+
+|.type EX, zend_execute_data, FP
+|.type OP, zend_opline, IP
 
 |.actionlist dasm_actions
 
@@ -50,16 +71,45 @@ static void* dasm_labels[lbl__MAX];
 
 static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
-	// TODO: check interrupt_handler ???
 	|->interrupt_handler:
+	|	//EG(vm_interrupt) = 0;
+	|	mov byte [&EG(vm_interrupt)], 0
+	|	//if (EG(timed_out)) {
+	|	cmp byte [&EG(timed_out)], 0
+	|	je >1
+	|	//zend_timeout(0);
 	|.if X64
-	| add rsp, 8 // stack alignment
-	| load_addr rax, zend_timeout
-	| jmp rax
+	|	mov CARG1d, 0
+	|	load_addr rax, zend_timeout
+	|	call rax
 	|.else
-	| add esp, 12 // stack alignment
-	| jmp extern zend_timeout
+	|	push 0
+	|	call &zend_timeout
 	|.endif
+	|1:
+	|	//} else if (zend_interrupt_function) {
+	|	mov r0, aword [zend_interrupt_function]
+	|	test r0, r0
+	|	je >2
+	|	//SAVE_OPLINE();
+	|	mov EX->opline, IP
+	|	//zend_interrupt_function(execute_data);
+	|.if X64
+	|	mov CARG1, FP
+	|.else
+	|	push FP
+	|.endif
+	|	call r0
+	|	//ZEND_VM_ENTER();
+	|		//execute_data = EG(current_execute_data);
+	|	mov FP, aword [&EG(current_execute_data)]
+	|		// LOAD_OPLINE();
+	|	mov IP, EX->opline
+	|	//}
+	|2:
+	|	//ZEND_VM_CONTINUE()
+	|	add r4, SPAD // stack alignment
+	|	jmp aword [IP]
 
 	return 1;
 }
