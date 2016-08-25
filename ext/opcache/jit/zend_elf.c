@@ -37,6 +37,9 @@ static zend_elf_header *zend_elf_read_elfhdr(int fd, void *buf) {
 static int zend_elf_parse_sym_entry(zend_array *sym_table, char *str_tbl, zend_elf_symbol *sym) {
 	if (sym->name) {
 		zval zv;
+		zend_string *str = zend_string_init(str_tbl + sym->name, strlen(str_tbl + sym->name), 1);
+
+		ZVAL_STR(&zv, str);
 		ZVAL_STRING(&zv, (str_tbl + sym->name));
 		zend_hash_index_update(sym_table, sym->value, &zv);
 	}
@@ -68,7 +71,7 @@ static zend_elf_sectheader* zend_elf_load_sects(int fd, zend_elf_header *hdr) {
 }
 
 static zend_array* zend_elf_load_symbols(int fd, zend_elf_header *hdr) {
-	uint32_t i, ofs;
+	uint32_t i;
 	zend_array *symbols;
 	zend_elf_sectheader *sects;
 
@@ -125,9 +128,8 @@ const char* zend_elf_resolve_sym(void *addr) {
 	if (!symbols_table) {
 		return NULL;
 	}
-	if ((zv = zend_hash_index_find(symbols_table, (size_t)addr))) {
-		return Z_STRVAL_P(zv);
-	}
+	zv = zend_hash_index_find(symbols_table, (size_t)addr);
+	return zv ? Z_STRVAL_P(zv) : NULL;
 }
 
 /*
