@@ -359,13 +359,14 @@ static zend_long php_session_gc(zend_bool immediate) /* {{{ */
 	zend_long num = -1;
 
 	/* GC must be done before reading session data. */
-	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
+	if ((PS(mod_data) || PS(mod_user_implemented))) {
 		if (immediate) {
+			/* 0 TTL may be used for special meaning. Use 1. */
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 			return num;
 		}
 		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
-		if (nrand < PS(gc_probability)) {
+		if (PS(gc_probability) > 0 && nrand < PS(gc_probability)) {
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 		}
 	}
