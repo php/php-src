@@ -117,13 +117,12 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 static int zend_jit_exception_handler_stub(dasm_State **Dst)
 {
 	|->exception_handler:
+	|	add r4, SPAD // stack alignment
 	|.if X64
-	| add rsp, 8 // stack alignment
-	| load_addr rax, EG(exception_op)->handler
-	| jmp rax
+	|	load_addr rax, EG(exception_op)->handler
+	|	jmp rax
 	|.else
-	| add esp, 12 // stack alignment
-	| jmp &(EG(exception_op)->handler)
+	|	jmp &(EG(exception_op)->handler)
 	|.endif
 
 	return 1;
@@ -142,11 +141,7 @@ static int zend_jit_align_func(dasm_State **Dst)
 
 static int zend_jit_prologue(dasm_State **Dst)
 {
-	|.if X64
-	| sub rsp, 8 // stack alignment
-	|.else
-	| sub esp, 12 // stack alignment
-	|.endif
+	|	sub r4, SPAD // stack alignment
 	return 1;
 }
 
@@ -158,15 +153,15 @@ static int zend_jit_label(dasm_State **Dst, unsigned int label)
 
 static int zend_jit_check_timeout(dasm_State **Dst)
 {
-	| cmp byte [&EG(vm_interrupt)], 0
-	| jne ->interrupt_handler
+	|	cmp byte [&EG(vm_interrupt)], 0
+	|	jne ->interrupt_handler
 	return 1;
 }
 
 static int zend_jit_check_exception(dasm_State **Dst)
 {
-	| cmp aword [&EG(exception)], 0
-	| jne ->exception_handler
+	|	cmp aword [&EG(exception)], 0
+	|	jne ->exception_handler
 	return 1;
 }
 
@@ -175,10 +170,10 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline)
 	const void *handler = opline->handler;
 
 	|.if X64
-	| load_addr rax, handler
-	| call rax
+	|	load_addr rax, handler
+	|	call rax
 	|.else
-	| call aword &handler
+	|	call aword &handler
 	|.endif
 	zend_jit_check_exception(Dst);
 	return 1;
@@ -188,62 +183,61 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 {
 	const void *handler = opline->handler;
 
+	|	add r4, SPAD // stack alignment
 	|.if X64
-	| add rsp, 8 // stack alignment
-	| load_addr rax, handler
-	| jmp rax
+	|	load_addr rax, handler
+	|	jmp rax
 	|.else
-	| add esp, 12 // stack alignment
-	| jmp aword &handler
+	|	jmp aword &handler
 	|.endif
 	return 1;
 }
 
 static int zend_jit_skip_handler(dasm_State **Dst, uint32_t skip)
 {
-	| add IP, sizeof(zend_op) * skip
+	|	add IP, sizeof(zend_op) * skip
 	return 1;
 }
 
 static int zend_jit_set_opline(dasm_State **Dst, zend_op *target_opline)
 {
 	|.if X64
-	| load_addr IP, target_opline
+	|	load_addr IP, target_opline
 	|.else
-	| mov IP, target_opline
+	|	mov IP, target_opline
 	|.endif
 	return 1;
 }
 
 static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
 {
-	| jmp =>target_label
+	|	jmp =>target_label
 	return 1;
 }
 
 static int zend_jit_cond_jmp(dasm_State **Dst, zend_op *next_opline, unsigned int target_label)
 {
-    | cmp IPl, next_opline
-    | jnz =>target_label
+	|	cmp IPl, next_opline
+	|	jnz =>target_label
 	return 1;
 }
 
 static int zend_jit_smart_branch(dasm_State **Dst, zend_op *opline, unsigned int next_label, unsigned int target_label)
 {
-    zend_op *next_opline = opline + 1;
-    zend_op *target_opline = OP_JMP_ADDR(opline, opline->op2);
+	zend_op *next_opline = opline + 1;
+	zend_op *target_opline = OP_JMP_ADDR(opline, opline->op2);
 
-    | cmp IPl, next_opline
-    | jz =>next_label
-    | cmp IPl, target_opline
-    | jz =>target_label
+	|	cmp IPl, next_opline
+	|	jz =>next_label
+	|	cmp IPl, target_opline
+	|	jz =>target_label
 	return 1;
 }
 
 static int zend_jit_recv(dasm_State **Dst, zend_op *opline)
 {
-    | cmp IPl, opline
-	| jnz >1
+	|	cmp IPl, opline
+	|	jnz >1
 	zend_jit_handler(Dst, opline);
 	|1:
 	return 1;
@@ -254,13 +248,13 @@ static int zend_jit_context_threaded_call(dasm_State **Dst, zend_op *opline)
 {
 	if (!zend_jit_handler(Dst, opline)) return 0;
 	if (opline->opcode == ZEND_DO_UCALL) {
-		| call aword [IP]
+		|	call aword [IP]
 	} else {
-	    zend_op *next_opline = opline + 1;
+		zend_op *next_opline = opline + 1;
 
-	    | cmp IPl, next_opline
-	    | jz >1
-		| call aword [IP]
+		|	cmp IPl, next_opline
+		|	jz >1
+		|	call aword [IP]
 		|1:
 	}
 	return 1;
@@ -280,10 +274,10 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 {
 	if (!zend_jit_handler(Dst, opline)) return 0;
 	if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
-	    zend_op *next_opline = opline + 1;
+		zend_op *next_opline = opline + 1;
 
-	    | cmp IPl, next_opline
-	    | jnz >1
+		|	cmp IPl, next_opline
+		|	jnz >1
 		zend_jit_call(Dst, next_opline);
 		|1:
 	}
