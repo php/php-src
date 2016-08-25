@@ -39,13 +39,22 @@ static void* dasm_labels[lbl__MAX];
 
 |.section code
 
+|.macro load_addr, reg, addr
+||if (((ptrdiff_t)addr) <= 0x7fffffff) {
+|	mov reg, ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
+|| } else {
+|	mov64 reg, ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
+||}
+|.endmacro
+
+
 static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
 	// TODO: check interrupt_handler ???
 	|->interrupt_handler:
 	|.if X64
 	| add rsp, 8 // stack alignment
-	| mov64 rax, ((ptrdiff_t)zend_timeout)
+	| load_addr rax, zend_timeout
 	| jmp rax
 	|.else
 	| add esp, 12 // stack alignment
@@ -60,7 +69,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 	|->exception_handler:
 	|.if X64
 	| add rsp, 8 // stack alignment
-	| mov64 rax, ((ptrdiff_t)EG(exception_op)->handler)
+	| load_addr rax, EG(exception_op)->handler
 	| jmp rax
 	|.else
 	| add esp, 12 // stack alignment
@@ -116,7 +125,7 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline)
 	const void *handler = opline->handler;
 
 	|.if X64
-	| mov64 rax, ((ptrdiff_t)handler)
+	| load_addr rax, handler
 	| call rax
 	|.else
 	| call aword &handler
@@ -131,7 +140,7 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 
 	|.if X64
 	| add rsp, 8 // stack alignment
-	| mov64 rax, ((ptrdiff_t)handler)
+	| load_addr rax, handler
 	| jmp rax
 	|.else
 	| add esp, 12 // stack alignment
@@ -149,7 +158,7 @@ static int zend_jit_skip_handler(dasm_State **Dst, uint32_t skip)
 static int zend_jit_set_opline(dasm_State **Dst, zend_op *target_opline)
 {
 	|.if X64
-	| mov64 IP, ((ptrdiff_t)target_opline)
+	| load_addr IP, target_opline
 	|.else
 	| mov IP, target_opline
 	|.endif
