@@ -356,20 +356,20 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 static zend_long php_session_gc(zend_bool immediate) /* {{{ */
 {
 	int nrand;
-	int num = -1;
+	zend_long num = -1;
 
 	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
 		if (immediate) {
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
-			return (zend_long)num;
+			return num;
 		}
 		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 		}
 	}
-	return (zend_long)num;
+	return num;
 } /* }}} */
 
 static void php_session_initialize(void) /* {{{ */
