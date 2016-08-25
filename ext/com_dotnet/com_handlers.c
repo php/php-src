@@ -279,7 +279,6 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
-		zend_set_function_arg_flags((zend_function*)&f);
 
 		fptr = &f;
 
@@ -306,11 +305,11 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 								f.arg_info[i].allow_null = 1;
 								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
 									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
-									ZEND_SET_ARG_FLAG(fptr, i + 1, ZEND_SEND_BY_REF);
 								}
 							}
 
 							f.num_args = bindptr.lpfuncdesc->cParams;
+							zend_set_function_arg_flags((zend_function*)&f);
 
 							ITypeInfo_ReleaseFuncDesc(TI, bindptr.lpfuncdesc);
 							break;
