@@ -553,7 +553,10 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 			for (i = 0, j = 0; i < nargs; i++) {
 				/* if this was byref, update the zval */
 				if (f->arg_info[nargs - i - 1].pass_by_reference) {
-					SEPARATE_ZVAL_IF_NOT_REF(&args[nargs - i - 1]);
+					zval *arg = &args[nargs - i - 1];
+
+					ZVAL_DEREF(arg);
+					SEPARATE_ZVAL_NOREF(arg);
 
 					/* if the variant is pointing at the byref_vals, we need to map
 					 * the pointee value as a zval; otherwise, the value is pointing
@@ -561,14 +564,12 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 					if (V_VT(&vargs[i]) & VT_BYREF) {
 						if (vargs[i].byref == &V_UINT(&byref_vals[j])) {
 							/* copy that value */
-							php_com_zval_from_variant(&args[nargs - i - 1], &byref_vals[j],
-								obj->code_page);
+							php_com_zval_from_variant(arg, &byref_vals[j], obj->code_page);
 						}
 					} else {
 						/* not sure if this can ever happen; the variant we marked as BYREF
 						 * is no longer BYREF - copy its value */
-						php_com_zval_from_variant(&args[nargs - i - 1], &vargs[i],
-							obj->code_page);
+						php_com_zval_from_variant(arg, &vargs[i], obj->code_page);
 					}
 					VariantClear(&byref_vals[j]);
 					j++;
