@@ -289,6 +289,9 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 	}
 
 	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL)
+	 && ssa.cfg.blocks
+	 && op_array->last_try_catch == 0
+	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
 	 && !(flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa, &flags) != SUCCESS) {
 			goto jit_failure;
