@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
 
+- PDO_DBlib:
+  . Implemented stringify 'uniqueidentifier' fields.
+    (Alexander Zhuravlev, Adam Baratz)
+
 - Reflection:
   . Reverted prepending \ for class names. (Trowski)
 
