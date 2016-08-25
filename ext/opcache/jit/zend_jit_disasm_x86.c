@@ -19,8 +19,6 @@
 #define HAVE_DISASM 1
 #define DISASM_INTEL_SYNTAX 0
 
-#include "zend_elf.h"
-
 #include "jit/libudis86/itab.c"
 #include "jit/libudis86/decode.c"
 #include "jit/libudis86/syn.c"
@@ -35,6 +33,8 @@ static void zend_jit_disasm_add_symbol(const char *name,
                                        uint64_t    addr);
 
 #include "jit/zend_elf.c"
+
+#include "zend_sort.h"
 
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
@@ -91,12 +91,24 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
 	return NULL;
 }
 
+static int zend_jit_cmp_labels(Bucket *b1, Bucket *b2)
+{
+	return ((b1->h > b2->h) > 0) ? 1 : -1;
+}
+
+
 static int zend_jit_disasm(const char *name,
                            const char *filename,
                            const void *start,
                            size_t      size)
 {
 	const void *end = (void *)((char *)start + size);
+	zval zv, *z;
+	zend_long n;
+	HashTable labels;
+	const struct ud_operand *op;
+	uint64_t addr;
+
 	if (name) {
 		fprintf(stderr, "%s: ; (%s)\n", name, filename ? filename : "unknown");
 	}
@@ -104,10 +116,64 @@ static int zend_jit_disasm(const char *name,
 	ud_set_input_buffer(&ud, (uint8_t*)start, (uint8_t*)end - (uint8_t*)start);
 	ud_set_pc(&ud, (uint64_t)(uintptr_t)start);
 
+	zend_hash_init(&labels, 8, NULL, NULL, 0);
+	ZVAL_NULL(&zv);
 	while (ud_disassemble(&ud)) {
-		fprintf(stderr, "0x%" PRIx64 ":\t%s\n", ud_insn_off(&ud), ud_insn_asm(&ud));
+		op = ud_insn_opr(&ud, 0);
+		if (op && op->type == UD_OP_JIMM) {
+			addr = ud_syn_rel_target(&ud, (struct ud_operand*)op);
+			if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)end) {
+				zend_hash_index_add(&labels, addr, &zv);
+			}
+		}
+	}
+
+	zend_hash_sort(&labels, (compare_func_t)zend_jit_cmp_labels, 0);
+
+	/* label numbering */
+	n = 0;
+	ZEND_HASH_FOREACH_VAL(&labels, z) {
+		n++;
+		ZVAL_LONG(z, n);
+	} ZEND_HASH_FOREACH_END();
+
+	ud_set_input_buffer(&ud, (uint8_t*)start, (uint8_t*)end - (uint8_t*)start);
+	ud_set_pc(&ud, (uint64_t)(uintptr_t)start);
+
+	while (ud_disassemble(&ud)) {
+		addr = ud_insn_off(&ud);
+		z = zend_hash_index_find(&labels, addr);
+		if (z) {
+			fprintf(stderr, ".L%ld:\n", Z_LVAL_P(z));
+		}
+		op = ud_insn_opr(&ud, 0);
+		if (op && op->type == UD_OP_JIMM) {
+			addr = ud_syn_rel_target(&ud, (struct ud_operand*)op);
+			if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)end) {
+				z = zend_hash_index_find(&labels, addr);
+				if (z) {
+					const char *str = ud_insn_asm(&ud);
+					int len;
+
+					len = 0;
+					while (str[len] != 0 && str[len] != ' ' && str[len] != '\t') {
+						len++;
+					}
+					if (str[len] != 0) {
+						while (str[len] == ' ' || str[len] == '\t') {
+							len++;
+						}
+						fprintf(stderr, "\t%.*s.L%ld\n", len, str, Z_LVAL_P(z));
+						continue;
+					}
+				}
+			}
+		}
+		fprintf(stderr, "\t%s\n", ud_insn_asm(&ud));
 	}
 	fprintf(stderr, "\n");
+
+	zend_hash_destroy(&labels);
 
 	return 1;
 }
