@@ -186,7 +186,7 @@ PS_GC_FUNC(user)
 		convert_to_long(&retval);
 		return Z_LVAL(retval);
 	}
-	/* This is for compatibility for older API */
+	/* This is for older API compatibility */
 	if (Z_TYPE(retval) == IS_TRUE) {
 		return 1;
 	}
