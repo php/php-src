@@ -43,8 +43,20 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
                                             uint64_t   addr,
                                             int64_t   *offset)
 {
+	((void)ud);
 	void *a = (void*)(zend_uintptr_t)(addr);
 	Dl_info info;
+
+#ifndef ZTS
+	if (a > (void*)&executor_globals && a < (void*)((char*)&executor_globals + sizeof(executor_globals))) {
+		*offset = (int64_t)((char*)a - (char*)&executor_globals);
+		return "executor_globals";
+	}
+	if (a > (void*)&compiler_globals && a < (void*)((char*)&compiler_globals + sizeof(compiler_globals))) {
+		*offset = (int64_t)((char*)a - (char*)&compiler_globals);
+		return "compiler_globals";
+	}
+#endif
 
 	if (dladdr(a, &info)
 	 && info.dli_sname != NULL
