@@ -19,13 +19,8 @@
 
 #define HAVE_GDB
 
+#include "zend_elf.h"
 #include "zend_gdb.h"
-
-#if SIZEOF_SIZE_T == 8
-# define ELF64
-#else
-# undef ELF64
-#endif
 
 #if defined(__x86_64)
 #define CFRAME_SIZE         (12*4)
@@ -36,80 +31,6 @@
 #else
 #error "Unsupported target architecture"
 #endif
-
-typedef struct _zend_elf_header {
-	uint8_t   emagic[4];
-	uint8_t   eclass;
-	uint8_t   eendian;
-	uint8_t   eversion;
-	uint8_t   eosabi;
-	uint8_t   eabiversion;
-	uint8_t   epad[7];
-	uint16_t  type;
-	uint16_t  machine;
-	uint32_t  version;
-	uintptr_t entry;
-	uintptr_t phofs;
-	uintptr_t shofs;
-	uint32_t  flags;
-	uint16_t  ehsize;
-	uint16_t  phentsize;
-	uint16_t  phnum;
-	uint16_t  shentsize;
-	uint16_t  shnum;
-	uint16_t  shstridx;
-} zend_elf_header;
-
-typedef struct zend_elf_sectheader {
-	uint32_t  name;
-	uint32_t  type;
-	uintptr_t flags;
-	uintptr_t addr;
-	uintptr_t ofs;
-	uintptr_t size;
-	uint32_t  link;
-	uint32_t  info;
-	uintptr_t align;
-	uintptr_t entsize;
-} zend_elf_sectheader;
-
-#define ELFSECT_IDX_ABS     0xfff1
-
-enum {
-	ELFSECT_TYPE_PROGBITS = 1,
-	ELFSECT_TYPE_SYMTAB = 2,
-	ELFSECT_TYPE_STRTAB = 3,
-	ELFSECT_TYPE_NOBITS = 8
-};
-
-#define ELFSECT_FLAGS_WRITE 1
-#define ELFSECT_FLAGS_ALLOC 2
-#define ELFSECT_FLAGS_EXEC  4
-
-typedef struct zend_elf_symbol {
-#ifdef ELF64
-	uint32_t  name;
-	uint8_t   info;
-	uint8_t   other;
-	uint16_t  sectidx;
-	uintptr_t value;
-	uint64_t  size;
-#else
-	uint32_t  name;
-	uintptr_t value;
-	uint32_t  size;
-	uint8_t   info;
-	uint8_t   other;
-	uint16_t  sectidx;
-#endif
-} zend_elf_symbol;
-
-enum {
-	ELFSYM_TYPE_FUNC = 2,
-	ELFSYM_TYPE_FILE = 4,
-	ELFSYM_BIND_LOCAL = 0 << 4,
-	ELFSYM_BIND_GLOBAL = 1 << 4,
-};
 
 /* DWARF definitions. */
 #define DW_CIE_VERSION  1

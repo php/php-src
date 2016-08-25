@@ -19,6 +19,8 @@
 #define HAVE_DISASM 1
 #define DISASM_INTEL_SYNTAX 0
 
+#include "zend_elf.h"
+
 #include "jit/libudis86/itab.c"
 #include "jit/libudis86/decode.c"
 #include "jit/libudis86/syn.c"
@@ -50,7 +52,7 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
 		return info.dli_sname;
 	}
 
-	return NULL;
+	return zend_elf_resolve_sym((void*)addr);
 }
 
 static int zend_jit_disasm(const char *name,

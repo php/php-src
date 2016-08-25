@@ -59,6 +59,7 @@ typedef struct _zend_jit_stub {
 #ifdef HAVE_OPROFILE
 # include "jit/zend_jit_oprofile.c"
 #endif
+#include "jit/zend_elf.c"
 
 #if _WIN32
 # include <Windows.h>
@@ -588,6 +589,7 @@ ZEND_API int zend_jit_startup(size_t size)
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+		zend_elf_init();
 		if (!zend_jit_disasm_init()) {
 			// TODO: error reporting and cleanup ???
 			return FAILURE;
@@ -618,6 +620,12 @@ ZEND_API void zend_jit_shutdown(void)
 #ifdef HAVE_GDB
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
 		zend_jit_gdb_unregister();
+	}
+#endif
+
+#ifdef HAVE_DISASM
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+		zend_elf_shutdown();
 	}
 #endif
 
