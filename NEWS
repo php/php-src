@@ -48,6 +48,10 @@ PHP                                                                        NEWS
   . Fixed bug #60665 (call to empty() on NULL result using PDO::FETCH_LAZY
     returns false). (cmb)
 
+- PDO_DBlib:
+  . Implemented stringify 'uniqueidentifier' fields.
+    (Alexander Zhuravlev, Adam Baratz)
+
 - PDO_pgsql:
   . Implemented FR #72633 (Postgres PDO lastInsertId() should work without
     specifying a sequence). (Pablo Santiago Sánchez, Matteo)
