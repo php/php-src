@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72854 (PHP Crashes on duplicate destructor call). (Nikita)
   . Fixed bug #72857 (stream_socket_recvfrom read access violation). (Anatol)
 
+- COM:
+  . Fixed bug #72922 (COM called from PHP does not return out parameters).
+    (Anatol)
+
 - FTP:
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
     require_ssl_reuse). (Benedict Singer)
