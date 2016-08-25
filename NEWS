@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #72922 (COM called from PHP does not return out parameters).
     (Anatol)
 
+- Dba:
+  . Fixed bug #70825 (Cannot fetch multiple values with group in ini file).
+    (cmb)
+
 - FTP:
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
     require_ssl_reuse). (Benedict Singer)
