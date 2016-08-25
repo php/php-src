@@ -40,7 +40,6 @@ static int zend_elf_parse_sym_entry(zend_array *sym_table, char *str_tbl, zend_e
 		zend_string *str = zend_string_init(str_tbl + sym->name, strlen(str_tbl + sym->name), 1);
 
 		ZVAL_STR(&zv, str);
-		ZVAL_STRING(&zv, (str_tbl + sym->name));
 		zend_hash_index_update(sym_table, sym->value, &zv);
 	}
 	return 1;
