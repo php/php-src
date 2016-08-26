@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0RC1
 
 - Core:
+  . Fixed bug #72943 (assign_dim on string doesn't reset hval). (Laruence)
   . Fixed bug #72598 (Reference is lost after array_slice()) (Nikita)
 
 - COM:

@@ -1330,6 +1330,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		zend_string_release(old_str);
 	} else {
 		SEPARATE_STRING(str);
+		zend_string_forget_hash_val(Z_STR_P(str));
 	}
 
 	Z_STRVAL_P(str)[offset] = c;
