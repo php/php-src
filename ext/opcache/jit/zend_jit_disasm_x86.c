@@ -115,6 +115,7 @@ static void zend_jit_disasm_add_symbol(const char *name,
 		/* insert it into rbtree */
 		do {
 			if (sym->addr > node->addr) {
+				ZEND_ASSERT(sym->addr >= (node->addr + node->size));
 				if (node->child[1]) {
 					node = node->child[1];
 				} else {
@@ -196,7 +197,8 @@ static const char* zend_jit_disasm_find_symbol(uint64_t  addr,
 	while (node) {
 		if (addr < node->addr) {
 			node = node->child[0];
-		} else if (addr > (node->addr + node->size)) {
+		} else if (addr > node->addr &&
+			addr >= (node->addr + node->size)) {
 			node = node->child[1];
 		} else {
 			*offset = addr - node->addr;
