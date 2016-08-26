@@ -1827,7 +1827,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						gen_specs($f, $spec, $kind, $prolog."\t", $specs);
 						out($f,$prolog."};\n");
 						out($f,$prolog."zend_opcode_handlers = labels;\n");
-						out($f,$prolog."\tzend_handlers_count = sizeof(labels) / sizeof(void*);\n");
+						out($f,$prolog."zend_handlers_count = sizeof(labels) / sizeof(void*);\n");
 						out($f,$prolog."zend_spec_handlers = specs;\n");
 					}
 					break;
