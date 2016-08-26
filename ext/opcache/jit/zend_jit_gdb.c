@@ -28,6 +28,7 @@
 /* DWARF definitions. */
 #define DW_CIE_VERSION  1
 
+/* CFA (Canonical frame address) */
 enum {
 	DW_CFA_nop = 0x0,
 	DW_CFA_offset_extended = 0x5,
@@ -295,7 +296,7 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
   uint8_t *p = ctx->p;
   uint8_t *framep = p;
 
-  /* DWARF EH CIE (Call Frame Information). */
+  /* DWARF EH CIE (Common Information Entry) */
   DSECT(CIE,
     DU32(0);			                           /* CIE ID. */
     DB(DW_CIE_VERSION);                            /* Version */
