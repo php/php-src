@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
   . Fixed bug #72524 (Binding null values triggers ORA-24816 error). (Chris Jones)
 
+- Opcache:
+  . Fixed bug #72949 (Typo in opcache error message). (cmb)
+
 - PDO:
   . Fixed bug #72788 (Invalid memory access when using persistent PDO
     connection). (Keyur)
