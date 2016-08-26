@@ -234,17 +234,20 @@ static int zend_jit_cmp_labels(Bucket *b1, Bucket *b2)
 	return ((b1->h > b2->h) > 0) ? 1 : -1;
 }
 
-static int zend_jit_disasm(const char *name,
-                           const char *filename,
-                           const void *start,
-                           size_t      size)
+static int zend_jit_disasm(const char    *name,
+                           const char    *filename,
+                           zend_op_array *op_array,
+                           zend_cfg      *cfg,
+                           const void    *start,
+                           size_t         size)
 {
 	const void *end = (void *)((char *)start + size);
 	zval zv, *z;
-	zend_long n;
+	zend_long n, m;
 	HashTable labels;
 	const struct ud_operand *op;
 	uint64_t addr;
+	int b;
 
 	if (name) {
 		fprintf(stderr, "%s: ; (%s)\n", name, filename ? filename : "unknown");
@@ -254,7 +257,18 @@ static int zend_jit_disasm(const char *name,
 	ud_set_pc(&ud, (uint64_t)(uintptr_t)start);
 
 	zend_hash_init(&labels, 8, NULL, NULL, 0);
-	ZVAL_NULL(&zv);
+	if (op_array && cfg) {
+		ZVAL_FALSE(&zv);
+		for (b = 0; b < cfg->blocks_count; b++) {
+			if (cfg->blocks[b].flags & ZEND_BB_ENTRY) {
+				addr = (uint64_t)(uintptr_t)op_array->opcodes[cfg->blocks[b].start].handler;
+				if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)end) {
+					zend_hash_index_add(&labels, addr, &zv);
+				}
+			}
+		}
+	}
+	ZVAL_TRUE(&zv);
 	while (ud_disassemble(&ud)) {
 		op = ud_insn_opr(&ud, 0);
 		if (op && op->type == UD_OP_JIMM) {
@@ -268,10 +282,15 @@ static int zend_jit_disasm(const char *name,
 	zend_hash_sort(&labels, (compare_func_t)zend_jit_cmp_labels, 0);
 
 	/* label numbering */
-	n = 0;
+	n = 0; m = 0;
 	ZEND_HASH_FOREACH_VAL(&labels, z) {
-		n++;
-		ZVAL_LONG(z, n);
+		if (Z_TYPE_P(z) == IS_FALSE) {
+			m--;
+			ZVAL_LONG(z, m);
+		} else {
+			n++;
+			ZVAL_LONG(z, n);
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	ud_set_input_buffer(&ud, (uint8_t*)start, (uint8_t*)end - (uint8_t*)start);
@@ -281,7 +300,11 @@ static int zend_jit_disasm(const char *name,
 		addr = ud_insn_off(&ud);
 		z = zend_hash_index_find(&labels, addr);
 		if (z) {
-			fprintf(stderr, ".L" ZEND_LONG_FMT ":\n", Z_LVAL_P(z));
+			if (Z_LVAL_P(z) < 0) {
+				fprintf(stderr, ".ENTRY" ZEND_LONG_FMT ":\n", -Z_LVAL_P(z));
+			} else {
+				fprintf(stderr, ".L" ZEND_LONG_FMT ":\n", Z_LVAL_P(z));
+			}
 		}
 		op = ud_insn_opr(&ud, 0);
 		if (op && op->type == UD_OP_JIMM) {
@@ -300,7 +323,11 @@ static int zend_jit_disasm(const char *name,
 						while (str[len] == ' ' || str[len] == '\t') {
 							len++;
 						}
-						fprintf(stderr, "\t%.*s.L" ZEND_LONG_FMT "\n", len, str, Z_LVAL_P(z));
+						if (Z_LVAL_P(z) < 0) {
+							fprintf(stderr, "\t%.*s.ENTRY" ZEND_LONG_FMT "\n", len, str, -Z_LVAL_P(z));
+						} else {
+							fprintf(stderr, "\t%.*s.L" ZEND_LONG_FMT "\n", len, str, Z_LVAL_P(z));
+						}
 						continue;
 					}
 				}

@@ -105,6 +105,7 @@ static zend_string *zend_jit_func_name(zend_op_array *op_array)
 
 static void *dasm_link_and_encode(dasm_State    **dasm_state,
                                   zend_op_array  *op_array,
+                                  zend_cfg       *cfg,
                                   const char     *name)
 {
 	size_t size;
@@ -134,6 +135,25 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 	entry = dasm_ptr;
 	dasm_ptr = (void*)((char*)dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
 
+	if (op_array && cfg) {
+		int b;
+
+		for (b = 0; b < cfg->blocks_count; b++) {
+			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
+				zend_op *opline = op_array->opcodes + cfg->blocks[b].start;
+
+				opline->handler = (void*)(((char*)entry) +
+					dasm_getpclabel(dasm_state, cfg->blocks_count + b));
+				/* RECV may be skipped */
+				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+					opline++;
+					opline->handler = (void*)(((char*)entry) +
+						dasm_getpclabel(dasm_state, cfg->blocks_count + b));
+				}
+			}
+		}
+	}
+
 #if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS)
     if (!name) {
 		if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_OPROFILE|ZEND_JIT_DEBUG_PERF)) {
@@ -151,6 +171,8 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 		zend_jit_disasm(
 			name,
 			(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
+			op_array,
+			cfg,
 			entry,
 			size);
 	}
@@ -479,22 +501,9 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		}
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, op_array, NULL);
+	handler = dasm_link_and_encode(&dasm_state, op_array, &ssa.cfg, NULL);
 	if (!handler) {
 		goto jit_failure;
-	}
-	for (b = 0; b < ssa.cfg.blocks_count; b++) {
-		if (ssa.cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
-			opline = op_array->opcodes + ssa.cfg.blocks[b].start;
-			opline->handler = (void*)(((char*)handler) +
-				dasm_getpclabel(&dasm_state, ssa.cfg.blocks_count + b));
-			/* RECV may be skipped */
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
-				opline->handler = (void*)(((char*)handler) +
-					dasm_getpclabel(&dasm_state, ssa.cfg.blocks_count + b));
-			}
-		}
 	}
 	dasm_free(&dasm_state);
 
@@ -540,7 +549,7 @@ static int zend_jit_make_stubs(void)
 		if (!zend_jit_stubs[i].stub(&dasm_state)) {
 			return 0;
 		}
-		if (!dasm_link_and_encode(&dasm_state, NULL, zend_jit_stubs[i].name)) {
+		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, zend_jit_stubs[i].name)) {
 			return 0;
 		}
 	}
