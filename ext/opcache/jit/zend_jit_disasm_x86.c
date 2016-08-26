@@ -356,10 +356,24 @@ static int zend_jit_disasm_init(void)
 	ud_set_syntax(&ud, UD_SYN_ATT);
 #endif
 	ud_set_sym_resolver(&ud, zend_jit_disasm_resolver);
+
 #ifndef ZTS
-	zend_jit_disasm_add_symbol("executor_globals", (uint64_t)(uintptr_t)&executor_globals, sizeof(executor_globals));
-	zend_jit_disasm_add_symbol("compiler_globals", (uint64_t)(uintptr_t)&compiler_globals, sizeof(compiler_globals));
+#define REGISTER_EG(n)  \
+	zend_jit_disasm_add_symbol("EG("#n")", \
+		(uint64_t)(uintptr_t)&executor_globals.n, sizeof(executor_globals.n))
+	REGISTER_EG(uninitialized_zval);
+	REGISTER_EG(exception);
+	REGISTER_EG(vm_interrupt);
+	REGISTER_EG(exception_op);
+	REGISTER_EG(timed_out);
+#undef  REGISTER_EG
+#define REGISTER_CG(n)  \
+	zend_jit_disasm_add_symbol("CG("#n")", \
+		(uint64_t)(uintptr_t)&compiler_globals.n, sizeof(compiler_globals.n))
+	REGISTER_CG(known_strings);
+#undef  REGISTER_CG
 #endif
+
 	zend_elf_load_symbols();
 
 	return 1;
