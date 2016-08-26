@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   |          Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -30,7 +31,8 @@
 #include "jit/libudis86/udis86.c"
 
 static void zend_jit_disasm_add_symbol(const char *name,
-                                       uint64_t    addr);
+                                       uint64_t    addr,
+                                       uint64_t    size);
 
 #include "jit/zend_elf.c"
 
@@ -43,18 +45,165 @@ static void zend_jit_disasm_add_symbol(const char *name,
 #include <dlfcn.h>
 
 static struct ud ud;
-static HashTable disasm_symbols;
+
+typedef struct _sym_node {
+	uint64_t          addr;
+	uint64_t          size;
+	struct _sym_node *parent;
+	struct _sym_node *child[2];
+	unsigned char     info;
+	unsigned char     name[1];
+} zend_sym_node;
+
+static zend_sym_node *symbols = NULL;
+
+static void zend_syms_rotateleft(zend_sym_node *p) {
+	zend_sym_node *r = p->child[1];
+	p->child[1] = r->child[0];
+	if (r->child[0]) {
+		r->child[0]->parent = p;
+	}
+	r->parent = p->parent;
+	if (p->parent == NULL) {
+		symbols = r;
+	} else if (p->parent->child[0] == p) {
+		p->parent->child[0] = r;
+	} else {
+		p->parent->child[1] = r;
+	}
+	r->child[0] = p;
+	p->parent = r;
+}
+
+static void zend_syms_rotateright(zend_sym_node *p) {
+	zend_sym_node *l = p->child[0];
+	p->child[0] = l->child[1];
+	if (l->child[1]) {
+		l->child[1]->parent = p;
+	}
+	l->parent = p->parent;
+	if (p->parent == NULL) {
+		symbols = l;
+	} else if (p->parent->child[1] == p) {
+		p->parent->child[1] = l;
+	} else {
+		p->parent->child[0] = l;
+	}
+	l->child[1] = p;
+	p->parent = l;
+}
 
 static void zend_jit_disasm_add_symbol(const char *name,
-                                       uint64_t    addr)
+                                       uint64_t    addr,
+                                       uint64_t    size)
 {
-	zval zv;
-	zend_string *str = zend_string_init(name, strlen(name), 1);
+	zend_sym_node *sym;
+	size_t len = strlen(name);
 
-	ZVAL_STR(&zv, str);
-	if (zend_hash_index_add(&disasm_symbols, addr, &zv) == NULL) {
-		zend_string_release(str);
+	sym = malloc(sizeof(zend_sym_node) + len + 1);
+	if (!sym) {
+		return;
 	}
+	sym->addr = addr;
+	sym->size = size;
+	memcpy((char*)&sym->name, name, len + 1);
+	sym->parent = sym->child[0] = sym->child[1] = NULL;
+	sym->info = 1;
+	if (symbols) {
+		zend_sym_node *node = symbols;
+
+		/* insert it into rbtree */
+		do {
+			if (sym->addr > node->addr) {
+				if (node->child[1]) {
+					node = node->child[1];
+				} else {
+					node->child[1] = sym;
+					sym->parent = node;
+					break;
+				}
+			} else if (sym->addr < node->addr) {
+				if (node->child[0]) {
+					node = node->child[0];
+				} else {
+					node->child[0] = sym;
+					sym->parent = node;
+					break;
+				}
+			} else {
+				ZEND_ASSERT(sym->addr == node->addr);
+				free(sym);
+				return;
+			}
+		} while (1);
+
+		/* fix rbtree after instering */
+		while (sym && sym != symbols && sym->parent->info == 1) {
+			if (sym->parent == sym->parent->parent->child[0]) {
+				node = sym->parent->parent->child[1];
+				if (node && node->info == 1) {
+					sym->parent->info = 0;
+					node->info = 0;
+					sym->parent->parent->info = 1;
+					sym = sym->parent->parent;
+				} else {
+					if (sym == sym->parent->child[1]) {
+						sym = sym->parent;
+						zend_syms_rotateleft(sym);
+					}
+					sym->parent->info = 0;
+					sym->parent->parent->info = 1;
+					zend_syms_rotateright(sym->parent->parent);
+				}
+			} else {
+				node = sym->parent->parent->child[0];
+				if (node && node->info == 1) {
+					sym->parent->info = 0;
+					node->info = 0;
+					sym->parent->parent->info = 1;
+					sym = sym->parent->parent;
+				} else {
+					if (sym == sym->parent->child[0]) {
+						sym = sym->parent;
+						zend_syms_rotateright(sym);
+					}
+					sym->parent->info = 0;
+					sym->parent->parent->info = 1;
+					zend_syms_rotateleft(sym->parent->parent);
+				}
+			}
+		}
+	} else {
+		symbols = sym;
+	}
+	symbols->info = 0;
+}
+
+static void zend_jit_disasm_destroy_symbols(zend_sym_node *n) {
+	if (n) {
+		if (n->child[0]) {
+			zend_jit_disasm_destroy_symbols(n->child[0]);
+		} else if (n->child[1]) {
+			zend_jit_disasm_destroy_symbols(n->child[1]);
+		}
+		free(n);
+	}
+}
+
+static const char* zend_jit_disasm_find_symbol(uint64_t  addr,
+                                               int64_t  *offset) {
+	zend_sym_node *node = symbols;
+	while (node) {
+		if (addr < node->addr) {
+			node = node->child[0];
+		} else if (addr > (node->addr + node->size)) {
+			node = node->child[1];
+		} else {
+			*offset = addr - node->addr;
+			return node->name;
+		}
+	}
+	return NULL;
 }
 
 static const char* zend_jit_disasm_resolver(struct ud *ud,
@@ -62,24 +211,13 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
                                             int64_t   *offset)
 {
 	((void)ud);
+	const char *name;
 	void *a = (void*)(zend_uintptr_t)(addr);
-	zval *zv;
 	Dl_info info;
 
-#ifndef ZTS
-	if (a > (void*)&executor_globals && a < (void*)((char*)&executor_globals + sizeof(executor_globals))) {
-		*offset = (int64_t)((char*)a - (char*)&executor_globals);
-		return "executor_globals";
-	}
-	if (a > (void*)&compiler_globals && a < (void*)((char*)&compiler_globals + sizeof(compiler_globals))) {
-		*offset = (int64_t)((char*)a - (char*)&compiler_globals);
-		return "compiler_globals";
-	}
-#endif
-
-	zv = zend_hash_index_find(&disasm_symbols, addr);
-	if (zv) {
-		return Z_STRVAL_P(zv);
+	name = zend_jit_disasm_find_symbol(addr, offset);
+	if (name) {
+		return name;
 	}
 
 	if (dladdr(a, &info)
@@ -95,7 +233,6 @@ static int zend_jit_cmp_labels(Bucket *b1, Bucket *b2)
 {
 	return ((b1->h > b2->h) > 0) ? 1 : -1;
 }
-
 
 static int zend_jit_disasm(const char *name,
                            const char *filename,
@@ -192,8 +329,10 @@ static int zend_jit_disasm_init(void)
 	ud_set_syntax(&ud, UD_SYN_ATT);
 #endif
 	ud_set_sym_resolver(&ud, zend_jit_disasm_resolver);
-
-	zend_hash_init(&disasm_symbols, 8, NULL, ZVAL_PTR_DTOR, 1);
+#ifndef ZTS
+	zend_jit_disasm_add_symbol("executor_globals", (uint64_t)&executor_globals, sizeof(executor_globals));
+	zend_jit_disasm_add_symbol("compiler_globals", (uint64_t)&compiler_globals, sizeof(compiler_globals));
+#endif
 	zend_elf_load_symbols();
 
 	return 1;
@@ -201,7 +340,7 @@ static int zend_jit_disasm_init(void)
 
 static void zend_jit_disasm_shutdown(void)
 {
-	zend_hash_destroy(&disasm_symbols);
+	zend_jit_disasm_destroy_symbols(symbols);
 }
 
 /*

@@ -147,7 +147,7 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
-		zend_jit_disasm_add_symbol(name, (uintptr_t)entry);
+		zend_jit_disasm_add_symbol(name, (uintptr_t)entry, size);
 		zend_jit_disasm(
 			name,
 			(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
