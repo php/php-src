@@ -22,16 +22,6 @@
 #include "zend_elf.h"
 #include "zend_gdb.h"
 
-#if defined(__x86_64)
-#define CFRAME_SIZE         (12*4)
-#define CFRAME_SIZE_JIT CFRAME_SIZE
-#elif defined(__i386__)
-#define CFRAME_SIZE         (10*8)
-#define CFRAME_SIZE_JIT     (CFRAME_SIZE + 16)
-#else
-#error "Unsupported target architecture"
-#endif
-
 /* DWARF definitions. */
 #define DW_CIE_VERSION  1
 
@@ -46,7 +36,7 @@ enum {
 };
 
 enum {
-	DW_EH_PE_udata4 = 3,
+	DW_EH_PE_udata4 = 0x03,
 	DW_EH_PE_textrel = 0x20
 };
 
@@ -185,8 +175,6 @@ typedef struct _zend_gdbjit_ctx {
 	uint8_t *startp;         /* Pointer to start address in obj.space. */
 	uintptr_t mcaddr;        /* Machine code address. */
 	uint32_t szmcode;        /* Size of machine code. */
-	uint32_t spadjp;         /* Stack adjustment for parent trace or interpreter. */
-	uint32_t spadj;          /* Stack adjustment for trace itself. */
 	int32_t  lineno;         /* Starting line number. */
 	const char *name;        /* JIT function name */
 	const char *filename;    /* Starting file name. */
@@ -304,13 +292,13 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
   uint8_t *p = ctx->p;
   uint8_t *framep = p;
 
-  /* Emit DWARF EH CIE. */
+  /* DWARF EH CIE (Call Frame Information). */
   DSECT(CIE,
-    DU32(0);			                /* Offset to CIE itself. */
-    DB(DW_CIE_VERSION);
-    DSTR("zR");			                /* Augmentation. */
-    DUV(1);			                    /* Code alignment factor. */
-    DSV(-(int32_t)sizeof(uintptr_t));   /* Data alignment factor. */
+    DU32(0);			                           /* CIE ID. */
+    DB(DW_CIE_VERSION);                            /* Version */
+    DSTR("zR");			                           /* Augmentation String. */
+    DUV(1);			                               /* Code alignment factor. */
+    DSV(-(int32_t)sizeof(uintptr_t));              /* Data alignment factor. */
     DB(DW_REG_RA);		                           /* Return address register. */
     DB(1); DB(DW_EH_PE_textrel|DW_EH_PE_udata4);   /* Augmentation data. */
     DB(DW_CFA_def_cfa); DUV(DW_REG_SP); DUV(sizeof(uintptr_t));
@@ -318,32 +306,22 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
     DALIGNNOP(sizeof(uintptr_t));
   )
 
-  /* Emit DWARF EH FDE. */
+  /* DWARF EH FDE (Frame Description Entry). */
   DSECT(FDE,
-    DU32((uint32_t)(p-framep));	/* Offset to CIE. */
-    DU32(0);			        /* Machine code offset relative to .text. */
+    DU32((uint32_t)(p-framep));	/* Offset to CIE Pointer. */
+    DU32(0);                    /* Machine code offset relative to .text. */
     DU32(ctx->szmcode);		    /* Machine code length. */
     DB(0);			            /* Augmentation data. */
-    /* Registers saved in CFRAME. */
+    DB(DW_CFA_def_cfa_offset); DUV(sizeof(uintptr_t));
 #if defined(__i386__)
-    DB(DW_CFA_offset|DW_REG_BP); DUV(2);
-    DB(DW_CFA_offset|DW_REG_DI); DUV(3);
-    DB(DW_CFA_offset|DW_REG_SI); DUV(4);
-    DB(DW_CFA_offset|DW_REG_BX); DUV(5);
+    DB(DW_CFA_advance_loc|3);            /* sub $0xc,%esp */
+    DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
 #elif defined(__x86_64__)
-    DB(DW_CFA_offset|DW_REG_BP); DUV(2);
-    DB(DW_CFA_offset|DW_REG_BX); DUV(3);
-    DB(DW_CFA_offset|DW_REG_15); DUV(4);
-    DB(DW_CFA_offset|DW_REG_14); DUV(5);
-    /* Extra registers saved for JIT-compiled code. */
-    DB(DW_CFA_offset|DW_REG_13); DUV(9);
-    DB(DW_CFA_offset|DW_REG_12); DUV(10);
+    DB(DW_CFA_advance_loc|4);            /* sub $0x8,%rsp */
+    DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
 #else
-#error "Unsupported target architecture"
+# error "Unsupported target architecture"
 #endif
-    if (ctx->spadjp != ctx->spadj)  /* Parent/interpreter stack frame size. */
-		(DB(DW_CFA_def_cfa_offset), DUV(ctx->spadjp), DB(DW_CFA_advance_loc|1));  /* Only an approximation. */
-    DB(DW_CFA_def_cfa_offset); DUV(ctx->spadj);  /* Trace stack frame size. */
     DALIGNNOP(sizeof(uintptr_t));
   )
 
@@ -480,12 +458,6 @@ static int zend_jit_gdb_register(const char *name,
 	ctx.op_array = op_array;
 	ctx.mcaddr = (uintptr_t)start;
 	ctx.szmcode = (uint32_t)size;
-#if defined(__x86_64__)
-	ctx.spadjp = CFRAME_SIZE_JIT + 8;
-#elif defined(__i386__)
-	ctx.spadjp = CFRAME_SIZE_JIT + 12;
-#endif
-	ctx.spadj =  CFRAME_SIZE_JIT;
 	ctx.name = name;
 	ctx.filename = op_array ? ZSTR_VAL(op_array->filename) : "unknown";
 	ctx.lineno = op_array ? op_array->line_start : 0;
