@@ -70,7 +70,7 @@ void zend_elf_load_symbols(void)
 								if (syms[n].name
 								 && (syms[n].info & ELFSYM_TYPE_FUNC)
 								 &&	!(syms[n].info & ELFSYM_BIND_GLOBAL)) {
-									zend_jit_disasm_add_symbol(str_tbl + syms[n].name, syms[n].value, 0);
+									zend_jit_disasm_add_symbol(str_tbl + syms[n].name, syms[n].value, syms[n].size);
 								}
 							}
 							efree(str_tbl);
