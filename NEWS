@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
+- Opcache:
+  . Fixed bug #72949 (Typo in opcache error message). (cmb)
 
 - PDO_DBlib:
   . Implemented stringify 'uniqueidentifier' fields.
