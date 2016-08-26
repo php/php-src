@@ -61806,7 +61806,7 @@ void zend_init_opcodes_handlers(void)
 		4596
 	};
 	zend_opcode_handlers = labels;
-		zend_handlers_count = sizeof(labels) / sizeof(void*);
+	zend_handlers_count = sizeof(labels) / sizeof(void*);
 	zend_spec_handlers = specs;
 }
 
