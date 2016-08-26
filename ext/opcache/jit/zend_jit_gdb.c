@@ -170,7 +170,6 @@ static const zend_elf_header zend_elfhdr_template = {
 
 /* Context for generating the ELF object for the GDB JIT API. */
 typedef struct _zend_gdbjit_ctx {
-	zend_op_array *op_array; /* Pointer to op_array */
 	uint8_t *p;              /* Pointer to next address in obj.space. */
 	uint8_t *startp;         /* Pointer to start address in obj.space. */
 	uintptr_t mcaddr;        /* Machine code address. */
@@ -214,7 +213,8 @@ static void zend_gdbjit_sleb128(zend_gdbjit_ctx *ctx, int32_t v)
 	ctx->p = p;
 }
 
-static void zend_gdbjit_secthdr(zend_gdbjit_ctx *ctx) {
+static void zend_gdbjit_secthdr(zend_gdbjit_ctx *ctx)
+{
 	zend_elf_sectheader *sect;
 
 	*ctx->p++ = '\0';
@@ -369,7 +369,6 @@ static void zend_gdbjit_debugabbrev(zend_gdbjit_ctx *ctx)
 	ctx->p = p;
 }
 
-
 #define DLNE(op, s) (DB(DW_LNS_extended_op), DUV(1+(s)), DB((op)))
 
 static void zend_gdbjit_debugline(zend_gdbjit_ctx *ctx)
@@ -419,14 +418,16 @@ static void zend_gdbjit_debugline(zend_gdbjit_ctx *ctx)
 
 typedef void (*zend_gdbjit_initf) (zend_gdbjit_ctx *ctx);
 
-static void zend_gdbjit_initsect(zend_gdbjit_ctx *ctx, int sect, zend_gdbjit_initf initf) {
+static void zend_gdbjit_initsect(zend_gdbjit_ctx *ctx, int sect, zend_gdbjit_initf initf)
+{
 	ctx->startp = ctx->p;
 	ctx->obj.sect[sect].ofs = (uintptr_t)((char *)ctx->p - (char *)&ctx->obj);
 	initf(ctx);
 	ctx->obj.sect[sect].size = (uintptr_t)(ctx->p - ctx->startp);
 }
 
-static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx) {
+static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx)
+{
 	zend_gdbjit_obj *obj = &ctx->obj;
 
 	/* Fill in ELF header and clear structures. */
@@ -448,14 +449,13 @@ static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx) {
 	ZEND_ASSERT(ctx->objsize < sizeof(zend_gdbjit_obj));
 }
 
-static int zend_jit_gdb_register(const char *name,
+static int zend_jit_gdb_register(const char    *name,
                                  zend_op_array *op_array,
-                                 const void *start,
-                                 size_t      size)
+                                 const void    *start,
+                                 size_t         size)
 {
 	zend_gdbjit_ctx ctx;
 
-	ctx.op_array = op_array;
 	ctx.mcaddr = (uintptr_t)start;
 	ctx.szmcode = (uint32_t)size;
 	ctx.name = name;
