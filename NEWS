@@ -72,6 +72,8 @@ PHP                                                                        NEWS
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
     Kenttä)
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
+  . Fixed bug #65550 (get_browser() incorrectly parses entries with "+" sign).
+    (cmb)
 
 - Streams:
   . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
