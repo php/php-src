@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
+  . Fixed bug #71241 (array_replace_recursive sometimes mutates its parameters).
+    (adsr)
 
 13 Oct 2016 PHP 7.0.12
 
