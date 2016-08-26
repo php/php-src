@@ -1335,6 +1335,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		zend_string_release(tmp);
 	} else {
 		Z_STRVAL_P(str)[offset] = Z_STRVAL_P(value)[0];
+		zend_string_forget_hash_val(Z_STR_P(str));
 	}
 	/*
 	 * the value of an assignment to a string offset is undefined
