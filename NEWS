@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #72920 (Accessing a private constant using constant() creates
     an exception AND warning). (Laruence)
+  . Fixed bug #65550 (get_browser() incorrectly parses entries with "+" sign).
+    (cmb)
 
 - XML:
   . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
