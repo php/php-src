@@ -337,6 +337,19 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		}
 	}
 
+	/* mark hidden branch targets */
+	for (b = 0; b < ssa.cfg.blocks_count; b++) {
+		if (ssa.cfg.blocks[b].flags & ZEND_BB_REACHABLE &&
+		    ssa.cfg.blocks[b].len > 1) {
+
+			opline = op_array->opcodes + ssa.cfg.blocks[b].start + ssa.cfg.blocks[b].len - 1;
+			if (opline->opcode == ZEND_DO_FCALL &&
+			    (opline-1)->opcode == ZEND_NEW) {
+				ssa.cfg.blocks[ssa.cfg.blocks[b].successors[0]].flags |= ZEND_BB_TARGET;
+			}
+		}
+	}
+
 	dasm_init(&dasm_state, DASM_MAXSECTION);
 	dasm_setupglobal(&dasm_state, dasm_labels, lbl__MAX);
 	dasm_setup(&dasm_state, dasm_actions);
@@ -349,7 +362,8 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 			continue;
 		}
 		if (ssa.cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
-			if (ssa.cfg.blocks[b].flags & ZEND_BB_ENTRY) {
+			if ((ssa.cfg.blocks[b].flags & ZEND_BB_ENTRY) &&
+			    (ssa.cfg.blocks[b].flags & ZEND_BB_TARGET)) {
 				zend_jit_jmp(&dasm_state, b);
 			}
 			zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
