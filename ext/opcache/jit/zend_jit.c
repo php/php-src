@@ -36,6 +36,8 @@
 
 #define ZEND_JIT_LEVEL  ZEND_JIT_LEVEL_FULL
 
+//#define CONTEXT_THREDED_JIT
+
 #define JIT_PREFIX      "JIT$"
 #define JIT_STUB_PREFIX "JIT$$"
 
@@ -139,7 +141,11 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 		int b;
 
 		for (b = 0; b < cfg->blocks_count; b++) {
+#ifdef CONTEXT_THREDED_JIT
+			if (cfg->blocks[b].flags & ZEND_BB_START) {
+#else
 			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
+#endif
 				zend_op *opline = op_array->opcodes + cfg->blocks[b].start;
 
 				opline->handler = (void*)(((char*)entry) +
@@ -361,6 +367,12 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		if ((ssa.cfg.blocks[b].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
+#ifdef CONTEXT_THREDED_JIT
+		if (ssa.cfg.blocks[b].flags & ZEND_BB_START) {
+			zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
+			zend_jit_prologue(&dasm_state);
+		}
+#else
 		if (ssa.cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
 			if ((ssa.cfg.blocks[b].flags & ZEND_BB_ENTRY) &&
 			    (ssa.cfg.blocks[b].flags & ZEND_BB_TARGET)) {
@@ -369,6 +381,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 			zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
 		}
+#endif
 		zend_jit_label(&dasm_state, b);
 		if (ssa.cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
 			if (!zend_jit_check_timeout(&dasm_state)) {
