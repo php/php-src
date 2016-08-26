@@ -655,11 +655,8 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_SUBST_OLD(php_fpm_user)
   PHP_SUBST_OLD(php_fpm_group)
-  php_fpm_sysconfdir=`eval echo $sysconfdir`
-  PHP_SUBST_OLD(php_fpm_sysconfdir)
-  php_fpm_localstatedir=`eval echo $localstatedir`
-  PHP_SUBST_OLD(php_fpm_localstatedir)
   php_fpm_prefix=`eval echo $prefix`
+  test "$php_fpm_prefix" = "NONE" && php_fpm_prefix=/usr/local
   PHP_SUBST_OLD(php_fpm_prefix)
 
   AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
