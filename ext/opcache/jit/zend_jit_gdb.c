@@ -15,6 +15,9 @@
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
    |          Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
+   | Based on Mike Pall's implementation of GDB interface for LuaJIT.     |
+   | LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/        |
+   +----------------------------------------------------------------------+
 */
 
 #define HAVE_GDB
