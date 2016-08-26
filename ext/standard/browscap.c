@@ -123,6 +123,10 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 				t[j++] = '\\';
 				t[j] = '~';
 				break;
+			case '+':
+				t[j++] = '\\';
+				t[j] = '+';
+				break;
 			default:
 				t[j] = Z_STRVAL_P(pattern)[i];
 				break;
