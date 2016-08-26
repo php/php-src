@@ -52,7 +52,7 @@ typedef struct _sym_node {
 	struct _sym_node *parent;
 	struct _sym_node *child[2];
 	unsigned char     info;
-	unsigned char     name[1];
+	char              name[1];
 } zend_sym_node;
 
 static zend_sym_node *symbols = NULL;
@@ -281,7 +281,7 @@ static int zend_jit_disasm(const char *name,
 		addr = ud_insn_off(&ud);
 		z = zend_hash_index_find(&labels, addr);
 		if (z) {
-			fprintf(stderr, ".L%ld:\n", Z_LVAL_P(z));
+			fprintf(stderr, ".L" ZEND_LONG_FMT ":\n", Z_LVAL_P(z));
 		}
 		op = ud_insn_opr(&ud, 0);
 		if (op && op->type == UD_OP_JIMM) {
@@ -300,7 +300,7 @@ static int zend_jit_disasm(const char *name,
 						while (str[len] == ' ' || str[len] == '\t') {
 							len++;
 						}
-						fprintf(stderr, "\t%.*s.L%ld\n", len, str, Z_LVAL_P(z));
+						fprintf(stderr, "\t%.*s.L" ZEND_LONG_FMT "\n", len, str, Z_LVAL_P(z));
 						continue;
 					}
 				}
@@ -330,8 +330,8 @@ static int zend_jit_disasm_init(void)
 #endif
 	ud_set_sym_resolver(&ud, zend_jit_disasm_resolver);
 #ifndef ZTS
-	zend_jit_disasm_add_symbol("executor_globals", (uint64_t)&executor_globals, sizeof(executor_globals));
-	zend_jit_disasm_add_symbol("compiler_globals", (uint64_t)&compiler_globals, sizeof(compiler_globals));
+	zend_jit_disasm_add_symbol("executor_globals", (uint64_t)(uintptr_t)&executor_globals, sizeof(executor_globals));
+	zend_jit_disasm_add_symbol("compiler_globals", (uint64_t)(uintptr_t)&compiler_globals, sizeof(compiler_globals));
 #endif
 	zend_elf_load_symbols();
 
