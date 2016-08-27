@@ -79,7 +79,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	je >1
 	|	//zend_timeout(0);
 	|.if X64
-	|	mov CARG1d, 0
+	|	xor CARG1d, CARG1d
 	|	load_addr rax, zend_timeout
 	|	call rax
 	|.else
