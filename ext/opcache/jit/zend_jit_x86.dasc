@@ -55,8 +55,8 @@
 
 |.actionlist dasm_actions
 
-|.globals lbl_
-static void* dasm_labels[lbl__MAX];
+|.globals zend_lb
+static void* dasm_labels[zend_lb_MAX];
 
 |.section code
 

@@ -357,7 +357,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 	}
 
 	dasm_init(&dasm_state, DASM_MAXSECTION);
-	dasm_setupglobal(&dasm_state, dasm_labels, lbl__MAX);
+	dasm_setupglobal(&dasm_state, dasm_labels, zend_lb_MAX);
 	dasm_setup(&dasm_state, dasm_actions);
 
 	dasm_growpc(&dasm_state, ssa.cfg.blocks_count * 2);
@@ -569,7 +569,7 @@ static int zend_jit_make_stubs(void)
 	uint32_t i;
 
 	dasm_init(&dasm_state, DASM_MAXSECTION);
-	dasm_setupglobal(&dasm_state, dasm_labels, lbl__MAX);
+	dasm_setupglobal(&dasm_state, dasm_labels, zend_lb_MAX);
 
 	for (i = 0; i < sizeof(zend_jit_stubs)/sizeof(zend_jit_stubs[0]); i++) {
 		dasm_setup(&dasm_state, dasm_actions);
