@@ -35,7 +35,7 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
-	assert(in_len ? in[in_len] == L'\0' : 1);
+	assert(in_len ? (in[in_len] == L'\0') : 1);
 
 	tmp_len = !in_len ? -1 : (int)in_len + 1;
 

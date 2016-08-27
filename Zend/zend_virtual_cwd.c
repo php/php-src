@@ -1406,6 +1406,7 @@ verify:
 
 		tmp = erealloc(state->cwd, state->cwd_length+1);
 		if (tmp == NULL) {
+			CWD_STATE_FREE(&old_state);
 #if VIRTUAL_CWD_DEBUG
 			fprintf (stderr, "Out of memory\n");
 #endif
