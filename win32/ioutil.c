@@ -193,7 +193,7 @@ PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...)
 	int fd;
 	mode_t mode = 0;
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	if (flags & O_CREAT) {
 		va_list arg;
@@ -291,7 +291,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 	int ret = 0;
 	DWORD err = 0;
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	/* TODO extend with mode usage */
 	if (!CreateDirectoryW(path, NULL)) {
@@ -316,7 +316,7 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 0)
 
 	if (!CreateDirectoryW(pathw, NULL)) {
 		err = GetLastError();
@@ -336,7 +336,7 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 	int ret = 0;
 	DWORD err = 0;
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	if (!DeleteFileW(path)) {
 		err = GetLastError();
@@ -352,7 +352,7 @@ PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 	int ret = 0;
 	DWORD err = 0;
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	if (!RemoveDirectoryW(path)) {
 		err = GetLastError();
@@ -382,8 +382,8 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 	int ret = 0;
 	DWORD err = 0;
 	
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1)
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
 
 
 	if (!MoveFileExW(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {

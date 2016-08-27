@@ -128,11 +128,15 @@ typedef enum {
 	pathw = php_win32_ioutil_any_to_w(path); \
 } while (0);
 
-#define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret) do { \
-		size_t len = wcslen(pathw); \
-		if (len >= 1 && L' ' == pathw[len-1] || \
-			len > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[len-2]) && L'.' != pathw[len-2] && L'.' == pathw[len-1] \
-			) { \
+#define PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, len) \
+	(!((len) >= 1 && L' ' == pathw[(len)-1] || \
+	(len) > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[(len)-2]) && L'.' != pathw[(len)-2] && L'.' == pathw[(len)-1]))
+
+#define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret, dealloc) do { \
+		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, wcslen(pathw))) { \
+			if (dealloc) { \
+				free(pathw); \
+			} \
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
 			return ret; \
 		} \
@@ -237,7 +241,7 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	ret = _waccess(pathw, mode);
 	_get_errno(&err);
@@ -262,7 +266,7 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	if (flags & O_CREAT) {
 		va_list arg;
@@ -294,7 +298,7 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	if (!DeleteFileW(pathw)) {
 		err = GetLastError();
@@ -320,7 +324,7 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	if (!RemoveDirectoryW(pathw)) {
 		err = GetLastError();
@@ -342,18 +346,24 @@ fdopen() might be the way, if we learn how to convert the mode options (maybe gr
 __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
 {/*{{{*/
 	FILE *ret;
-	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
-	wchar_t *modew = php_win32_ioutil_ascii_to_w(modea);
+	wchar_t *pathw;
+	wchar_t *modew;
 	int err = 0;
 
-	if (!pathw || !modew) {
-		free(pathw);
-		free(modew);
+	pathw = php_win32_ioutil_any_to_w(patha);
+	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, NULL)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, NULL, 1)
+
+	modew = php_win32_ioutil_ascii_to_w(modea);
+	if (!modew) {
+		free(pathw);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return NULL;
+	}
 
 	ret = _wfopen(pathw, modew);
 	_get_errno(&err);
@@ -368,20 +378,29 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 
 __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
 {/*{{{*/
-	wchar_t *oldnamew = php_win32_ioutil_any_to_w(oldnamea);
-	wchar_t *newnamew = php_win32_ioutil_any_to_w(newnamea);
+	wchar_t *oldnamew;
+	wchar_t *newnamew;
 	int ret;
 	DWORD err = 0;
 
-	if (!oldnamew || !newnamew) {
-		free(oldnamew);
-		free(newnamew);
+	oldnamew = php_win32_ioutil_any_to_w(oldnamea);
+	if (!oldnamew) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldnamew, -1, 1)
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldnamew, -1)
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(newnamew, -1)
+	newnamew = php_win32_ioutil_any_to_w(newnamea);
+	if (!newnamew) {
+		free(oldnamew);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	} else if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(newnamew, wcslen(newnamew))) {
+		free(oldnamew);
+		free(newnamew);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED);
+		return -1;
+	}
 
 	ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
 	err = GetLastError();
@@ -471,7 +490,7 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	ret = _wchmod(pathw, mode);
 	_get_errno(&err);
