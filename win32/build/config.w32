@@ -209,18 +209,14 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 	}
 }
 
-DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
+ARG_ENABLE("security-flags", "[Ignored] Disabling compiler security features no longer supported", "yes");
 
-ARG_ENABLE("security-flags", "Disable the compiler security flags", "yes");
-if (PHP_SECURITY_FLAGS == "yes") {
-	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
-}
+DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
 /* XXX add and implement clang keyword for clang analyzer */
 ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, pvs for PVS-Studio", "no");
 if (PHP_ANALYZER == "vs") {
 	ADD_FLAG("CFLAGS", " /analyze ");
-	ADD_FLAG("CFLAGS", " /wd6308 ");
 } else if (PHP_ANALYZER == "pvs") {
 	var pvs_studio = false;
 
