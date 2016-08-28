@@ -176,13 +176,22 @@ PS_DESTROY_FUNC(user)
 PS_GC_FUNC(user)
 {
 	zval args[1];
-	STDVARS;
+	zval retval;
 
 	ZVAL_LONG(&args[0], maxlifetime);
 
 	ps_call_handler(&PSF(gc), 1, args, &retval);
 
-	FINISH;
+	if (Z_TYPE(retval) == IS_LONG) {
+		convert_to_long(&retval);
+		return Z_LVAL(retval);
+	}
+	/* This is for older API compatibility */
+	if (Z_TYPE(retval) == IS_TRUE) {
+		return 1;
+	}
+	/* Anything else is some kind of error */
+	return -1; // Error
 }
 
 PS_CREATE_SID_FUNC(user)
