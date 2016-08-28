@@ -212,11 +212,27 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-/* XXX add and implement clang keyword for clang analyzer */
 ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, pvs for PVS-Studio", "no");
 if (PHP_ANALYZER == "vs") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 	ADD_FLAG("CFLAGS", " /wd6308 ");
+} else if (PHP_ANALYZER == "clang") {
+	var clang_cl = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
+	} else if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
+	}
+
+	if (!clang_cl) {
+		if (false == PATH_PROG('clang-cl', null, 'CLANG_CL')) {
+			WARNING("Couldn't find clang binaries, static analyze was disabled");
+			PHP_ANALYZER = "no";
+		}
+	} else {
+		DEFINE("CLANG_CL", clang_cl);
+	}
 } else if (PHP_ANALYZER == "pvs") {
 	var pvs_studio = false;
 
