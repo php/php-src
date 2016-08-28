@@ -2465,7 +2465,6 @@ ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t l
 	register const char *tmp = key;
 
 	const char *end = key + length;
-	ZEND_ASSERT(*end == '\0');
 
 	if (*tmp == '-') {
 		tmp++;
