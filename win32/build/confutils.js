@@ -2790,7 +2790,7 @@ function toolset_setup_common_cflags()
 		ADD_FLAG("CFLAGS", " /fallback ");
 
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
-		ADD_FLAG("CFLAGS", "-fms-compatibility-version=" + vc_ver);
+		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
 	}
 }
 
