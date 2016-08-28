@@ -316,7 +316,7 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 0)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	if (!CreateDirectoryW(pathw, NULL)) {
 		err = GetLastError();
