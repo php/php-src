@@ -108,6 +108,20 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 }
 /* }}} */
 
+#define PHP_JSON_HASH_APPLY_PROTECTION_INC(_tmp_ht) \
+	do { \
+		if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(_tmp_ht)) { \
+			ZEND_HASH_INC_APPLY_COUNT(_tmp_ht); \
+		} \
+	} while (0)
+
+#define PHP_JSON_HASH_APPLY_PROTECTION_DEC(_tmp_ht) \
+	do { \
+		if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(_tmp_ht)) { \
+			ZEND_HASH_DEC_APPLY_COUNT(_tmp_ht); \
+		} \
+	} while (0)
+
 static int php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
 {
 	int i, r, need_comma = 0;
@@ -146,9 +160,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{ 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
 			ZVAL_DEREF(data);
 			tmp_ht = HASH_OF(data);
-			if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
-				ZEND_HASH_INC_APPLY_COUNT(tmp_ht);
-			}
+			PHP_JSON_HASH_APPLY_PROTECTION_INC(tmp_ht);
 
 			if (r == PHP_JSON_OUTPUT_ARRAY) {
 				if (need_comma) {
@@ -163,9 +175,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{ 
 				if (key) {
 					if (ZSTR_VAL(key)[0] == '\0' && ZSTR_LEN(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
-						if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
-							ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
-						}
+						PHP_JSON_HASH_APPLY_PROTECTION_DEC(tmp_ht);
 						continue;
 					}
 
@@ -198,19 +208,18 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{ 
 				php_json_pretty_print_char(buf, options, ' ');
 			}
 
-			if (php_json_encode(buf, data, options) == FAILURE && (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+			if (php_json_encode(buf, data, options) == FAILURE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+				PHP_JSON_HASH_APPLY_PROTECTION_DEC(tmp_ht);
 				return FAILURE;
 			}
 
-			if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(tmp_ht)) {
-				ZEND_HASH_DEC_APPLY_COUNT(tmp_ht);
-			}
+			PHP_JSON_HASH_APPLY_PROTECTION_DEC(tmp_ht);
 		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (JSON_G(encoder_depth) > JSON_G(encode_max_depth)) {
 		JSON_G(error_code) = PHP_JSON_ERROR_DEPTH;
-		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+		if (!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 			return FAILURE;
 		}
 	}
