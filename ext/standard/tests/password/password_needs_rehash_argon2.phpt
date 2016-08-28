@@ -2,7 +2,7 @@
 Test normal operation of password_needs_rehash() with argon2
 --SKIPIF--
 <?php
-if (!defined('PASSWORD_ARGON2I')) die('Skipped: password_get_info not built with Argon2');
+if (!defined('PASSWORD_ARGON2I')) die('Skipped: password_needs_rehash not built with Argon2');
 ?>
 --FILE--
 <?php
