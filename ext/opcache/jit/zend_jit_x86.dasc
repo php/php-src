@@ -84,7 +84,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	call rax
 	|.else
 	|	push 0
-	|	call &zend_timeout
+	|	call dword &zend_timeout
 	|.endif
 	|1:
 	|	//} else if (zend_interrupt_function) {
@@ -98,7 +98,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	call rax
 	|.else
 	|	push FP
-	|	call &zend_interrupt_function
+	|	call dword &zend_interrupt_function
 	|.endif
 	|	//ZEND_VM_ENTER();
 	|	//execute_data = EG(current_execute_data);
@@ -122,7 +122,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 	|	load_addr rax, EG(exception_op)->handler
 	|	jmp rax
 	|.else
-	|	jmp &(EG(exception_op)->handler)
+	|	jmp dword &(EG(exception_op)->handler)
 	|.endif
 
 	return 1;
@@ -173,7 +173,7 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline)
 	|	load_addr rax, handler
 	|	call rax
 	|.else
-	|	call aword &handler
+	|	call dword &handler
 	|.endif
 	zend_jit_check_exception(Dst);
 	return 1;
@@ -188,7 +188,7 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 	|	load_addr rax, handler
 	|	jmp rax
 	|.else
-	|	jmp aword &handler
+	|	jmp dword &handler
 	|.endif
 	return 1;
 }
