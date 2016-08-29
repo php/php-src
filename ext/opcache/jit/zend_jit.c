@@ -712,11 +712,24 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 						    (opline-1)->opcode == ZEND_IS_SMALLER ||
 						    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
 						    (opline-1)->opcode == ZEND_CASE) {
-							/* might be smart branch */
-							if (!zend_jit_smart_branch(&dasm_state, opline, (b + 1), ssa.cfg.blocks[b].successors[0])) {
-								goto jit_failure;
+
+							uint32_t t1 = _ssa_op1_info(op_array, &ssa, (opline-1));
+							uint32_t t2 = _ssa_op2_info(op_array, &ssa, (opline-1));
+
+							if ((t1 & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
+							    (t2 & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
+								/* might be smart branch */
+								if (!zend_jit_smart_branch(&dasm_state, opline, (b + 1), ssa.cfg.blocks[b].successors[0])) {
+									goto jit_failure;
+								}
+								/* break missing intentionally */
+							} else {
+								/* smart branch */
+								if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
+									goto jit_failure;
+								}
+								break;
 							}
-							/* break missing intentionally */
 						} else if ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
 						           (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
 						           (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
