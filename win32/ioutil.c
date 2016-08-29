@@ -425,6 +425,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	if (!GetCurrentDirectoryW(len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
+		free(tmp_buf);
 		return NULL;
 	}
 
