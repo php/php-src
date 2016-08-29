@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #72854 (PHP Crashes on duplicate destructor call). (Nikita)
   . Fixed bug #72857 (stream_socket_recvfrom read access violation). (Anatol)
+  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
+    password_verify). (Anatol)
 
 - COM:
   . Fixed bug #72922 (COM called from PHP does not return out parameters).
