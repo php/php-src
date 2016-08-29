@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.11
 
 - Core:
+  . Fixed bug #72944 (Null pointer deref in zval_delref_p). (Dmitry)
   . Fixed bug #72943 (assign_dim on string doesn't reset hval). (Laruence)
   . Fixed bug #72911 (Memleak in zend_binary_assign_op_obj_helper). (Laruence)
   . Fixed bug #72813 (Segfault with __get returned by ref). (Laruence)

@@ -561,7 +561,7 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 		convert_to_string((v)); \
 	}
 
-static void strip_nop(zend_code_block *block, zend_optimizer_ctx *ctx)
+static void strip_nop(zend_code_block *block, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = block->start_opline;
 	zend_op *end, *new_end;
@@ -574,6 +574,14 @@ static void strip_nop(zend_code_block *block, zend_optimizer_ctx *ctx)
 				delete_code_block(block, ctx);
 			}
 			return;
+		}
+		if (block->len == 2
+		 && ((block->start_opline + 1)->opcode == ZEND_JMPZ
+		  || (block->start_opline + 1)->opcode == ZEND_JMPNZ)
+		 && (block->start_opline + 1)->op1_type & (IS_CV|IS_CONST)
+		 && block->start_opline > op_array->opcodes
+		 && zend_is_smart_branch(block->start_opline - 1)) {
+			break;
 		}
 		block->start_opline++;
 		block->start_opline_no++;
@@ -588,10 +596,21 @@ static void strip_nop(zend_code_block *block, zend_optimizer_ctx *ctx)
 		zend_op *src;
 		int len = 0;
 
+		src = opline;
 		while (opline < end && opline->opcode == ZEND_NOP) {
+			if (opline + 1 < end
+			 && ((opline + 1)->opcode == ZEND_JMPZ
+			  || (opline + 1)->opcode == ZEND_JMPNZ)
+			 && (opline + 1)->op1_type & (IS_CV|IS_CONST)
+			 && opline > op_array->opcodes
+			 && zend_is_smart_branch(opline - 1)) {
+				/* don't remove NOP, that splits incorrect smart branch */
+				opline++;
+				break;
+			}
+			src++;
 			opline++;
 		}
-		src = opline;
 
 		while (opline < end && opline->opcode != ZEND_NOP) {
 			opline++;
@@ -620,6 +639,14 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			/* this block is all NOPs, join with following block */
 			if (block->follow_to) {
 				delete_code_block(block, ctx);
+			}
+			if (block->len == 2
+			 && ((block->start_opline + 1)->opcode == ZEND_JMPZ
+			  || (block->start_opline + 1)->opcode == ZEND_JMPNZ)
+			 && (block->start_opline + 1)->op1_type & (IS_CV|IS_CONST)
+			 && block->start_opline > op_array->opcodes
+			 && zend_is_smart_branch(block->start_opline - 1)) {
+				break;
 			}
 			return;
 		}
@@ -1137,7 +1164,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 		opline++;
 	}
 
-	strip_nop(block, ctx);
+	strip_nop(block, op_array, ctx);
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
