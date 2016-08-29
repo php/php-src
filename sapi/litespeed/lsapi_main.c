@@ -69,6 +69,19 @@
 
 #define SAPI_LSAPI_MAX_HEADER_LENGTH 2048
 
+/* Key for each cache entry is dirname(PATH_TRANSLATED).
+ *
+ * NOTE: Each cache entry config_hash contains the combination from all user ini files found in
+ *       the path starting from doc_root throught to dirname(PATH_TRANSLATED).  There is no point
+ *       storing per-file entries as it would not be possible to detect added / deleted entries
+ *       between separate files.
+ */
+typedef struct _user_config_cache_entry {
+    time_t expires;
+    HashTable user_config;
+} user_config_cache_entry;
+static HashTable user_config_cache;
+
 static int  lsapi_mode       = 0;
 static char *php_self        = "";
 static char *script_filename = "";
@@ -76,6 +89,7 @@ static int  source_highlight = 0;
 static int  ignore_php_ini   = 0;
 static char * argv0 = NULL;
 static int  engine = 1;
+static int  parse_user_ini   = 0;
 #ifdef ZTS
 zend_compiler_globals    *compiler_globals;
 zend_executor_globals    *executor_globals;
@@ -85,6 +99,14 @@ void ***tsrm_ls;
 #endif
 
 zend_module_entry litespeed_module_entry;
+
+static void init_sapi_from_env(sapi_module_struct *sapi_module)
+{
+    char *p;
+    p = getenv("LSPHPRC");
+    if (p)
+        sapi_module->php_ini_path_override = p;
+}
 
 /* {{{ php_lsapi_startup
  */
@@ -126,7 +148,11 @@ static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 
 /* {{{ sapi_lsapi_ub_write
  */
+#if PHP_MAJOR_VERSION >= 7
+static size_t sapi_lsapi_ub_write(const char *str, size_t str_length TSRMLS_DC)
+#else
 static int sapi_lsapi_ub_write(const char *str, uint str_length TSRMLS_DC)
+#endif
 {
     int ret;
     int remain;
@@ -155,7 +181,7 @@ static int sapi_lsapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 /* {{{ sapi_lsapi_flush
  */
-static void sapi_lsapi_flush( void * server_context TSRMLS_DC )
+static void sapi_lsapi_flush(void * server_context)
 {
     if ( lsapi_mode ) {
         if ( LSAPI_Flush() == -1) {
@@ -195,27 +221,30 @@ static char *sapi_lsapi_getenv( char * name, size_t name_len TSRMLS_DC )
 /* }}} */
 
 
-
+#if PHP_MAJOR_VERSION > 4
 
 static int add_variable( const char * pKey, int keyLen, const char * pValue, int valLen,
-                         void * arg )
+                         void * arg TSRMLS_DC)
 {
 #if PHP_MAJOR_VERSION >= 7
-	int filter_arg = (Z_ARR_P((zval *)arg) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))
+    int filter_arg = (Z_ARR_P((zval *)arg) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))
         ? PARSE_ENV : PARSE_SERVER;
+    size_t new_val_len;
 #else
     int filter_arg = (arg == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
-#endif
-    char * new_val = (char *) pValue; 
     unsigned int new_val_len;
+#endif
+
+    char * new_val = (char *) pValue; 
 
     if (sapi_module.input_filter(filter_arg, (char *)pKey, &new_val, valLen, &new_val_len TSRMLS_CC)) {
-        php_register_variable_safe((char *)pKey, new_val, new_val_len, (zval *)arg );
+        php_register_variable_safe((char *)pKey, new_val, new_val_len, (zval *)arg TSRMLS_CC);
     }
-	return 1;
+    return 1;
 }
 
-/*
+#else
+
 static int add_variable( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
 {
@@ -227,14 +256,26 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
     Z_STRLEN_P( gpc_element ) = valLen;
     Z_STRVAL_P( gpc_element ) = estrndup(pValue, valLen);
     Z_TYPE_P( gpc_element ) = IS_STRING;
-#if PHP_MAJOR_VERSION > 4
-    zend_symtable_update( symtable1, pKey1, keyLen + 1, &gpc_element, sizeof( zval *), (void **) &gpc_element_p );
-#else
     zend_hash_update( symtable1, pKey1, keyLen + 1, &gpc_element, sizeof( zval *), (void **) &gpc_element_p );
-#endif
     return 1;
 }
-*/
+#endif
+
+
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+struct param_zts
+{
+    void *arg;
+    TSRMLS_D ;
+};
+
+static int add_variable_zts(const char * pKey, int keyLen, const char * pValue, int valLen,
+                         void * arg )
+{
+    struct param_zts * params = (struct param_zts *)arg;
+    return add_variable(pKey, keyLen, pValue, valLen, params->arg, params->TSRMLS_C);
+}
+#endif
 
 static void litespeed_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
@@ -330,6 +371,11 @@ static int add_variable_magic_quote( const char * pKey, int keyLen, const char *
 static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
     char * php_self = "";
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+    struct param_zts params;
+    params.arg = track_vars_array;
+    params.TSRMLS_C = TSRMLS_C;
+#endif
     if ( lsapi_mode ) {
         if ( (SG(request_info).request_uri ) )
             php_self = (SG(request_info).request_uri );
@@ -339,9 +385,15 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
 #if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
         if (!PG(magic_quotes_gpc)) {
 #endif
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+            LSAPI_ForeachHeader( add_variable_zts, &params );
+            LSAPI_ForeachEnv( add_variable_zts, &params );
+#else
             LSAPI_ForeachHeader( add_variable, track_vars_array );
             LSAPI_ForeachEnv( add_variable, track_vars_array );
-            add_variable("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
+#endif            
+            add_variable("PHP_SELF", 8, php_self, strlen( php_self ), 
+                         track_vars_array TSRMLS_CC);
 #if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
         } else {
             LSAPI_ForeachHeader( add_variable_magic_quote, track_vars_array );
@@ -365,7 +417,11 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
 
 /* {{{ sapi_lsapi_read_post
  */
+#if PHP_MAJOR_VERSION >= 7
+static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
+#else
 static int sapi_lsapi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+#endif
 {
     if ( lsapi_mode ) {
         return LSAPI_ReadReqBody( buffer, (unsigned long long)count_bytes );
@@ -430,7 +486,11 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 /* {{{ sapi_lsapi_send_headers
  */
-static void sapi_lsapi_log_message(char *message TSRMLS_DC)
+static void sapi_lsapi_log_message(char *message
+#if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 1)
+                                   , int syslog_type_int   /* unused */
+#endif
+                                   TSRMLS_DC)
 {
     char buf[8192];
     int len = strlen( message );
@@ -444,13 +504,33 @@ static void sapi_lsapi_log_message(char *message TSRMLS_DC)
 }
 /* }}} */
 
+/* Set to 1 to turn on log messages useful during development:
+ */
+#if 0
+static void log_message (const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    char buf[0x100];
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    sapi_lsapi_log_message(buf
+#if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 1)
+                               , 0
+#endif
+                                  );
+}
+#define DEBUG_MESSAGE(fmt, ...) log_message("LS:%d " fmt "\n", __LINE__, ##__VA_ARGS__)
+#else
+#define DEBUG_MESSAGE(fmt, ...)
+#endif
 
 /* {{{ sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V6.9",
+    "LiteSpeed V6.10",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -475,6 +555,10 @@ static sapi_module_struct lsapi_sapi_module =
     sapi_lsapi_register_variables,  /* register server variables */
     sapi_lsapi_log_message,         /* Log message */
 
+#if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 1)
+    NULL,                           /* Get request time */
+    NULL,                           /* Child terminate */
+#else
     NULL,                           /* php.ini path override */
     NULL,                           /* block interruptions */
     NULL,                           /* unblock interruptions */
@@ -483,6 +567,7 @@ static sapi_module_struct lsapi_sapi_module =
     NULL,                           /* executable location */
 
     0,                              /* php.ini ignore */
+#endif
 
     STANDARD_SAPI_MODULE_PROPERTIES
 
@@ -588,6 +673,7 @@ static int lsapi_execute_script( zend_file_handle * file_handle TSRMLS_DC)
 
 }
 
+static int lsapi_activate_user_ini(TSRMLS_D);
 
 static int lsapi_module_main(int show_source TSRMLS_DC)
 {
@@ -596,6 +682,12 @@ static int lsapi_module_main(int show_source TSRMLS_DC)
     if (php_request_startup(TSRMLS_C) == FAILURE ) {
         return -1;
     }
+    
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
+    if (parse_user_ini && lsapi_activate_user_ini(TSRMLS_C) == FAILURE) {
+        return -1;
+    }
+#endif    
     if (show_source) {
         zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -632,23 +724,368 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
                 engine = 0;
         }
         else
-		{
+        {
 #if PHP_MAJOR_VERSION >= 7
-			psKey = STR_INIT( pKey, keyLen, 1 );
-            zend_alter_ini_entry(psKey, 
+            --keyLen;
+            psKey = zend_string_init( pKey, keyLen, 1 );
+            zend_alter_ini_entry_chars(psKey, 
                              (char *)pValue, valLen,
                              type, PHP_INI_STAGE_ACTIVATE);
-            STR_RELEASE( psKey );
+            zend_string_release( psKey );
 #else
             zend_alter_ini_entry((char *)pKey, keyLen,
                              (char *)pValue, valLen,
                              type, PHP_INI_STAGE_ACTIVATE);            
 #endif
-		}
+        }
     }
     return 1;
 }
 
+static void user_config_cache_entry_dtor(
+#if PHP_MAJOR_VERSION >= 7
+                                         zval
+#else
+                                         void
+#endif
+                                               *el)
+{
+    user_config_cache_entry *entry =
+#if PHP_MAJOR_VERSION >= 7
+                                      (user_config_cache_entry *)Z_PTR_P(el)
+#else
+                                     *(user_config_cache_entry **)el
+#endif
+    ;
+    zend_hash_destroy(&entry->user_config);
+    free(entry);
+}
+
+static void user_config_cache_init()
+{
+    zend_hash_init(&user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
+}
+
+static int pathlen_without_trailing_slash(char *path)
+{
+    int len = (int)strlen(path);
+    while (len > 1 && /* mind "/" as root dir */
+           path[len-1] == DEFAULT_SLASH)
+    {
+        --len;
+    }
+    return len;
+}
+
+static inline char* skip_slash(char *s)
+{
+    while (*s == DEFAULT_SLASH) {
+        ++s;
+    }
+    return s;
+}
+
+/**
+ * Walk down the path_stop starting at path_start.
+ *
+ * If path_start = "/path1" and path_stop = "/path1/path2/path3"
+ * the callback will be called 3 times with the next args:
+ *
+ *   1. "/path1/path2/path3"
+ *             ^ end
+ *       ^ start
+ *   2. "/path1/path2/path3"
+ *                   ^ end
+ *       ^ start
+ *   3. "/path1/path2/path3"
+ *                         ^ end
+ *       ^ start
+ *
+ * path_stop has to be a subdir of path_start
+ * or to be path_start itself.
+ *
+ * Both path args have to be absolute.
+ * Trailing slashes are allowed.
+ * NULL or empty string args are not allowed.
+ */
+static void walk_down_the_path(char* path_start,
+                               char* path_stop,
+                               void (*cb)(char* begin,
+                                          char* end,
+                                          void* data),
+                               void* data)
+{
+    char *pos = path_stop + pathlen_without_trailing_slash(path_start);
+    cb(path_stop, pos, data);
+
+    while ((pos = skip_slash(pos))[0]) {
+        pos = strchr(pos, DEFAULT_SLASH);
+        if (!pos) {
+            /* The last token without trailing slash
+             */
+            cb(path_stop, path_stop + strlen(path_stop), data);
+            return;
+        }
+        cb(path_stop, pos, data);
+    }
+}
+
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
+
+typedef struct {
+    char *path;
+    uint path_len;
+    char *doc_root;
+    user_config_cache_entry *entry;
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+    TSRMLS_D ;
+#endif
+} _lsapi_activate_user_ini_ctx;
+
+typedef int (*fn_activate_user_ini_chain_t)
+        (_lsapi_activate_user_ini_ctx *ctx, void* next);
+
+static int lsapi_activate_user_ini_basic_checks(_lsapi_activate_user_ini_ctx *ctx,
+                                                void* next)
+{
+    int rc = SUCCESS;
+    fn_activate_user_ini_chain_t *fn_next = next;
+
+    if (!PG(user_ini_filename) || !*PG(user_ini_filename)) {
+        return SUCCESS;
+    }
+
+    /* PATH_TRANSLATED should be defined at this stage */
+    ctx->path = SG(request_info).path_translated;
+    if (!ctx->path || !*ctx->path) {
+        return FAILURE;
+    }
+
+    ctx->doc_root = sapi_lsapi_getenv("DOCUMENT_ROOT", 0
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+                    , ctx->TSRMLS_C
+#endif
+    );
+    DEBUG_MESSAGE("doc_root: %s", ctx->doc_root);
+
+    if (*fn_next) {
+        rc = (*fn_next)(ctx, fn_next + 1);
+    }
+
+    return rc;
+}
+
+static int lsapi_activate_user_ini_mk_path(_lsapi_activate_user_ini_ctx *ctx,
+                                           void* next)
+{
+    char *path;
+    int rc = SUCCESS;
+    fn_activate_user_ini_chain_t *fn_next = next;
+
+    /* Extract dir name from path_translated * and store it in 'path' */
+    ctx->path_len = strlen(ctx->path);
+    path = ctx->path = estrndup(SG(request_info).path_translated, ctx->path_len);
+    if (!path)
+        return FAILURE;
+    ctx->path_len = zend_dirname(path, ctx->path_len);
+    DEBUG_MESSAGE("dirname: %s", ctx->path);
+
+    if (*fn_next) {
+        rc = (*fn_next)(ctx, fn_next + 1);
+    }
+
+    efree(path);
+    return rc;
+}
+
+static int lsapi_activate_user_ini_mk_realpath(_lsapi_activate_user_ini_ctx *ctx,
+                                               void* next)
+{
+    char *real_path;
+    int rc = SUCCESS;
+    fn_activate_user_ini_chain_t *fn_next = next;
+
+    if (!IS_ABSOLUTE_PATH(ctx->path, ctx->path_len)) {
+        real_path = tsrm_realpath(ctx->path, NULL
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+                    , ctx->TSRMLS_C
+#endif
+        );
+        if (!real_path) {
+            return SUCCESS;
+        }
+        ctx->path = real_path;
+        ctx->path_len = strlen(ctx->path);
+        DEBUG_MESSAGE("calculated tsrm realpath: %s", real_path);
+    } else {
+        DEBUG_MESSAGE("%s is an absolute path", ctx->path);
+        real_path = NULL;
+    }
+
+    if (*fn_next) {
+        rc = (*fn_next)(ctx, fn_next + 1);
+    }
+
+    if (real_path)
+        efree(real_path);
+    return rc;
+}
+
+static int lsapi_activate_user_ini_mk_user_config(_lsapi_activate_user_ini_ctx *ctx,
+                                                  void* next)
+{
+    fn_activate_user_ini_chain_t *fn_next = next;
+
+    /* Find cached config entry: If not found, create one */
+#if PHP_MAJOR_VERSION >= 7
+    ctx->entry = zend_hash_str_find_ptr(&user_config_cache, ctx->path, ctx->path_len);
+#else
+    {
+        user_config_cache_entry **entry_pp;
+        if (SUCCESS == zend_hash_find(&user_config_cache, ctx->path,
+                                            ctx->path_len + 1, (void **) &entry_pp))
+            ctx->entry = *entry_pp;
+        else
+            ctx->entry = NULL;
+    }
+#endif
+
+    if (ctx->entry) {
+        DEBUG_MESSAGE("found entry for %s", ctx->path);
+    } else {
+        DEBUG_MESSAGE("entry for %s not found, creating new entry", ctx->path);
+        ctx->entry = pemalloc(sizeof(user_config_cache_entry), 1);
+        ctx->entry->expires = 0;
+        zend_hash_init(&ctx->entry->user_config, 0, NULL,
+#if PHP_MAJOR_VERSION <= 5
+                       (dtor_func_t)
+#endif
+                       config_zval_dtor, 1);
+#if PHP_MAJOR_VERSION >= 7
+        zend_hash_str_update_ptr(&user_config_cache, ctx->path,
+                                            ctx->path_len, ctx->entry);
+#else
+        zend_hash_update(&user_config_cache, ctx->path, ctx->path_len + 1,
+                                &ctx->entry, sizeof(&ctx->entry), NULL);
+#endif
+    }
+
+    if (*fn_next) {
+        return (*fn_next)(ctx, fn_next + 1);
+    } else {
+        return SUCCESS;
+    }
+}
+
+static void walk_down_the_path_callback(char* begin,
+                                        char* end,
+                                        void* data)
+{
+    _lsapi_activate_user_ini_ctx *ctx = data;
+    char tmp = end[0];
+    end[0] = 0;
+    DEBUG_MESSAGE("parsing %s%c%s", begin, DEFAULT_SLASH, PG(user_ini_filename));
+    php_parse_user_ini_file(begin, PG(user_ini_filename), &ctx->entry->user_config
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+                    , ctx->TSRMLS_C
+#endif
+    );
+    end[0] = tmp;
+}
+
+static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_ctx *ctx,
+                                                      void* next)
+{
+    time_t request_time = sapi_get_request_time(
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+                    ctx->TSRMLS_C
+#endif
+    );
+    uint path_len, docroot_len;
+    int rc = SUCCESS;
+    fn_activate_user_ini_chain_t *fn_next = next;
+
+    if (!ctx->entry->expires || request_time > ctx->entry->expires)
+    {
+        docroot_len = ctx->doc_root && ctx->doc_root[0]
+                    ? pathlen_without_trailing_slash(ctx->doc_root)
+                    : 0;
+
+        int is_outside_of_docroot = !docroot_len ||
+                ctx->path_len < docroot_len ||
+                strncmp(ctx->path, ctx->doc_root, docroot_len) != 0;
+
+        if (is_outside_of_docroot) {
+            php_parse_user_ini_file(ctx->path, PG(user_ini_filename), &ctx->entry->user_config
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+                    , ctx->TSRMLS_C
+#endif
+            );
+        } else {
+            walk_down_the_path(ctx->doc_root, ctx->path,
+                               &walk_down_the_path_callback, ctx);
+        }
+
+        ctx->entry->expires = request_time + PG(user_ini_cache_ttl);
+    }
+
+    if (*fn_next) {
+        rc = (*fn_next)(ctx, fn_next + 1);
+    }
+
+    return rc;
+}
+
+static int lsapi_activate_user_ini_finally(_lsapi_activate_user_ini_ctx *ctx,
+                                           void* next)
+{
+    int rc = SUCCESS;
+    fn_activate_user_ini_chain_t *fn_next = next;
+
+    DEBUG_MESSAGE("calling php_ini_activate_config()");
+    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR, PHP_INI_STAGE_HTACCESS
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+                    , ctx->TSRMLS_C
+#endif
+    );
+
+    if (*fn_next) {
+        rc = (*fn_next)(ctx, fn_next + 1);
+    }
+
+    return rc;
+}
+
+static int lsapi_activate_user_ini(TSRMLS_D)
+{
+    _lsapi_activate_user_ini_ctx ctx;
+    /**
+     * The reason to have this function list stacked
+     * is each function now can define a scoped destructor.
+     *
+     * Passing control via function pointer is a sign of low coupling,
+     * which means dependencies between these functions are to be
+     * controlled from a single place
+     * (here below, by modifying this function list order)
+     */
+    static const fn_activate_user_ini_chain_t fn_chain[] = {
+        &lsapi_activate_user_ini_basic_checks,
+        &lsapi_activate_user_ini_mk_path,
+        &lsapi_activate_user_ini_mk_realpath,
+        &lsapi_activate_user_ini_mk_user_config,
+        &lsapi_activate_user_ini_walk_down_the_path,
+        &lsapi_activate_user_ini_finally,
+        NULL
+    };
+    
+#if defined(ZTS) && PHP_MAJOR_VERSION < 7
+    ctx.TSRMLS_C = TSRMLS_C;
+#endif
+
+    return fn_chain[0](&ctx, (fn_activate_user_ini_chain_t*)(fn_chain + 1));
+}
+
+#endif
 
 static void override_ini()
 {
@@ -809,11 +1246,11 @@ static int cli_main( int argc, char * argv[] )
 #endif
         for( ini = ini_defaults; *ini; ini+=2 ) {
 #if PHP_MAJOR_VERSION >= 7
-			psKey = STR_INIT( *ini, strlen( *ini ), 1 );
-            zend_alter_ini_entry( psKey, 
+			psKey = zend_string_init( *ini, strlen( *ini ), 1 );
+            zend_alter_ini_entry_chars( psKey, 
                                 (char *)*(ini+1), strlen( *(ini+1) ),
                                 PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-            STR_RELEASE( psKey );
+            zend_string_release( psKey );
 #else
             zend_alter_ini_entry( (char *)*ini, strlen( *ini )+1,
                                 (char *)*(ini+1), strlen( *(ini+1) ),
@@ -842,9 +1279,9 @@ static int cli_main( int argc, char * argv[] )
             case 'v':
                 if (php_request_startup(TSRMLS_C) != FAILURE) {
 #if ZEND_DEBUG
-                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 #ifdef PHP_OUTPUT_NEWAPI
                     php_output_end_all(TSRMLS_C);
@@ -1065,6 +1502,11 @@ int main( int argc, char * argv[] )
 #endif
 
     lsapi_sapi_module.executable_location = argv[0];
+
+    /* Initialize from environment variables before processing command-line
+     * options: the latter override the former.
+     */
+    init_sapi_from_env(&lsapi_sapi_module);
     
     if ( ignore_php_ini )
         lsapi_sapi_module.php_ini_ignore = 1;
@@ -1148,16 +1590,23 @@ int main( int argc, char * argv[] )
 
 /*   LiteSpeed PHP module starts here */
 
+#if PHP_MAJOR_VERSION > 4
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_litespeed__void, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
+
+#else
+#define arginfo_litespeed__void NULL
+#endif
 
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
 PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(litespeed);
+
 
 zend_function_entry litespeed_functions[] = {
     PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)
@@ -1171,6 +1620,12 @@ zend_function_entry litespeed_functions[] = {
 
 static PHP_MINIT_FUNCTION(litespeed)
 {
+    user_config_cache_init();
+
+    const char *p = getenv("LSPHP_ENABLE_USER_INI");
+    if (p && 0 == strcasecmp(p, "on"))
+        parse_user_ini = 1;
+
     /* REGISTER_INI_ENTRIES(); */
     return SUCCESS;
 }
@@ -1178,6 +1633,8 @@ static PHP_MINIT_FUNCTION(litespeed)
 
 static PHP_MSHUTDOWN_FUNCTION(litespeed)
 {
+    zend_hash_destroy(&user_config_cache);
+
     /* UNREGISTER_INI_ENTRIES(); */
     return SUCCESS;
 }
@@ -1198,11 +1655,11 @@ zend_module_entry litespeed_module_entry = {
 static int add_associate_array( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
 {
-    add_assoc_string_ex( (zval *)arg, (char *)pKey, keyLen+1, (char *)pValue
 #if PHP_MAJOR_VERSION < 7
-            , 1
+    add_assoc_string_ex((zval *)arg, (char *)pKey, keyLen+1, (char *)pValue, 1);
+#else
+    add_assoc_string_ex((zval *)arg, (char *)pKey, keyLen, (char *)pValue);
 #endif        
-    );
     return 1;
 }
 
@@ -1256,11 +1713,11 @@ PHP_FUNCTION(litespeed_response_headers)
                 headerBuf[len] = 0;
                 if ( len ) {
                     while( isspace(*++p));
-                    add_assoc_string_ex(return_value, headerBuf, len+1, p
 #if PHP_MAJOR_VERSION < 7
-                                        , 1
+                    add_assoc_string_ex(return_value, headerBuf, len+1, p, 1);
+#else
+                    add_assoc_string_ex(return_value, headerBuf, len, p);
 #endif        
-                    );
                 }
             }
         }
