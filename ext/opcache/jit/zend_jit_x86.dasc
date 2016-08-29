@@ -88,25 +88,25 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|.endif
 	|1:
 	|	//} else if (zend_interrupt_function) {
-	|| if (zend_interrupt_function) {
-	|	//SAVE_OPLINE();
-	|	mov EX->opline, IP
-	|	//zend_interrupt_function(execute_data);
-	|.if X64
-	|	load_addr rax, zend_interrupt_function
-	|	mov CARG1, FP
-	|	call rax
-	|.else
-	|	push FP
-	|	call dword &zend_interrupt_function
-	|.endif
-	|	//ZEND_VM_ENTER();
-	|	//execute_data = EG(current_execute_data);
-	|	mov FP, aword [&EG(current_execute_data)]
-	|	// LOAD_OPLINE();
-	|	mov IP, EX->opline
-	|	//}
-	||}
+	if (zend_interrupt_function) {
+		|	//SAVE_OPLINE();
+		|	mov EX->opline, IP
+		|	//zend_interrupt_function(execute_data);
+		|.if X64
+		|	load_addr rax, zend_interrupt_function
+		|	mov CARG1, FP
+		|	call rax
+		|.else
+		|	push FP
+		|	call dword &zend_interrupt_function
+		|.endif
+		|	//ZEND_VM_ENTER();
+		|	//execute_data = EG(current_execute_data);
+		|	mov FP, aword [&EG(current_execute_data)]
+		|	// LOAD_OPLINE();
+		|	mov IP, EX->opline
+		|	//}
+	}
 	|	//ZEND_VM_CONTINUE()
 	|	add r4, SPAD // stack alignment
 	|	jmp aword [IP]
