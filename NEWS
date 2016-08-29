@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #72944 (Null pointer deref in zval_delref_p). (Dmitry)
   . Fixed bug #72943 (assign_dim on string doesn't reset hval). (Laruence)
   . Fixed bug #72598 (Reference is lost after array_slice()) (Nikita)
+  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
+    password_verify). (Anatol)
 
 - COM:
   . Fixed bug #72922 (COM called from PHP does not return out parameters).
