@@ -669,7 +669,7 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_EXIT) {
 		fprintf(stderr, " exit");
 	}
-	if (b->flags & ZEND_BB_ENTRY) {
+	if (b->flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 		fprintf(stderr, " entry");
 	}
 	if (b->flags & ZEND_BB_TRY) {
