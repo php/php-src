@@ -39,7 +39,7 @@
 #define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, zend_long maxlifetime
 #define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime
 #define PS_DESTROY_ARGS  void **mod_data, zend_string *key
-#define PS_GC_ARGS       void **mod_data, zend_long maxlifetime, int *nrdels
+#define PS_GC_ARGS       void **mod_data, zend_long maxlifetime, zend_long *nrdels
 #define PS_CREATE_SID_ARGS void **mod_data
 #define PS_VALIDATE_SID_ARGS void **mod_data, zend_string *key
 #define PS_UPDATE_TIMESTAMP_ARGS void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime
@@ -51,7 +51,7 @@ typedef struct ps_module_struct {
 	int (*s_read)(PS_READ_ARGS);
 	int (*s_write)(PS_WRITE_ARGS);
 	int (*s_destroy)(PS_DESTROY_ARGS);
-	int (*s_gc)(PS_GC_ARGS);
+	zend_long (*s_gc)(PS_GC_ARGS);
 	zend_string *(*s_create_sid)(PS_CREATE_SID_ARGS);
 	int (*s_validate_sid)(PS_VALIDATE_SID_ARGS);
 	int (*s_update_timestamp)(PS_UPDATE_TIMESTAMP_ARGS);
@@ -65,7 +65,7 @@ typedef struct ps_module_struct {
 #define PS_READ_FUNC(x) 	int ps_read_##x(PS_READ_ARGS)
 #define PS_WRITE_FUNC(x) 	int ps_write_##x(PS_WRITE_ARGS)
 #define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
-#define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
+#define PS_GC_FUNC(x) 		zend_long ps_gc_##x(PS_GC_ARGS)
 #define PS_CREATE_SID_FUNC(x)	zend_string *ps_create_sid_##x(PS_CREATE_SID_ARGS)
 #define PS_VALIDATE_SID_FUNC(x)	int ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
 #define PS_UPDATE_TIMESTAMP_FUNC(x) 	int ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)

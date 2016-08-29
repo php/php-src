@@ -1526,19 +1526,37 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			ADD_FLAG(bd_flags_name, "/Fd" + sub_build + d);
 		}
 
+		if (PHP_ANALYZER == "clang") {
+			var analyzer_base_args = X64 ? "-m64" : "-m32";
+			
+			analyzer_base_args += " --analyze";
+
+			var vc_ver;
+			if (VS_TOOLSET) {
+				vc_ver = VCVERS;
+			} else {
+				vc_ver = probe_binary(PATH_PROG('cl', null));
+			}
+
+			analyzer_base_args += " -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions";
+		}
+
 		if (PHP_MP_DISABLED) {
 			for (var j in srcs_by_dir[k]) {
 				src = file_list[srcs_by_dir[k][j]];
-				if (PHP_ANALYZER == "pvs") {
-					MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
-						+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
-				}
 
 				var _tmp = src.split("\\");
 				var filename = _tmp.pop();
 				obj = filename.replace(re, ".obj");
 
 				MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+
+				if ("clang" == PHP_ANALYZER) {
+					MFO.WriteLine("\t\"@$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) /c " + dir + "\\" + src); 
+				}else if (PHP_ANALYZER == "pvs") {
+					MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+						+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
+				}
 			}
 		} else {
 			/* TODO create a response file at least for the source files to work around the cmd line length limit. */
@@ -1548,6 +1566,10 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			}
 
 			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
+
+			if ("clang" == PHP_ANALYZER) {
+				MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) /c " + src_line);
+			}
 		}
 	}
 
@@ -1729,6 +1751,8 @@ function write_summary()
 	}
 	if (PHP_ANALYZER == "vs") {
 		ar[5] = ['Static analyzer', 'Visual Studio'];
+	} else if (PHP_ANALYZER == "clang") {
+		ar[5] = ['Static analyzer', 'clang'];
 	} else if (PHP_ANALYZER == "pvs") {
 		ar[5] = ['Static analyzer', 'PVS-Studio'];
 	} else {
@@ -2057,6 +2081,54 @@ function generate_phpize()
 	CJ.Close();
 }
 
+function handle_analyzer_makefile_flags(fd, key, val)
+{
+	var relevant = false;
+
+	/* VS integrates /analyze with the bulid process,
+		no further action is required. */
+	if ("no" == PHP_ANALYZER || "vs" == PHP_ANALYZER) {
+		return;
+	}
+
+	if (key.match("CFLAGS")) {
+		var new_val = val;
+		var reg = /\$\(([^\)]+)\)/g;
+		while (r = reg.exec(val)) {
+			var repl = "$(" + r[1] + "_ANALYZER)"
+			new_val = new_val.replace(r[0], repl);
+		}
+		val = new_val;
+
+		if ("clang" == PHP_ANALYZER) {	
+			val = val.replace(/\/FD /, "")
+				.replace(/\/Fp.+? /, "")
+				.replace(/\/Fo.+? /, "")
+				.replace(/\/Fd.+? /, "")
+				//.replace(/\/Fd.+?/, " ")
+				.replace(/\/FR.+? /, "")
+				.replace("/guard:cf ", "")
+				.replace(/\/MP \d+ /, "")
+				.replace(/\/MP /, "")
+				.replace("/LD ", "");
+		}
+	
+		relevant = true;
+	} else if (key.match("BASE_INCLUDES")) {
+		relevant = true;
+	}
+
+	if (!relevant) {
+		return;
+	}
+
+	key += "_ANALYZER";
+	//WARNING("KEY: " + key + " VAL: " + val);
+
+	fd.WriteLine(key + "=" + val + " ");
+	fd.WriteBlankLines(1);
+}
+
 /* Generate the Makefile */
 function generate_makefile()
 {
@@ -2072,12 +2144,16 @@ function generate_makefile()
 		// The trailing space is needed to prevent the trailing backslash
 		// that is part of the build dir flags (CFLAGS_BD_XXX) from being
 		// seen as a line continuation character
-		MF.WriteLine(keys[i] + "=" + 
-			/* \s+\/ eliminates extra whitespace caused when using \ for string continuation,
-				whereby \/ is the start of the next compiler switch */
-			trim(configure_subst.Item(keys[i])).replace(/\s+\//gm, " /") + " "
-			);
+
+		/* \s+\/ eliminates extra whitespace caused when using \ for string continuation,
+			whereby \/ is the start of the next compiler switch */
+		var val = trim(configure_subst.Item(keys[i])).replace(/\s+\//gm, " /");
+		
+		MF.WriteLine(keys[i] + "=" + val + " ");
 		MF.WriteBlankLines(1);
+
+		/* If static analyze is enabled, add analyzer specific stuff to the Makefile. */
+		handle_analyzer_makefile_flags(MF, keys[i], val);
 	}
 
 	MF.WriteBlankLines(1);
@@ -2714,7 +2790,7 @@ function toolset_setup_common_cflags()
 		ADD_FLAG("CFLAGS", " /fallback ");
 
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
-		ADD_FLAG("CFLAGS", "-fms-compatibility-version=" + vc_ver);
+		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
 	}
 }
 
