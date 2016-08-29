@@ -25,6 +25,12 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
+
+- JSON:
+  . Implemented earlier return when json_encode fails, fixes bugs #68992
+    (Stacking exceptions thrown by JsonSerializable) and #70275 (On recursion
+    error, json_encode can eat up all system memory). (Jakub Zelenka)
+
 - Opcache:
   . Fixed bug #72949 (Typo in opcache error message). (cmb)
 
