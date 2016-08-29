@@ -109,6 +109,15 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 				b = blocks + block_map[live_range->start];
 				if (b->flags & ZEND_BB_REACHABLE) {
 					while (b->len > 0 && op_array->opcodes[b->start].opcode == ZEND_NOP) {
+					    /* check if NOP breaks incorrect smart branch */
+						if (b->len == 2
+						 && (op_array->opcodes[b->start + 1].opcode == ZEND_JMPZ
+						  || op_array->opcodes[b->start + 1].opcode == ZEND_JMPNZ)
+						 && (op_array->opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
+						 && b->start > 0
+						 && zend_is_smart_branch(op_array->opcodes + b->start - 1)) {
+							break;
+						}
 						b->start++;
 						b->len--;
 					}
