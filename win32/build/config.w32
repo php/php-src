@@ -216,7 +216,7 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, clang for clang, pvs for PVS-Studio", "no");
+ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, clang for clang, cppcheck for Cppcheck, pvs for PVS-Studio", "no");
 if (PHP_ANALYZER == "vs") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 	ADD_FLAG("CFLAGS", " /wd6308 ");
