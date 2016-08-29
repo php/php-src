@@ -165,7 +165,7 @@ static int zend_jit_check_exception(dasm_State **Dst)
 	return 1;
 }
 
-static int zend_jit_handler(dasm_State **Dst, zend_op *opline)
+static int zend_jit_handler(dasm_State **Dst, zend_op *opline, int may_throw)
 {
 	const void *handler = opline->handler;
 
@@ -175,7 +175,9 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline)
 	|.else
 	|	call dword &handler
 	|.endif
-	zend_jit_check_exception(Dst);
+	if (may_throw) {
+		zend_jit_check_exception(Dst);
+	}
 	return 1;
 }
 
@@ -238,7 +240,7 @@ static int zend_jit_recv(dasm_State **Dst, zend_op *opline)
 {
 	|	cmp IPl, opline
 	|	jnz >1
-	zend_jit_handler(Dst, opline);
+	zend_jit_handler(Dst, opline, 1);
 	|1:
 	return 1;
 }
@@ -246,7 +248,7 @@ static int zend_jit_recv(dasm_State **Dst, zend_op *opline)
 #ifdef CONTEXT_THREDED_JIT
 static int zend_jit_context_threaded_call(dasm_State **Dst, zend_op *opline)
 {
-	if (!zend_jit_handler(Dst, opline)) return 0;
+	if (!zend_jit_handler(Dst, opline, 1)) return 0;
 	if (opline->opcode == ZEND_DO_UCALL) {
 		|	call aword [IP]
 		zend_jit_check_exception(Dst);
@@ -274,7 +276,7 @@ static int zend_jit_call(dasm_State **Dst, zend_op *opline)
 
 static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 {
-	if (!zend_jit_handler(Dst, opline)) return 0;
+	if (!zend_jit_handler(Dst, opline, 1)) return 0;
 	if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
 		zend_op *next_opline = opline + 1;
 

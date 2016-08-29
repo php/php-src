@@ -280,6 +280,254 @@ static void jit_free(void *p, size_t size)
 #endif
 }
 
+static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t t1 = OP1_INFO();
+	uint32_t t2 = OP2_INFO();
+
+    if (opline->op1_type == IS_CV) {
+		if (t1 & MAY_BE_UNDEF) {
+			switch (opline->opcode) {
+				case ZEND_UNSET_VAR:
+				case ZEND_ISSET_ISEMPTY_VAR:
+					if (opline->extended_value & ZEND_QUICK_SET) {
+						break;
+					}
+				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+				case ZEND_ASSIGN:
+				case ZEND_ASSIGN_REF:
+				case ZEND_BIND_GLOBAL:
+				case ZEND_FETCH_DIM_IS:
+				case ZEND_FETCH_OBJ_IS:
+				case ZEND_SEND_REF:
+					break;
+				default:
+					/* undefined variable warning */
+					return 1;
+			}
+		}
+    } else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+		if (t1 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_RESOURCE)) {
+			switch (opline->opcode) {
+				case ZEND_CASE:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+				case ZEND_FETCH_LIST:
+				case ZEND_QM_ASSIGN:
+				case ZEND_SEND_VAL:
+				case ZEND_SEND_VAL_EX:
+				case ZEND_SEND_VAR:
+				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_VAR_NO_REF:
+				case ZEND_SEND_VAR_NO_REF_EX:
+				case ZEND_SEND_REF:
+				case ZEND_SEPARATE:
+					break;
+				default:
+					/* destructor may be called */
+					return 1;
+			}
+		}
+    }
+
+    if (opline->op2_type == IS_CV) {
+		if (t2 & MAY_BE_UNDEF) {
+			switch (opline->opcode) {
+				case ZEND_ASSIGN_REF:
+					break;
+				default:
+					/* undefined variable warning */
+					return 1;
+			}
+		}
+	} else if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
+		if (t2 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_RESOURCE)) {
+			switch (opline->opcode) {
+				case ZEND_ASSIGN:
+					break;
+				default:
+					/* destructor may be called */
+					return 1;
+			}
+		}
+    }
+
+	switch (opline->opcode) {
+		case ZEND_NOP:
+		case ZEND_IS_IDENTICAL:
+		case ZEND_IS_NOT_IDENTICAL:
+		case ZEND_QM_ASSIGN:
+		case ZEND_JMP:
+		case ZEND_CHECK_VAR:
+		case ZEND_MAKE_REF:
+		case ZEND_SEND_VAR:
+		case ZEND_BEGIN_SILENCE:
+		case ZEND_END_SILENCE:
+		case ZEND_SEND_VAL:
+		case ZEND_SEND_REF:
+		case ZEND_FREE:
+		case ZEND_SEPARATE:
+			return 0;
+		case ZEND_BIND_GLOBAL:
+			if ((opline+1)->opcode == ZEND_BIND_GLOBAL) {
+				return zend_may_throw(opline + 1, op_array, ssa);
+			}
+			return 0;
+		case ZEND_ADD:
+			if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY
+			 && (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
+				return 0;
+			}
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_DIV:
+		case ZEND_MOD:
+			if (opline->op2_type != IS_CONST
+			 || Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_NULL
+			 || Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_FALSE
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_LONG
+			  && Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)) == 0)
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_DOUBLE
+			  && Z_DVAL_P(RT_CONSTANT(op_array, opline->op2)) == 0.0)) {
+				return 1;
+			}
+			/* break missing intentionally */
+		case ZEND_SUB:
+		case ZEND_MUL:
+		case ZEND_POW:
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_SL:
+		case ZEND_SR:
+			if (opline->op2_type != IS_CONST
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_LONG
+			  && (zend_ulong)Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)) >= SIZEOF_ZEND_LONG * 8)
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_DOUBLE
+			  && (zend_ulong)Z_DVAL_P(RT_CONSTANT(op_array, opline->op2)) >= SIZEOF_ZEND_LONG * 8)) {
+				return 1;
+			}
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_CONCAT:
+		case ZEND_FAST_CONCAT:
+			return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_BW_OR:
+		case ZEND_BW_AND:
+		case ZEND_BW_XOR:
+			if ((t1 & MAY_BE_ANY) == MAY_BE_STRING
+			 && (t2 & MAY_BE_ANY) == MAY_BE_STRING) {
+				return 0;
+			}
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_BW_NOT:
+			return (t1 & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_BOOL_NOT:
+		case ZEND_PRE_INC:
+		case ZEND_POST_INC:
+		case ZEND_PRE_DEC:
+		case ZEND_POST_DEC:
+		case ZEND_JMPZ:
+		case ZEND_JMPNZ:
+		case ZEND_JMPZNZ:
+		case ZEND_JMPZ_EX:
+		case ZEND_JMPNZ_EX:
+		case ZEND_BOOL:
+			return (t1 & MAY_BE_OBJECT);
+		case ZEND_BOOL_XOR:
+			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_OBJECT);
+		case ZEND_IS_EQUAL:
+		case ZEND_IS_NOT_EQUAL:
+		case ZEND_IS_SMALLER:
+		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_CASE:
+			if ((t1 & MAY_BE_ANY) == MAY_BE_NULL
+			 || (t2 & MAY_BE_ANY) == MAY_BE_NULL) {
+				return 0;
+			}
+			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_OBJECT);
+		case ZEND_ASSIGN_ADD:
+			if (opline->extended_value != 0) {
+				return 1;
+			}
+			if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY
+			 && (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
+				return 0;
+			}
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_MOD:
+			if (opline->extended_value != 0) {
+				return 1;
+			}
+			if (opline->op2_type != IS_CONST
+			 || Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_NULL
+			 || Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_FALSE
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_LONG
+			  && Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)) == 0)
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_DOUBLE
+			  && Z_DVAL_P(RT_CONSTANT(op_array, opline->op2)) == 0.0)) {
+				return 1;
+			}
+			/* break missing intentionally */
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_POW:
+			if (opline->extended_value != 0) {
+				return 1;
+			}
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+			if (opline->extended_value != 0) {
+				return 1;
+			}
+			if (opline->op2_type != IS_CONST
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_LONG
+			  && (zend_ulong)Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)) >= SIZEOF_ZEND_LONG * 8)
+			 || (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_DOUBLE
+			  && (zend_ulong)Z_DVAL_P(RT_CONSTANT(op_array, opline->op2)) >= SIZEOF_ZEND_LONG * 8)) {
+				return 1;
+			}
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_ASSIGN_CONCAT:
+			if (opline->extended_value != 0) {
+				return 1;
+			}
+			return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
+			if (opline->extended_value != 0) {
+				return 1;
+			}
+			if ((t1 & MAY_BE_ANY) == MAY_BE_STRING
+			 && (t2 & MAY_BE_ANY) == MAY_BE_STRING) {
+				return 0;
+			}
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_ASSIGN:
+			return (t1 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_RESOURCE));
+		case ZEND_ROPE_INIT:
+		case ZEND_ROPE_ADD:
+			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT);
+		case ZEND_INIT_ARRAY:
+		case ZEND_ADD_ARRAY_ELEMENT:
+			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE);
+		case ZEND_STRLEN:
+			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
+		default:
+			return 1;
+	}
+}
+
 ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 {
 	uint32_t flags = 0;
@@ -341,6 +589,8 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
 			zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
 		}
+	} else {
+		ssa.rt_constants = 1;
 	}
 
 	/* mark hidden branch targets */
@@ -405,7 +655,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 				case ZEND_BIND_GLOBAL:
 					if (opline->opcode != op_array->opcodes[i+1].opcode) {
 						/* repeatable opcodes */
-						if (!zend_jit_handler(&dasm_state, opline)) {
+						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa))) {
 							goto jit_failure;
 						}
 					}
@@ -491,7 +741,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
-					if (!zend_jit_handler(&dasm_state, opline) ||
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
@@ -505,7 +755,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 					}
 					break;
 				case ZEND_JMPZNZ:
-					if (!zend_jit_handler(&dasm_state, opline) ||
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, OP_JMP_ADDR(opline, opline->op2), ssa.cfg.blocks[b].successors[1]) ||
 					    !zend_jit_jmp(&dasm_state, ssa.cfg.blocks[b].successors[0])) {
 						goto jit_failure;
@@ -515,13 +765,13 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 				case ZEND_FE_FETCH_RW:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				if (!zend_jit_handler(&dasm_state, opline) ||
+				if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
 				default:
-					if (!zend_jit_handler(&dasm_state, opline)) {
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa))) {
 						goto jit_failure;
 					}
 			}
