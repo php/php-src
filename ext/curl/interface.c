@@ -1851,8 +1851,9 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode TSRMLS_DC)
 				int len;
 				char s[64];
 				char *tmp;
-				strncpy(s, slist->data, 64);
-				tmp = memchr(s, ':', 64);
+				strncpy(s, slist->data, sizeof(s));
+				s[sizeof(s)-1] = '\0';
+				tmp = memchr(s, ':', sizeof(s));
 				if(tmp) {
 					*tmp = '\0';
 					len = strlen(s);
