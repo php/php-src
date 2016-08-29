@@ -221,8 +221,8 @@ if (PHP_ANALYZER == "vs") {
 
 	if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
 		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
-	} else if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
-		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe";
 	}
 
 	if (!clang_cl) {
