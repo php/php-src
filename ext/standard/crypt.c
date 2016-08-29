@@ -201,6 +201,14 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 				salt[5] >= '0' && salt[5] <= '9' &&
 				salt[6] == '$') {
 			char output[PHP_MAX_SALT_LEN + 1];
+			int k = 7;
+
+			while (isalnum(salt[k]) || '.' == salt[k] || '/' == salt[k]) {
+				k++;
+			}
+			if (k != salt_len) {
+				return FAILURE;
+			}
 
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
 
