@@ -34,6 +34,9 @@ PHP                                                                        NEWS
     images). (cmb)
   . Fixed bug #68716 (possible resource leaks in _php_image_convert()). (cmb)
 
+- iconv:
+  . Fixed bug #72320 (iconv_substr returns false for empty strings). (cmb)
+
 - IMAP:
   . Fixed bug #72852 (imap_mail null dereference). (Anatol)
 
