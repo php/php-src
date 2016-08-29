@@ -61,6 +61,7 @@ PHP_FUNCTION(stream_socket_shutdown);
 PHP_FUNCTION(stream_resolve_include_path);
 PHP_FUNCTION(stream_is_local);
 PHP_FUNCTION(stream_supports_lock);
+PHP_FUNCTION(stream_vt100_support);
 
 #if HAVE_SOCKETPAIR
 PHP_FUNCTION(stream_socket_pair);

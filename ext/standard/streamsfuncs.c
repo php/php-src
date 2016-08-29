@@ -37,6 +37,7 @@ typedef unsigned long long php_timeout_ull;
 #else
 #include "win32/select.h"
 #include "win32/sockets.h"
+#include "win32/console.h"
 typedef unsigned __int64 php_timeout_ull;
 #endif
 
@@ -1633,6 +1634,129 @@ PHP_FUNCTION(stream_supports_lock)
 	}
 
 	RETURN_TRUE;
+}
+
+/* {{{ proto proto stream_vt100_support(string stream[, bool enable])
+   Get or set VT100 support for the specified stream.
+*/
+PHP_FUNCTION(stream_vt100_support)
+{
+	zend_string *stream;
+	zend_bool enable;
+#ifdef PHP_WIN32
+	DWORD handle_id;
+#else
+	int fileno;
+#endif
+	int argc = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(argc, "S|b", &stream, &enable) == FAILURE) {
+		return;
+	}
+	if (!stream || !ZSTR_VAL(stream) || !ZSTR_LEN(stream)) {
+		/* Empty stream name */
+		RETURN_FALSE;
+	}
+
+#ifdef PHP_WIN32
+	/* Determine the Windows standard handle associated to the stream name received */
+	if (strcmp(ZSTR_VAL(stream), "php://stdin") == 0) {
+		handle_id = STD_INPUT_HANDLE;
+	}
+	else if (strcmp(ZSTR_VAL(stream), "php://stdout") == 0) {
+		handle_id = STD_OUTPUT_HANDLE;
+	}
+	else if (strcmp(ZSTR_VAL(stream), "php://stderr") == 0) {
+		handle_id = STD_ERROR_HANDLE;
+	}
+	else {
+		RETURN_FALSE;
+	}
+#else
+	/* Determine the file descriptor identifier associated to the stream name received */
+	if (strcmp(ZSTR_VAL(stream), "php://stdin") == 0) {
+		fileno = STDIN_FILENO;
+	}
+	else if (strcmp(ZSTR_VAL(stream), "php://stdout") == 0) {
+		fileno = STDOUT_FILENO;
+	}
+	else if (strcmp(ZSTR_VAL(stream), "php://stderr") == 0) {
+		fileno = STDERR_FILENO;
+	} else {
+		RETURN_FALSE;
+	}
+#endif
+
+	if (argc == 1) {
+		/* Check if the specified stream supports VT100 control codes */
+#ifdef PHP_WIN32
+		/* Check if the current Windows version supports VT100 control codes */
+		if (!_php_win32_console_os_supports_vt100()) {
+			RETURN_FALSE;
+		}
+		/* Check if the Windows standard handle is redirected to file */
+		if (_php_win32_console_handle_is_redirected(handle_id)) {
+			RETURN_FALSE;
+		}
+		/* Check if the Windows standard handle has VT100 control codes enabled */
+		if (_php_win32_console_handle_has_vt100(handle_id)) {
+			RETURN_TRUE;
+		}
+		else {
+			RETURN_FALSE;
+		}
+#elif HAVE_POSIX
+		/* Check if the file descriptor identifier is a terminal */
+		if (isatty(fileno)) {
+			RETURN_TRUE;
+		}
+		else {
+			RETURN_FALSE;
+		}
+#else
+		RETURN_FALSE;
+#endif
+	}
+	else {
+		/* Enable/disable VT100 control codes support for the specified stream */
+#ifdef PHP_WIN32
+		/* Check if the current Windows version supports VT100 control codes */
+		if (!_php_win32_console_os_supports_vt100()) {
+			RETURN_FALSE;
+		}
+		/* Check if the Windows standard handle is redirected to file */
+		if (_php_win32_console_handle_is_redirected(handle_id)) {
+			RETURN_FALSE;
+		}
+		/* Enable/disable VT100 control codes support for the specified Windows standard handle */
+		if (_php_win32_console_handle_set_vt100(handle_id, enable ? TRUE : FALSE)) {
+			RETURN_TRUE;
+		}
+		else {
+			RETURN_FALSE;
+		}
+#elif HAVE_POSIX
+		/* Check if the file descriptor identifier is a terminal */
+		if (isatty(fd)) {
+			if (enable) {
+				RETURN_TRUE;
+			}
+			else {
+				RETURN_FALSE;
+			}
+		}
+		else {
+			if (enable) {
+				RETURN_FALSE;
+			}
+			else {
+				RETURN_TRUE;
+			}
+		}
+#else
+		RETURN_FALSE;
+#endif
+	}
 }
 
 #ifdef HAVE_SHUTDOWN
