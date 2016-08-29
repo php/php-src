@@ -367,6 +367,7 @@ PHP_FUNCTION(ldap_connect)
 			int	urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
+				efree(ld);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid port number: %ld", port);
 				RETURN_FALSE;
 			}
