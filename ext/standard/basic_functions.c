@@ -2013,6 +2013,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_supports_lock, 0, 0, 1)
     ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_isatty, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+#ifdef PHP_WIN32
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_vt100_support, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO(0, enable)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_select, 0, 0, 4)
 	ZEND_ARG_INFO(1, read_streams) /* ARRAY_INFO(1, read_streams, 1) */
 	ZEND_ARG_INFO(1, write_streams) /* ARRAY_INFO(1, write_streams, 1) */
@@ -3146,6 +3157,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_copy_to_stream,											arginfo_stream_copy_to_stream)
 	PHP_FE(stream_get_contents,												arginfo_stream_get_contents)
 	PHP_FE(stream_supports_lock,											arginfo_stream_supports_lock)
+	PHP_FE(stream_isatty,													arginfo_stream_isatty)
+#ifdef PHP_WIN32
+	PHP_FE(sapi_windows_vt100_support,										arginfo_sapi_windows_vt100_support)
+#endif
 	PHP_FE(fgetcsv,															arginfo_fgetcsv)
 	PHP_FE(fputcsv,															arginfo_fputcsv)
 	PHP_FE(flock,															arginfo_flock)
