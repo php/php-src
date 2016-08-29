@@ -2198,10 +2198,42 @@ static inline uint32_t zend_emit_jump(uint32_t opnum_target) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
+{
+	switch (opline->opcode) {
+		case ZEND_IS_IDENTICAL:
+		case ZEND_IS_NOT_IDENTICAL:
+		case ZEND_IS_EQUAL:
+		case ZEND_IS_NOT_EQUAL:
+		case ZEND_IS_SMALLER:
+		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_CASE:
+		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+		case ZEND_INSTANCEOF:
+		case ZEND_TYPE_CHECK:
+		case ZEND_DEFINED:
+			return 1;
+		default:
+			return 0;
+	}
+}
+/* }}} */
+
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number(CG(active_op_array));
-	zend_op *opline = zend_emit_op(NULL, opcode, cond, NULL);
+	zend_op *opline;
+
+	if ((cond->op_type & (IS_CV|IS_CONST))
+	 && opnum > 0
+	 && zend_is_smart_branch(CG(active_op_array)->opcodes + opnum - 1)) {
+		/* emit extra NOP to avoid incorrect SMART_BRANCH in very rare cases */
+		zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
+		opnum = get_next_op_number(CG(active_op_array));
+	}
+	opline = zend_emit_op(NULL, opcode, cond, NULL);
 	opline->op2.opline_num = opnum_target;
 	return opnum;
 }
