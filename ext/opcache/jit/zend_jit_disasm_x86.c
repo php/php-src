@@ -262,7 +262,7 @@ static int zend_jit_disasm(const char    *name,
 	if (op_array && cfg) {
 		ZVAL_FALSE(&zv);
 		for (b = 0; b < cfg->blocks_count; b++) {
-			if (cfg->blocks[b].flags & ZEND_BB_ENTRY) {
+			if (cfg->blocks[b].flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 				addr = (uint64_t)(uintptr_t)op_array->opcodes[cfg->blocks[b].start].handler;
 				if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)end) {
 					zend_hash_index_add(&labels, addr, &zv);

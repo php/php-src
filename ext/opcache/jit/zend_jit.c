@@ -144,18 +144,12 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 #ifdef CONTEXT_THREDED_JIT
 			if (cfg->blocks[b].flags & ZEND_BB_START) {
 #else
-			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
+			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 #endif
 				zend_op *opline = op_array->opcodes + cfg->blocks[b].start;
 
 				opline->handler = (void*)(((char*)entry) +
 					dasm_getpclabel(dasm_state, cfg->blocks_count + b));
-				/* RECV may be skipped */
-				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-					opline++;
-					opline->handler = (void*)(((char*)entry) +
-						dasm_getpclabel(dasm_state, cfg->blocks_count + b));
-				}
 			}
 		}
 	}
@@ -547,7 +541,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
     /* Build SSA */
 	memset(&ssa, 0, sizeof(zend_ssa));
 
-	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa.cfg, &flags) != SUCCESS) {
+	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa.cfg, &flags) != SUCCESS) {
 		goto jit_failure;
 	}
 
@@ -623,13 +617,36 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 			zend_jit_prologue(&dasm_state);
 		}
 #else
-		if (ssa.cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
-			if ((ssa.cfg.blocks[b].flags & ZEND_BB_ENTRY) &&
-			    (ssa.cfg.blocks[b].flags & ZEND_BB_TARGET)) {
+		if (ssa.cfg.blocks[b].flags & ZEND_BB_ENTRY) {
+			if (ssa.cfg.blocks[b].flags & ZEND_BB_TARGET) {
 				zend_jit_jmp(&dasm_state, b);
 			}
 			zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
+		} else if (ssa.cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
+			opline = op_array->opcodes + ssa.cfg.blocks[b].start;
+			if (ssa.cfg.split_at_recv && opline->opcode == ZEND_RECV_INIT) {
+				if (opline > op_array->opcodes &&
+				    (opline-1)->opcode == ZEND_RECV_INIT) {
+					/* repeatable opcode */
+					continue;
+				} else {
+					for (i = 0; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
+					}
+					zend_jit_jmp(&dasm_state, b + i);
+					zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
+					for (i = 1; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
+						zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b + i);
+					}
+					zend_jit_prologue(&dasm_state);
+				}
+			} else {
+				if (ssa.cfg.blocks[b].flags & (ZEND_BB_TARGET|ZEND_BB_RECV_ENTRY)) {
+					zend_jit_jmp(&dasm_state, b);
+				}
+				zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
+				zend_jit_prologue(&dasm_state);
+			}
 		}
 #endif
 		zend_jit_label(&dasm_state, b);
@@ -645,13 +662,14 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 		for (i = ssa.cfg.blocks[b].start; i <= end; i++) {
 			opline = op_array->opcodes + i;
 			switch (opline->opcode) {
-				case ZEND_RECV:
 				case ZEND_RECV_INIT:
-					/* RECV may be skipped */
-					if (!zend_jit_recv(&dasm_state, opline)) {
-						goto jit_failure;
+					if (ssa.cfg.split_at_recv) {
+						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa))) {
+							goto jit_failure;
+						}
+						break;
 					}
-					break;
+					/* break missing intentionally */
 				case ZEND_BIND_GLOBAL:
 					if (opline->opcode != op_array->opcodes[i+1].opcode) {
 						/* repeatable opcodes */
