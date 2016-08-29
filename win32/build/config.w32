@@ -225,8 +225,8 @@ if (PHP_ANALYZER == "vs") {
 
 	if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
 		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
-	} else if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
-		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe";
 	}
 
 	if (!clang_cl) {
@@ -236,6 +236,23 @@ if (PHP_ANALYZER == "vs") {
 		}
 	} else {
 		DEFINE("CLANG_CL", clang_cl);
+	}
+} else if (PHP_ANALYZER == "cppcheck") {
+
+	var cppcheck = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe")) {
+		cppcheck = PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe")) {
+		cppcheck = PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe";
+	}
+	if (!cppcheck) {
+		if (false == PATH_PROG('cppcheck', null, 'CPPCHECK')) {
+			WARNING("Couldn't find Cppcheck binaries, static analyze was disabled");
+			PHP_ANALYZER = "no";
+		}
+	} else {
+		DEFINE("CPPCHECK", cppcheck);
 	}
 } else if (PHP_ANALYZER == "pvs") {
 	var pvs_studio = false;

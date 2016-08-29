@@ -1528,6 +1528,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 		if (PHP_ANALYZER == "clang") {
 			var analyzer_base_args = X64 ? "-m64" : "-m32";
+			var analyzer_base_flags = "";
 			
 			analyzer_base_args += " --analyze";
 
@@ -1539,6 +1540,37 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			}
 
 			analyzer_base_args += " -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions";
+		} else if (PHP_ANALYZER == "cppcheck") {
+			var analyzer_base_args = "";
+			var analyzer_base_flags = "";
+
+			if (VS_TOOLSET) {
+				analyzer_base_flags += " -D _MSC_VER=" + VCVERS;
+			} else {
+				analyzer_base_flags += " -D _MSC_VER=" + probe_binary(PATH_PROG('cl', null));
+			}
+			
+			if (X64) {
+				analyzer_base_flags += " -D _M_X64 -D _WIN32 -D _WIN64";
+			} else {
+				analyzer_base_flags += " -D _M_IX86 -D _WIN32";
+			}
+
+			var vc_incs = WshShell.Environment("Process").Item("INCLUDE").split(";")
+			for (i in vc_incs) {
+				analyzer_base_flags += " -I " + "\"" + vc_incs[i] + "\"";
+			}
+
+			var cppcheck_platform = X64 ? "win64" : "win32A";
+			var cppcheck_lib = "win32\\build\\cppcheck_" + (X64 ? "x64" : "x86") + ".cfg";
+			analyzer_base_args += "--enable=warning,performance,portability,information,missingInclude " +
+						"--platform=" + cppcheck_platform + " " +
+						"--library=windows.cfg --library=microsoft_sal.cfg " +
+						"--library=win32\\build\\cppcheck.cfg " +
+						"--library=" + cppcheck_lib + " " +
+						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
+						" --std=c89 --std=c++11 " + 
+						"--quiet --inconclusive --template=vs ";
 		}
 
 		if (PHP_MP_DISABLED) {
@@ -1552,7 +1584,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"@$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) /c " + dir + "\\" + src); 
+					MFO.WriteLine("\t\"@$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src); 
+				} else if ("cppcheck" == PHP_ANALYZER) {
+					MFO.WriteLine("\t\"@$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src); 
 				}else if (PHP_ANALYZER == "pvs") {
 					MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
 						+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
@@ -1568,7 +1602,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
 
 			if ("clang" == PHP_ANALYZER) {
-				MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) /c " + src_line);
+				MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
+			} else if ("cppcheck" == PHP_ANALYZER) {
+				MFO.WriteLine("\t\"$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + src_line);
 			}
 		}
 	}
@@ -1753,6 +1789,8 @@ function write_summary()
 		ar[5] = ['Static analyzer', 'Visual Studio'];
 	} else if (PHP_ANALYZER == "clang") {
 		ar[5] = ['Static analyzer', 'clang'];
+	} else if (PHP_ANALYZER == "cppcheck") {
+		ar[5] = ['Static analyzer', 'Cppcheck'];
 	} else if (PHP_ANALYZER == "pvs") {
 		ar[5] = ['Static analyzer', 'PVS-Studio'];
 	} else {
@@ -2081,6 +2119,59 @@ function generate_phpize()
 	CJ.Close();
 }
 
+function extract_convert_style_line(val, match_sw, to_sw, keep_mkfile_vars)
+{
+	var ret = "";
+
+	/*var re = new RegExp(match_sw + "(.*)", "g");
+	var r;
+
+	while (r = re.execute(val)) {
+		WARNING(r);
+	}
+	return ret;*/
+
+	var cf = val.replace(/\s+/g, " ").split(" ");
+
+	var i_val = false;
+	for (var i in cf) {
+		var r;
+
+		if (keep_mkfile_vars) {
+			r = cf[i].match(/^\$\((.*)\)/);
+			if (!!r) {
+				ret += " " + r[0];
+				continue;
+			}
+		}
+
+		if (i_val && !!cf[i]) {
+			i_val = false;
+			ret += " " + to_sw + " " + cf[i];
+			continue;
+		}
+
+		var re;
+
+		re = new RegExp(match_sw + "(.*)");
+		r = cf[i].match(re);
+		if (!!r && r.length > 1 && !!r[1]) {
+			/* The value is not ws separated from the switch. */
+			ret += " " + to_sw + " " + r[1];
+			continue;
+		}
+
+		r = cf[i].match(match_sw);
+		if (!!r) {
+			//WARNING(cf[i]);
+			/* Value is going to be added in the next iteration. */
+			i_val = true;
+		}
+	}
+
+	return ret;
+}
+
 function handle_analyzer_makefile_flags(fd, key, val)
 {
 	var relevant = false;
@@ -2094,6 +2185,7 @@ function handle_analyzer_makefile_flags(fd, key, val)
 	if (key.match("CFLAGS")) {
 		var new_val = val;
 		var reg = /\$\(([^\)]+)\)/g;
+		var r;
 		while (r = reg.exec(val)) {
 			var repl = "$(" + r[1] + "_ANALYZER)"
 			new_val = new_val.replace(r[0], repl);
@@ -2111,10 +2203,26 @@ function handle_analyzer_makefile_flags(fd, key, val)
 				.replace(/\/MP \d+ /, "")
 				.replace(/\/MP /, "")
 				.replace("/LD ", "");
+		} else if ("cppcheck" == PHP_ANALYZER) {
+			new_val = "";
+
+			new_val += extract_convert_style_line(val, "/I", "-I", true);
+			new_val += extract_convert_style_line(val, "/D", "-D", false);
+
+			val = new_val;
 		}
-	
+
 		relevant = true;
 	} else if (key.match("BASE_INCLUDES")) {
+		if ("cppcheck" == PHP_ANALYZER) {
+			new_val = "";
+
+			new_val += extract_convert_style_line(val, "/I", "-I", true);
+			new_val += extract_convert_style_line(val, "/D", "-D", false);
+
+			val = new_val;
+		}
+
 		relevant = true;
 	}
 
