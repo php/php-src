@@ -36,6 +36,9 @@ PHP                                                                        NEWS
     (Stacking exceptions thrown by JsonSerializable) and #70275 (On recursion
     error, json_encode can eat up all system memory). (Jakub Zelenka)
 
+- mbstring:
+  . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
+
 - Opcache:
   . Fixed bug #72949 (Typo in opcache error message). (cmb)
 
