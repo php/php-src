@@ -73,6 +73,8 @@ PHP                                                                        NEWS
 
 - Session:
   . Fixed bug #72724 (PHP7: session-uploadprogress kills httpd). (Nikita)
+  . Fixed bug #72940 (SID always return "name=ID", even if session
+    cookie exist). (Yasuo)
 
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
