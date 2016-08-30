@@ -402,6 +402,9 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 		case ZEND_ISSET_ISEMPTY_THIS:
 		case ZEND_COALESCE:
 			return 0;
+		case ZEND_INIT_FCALL:
+			/* can't throw, because call is resolved at compile time */
+			return 0;
 		case ZEND_BIND_GLOBAL:
 			if ((opline+1)->opcode == ZEND_BIND_GLOBAL) {
 				return zend_may_throw(opline + 1, op_array, ssa);
