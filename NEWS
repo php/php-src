@@ -60,6 +60,7 @@ PHP                                                                        NEWS
     SimpleXMLElement). (Nikita)
 
 - SOAP:
+  . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita) 
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
 
