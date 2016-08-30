@@ -51,6 +51,8 @@ PHP                                                                        NEWS
     an exception AND warning). (Laruence)
   . Fixed bug #65550 (get_browser() incorrectly parses entries with "+" sign).
     (cmb)
+  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
+    (cmb)
 
 - XML:
   . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
