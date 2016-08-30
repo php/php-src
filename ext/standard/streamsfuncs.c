@@ -1636,56 +1636,54 @@ PHP_FUNCTION(stream_supports_lock)
 	RETURN_TRUE;
 }
 
-/* {{{ proto proto stream_vt100_support(string stream[, bool enable])
+/* {{{ proto proto stream_vt100_support(resource stream[, bool enable])
    Get or set VT100 support for the specified stream.
 */
 PHP_FUNCTION(stream_vt100_support)
 {
-	zend_string *stream;
+	zval *z_stream;
+	php_stream *stream;
+	int fileno;
 	zend_bool enable;
 #ifdef PHP_WIN32
 	DWORD handle_id;
-#else
-	int fileno;
 #endif
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "S|b", &stream, &enable) == FAILURE) {
+	if (zend_parse_parameters(argc, "z|b", &z_stream, &enable) == FAILURE) {
 		return;
 	}
-	if (!stream || !ZSTR_VAL(stream) || !ZSTR_LEN(stream)) {
-		/* Empty stream name */
+	stream = NULL;
+	switch (Z_TYPE_P(z_stream)) {
+		case IS_RESOURCE:
+			php_stream_from_zval_no_verify(stream, z_stream);
+			break;
+	}
+	if (stream == NULL) {
 		RETURN_FALSE;
 	}
-
-#ifdef PHP_WIN32
-	/* Determine the Windows standard handle associated to the stream name received */
-	if (strcmp(ZSTR_VAL(stream), "php://stdin") == 0) {
-		handle_id = STD_INPUT_HANDLE;
-	}
-	else if (strcmp(ZSTR_VAL(stream), "php://stdout") == 0) {
-		handle_id = STD_OUTPUT_HANDLE;
-	}
-	else if (strcmp(ZSTR_VAL(stream), "php://stderr") == 0) {
-		handle_id = STD_ERROR_HANDLE;
-	}
-	else {
-		RETURN_FALSE;
-	}
-#else
-	/* Determine the file descriptor identifier associated to the stream name received */
-	if (strcmp(ZSTR_VAL(stream), "php://stdin") == 0) {
-		fileno = STDIN_FILENO;
-	}
-	else if (strcmp(ZSTR_VAL(stream), "php://stdout") == 0) {
-		fileno = STDOUT_FILENO;
-	}
-	else if (strcmp(ZSTR_VAL(stream), "php://stderr") == 0) {
-		fileno = STDERR_FILENO;
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
 	} else {
 		RETURN_FALSE;
 	}
+	switch (fileno) {
+		case STDOUT_FILENO:
+#ifdef PHP_WIN32
+			handle_id = STD_OUTPUT_HANDLE;
 #endif
+			break;
+		case STDERR_FILENO:
+#ifdef PHP_WIN32
+			handle_id = STD_ERROR_HANDLE;
+#endif
+			break;
+		default:
+			RETURN_FALSE;
+	}
+
 
 	if (argc == 1) {
 		/* Check if the specified stream supports VT100 control codes */
@@ -1737,7 +1735,7 @@ PHP_FUNCTION(stream_vt100_support)
 		}
 #elif HAVE_POSIX
 		/* Check if the file descriptor identifier is a terminal */
-		if (isatty(fd)) {
+		if (isatty(fileno)) {
 			if (enable) {
 				RETURN_TRUE;
 			}
