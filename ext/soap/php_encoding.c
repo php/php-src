@@ -2120,6 +2120,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 	 		if (j >= dims[0]) {
 	 			break;
 	 		}
+			ZVAL_DEREF(zdata);
  			if (dimension == 1) {
  				if (enc == NULL) {
 					xparam = master_to_xml(get_conversion(Z_TYPE_P(zdata)), zdata, style, xmlParam);

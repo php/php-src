@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - mbstring:
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
 
+- SOAP:
+  . Fixed bug #71996 (Using references in arrays doesn't work like expected).
+    (Nikita)
+
 - Standard:
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
