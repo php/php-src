@@ -68,6 +68,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
+#define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0x7fffffff)
 
 static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
@@ -80,8 +81,12 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//zend_timeout(0);
 	|.if X64
 	|	xor CARG1d, CARG1d
+	if (IS_32BIT(dasm_end) && IS_32BIT(zend_timeout)) {
+	|	call qword &zend_timeout
+	} else {
 	|	load_addr rax, zend_timeout
 	|	call rax
+	}
 	|.else
 	|	push 0
 	|	call dword &zend_timeout
@@ -93,9 +98,14 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	mov EX->opline, IP
 		|	//zend_interrupt_function(execute_data);
 		|.if X64
+		if (IS_32BIT(dasm_end) && IS_32BIT(zend_interrupt_function)) {
+		|	mov CARG1, FP
+		|	call qword &zend_interrupt_function
+		} else {
 		|	load_addr rax, zend_interrupt_function
 		|	mov CARG1, FP
 		|	call rax
+		}
 		|.else
 		|	push FP
 		|	call dword &zend_interrupt_function
@@ -119,8 +129,12 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 	|->exception_handler:
 	|	add r4, SPAD // stack alignment
 	|.if X64
+	if (IS_32BIT(dasm_end) && IS_32BIT(EG(exception_op)->handler)) {
+	|	jmp qword &(EG(exception_op)->handler)
+	} else {
 	|	load_addr rax, EG(exception_op)->handler
 	|	jmp rax
+	}
 	|.else
 	|	jmp dword &(EG(exception_op)->handler)
 	|.endif
@@ -170,8 +184,12 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline, int may_throw)
 	const void *handler = opline->handler;
 
 	|.if X64
+	if (IS_32BIT(dasm_end) && IS_32BIT(handler)) {
+	|	call qword &handler
+	} else {
 	|	load_addr rax, handler
 	|	call rax
+	}
 	|.else
 	|	call dword &handler
 	|.endif
@@ -187,8 +205,12 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 
 	|	add r4, SPAD // stack alignment
 	|.if X64
+	if (IS_32BIT(dasm_end) && IS_32BIT(handler)) {
+	|	jmp qword &handler
+	} else {
 	|	load_addr rax, handler
 	|	jmp rax
+	}
 	|.else
 	|	jmp dword &handler
 	|.endif

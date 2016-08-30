@@ -37,6 +37,7 @@
 #define ZEND_JIT_LEVEL  ZEND_JIT_LEVEL_FULL
 
 //#define CONTEXT_THREDED_JIT
+#define PREFER_MAP_32BIT
 
 #define JIT_PREFIX      "JIT$"
 #define JIT_STUB_PREFIX "JIT$$"
@@ -52,6 +53,10 @@ typedef struct _zend_jit_stub {
 
 #define JIT_STUB(name) \
 	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub}
+
+static void *dasm_buf = NULL;
+static void *dasm_ptr = NULL;
+static void *dasm_end = NULL;
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.c"
@@ -72,10 +77,6 @@ typedef struct _zend_jit_stub {
 #endif
 
 #define DASM_ALIGNMENT 16
-
-static void *dasm_buf = NULL;
-static void *dasm_ptr = NULL;
-static void *dasm_end = NULL;
 
 static zend_string *zend_jit_func_name(zend_op_array *op_array)
 {
@@ -253,20 +254,49 @@ static void *jit_alloc(size_t size, int shared)
 
 # ifdef MAP_HUGETLB
 	if (size >= huge_page_size && size % huge_page_size == 0) {
+#  if defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
+		/* to got HUGE PAGES in low 32-bit address we have to reseve address
+		   space and then remap it using MAP_HUGETLB */
+		p = mmap(NULL, size, prot,
+				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+		if (p != MAP_FAILED) {
+			void *p2 = mmap(p, size, prot,
+					(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB | MAP_FIXED, -1, 0);
+			if (p2 != MAP_FAILED) {
+				return p2;
+			} else {
+				return p;
+			}
+		}
+#  endif
 		p = mmap(NULL, size, prot,
 				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
 		if (p != MAP_FAILED) {
-			return (void*)p;
+			return p;
 		}
+#  if defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
+	} else {
+		p = mmap(NULL, size, prot,
+				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+		if (p != MAP_FAILED) {
+			return p;
+		}
+#  endif
+	}
+# elif defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
+	p = mmap(NULL, size, prot,
+			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+	if (p != MAP_FAILED) {
+		return p;
 	}
 # endif
 	p = mmap(NULL, size, prot,
 			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS, -1, 0);
-    if (p == MAP_FAILED) {
+	if (p == MAP_FAILED) {
 		return NULL;
 	}
 
-    return (void*)p;
+	return (void*)p;
 #endif
 }
 
