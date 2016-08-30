@@ -76,6 +76,9 @@ PHP                                                                        NEWS
   . Fixed bug #72940 (SID always return "name=ID", even if session
     cookie exist). (Yasuo)
 
+- SimpleXML:
+  . Fixed bug #72971 (SimpleXML isset/unset do not respect namespace). (Nikita)
+
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
     Kenttä)
