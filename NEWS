@@ -31,6 +31,9 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed bug #72787 (json_decode reads out of bounds). (Jakub Zelenka)
 
+- mbstring:
+  . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
+
 - MSSQL:
   . Fixed bug #72039 (Use of uninitialised value on mssql_guid_string). (Kalle)
 
