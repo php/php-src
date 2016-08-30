@@ -226,12 +226,7 @@ static size_t jit_page_size(void)
 	GetSystemInfo(&system_info);
 	return system_info.dwPageSize;
 #else
-# ifdef MAP_HUGETLB
-	/* hardcode hugepage size */
-	return 2 * 1024 * 1024;
-# else
 	return getpagesize();
-# endif
 #endif
 }
 
@@ -242,6 +237,9 @@ static void *jit_alloc(size_t size, int shared)
 #else
 	void *p;
 	int prot;
+# ifdef MAP_HUGETLB
+	size_t huge_page_size = 2 * 1024 * 1024;
+# endif
 
 # ifdef HAVE_MPROTECT
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
@@ -254,10 +252,12 @@ static void *jit_alloc(size_t size, int shared)
 # endif
 
 # ifdef MAP_HUGETLB
-	p = mmap(NULL, size, prot,
-			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
-    if (p != MAP_FAILED) {
-		return (void*)p;
+	if (size >= huge_page_size && size % huge_page_size == 0) {
+		p = mmap(NULL, size, prot,
+				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+		if (p != MAP_FAILED) {
+			return (void*)p;
+		}
 	}
 # endif
 	p = mmap(NULL, size, prot,
@@ -835,7 +835,9 @@ ZEND_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB)) {
-		mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE);
+		if (mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE) != 0) {
+			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		}
 	}
 #endif
 }
@@ -844,7 +846,9 @@ ZEND_API void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB)) {
-		mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC);
+		if (mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC) != 0) {
+			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		}
 	}
 #endif
 }
