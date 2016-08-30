@@ -356,7 +356,10 @@ long_dim:
 					_node_as_zval(sxe, node, rv, newtype, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
 #else
-				_node_as_zval(sxe, node, rv, SXE_ITER_ELEMENT, name, sxe->iter.nsprefix, sxe->iter.isprefix);
+				/* In BP_VAR_IS mode only return a proper node if it actually exists. */
+				if (type != BP_VAR_IS || sxe_find_element_by_name(sxe, node->children, (xmlChar *) name)) {
+					_node_as_zval(sxe, node, rv, SXE_ITER_ELEMENT, name, sxe->iter.nsprefix, sxe->iter.isprefix);
+				}
 #endif
 			}
 		}
@@ -610,7 +613,7 @@ long_dim:
 				while (node) {
 					SKIP_TEXT(node);
 
-					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member))) {
+					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member)) && match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 						newnode = node;
 						++counter;
 					}
@@ -803,17 +806,8 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 					node = php_sxe_get_first_node(sxe, node);
 				}
 				node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, NULL);
-			}
-			else {
-				node = node->children;
-				while (node) {
-					xmlNodePtr nnext;
-					nnext = node->next;
-					if (node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member)) && match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
-						break;
-					}
-					node = nnext;
-				}
+			} else {
+				node = sxe_find_element_by_name(sxe, node->children, (xmlChar *)Z_STRVAL_P(member));
 			}
 			if (node) {
 				exists = 1;
