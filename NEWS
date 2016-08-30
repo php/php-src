@@ -78,6 +78,8 @@ PHP                                                                        NEWS
 
 - SimpleXML:
   . Fixed bug #72971 (SimpleXML isset/unset do not respect namespace). (Nikita)
+  . Fixed bug #72957 (Null coalescing operator doesn't behave as expected with
+    SimpleXMLElement). (Nikita)
 
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
