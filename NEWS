@@ -80,6 +80,8 @@ PHP                                                                        NEWS
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
   . Fixed bug #65550 (get_browser() incorrectly parses entries with "+" sign).
     (cmb)
+  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
+    (cmb)
 
 - Streams:
   . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
