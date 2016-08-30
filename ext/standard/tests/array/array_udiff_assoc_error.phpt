@@ -37,6 +37,6 @@ NULL
 
 -- Testing array_udiff_assoc() function with less than expected no. of arguments --
 
-Warning: array_udiff_assoc(): at least 3 parameters are required, 2 given in %sarray_udiff_assoc_error.php on line %d
+Warning: array_udiff_assoc() expects at least 3 parameters, 2 given in %sarray_udiff_assoc_error.php on line %d
 NULL
 ===DONE===

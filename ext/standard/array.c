@@ -4002,7 +4002,14 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	}
 
 	if (argc < req_args) {
-		php_error_docref(NULL, E_WARNING, "at least %d parameters are required, %d given", req_args, argc);
+		zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				get_active_function_name(),
+				req_args,
+				"s",
+				argc);
+		
 		return;
 	}
 
@@ -4106,7 +4113,13 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			php_error_docref(NULL, E_WARNING, "at least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				get_active_function_name(),
+				req_args,
+				"s",
+				ZEND_NUM_ARGS());
 			return;
 		}
 
@@ -4159,7 +4172,14 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			php_error_docref(NULL, E_WARNING, "at least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				get_active_function_name(),
+				req_args,
+				"s",
+				ZEND_NUM_ARGS());
+			
 			return;
 		}
 
@@ -4413,7 +4433,13 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	argc = ZEND_NUM_ARGS();
 	if (data_compare_type == DIFF_COMP_DATA_USER) {
 		if (argc < 3) {
-			php_error_docref(NULL, E_WARNING, "at least 3 parameters are required, %d given", ZEND_NUM_ARGS());
+			zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				get_active_function_name(),
+				3,
+				"s",
+				ZEND_NUM_ARGS());
 			return;
 		}
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+f", &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
@@ -4422,7 +4448,14 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		diff_data_compare_func = zval_user_compare;
 	} else {
 		if (argc < 2) {
-			php_error_docref(NULL, E_WARNING, "at least 2 parameters are required, %d given", ZEND_NUM_ARGS());
+			zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				get_active_function_name(),
+				2,
+				"s",
+				ZEND_NUM_ARGS());
+
 			return;
 		}
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
@@ -4529,7 +4562,14 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			php_error_docref(NULL, E_WARNING, "at least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				get_active_function_name(),
+				req_args,
+				"s",
+				ZEND_NUM_ARGS());
+
 			return;
 		}
 
@@ -4581,7 +4621,14 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 
 		if (ZEND_NUM_ARGS() < req_args) {
-			php_error_docref(NULL, E_WARNING, "at least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
+			zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				get_active_function_name(),
+				req_args,
+				"s",
+				ZEND_NUM_ARGS());
+
 			return;
 		}
 
@@ -4785,7 +4832,14 @@ PHP_FUNCTION(array_diff)
 	zval dummy;
 
 	if (ZEND_NUM_ARGS() < 2) {
-		php_error_docref(NULL, E_WARNING, "at least 2 parameters are required, %d given", ZEND_NUM_ARGS());
+		zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s() expects at least %d parameter%s, %d given", 
+				"array_diff",
+				2,
+				"s",
+				ZEND_NUM_ARGS());
+
 		return;
 	}
 

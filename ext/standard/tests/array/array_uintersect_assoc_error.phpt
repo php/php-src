@@ -38,6 +38,6 @@ NULL
 
 -- Testing array_uintersect_assoc() function with less than expected no. of arguments --
 
-Warning: array_uintersect_assoc(): at least 3 parameters are required, 2 given in %sarray_uintersect_assoc_error.php on line %d
+Warning: array_uintersect_assoc() expects at least 3 parameters, 2 given in %sarray_uintersect_assoc_error.php on line %d
 NULL
 ===DONE===

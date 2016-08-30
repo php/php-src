@@ -40,6 +40,6 @@ NULL
 
 -- Testing array_uintersect_uassoc() function with less than expected no. of arguments --
 
-Warning: array_uintersect_uassoc(): at least 4 parameters are required, 3 given in %sarray_uintersect_uassoc_error.php on line %d
+Warning: array_uintersect_uassoc() expects at least 4 parameters, 3 given in %sarray_uintersect_uassoc_error.php on line %d
 NULL
 ===DONE===

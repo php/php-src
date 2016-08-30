@@ -696,20 +696,24 @@ static ZEND_COLD void zend_verify_arg_error(
 	const char *fname, *fsep, *fclass;
 	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
 
-	zend_verify_type_error_common(
-		zf, arg_info, ce, value,
-		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
+	if (value) {
+		zend_verify_type_error_common(
+			zf, arg_info, ce, value,
+			&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
 
-	if (zf->common.type == ZEND_USER_FUNCTION) {
-		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-			zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given, called in %s on line %d",
-					arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind,
-					ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
+		if (zf->common.type == ZEND_USER_FUNCTION) {
+			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given, called in %s on line %d",
+						arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind,
+						ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
+			} else {
+				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+			}
 		} else {
 			zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
 		}
 	} else {
-		zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+		zend_missing_arg_error(ptr);
 	}
 }
 
@@ -955,7 +959,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 	zend_execute_data *ptr = EX(prev_execute_data);
 
 	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
+		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
 			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
 			EX(func)->common.scope ? "::" : "",
 			ZSTR_VAL(EX(func)->common.function_name),
@@ -965,7 +969,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 			EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
 			EX(func)->common.required_num_args);
 	} else {
-		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed and %s %d expected",
+		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%s(), %d passed and %s %d expected",
 			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
 			EX(func)->common.scope ? "::" : "",
 			ZSTR_VAL(EX(func)->common.function_name),

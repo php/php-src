@@ -26,11 +26,11 @@ var_dump( array_intersect_key() );
 
 -- Testing array_intersect_key() function with less than expected no. of arguments --
 
-Warning: array_intersect_key(): at least 2 parameters are required, 1 given in %s on line %d
+Warning: array_intersect_key() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
 -- Testing array_intersect_key() function with no arguments --
 
-Warning: array_intersect_key(): at least 2 parameters are required, 0 given in %s on line %d
+Warning: array_intersect_key() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 ===DONE===
