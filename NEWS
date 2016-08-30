@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.11
 
+- Standard:
+  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
+    (cmb)
+
+15 Sep 2016 PHP 7.0.11
+
 - Core:
   . Fixed bug #72944 (Null pointer deref in zval_delref_p). (Dmitry)
   . Fixed bug #72943 (assign_dim on string doesn't reset hval). (Laruence)
@@ -86,8 +92,6 @@ PHP                                                                        NEWS
     Kenttä)
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
   . Fixed bug #65550 (get_browser() incorrectly parses entries with "+" sign).
-    (cmb)
-  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
 
 - Streams:
