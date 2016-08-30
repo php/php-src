@@ -68,7 +68,7 @@ BOOL php_win32_console_handle_is_redirected(DWORD handle_id)
 	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
 
 	if (handle != INVALID_HANDLE_VALUE) {
-		if (GetFinalPathNameByHandle(handle, NULL, 0, 0) != 0 || GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+		if (GetFinalPathNameByHandleW(handle, NULL, 0, 0) != 0 || GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
 			result = TRUE;
 		}
 	}
