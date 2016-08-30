@@ -235,10 +235,6 @@ static void *jit_alloc(size_t size, int shared)
 #ifdef _WIN32
 	return VirtualAlloc(0, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 #else
-#ifdef MAP_HUGETLB
-	zend_ulong huge_page_size = 2 * 1024 * 1024;
-#endif
-
 	void *p;
 	int prot;
 
@@ -253,12 +249,10 @@ static void *jit_alloc(size_t size, int shared)
 # endif
 
 # ifdef MAP_HUGETLB
-	if (size >= huge_page_size) {
-		p = mmap(NULL, size, prot,
-				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
-		if (p != MAP_FAILED) {
-			return (void*)p;
-		}
+	p = mmap(NULL, size, prot,
+			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+    if (p != MAP_FAILED) {
+		return (void*)p;
 	}
 # endif
 	p = mmap(NULL, size, prot,
