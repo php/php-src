@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.11
+?? ??? 2016 PHP 7.0.12
 
 - Standard:
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
