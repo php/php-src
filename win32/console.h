@@ -29,9 +29,6 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-/* Pointer type to the RtlGetVersion function of ntdll.dll */
-typedef LONG (WINAPI * php_win32_console_rtlgetversion) (PRTL_OSVERSIONINFOW);
-
 /* Check if the current Windows version supports VT100 control codes */
 BOOL php_win32_console_os_supports_vt100();
 
