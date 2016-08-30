@@ -337,7 +337,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 			}
 		}
     } else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-		if (t1 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_RESOURCE)) {
+		if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
 			switch (opline->opcode) {
 				case ZEND_CASE:
 				case ZEND_FE_FETCH_R:
@@ -371,7 +371,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 			}
 		}
 	} else if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
-		if (t2 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_RESOURCE)) {
+		if (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN:
 					break;
@@ -397,6 +397,10 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 		case ZEND_SEND_REF:
 		case ZEND_FREE:
 		case ZEND_SEPARATE:
+		case ZEND_TYPE_CHECK:
+		case ZEND_DEFINED:
+		case ZEND_ISSET_ISEMPTY_THIS:
+		case ZEND_COALESCE:
 			return 0;
 		case ZEND_BIND_GLOBAL:
 			if ((opline+1)->opcode == ZEND_BIND_GLOBAL) {
@@ -464,6 +468,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 		case ZEND_BOOL:
+		case ZEND_JMP_SET:
 			return (t1 & MAY_BE_OBJECT);
 		case ZEND_BOOL_XOR:
 			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_OBJECT);
@@ -472,6 +477,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
 		case ZEND_CASE:
+		case ZEND_SPACESHIP:
 			if ((t1 & MAY_BE_ANY) == MAY_BE_NULL
 			 || (t2 & MAY_BE_ANY) == MAY_BE_NULL) {
 				return 0;
@@ -543,9 +549,10 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_ASSIGN:
-			return (t1 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_RESOURCE));
+			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
+		case ZEND_ROPE_END:
 			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT);
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
