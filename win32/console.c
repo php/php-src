@@ -20,7 +20,7 @@
 
 #include "win32/console.h"
 
-BOOL _php_win32_console_os_supports_vt100()
+BOOL php_win32_console_os_supports_vt100()
 {
 	const DWORD MINV_MAJOR = 10, MINV_MINOR = 0, MINV_BUILD = 10586;
 	static BOOL result = 2;
@@ -30,7 +30,7 @@ BOOL _php_win32_console_os_supports_vt100()
 		HMODULE module_handle = GetModuleHandle(TEXT("ntdll.dll"));
 
 		if (module_handle) {
-			_php_win32_console_rtlgetversion rtlgetversion_pointer = (_php_win32_console_rtlgetversion)GetProcAddress(module_handle, "RtlGetVersion");
+			php_win32_console_rtlgetversion rtlgetversion_pointer = (php_win32_console_rtlgetversion)GetProcAddress(module_handle, "RtlGetVersion");
 
 			if (rtlgetversion_pointer != NULL) {
 				RTL_OSVERSIONINFOW rtl_versioninfo = { 0 };
@@ -62,7 +62,7 @@ BOOL _php_win32_console_os_supports_vt100()
 	return result;
 }
 
-BOOL _php_win32_console_handle_is_redirected(DWORD handle_id)
+BOOL php_win32_console_handle_is_redirected(DWORD handle_id)
 {
 	BOOL result = FALSE;
 	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
@@ -75,7 +75,7 @@ BOOL _php_win32_console_handle_is_redirected(DWORD handle_id)
 	return result;
 }
 
-BOOL _php_win32_console_handle_has_vt100(DWORD handle_id)
+BOOL php_win32_console_handle_has_vt100(DWORD handle_id)
 {
 	BOOL result = FALSE;
 	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
@@ -92,7 +92,7 @@ BOOL _php_win32_console_handle_has_vt100(DWORD handle_id)
 	return result;
 }
 
-BOOL _php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable)
+BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable)
 {
 	BOOL result = FALSE;
 	HANDLE handle = handle_id ? GetStdHandle(STD_OUTPUT_HANDLE) : INVALID_HANDLE_VALUE;

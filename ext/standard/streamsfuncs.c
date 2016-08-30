@@ -1691,15 +1691,15 @@ PHP_FUNCTION(stream_vt100_support)
 		/* Check if the specified stream supports VT100 control codes */
 #ifdef PHP_WIN32
 		/* Check if the current Windows version supports VT100 control codes */
-		if (!_php_win32_console_os_supports_vt100()) {
+		if (!php_win32_console_os_supports_vt100()) {
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle is redirected to file */
-		if (_php_win32_console_handle_is_redirected(handle_id)) {
+		if (php_win32_console_handle_is_redirected(handle_id)) {
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle has VT100 control codes enabled */
-		if (_php_win32_console_handle_has_vt100(handle_id)) {
+		if (php_win32_console_handle_has_vt100(handle_id)) {
 			RETURN_TRUE;
 		}
 		else {
@@ -1721,15 +1721,15 @@ PHP_FUNCTION(stream_vt100_support)
 		/* Enable/disable VT100 control codes support for the specified stream */
 #ifdef PHP_WIN32
 		/* Check if the current Windows version supports VT100 control codes */
-		if (!_php_win32_console_os_supports_vt100()) {
+		if (!php_win32_console_os_supports_vt100()) {
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle is redirected to file */
-		if (_php_win32_console_handle_is_redirected(handle_id)) {
+		if (php_win32_console_handle_is_redirected(handle_id)) {
 			RETURN_FALSE;
 		}
 		/* Enable/disable VT100 control codes support for the specified Windows standard handle */
-		if (_php_win32_console_handle_set_vt100(handle_id, enable ? TRUE : FALSE)) {
+		if (php_win32_console_handle_set_vt100(handle_id, enable ? TRUE : FALSE)) {
 			RETURN_TRUE;
 		}
 		else {
