@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-01 Sep 2016 PHP 7.0.11
+01 Sep 2016 PHP 7.0.11RC1
 
 - Core:
   . Fixed bug #72944 (Null pointer deref in zval_delref_p). (Dmitry)
