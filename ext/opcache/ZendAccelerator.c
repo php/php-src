@@ -2770,7 +2770,7 @@ static int accel_startup(zend_extension *extension)
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
 		if (ZCG(accel_directives).jit_buffer_size) {
-			zend_jit_startup(ZCG(accel_directives).jit_buffer_size);
+			zend_jit_startup(ZCG(accel_directives).jit_buffer_size * 1024 * 1024);
 		}
 #endif
 		zend_shared_alloc_save_state();
