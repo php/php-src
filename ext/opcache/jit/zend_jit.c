@@ -226,7 +226,12 @@ static size_t jit_page_size(void)
 	GetSystemInfo(&system_info);
 	return system_info.dwPageSize;
 #else
+# ifdef MAP_HUGETLB
+	/* hardcode hugepage size */
+	return 2 * 1024 * 1024;
+# else
 	return getpagesize();
+# endif
 #endif
 }
 
