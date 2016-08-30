@@ -51,6 +51,9 @@ PHP                                                                        NEWS
     cookie exist). (Yasuo)
   . Implemented session_gc() and session_create_id() functions. (Yasuo)
 
+- SimpleXML:
+  . Fixed bug #72971 (SimpleXML isset/unset do not respect namespace). (Nikita)
+
 - Standard:
   . Fixed bug #72920 (Accessing a private constant using constant() creates
     an exception AND warning). (Laruence)
