@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
 
 - SOAP:
+  . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita)
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
 

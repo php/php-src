@@ -1963,7 +1963,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			xmlNodePtr property;
 
 			ZEND_HASH_FOREACH_STR_KEY_VAL_IND(prop, str_key, zprop) {
-
+				ZVAL_DEREF(zprop);
 				property = master_to_xml(get_conversion(Z_TYPE_P(zprop)), zprop, style, xmlParam);
 
 				if (str_key) {
@@ -2684,7 +2684,6 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(data), int_val, key_val, temp_data) {
-
 			item = xmlNewNode(NULL, BAD_CAST("item"));
 			xmlAddChild(xmlParam, item);
 			key = xmlNewNode(NULL, BAD_CAST("key"));
@@ -2707,6 +2706,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 				smart_str_free(&tmp);
 			}
 
+			ZVAL_DEREF(temp_data);
 			xparam = master_to_xml(get_conversion(Z_TYPE_P(temp_data)), temp_data, style, item);
 			xmlNodeSetName(xparam, BAD_CAST("value"));
 		} ZEND_HASH_FOREACH_END();
