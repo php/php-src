@@ -86,7 +86,7 @@ BOOL php_win32_console_handle_has_vt100(DWORD handle_id)
 BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable)
 {
 	BOOL result = FALSE;
-	HANDLE handle = handle_id ? GetStdHandle(STD_OUTPUT_HANDLE) : INVALID_HANDLE_VALUE;
+	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
 
 	if (handle != INVALID_HANDLE_VALUE) {
 		DWORD mode;
