@@ -607,7 +607,7 @@ long_dim:
 				while (node) {
 					SKIP_TEXT(node);
 
-					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member))) {
+					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member)) && match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 						newnode = node;
 						++counter;
 					}
