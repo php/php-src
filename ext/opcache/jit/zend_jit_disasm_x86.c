@@ -48,7 +48,7 @@ static struct ud ud;
 
 typedef struct _sym_node {
 	uint64_t          addr;
-	uint64_t          size;
+	uint64_t          end;
 	struct _sym_node *parent;
 	struct _sym_node *child[2];
 	unsigned char     info;
@@ -105,7 +105,7 @@ static void zend_jit_disasm_add_symbol(const char *name,
 		return;
 	}
 	sym->addr = addr;
-	sym->size = size;
+	sym->end  = (addr + size - 1);
 	memcpy((char*)&sym->name, name, len + 1);
 	sym->parent = sym->child[0] = sym->child[1] = NULL;
 	sym->info = 1;
@@ -115,7 +115,7 @@ static void zend_jit_disasm_add_symbol(const char *name,
 		/* insert it into rbtree */
 		do {
 			if (sym->addr > node->addr) {
-				ZEND_ASSERT(sym->addr >= (node->addr + node->size));
+				ZEND_ASSERT(sym->addr > (node->end));
 				if (node->child[1]) {
 					node = node->child[1];
 				} else {
@@ -197,8 +197,7 @@ static const char* zend_jit_disasm_find_symbol(uint64_t  addr,
 	while (node) {
 		if (addr < node->addr) {
 			node = node->child[0];
-		} else if (addr > node->addr &&
-			addr >= (node->addr + node->size)) {
+		} else if (addr > node->end) {
 			node = node->child[1];
 		} else {
 			*offset = addr - node->addr;
