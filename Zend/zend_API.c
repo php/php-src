@@ -212,8 +212,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int num_
 		class_name, \
 		class_name[0] ? "::" : "", \
 		ZSTR_VAL(active_function->common.function_name),
-		min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-		num_args < min_num_args ? min_num_args : max_num_args,
+		min_num_args == max_num_args ? "exactly" : "at least",
+		min_num_args,
 		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
 		num_args);
 }
@@ -736,7 +736,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			/* 'Z' iz not supported anymore and should be replaced with 'z' */
 			ZEND_ASSERT(c != 'Z');
 		default:
-			return "unknown";
+			return NULL;
 	}
 
 	*spec = spec_walk;
@@ -870,7 +870,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		max_num_args = -1;
 	}
 
-	if (num_args < min_num_args || (num_args > max_num_args && max_num_args >= 0)) {
+	if (num_args < min_num_args) {
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
 			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
@@ -879,8 +879,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 					class_name,
 					class_name[0] ? "::" : "",
 					ZSTR_VAL(active_function->common.function_name),
-					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-					num_args < min_num_args ? min_num_args : max_num_args,
+					min_num_args == max_num_args ? "exactly" : "at least",
+					min_num_args,
 					(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
 					num_args);
 		}
