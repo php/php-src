@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.12
 
+- mbstring:
+  . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
+
 - Standard:
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
