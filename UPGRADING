@@ -236,6 +236,10 @@ PHP 7.1 UPGRADE NOTES
   . Added pcntl_signal_get_handler() that returns the current signal handler
     for a particular signal.
 
+- Session:
+  . Added session_gc() that performs session data garbage collection.
+  . Added session_create_id() for creating custom session ID.
+
 - Standard:
   . Added is_iterable() that determines if a value will be accepted by the new
     iterable pseudo-type.
