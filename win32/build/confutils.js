@@ -1553,7 +1553,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			if (X64) {
 				analyzer_base_flags += " -D _M_X64 -D _WIN64";
 			} else {
-				analyzer_base_flags += " -D _M_IX86 -D _WIN32";
+				analyzer_base_flags += " -D _M_IX86 ";
 			}
 			analyzer_base_flags += " -D _WIN32 -D WIN32 -D _WINDOWS";
 
