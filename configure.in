@@ -583,6 +583,18 @@ dnl Check __builtin_ctzl
 PHP_CHECK_BUILTIN_CTZL
 dnl Check __builtin_ctzll
 PHP_CHECK_BUILTIN_CTZLL
+dnl Check __builtin_smull_overflow
+PHP_CHECK_BUILTIN_SMULL_OVERFLOW
+dnl Check __builtin_smulll_overflow
+PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
+dnl Check __builtin_saddl_overflow
+PHP_CHECK_BUILTIN_SADDL_OVERFLOW
+dnl Check __builtin_saddll_overflow
+PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
+dnl Check __builtin_ssubl_overflow
+PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
+dnl Check __builtin_ssubll_overflow
+PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE

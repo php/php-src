@@ -54,12 +54,14 @@ DIR *opendir(const char *dir)
 
 	resolvedw = php_win32_ioutil_conv_any_to_w(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
 	if (!resolvedw) {
+		free(dp);
 		return NULL;
 	}
 
 	filespecw_len = resolvedw_len + 2;
 	filespecw = (wchar_t *)malloc((filespecw_len + 1)*sizeof(wchar_t));
 	if (filespecw == NULL) {
+		free(dp);
 		free(resolvedw);
 		return NULL;
 	}

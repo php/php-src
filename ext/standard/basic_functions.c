@@ -2851,7 +2851,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(proc_nice,														arginfo_proc_nice)
 #endif
 
-	PHP_FALIAS(rand, mt_rand,												arginfo_mt_rand)
+	PHP_FE(rand,															arginfo_mt_rand)
 	PHP_FALIAS(srand, mt_srand,												arginfo_mt_srand)
 	PHP_FALIAS(getrandmax, mt_getrandmax,									arginfo_mt_getrandmax)
 	PHP_FE(mt_rand,															arginfo_mt_rand)
@@ -3481,7 +3481,14 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
-	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
+	memset(&BG(url_adapt_session_ex), 0, sizeof(BG(url_adapt_session_ex)));
+	memset(&BG(url_adapt_output_ex), 0, sizeof(BG(url_adapt_output_ex)));
+
+	BG(url_adapt_session_ex).type = 1;
+	BG(url_adapt_output_ex).type  = 0;
+
+	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
+	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
 
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
@@ -3495,10 +3502,17 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 
 static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	if (basic_globals_p->url_adapt_state_ex.tags) {
-		zend_hash_destroy(basic_globals_p->url_adapt_state_ex.tags);
-		free(basic_globals_p->url_adapt_state_ex.tags);
+	if (basic_globals_p->url_adapt_session_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_session_ex.tags);
+		free(basic_globals_p->url_adapt_session_ex.tags);
 	}
+	if (basic_globals_p->url_adapt_output_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_output_ex.tags);
+		free(basic_globals_p->url_adapt_output_ex.tags);
+	}
+
+	zend_hash_destroy(&basic_globals_p->url_adapt_session_hosts_ht);
+	zend_hash_destroy(&basic_globals_p->url_adapt_output_hosts_ht);
 }
 /* }}} */
 
@@ -3873,7 +3887,9 @@ PHP_FUNCTION(constant)
 			}
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
+		}
 		RETURN_NULL();
 	}
 }

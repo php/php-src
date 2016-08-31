@@ -1901,8 +1901,9 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
 				int len;
 				char s[64];
 				char *tmp;
-				strncpy(s, slist->data, 64);
-				tmp = memchr(s, ':', 64);
+				strncpy(s, slist->data, sizeof(s));
+				s[sizeof(s)-1] = '\0';
+				tmp = memchr(s, ':', sizeof(s));
 				if(tmp) {
 					*tmp = '\0';
 					len = strlen(s);
@@ -3530,7 +3531,7 @@ PHP_FUNCTION(curl_reset)
 PHP_FUNCTION(curl_escape)
 {
 	char       *str = NULL, *res = NULL;
-	size_t        str_len = 0;
+	size_t     str_len = 0;
 	zval       *zid;
 	php_curl   *ch;
 
@@ -3539,6 +3540,10 @@ PHP_FUNCTION(curl_escape)
 	}
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_SIZE_T_INT_OVFL(str_len)) {
 		RETURN_FALSE;
 	}
 
@@ -3569,7 +3574,7 @@ PHP_FUNCTION(curl_unescape)
 		RETURN_FALSE;
 	}
 
-	if (str_len > INT_MAX) {
+	if (ZEND_SIZE_T_INT_OVFL(str_len)) {
 		RETURN_FALSE;
 	}
 

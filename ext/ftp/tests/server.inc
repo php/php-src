@@ -139,7 +139,10 @@ if ($pid) {
 			$buf = fread($s, 2048);
 		}
 
-		if (!preg_match('/^USER (\w+)\r\n$/', $buf, $m)) {
+		if ($buf == "AUTH TLS\r\n") {
+		   fputs($s, "500 not supported.\r\n");
+		   return ;
+		} else if (!preg_match('/^USER (\w+)\r\n$/', $buf, $m)) {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
 			dump_and_exit($buf);
 		}
@@ -207,6 +210,10 @@ if ($pid) {
 		} elseif ($buf === "TYPE A\r\n") {
 			$ascii = true;
 			fputs($s, "200 OK\r\n");
+
+		} elseif ($buf === "AUTH SSL\r\n") {
+			$ascii = true;
+			fputs($s, "500 not supported\r\n");
 
 		} elseif ($buf === "TYPE I\r\n") {
 			$ascii = false;

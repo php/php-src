@@ -28,10 +28,10 @@ imageline($mainimg, 50, 50, 50, 60, IMG_COLOR_BRUSHED);
 
 // Get output and generate md5 hash
 ob_start();
-imagepng($mainimg, null, 9);
+imagegd($mainimg);
 $result_image = ob_get_contents();
 ob_end_clean();
 echo md5(base64_encode($result_image));
 ?>
 --EXPECT--
-8168577c0d1fe6d9d11397cb15263d82
+2bb294c388d826cc9bba6c6fd31f265a
