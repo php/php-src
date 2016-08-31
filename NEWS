@@ -145,6 +145,8 @@ PHP                                                                        NEWS
   . Fixed bug #72683 (getmxrr broken). (Anatol)
   . Fixed bug #72742 (memory allocator fails to realloc small block to large
     one). (Stas)
+  . Fixed URL rewriter partially. It would not rewrite '//example.com/' URL
+    unconditionally. Only requested host(HTTP_HOST) is rewritten. (Yasuo)
 
 - Bz2:
   . Fixed bug #72837 (integer overflow in bzdecompress caused heap
