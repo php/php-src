@@ -90,6 +90,8 @@ PHP                                                                        NEWS
   . Fixed bug #72681 (PHP Session Data Injection Vulnerability). (Stas)
   . Fixed bug #72742 (memory allocator fails to realloc small block to large
     one). (Stas)
+  . Fixed URL rewriter. It would not rewrite '//example.com/' URL
+    unconditionally. URL rewrite target hosts whitelist is implemented. (Yasuo)
 
 - Bz2:
   . Fixed bug #72837 (integer overflow in bzdecompress caused heap
