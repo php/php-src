@@ -252,53 +252,48 @@ static void *jit_alloc(size_t size, int shared)
 	prot = PROT_EXEC | PROT_READ | PROT_WRITE;
 # endif
 
+	shared = shared? MAP_SHARED : MAP_PRIVATE;
+
 # ifdef MAP_HUGETLB
 	if (size >= huge_page_size && size % huge_page_size == 0) {
 #  if defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
+		void *p2;
 		/* to got HUGE PAGES in low 32-bit address we have to reseve address
 		   space and then remap it using MAP_HUGETLB */
-		p = mmap(NULL, size, prot,
-				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+		p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
 		if (p != MAP_FAILED) {
-			void *p2 = mmap(p, size, prot,
-					(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB | MAP_FIXED, -1, 0);
+			munmap(p, size);
+			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
+			p2 = mmap(p, size, prot, shared | MAP_ANONYMOUS | MAP_HUGETLB | MAP_FIXED, -1, 0);
 			if (p2 != MAP_FAILED) {
 				return p2;
 			} else {
-				/* If mmap failed, p becomes unaccessable,
-				 * however, Let's munmap it explictly in case it is not discarded */
-				munmap(p, size);
-				p = mmap(NULL, size, prot,
-						(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+				p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
 				if (p != MAP_FAILED) {
 					return p;
 				}
 			}
 		}
 #  endif
-		p = mmap(NULL, size, prot,
-				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+		p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
 		if (p != MAP_FAILED) {
 			return p;
 		}
 #  if defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
 	} else {
-		p = mmap(NULL, size, prot,
-				(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+		p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
 		if (p != MAP_FAILED) {
 			return p;
 		}
 #  endif
 	}
 # elif defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
-	p = mmap(NULL, size, prot,
-			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+	p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
 	if (p != MAP_FAILED) {
 		return p;
 	}
 # endif
-	p = mmap(NULL, size, prot,
-			(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS, -1, 0);
+	p = mmap(NULL, size, prot, shared | MAP_ANONYMOUS, -1, 0);
 	if (p == MAP_FAILED) {
 		return NULL;
 	}
