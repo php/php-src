@@ -643,11 +643,9 @@ PS_GC_FUNC(files)
 
 	if (data->dirdepth == 0) {
 		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime);
-	} else {
-		*nrdels = -1; // Cannot process multiple depth save dir
 	}
 
-	return *nrdels;
+	return SUCCESS;
 }
 
 

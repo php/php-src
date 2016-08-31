@@ -148,7 +148,7 @@ PHP_METHOD(SessionHandler, destroy)
 PHP_METHOD(SessionHandler, gc)
 {
 	zend_long maxlifetime;
-	zend_long nrdels = -1;
+	int nrdels;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
@@ -156,10 +156,7 @@ PHP_METHOD(SessionHandler, gc)
 		return;
 	}
 
-	if (PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels) == FAILURE) {
-		RETURN_FALSE;
-	}
-	RETURN_LONG(nrdels);
+	RETURN_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels));
 }
 /* }}} */
 
