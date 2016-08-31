@@ -79,6 +79,8 @@ PHP                                                                        NEWS
   . Fixed bug #72663 (Create an Unexpected Object and Don't Invoke
     __wakeup() in Deserialization). (Stas)
   . Fixed bug #72681 (PHP Session Data Injection Vulnerability). (Stas)
+  . Fixed URL rewriter partially. It would not rewrite '//example.com/' URL
+    unconditionally. Only requested host(HTTP_HOST) is rewritten. (Yasuo)
 
 - Calendar:
   . Fixed bug #67976 (cal_days_month() fails for final month of the French
