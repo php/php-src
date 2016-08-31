@@ -22,8 +22,6 @@
 
 #define HAVE_GDB
 
-#ifdef HAVE_GDB
-
 #include "zend_elf.h"
 #include "zend_gdb.h"
 
@@ -488,7 +486,6 @@ static void zend_jit_gdb_init(void)
 #endif
 }
 
-#endif
 /*
  * Local variables:
  * tab-width: 4
