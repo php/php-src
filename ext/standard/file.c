@@ -1547,7 +1547,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	}
 
 	if (size < 0) {
-		php_error_docref(NULL, E_WARNING, "Negative size is not supported");
+		/* php_error_docref(NULL, E_WARNING, "Negative size is not supported"); */
 		RETURN_FALSE;
 	}
 
