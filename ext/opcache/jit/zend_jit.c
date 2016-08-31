@@ -265,7 +265,14 @@ static void *jit_alloc(size_t size, int shared)
 			if (p2 != MAP_FAILED) {
 				return p2;
 			} else {
-				return p;
+				/* If mmap failed, p becomes unaccessable,
+				 * however, Let's munmap it explictly in case it is not discarded */
+				munmap(p, size);
+				p = mmap(NULL, size, prot,
+						(shared ? MAP_SHARED : MAP_PRIVATE) | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+				if (p != MAP_FAILED) {
+					return p;
+				}
 			}
 		}
 #  endif
