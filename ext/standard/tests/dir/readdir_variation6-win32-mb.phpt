@@ -1,5 +1,7 @@
 --TEST--
 Test readdir() function : usage variations - operate on previously opened directory
+--SKIPIF--
+<?php if (stristr(PHP_OS, "Darwin")) { die("Skip Unsupported on OS X"); } ?> 
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
