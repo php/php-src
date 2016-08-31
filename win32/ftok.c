@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 
 
-PHPAPI key_t
+PHP_WIN32_IPC_API key_t
 ftok(const char *pathname, int proj_id)
 {
 	HANDLE fh;

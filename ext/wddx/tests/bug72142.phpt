@@ -1,5 +1,7 @@
 --TEST--
 Bug #72142: WDDX Packet Injection Vulnerability in wddx_serialize_value()
+--SKIPIF--
+<?php if (!extension_loaded("wddx")) print "skip"; ?>
 --FILE--
 <?php
 

@@ -753,9 +753,14 @@ PHP_FUNCTION(proc_open)
 
 		len = (sizeof(COMSPEC_NT) + sizeof(" /c ") + tmp_len + 1);
 		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
+		if (!cmdw2) {
+			php_error_docref(NULL, E_WARNING, "Command conversion failed");
+			goto exit_fail;
+		}
 		ret = _snwprintf(cmdw2, len, L"%hs /c %s", COMSPEC_NT, cmdw);
 
 		if (-1 == ret) {
+			free(cmdw2);
 			php_error_docref(NULL, E_WARNING, "Command conversion failed");
 			goto exit_fail;
 		}

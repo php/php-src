@@ -186,9 +186,7 @@ static PHP_MINFO_FUNCTION(json)
 
 PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	php_json_encode_zval(buf, val, options);
-
-	return JSON_G(error_code) > 0 ? FAILURE : SUCCESS;
+	return php_json_encode_zval(buf, val, options);
 }
 /* }}} */
 
@@ -255,6 +253,16 @@ static PHP_FUNCTION(json_decode)
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		RETURN_NULL();
+	}
+
+	if (depth <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be greater than zero");
+		RETURN_NULL();
+	}
+
+	if (depth > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be lower than %d", INT_MAX);
 		RETURN_NULL();
 	}
 

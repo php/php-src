@@ -19,7 +19,7 @@ try {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Too few arguments to function foo(), 0 passed in %sbug70689.php on line 12 and exactly 1 expected in %sbug70689.php:3
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function foo(), 0 passed in %sbug70689.php on line 12 and exactly 1 expected in %sbug70689.php:3
 Stack trace:
 #0 %sbug70689.php(12): foo()
 #1 {main}

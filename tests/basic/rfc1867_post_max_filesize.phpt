@@ -2,8 +2,6 @@
 rfc1867 post_max_filesize
 --INI--
 file_uploads=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1
 max_file_uploads=10
 --POST_RAW--

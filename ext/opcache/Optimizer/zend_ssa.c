@@ -450,9 +450,8 @@ static void place_essa_pis(
 			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
 				pi_type_mask(pi, mask_for_type_check(type));
 			}
-			if (type != IS_OBJECT && type != IS_RESOURCE) {
-				/* is_object() and is_resource() may return false, even though the value is
-				 * an object/resource. */
+			if (type != IS_RESOURCE) {
+				/* is_resource() may return false for closed resources */
 				if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var))) {
 					pi_not_type_mask(pi, mask_for_type_check(type));
 				}
@@ -501,7 +500,7 @@ static void place_essa_pis(
 				   (opline-1)->op2_type == IS_CONST) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 			zend_string *lcname = Z_STR_P(CRT_CONSTANT((opline-1)->op2) + 1);
-			zend_class_entry *ce = zend_hash_find_ptr(&script->class_table, lcname);
+			zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
 			if (!ce) {
 				ce = zend_hash_find_ptr(CG(class_table), lcname);
 				if (!ce || ce->type != ZEND_INTERNAL_CLASS) {

@@ -4059,11 +4059,8 @@ zend_bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, pub_key);
 	OPENSSL_PKEY_SET_BN(data, priv_key);
-	if (priv_key || pub_key) {
-		return 1;
-	}
-	if (!DSA_set0_key(dsa, pub_key, priv_key)) {
-		return 0;
+	if (pub_key) {
+		return DSA_set0_key(dsa, pub_key, priv_key);
 	}
 
 	/* generate key */
@@ -4098,11 +4095,8 @@ zend_bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, priv_key);
 	OPENSSL_PKEY_SET_BN(data, pub_key);
-	if (priv_key || pub_key) {
-		return 1;
-	}
-	if (!DH_set0_key(dh, pub_key, priv_key)) {
-		return 0;
+	if (pub_key) {
+		return DH_set0_key(dh, pub_key, priv_key);
 	}
 
 	/* generate key */
@@ -6293,6 +6287,7 @@ PHP_FUNCTION(openssl_encrypt)
 
 			base64_str = php_base64_encode((unsigned char*)ZSTR_VAL(outbuf), outlen);
 			zend_string_release(outbuf);
+			outbuf = base64_str;
 			RETVAL_STR(base64_str);
 		}
 		if (mode.is_aead && tag) {
@@ -6304,14 +6299,20 @@ PHP_FUNCTION(openssl_encrypt)
 				ZSTR_LEN(tag_str) = tag_len;
 				ZVAL_NEW_STR(tag, tag_str);
 			} else {
-				zend_string_release(tag_str);
 				php_error_docref(NULL, E_WARNING, "Retrieving verification tag failed");
+				zend_string_release(tag_str);
+				zend_string_release(outbuf);
+				RETVAL_FALSE;
 			}
 		} else if (tag) {
 			zval_dtor(tag);
 			ZVAL_NULL(tag);
 			php_error_docref(NULL, E_WARNING,
 					"The authenticated tag cannot be provided for cipher that doesn not support AEAD");
+		} else if (mode.is_aead) {
+			php_error_docref(NULL, E_WARNING, "A tag should be provided when using AEAD mode");
+			zend_string_release(outbuf);
+			RETVAL_FALSE;
 		}
 	} else {
 		php_openssl_store_errors();
