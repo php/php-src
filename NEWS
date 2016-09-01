@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC2
 
+- Opcache:
+  . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
+    function). (Laruence)
 
 
 01 Sep 2016, PHP 7.1.0RC1
