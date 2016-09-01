@@ -61,7 +61,7 @@ PHP 7.1 UPGRADE NOTES
   . Fixes to random number generators mean that mt_rand() now produces a
     different sequence of outputs to previous versions. If you relied on
     mt_srand() to produce a deterministic sequence, it can be called using
-    mt_srand($seed, MT_RAND_PHP) to produce old the sequences.
+    mt_srand($seed, MT_RAND_PHP) to produce the old sequences.
   . URL rewriter has been improved.
      . Use dedicated buffer for Session module rewrite and User rewrite.
      . Full path URL rewrite is supported. Allowed domain can be specified.
@@ -122,7 +122,7 @@ PHP 7.1 UPGRADE NOTES
 
 - Reflection:
   . The behavior of ReflectionMethod::invoke() and ::invokeArgs() has been
-    aligned, what causes slightly different behavior than before for some
+    aligned, which causes slightly different behavior than before for some
     pathological cases.
   . ReflectionType::__toString() will now return the type name with a leading
     "?" if it is nullable. To retrieve the type name without leading "?" the new
@@ -268,7 +268,7 @@ PHP 7.1 UPGRADE NOTES
 
 - DBA:
   . Data modification functions (e.g.: dba_insert()) now throw an instance of
-    Error instead of triggering a catchable fatal error if the key is does not
+    Error instead of triggering a catchable fatal error if the key does not
     contain exactly two elements.
 
 - DOM:
