@@ -398,6 +398,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 		case ZEND_END_SILENCE:
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_REF:
+		case ZEND_SEND_VAR_EX:
 		case ZEND_FREE:
 		case ZEND_SEPARATE:
 		case ZEND_TYPE_CHECK:
@@ -565,6 +566,25 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE);
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
+		case ZEND_RECV_INIT:
+			if (Z_CONSTANT_P(RT_CONSTANT(op_array, opline->op2))) {
+				return 1;
+			}
+			if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+				uint32_t arg_num = opline->op1.num;
+				zend_arg_info *cur_arg_info;
+
+				if (EXPECTED(arg_num <= op_array->num_args)) {
+					cur_arg_info = &op_array->arg_info[arg_num-1];
+				} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
+					cur_arg_info = &op_array->arg_info[op_array->num_args];
+				} else {
+					return 0;
+				}
+				return (cur_arg_info->type_hint != 0);
+			} else {
+				return 0;
+			}
 		default:
 			return 1;
 	}
