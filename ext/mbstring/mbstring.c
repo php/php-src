@@ -1027,9 +1027,18 @@ static void *_php_mb_compile_regex(const char *pattern)
 /* {{{ _php_mb_match_regex */
 static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 {
-	return onig_search((php_mb_regex_t *)opaque, (const OnigUChar *)str,
-			(const OnigUChar*)str + str_len, (const OnigUChar *)str,
-			(const OnigUChar*)str + str_len, NULL, ONIG_OPTION_NONE) >= 0;
+	OnigMatchParam *mp = onig_new_match_param();
+	int err;
+	onig_initialize_match_param(mp);
+	if(MBSTRG(regex_stack_limit) > 0 && MBSTRG(regex_stack_limit) < UINT_MAX) {
+		onig_set_match_stack_limit_size_of_match_param(mp, (unsigned int)MBSTRG(regex_stack_limit));
+	}
+	/* search */
+	err = onig_search_with_param((php_mb_regex_t *)opaque, (const OnigUChar *)str,
+		(const OnigUChar*)str + str_len, (const OnigUChar *)str,
+		(const OnigUChar*)str + str_len, NULL, ONIG_OPTION_NONE, mp);
+	onig_free_match_param(mp);
+	return err >= 0;
 }
 /* }}} */
 
@@ -1502,6 +1511,9 @@ PHP_INI_BEGIN()
 		PHP_INI_ALL,
 		OnUpdateBool,
 		strict_detection, zend_mbstring_globals, mbstring_globals)
+#if HAVE_MBREGEX
+	STD_PHP_INI_ENTRY("mbstring.regex_stack_limit", "100000",PHP_INI_ALL, OnUpdateLong, regex_stack_limit, zend_mbstring_globals, mbstring_globals)
+#endif
 PHP_INI_END()
 /* }}} */
 
