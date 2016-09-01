@@ -563,7 +563,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT);
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
-			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE);
+			return (opline->op2_type != IS_UNUSED) && (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
 		case ZEND_RECV_INIT:
@@ -584,6 +584,27 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 				return (cur_arg_info->type_hint != 0);
 			} else {
 				return 0;
+			}
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+		case ZEND_FETCH_DIM_IS:
+			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_CAST:
+			switch (opline->extended_value) {
+				case IS_NULL:
+					return 0;
+				case _IS_BOOL:
+					return (t1 & MAY_BE_OBJECT);
+				case IS_LONG:
+				case IS_DOUBLE:
+					return (t1 & (MAY_BE_STRING|MAY_BE_OBJECT));
+				case IS_STRING:
+					return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
+				case IS_ARRAY:
+					return (t1 & MAY_BE_OBJECT);
+				case IS_OBJECT:
+					return (t1 & MAY_BE_ARRAY);
+				default:
+					return 1;
 			}
 		default:
 			return 1;
