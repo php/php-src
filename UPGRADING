@@ -49,13 +49,6 @@ PHP 7.1 UPGRADE NOTES
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
 
-- Session:
-  . Implemented session_gc()
-    https://wiki.php.net/rfc/session-gc
-  . Implemented session_create_id()
-    https://wiki.php.net/rfc/session-create-id
-
-
 ========================================
 7. New Classes and Interfaces
 ========================================
