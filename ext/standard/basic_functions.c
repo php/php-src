@@ -5417,6 +5417,9 @@ PHP_FUNCTION(ini_set)
 	if (old_value) {
 		RETVAL_STRING(old_value);
 	} else {
+		if (!old_value) {
+			php_error_docref(NULL, E_WARNING, "INI(%s) does not exist", ZSTR_VAL(varname));
+		}
 		RETVAL_FALSE;
 	}
 

@@ -76,6 +76,7 @@ struct _php_core_globals {
 	zend_bool ignore_repeated_errors;
 	zend_bool ignore_repeated_source;
 	zend_bool report_memleaks;
+	zend_bool report_ini_error;
 	char *error_log;
 
 	char *doc_root;
