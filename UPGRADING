@@ -238,7 +238,9 @@ PHP 7.1 UPGRADE NOTES
 
 - Session:
   . Added session_gc() that performs session data garbage collection.
+    https://wiki.php.net/rfc/session-gc
   . Added session_create_id() for creating custom session ID.
+    https://wiki.php.net/rfc/session-create-id
 
 - Standard:
   . Added is_iterable() that determines if a value will be accepted by the new

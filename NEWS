@@ -57,7 +57,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #72940 (SID always return "name=ID", even if session
     cookie exist). (Yasuo)
-  . Implemented session_gc() and session_create_id() functions. (Yasuo)
+  . Implemented session_gc() (Yasuo)
+    https://wiki.php.net/rfc/session-create-id
+  . Implemented session_create_id() (Yasuo)
+    https://wiki.php.net/rfc/session-gc
 
 - SimpleXML:
   . Fixed bug #72971 (SimpleXML isset/unset do not respect namespace). (Nikita)
