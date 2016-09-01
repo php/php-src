@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 5.6.26
+?? ??? 2016, PHP 5.6.27
+
+15 Sep 2016, PHP 5.6.26
 
 - Core:
   . Fixed bug #72907 (null pointer deref, segfault in gc_remove_zval_from_buffer
@@ -13,9 +15,6 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #70825 (Cannot fetch multiple values with group in ini file).
     (cmb)
-
-- Streams:
-  . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
 
 - FTP:
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
@@ -53,6 +52,9 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
+
+- Streams:
+  . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
 
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
