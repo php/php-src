@@ -921,7 +921,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
 			char *printname = NULL, *substitutename = NULL;
-			int printname_len, substitutename_len;
+			int substitutename_len;
 			int substitutename_off = 0;
 
 			if(++(*ll) > LINK_MAX) {
@@ -956,7 +956,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
-				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
@@ -979,7 +978,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
 				isabsolute = 1;
 				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
-				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
