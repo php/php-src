@@ -519,8 +519,8 @@ ignore_repeated_source = Off
 ; http://php.net/report-memleaks
 report_memleaks = On
 
-; If this parameter is set to On, them ini_set() report errors for non existing INI
-; parameters.
+; If this parameter is set to On, them ini_set()/ini_get() report errors
+; for non existing INI parameters.
 ; http://php.net/report-ini-error
 report_ini_error = On
 

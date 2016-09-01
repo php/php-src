@@ -5304,6 +5304,9 @@ PHP_FUNCTION(ini_get)
 	str = zend_ini_string(varname, (uint)varname_len, 0);
 
 	if (!str) {
+		if (PG(report_ini_error)) {
+			php_error_docref(NULL, E_WARNING, "INI(%s) does not exist", varname);
+		}
 		RETURN_FALSE;
 	}
 
@@ -5417,7 +5420,7 @@ PHP_FUNCTION(ini_set)
 	if (old_value) {
 		RETVAL_STRING(old_value);
 	} else {
-		if (!old_value) {
+		if (PG(report_ini_error) && !old_value) {
 			php_error_docref(NULL, E_WARNING, "INI(%s) does not exist", ZSTR_VAL(varname));
 		}
 		RETVAL_FALSE;
