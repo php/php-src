@@ -1480,52 +1480,50 @@ PHPAPI void php_session_start(void) /* {{{ */
 			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
 				ppid2sid(ppid);
 				PS(send_cookie) = 0;
+				PS(define_sid) = 0;
 			}
 		}
-
-		if (PS(define_sid) && !PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1))) {
-			ZVAL_DEREF(data);
-			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
-				ppid2sid(ppid);
+		/* Initilize session ID from non cookie values */
+		if (!PS(use_only_cookies)) {
+			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1))) {
+				ZVAL_DEREF(data);
+				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
+					ppid2sid(ppid);
+				}
 			}
-		}
-
-		if (PS(define_sid) && !PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_POST", sizeof("_POST") - 1))) {
-			ZVAL_DEREF(data);
-			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
-				ppid2sid(ppid);
+			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_POST", sizeof("_POST") - 1))) {
+				ZVAL_DEREF(data);
+				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
+					ppid2sid(ppid);
+				}
 			}
-		}
-
-		/* Check the REQUEST_URI symbol for a string of the form
-		 * '<session-name>=<session-id>' to allow URLs of the form
-		 * http://yoursite/<session-name>=<session-id>/script.php */
-		if (PS(define_sid) && !PS(id) &&
-			zend_is_auto_global_str("_SERVER", sizeof("_SERVER") - 1) == SUCCESS &&
-			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
-			Z_TYPE_P(data) == IS_STRING &&
-			(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
-			p[lensess] == '='
-		) {
-			char *q;
-			p += lensess + 1;
-			if ((q = strpbrk(p, "/?\\"))) {
-				PS(id) = zend_string_init(p, q - p, 0);
+			/* Check the REQUEST_URI symbol for a string of the form
+			 * '<session-name>=<session-id>' to allow URLs of the form
+			 * http://yoursite/<session-name>=<session-id>/script.php */
+			if (!PS(id) && zend_is_auto_global_str("_SERVER", sizeof("_SERVER") - 1) == SUCCESS &&
+				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
+				Z_TYPE_P(data) == IS_STRING &&
+				(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
+				p[lensess] == '='
+				) {
+				char *q;
+				p += lensess + 1;
+				if ((q = strpbrk(p, "/?\\"))) {
+					PS(id) = zend_string_init(p, q - p, 0);
+				}
 			}
-		}
-
-		/* Check whether the current request was referred to by
-		 * an external site which invalidates the previously found id. */
-		if (PS(define_sid) && PS(id) &&
-			PS(extern_referer_chk)[0] != '\0' &&
-			!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
-			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
-			Z_TYPE_P(data) == IS_STRING &&
-			Z_STRLEN_P(data) != 0 &&
-			strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
-		) {
-			zend_string_release(PS(id));
-			PS(id) = NULL;
+			/* Check whether the current request was referred to by
+			 * an external site which invalidates the previously found id. */
+			if (PS(id) && PS(extern_referer_chk)[0] != '\0' &&
+				!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
+				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
+				Z_TYPE_P(data) == IS_STRING &&
+				Z_STRLEN_P(data) != 0 &&
+				strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
+			) {
+				zend_string_release(PS(id));
+				PS(id) = NULL;
+			}
 		}
 	}
 
@@ -2020,7 +2018,6 @@ static PHP_FUNCTION(session_regenerate_id)
 
 /* {{{ proto void session_create_id([string prefix])
    Generate new session ID. Intended for user save handlers. */
-#if 0
 /* This is not used yet */
 static PHP_FUNCTION(session_create_id)
 {
@@ -2042,7 +2039,20 @@ static PHP_FUNCTION(session_create_id)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		new_id = PS(mod)->s_create_sid(&PS(mod_data));
+		int limit = 3;
+		while (limit--) {
+			new_id = PS(mod)->s_create_sid(&PS(mod_data));
+			if (!PS(mod)->s_validate_sid) {
+				break;
+			} else {
+				/* Detect collision and retry */
+				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == FAILURE) {
+					zend_string_release(new_id);
+					continue;
+				}
+				break;
+			}
+		}
 	} else {
 		new_id = php_session_create_id(NULL);
 	}
@@ -2057,9 +2067,7 @@ static PHP_FUNCTION(session_create_id)
 	}
 	smart_str_0(&id);
 	RETVAL_NEW_STR(id.s);
-	smart_str_free(&id);
 }
-#endif
 /* }}} */
 
 /* {{{ proto string session_cache_limiter([string new_cache_limiter])
@@ -2356,6 +2364,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_id, 0, 0, 0)
 	ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_create_id, 0, 0, 0)
+	ZEND_ARG_INFO(0, prefix)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_regenerate_id, 0, 0, 0)
 	ZEND_ARG_INFO(0, delete_old_session)
 ZEND_END_ARG_INFO()
@@ -2440,6 +2452,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_module_name,       arginfo_session_module_name)
 	PHP_FE(session_save_path,         arginfo_session_save_path)
 	PHP_FE(session_id,                arginfo_session_id)
+	PHP_FE(session_create_id,         arginfo_session_create_id)
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
 	PHP_FE(session_decode,            arginfo_session_decode)
 	PHP_FE(session_encode,            arginfo_session_void)
