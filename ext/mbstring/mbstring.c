@@ -2887,20 +2887,10 @@ PHP_FUNCTION(mb_substr_count)
 }
 /* }}} */
 
-/* {{{ proto string mb_substr(string str, int start [, int length [, string encoding]])
-   Returns part of a string */
-PHP_FUNCTION(mb_substr)
+static inline char* php_mb_substr(char* str, size_t str_len, zend_long from, zend_long len, const char* encoding, size_t *output_len)
 {
-	char *str, *encoding = NULL;
-	zend_long from, len;
-	int mblen;
-	size_t str_len, encoding_len;
-	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!s", &str, &str_len, &from, &len, &len_is_null, &encoding, &encoding_len) == FAILURE) {
-		return;
-	}
+	int mblen;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
@@ -2910,16 +2900,12 @@ PHP_FUNCTION(mb_substr)
 		string.no_encoding = mbfl_name2no_encoding(encoding);
 		if (string.no_encoding == mbfl_no_encoding_invalid) {
 			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding);
-			RETURN_FALSE;
+			return NULL;
 		}
 	}
 
 	string.val = (unsigned char *)str;
 	string.len = str_len;
-
-	if (len_is_null) {
-		len = str_len;
-	}
 
 	/* measures length */
 	mblen = 0;
@@ -2949,7 +2935,7 @@ PHP_FUNCTION(mb_substr)
 
 	if (((MBSTRG(func_overload) & MB_OVERLOAD_STRING) == MB_OVERLOAD_STRING)
 		&& (from >= mbfl_strlen(&string))) {
-		RETURN_FALSE;
+		return NULL;
 	}
 
 	if (from > INT_MAX) {
@@ -2960,13 +2946,40 @@ PHP_FUNCTION(mb_substr)
 	}
 
 	ret = mbfl_substr(&string, &result, from, len);
+
+	if (output_len) {
+		*output_len = ret->len;
+	}
+
+	return (char *) ret->val;
+}
+
+/* {{{ proto string mb_substr(string str, int start [, int length [, string encoding]])
+   Returns part of a string */
+PHP_FUNCTION(mb_substr)
+{
+	char *str, *ret, *encoding = NULL;
+	zend_long from, len;
+	size_t str_len, ret_len, encoding_len;
+	zend_bool len_is_null = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!s", &str, &str_len, &from, &len, &len_is_null, &encoding, &encoding_len) == FAILURE) {
+		return;
+	}
+
+	if (len_is_null) {
+		len = str_len;
+	}
+
+	ret = php_mb_substr(str, str_len, from, len, encoding, &ret_len);
+
 	if (NULL == ret) {
 		RETURN_FALSE;
 	}
 
 	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
-	efree(ret->val);
+	RETVAL_STRINGL(ret, ret_len); /* the string is already strdup()'ed */
+	efree(ret);
 }
 /* }}} */
 
@@ -3124,7 +3137,7 @@ PHP_FUNCTION(mb_strimwidth)
 	if (from < 0) {
 		from += swidth;
 	}
-		
+
 	if (from < 0 || (size_t)from > str_len) {
 		php_error_docref(NULL, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;
