@@ -124,6 +124,7 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 	}
 
 	if ((void*)((char*)dasm_ptr + size) > dasm_end) {
+		dasm_ptr = dasm_end; //prevent further try
 		// TODO: jit_buffer_size overflow ???
 		return NULL;
 	}
@@ -579,7 +580,7 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 	dasm_State* dasm_state = NULL;
 	void *handler;
 
-	if (!dasm_buf) {
+	if (dasm_ptr == dasm_end) {
 		return FAILURE;
 	}
 
