@@ -328,32 +328,19 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		buf->st_dev = buf->st_rdev = 0;
 	} else {
 		wchar_t cur_path[MAXPATHLEN+1];
-		DWORD len = sizeof(cur_path);
-		wchar_t *tmp = cur_path;
 
-		while(1) {
-			DWORD r = GetCurrentDirectoryW(len, tmp);
-			if (r < len) {
-				if (tmp[1] == L':') {
-					if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
-						buf->st_dev = buf->st_rdev = pathw[0] - L'A';
-					} else {
-						buf->st_dev = buf->st_rdev = pathw[0] - L'a';
-					}
+		if (NULL != _wgetcwd(cur_path, sizeof(cur_path)/sizeof(wchar_t))) {
+			if (cur_path[1] == L':') {
+				if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
+					buf->st_dev = buf->st_rdev = pathw[0] - L'A';
 				} else {
-					buf->st_dev = buf->st_rdev = -1;
+					buf->st_dev = buf->st_rdev = pathw[0] - L'a';
 				}
-				break;
-			} else if (!r) {
-				buf->st_dev = buf->st_rdev = -1;
-				break;
 			} else {
-				len = r+1;
-				tmp = (wchar_t*)malloc(len*sizeof(wchar_t));
+				buf->st_dev = buf->st_rdev = -1;
 			}
-		}
-		if (tmp != cur_path) {
-			free(tmp);
+		} else {
+			buf->st_dev = buf->st_rdev = -1;
 		}
 	}
 
@@ -934,7 +921,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
 			char *printname = NULL, *substitutename = NULL;
-			int printname_len, substitutename_len;
+			int substitutename_len;
 			int substitutename_off = 0;
 
 			if(++(*ll) > LINK_MAX) {
@@ -969,7 +956,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
-				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
@@ -992,7 +978,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
 				isabsolute = 1;
 				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
-				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
