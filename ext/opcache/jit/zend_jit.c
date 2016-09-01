@@ -18,6 +18,7 @@
 
 #include <ZendAccelerator.h>
 #include "Zend/zend_execute.h"
+#include "Zend/zend_vm.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
 
@@ -38,6 +39,7 @@
 
 //#define CONTEXT_THREDED_JIT
 #define PREFER_MAP_32BIT
+//#define ZEND_RUNTIME_JIT
 
 #define JIT_PREFIX      "JIT$"
 #define JIT_STUB_PREFIX "JIT$$"
@@ -611,7 +613,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 	}
 }
 
-ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
+static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 {
 	uint32_t flags = 0;
 	zend_ssa ssa;
@@ -913,6 +915,73 @@ jit_failure:
     }
 	zend_arena_release(&CG(arena), checkpoint);
 	return FAILURE;
+}
+
+
+#ifdef ZEND_RUNTIME_JIT
+
+/* memory write protection */
+void zend_accel_shared_protect(int mode);
+
+#define SHM_PROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(1); \
+		} \
+	} while (0)
+#define SHM_UNPROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(0); \
+		} \
+	} while (0)
+
+typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_t)(void);
+
+/* Run-time JIT handler */
+static void ZEND_FASTCALL zend_runtime_jit(void)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zend_op_array *op_array = &EX(func)->op_array;
+	zend_op *opline = op_array->opcodes;
+
+	SHM_UNPROTECT();
+	zend_jit_unprotect();
+
+	/* restore original opcode handlers */
+	while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+		zend_vm_set_opcode_handler(opline);
+		opline++;
+	}
+	opline->handler = ZEND_FUNC_INFO(op_array);
+	ZEND_SET_FUNC_INFO(op_array, NULL);
+
+	/* perform real JIT for this function */
+	zend_real_jit_func(op_array, NULL);
+
+	zend_jit_protect();
+	SHM_PROTECT();
+
+	/* JIT-ed code is going to be called by VM */
+}
+#endif
+
+ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
+{
+#ifdef ZEND_RUNTIME_JIT
+	zend_op *opline = op_array->opcodes;
+
+	/* Set run-time JIT handler */
+	while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+		opline->handler = (const void*)zend_runtime_jit;
+		opline++;
+	}
+	ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
+	opline->handler = (const void*)zend_runtime_jit;
+	return SUCCESS;
+#else
+	return zend_real_jit_func(op_array, script);
+#endif
 }
 
 ZEND_API void zend_jit_unprotect(void)
