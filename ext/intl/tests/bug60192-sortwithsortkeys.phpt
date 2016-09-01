@@ -18,4 +18,4 @@ $a = array('a', 'b');
 $c->sortWithSortKeys($a);
 --EXPECTF--
 
-Catchable fatal error: Collator::sortWithSortKeys(): Object not initialized in %s on line %d
+Recoverable fatal error: Collator::sortWithSortKeys(): Object not initialized in %s on line %d

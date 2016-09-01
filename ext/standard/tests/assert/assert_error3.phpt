@@ -15,6 +15,6 @@ var_dump($r2 = assert("0 $ 0"));
 
 Parse error: syntax error, unexpected '$', expecting ';' in %s(2) : assert code on line 1
 
-Catchable fatal error: assert(): Failure evaluating code: 
+Recoverable fatal error: assert(): Failure evaluating code: 
 0 $ 0 in %s on line 2
 

@@ -16,6 +16,6 @@ var_dump($r2 = assert($sa, "Describing what was asserted"));
 
 Parse error: syntax error, %s in %s(3) : assert code on line 1
 
-Catchable fatal error: assert(): Failure evaluating code: 
+Recoverable fatal error: assert(): Failure evaluating code: 
 Describing what was asserted:"0 $ 0" in %s on line 3
 
