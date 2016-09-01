@@ -1479,9 +1479,6 @@ static PHP_INI_MH(OnUpdate_regex_stack_limit)
 {
 	zend_long stack_limit;
 
-	/* keep the compiler happy */
-	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
-
 	stack_limit = atol(ZSTR_VAL(new_value));
 	if (stack_limit > 0 && stack_limit <= UINT_MAX) {
 		onig_set_match_stack_limit_size(stack_limit);
@@ -1522,7 +1519,7 @@ PHP_INI_BEGIN()
 		OnUpdateLong,
 		strict_detection, zend_mbstring_globals, mbstring_globals)
 #if HAVE_MBREGEX
-	STD_PHP_INI_ENTRY("mbstring.regex_stack_limit", "10000", PHP_INI_ALL, OnUpdate_regex_stack_limit, regex_stack_limit, zend_mbstring_globals, mbstring_globals)
+	PHP_INI_ENTRY("mbstring.regex_stack_limit", "10000", PHP_INI_ALL, OnUpdate_regex_stack_limit)
 #endif
 PHP_INI_END()
 /* }}} */

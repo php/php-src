@@ -190,10 +190,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	long strict_detection;
 	long illegalchars;
 	mbfl_buffer_converter *outconv;
-	void *http_output_conv_mimetypes;
+    void *http_output_conv_mimetypes;
 #if HAVE_MBREGEX
-	struct _zend_mb_regex_globals *mb_regex_globals;
-	zend_long regex_stack_limit; /* Dummy */
+    struct _zend_mb_regex_globals *mb_regex_globals;
 #endif
 ZEND_END_MODULE_GLOBALS(mbstring)
 
