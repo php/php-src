@@ -445,6 +445,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_chr, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_at, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
@@ -573,6 +579,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_ord,					arginfo_mb_ord)
 	PHP_FE(mb_chr,					arginfo_mb_chr)
 	PHP_FE(mb_scrub,				arginfo_mb_scrub)
+	PHP_FE(mb_at,				arginfo_mb_at)
 #if HAVE_MBREGEX
 	PHP_MBREGEX_FUNCTION_ENTRIES
 #endif
@@ -5372,6 +5379,30 @@ PHP_FUNCTION(mb_scrub)
 }
 /* }}} */
 
+/* {{{ proto string mb_at([string str, int index[, string encoding]]) */
+PHP_FUNCTION(mb_at)
+{
+	char* str;
+	char* ret;
+	char* enc = NULL;
+	size_t str_len, enc_len, ret_len;
+	long index;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s", &str, &str_len, &index, &enc, &enc_len) == FAILURE) {
+		return;
+	}
+
+	ret = php_mb_substr(str, str_len, index, 1, (char*) enc, &ret_len);
+
+	if (ret != NULL) {
+		RETVAL_STRINGL(ret, ret_len);
+		efree(ret);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
+
+}
+/* }}} */
 
 /* {{{ php_mb_populate_current_detect_order_list */
 static void php_mb_populate_current_detect_order_list(void)
