@@ -61,7 +61,7 @@
 				: newlen + SMART_STRING_PREALLOC;					\
 		SMART_STRING_DO_REALLOC(d, what);							\
 	} else {														\
-		if(UNEXPECTED(n > SIZE_MAX - (d)->len)) {					\
+		if(UNEXPECTED((size_t)n > SIZE_MAX - (d)->len)) {					\
 			zend_error(E_ERROR, "String size overflow");			\
 		}															\
 		newlen = (d)->len + (n);									\
