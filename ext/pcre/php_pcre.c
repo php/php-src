@@ -806,7 +806,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
 				int unit_len = calculate_unit_length(pce, subject + start_offset);
-				
+
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + unit_len;
 			} else
@@ -821,7 +821,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
 		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
-		
+
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
 	} while (global);
@@ -1055,7 +1055,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 		return NULL;
 	}
 	pce->refcount++;
-	result = php_pcre_replace_impl(pce, subject, subject_len, replace_val, 
+	result = php_pcre_replace_impl(pce, subject, subject_len, replace_val,
 		is_callable_replace, result_len, limit, replace_count TSRMLS_CC);
 	pce->refcount--;
 
@@ -1300,7 +1300,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
 		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
-		
+
 		/* Advance to the next piece. */
 		start_offset = offsets[1];
 	}
@@ -1593,7 +1593,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 #ifdef PCRE_EXTRA_MARK
 	extra->flags &= ~PCRE_EXTRA_MARK;
 #endif
-	
+
 	/* Initialize return value */
 	array_init(return_value);
 
@@ -1701,7 +1701,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
 		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
-		
+
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
 	}
@@ -1762,7 +1762,7 @@ static PHP_FUNCTION(preg_quote)
 
 	/* Allocate enough memory so that even if each character
 	   is quoted, we won't run out of room */
-	out_str = safe_emalloc(4, in_str_len, 1);
+	out_str = safe_emalloc_string(4, in_str_len, 1);
 
 	/* Go through the string and quote necessary characters */
 	for(p = in_str, q = out_str; p != in_str_end; p++) {

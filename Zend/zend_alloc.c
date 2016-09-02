@@ -2578,6 +2578,15 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 #endif
 
 
+ZEND_API void *_safe_emalloc_string(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	size_t str_size = safe_address(nmemb, size, offset);
+	if (UNEXPECTED(str_size > INT_MAX)) {
+		zend_error_noreturn(E_ERROR, "String allocation overflow, max size is %d", INT_MAX);
+	}
+	return emalloc_rel(str_size);
+}
+
 ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	return emalloc_rel(safe_address(nmemb, size, offset));

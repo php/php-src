@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Sterling Hughes <sterling@php.net>                          |
    +----------------------------------------------------------------------+
@@ -638,7 +638,7 @@ PHPAPI char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char
 	}
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
-	newbuf = safe_emalloc(len, 4, 1);
+	newbuf = safe_emalloc_string(len, 4, 1);
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
 		if (c < 0x80) {
