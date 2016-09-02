@@ -667,6 +667,10 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 			goto jit_failure;
 		}
 
+		if (zend_ssa_find_sccs(op_array, &ssa) != SUCCESS){
+			goto jit_failure;
+		}
+
 		if (zend_ssa_inference(&CG(arena), op_array, script, &ssa) != SUCCESS) {
 			goto jit_failure;
 		}
