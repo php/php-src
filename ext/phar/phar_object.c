@@ -665,6 +665,7 @@ PHP_METHOD(Phar, webPhar)
 			if (free_pathinfo) {
 				efree(path_info);
 			}
+			efree(pt);
 
 			return;
 		}
@@ -682,6 +683,7 @@ PHP_METHOD(Phar, webPhar)
 			if (free_pathinfo) {
 				efree(path_info);
 			}
+			efree(pt);
 
 			return;
 		}
@@ -691,6 +693,7 @@ PHP_METHOD(Phar, webPhar)
 				efree(path_info);
 			}
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
+			efree(pt);
 			return;
 		}
 
@@ -707,6 +710,7 @@ PHP_METHOD(Phar, webPhar)
 				if (free_pathinfo) {
 					efree(path_info);
 				}
+				efree(pt);
 
 				zend_bailout();
 				return;
@@ -714,6 +718,7 @@ PHP_METHOD(Phar, webPhar)
 				if (free_pathinfo) {
 					efree(path_info);
 				}
+				efree(pt);
 
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 				return;
