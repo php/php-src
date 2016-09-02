@@ -82,7 +82,7 @@ static int php_zlib_output_encoding(TSRMLS_D)
 	zval **enc;
 
 	if (!ZLIBG(compression_coding)) {
-		if ((PG(http_globals)[TRACK_VARS_SERVER]  || zend_is_auto_global(ZEND_STRL("_SERVER") TSRMLS_CC)) && 
+		if ((PG(http_globals)[TRACK_VARS_SERVER]  || zend_is_auto_global(ZEND_STRL("_SERVER") TSRMLS_CC)) &&
 				SUCCESS == zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void *) &enc)) {
 			convert_to_string(*enc);
 			if (strstr(Z_STRVAL_PP(enc), "gzip")) {
@@ -574,7 +574,7 @@ static PHP_FUNCTION(gzfile)
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf, 0, sizeof(buf));
-	    
+
 	while (php_stream_gets(stream, buf, sizeof(buf) - 1) != NULL) {
 		add_index_string(return_value, i++, buf, 1);
 	}
@@ -693,7 +693,7 @@ static PHP_FUNCTION(name) \
 	if (SUCCESS != php_zlib_decode(in_buf, in_len, &out_buf, &out_len, encoding, max_len TSRMLS_CC)) { \
 		RETURN_FALSE; \
 	} \
-	RETURN_STRINGL(out_buf, out_len, 0); \
+	RETVAL_STRINGL_CHECK(out_buf, out_len, 0); \
 }
 
 /* {{{ proto binary zlib_encode(binary data, int encoding[, int level = -1])
@@ -931,7 +931,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_handler)
 	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 /* }}} */
- 
+
 /* {{{ INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zlib.output_compression",      "0", PHP_INI_ALL, OnUpdate_zlib_output_compression,       output_compression_default,       zend_zlib_globals, zlib_globals)

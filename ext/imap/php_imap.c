@@ -1711,7 +1711,7 @@ PHP_FUNCTION(imap_body)
 	if (body_len == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
-		RETVAL_STRINGL(body, body_len, 1);
+		RETVAL_STRINGL_CHECK(body, body_len, 1);
 	}
 }
 /* }}} */
@@ -1899,7 +1899,7 @@ PHP_FUNCTION(imap_list_full)
 	}
 
 	array_init(return_value);
-	delim = safe_emalloc(2, sizeof(char), 0);
+	delim = emalloc(2);
 	cur=IMAPG(imap_folder_objects);
 	while (cur != NIL) {
 		MAKE_STD_ZVAL(mboxob);
@@ -2205,7 +2205,7 @@ PHP_FUNCTION(imap_lsub_full)
 	}
 
 	array_init(return_value);
-	delim = safe_emalloc(2, sizeof(char), 0);
+	delim = emalloc(2);
 	cur=IMAPG(imap_sfolder_objects);
 	while (cur != NIL) {
 		MAKE_STD_ZVAL(mboxob);
@@ -2356,7 +2356,7 @@ PHP_FUNCTION(imap_fetchbody)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No body information available");
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(body, len, 1);
+	RETVAL_STRINGL_CHECK(body, len, 1);
 }
 
 /* }}} */
@@ -2396,7 +2396,12 @@ PHP_FUNCTION(imap_fetchmime)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No body MIME information available");
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(body, len, 1);
+	if (len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long, max is %d", INT_MAX);
+		efree(body);
+		RETURN_FALSE;
+	}
+	RETVAL_STRINGL_CHECK(body, len, 1);
 }
 
 /* }}} */
@@ -2495,7 +2500,7 @@ PHP_FUNCTION(imap_qprint)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(decode, newlength, 1);
+	RETVAL_STRINGL_CHECK(decode, newlength, 1);
 	fs_give((void**) &decode);
 }
 /* }}} */
@@ -2541,7 +2546,7 @@ PHP_FUNCTION(imap_binary)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(decode, newlength, 1);
+	RETVAL_STRINGL_CHECK(decode, newlength, 1);
 	fs_give((void**) &decode);
 }
 /* }}} */
@@ -2626,7 +2631,7 @@ PHP_FUNCTION(imap_rfc822_write_address)
 
 	string = _php_rfc822_write_address(addr TSRMLS_CC);
 	if (string) {
-		RETVAL_STRING(string, 0);
+		RETVAL_STRINGL_CHECK(string, strlen(string), 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2882,7 +2887,8 @@ PHP_FUNCTION(imap_utf7_encode)
 	const unsigned char *in, *inp, *endp;
 	unsigned char *out, *outp;
 	unsigned char c;
-	int arg_len, inlen, outlen;
+	int arg_len, inlen;
+	size_t outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
 		ST_ENCODE0,	/* encoded text rotation... */
@@ -2929,7 +2935,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}
 
 	/* allocate output buffer */
-	out = emalloc(outlen + 1);
+	out = safe_emalloc_string(1, outlen, 1);
 
 	/* encode input string */
 	outp = out;
@@ -3019,7 +3025,7 @@ static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	if (out == NIL) {
 		RETURN_FALSE;
 	} else {
-		RETURN_STRING((char *)out, 1);
+		RETVAL_STRINGL_CHECK((char *)out, strlen(out), 1);
 	}
 }
 /* }}} */
