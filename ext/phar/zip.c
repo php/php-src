@@ -1171,7 +1171,6 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 
 		if (pass->error && *(pass->error)) {
 			/* error is set by writeheaders */
-			php_stream_close(newfile);
 			return FAILURE;
 		}
 	} /* signature */
