@@ -766,6 +766,14 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_ADD:
+				case ZEND_SUB:
+				case ZEND_MUL:
+//				case ZEND_DIV: // TODO: check for division by zero ???
+					if (!zend_jit_math(&dasm_state, opline, op_array, &ssa)) {
+						goto jit_failure;
+					}
+					break;
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa.cfg.split_at_recv) {
