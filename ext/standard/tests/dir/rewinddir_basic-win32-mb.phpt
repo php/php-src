@@ -1,5 +1,11 @@
 --TEST--
 Test rewinddir() function : basic functionality 
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : void rewinddir([resource $dir_handle])
