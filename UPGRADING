@@ -1,4 +1,4 @@
-PHP 7.1 UPGRADE NOTES
+PHP 7.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -64,6 +64,10 @@ PHP 7.1 UPGRADE NOTES
 - EXIF:
    . Added extended exif tag support for the following formats: 
      Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+
+- Mbstring
+  . mb_check_encoding() accepts array parameter. Both key and value
+    ecodings are checked recursively.
 
 ========================================
 10. New Global Constants
