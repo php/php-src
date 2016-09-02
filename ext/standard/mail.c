@@ -105,17 +105,17 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.3 */
 	while (len < value->len) {
-		if (*value->val == '\r') {
+		if (*(value->val+len) == '\r') {
 			if (value->len - len > 4
-				&&  *value->val+1 == '\n'
-				&& (*value->val+2 == ' '  || *value->val+2 == '\t')
-				&& (*value->val+3 >= 32   && *value->val+3 <= 126)) {
+				&&  *(value->val+len+1) == '\n'
+				&& (*(value->val+len+2) == ' '  || *(value->val+len+2) == '\t')
+				&& (*(value->val+len+3) >= 32   && *(value->val+len+3) <= 126)) {
 				len += 4;
 				continue;
 			}
 			return FAILURE;
 		}
-		if (*value->val < 33 || *value->val > 126) {
+		if (*(value->val+len) < 33 || *(value->val+len) > 126) {
 			return FAILURE;
 		}
 		len++;
@@ -130,7 +130,7 @@ static zend_bool php_mail_build_headers_check_field_name(zend_string *key)
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2 */
 	while (len < key->len) {
-		if (*key->val < 33 || *key->val > 126 || *key->val == ':') {
+		if (*(key->val+len) < 33 || *(key->val+len) > 126 || *(key->val+len) == ':') {
 			return FAILURE;
 		}
 		len++;
