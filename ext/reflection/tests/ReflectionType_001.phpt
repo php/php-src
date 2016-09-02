@@ -73,6 +73,8 @@ foreach ([
     var_dump((string)$ra);
   }
 }
+
+?>
 --EXPECT--
 *** functions
 ** Function 0 - Parameter 0

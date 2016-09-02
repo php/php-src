@@ -3029,6 +3029,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 		} else {
 			len = ZSTR_LEN(str_key);
 			if (UNEXPECTED(len < 1)) {
+				efree(num_bitset);
 				RETURN_FALSE;
 			} else if (UNEXPECTED(len > slen)) {
 				/* skip long patterns */

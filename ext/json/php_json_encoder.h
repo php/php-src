@@ -22,6 +22,6 @@
 #include "php.h"
 #include "zend_smart_str.h"
 
-void php_json_encode_zval(smart_str *buf, zval *val, int options);
+int php_json_encode_zval(smart_str *buf, zval *val, int options);
 
 #endif	/* PHP_JSON_ENCODER_H */

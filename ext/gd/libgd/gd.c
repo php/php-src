@@ -2245,7 +2245,9 @@ void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, 
 			for (y = 0; (y < h); y++) {
 				for (x = 0; (x < w); x++) {
 					int c = gdImageGetTrueColorPixel (src, srcX + x, srcY + y);
-					gdImageSetPixel (dst, dstX + x, dstY + y, c);
+					if (c != src->transparent) {
+						gdImageSetPixel (dst, dstX + x, dstY + y, c);
+					}
 				}
 			}
 		} else {
@@ -2258,26 +2260,6 @@ void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, 
 					}
 				}
 			}
-		}
-		return;
-	}
-
-	/* Destination is palette based */
-	if (src->trueColor) { /* But source is truecolor (Ouch!) */
-		toy = dstY;
-		for (y = srcY; (y < (srcY + h)); y++) {
-			tox = dstX;
-			for (x = srcX; x < (srcX + w); x++) {
-				int nc;
-				c = gdImageGetPixel (src, x, y);
-
-				/* Get best match possible. */
-				nc = gdImageColorResolveAlpha(dst, gdTrueColorGetRed(c), gdTrueColorGetGreen(c), gdTrueColorGetBlue(c), gdTrueColorGetAlpha(c));
-
-				gdImageSetPixel(dst, tox, toy, nc);
-				tox++;
-			}
-			toy++;
 		}
 		return;
 	}

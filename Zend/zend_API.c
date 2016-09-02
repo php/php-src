@@ -157,7 +157,7 @@ ZEND_API ZEND_COLD void zend_wrong_param_count(void) /* {{{ */
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
 
-	zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
+	zend_internal_argument_count_error(ZEND_ARG_USES_STRICT_TYPES(), "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
 }
 /* }}} */
 
@@ -208,14 +208,16 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int num_
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
 
-	zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects %s %d parameter%s, %d given",
-		class_name, \
-		class_name[0] ? "::" : "", \
-		ZSTR_VAL(active_function->common.function_name),
-		min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
-		num_args < min_num_args ? min_num_args : max_num_args,
-		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
-		num_args);
+	zend_internal_argument_count_error(
+				ZEND_ARG_USES_STRICT_TYPES(), 
+				"%s%s%s() expects %s %d parameter%s, %d given", 
+				class_name, \
+				class_name[0] ? "::" : "", \
+				ZSTR_VAL(active_function->common.function_name),
+				min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
+				num_args < min_num_args ? min_num_args : max_num_args,
+				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+				num_args);
 }
 /* }}} */
 
@@ -875,7 +877,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
 			zend_bool throw_exception = ZEND_ARG_USES_STRICT_TYPES() || (flags & ZEND_PARSE_PARAMS_THROW);
-			zend_internal_type_error(throw_exception, "%s%s%s() expects %s %d parameter%s, %d given",
+			zend_internal_argument_count_error(throw_exception, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
 					class_name[0] ? "::" : "",
 					ZSTR_VAL(active_function->common.function_name),
@@ -2909,7 +2911,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	zend_string *mname, *cname;
 	zend_string *lmname;
 	const char *colon;
-	size_t clen, mlen;
+	size_t clen;
 	HashTable *ftable;
 	int call_via_handler = 0;
 	zend_class_entry *scope;
@@ -2962,6 +2964,8 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		colon > Z_STRVAL_P(callable) &&
 		*(colon-1) == ':'
 	) {
+		size_t mlen;
+
 		colon--;
 		clen = colon - Z_STRVAL_P(callable);
 		mlen = Z_STRLEN_P(callable) - clen - 2;
@@ -2994,7 +2998,6 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		mname = zend_string_init(Z_STRVAL_P(callable) + clen + 2, mlen, 0);
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
-		mlen = Z_STRLEN_P(callable);
 		mname = Z_STR_P(callable);
 		zend_string_addref(mname);
 		ftable = &ce_org->function_table;

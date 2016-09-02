@@ -2934,6 +2934,13 @@ PHP_FUNCTION(mb_substr)
 		RETURN_FALSE;
 	}
 
+	if (from > INT_MAX) {
+		from = INT_MAX;
+	}
+	if (len > INT_MAX) {
+		len = INT_MAX;
+	}
+
 	ret = mbfl_substr(&string, &result, from, len);
 	if (NULL == ret) {
 		RETURN_FALSE;

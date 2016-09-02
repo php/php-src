@@ -1,8 +1,90 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0RC1
+?? ??? 2016, PHP 7.1.0RC2
+
+- Opcache:
+  . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
+    function). (Laruence)
 
 
+01 Sep 2016, PHP 7.1.0RC1
+
+- Core:
+  . Fixed bug #72944 (Null pointer deref in zval_delref_p). (Dmitry)
+  . Fixed bug #72943 (assign_dim on string doesn't reset hval). (Laruence)
+  . Fixed bug #72598 (Reference is lost after array_slice()) (Nikita)
+  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
+    password_verify). (Anatol)
+  . Implement \ArgumentCountError when passing in too few arguments (Davey)
+
+- COM:
+  . Fixed bug #72922 (COM called from PHP does not return out parameters).
+    (Anatol)
+
+- Dba:
+  . Fixed bug #70825 (Cannot fetch multiple values with group in ini file).
+    (cmb)
+
+- GD:
+  . Fixed bug #66005 (imagecopy does not support 1bit transparency on truecolor
+    images). (cmb)
+  . Fixed bug #72913 (imagecopy() loses single-color transparency on palette
+    images). (cmb)
+  . Fixed bug #68716 (possible resource leaks in _php_image_convert()). (cmb)
+
+- iconv:
+  . Fixed bug #72320 (iconv_substr returns false for empty strings). (cmb)
+
+- Intl:
+  . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
+    sequence). (cmb)
+
+- JSON:
+  . Implemented earlier return when json_encode fails, fixes bugs #68992
+    (Stacking exceptions thrown by JsonSerializable) and #70275 (On recursion
+    error, json_encode can eat up all system memory). (Jakub Zelenka)
+
+- mbstring:
+  . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
+
+- Opcache:
+  . Fixed bug #72949 (Typo in opcache error message). (cmb)
+
+- PDO_DBlib:
+  . Implemented stringify 'uniqueidentifier' fields.
+    (Alexander Zhuravlev, Adam Baratz)
+
+- Reflection:
+  . Reverted prepending \ for class names. (Trowski)
+
+- Session:
+  . Fixed bug #72940 (SID always return "name=ID", even if session
+    cookie exist). (Yasuo)
+  . Implemented session_gc() (Yasuo)
+    https://wiki.php.net/rfc/session-create-id
+  . Implemented session_create_id() (Yasuo)
+    https://wiki.php.net/rfc/session-gc
+
+- SimpleXML:
+  . Fixed bug #72971 (SimpleXML isset/unset do not respect namespace). (Nikita)
+  . Fixed bug #72957 (Null coalescing operator doesn't behave as expected with
+    SimpleXMLElement). (Nikita)
+
+- SOAP:
+  . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita) 
+  . Fixed bug #71996 (Using references in arrays doesn't work like expected).
+    (Nikita)
+
+- Standard:
+  . Fixed bug #72920 (Accessing a private constant using constant() creates
+    an exception AND warning). (Laruence)
+  . Fixed bug #65550 (get_browser() incorrectly parses entries with "+" sign).
+    (cmb)
+  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
+    (cmb)
+
+- XML:
+  . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
 
 18 Aug 2016, PHP 7.1.0beta3
 
@@ -18,6 +100,8 @@ PHP                                                                        NEWS
   . Fixed bug #72681 (PHP Session Data Injection Vulnerability). (Stas)
   . Fixed bug #72742 (memory allocator fails to realloc small block to large
     one). (Stas)
+  . Fixed URL rewriter. It would not rewrite '//example.com/' URL
+    unconditionally. URL rewrite target hosts whitelist is implemented. (Yasuo)
 
 - Bz2:
   . Fixed bug #72837 (integer overflow in bzdecompress caused heap
@@ -59,8 +143,10 @@ PHP                                                                        NEWS
 - Reflection:
   . Implemented request #38992 (invoke() and invokeArgs() static method calls
     should match). (cmb).
-  . Add ReflectionNamedType::getName() and return leading "?" for nullable types
-    from ReflectionType::__toString(). (Trowski)
+  . Add ReflectionNamedType::getName(). This method should be used instead of
+    ReflectionType::__toString()
+  . Prepend \ for class names and ? for nullable types returned from
+    ReflectionType::__toString(). (Trowski)
 
 - Session:
   . Implemented RFC: Session ID without hashing. (Yasuo)

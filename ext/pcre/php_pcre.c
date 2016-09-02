@@ -1176,6 +1176,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	if (UNEXPECTED(pce->name_count > 0)) {
 		subpat_names = make_subpats_table(num_subpats, pce);
 		if (!subpat_names) {
+			if (size_offsets <= 32) {
+				free_alloca(offsets, use_heap);
+			} else {
+				efree(offsets);
+			}
 			return NULL;
 		}
 	}

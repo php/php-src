@@ -788,41 +788,29 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(func, i + 1)) {
 			if (UNEXPECTED(!Z_ISREF_P(arg))) {
-				if (fci->no_separation &&
-					!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
-					if (i) {
-						/* hack to clean up the stack */
-						ZEND_CALL_NUM_ARGS(call) = i;
-						zend_vm_stack_free_args(call);
-					}
-					zend_vm_stack_free_call_frame(call);
-
-					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
-						i+1,
+				if (!fci->no_separation) {
+					/* Separation is enabled -- create a ref */
+					ZVAL_NEW_REF(arg, arg);
+				} else if (!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
+					/* By-value send is not allowed -- emit a warning,
+					 * but still perform the call with a by-value send. */
+					zend_error(E_WARNING,
+						"Parameter %d to %s%s%s() expected to be a reference, value given", i+1,
 						func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
 						func->common.scope ? "::" : "",
 						ZSTR_VAL(func->common.function_name));
-					if (EG(current_execute_data) == &dummy_execute_data) {
-						EG(current_execute_data) = dummy_execute_data.prev_execute_data;
-					}
-					return FAILURE;
 				}
-
-				ZVAL_NEW_REF(arg, arg);
 			}
-			Z_ADDREF_P(arg);
 		} else {
 			if (Z_ISREF_P(arg) &&
 			    !(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 				/* don't separate references for __call */
 				arg = Z_REFVAL_P(arg);
 			}
-			if (Z_OPT_REFCOUNTED_P(arg)) {
-				Z_ADDREF_P(arg);
-			}
 		}
+
 		param = ZEND_CALL_ARG(call, i+1);
-		ZVAL_COPY_VALUE(param, arg);
+		ZVAL_COPY(param, arg);
 	}
 
 	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
