@@ -103,7 +103,7 @@ PHP 7.1 UPGRADE NOTES
      . session.entropy_length
   . New INIs and defaults
      . session.sid_length (Number of session ID characters - 22 to 256.
-       (php.ini-* default: 26 Compitled default: 32)
+       (php.ini-* default: 26 Compiled default: 32)
      . session.sid_bits_per_character (Bits used per character. 4 to 6.
        php.ini-* default: 5 Compiled default: 4)
     Length of old session ID string is determined as follows
