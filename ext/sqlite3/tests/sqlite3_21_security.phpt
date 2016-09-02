@@ -6,6 +6,8 @@ SQLite3 open_basedir checks
 open_basedir=.
 --FILE--
 <?php
+chdir(__DIR__);
+
 $directory = dirname(__FILE__) . '/';
 $file = uniqid() . '.db';
 
