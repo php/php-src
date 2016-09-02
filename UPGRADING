@@ -49,6 +49,10 @@ PHP 7.2 UPGRADE NOTES
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
 
+- Sockets:
+  . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
+    socket_addrinfo_bind() and socket_addrinfo_explain().
+
 ========================================
 7. New Classes and Interfaces
 ========================================
