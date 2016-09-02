@@ -60,6 +60,8 @@ static void *dasm_buf = NULL;
 static void *dasm_ptr = NULL;
 static void *dasm_end = NULL;
 
+static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
+
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.c"
 #include "jit/zend_jit_disasm_x86.c"
@@ -757,6 +759,14 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 		for (i = ssa.cfg.blocks[b].start; i <= end; i++) {
 			opline = op_array->opcodes + i;
 			switch (opline->opcode) {
+#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
+				case ZEND_PRE_INC:
+				case ZEND_PRE_DEC:
+					if (!zend_jit_inc_dec(&dasm_state, opline, op_array, &ssa)) {
+						goto jit_failure;
+					}
+					break;
+#endif
 				case ZEND_RECV_INIT:
 					if (ssa.cfg.split_at_recv) {
 						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa))) {

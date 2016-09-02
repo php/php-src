@@ -301,6 +301,68 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 	return 1;
 }
 
+#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
+static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info, op1_def_info;
+
+	if (!ssa->ops || !ssa->var_info || opline->result_type != IS_UNUSED) {
+		goto fallback;
+	}
+	op1_info = OP1_INFO();
+
+	if (!(op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)-(MAY_BE_LONG/*|MAY_BE_DOUBLE*/)))) {
+		if (op1_info & MAY_BE_LONG) {
+			if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
+				|	cmp	dword [FP + opline->op1.var + 8], IS_LONG
+				|	jne >2
+			}
+			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+				|	inc aword [FP + opline->op1.var]
+			} else {
+				|	dec aword [FP + opline->op1.var]
+			}
+			op1_def_info = OP1_DEF_INFO();
+			if (op1_def_info & MAY_BE_DOUBLE) {
+				|	jno >2
+				if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+					|.if X64
+					|	mov64 rax, 0x43e0000000000000
+					|	mov qword [FP + opline->op1.var], rax
+					|.else
+					|	mov dword [FP + opline->op1.var], 0
+					|	mov dword [FP + opline->op1.var + 4], 0x41e00000
+					|.endif
+				} else {
+					|.if X64
+					|	mov64 rax, 0x43e0000000000000
+					|	mov qword [FP + opline->op1.var], rax
+					|.else
+					|	mov dword [FP + opline->op1.var], 0x00200000
+					|	mov dword [FP + opline->op1.var + 4], 0xc1e00000
+					|.endif
+				}
+				|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
+				|	jmp >1
+			} else if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
+				|	jmp >1
+			}
+		}
+		if (op1_info & MAY_BE_DOUBLE) {
+			|2:
+			|
+		}
+		|1:
+		|	add IP, sizeof(zend_op)
+		return 1;
+	}
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+#endif
+
 /*
  * Local variables:
  * tab-width: 4
