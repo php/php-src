@@ -98,7 +98,7 @@ mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
 
   len = enclen(ONIG_ENCODING_UTF8, p);
   c = *p++;
-  if (len > 1) {
+  if (len > 1 && p < end) {
     len--;
     n = c & ((1 << (6 - len)) - 1);
     while (len--) {
