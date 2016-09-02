@@ -1,5 +1,7 @@
 --TEST--
 Test rewinddir() function : basic functionality 
+--SKIPIF--
+<?php if (stristr(PHP_OS, "Darwin")) { die("Skip Unsupported on OS X"); } ?> 
 --FILE--
 <?php
 /* Prototype  : void rewinddir([resource $dir_handle])

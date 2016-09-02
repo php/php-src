@@ -1,5 +1,7 @@
 --TEST--
 Test chdir() function : basic functionality 
+--SKIPIF--
+<?php if (stristr(PHP_OS, "Darwin")) { die("Skip Unsupported on OS X"); } ?> 
 --FILE--
 <?php
 /* Prototype  : bool chdir(string $directory)

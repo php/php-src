@@ -1,5 +1,7 @@
 --TEST--
 Test scandir() function : basic functionality 
+--SKIPIF--
+<?php if (stristr(PHP_OS, "Darwin")) { die("Skip Unsupported on OS X"); } ?> 
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
