@@ -73,7 +73,7 @@
 #include "jit/zend_jit_x86.h"
 
 const char* zend_reg_name[] = {
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_M_X64)
 	"rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
 	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
@@ -1379,7 +1379,11 @@ static void* dasm_labels[zend_lb_MAX];
 |			add r4, 4
 |		.endif
 ||#else
+||#ifdef HAVE_BUILTIN_CONSTANT_P
 |		EXT_CALL _efree_24, r0
+||#else
+|		EXT_CALL _efree, r0
+||#endif
 ||#endif
 |.endmacro
 
@@ -1408,12 +1412,17 @@ static void* dasm_labels[zend_lb_MAX];
 |			add r4, 4
 |		.endif
 ||#else
+||#ifdef HAVE_BUILTIN_CONSTANT_P
 ||	if (size == 24) {
 |		EXT_CALL _emalloc_24, r0
 ||	} else {
 |		mov FCARG1a, size
 |		EXT_CALL _emalloc, r0
 ||	}
+||#else
+|		mov FCARG1a, size
+|		EXT_CALL _emalloc, r0
+||#endif
 ||#endif
 |.endmacro
 

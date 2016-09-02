@@ -129,8 +129,10 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 #include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_x86.c"
 #include "jit/zend_jit_disasm_x86.c"
+#ifndef _WIN32
 #include "jit/zend_jit_gdb.c"
 #include "jit/zend_jit_perf_dump.c"
+#endif
 #ifdef HAVE_OPROFILE
 # include "jit/zend_jit_oprofile.c"
 #endif
@@ -147,7 +149,7 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 
 #define DASM_ALIGNMENT 16
 
-ZEND_API void zend_jit_status(zval *ret)
+ZEND_EXT_API void zend_jit_status(zval *ret)
 {
 	zval stats;
 	array_init(&stats);
@@ -2824,7 +2826,7 @@ static int zend_needs_manual_jit(const zend_op_array *op_array)
 	return 0;
 }
 
-ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
+ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	if (dasm_ptr == NULL) {
 		return FAILURE;
@@ -2869,7 +2871,7 @@ ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	}
 }
 
-ZEND_API int zend_jit_script(zend_script *script)
+ZEND_EXT_API int zend_jit_script(zend_script *script)
 {
 	void *checkpoint;
 	zend_call_graph call_graph;
@@ -2989,7 +2991,7 @@ jit_failure:
 	return FAILURE;
 }
 
-ZEND_API void zend_jit_unprotect(void)
+ZEND_EXT_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
@@ -3000,7 +3002,7 @@ ZEND_API void zend_jit_unprotect(void)
 #endif
 }
 
-ZEND_API void zend_jit_protect(void)
+ZEND_EXT_API void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
@@ -3076,7 +3078,7 @@ static int zend_jit_make_stubs(void)
 	return 1;
 }
 
-ZEND_API int zend_jit_startup(zend_long jit, size_t size)
+ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
 {
 	size_t page_size = jit_page_size();
 	int shared = 1;
@@ -3168,7 +3170,7 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 	return SUCCESS;
 }
 
-ZEND_API void zend_jit_shutdown(void)
+ZEND_EXT_API void zend_jit_shutdown(void)
 {
 #ifdef HAVE_OPROFILE
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_OPROFILE) {
@@ -3199,7 +3201,7 @@ ZEND_API void zend_jit_shutdown(void)
 	}
 }
 
-ZEND_API void zend_jit_activate(void)
+ZEND_EXT_API void zend_jit_activate(void)
 {
 	if (zend_jit_trigger == ZEND_JIT_ON_HOT_COUNTERS) {
 		int i;
@@ -3210,7 +3212,7 @@ ZEND_API void zend_jit_activate(void)
 	}
 }
 
-ZEND_API void zend_jit_deactivate(void)
+ZEND_EXT_API void zend_jit_deactivate(void)
 {
 	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
 		if (!zend_jit_profile_counter) {
@@ -3241,38 +3243,38 @@ ZEND_API void zend_jit_deactivate(void)
 
 #else /* HAVE_JIT */
 
-ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
+ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	return FAILURE;
 }
 
-ZEND_API int zend_jit_script(zend_script *script)
+ZEND_EXT_API int zend_jit_script(zend_script *script)
 {
 	return FAILURE;
 }
 
-ZEND_API void zend_jit_unprotect(void)
+ZEND_EXT_API void zend_jit_unprotect(void)
 {
 }
 
-ZEND_API void zend_jit_protect(void)
+ZEND_EXT_API void zend_jit_protect(void)
 {
 }
 
-ZEND_API int zend_jit_startup(zend_long jit, size_t size)
+ZEND_EXT_API int zend_jit_startup(zend_long jit, size_t size)
 {
 	return FAILURE;
 }
 
-ZEND_API void zend_jit_shutdown(void)
+ZEND_EXT_API void zend_jit_shutdown(void)
 {
 }
 
-ZEND_API void zend_jit_activate(void)
+ZEND_EXT_API void zend_jit_activate(void)
 {
 }
 
-ZEND_API void zend_jit_deactivate(void)
+ZEND_EXT_API void zend_jit_deactivate(void)
 {
 }
 

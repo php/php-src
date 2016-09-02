@@ -145,8 +145,28 @@ typedef uint32_t zend_regset;
 	(ZEND_REGSET(ZREG_RBX) | ZEND_REGSET(ZREG_RBP))
 #endif
 
+#ifndef _WIN32
 #define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
 #define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31)))
+#else
+#include <intrin.h>
+uint32_t __inline __zend_jit_ctz( uint32_t value ) {
+	DWORD trailing_zero = 0;
+	if (_BitScanForward(&trailing_zero, value)) {
+		return trailing_zero;
+	}
+	return 32;
+}
+uint32_t __inline __zend_jit_clz(uint32_t value) {
+	DWORD leading_zero = 0;
+	if (_BitScanReverse(&leading_zero, value)) {
+		return 31 - leading_zero;
+	}
+	return 32;
+}
+#define ZEND_REGSET_FIRST(set) ((zend_reg)__zend_jit_ctz(set))
+#define ZEND_REGSET_LAST(set)  ((zend_reg)(__zend_jit_clz(set)^31)))
+#endif
 
 #define ZEND_REGSET_FOREACH(set, reg) \
 	do { \

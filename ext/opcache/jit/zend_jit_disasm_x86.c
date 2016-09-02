@@ -34,7 +34,9 @@ static void zend_jit_disasm_add_symbol(const char *name,
                                        uint64_t    addr,
                                        uint64_t    size);
 
-#include "jit/zend_elf.c"
+#ifndef _WIN32
+# include "jit/zend_elf.c"
+#endif
 
 #include "zend_sort.h"
 
@@ -42,7 +44,9 @@ static void zend_jit_disasm_add_symbol(const char *name,
 # define _GNU_SOURCE
 #endif
 
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 
 static struct ud ud;
 
@@ -211,6 +215,7 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
                                             uint64_t   addr,
                                             int64_t   *offset)
 {
+#ifndef _WIN32
 	((void)ud);
 	const char *name;
 	void *a = (void*)(zend_uintptr_t)(addr);
@@ -226,6 +231,13 @@ static const char* zend_jit_disasm_resolver(struct ud *ud,
 	 && info.dli_saddr == a) {
 		return info.dli_sname;
 	}
+#else
+	const char *name;
+	name = zend_jit_disasm_find_symbol(addr, offset);
+	if (name) {
+		return name;
+	}
+#endif
 
 	return NULL;
 }
@@ -444,7 +456,9 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_hot_func);
 #undef  REGISTER_HELPER
 
+#ifndef _WIN32
 	zend_elf_load_symbols();
+#endif
 
 	return 1;
 }
