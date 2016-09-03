@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.12
 
+- GD:
+  . Fixed bug #67325 (imagetruecolortopalette: white is duplicated in palette).
+    (cmb)
+
 - mbstring:
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
 
