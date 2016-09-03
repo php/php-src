@@ -4083,14 +4083,14 @@ PHP_FUNCTION(pg_copy_to)
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
 		return;
 	}
-	if (!pg_delim) {
-		pg_delim = "\t";
-	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
 		RETURN_FALSE;
 	}
 
+	if (!pg_delim) {
+		pg_delim = "\t";
+	}
 	if (!pg_null_as) {
 		pg_null_as = estrdup("\\\\N");
 		free_pg_null = 1;
@@ -4216,16 +4216,17 @@ PHP_FUNCTION(pg_copy_from)
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
 		return;
 	}
+
+	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
+		RETURN_FALSE;
+	}
+
 	if (!pg_delim) {
 		pg_delim = "\t";
 	}
 	if (!pg_null_as) {
 		pg_null_as = estrdup("\\\\N");
 		pg_null_as_free = 1;
-	}
-
-	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
 	}
 
 	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, *pg_delim, pg_null_as);
