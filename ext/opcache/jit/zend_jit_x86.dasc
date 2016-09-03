@@ -306,7 +306,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |.macro fp_op, fp_ins, op_type, op
 || if (op_type == IS_CONST) {
 |    .if X64
-|    mov aword EX->literals, r0
+|    mov r0, aword EX->literals
 |    fp_ins qword [r0 + op.constant]
 |    .else
 |    fp_ins qword [op.zv]
@@ -345,7 +345,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |.macro sse_op, sse_ins, op_type, op, reg
 || if (op_type == IS_CONST) {
 |    .if X64
-|    mov aword EX->literals, r0
+|    mov r0, aword EX->literals
 |    sse_ins reg, qword [r0 + op.constant]
 |    .else
 |    sse_ins reg, qword [op.zv]
