@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC2
 
+-GD:
+  . Fixed bug #67325 (imagetruecolortopalette: white is duplicated in palette).
+    (cmb)
+
 - Opcache:
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
     function). (Laruence)
