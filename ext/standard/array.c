@@ -1841,12 +1841,6 @@ PHP_FUNCTION(extract)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
-#if 0
-	if (!symbol_table) {
-		php_error_docref(NULL, E_WARNING, "failed to build symbol table");
-		return;
-	}
-#endif
 
 	/* The array might be stored in a local variable that will be overwritten. To avoid losing the
 	 * reference in that case we work on a copy. */
