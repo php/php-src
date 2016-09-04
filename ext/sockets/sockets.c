@@ -2540,6 +2540,8 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 					hints.ai_protocol = zval_get_long(hint);
 				} else if (zend_string_equals_literal(key, "ai_family")) {
 					hints.ai_family = zval_get_long(hint);
+				} else {
+					php_error_docref(NULL, E_NOTICE, "Unknown hint %s", ZSTR_VAL(key));
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
