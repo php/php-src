@@ -22,9 +22,18 @@ if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
 	$from = 'from dual';
 } else if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
 	$from = 'FROM RDB$DATABASE';
+} else if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'odbc') {
+  @$db->exec("DROP TABLE test");
+  $db->exec("CREATE TABLE test (a integer)");
+  $db->exec("INSERT INTO test VALUES (1)");
+  $from = 'from test';
 }
 
 var_dump($db->query("select 0 as abc, 1 as xyz, 2 as def $from")->fetchAll(PDO::FETCH_GROUP));
+
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'odbc') {
+  $db->exec("DROP TABLE test");
+}
 ?>
 --EXPECT--
 array(1) {

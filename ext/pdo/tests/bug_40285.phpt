@@ -1,12 +1,14 @@
 --TEST--
 PDO Common: Bug #40285 (The prepare parser goes into an infinite loop on ': or ":)
 --SKIPIF--
-<?php  
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
+$db = PDOTest::factory();
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'dblib') die('skip DBLIB driver does not support PDO::ATTR_EMULATE_PREPARES');
 ?>
 --FILE--
 <?php
@@ -16,12 +18,10 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test (field1 VARCHAR(32), field2 VARCHAR(32), field3 VARCHAR(32), field4 INT)');
-
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $s = $db->prepare("INSERT INTO test VALUES( ':id', 'name', 'section', 22)" );
 $s->execute();
-
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

@@ -159,7 +159,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	 * we want PDO to rewrite them for us */
 	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
-	
+
 	if (ret == 1) {
 		/* query was re-written */
 		sql = nsql;
@@ -169,7 +169,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 		efree(S);
 		return 0;
 	}
-	
+
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &S->stmt);
 
 	if (rc == SQL_INVALID_HANDLE || rc == SQL_ERROR) {
@@ -193,7 +193,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 			return 0;
 		}
 	}
-	
+
 	rc = SQLPrepare(S->stmt, (char*)sql, SQL_NTS);
 	if (nsql) {
 		efree(nsql);
@@ -226,7 +226,7 @@ static long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRML
 	RETCODE rc;
 	SQLLEN row_count = -1;
 	PDO_ODBC_HSTMT	stmt;
-	
+
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &stmt);
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_drv_error("SQLAllocHandle: STMT");
@@ -263,9 +263,40 @@ out:
 
 static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type param_type  TSRMLS_DC)
 {
-	/* pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data; */
-	/* TODO: figure it out */
-	return 0;
+	int qcount = 0;
+	char const *cu, *l, *r;
+	char *c;
+
+	/* ODBC driver requires single quotes to become double quotes. */
+
+	if (!unquotedlen) {
+		*quotedlen = 2;
+		*quoted = emalloc(*quotedlen+1);
+		strcpy(*quoted, "''");
+		return 1;
+	}
+
+	/* count single quotes */
+	for (cu = unquoted; (cu = strchr(cu,'\'')); qcount++, cu++)
+		; /* empty loop */
+
+	*quotedlen = unquotedlen + qcount + 2;
+	*quoted = c = emalloc(*quotedlen+1);
+	*c++ = '\'';
+
+	/* foreach (chunk that ends in a quote) */
+	for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
+		strncpy(c, l, r-l+1);
+		c += (r-l+1);
+		*c++ = '\'';			/* add second quote */
+	}
+
+    /* Copy remainder and add enclosing quote */
+	strncpy(c, l, *quotedlen-(c-*quoted)-1);
+	(*quoted)[*quotedlen-1] = '\'';
+	(*quoted)[*quotedlen]   = '\0';
+
+	return 1;
 }
 
 static int odbc_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
@@ -398,7 +429,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 
 	dbh->driver_data = H;
-	
+
 	SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &H->env);
 	rc = SQLSetEnvAttr(H->env, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
 
@@ -416,7 +447,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 		}
 	}
 #endif
-	
+
 	rc = SQLAllocHandle(SQL_HANDLE_DBC, H->env, &H->dbc);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		pdo_odbc_drv_error("SQLAllocHandle (DBC)");
@@ -469,7 +500,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 
 	dbh->methods = &odbc_methods;
 	dbh->alloc_own_columns = 1;
-	
+
 	return 1;
 
 fail:
