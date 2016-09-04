@@ -709,7 +709,11 @@ static zend_bool php_auto_globals_create_post(zend_string *name)
 			(strchr(PG(variables_order),'P') || strchr(PG(variables_order),'p')) &&
 		!SG(headers_sent) &&
 		SG(request_info).request_method &&
-		!strcasecmp(SG(request_info).request_method, "POST")) {
+			(!strcasecmp(SG(request_info).request_method, "POST") ||
+			!strcasecmp(SG(request_info).request_method, "PUT") ||
+			!strcasecmp(SG(request_info).request_method, "PATCH") ||
+			!strcasecmp(SG(request_info).request_method, "DELETE"))
+		) {
 		sapi_module.treat_data(PARSE_POST, NULL, NULL);
 	} else {
 		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_POST]);

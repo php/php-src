@@ -1296,7 +1296,7 @@ TEST $file
 				unset($section_text['FILEEOF']);
 			}
 
-			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {            
+			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {
 				$key = $prefix . '_EXTERNAL';
 
 				if (@count($section_text[$key]) == 1) {
@@ -1340,8 +1340,8 @@ TEST $file
 
 	$tested = trim($section_text['TEST']);
 
-	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
-	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
+	/* For GET/POST/PUT/PATCH/DELETE tests, check if cgi sapi is available and if it is, use it. */
+	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['PATCH']) || !empty($section_text['DELETE']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
 			$old_php = $php;
 			$php = $php_cgi . ' -C ';
@@ -1599,9 +1599,9 @@ TEST $file
 			}
 		}
 	}
-	
+
 	if (!extension_loaded("zlib")
-	&& (	array_key_exists("GZIP_POST", $section_text) 
+	&& (	array_key_exists("GZIP_POST", $section_text)
 		||	array_key_exists("DEFLATE_POST", $section_text))
 	) {
 		$message = "ext/zlib required";
@@ -1775,8 +1775,88 @@ TEST $file
 			$request .= $line;
 		}
 
+		if (empty($env['CONTENT_TYPE'])) {
+			$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		}
+
 		$env['CONTENT_LENGTH'] = strlen($request);
 		$env['REQUEST_METHOD'] = 'PUT';
+
+		if (empty($request)) {
+			junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+			return 'BORKED';
+		}
+
+		save_text($tmp_post, $request);
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+	} elseif (array_key_exists('PATCH', $section_text) && !empty($section_text['PATCH'])) {
+
+		$post = trim($section_text['PATCH']);
+		$raw_lines = explode("\n", $post);
+
+		$request = '';
+		$started = false;
+
+		foreach ($raw_lines as $line) {
+
+			if (empty($env['CONTENT_TYPE']) && preg_match('/^Content-Type:(.*)/i', $line, $res)) {
+				$env['CONTENT_TYPE'] = trim(str_replace("\r", '', $res[1]));
+				continue;
+			}
+
+			if ($started) {
+				$request .= "\n";
+			}
+
+			$started = true;
+			$request .= $line;
+		}
+
+		if (empty($env['CONTENT_TYPE'])) {
+			$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		}
+
+		$env['CONTENT_LENGTH'] = strlen($request);
+		$env['REQUEST_METHOD'] = 'PATCH';
+
+		if (empty($request)) {
+			junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+			return 'BORKED';
+		}
+
+		save_text($tmp_post, $request);
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+	} elseif (array_key_exists('DELETE', $section_text) && !empty($section_text['DELETE'])) {
+
+		$post = trim($section_text['DELETE']);
+		$raw_lines = explode("\n", $post);
+
+		$request = '';
+		$started = false;
+
+		foreach ($raw_lines as $line) {
+
+			if (empty($env['CONTENT_TYPE']) && preg_match('/^Content-Type:(.*)/i', $line, $res)) {
+				$env['CONTENT_TYPE'] = trim(str_replace("\r", '', $res[1]));
+				continue;
+			}
+
+			if ($started) {
+				$request .= "\n";
+			}
+
+			$started = true;
+			$request .= $line;
+		}
+
+		if (empty($env['CONTENT_TYPE'])) {
+			$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		}
+
+		$env['CONTENT_LENGTH'] = strlen($request);
+		$env['REQUEST_METHOD'] = 'DELETE';
 
 		if (empty($request)) {
 			junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
@@ -2190,7 +2270,7 @@ $output
 	if (isset($old_php)) {
 		$php = $old_php;
 	}
-	
+
 	$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
 	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
