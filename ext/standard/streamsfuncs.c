@@ -996,7 +996,7 @@ PHP_FUNCTION(stream_context_set_option)
 		zval *options;
 
 #ifndef FAST_ZPP
-		if (zend_parse_parameters(, ZEND_NUM_ARGS(), "ra", &zcontext, &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &zcontext, &options) == FAILURE) {
 			RETURN_FALSE;
 		}
 #else
@@ -1511,7 +1511,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 	zend_bool enable, cryptokindnull;
 	int ret;
 
-#ifdef FAST_ZPP
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rb|l!r", &zstream, &enable, &cryptokind, &cryptokindnull, &zsessstream) == FAILURE) {
 		RETURN_FALSE;
 	}
