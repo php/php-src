@@ -398,6 +398,39 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |    mov dword [FP + op.var + 8], IS_DOUBLE
 |.endmacro
 |
+|.macro long_op, long_ins, op_type, op, reg
+|| if (op_type == IS_CONST) {
+|    .if X64
+||   if (IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
+|    mov64 r1, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    long_ins reg, r1
+||   } else {
+|    long_ins reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+||   }
+|    .else
+|    long_ins reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    .endif
+|| } else {
+|    long_ins reg, aword [FP + op.var]
+|| }
+|.endmacro
+|
+|.macro long_load, op_type, op, reg
+|| if (op_type == IS_CONST) {
+|    .if X64
+||   if (IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
+|    mov64 reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+||   } else {
+|    mov reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+||   }
+|    .else
+|    mov reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    .endif
+|| } else {
+|    mov reg, aword [FP + op.var]
+|| }
+|.endmacro
+|
 |.macro next_opline
 |	add IP, sizeof(zend_op)
 |.endmacro
@@ -510,7 +543,76 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 
-	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
+	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
+	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG)) {
+		|	long_load opline->op1_type, opline->op1, r0
+		|	long_op cmp, opline->op2_type, opline->op2, r0
+		if ((opline+1)->opcode == ZEND_JMPZ &&
+		    (opline+1)->op1_type == IS_TMP_VAR &&
+		    (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+					| jne => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					| je => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					| jg => target_label
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					| jge => target_label
+					break;
+			}
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
+				|	add IP, sizeof(zend_op) * 2
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+		           (opline+1)->op1_type == IS_TMP_VAR &&
+		           (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+					| je => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					| jne => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					| jl => target_label
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					| jle => target_label
+					break;
+			}
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
+				|	add IP, sizeof(zend_op) * 2
+			}
+		} else {
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+					|	sete al
+					|	add eax, 2
+				case ZEND_IS_NOT_EQUAL:
+					|	setne al
+					|	add eax, 2
+					break;
+				case ZEND_IS_SMALLER:
+					|	setg al
+					|	add eax, 2
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					|	setge al
+					|	add eax, 2
+					break;
+			}
+			|	mov dword [FP + opline->result.var + 8], eax
+			| next_opline
+		}
+	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
 		|.if X64 // TODO: or SSE ???
 		|	sse_load opline->op1_type, opline->op1, xmm0
