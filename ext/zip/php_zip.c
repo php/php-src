@@ -279,6 +279,12 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 0;
 	}
 
+	zf = zip_fopen(za, file, 0);
+	if (zf == NULL) {
+		n = -1;
+		goto done;
+	}
+
 #if PHP_API_VERSION < 20100412
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
@@ -287,13 +293,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 	if (stream == NULL) {
 		n = -1;
-		goto done;
-	}
-
-	zf = zip_fopen(za, file, 0);
-	if (zf == NULL) {
-		n = -1;
-		php_stream_close(stream);
+		zip_fclose(zf);
 		goto done;
 	}
 

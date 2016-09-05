@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur) (julien backport)
 
+- Zip:
+  . Fixed bug #70752 (Depacking with wrong password leaves 0 length files).
+    (cmb)
+
 15 Sep 2016, PHP 5.6.26
 
 - Core:
