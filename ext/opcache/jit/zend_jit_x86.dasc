@@ -376,6 +376,23 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 || }
 |.endmacro
 |
+|.macro sse_math2, opcode, reg1, reg2
+|| switch (opcode) {
+||     case ZEND_ADD:
+|	       addsd reg2, reg1
+||         break;
+||     case ZEND_SUB:
+|	       subsd reg2, reg1
+||         break;
+||     case ZEND_MUL:
+|	       mulsd reg2, reg1
+||         break;
+||     case ZEND_DIV:
+|	       divsd reg2, reg1
+||         break;
+|| }
+|.endmacro
+|
 |.macro sse_store, op, reg
 |    movsd qword [FP + op.var], reg
 |    mov dword [FP + op.var + 8], IS_DOUBLE
@@ -459,7 +476,11 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
 		|.if X64 // TODO: or SSE ???
 		|	sse_load opline->op1_type, opline->op1, xmm0
-		|	sse_math opline->opcode, opline->op2_type, opline->op2, xmm0
+		if (opline->op1_type == opline->op2_type && opline->op1.var == opline->op2.var) {
+			|	sse_math2 opline->opcode, xmm0, xmm0
+		} else {
+			|	sse_math opline->opcode, opline->op2_type, opline->op2, xmm0
+		}
 		|	sse_store opline->result, xmm0
 		|.else
 		|	fp_load opline->op1_type, opline->op1
