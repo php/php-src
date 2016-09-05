@@ -1482,7 +1482,7 @@ static PHP_INI_MH(OnUpdate_regex_stack_limit)
 	stack_limit = atol(ZSTR_VAL(new_value));
 	if (stack_limit > 0 && stack_limit <= UINT_MAX) {
 		onig_set_match_stack_limit_size(stack_limit);
-	} else if (stack_limit < 0) {
+	} else if (stack_limit <= 0) {
 		onig_set_match_stack_limit_size(UINT_MAX);
 	} else {
 		php_error_docref("ref.mbstring", E_WARNING, "mbstring.regex_stack_limit exceeds UNIT_MAX");
@@ -1519,7 +1519,7 @@ PHP_INI_BEGIN()
 		OnUpdateLong,
 		strict_detection, zend_mbstring_globals, mbstring_globals)
 #if HAVE_MBREGEX
-	PHP_INI_ENTRY("mbstring.regex_stack_limit", "10000", PHP_INI_ALL, OnUpdate_regex_stack_limit)
+	PHP_INI_ENTRY("mbstring.regex_stack_limit", "100000", PHP_INI_ALL, OnUpdate_regex_stack_limit)
 #endif
 PHP_INI_END()
 /* }}} */

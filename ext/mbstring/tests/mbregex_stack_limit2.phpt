@@ -14,6 +14,7 @@ function mb_trim( $string, $chars = "", $chars_array = array() )
     return $string;
 }
 
+ini_set('mbstring.regex_stack_limit', 10000);
 var_dump(mb_trim(str_repeat(' ', 10000)));
 
 echo 'OK';
