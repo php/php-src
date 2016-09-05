@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
 
+- Zip:
+  . Fixed bug #70752 (Depacking with wrong password leaves 0 length files).
+    (cmb)
+
 15 Sep 2016 PHP 7.0.11
 
 - Core:
