@@ -29,6 +29,9 @@ PHP 7.2 UPGRADE NOTES
 2. New Features
 ========================================
 
+- PCRE:
+  . Added `J` modifier for setting PCRE_DUPNAMES.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
