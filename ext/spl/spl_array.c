@@ -1224,15 +1224,9 @@ SPL_METHOD(Array, setIteratorClass)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_class_entry * ce_get_iterator = spl_ce_Iterator;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C", &ce_get_iterator) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_CLASS(ce_get_iterator)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	intern->ce_get_iterator = ce_get_iterator;
 }
