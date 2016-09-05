@@ -60,7 +60,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.section code
 
-|.macro load_addr, reg, addr
+|.macro LOAD_ADDR, reg, addr
 ||if (((ptrdiff_t)addr) <= 0x7fffffff) {
 |	mov reg, ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
 || } else {
@@ -84,7 +84,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	if (IS_32BIT(dasm_end) && IS_32BIT(zend_timeout)) {
 	|	call qword &zend_timeout
 	} else {
-	|	load_addr rax, zend_timeout
+	|	LOAD_ADDR rax, zend_timeout
 	|	call rax
 	}
 	|.else
@@ -102,7 +102,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	mov CARG1, FP
 		|	call qword &zend_interrupt_function
 		} else {
-		|	load_addr rax, zend_interrupt_function
+		|	LOAD_ADDR rax, zend_interrupt_function
 		|	mov CARG1, FP
 		|	call rax
 		}
@@ -132,7 +132,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 	if (IS_32BIT(dasm_end) && IS_32BIT(EG(exception_op)->handler)) {
 	|	jmp qword &(EG(exception_op)->handler)
 	} else {
-	|	load_addr rax, EG(exception_op)->handler
+	|	LOAD_ADDR rax, EG(exception_op)->handler
 	|	jmp rax
 	}
 	|.else
@@ -187,7 +187,7 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline, int may_throw)
 	if (IS_32BIT(dasm_end) && IS_32BIT(handler)) {
 	|	call qword &handler
 	} else {
-	|	load_addr rax, handler
+	|	LOAD_ADDR rax, handler
 	|	call rax
 	}
 	|.else
@@ -208,7 +208,7 @@ static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 	if (IS_32BIT(dasm_end) && IS_32BIT(handler)) {
 	|	jmp qword &handler
 	} else {
-	|	load_addr rax, handler
+	|	LOAD_ADDR rax, handler
 	|	jmp rax
 	}
 	|.else
@@ -226,7 +226,7 @@ static int zend_jit_skip_handler(dasm_State **Dst, uint32_t skip)
 static int zend_jit_set_opline(dasm_State **Dst, zend_op *target_opline)
 {
 	|.if X64
-	|	load_addr IP, target_opline
+	|	LOAD_ADDR IP, target_opline
 	|.else
 	|	mov IP, target_opline
 	|.endif
@@ -303,7 +303,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
 
-|.macro fp_op, fp_ins, op_type, op
+|.macro FP_OP, fp_ins, op_type, op
 || if (op_type == IS_CONST) {
 |    .if X64
 |    mov r0, aword EX->literals
@@ -315,34 +315,34 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |    fp_ins qword [FP + op.var]
 || }
 |.endmacro
-|
-|.macro fp_load, op_type, op
-|	fp_op fld, op_type, op
+
+|.macro FP_LOAD, op_type, op
+|	FP_OP fld, op_type, op
 |.endmacro
-|
-|.macro fp_math, opcode, op_type, op
+
+|.macro FP_MATH, opcode, op_type, op
 || switch (opcode) {
 ||     case ZEND_ADD:
-|	       fp_op fadd, op_type, op
+|	       FP_OP fadd, op_type, op
 ||         break;
 ||     case ZEND_SUB:
-|	       fp_op fsub, op_type, op
+|	       FP_OP fsub, op_type, op
 ||         break;
 ||     case ZEND_MUL:
-|	       fp_op fmul, op_type, op
+|	       FP_OP fmul, op_type, op
 ||         break;
 ||     case ZEND_DIV:
-|	       fp_op fdiv, op_type, op
+|	       FP_OP fdiv, op_type, op
 ||         break;
 || }
 |.endmacro
-|
-|.macro fp_store, op
+
+|.macro FP_STORE, op
 |    fstp qword [FP + op.var]
 |    mov dword [FP + op.var + 8], IS_DOUBLE
 |.endmacro
-|
-|.macro sse_op, sse_ins, op_type, op, reg
+
+|.macro SSE_OP, sse_ins, op_type, op, reg
 || if (op_type == IS_CONST) {
 |    .if X64
 |    mov r0, aword EX->literals
@@ -354,29 +354,29 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |    sse_ins reg, qword [FP + op.var]
 || }
 |.endmacro
-|
-|.macro sse_load, op_type, op, reg
-|	sse_op movsd, op_type, op, reg
+
+|.macro SSE_LOAD, op_type, op, reg
+|	SSE_OP movsd, op_type, op, reg
 |.endmacro
-|
-|.macro sse_math, opcode, op_type, op, reg
+
+|.macro SSE_MATH, opcode, op_type, op, reg
 || switch (opcode) {
 ||     case ZEND_ADD:
-|	       sse_op addsd, op_type, op, reg
+|	       SSE_OP addsd, op_type, op, reg
 ||         break;
 ||     case ZEND_SUB:
-|	       sse_op subsd, op_type, op, reg
+|	       SSE_OP subsd, op_type, op, reg
 ||         break;
 ||     case ZEND_MUL:
-|	       sse_op mulsd, op_type, op, reg
+|	       SSE_OP mulsd, op_type, op, reg
 ||         break;
 ||     case ZEND_DIV:
-|	       sse_op divsd, op_type, op, reg
+|	       SSE_OP divsd, op_type, op, reg
 ||         break;
 || }
 |.endmacro
-|
-|.macro sse_math2, opcode, reg1, reg2
+
+|.macro SSE_MATH2, opcode, reg1, reg2
 || switch (opcode) {
 ||     case ZEND_ADD:
 |	       addsd reg2, reg1
@@ -392,46 +392,46 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 ||         break;
 || }
 |.endmacro
-|
-|.macro sse_store, op, reg
+
+|.macro SSE_STORE, op, reg
 |    movsd qword [FP + op.var], reg
 |    mov dword [FP + op.var + 8], IS_DOUBLE
 |.endmacro
-|
-|.macro long_op, long_ins, op_type, op, reg
+
+|.macro LONG_OP, long_ins, op_type, op, reg
 || if (op_type == IS_CONST) {
 |    .if X64
 ||   if (IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
-|    mov64 r1, Z_LVAL_P(RT_CONSTANT(op_array, op))
-|    long_ins reg, r1
+|    	mov64 r1, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    	long_ins reg, r1
 ||   } else {
-|    long_ins reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    	long_ins reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
 ||   }
 |    .else
-|    long_ins reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    	long_ins reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
 |    .endif
 || } else {
 |    long_ins reg, aword [FP + op.var]
 || }
 |.endmacro
-|
-|.macro long_load, op_type, op, reg
+
+|.macro LONG_LOAD, op_type, op, reg
 || if (op_type == IS_CONST) {
 |    .if X64
 ||   if (IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
-|    mov64 reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    	mov64 reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
 ||   } else {
-|    mov reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    	mov reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
 ||   }
 |    .else
-|    mov reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
+|    	mov reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
 |    .endif
 || } else {
 |    mov reg, aword [FP + op.var]
 || }
 |.endmacro
-|
-|.macro next_opline
+
+|.macro INC_OPLINE
 |	add IP, sizeof(zend_op)
 |.endmacro
 
@@ -486,7 +486,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 			|
 		}
 		|1:
-		|	add IP, sizeof(zend_op)
+		|	INC_OPLINE
 		return 1;
 	}
 
@@ -508,19 +508,19 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
 		|.if X64 // TODO: or SSE ???
-		|	sse_load opline->op1_type, opline->op1, xmm0
+		|	SSE_LOAD opline->op1_type, opline->op1, xmm0
 		if (opline->op1_type == opline->op2_type && opline->op1.var == opline->op2.var) {
-			|	sse_math2 opline->opcode, xmm0, xmm0
+			|	SSE_MATH2 opline->opcode, xmm0, xmm0
 		} else {
-			|	sse_math opline->opcode, opline->op2_type, opline->op2, xmm0
+			|	SSE_MATH opline->opcode, opline->op2_type, opline->op2, xmm0
 		}
-		|	sse_store opline->result, xmm0
+		|	SSE_STORE opline->result, xmm0
 		|.else
-		|	fp_load opline->op1_type, opline->op1
-		|	fp_math opline->opcode, opline->op2_type, opline->op2
-		|	fp_store opline->result
+		|	FP_LOAD opline->op1_type, opline->op1
+		|	FP_MATH opline->opcode, opline->op2_type, opline->op2
+		|	FP_STORE opline->result
 		|.endif
-		| next_opline
+		|	INC_OPLINE
     } else {
 		goto fallback;
     }
@@ -545,8 +545,8 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 
 	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG)) {
-		|	long_load opline->op1_type, opline->op1, r0
-		|	long_op cmp, opline->op2_type, opline->op2, r0
+		|	LONG_LOAD opline->op1_type, opline->op1, r0
+		|	LONG_OP cmp, opline->op2_type, opline->op2, r0
 		if ((opline+1)->opcode == ZEND_JMPZ &&
 		    (opline+1)->op1_type == IS_TMP_VAR &&
 		    (opline+1)->op1.var == opline->result.var) {
@@ -610,16 +610,16 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					break;
 			}
 			|	mov dword [FP + opline->result.var + 8], eax
-			| next_opline
+			| INC_OPLINE
 		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
 		|.if X64 // TODO: or SSE ???
-		|	sse_load opline->op1_type, opline->op1, xmm0
-		|	sse_op ucomisd, opline->op2_type, opline->op2, xmm0
+		|	SSE_LOAD opline->op1_type, opline->op1, xmm0
+		|	SSE_OP ucomisd, opline->op2_type, opline->op2, xmm0
 		|.else
-		|	fp_load opline->op2_type, opline->op2
-		|	fp_load opline->op1_type, opline->op1
+		|	FP_LOAD opline->op2_type, opline->op2
+		|	FP_LOAD opline->op1_type, opline->op1
 		|	fucomip st1
 		|	fstp st0
 		|.endif
@@ -703,7 +703,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					break;
 			}
 			|	mov dword [FP + opline->result.var + 8], eax
-			| next_opline
+			| INC_OPLINE
 		}
     } else {
 		goto fallback;
