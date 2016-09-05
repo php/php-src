@@ -1040,7 +1040,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 	}
 
-	ZVAL_STRINGL(return_value, buf, line_len, 0);
+	RETVAL_STRINGL_CHECK(buf, line_len, 0);
 	/* resize buffer if it's much larger than the result.
 	 * Only needed if the user requested a buffer size. */
 	if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
@@ -1124,7 +1124,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
-	RETURN_STRINGL(retval, retval_len, 0);
+	RETVAL_STRINGL_CHECK(retval, retval_len, 0);
 }
 /* }}} */
 
