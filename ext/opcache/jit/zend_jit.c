@@ -779,6 +779,14 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_SMALLER:
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, &ssa)) {
+						goto jit_failure;
+					}
+					break;
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa.cfg.split_at_recv) {

@@ -498,6 +498,121 @@ fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
+
+static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info, op2_info;
+	unsigned int target_label;
+
+	if (!ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+	op1_info = OP1_INFO();
+	op2_info = OP2_INFO();
+
+	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
+	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
+		|.if X64 // TODO: or SSE ???
+		|	sse_load opline->op1_type, opline->op1, xmm0
+		|	sse_op ucomisd, opline->op2_type, opline->op2, xmm0
+		|.else
+		|	fp_load opline->op2_type, opline->op2
+		|	fp_load opline->op1_type, opline->op1
+		|	fucomip st1
+		|	fstp st0
+		|.endif
+		if ((opline+1)->opcode == ZEND_JMPZ &&
+		    (opline+1)->op1_type == IS_TMP_VAR &&
+		    (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+					| jp >1
+					| je => target_label
+					|1:
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					| jp >1
+					| jne => target_label
+					|1:
+					break;
+				case ZEND_IS_SMALLER:
+					| ja => target_label
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					| jae => target_label
+					break;
+			}
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
+				|	add IP, sizeof(zend_op) * 2
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+		           (opline+1)->op1_type == IS_TMP_VAR &&
+		           (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+					| jp >1
+					| jne => target_label
+					|1:
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					| jp >1
+					| je => target_label
+					|1:
+					break;
+				case ZEND_IS_SMALLER:
+					| jna => target_label
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					| jnae => target_label
+					break;
+			}
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
+				|	add IP, sizeof(zend_op) * 2
+			}
+		} else {
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+					|	jp >1
+					|	mov eax, IS_TRUE
+					|	je >2
+					|1:
+					|	mov eax, IS_FALSE
+					|2:
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					|	jp >1
+					|	mov eax, IS_TRUE
+					|	jne >2
+					|1:
+					|	mov eax, IS_FALSE
+					|2:
+					break;
+				case ZEND_IS_SMALLER:
+					|	seta al
+					|	add eax, 2
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					|	setae al
+					|	add eax, 2
+					break;
+			}
+			|	mov dword [FP + opline->result.var + 8], eax
+			| next_opline
+		}
+    } else {
+		goto fallback;
+    }
+
+	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
 #endif
 
 /*
