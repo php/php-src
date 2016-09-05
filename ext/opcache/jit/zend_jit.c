@@ -747,6 +747,11 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 		}
 #endif
 		zend_jit_label(&dasm_state, b);
+		if (ssa.cfg.blocks[b].flags & ZEND_BB_TARGET) {
+			if (!zend_jit_set_opline(&dasm_state, op_array->opcodes + ssa.cfg.blocks[b].start)) {
+				goto jit_failure;
+			}
+		}
 		if (ssa.cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
 			if (!zend_jit_check_timeout(&dasm_state)) {
 				goto jit_failure;
@@ -806,8 +811,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 				case ZEND_OP_DATA:
 					break;
 				case ZEND_JMP:
-					if (!zend_jit_set_opline(&dasm_state, OP_JMP_ADDR(opline, opline->op1)) ||
-					    !zend_jit_jmp(&dasm_state, ssa.cfg.blocks[b].successors[0])) {
+					if (!zend_jit_jmp(&dasm_state, ssa.cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
