@@ -401,7 +401,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |.macro LONG_OP, long_ins, op_type, op, reg
 || if (op_type == IS_CONST) {
 |    .if X64
-||   if (IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
+||   if (!IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
 |    	mov64 r1, Z_LVAL_P(RT_CONSTANT(op_array, op))
 |    	long_ins reg, r1
 ||   } else {
@@ -418,7 +418,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |.macro LONG_LOAD, op_type, op, reg
 || if (op_type == IS_CONST) {
 |    .if X64
-||   if (IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
+||   if (!IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, op)))) {
 |    	mov64 reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
 ||   } else {
 |    	mov reg, Z_LVAL_P(RT_CONSTANT(op_array, op))
