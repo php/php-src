@@ -1925,7 +1925,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 #else /* Unix */
 CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 {
-	int command_length;
+	size_t command_length;
 	int dir_length, extra = 0;
 	char *command_line;
 	char *ptr, *dir;
