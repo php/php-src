@@ -45,12 +45,12 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash);
 PHPAPI int php_var_unserialize_ref(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash);
 PHPAPI int php_var_unserialize_intern(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash);
-PHPAPI int php_var_unserialize_ex(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes);
 
 PHPAPI php_serialize_data_t php_var_serialize_init(void);
 PHPAPI void php_var_serialize_destroy(php_serialize_data_t d);
 PHPAPI php_unserialize_data_t php_var_unserialize_init(void);
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d);
+PHPAPI void php_var_unserialize_set_allowed_classes(php_unserialize_data_t d, HashTable *classes);
 
 #define PHP_VAR_SERIALIZE_INIT(d) \
 	(d) = php_var_serialize_init()

@@ -1079,6 +1079,12 @@ PHP_FUNCTION(unserialize)
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if(options != NULL) {
 		classes = zend_hash_str_find(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
+		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
+			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
+			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+			RETURN_FALSE;
+		}
+
 		if(classes && (Z_TYPE_P(classes) == IS_ARRAY || !zend_is_true(classes))) {
 			ALLOC_HASHTABLE(class_hash);
 			zend_hash_init(class_hash, (Z_TYPE_P(classes) == IS_ARRAY)?zend_hash_num_elements(Z_ARRVAL_P(classes)):0, NULL, NULL, 0);
@@ -1094,9 +1100,10 @@ PHP_FUNCTION(unserialize)
 		        zend_string_release(lcname);
 			} ZEND_HASH_FOREACH_END();
 		}
+		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 	}
 
-	if (!php_var_unserialize_ex(return_value, &p, p + buf_len, &var_hash, class_hash)) {
+	if (!php_var_unserialize(return_value, &p, p + buf_len, &var_hash)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		if (class_hash) {
 			zend_hash_destroy(class_hash);
