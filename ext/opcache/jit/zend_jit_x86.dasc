@@ -70,6 +70,48 @@ static void* dasm_labels[zend_lb_MAX];
 
 #define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0x7fffffff)
 
+/* bit helpers */
+
+/* from http://aggregate.org/MAGIC/ */
+static uint32_t ones32(uint32_t x)
+{
+	x -= ((x >> 1) & 0x55555555);
+	x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
+	x = (((x >> 4) + x) & 0x0f0f0f0f);
+	x += (x >> 8);
+	x += (x >> 16);
+	return x & 0x0000003f;
+}
+
+static uint32_t floor_log2(uint32_t x)
+{
+	x |= (x >> 1);
+	x |= (x >> 2);
+	x |= (x >> 4);
+	x |= (x >> 8);
+	x |= (x >> 16);
+	return ones32(x) - 1;
+}
+
+static zend_bool is_power_of_two(uint32_t x)
+{
+	return !(x & (x - 1));
+}
+
+static zend_bool has_concrete_type(uint32_t value_type)
+{
+	if (value_type & MAY_BE_UNDEF) {
+		value_type |= MAY_BE_NULL;
+	}
+	value_type &= MAY_BE_ANY;
+	return is_power_of_two (value_type);
+}
+
+static uint32_t concrete_type(uint32_t value_type)
+{
+	return floor_log2(value_type & MAY_BE_ANY);
+}
+
 static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
 	|->interrupt_handler:
@@ -747,6 +789,102 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
+static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, zend_uchar val_type, znode_op val, uint32_t val_info)
+{
+	if (val_type == IS_CV && (val_info & (MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
+		/* TODO: allow JIT for Z_ADDREF_P() ??? */
+		goto fallback;
+	} else if (val_type == IS_VAR && (val_info & MAY_BE_REF)) {
+		goto fallback;
+	} else if (val_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(op_array, val);
+
+		if (Z_OPT_REFCOUNTED_P(zv)) {
+			/* TODO: allow JIT for Z_ADDREF_P() ??? */
+			goto fallback;
+		}
+		if (Z_TYPE_P(zv) > IS_TRUE) {
+			if (Z_TYPE_P(zv) == IS_DOUBLE) {
+				|.if X64 // TODO: or SSE ???
+				||	if (Z_DVAL_P(zv) == 0.0) {
+				|		xorps xmm0, xmm0
+				||  } else if (!IS_32BIT(zv)) {
+				|		mov64 r0, ((uintptr_t)zv)
+				|    	movsd xmm0, qword [r0]
+				||   } else {
+				|    	movsd xmm0, qword [((uint32_t)(uintptr_t)zv)]
+				||   }
+				|	movsd qword [FP + var], xmm0
+				|.else
+				||	if (Z_DVAL_P(zv) == 0.0) {
+				|		fldz
+				||	} else if (Z_DVAL_P(zv) == 1.0) {
+				|		fld1
+				||	} else  {
+				|		fld qword [zv]
+				||	}
+				|	fstp qword [FP + var]
+				|.endif
+			} else {
+				|.if X64
+				||	if (!IS_32BIT(Z_LVAL_P(zv))) {
+				|		mov64 r0, ((uintptr_t)Z_LVAL_P(zv))
+				|    	mov qword [FP + var], r0
+				||	} else {
+				|		mov qword [FP + var], Z_LVAL_P(zv)
+				||	}
+				|.else
+				|	mov dword [FP + var], Z_LVAL_P(zv)
+				|.endif
+			}
+		}
+		|	mov dword [FP + var + 8], Z_TYPE_INFO_P(zv);
+		|	INC_OPLINE
+		return 1;
+	}
+
+	if (val_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+		if (!(val_info & MAY_BE_DOUBLE)) {
+			|	mov r0, aword [FP + val.var]
+			|	mov aword [FP + var], r0
+		} else if ((val_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+			|.if X64 // TODO: or SSE ???
+			|	movsd xmm0, qword [FP + val.var]
+			|	movsd qword [FP + var], xmm0
+			|.else
+			|	fld qword [FP + val.var]
+			|	fstp qword [FP + var]
+			|.endif
+		} else {
+			|.if X64
+			|	mov r0, aword [FP + val.var]
+			|	mov aword [FP + var], r0
+			|.else
+			|	mov r0, dword [FP + val.var]
+			|	mov r1, dword [FP + val.var + 4]
+			|	mov dword [FP + var], r0
+			|	mov dword [FP + var + 4], r1
+			|.endif
+		}
+	}
+
+	if ((val_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+	    has_concrete_type(val_info & MAY_BE_ANY)) {
+		zend_uchar type = concrete_type(val_info);
+		|	mov dword [FP + var + 8], type
+	} else {
+		|	mov eax, dword [FP + val.var + 8]
+		|	mov dword [FP + var + 8], eax
+	}
+	|	INC_OPLINE
+
+	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
 static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
@@ -757,43 +895,27 @@ static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *
 
 	op1_info = OP1_INFO();
 
-	if (!(op1_info &
-		((MAY_BE_ANY|MAY_BE_UNDEF) -
-		(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)))) {
-		if (opline->op1_type == IS_CONST) {
-			zval *zv = RT_CONSTANT(op_array, opline->op1);
-			if (Z_TYPE_P(zv) > IS_TRUE) {
-				|.if X64
-				if (IS_32BIT((ptrdiff_t)Z_PTR_P(zv))) {
-					|	mov qword [FP + opline->result.var], (ptrdiff_t)Z_PTR_P(zv)
-				} else {
-					|	mov64 r0, (ptrdiff_t)Z_PTR_P(zv)
-					|	mov qword [FP + opline->result.var], r0
-				}
-				|.else
-				|	mov dword [FP + opline->result.var], zv->value.ww.w1
-				|	mov dword [FP + opline->result.var + 4], zv->value.ww.w2
-				|.endif
-			}
-			|	mov dword [FP + opline->result.var + 8], Z_TYPE_INFO_P(zv)
-		} else {
-			if (op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) {
-				|.if X64
-				|	movdqa xmm0, [FP + opline->op1.var]
-				|	movdqa [FP + opline->result.var], xmm0
-				|.else
-				|	movsd xmm0, qword [FP + opline->op1.var]
-				|	movsd qword [FP + opline->result.var], xmm0
-				|	mov	eax, [FP + opline->op1.var + 8]
-				|	mov [FP + opline->result.var + 8], eax
-				|.endif
-			} else {
-				|	mov eax, [FP + opline->op1.var + 8]
-				|	mov [FP + opline->result.var + 8], eax
-			}
-		}
-		|	INC_OPLINE
-		return 1;
+	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, opline->op1_type, opline->op1, op1_info);
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
+static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info, op2_info;
+
+	if (opline->op1_type != IS_CV || opline->result_type != IS_UNDEF ||
+	    !ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+	op2_info = OP2_INFO();
+
+	if (!(op1_info & (MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_REF))) {
+		return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, opline->op2_type, opline->op2, op2_info);
 	}
 
 fallback:

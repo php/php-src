@@ -779,6 +779,11 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_ASSIGN:
+					if (!zend_jit_assign(&dasm_state, opline, op_array, &ssa)) {
+						goto jit_failure;
+					}
+					break;
 				case ZEND_QM_ASSIGN:
 					if (!zend_jit_qm_assign(&dasm_state, opline, op_array, &ssa)) {
 						goto jit_failure;
