@@ -596,20 +596,21 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 
 	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
 		((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG)) {
+		//TODO: imul/idiv overflow?
+		if (opline->opcode == ZEND_MUL || opline->opcode == ZEND_DIV) {
+			goto fallback;
+		}
 		res_info = RES_INFO();
 		|	LONG_LOAD opline->op1_type, opline->op1, r0
 		|	LONG_MATH opline->opcode, opline->op2_type, opline->op2, r0
 		if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 			|	LONG_STORE opline->result, r0
 		} else {
-			| jo >1
+			uint32_t from, to;
+			zend_jit_delay(op_array, opline, &from, &to);
+			| jo =>from
 			|	LONG_STORE opline->result, r0
-			|	jmp >2
-			|1:
-			|	LONGF_LOAD opline->op2_type, opline->op2
-			|	LONGF_LOAD opline->op1_type, opline->op1
-			|	LONGF_MATH opline->opcode
-			|	FP_STORE opline->result
+			|=>to:
 		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
@@ -629,7 +630,6 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
     } else {
 		goto fallback;
     }
-	|2:
 	|	INC_OPLINE
 
 	return 1;
@@ -957,6 +957,26 @@ static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
+static void zend_jit_delayed_gen(dasm_State **Dst, zend_op_array *op_array, zend_op *opline, uint32_t from, uint32_t to) {
+	switch (opline->opcode) {
+		case ZEND_ADD:
+		case ZEND_SUB:
+		case ZEND_MUL:
+		case ZEND_DIV: {
+			/* overflow slow path */
+			|=>from:
+			|	LONGF_LOAD opline->op2_type, opline->op2
+			|	LONGF_LOAD opline->op1_type, opline->op1
+			|	LONGF_MATH opline->opcode
+			|	FP_STORE opline->result
+			|	jmp =>to
+		}
+		break;
+		default:
+			break;
+	}
 }
 
 #endif
