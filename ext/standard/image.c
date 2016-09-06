@@ -207,23 +207,27 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	unsigned char *b, *buf = NULL;
 	zend_string *bufz;
 
+	if (php_stream_seek(stream, 5, SEEK_CUR)) {
+		return NULL;
+	}
+
+	if (php_stream_read(stream, (char *) a, sizeof(a)) != sizeof(a)) {
+		return NULL;
+	}
+
 	b = ecalloc(1, len + 1);
-
-	if (php_stream_seek(stream, 5, SEEK_CUR))
-		return NULL;
-
-	if (php_stream_read(stream, (char *) a, sizeof(a)) != sizeof(a))
-		return NULL;
 
 	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
 		/* failed to decompress the file, will try reading the rest of the file */
 		if (php_stream_seek(stream, 8, SEEK_SET)) {
+			efree(b);
 			return NULL;
 		}
 
 		bufz = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 
 		if (!bufz) {
+			efree(b);
 			return NULL;
 		}
 

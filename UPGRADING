@@ -1,4 +1,4 @@
-PHP 7.1 UPGRADE NOTES
+PHP 7.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -29,6 +29,9 @@ PHP 7.1 UPGRADE NOTES
 2. New Features
 ========================================
 
+- PCRE:
+  . Added `J` modifier for setting PCRE_DUPNAMES.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -49,6 +52,10 @@ PHP 7.1 UPGRADE NOTES
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
 
+- Sockets:
+  . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
+    socket_addrinfo_bind() and socket_addrinfo_explain().
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -64,6 +71,10 @@ PHP 7.1 UPGRADE NOTES
 - EXIF:
    . Added extended exif tag support for the following formats: 
      Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+
+- Mbstring
+  . mb_check_encoding() accepts array parameter. Both key and value
+    ecodings are checked recursively.
 
 ========================================
 10. New Global Constants
