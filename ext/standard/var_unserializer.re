@@ -57,6 +57,9 @@ PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
 	}
 }
 
+PHPAPI HashTable *php_var_unserialize_get_allowed_classes(php_unserialize_data_t d) {
+	return d->allowed_classes;
+}
 PHPAPI void php_var_unserialize_set_allowed_classes(php_unserialize_data_t d, HashTable *classes) {
 	d->allowed_classes = classes;
 }
