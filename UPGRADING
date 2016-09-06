@@ -75,6 +75,8 @@ PHP 7.2 UPGRADE NOTES
 - Mbstring
   . mb_check_encoding() accepts array parameter. Both key and value
     ecodings are checked recursively.
+  . mb_convert_encoding() accepts array parameter. Only value encodings
+    are converted recursively.
 
 ========================================
 10. New Global Constants
