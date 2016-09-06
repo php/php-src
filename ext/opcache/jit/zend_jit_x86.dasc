@@ -492,6 +492,28 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 || }
 |.endmacro
 
+|.macro LONGF_LOAD, op_type, op
+|	FP_OP fild, op_type, op
+|.endmacro
+
+|.macro LONGF_MATH, opcode
+|| switch (opcode) {
+||     case ZEND_ADD:
+|		   fadd st0, st1
+||         break;
+||     case ZEND_SUB:
+|	       fsub st0, st1
+||         break;
+||     case ZEND_MUL:
+|	       fmul st0, st1
+||         break;
+||     case ZEND_DIV:
+|	       fdiv st0, st1
+||         break;
+|| }
+|.endmacro
+
+
 |.macro LONG_STORE, op, reg
 |    mov aword [FP + op.var], reg
 |    mov dword [FP + op.var + 8], IS_LONG
@@ -571,15 +593,24 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
-	res_info = RES_INFO();
 
 	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
-		((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
-		((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG)) {
-		//TODO? overflow?
+		((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG)) {
+		res_info = RES_INFO();
 		|	LONG_LOAD opline->op1_type, opline->op1, r0
 		|	LONG_MATH opline->opcode, opline->op2_type, opline->op2, r0
-		|	LONG_STORE opline->result, r0
+		if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
+			|	LONG_STORE opline->result, r0
+		} else {
+			| jo >1
+			|	LONG_STORE opline->result, r0
+			|	jmp >2
+			|1:
+			|	LONGF_LOAD opline->op2_type, opline->op2
+			|	LONGF_LOAD opline->op1_type, opline->op1
+			|	LONGF_MATH opline->opcode
+			|	FP_STORE opline->result
+		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
 		|.if X64 or SSE
@@ -598,6 +629,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
     } else {
 		goto fallback;
     }
+	|2:
 	|	INC_OPLINE
 
 	return 1;
@@ -926,6 +958,7 @@ fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
+
 #endif
 
 /*
