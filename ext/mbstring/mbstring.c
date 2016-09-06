@@ -3862,6 +3862,7 @@ PHP_FUNCTION(mb_convert_variables)
 	const mbfl_encoding **elist;
 	char *to_enc;
 	void *ptmp;
+	int recursion_error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz+", &to_enc, &to_enc_len, &zfrom_enc, &args, &argc) == FAILURE) {
 		return;
@@ -3926,6 +3927,11 @@ PHP_FUNCTION(mb_convert_variables)
 					target_hash = HASH_OF(var);
 					if (target_hash != NULL) {
 						while ((hash_entry = zend_hash_get_current_data(target_hash)) != NULL) {
+							if (++target_hash->u.v.nApplyCount > 1) {
+								--target_hash->u.v.nApplyCount;
+								recursion_error = 1;
+								goto detect_end;
+							}
 							zend_hash_move_forward(target_hash);
 							if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
 								hash_entry = Z_INDIRECT_P(hash_entry);
@@ -3965,6 +3971,19 @@ PHP_FUNCTION(mb_convert_variables)
 detect_end:
 			from_encoding = mbfl_encoding_detector_judge2(identd);
 			mbfl_encoding_detector_delete(identd);
+		}
+		if (recursion_error) {
+			while(stack_level-- && (var = &stack[stack_level])) {
+				if (HASH_OF(var)->u.v.nApplyCount > 1) {
+					HASH_OF(var)->u.v.nApplyCount--;
+				}
+			}
+			efree(stack);
+			if (elist != NULL) {
+				efree((void *)elist);
+			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			RETURN_FALSE;
 		}
 		efree(stack);
 
@@ -4020,6 +4039,11 @@ detect_end:
 						hash_entry = hash_entry_ptr;
 						ZVAL_DEREF(hash_entry);
 						if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
+							if (++(HASH_OF(hash_entry)->u.v.nApplyCount) > 1) {
+								--(HASH_OF(hash_entry)->u.v.nApplyCount);
+								recursion_error = 1;
+								goto conv_end;
+							}
 							if (stack_level >= stack_max) {
 								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
 								ptmp = erealloc(stack, sizeof(zval) * stack_max);
@@ -4059,10 +4083,22 @@ detect_end:
 				}
 			}
 		}
-		efree(stack);
 
+conv_end:
 		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
+
+		if (recursion_error) {
+			while(stack_level-- && (var = &stack[stack_level])) {
+				if (HASH_OF(var)->u.v.nApplyCount > 1) {
+					HASH_OF(var)->u.v.nApplyCount--;
+				}
+			}
+			efree(stack);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			RETURN_FALSE;
+		}
+		efree(stack);
 	}
 
 	if (from_encoding) {
