@@ -71,7 +71,7 @@ static zend_array delayed_entries = {0};
 static uint32_t delayed_offset = 0;
 
 static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
-static void *zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out);
+static int zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out);
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.c"
@@ -105,17 +105,19 @@ static void zend_jit_delayed_entries_init(uint32_t offset) {
 	return;
 }
 
-static void *zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out) {
-	delayed_entry *entry = (delayed_entry*)emalloc(sizeof(delayed_entry));
-	entry->op_array = op_array;
-	entry->opline = opline;
-	entry->in = delayed_offset++;
-	entry->out = delayed_offset++;
-	zend_hash_next_index_insert_ptr(&delayed_entries, (void*)entry);
-	*in = entry->in;
-	*out = entry->out;
-	ZEND_ASSERT(delayed_offset < op_array->last * 2);
-	return;
+static int zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out) {
+	if (delayed_offset < op_array->last * 2) {
+		delayed_entry *entry = (delayed_entry*)emalloc(sizeof(delayed_entry));
+		entry->op_array = op_array;
+		entry->opline = opline;
+		entry->in = delayed_offset++;
+		entry->out = delayed_offset++;
+		zend_hash_next_index_insert_ptr(&delayed_entries, (void*)entry);
+		*in = entry->in;
+		*out = entry->out;
+		return 1;
+	}
+	return 0;
 }
 
 static void *zend_jit_delayed_entries_shutdown(dasm_State **Dst) {
@@ -752,7 +754,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 
 	dasm_growpc(&dasm_state, op_array->last * 2);
 
-	zend_jit_delayed_entries_init(op_array->last);
+	zend_jit_delayed_entries_init(op_array->last + 1);
 
 	zend_jit_align_func(&dasm_state);
 	for (b = 0; b < ssa.cfg.blocks_count; b++) {
