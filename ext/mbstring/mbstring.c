@@ -3315,6 +3315,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 			case IS_STRING:
 				cval = php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), _to_encoding, _from_encodings, &cval_len);
 				ZVAL_STRINGL(&entry_tmp, cval, cval_len);
+				efree(cval);
 				break;
 			case IS_NULL:
 			case IS_TRUE:
