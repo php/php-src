@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #67325 (imagetruecolortopalette: white is duplicated in palette).
     (cmb)
 
+- Mbstring
+ . Fixed bug #66964 (mb_convert_variables() cannot detect recursion) (Yasuo)
+
 - Opcache:
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
     function). (Laruence)
