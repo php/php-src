@@ -27,6 +27,7 @@ struct php_unserialize_data {
 	void *last;
 	void *first_dtor;
 	void *last_dtor;
+	HashTable *allowed_classes;
 };
 
 PHPAPI php_unserialize_data_t php_var_unserialize_init() {
@@ -54,6 +55,10 @@ PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
 	if (!BG(serialize_lock) && !--BG(unserialize).level) {
 		BG(unserialize).data = NULL;
 	}
+}
+
+PHPAPI void php_var_unserialize_set_allowed_classes(php_unserialize_data_t d, HashTable *classes) {
+	d->allowed_classes = classes;
 }
 
 
@@ -244,8 +249,10 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 	return str;
 }
 
-static inline int unserialize_allowed_class(zend_string *class_name, HashTable *classes)
+static inline int unserialize_allowed_class(
+		zend_string *class_name, php_unserialize_data_t *var_hashx)
 {
+	HashTable *classes = (*var_hashx)->allowed_classes;
 	zend_string *lcname;
 	int res;
 	ALLOCA_FLAG(use_heap)
@@ -337,8 +344,8 @@ static inline size_t parse_uiv(const unsigned char *p)
 	return result;
 }
 
-#define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes
-#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes
+#define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash
+#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash
 
 static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER);
 
@@ -350,7 +357,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 
 		ZVAL_UNDEF(&key);
 
-		if (!php_var_unserialize_internal(&key, p, max, NULL, classes)) {
+		if (!php_var_unserialize_internal(&key, p, max, NULL)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -406,7 +413,7 @@ string_key:
 			}
 		}
 
-		if (!php_var_unserialize_internal(data, p, max, var_hash, classes)) {
+		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -537,13 +544,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 # pragma optimize("", on)
 #endif
 
-PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash)
-{
-	HashTable *classes = NULL;
-	return php_var_unserialize_ex(UNSERIALIZE_PASSTHRU);
-}
-
-PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
+PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 {
 	var_entries *orig_var_entries = (*var_hash)->last;
 	zend_long orig_used_slots = orig_var_entries ? orig_var_entries->used_slots : 0;
@@ -850,7 +851,7 @@ object ":" uiv ":" ["]	{
 	class_name = zend_string_init(str, len, 0);
 
 	do {
-		if(!unserialize_allowed_class(class_name, classes)) {
+		if(!unserialize_allowed_class(class_name, var_hash)) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
