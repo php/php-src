@@ -1011,7 +1011,7 @@ PHP_FUNCTION(wordwrap)
 		/* free unused memory */
 		newtext = erealloc(newtext, newtextlen+1);
 
-		RETURN_STRINGL(newtext, newtextlen, 0);
+		RETVAL_STRINGL_CHECK(newtext, newtextlen, 0);
 	}
 }
 /* }}} */
