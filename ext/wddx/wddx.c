@@ -230,7 +230,8 @@ static int wddx_stack_destroy(wddx_stack *stack)
 
 	if (stack->elements) {
 		for (i = 0; i < stack->top; i++) {
-			if (((st_entry *)stack->elements[i])->data)	{
+			if (((st_entry *)stack->elements[i])->data
+					&& ((st_entry *)stack->elements[i])->type != ST_FIELD)	{
 				zval_ptr_dtor(&((st_entry *)stack->elements[i])->data);
 			}
 			if (((st_entry *)stack->elements[i])->varname) {
