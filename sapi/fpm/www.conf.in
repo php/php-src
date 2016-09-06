@@ -322,6 +322,10 @@ pm.max_spare_servers = 3
 ; Default Value: 0
 ;request_slowlog_timeout = 0
 
+; Depth of slow log stack trace.
+; Default Value: 20
+;request_slowlog_trace_depth = 20
+
 ; The timeout for serving a single request after which the worker process will
 ; be killed. This option should be used when the 'max_execution_time' ini option
 ; does not stop script execution for some reason. A value of '0' means 'off'.
