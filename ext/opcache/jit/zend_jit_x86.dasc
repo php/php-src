@@ -746,6 +746,60 @@ fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
+
+static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info;
+
+	if (!ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+
+	if (!(op1_info &
+		((MAY_BE_ANY|MAY_BE_UNDEF) -
+		(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)))) {
+		if (opline->op1_type == IS_CONST) {
+			zval *zv = RT_CONSTANT(op_array, opline->op1);
+			if (Z_TYPE_P(zv) > IS_TRUE) {
+				|.if X64
+				if (IS_32BIT((ptrdiff_t)Z_PTR_P(zv))) {
+					|	mov qword [FP + opline->result.var], (ptrdiff_t)Z_PTR_P(zv)
+				} else {
+					|	mov64 r0, (ptrdiff_t)Z_PTR_P(zv)
+					|	mov qword [FP + opline->result.var], r0
+				}
+				|.else
+				|	mov dword [FP + opline->result.var], zv->value.ww.w1
+				|	mov dword [FP + opline->result.var + 4], zv->value.ww.w2
+				|.endif
+			}
+			|	mov dword [FP + opline->result.var + 8], Z_TYPE_INFO_P(zv)
+		} else {
+			if (op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) {
+				|.if X64
+				|	movdqa xmm0, [FP + opline->op1.var]
+				|	movdqa [FP + opline->result.var], xmm0
+				|.else
+				|	movsd xmm0, qword [FP + opline->op1.var]
+				|	movsd qword [FP + opline->result.var], xmm0
+				|	mov	eax, [FP + opline->op1.var + 8]
+				|	mov [FP + opline->result.var + 8], eax
+				|.endif
+			} else {
+				|	mov eax, [FP + opline->op1.var + 8]
+				|	mov [FP + opline->result.var + 8], eax
+			}
+		}
+		|	INC_OPLINE
+		return 1;
+	}
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
 #endif
 
 /*
