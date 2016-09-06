@@ -3530,7 +3530,8 @@ PHP_FUNCTION(mb_convert_variables)
 	size_t elistsz;
 	const mbfl_encoding **elist;
 	char *to_enc;
-	void *ptmp;	
+	void *ptmp;
+	int recursion_error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ+", &to_enc, &to_enc_len, &zfrom_enc, &args, &argc) == FAILURE) {
 		return;
@@ -3593,6 +3594,11 @@ PHP_FUNCTION(mb_convert_variables)
 					target_hash = HASH_OF(*var);
 					if (target_hash != NULL) {
 						while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
+							if (++target_hash->nApplyCount > 1) {
+								--target_hash->nApplyCount;
+								recursion_error = 1;
+								goto detect_end;
+							}
 							zend_hash_move_forward(target_hash);
 							if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
 								if (stack_level >= stack_max) {
@@ -3628,6 +3634,20 @@ PHP_FUNCTION(mb_convert_variables)
 detect_end:
 			from_encoding = mbfl_encoding_detector_judge2(identd);
 			mbfl_encoding_detector_delete(identd);
+		}
+		if (recursion_error) {
+			while(stack_level-- && (var = stack[stack_level])) {
+				if (HASH_OF(*var)->nApplyCount > 1) {
+					HASH_OF(*var)->nApplyCount--;
+				}
+			}
+			efree(stack);
+			efree(args);
+			if (elist != NULL) {
+				efree((void *)elist);
+			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			RETURN_FALSE;
 		}
 		efree(stack);
 
@@ -3676,6 +3696,11 @@ detect_end:
 					while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
 						zend_hash_move_forward(target_hash);
 						if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
+							if (++(HASH_OF(*hash_entry)->nApplyCount) > 1) {
+								--(HASH_OF(*hash_entry)->nApplyCount);
+								recursion_error = 1;
+								goto conv_end;
+							}
 							if (stack_level >= stack_max) {
 								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
 								ptmp = erealloc(stack, sizeof(zval **)*stack_max);
@@ -3684,7 +3709,6 @@ detect_end:
 							stack[stack_level] = var;
 							stack_level++;
 							var = hash_entry;
-							SEPARATE_ZVAL(hash_entry);
 							target_hash = HASH_OF(*var);
 							if (target_hash != NULL) {
 								zend_hash_internal_pointer_reset(target_hash);
@@ -3701,25 +3725,38 @@ detect_end:
 								} else {
 									zval_dtor(*hash_entry);
 								}
-							ZVAL_STRINGL(*hash_entry, (char *)ret->val, ret->len, 0);
+								ZVAL_STRINGL(*hash_entry, (char *)ret->val, ret->len, 0);
+							}
 						}
 					}
 				}
-			}
-		} else if (Z_TYPE_PP(var) == IS_STRING) {
-			string.val = (unsigned char *)Z_STRVAL_PP(var);
-			string.len = Z_STRLEN_PP(var);
-			ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-			if (ret != NULL) {
-				zval_dtor(*var);
-				ZVAL_STRINGL(*var, (char *)ret->val, ret->len, 0);
+			} else if (Z_TYPE_PP(var) == IS_STRING) {
+				string.val = (unsigned char *)Z_STRVAL_PP(var);
+				string.len = Z_STRLEN_PP(var);
+				ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
+				if (ret != NULL) {
+					zval_dtor(*var);
+					ZVAL_STRINGL(*var, (char *)ret->val, ret->len, 0);
 				}
 			}
 		}
-		efree(stack);
 
+conv_end:
 		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
+
+		if (recursion_error) {
+			while(stack_level-- && (var = stack[stack_level])) {
+				if (HASH_OF(*var)->nApplyCount > 1) {
+					HASH_OF(*var)->nApplyCount--;
+				}
+			}
+			efree(stack);
+			efree(args);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			RETURN_FALSE;
+		}
+		efree(stack);
 	}
 
 	efree(args);
