@@ -431,6 +431,28 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 || }
 |.endmacro
 
+|.macro LONG_MATH, opcode, op_type, op, reg
+|| switch (opcode) {
+||     case ZEND_ADD:
+|	       LONG_OP add, op_type, op, reg
+||         break;
+||     case ZEND_SUB:
+|	       LONG_OP sub, op_type, op, reg
+||         break;
+||     case ZEND_MUL:
+|	       LONG_OP imul, op_type, op, reg
+||         break;
+||     case ZEND_DIV:
+|	       idiv aword [FP + op.var]
+||         break;
+|| }
+|.endmacro
+
+|.macro LONG_STORE, op, reg
+|    mov aword [FP + op.var], reg
+|    mov dword [FP + op.var + 8], IS_LONG
+|.endmacro
+
 |.macro INC_OPLINE
 |	add IP, sizeof(zend_op)
 |.endmacro
@@ -497,15 +519,24 @@ fallback:
 
 static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
-	uint32_t op1_info, op2_info;
+	uint32_t op1_info, op2_info, res_info;
 
 	if (!ssa->ops || !ssa->var_info) {
 		goto fallback;
 	}
+
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
+	res_info = RES_INFO();
 
-	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
+	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
+		((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
+		((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG)) {
+		//TODO? overflow?
+		|	LONG_LOAD opline->op1_type, opline->op1, r0
+		|	LONG_MATH opline->opcode, opline->op2_type, opline->op2, r0
+		|	LONG_STORE opline->result, r0
+	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
 		|.if X64 // TODO: or SSE ???
 		|	SSE_LOAD opline->op1_type, opline->op1, xmm0
@@ -520,10 +551,10 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		|	FP_MATH opline->opcode, opline->op2_type, opline->op2
 		|	FP_STORE opline->result
 		|.endif
-		|	INC_OPLINE
     } else {
 		goto fallback;
     }
+	|	INC_OPLINE
 
 	return 1;
 
