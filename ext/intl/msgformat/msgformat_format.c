@@ -117,6 +117,8 @@ PHP_FUNCTION( msgfmt_format_message )
 		RETURN_FALSE;
 	}
 
+	INTL_CHECK_LOCALE_LEN(slocale_len);
+
 	msgformat_data_init(&mfo->mf_data TSRMLS_CC);
 
 	if(pattern && pattern_len) {
