@@ -545,10 +545,10 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 			}
 			op1_def_info = OP1_DEF_INFO();
 			if (op1_def_info & MAY_BE_DOUBLE) {
-				uint32_t from, to;
-				zend_jit_delay(op_array, opline, &from, &to);
-				|	jo =>from
-				|=>to:
+				uint32_t in, out;
+				zend_jit_delay(op_array, opline, &in, &out);
+				|	jo =>in
+				|=>out:
 			} else if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
 				|	jmp >1
 			}
@@ -590,11 +590,11 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 			|	LONG_STORE opline->result, r0
 		} else {
-			uint32_t from, to;
-			zend_jit_delay(op_array, opline, &from, &to);
-			| jo =>from
+			uint32_t in, out;
+			zend_jit_delay(op_array, opline, &in, &out);
+			| jo =>in
 			|	LONG_STORE opline->result, r0
-			|=>to:
+			|=>out:
 		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
@@ -943,8 +943,8 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static void zend_jit_delayed_gen(dasm_State **Dst, zend_op_array *op_array, zend_op *opline, uint32_t from, uint32_t to) {
-	|=>from:
+static void zend_jit_delayed_gen(dasm_State **Dst, zend_op_array *op_array, zend_op *opline, uint32_t in, uint32_t out) {
+	|=>in:
 	switch (opline->opcode) {
 		case ZEND_ADD:
 		case ZEND_SUB:
@@ -980,7 +980,7 @@ static void zend_jit_delayed_gen(dasm_State **Dst, zend_op_array *op_array, zend
 		default:
 			abort();
 	}
-	|	jmp =>to
+	|	jmp =>out
 }
 
 #endif

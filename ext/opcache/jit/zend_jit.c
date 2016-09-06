@@ -61,8 +61,8 @@ static void *dasm_ptr = NULL;
 static void *dasm_end = NULL;
 
 typedef struct _delayed_entry {
-	uint32_t from;
-	uint32_t to;
+	uint32_t in;
+	uint32_t out;
 	zend_op_array *op_array;
 	zend_op		  *opline;
 } delayed_entry;
@@ -71,7 +71,7 @@ static zend_array delayed_entries = {0};
 static uint32_t delayed_offset = 0;
 
 static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
-static void *zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *from, uint32_t *to);
+static void *zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out);
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.c"
@@ -105,15 +105,15 @@ static void zend_jit_delayed_entries_init(uint32_t offset) {
 	return;
 }
 
-static void *zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *from, uint32_t *to) {
+static void *zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out) {
 	delayed_entry *entry = (delayed_entry*)emalloc(sizeof(delayed_entry));
 	entry->op_array = op_array;
 	entry->opline = opline;
-	entry->from = delayed_offset++;
-	entry->to = delayed_offset++;
+	entry->in = delayed_offset++;
+	entry->out = delayed_offset++;
 	zend_hash_next_index_insert_ptr(&delayed_entries, (void*)entry);
-	*from = entry->from;
-	*to = entry->to;
+	*in = entry->in;
+	*out = entry->out;
 	ZEND_ASSERT(delayed_offset < op_array->last * 2);
 	return;
 }
@@ -122,7 +122,7 @@ static void *zend_jit_delayed_entries_shutdown(dasm_State **Dst) {
 	delayed_entry *entry;
 
 	ZEND_HASH_FOREACH_PTR(&delayed_entries, entry) {
-		zend_jit_delayed_gen(Dst, entry->op_array, entry->opline, entry->from, entry->to);
+		zend_jit_delayed_gen(Dst, entry->op_array, entry->opline, entry->in, entry->out);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(&delayed_entries);
