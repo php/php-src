@@ -222,3 +222,9 @@ really-install:
 	@echo It's okay for this step to fail:
 	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)
 
+
+    -   win32
+      -  N1   builder
+      -       npm  @4.0.1. 
+     graceful-fs@npm^4.0.0.
+
