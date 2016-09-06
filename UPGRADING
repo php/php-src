@@ -76,6 +76,8 @@ PHP 7.1 UPGRADE NOTES
   . Calling a function with less arguments than mandatory declared ones in
     signature now issues a Fatal Error (Error Exception) instead of a Warning.
     (RFC https://wiki.php.net/rfc/too_few_args).
+  . The error message for E_RECOVERABLE errors has been changed from "Catchable
+    fatal error" to "Recoverable fatal error".
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
