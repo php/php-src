@@ -41,6 +41,7 @@
  |.define FCARG1, CARG1d    // Simulate x86 fastcall.
  |.define FCARG2, CARG2d
  |.define SPAD,   8
+ |.define SSE,    1
 |.else
  |.define FP,     esi
  |.define IP,     edi
@@ -48,6 +49,7 @@
  |.define FCARG1, ecx       // x86 fastcall arguments.
  |.define FCARG2, edx
  |.define SPAD,   12
+ |.define SSE,    1
 |.endif
 
 |.type EX, zend_execute_data, FP
@@ -580,7 +582,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		|	LONG_STORE opline->result, r0
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
-		|.if X64 // TODO: or SSE ???
+		|.if X64 or SSE
 		|	SSE_LOAD opline->op1_type, opline->op1, xmm0
 		if (opline->op1_type == opline->op2_type && opline->op1.var == opline->op2.var) {
 			|	SSE_MATH2 opline->opcode, xmm0, xmm0
@@ -687,7 +689,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
-		|.if X64 // TODO: or SSE ???
+		|.if X64 or SSE
 		|	SSE_LOAD opline->op1_type, opline->op1, xmm0
 		|	SSE_OP ucomisd, opline->op2_type, opline->op2, xmm0
 		|.else
@@ -805,12 +807,14 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 		}
 		if (Z_TYPE_P(zv) > IS_TRUE) {
 			if (Z_TYPE_P(zv) == IS_DOUBLE) {
-				|.if X64 // TODO: or SSE ???
+				|.if X64 or SSE
 				||	if (Z_DVAL_P(zv) == 0.0) {
 				|		xorps xmm0, xmm0
+				|.if X64
 				||  } else if (!IS_32BIT(zv)) {
 				|		mov64 r0, ((uintptr_t)zv)
 				|    	movsd xmm0, qword [r0]
+				|.endif
 				||   } else {
 				|    	movsd xmm0, qword [((uint32_t)(uintptr_t)zv)]
 				||   }
@@ -848,7 +852,7 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 			|	mov r0, aword [FP + val.var]
 			|	mov aword [FP + var], r0
 		} else if ((val_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-			|.if X64 // TODO: or SSE ???
+			|.if X64 or SSE
 			|	movsd xmm0, qword [FP + val.var]
 			|	movsd qword [FP + var], xmm0
 			|.else
