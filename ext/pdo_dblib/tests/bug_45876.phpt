@@ -17,7 +17,7 @@ $stmt = null;
 --EXPECTF--
 array(10) {
   ["max_length"]=>
-  int(255)
+  int(%d)
   ["precision"]=>
   int(0)
   ["scale"]=>
@@ -35,5 +35,5 @@ array(10) {
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>
-  int(255)
+  int(%d)
 }

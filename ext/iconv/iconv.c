@@ -720,7 +720,6 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 
 			default:
 				/* other error */
-				retval = PHP_ICONV_ERR_UNKNOWN;
 				zend_string_free(out_buf);
 				return PHP_ICONV_ERR_UNKNOWN;
 		}

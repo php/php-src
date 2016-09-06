@@ -760,7 +760,7 @@ LOCAL (void)
   cinfo->colormap[2][icolor] = (JSAMPLE) ((c2total + (total >> 1)) / total);
 #else
   /* 2.0.16: Paul den Dulk found an occasion where total can be 0 */
-  if (count)
+  if (total)
     {
       nim->red[icolor] = (int) ((c0total + (total >> 1)) / total);
       nim->green[icolor] = (int) ((c1total + (total >> 1)) / total);

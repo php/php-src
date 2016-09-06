@@ -238,17 +238,17 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 0;
 	}
 
-	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
-
-	if (stream == NULL) {
+	zf = zip_fopen(za, file, 0);
+	if (zf == NULL) {
 		n = -1;
 		goto done;
 	}
 
-	zf = zip_fopen(za, file, 0);
-	if (zf == NULL) {
+	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
+
+	if (stream == NULL) {
 		n = -1;
-		php_stream_close(stream);
+		zip_fclose(zf);
 		goto done;
 	}
 

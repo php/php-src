@@ -2911,7 +2911,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	zend_string *mname, *cname;
 	zend_string *lmname;
 	const char *colon;
-	size_t clen, mlen;
+	size_t clen;
 	HashTable *ftable;
 	int call_via_handler = 0;
 	zend_class_entry *scope;
@@ -2964,6 +2964,8 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		colon > Z_STRVAL_P(callable) &&
 		*(colon-1) == ':'
 	) {
+		size_t mlen;
+
 		colon--;
 		clen = colon - Z_STRVAL_P(callable);
 		mlen = Z_STRLEN_P(callable) - clen - 2;
@@ -2996,7 +2998,6 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		mname = zend_string_init(Z_STRVAL_P(callable) + clen + 2, mlen, 0);
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
-		mlen = Z_STRLEN_P(callable);
 		mname = Z_STR_P(callable);
 		zend_string_addref(mname);
 		ftable = &ce_org->function_table;

@@ -1976,6 +1976,14 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			ZVAL_COPY(&data, value_ptr);
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		}
+		if (zend_string_equals_literal(Z_STR_P(entry), "this")) {
+			zend_object *object = zend_get_this_object(EG(current_execute_data));
+			if (object) {
+				GC_REFCOUNT(object)++;
+				ZVAL_OBJ(&data, object);
+				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
+			}
+		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		if ((Z_ARRVAL_P(entry)->u.v.nApplyCount > 1)) {
 			php_error_docref(NULL, E_WARNING, "recursion detected");
@@ -2390,7 +2398,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_rand();
 			RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
 			if (rnd_idx != n_left) {
 				temp = hash->arData[n_left];
@@ -2416,7 +2423,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_rand();
 			RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
 			if (rnd_idx != n_left) {
 				temp = hash->arData[n_left];
