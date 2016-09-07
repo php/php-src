@@ -1065,7 +1065,7 @@ PHP_FUNCTION(unserialize)
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
 	zval *options = NULL, *classes = NULL;
-	HashTable *class_hash = NULL;
+	HashTable *class_hash = NULL, *prev_class_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
 		RETURN_FALSE;
@@ -1077,7 +1077,9 @@ PHP_FUNCTION(unserialize)
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if(options != NULL) {
+
+	prev_class_hash = php_var_unserialize_get_allowed_classes(var_hash);
+	if (options != NULL) {
 		classes = zend_hash_str_find(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
 			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
@@ -1104,32 +1106,31 @@ PHP_FUNCTION(unserialize)
 	}
 
 	if (!php_var_unserialize(return_value, &p, p + buf_len, &var_hash)) {
-		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		if (class_hash) {
-			zend_hash_destroy(class_hash);
-			FREE_HASHTABLE(class_hash);
-		}
 		zval_ptr_dtor(return_value);
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
-		RETURN_FALSE;
-	}
-	/* We should keep an reference to return_value to prevent it from being dtor
-	   in case nesting calls to unserialize */
-	var_push_dtor(&var_hash, return_value);
+		RETVAL_FALSE;
+	} else {
+		/* We should keep an reference to return_value to prevent it from being dtor
+		   in case nesting calls to unserialize */
+		var_push_dtor(&var_hash, return_value);
 
-	/* Ensure return value is a value */
-	if (Z_ISREF_P(return_value)) {
-		zend_unwrap_reference(return_value);
+		/* Ensure return value is a value */
+		if (Z_ISREF_P(return_value)) {
+			zend_unwrap_reference(return_value);
+		}
 	}
 
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	if (class_hash) {
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}
+
+	/* Reset to previous allowed_classes in case this is a nested call */
+	php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 }
 /* }}} */
 
