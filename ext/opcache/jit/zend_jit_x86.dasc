@@ -1030,6 +1030,33 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 		return 1;
 	}
 
+	if (!ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+	|	mov r0, EX->call
+	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2
+	|	INC_OPLINE
+	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
+static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info;
+	if (opline->op1_type == IS_CV || !ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+	if (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) {
+		goto fallback;
+	}
+
 	op1_info = OP1_INFO();
 	|	mov r0, EX->call
 	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2

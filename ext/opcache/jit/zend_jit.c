@@ -794,6 +794,11 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_SEND_VAR:
+					if (!zend_jit_send_var(&dasm_state, opline, op_array, &ssa)) {
+						goto jit_failure;
+					}
+					break;
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
