@@ -120,13 +120,14 @@ static int zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in
 	return 0;
 }
 
-static void zend_jit_delayed_entries_shutdown(dasm_State **Dst) {
-	delayed_entry *entry;
+static void zend_jit_delayed_entries_shutdown(dasm_State **Dst, int flush) {
+	if (flush) {
+		delayed_entry *entry;
 
-	ZEND_HASH_FOREACH_PTR(&delayed_entries, entry) {
-		zend_jit_delayed_gen(Dst, entry->op_array, entry->opline, entry->in, entry->out);
-	} ZEND_HASH_FOREACH_END();
-
+		ZEND_HASH_FOREACH_PTR(&delayed_entries, entry) {
+			zend_jit_delayed_gen(Dst, entry->op_array, entry->opline, entry->in, entry->out);
+		} ZEND_HASH_FOREACH_END();
+	}
 	zend_hash_destroy(&delayed_entries);
 	delayed_entries.arData = NULL;
 	delayed_offset = 0;
@@ -1000,7 +1001,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 			}
 		}
 	}
-	zend_jit_delayed_entries_shutdown(&dasm_state);
+	zend_jit_delayed_entries_shutdown(&dasm_state, 1);
 
 	handler = dasm_link_and_encode(&dasm_state, op_array, &ssa.cfg, NULL);
 	if (!handler) {
@@ -1012,6 +1013,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 	return SUCCESS;
 
 jit_failure:
+	zend_jit_delayed_entries_shutdown(&dasm_state, 0);
     if (dasm_state) {
 		dasm_free(&dasm_state);
     }
