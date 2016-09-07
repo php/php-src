@@ -1001,7 +1001,6 @@ fallback:
 static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	zval *zv;
-#if 0
 	if (opline->op1_type != IS_CONST) {
 		goto fallback;
 	}
@@ -1012,9 +1011,7 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 		goto fallback;
 	}	
 
-	|.if X64
 	|	mov r0, EX->call
-	|.endif
 	
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
@@ -1025,8 +1022,8 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 				|.if X64
 				|	mov qword [r0 + opline->result.var], (uintptr_t)Z_PTR_P(zv)
 				|.else
-				|	mov dword [EX->call + opline->result.var], zv->value.ww.w1
-				|	mov dword [EX->call + opline->result.var + 4], zv->value.ww.w2
+				|	mov dword [r0 + opline->result.var], (uint32_t)zv->value.ww.w1
+				|	mov dword [r0 + opline->result.var + 4], (uint32_t)zv->value.ww.w2
 				|.endif
 			} else {
 				|.if X64
@@ -1034,25 +1031,20 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 				|	mov r1, [r1]
 				|	mov qword [r0 + opline->result.var], r1
 				|.else
-				|	movsd qword xmm0, [zv]
-				|	movsd qword [EX->call + opline->result.var + 4], xmm0
+				|	movsd xmm0, qword [zv]
+				|	movsd qword [r0 + opline->result.var], xmm0
 				|.endif
 			}
 		case IS_NULL:
 		case IS_FALSE:
 		case IS_TRUE:
-			|.if X64
 			|	mov dword [r0 + opline->result.var + 8], Z_TYPE_INFO_P(zv)
-			|.else
-			|	movsd qword [EX->call + opline->result.var + 8], Z_TYPE_INFO_P(zv)
-			|.endif
 		break;
 	}
 	|	INC_OPLINE
 
 	return 1;
 fallback:
-#endif
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
