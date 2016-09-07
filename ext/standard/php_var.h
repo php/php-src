@@ -50,6 +50,7 @@ PHPAPI php_serialize_data_t php_var_serialize_init(void);
 PHPAPI void php_var_serialize_destroy(php_serialize_data_t d);
 PHPAPI php_unserialize_data_t php_var_unserialize_init(void);
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d);
+PHPAPI HashTable *php_var_unserialize_get_allowed_classes(php_unserialize_data_t d);
 PHPAPI void php_var_unserialize_set_allowed_classes(php_unserialize_data_t d, HashTable *classes);
 
 #define PHP_VAR_SERIALIZE_INIT(d) \
