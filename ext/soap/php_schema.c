@@ -95,7 +95,7 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlCh
 	return enc;
 }
 
-static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import TSRMLS_DC) {
+static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import TSRMLS_DC, int debug_callsite_id) {
 	if (location != NULL &&
 	    !zend_hash_exists(&ctx->docs, (char*)location, xmlStrlen(location)+1)) {
 		xmlDocPtr doc;
@@ -107,22 +107,23 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		sdl_restore_uri_credentials(ctx TSRMLS_CC);
 
 		if (doc == NULL) {
-			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
+			//soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
+			soap_error1(E_ERROR, "[A:%i] Parsing Schema: can't import schema from '%s'", debug_callsite_id, location);  // Case ID added
 		}
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
 			xmlFreeDoc(doc);
-			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
+			soap_error1(E_ERROR, "[B:%i] Parsing Schema: can't import schema from '%s'",  debug_callsite_id, location);  // Case ID added
 		}
 		new_tns = get_attribute(schema->properties, "targetNamespace");
 		if (import) {
 			if (ns != NULL && (new_tns == NULL || xmlStrcmp(ns->children->content, new_tns->children->content) != 0)) {
 				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, ns->children->content);
+				soap_error2(E_ERROR, "[C:%i] Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", debug_callsite_id, location, ns->children->content);  // Case ID added
 			}
 			if (ns == NULL && new_tns != NULL) {
 				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, new_tns->children->content);
+				soap_error2(E_ERROR, "[D:%i] Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", debug_callsite_id, location, new_tns->children->content);  // Case ID added
 			}
 		} else {
 			new_tns = get_attribute(schema->properties, "targetNamespace");
@@ -202,7 +203,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 	    		uri = xmlBuildURI(location->children->content, base);
 			    xmlFree(base);
 				}
-				schema_load_file(ctx, NULL, uri, tns, 0 TSRMLS_CC);
+				schema_load_file(ctx, NULL, uri, tns, 0 TSRMLS_CC, 1);  // DEBUG: debug_callsite_id = 1
 				xmlFree(uri);
 			}
 
@@ -222,7 +223,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 	    		uri = xmlBuildURI(location->children->content, base);
 			    xmlFree(base);
 				}
-				schema_load_file(ctx, NULL, uri, tns, 0 TSRMLS_CC);
+				schema_load_file(ctx, NULL, uri, tns, 0 TSRMLS_CC, 2);  // DEBUG: debug_callsite_id = 2
 				xmlFree(uri);
 				/* TODO: <redefine> support */
 			}
@@ -251,7 +252,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 			    xmlFree(base);
 				}
 			}
-			schema_load_file(ctx, ns, uri, tns, 1 TSRMLS_CC);
+			schema_load_file(ctx, ns, uri, tns, 1 TSRMLS_CC, 3);  // DEBUG: debug_callsite_id = 3
 			if (uri != NULL) {xmlFree(uri);}
 		} else if (node_is_equal(trav,"annotation")) {
 			/* TODO: <annotation> support */
