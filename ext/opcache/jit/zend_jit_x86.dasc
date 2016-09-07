@@ -492,8 +492,21 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 || }
 |.endmacro
 
+|.macro LONGF_OP, fp_ins, op_type, op
+|| if (op_type == IS_CONST) {
+|    .if X64
+|    mov r0, aword EX->literals
+|    fp_ins qword [r0 + op.constant]
+|    .else
+|    fp_ins dword [op.zv]
+|    .endif
+|| } else {
+|    fp_ins aword [FP + op.var]
+|| }
+|.endmacro
+
 |.macro LONGF_LOAD, op_type, op
-|	FP_OP fild, op_type, op
+|	LONGF_OP fild, op_type, op
 |.endmacro
 
 |.macro LONGF_MATH, opcode
@@ -666,10 +679,6 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 
 	if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) &&
 		((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG)) {
-		//TODO: imul/idiv overflow?
-		if (opline->opcode == ZEND_MUL || opline->opcode == ZEND_DIV) {
-			goto fallback;
-		}
 		res_info = RES_INFO();
 		|	LONG_LOAD opline->op1_type, opline->op1, r0
 		|	LONG_MATH opline->opcode, opline->op2_type, opline->op2, r0
