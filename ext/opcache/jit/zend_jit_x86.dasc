@@ -60,7 +60,7 @@
 |.globals zend_lb
 static void* dasm_labels[zend_lb_MAX];
 
-|.section code
+|.section code, cold_codes
 
 |.macro LOAD_ADDR, reg, addr
 ||if (((ptrdiff_t)addr) <= 0x7fffffff) {
@@ -618,50 +618,6 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |	add IP, sizeof(zend_op)
 |.endmacro
 
-static void zend_jit_delayed_gen(dasm_State **Dst, zend_op_array *op_array, zend_op *opline, uint32_t in, uint32_t out) {
-	if (in) {
-		|=>in:
-	}
-	switch (opline->opcode) {
-		case ZEND_ADD:
-		case ZEND_SUB:
-		case ZEND_MUL:
-		case ZEND_DIV:
-			|	LONGF_LOAD opline->op2_type, opline->op2
-			|	LONGF_LOAD opline->op1_type, opline->op1
-			|	LONGF_MATH opline->opcode
-			|	FP_STORE opline->result
-		break;
-		case ZEND_POST_INC:
-		case ZEND_PRE_INC:
-			|.if X64
-			|	mov64 rax, 0x43e0000000000000
-			|	mov qword [FP + opline->op1.var], rax
-			|.else
-			|	mov dword [FP + opline->op1.var], 0
-			|	mov dword [FP + opline->op1.var + 4], 0x41e00000
-			|.endif
-			|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
-			break;
-		case ZEND_POST_DEC:
-		case ZEND_PRE_DEC:
-			|.if X64
-			|	mov64 rax, 0x43e0000000000000
-			|	mov qword [FP + opline->op1.var], rax
-			|.else
-			|	mov dword [FP + opline->op1.var], 0x00200000
-			|	mov dword [FP + opline->op1.var + 4], 0xc1e00000
-			|.endif
-			|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
-			break;
-		default:
-			abort();
-	}
-	if (out) {
-		|	jmp =>out
-	}
-}
-
 static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op1_def_info;
@@ -684,15 +640,27 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 			}
 			op1_def_info = OP1_DEF_INFO();
 			if (op1_def_info & MAY_BE_DOUBLE) {
-				uint32_t in, out;
-				if (zend_jit_delay(op_array, opline, &in, &out)) {
-					|	jo =>in
-					|=>out:
+				|	jno >1
+				|.cold_codes
+				if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+					|.if X64
+					|	mov64 rax, 0x43e0000000000000
+					|	mov qword [FP + opline->op1.var], rax
+					|.else
+					|	mov dword [FP + opline->op1.var], 0
+					|	mov dword [FP + opline->op1.var + 4], 0x41e00000
+					|.endif
 				} else {
-					|	jno >1
-					zend_jit_delayed_gen(Dst, op_array, opline, 0, 0);
-					|1:
+					|.if X64
+					|	mov64 rax, 0x43e0000000000000
+					|	mov qword [FP + opline->op1.var], rax
+					|.else
+					|	mov dword [FP + opline->op1.var], 0x00200000
+					|	mov dword [FP + opline->op1.var + 4], 0xc1e00000
+					|.endif
 				}
+				|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
+				|.code
 			} else if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
 				|	jmp >1
 			}
@@ -730,17 +698,15 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 			|	LONG_STORE opline->result, r0
 		} else {
-			uint32_t in, out;
-			if (zend_jit_delay(op_array, opline, &in, &out)) {
-				|	LONG_STORE opline->result, r0
-				|	jo =>in
-				|=>out:
-			} else {
-				|	LONG_STORE opline->result, r0
-				|	jno >1
-				zend_jit_delayed_gen(Dst, op_array, opline, 0, 0);
-				|1:
-			}
+			|	LONG_STORE opline->result, r0
+			|	jno >1
+			|.cold_codes
+			|	LONGF_LOAD opline->op2_type, opline->op2
+			|	LONGF_LOAD opline->op1_type, opline->op1
+			|	LONGF_MATH opline->opcode
+			|	FP_STORE opline->result
+			|.code
+			|1:
 		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {

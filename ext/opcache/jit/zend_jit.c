@@ -60,18 +60,7 @@ static void *dasm_buf = NULL;
 static void *dasm_ptr = NULL;
 static void *dasm_end = NULL;
 
-typedef struct _delayed_entry {
-	uint32_t in;
-	uint32_t out;
-	zend_op_array *op_array;
-	zend_op		  *opline;
-} delayed_entry;
-
-static zend_array delayed_entries = {0};
-static uint32_t delayed_offset = 0;
-
 static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
-static int zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out);
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.c"
@@ -92,46 +81,6 @@ static int zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in
 #endif
 
 #define DASM_ALIGNMENT 16
-
-static void free_delayed_entry(zval *el) {
-	efree((void*)Z_PTR_P(el));
-}
-
-static void zend_jit_delayed_entries_init(uint32_t offset) {
-	delayed_offset = offset;
-	if (delayed_entries.arData == NULL) {
-		zend_hash_init(&delayed_entries, 8, NULL, free_delayed_entry, 0);
-	}
-	return;
-}
-
-static int zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in, uint32_t *out) {
-	if (delayed_offset < op_array->last * 2) {
-		delayed_entry *entry = (delayed_entry*)emalloc(sizeof(delayed_entry));
-		entry->op_array = op_array;
-		entry->opline = opline;
-		entry->in = delayed_offset++;
-		entry->out = delayed_offset++;
-		zend_hash_next_index_insert_ptr(&delayed_entries, (void*)entry);
-		*in = entry->in;
-		*out = entry->out;
-		return 1;
-	}
-	return 0;
-}
-
-static void zend_jit_delayed_entries_shutdown(dasm_State **Dst, int flush) {
-	if (flush) {
-		delayed_entry *entry;
-
-		ZEND_HASH_FOREACH_PTR(&delayed_entries, entry) {
-			zend_jit_delayed_gen(Dst, entry->op_array, entry->opline, entry->in, entry->out);
-		} ZEND_HASH_FOREACH_END();
-	}
-	zend_hash_destroy(&delayed_entries);
-	delayed_entries.arData = NULL;
-	delayed_offset = 0;
-}
 
 static zend_string *zend_jit_func_name(zend_op_array *op_array)
 {
@@ -752,9 +701,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 	dasm_setupglobal(&dasm_state, dasm_labels, zend_lb_MAX);
 	dasm_setup(&dasm_state, dasm_actions);
 
-	dasm_growpc(&dasm_state, op_array->last * 2);
-
-	zend_jit_delayed_entries_init(op_array->last + 1);
+	dasm_growpc(&dasm_state, ssa.cfg.blocks_count * 2);
 
 	zend_jit_align_func(&dasm_state);
 	for (b = 0; b < ssa.cfg.blocks_count; b++) {
@@ -1001,7 +948,6 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 			}
 		}
 	}
-	zend_jit_delayed_entries_shutdown(&dasm_state, 1);
 
 	handler = dasm_link_and_encode(&dasm_state, op_array, &ssa.cfg, NULL);
 	if (!handler) {
@@ -1013,7 +959,6 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 	return SUCCESS;
 
 jit_failure:
-	zend_jit_delayed_entries_shutdown(&dasm_state, 0);
     if (dasm_state) {
 		dasm_free(&dasm_state);
     }
