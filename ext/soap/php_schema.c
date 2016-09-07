@@ -107,8 +107,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		sdl_restore_uri_credentials(ctx TSRMLS_CC);
 
 		if (doc == NULL) {
-			//soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
-			soap_error1(E_ERROR, "[A:%i] Parsing Schema: can't import schema from '%s'", debug_callsite_id, location);  // Case ID added
+			soap_error1(E_ERROR, "[A:%i] Parsing Schema: can't import schema from '%s'", debug_callsite_id, location);  // Case ID added: [A:%i] 
 		}
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
