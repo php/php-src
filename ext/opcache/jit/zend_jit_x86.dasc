@@ -622,59 +622,83 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 {
 	uint32_t op1_info, op1_def_info;
 
-	if (!ssa->ops || !ssa->var_info || opline->result_type != IS_UNUSED) {
+	if (!ssa->ops || !ssa->var_info || opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
 		goto fallback;
 	}
 	op1_info = OP1_INFO();
 
-	if (!(op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)-(MAY_BE_LONG/*|MAY_BE_DOUBLE*/)))) {
-		if (op1_info & MAY_BE_LONG) {
-			if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
-				|	cmp	dword [FP + opline->op1.var + 8], IS_LONG
-				|	jne >2
-			}
-			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-				|	inc aword [FP + opline->op1.var]
-			} else {
-				|	dec aword [FP + opline->op1.var]
-			}
-			op1_def_info = OP1_DEF_INFO();
-			if (op1_def_info & MAY_BE_DOUBLE) {
-				|	jo >1
-				|.cold_codes
-				|1:
-				if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-					|.if X64
-					|	mov64 rax, 0x43e0000000000000
-					|	mov qword [FP + opline->op1.var], rax
-					|.else
-					|	mov dword [FP + opline->op1.var], 0
-					|	mov dword [FP + opline->op1.var + 4], 0x41e00000
-					|.endif
-				} else {
-					|.if X64
-					|	mov64 rax, 0x43e0000000000000
-					|	mov qword [FP + opline->op1.var], rax
-					|.else
-					|	mov dword [FP + opline->op1.var], 0x00200000
-					|	mov dword [FP + opline->op1.var + 4], 0xc1e00000
-					|.endif
-				}
-				|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
-				|	jmp >3
-				|.code
-			} else if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
-				|	jmp >3
-			}
-		}
-		if (op1_info & MAY_BE_DOUBLE) {
-			|2:
-			|
-		}
-		|3:
-		|	INC_OPLINE
-		return 1;
+	if (!(op1_info & MAY_BE_LONG)) {
+		goto fallback;
 	}
+
+	if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
+		|	cmp	dword [FP + opline->op1.var + 8], IS_LONG
+		|	jne >2
+	}
+	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+		|	inc aword [FP + opline->op1.var]
+	} else {
+		|	dec aword [FP + opline->op1.var]
+	}
+	op1_def_info = OP1_DEF_INFO();
+	if (op1_def_info & MAY_BE_DOUBLE) {
+		|	jo >1
+		|.cold_codes
+		|1:
+		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+			|.if X64
+			|	mov64 rax, 0x43e0000000000000
+			|	mov qword [FP + opline->op1.var], rax
+			|.else
+			|	mov dword [FP + opline->op1.var], 0
+			|	mov dword [FP + opline->op1.var + 4], 0x41e00000
+			|.endif
+		} else {
+			|.if X64
+			|	mov64 rax, 0xc3e0000000000000
+			|	mov qword [FP + opline->op1.var], rax
+			|.else
+			|	mov dword [FP + opline->op1.var], 0x00200000
+			|	mov dword [FP + opline->op1.var + 4], 0xc1e00000
+			|.endif
+		}
+		|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
+		|	jmp >3
+		|.code
+	}
+	if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
+		|.cold_codes
+		|2:
+		|.if X64
+		|	lea	CARG1, [FP + opline->op1.var]
+		||	if (IS_32BIT(dasm_end) && IS_32BIT(increment_function)) {
+		||		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+		|			call qword &increment_function
+		||		} else {
+		|			call qword &decrement_function
+		||		}
+		||	} else {
+		||		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+		|			LOAD_ADDR rax, increment_function
+		||		} else {
+		|			LOAD_ADDR rax, decrement_function
+		||		}
+		|		call rax
+		||	}
+		|.else
+		|	lea	FCARG1, [FP + opline->op1.var]
+		||	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+		|		call dword &increment_function
+		||	} else {
+		|		call dword &decrement_function
+		||	}
+		|.endif
+		|	jmp >3
+		|.code
+	}
+	|3:
+	|	INC_OPLINE
+	return 1;
 
 fallback:
 	/* fallback to subroutine threading */
