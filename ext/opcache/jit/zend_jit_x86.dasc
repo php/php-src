@@ -640,8 +640,9 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 			}
 			op1_def_info = OP1_DEF_INFO();
 			if (op1_def_info & MAY_BE_DOUBLE) {
-				|	jno >1
+				|	jo >1
 				|.cold_codes
+				|1:
 				if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 					|.if X64
 					|	mov64 rax, 0x43e0000000000000
@@ -660,16 +661,17 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 					|.endif
 				}
 				|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
+				|	jmp >3
 				|.code
 			} else if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
-				|	jmp >1
+				|	jmp >3
 			}
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
 			|2:
 			|
 		}
-		|1:
+		|3:
 		|	INC_OPLINE
 		return 1;
 	}
@@ -698,15 +700,17 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 			|	LONG_STORE opline->result, r0
 		} else {
-			|	LONG_STORE opline->result, r0
-			|	jno >1
+			|	jo >1
 			|.cold_codes
+			|1:
 			|	LONGF_LOAD opline->op2_type, opline->op2
 			|	LONGF_LOAD opline->op1_type, opline->op1
 			|	LONGF_MATH opline->opcode
 			|	FP_STORE opline->result
+			|	jmp >2
 			|.code
-			|1:
+			|	LONG_STORE opline->result, r0
+			|2:
 		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
