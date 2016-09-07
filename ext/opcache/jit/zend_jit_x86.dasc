@@ -513,10 +513,47 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 || }
 |.endmacro
 
-
 |.macro LONG_STORE, op, reg
 |    mov aword [FP + op.var], reg
 |    mov dword [FP + op.var + 8], IS_LONG
+|.endmacro
+
+|.macro STORE_CTZV, base, reg, var, var_info, zv
+||if (Z_TYPE_P(zv) > IS_TRUE) {
+||	if (Z_TYPE_P(zv) < IS_STRING) {
+||		/* Simply copy value */
+|		.if X64
+||		if (IS_32BIT(Z_PTR_P(zv))) {
+|			mov qword [base + var], (uintptr_t)Z_PTR_P(zv)
+||		} else {
+|			mov64 reg, (uintptr_t)Z_PTR_P(zv)
+|			mov qword [base + var], reg
+||		}
+|		.else
+|			mov dword [base + var], zv->value.ww.w1
+||		if (Z_TYPE_P(zv) == IS_DOUBLE) {
+|			mov dword [base + var + 4], zv->value.ww.w2
+||		}
+|		.endif
+||	} else {
+||		/* Z_PTR_P(zv) could be changed, Read from memory */
+|		.if X64
+||		if (IS_32BIT(zv)) {
+|			mov reg, [(uintptr_t)(zv)]
+||		} else {
+|			mov64 reg, ((uintptr_t)(zv))
+|			mov reg, [reg]
+||		}
+|			mov qword [base + var], reg
+|		.else
+|			movsd xmm0, qword [(uintptr_t)(zv)]
+|			movsd qword [base + var], xmm0
+|		.endif
+||	}
+||}
+||if ((var_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
+|	mov dword [base + var + 8], Z_TYPE_INFO_P(zv)
+||}
 |.endmacro
 
 |.macro INC_OPLINE
@@ -871,46 +908,11 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 		goto fallback;
 	} else if (val_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, val);
-
 		if (Z_OPT_REFCOUNTED_P(zv)) {
 			/* TODO: allow JIT for Z_ADDREF_P() ??? */
 			goto fallback;
 		}
-		if (Z_TYPE_P(zv) > IS_TRUE) {
-			if (Z_TYPE_P(zv) < IS_STRING) {
-				/* Simply copy value */
-				|.if X64
-				if (IS_32BIT(Z_PTR_P(zv))) {
-				|	mov qword [FP + var], (uintptr_t)Z_PTR_P(zv)
-				} else {
-				|	mov64 r0, (uintptr_t)Z_PTR_P(zv)
-				|	mov qword [FP + var], r0
-				}
-				|.else
-				|	mov dword [FP + var], zv->value.ww.w1
-				if (Z_TYPE_P(zv) == IS_DOUBLE) {
-				|	mov dword [FP + var + 4], zv->value.ww.w2
-				}
-				|.endif
-			} else {
-				/* Z_PTR_P(zv) could be changed, Read from memory */
-				|.if X64
-				if (!IS_32BIT(zv)) {
-				|	mov64 r1, (uintptr_t)(zv)
-				|	mov r1, [r1]
-				} else {
-				|	mov r1, qword [(uintptr_t)(zv)]
-				}
-				|	mov qword [FP + var], r1
-				|.else
-				|	movsd xmm0, qword [zv]
-				|	movsd qword [FP + var], xmm0
-				|.endif
-			}
-		}
-		if ((var_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
-			|	mov dword [FP + var + 8], Z_TYPE_INFO_P(zv);
-		}
+		|	STORE_CTZV FP, r0, var, var_info, zv
 		|	INC_OPLINE
 		return 1;
 	}
@@ -1009,37 +1011,7 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	}	
 
 	|	mov r0, EX->call
-	if (Z_TYPE_P(zv) > IS_TRUE) {
-		if (Z_TYPE_P(zv) < IS_STRING) {
-			|.if X64
-			if (IS_32BIT(Z_PTR_P(zv))) {
-			|	mov qword [r0 + opline->result.var], (uintptr_t)Z_PTR_P(zv)
-			} else {
-			|	mov64 r1, (uintptr_t)Z_PTR_P(zv)
-			|	mov qword [r0 + opline->result.var], r1
-			}
-			|.else
-			|	mov dword [r0 + opline->result.var], zv->value.ww.w1
-			if (Z_TYPE_P(zv) == IS_DOUBLE) {
-			|	mov dword [r0 + opline->result.var + 4], zv->value.ww.w2
-			}
-			|.endif
-		} else {
-			|.if X64
-			if (IS_32BIT(zv)) {
-			|	mov r1, [(uintptr_t)(zv)]
-			} else {
-			|	mov64 r1, ((uintptr_t)(zv))
-			|	mov r1, [r1]
-			}
-			|	mov qword [r0 + opline->result.var], r1
-			|.else
-			|	movsd xmm0, qword [(uintptr_t)(zv)]
-			|	movsd qword [r0 + opline->result.var], xmm0
-			|.endif
-		}
-	}
-	|	mov dword [r0 + opline->result.var + 8], Z_TYPE_INFO_P(zv)
+	|	STORE_CTZV r0, r1, opline->result.var, -1, zv
 	|	INC_OPLINE
 
 	return 1;
