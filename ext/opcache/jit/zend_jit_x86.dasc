@@ -1068,6 +1068,63 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
+static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info;
+	unsigned int target_label;
+	zend_uchar type;
+
+	if (!ssa->ops || !ssa->var_info || opline->extended_value == IS_RESOURCE) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+	type = opline->extended_value;
+	if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == (1<<type)) {
+		if ((opline+1)->opcode == ZEND_JMPZ &&
+		    (opline+1)->op1_type == IS_TMP_VAR &&
+		    (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			|	add IP, sizeof(zend_op) * 2
+		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+                   (opline+1)->op1_type == IS_TMP_VAR &&
+                   (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			target_label = ssa->cfg.blocks[b].successors[0];
+			|	add IP, sizeof(zend_op) * 2
+			| 	jmp =>target_label
+		} else {
+			|	mov dword [FP + opline->result.var + 8], IS_TRUE
+			|	INC_OPLINE
+		}
+    } else if (!(op1_info & (1<<type))) {
+		if ((opline+1)->opcode == ZEND_JMPZ &&
+		    (opline+1)->op1_type == IS_TMP_VAR &&
+		    (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			target_label = ssa->cfg.blocks[b].successors[0];
+			|	add IP, sizeof(zend_op) * 2
+			| 	jmp =>target_label
+		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+                   (opline+1)->op1_type == IS_TMP_VAR &&
+                   (opline+1)->op1.var == opline->result.var) {
+			(*opnum)++;
+			|	add IP, sizeof(zend_op) * 2
+		} else {
+			|	mov dword [FP + opline->result.var + 8], IS_FALSE
+			|	INC_OPLINE
+		}
+	} else {
+		goto fallback;
+    }
+
+	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
 #endif
 
 /*

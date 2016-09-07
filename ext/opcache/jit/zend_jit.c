@@ -807,6 +807,11 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_TYPE_CHECK:
+					if (!zend_jit_type_check(&dasm_state, opline, b, &i, op_array, &ssa)) {
+						goto jit_failure;
+					}
+					break;
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa.cfg.split_at_recv) {
