@@ -120,7 +120,7 @@ static int zend_jit_delay(zend_op_array *op_array, zend_op *opline, uint32_t *in
 	return 0;
 }
 
-static void *zend_jit_delayed_entries_shutdown(dasm_State **Dst) {
+static void zend_jit_delayed_entries_shutdown(dasm_State **Dst) {
 	delayed_entry *entry;
 
 	ZEND_HASH_FOREACH_PTR(&delayed_entries, entry) {
@@ -130,7 +130,6 @@ static void *zend_jit_delayed_entries_shutdown(dasm_State **Dst) {
 	zend_hash_destroy(&delayed_entries);
 	delayed_entries.arData = NULL;
 	delayed_offset = 0;
-	return;
 }
 
 static zend_string *zend_jit_func_name(zend_op_array *op_array)

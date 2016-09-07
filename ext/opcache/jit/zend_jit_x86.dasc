@@ -531,41 +531,81 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline)
 |    mov dword [FP + op.var + 8], IS_LONG
 |.endmacro
 
-|.macro STORE_CTZV, base, reg, var, var_info, zv
-||if (Z_TYPE_P(zv) > IS_TRUE) {
-||	if (Z_TYPE_P(zv) < IS_STRING) {
-||		/* Simply copy value */
-|		.if X64
-||		if (IS_32BIT(Z_PTR_P(zv))) {
-|			mov qword [base + var], (uintptr_t)Z_PTR_P(zv)
-||		} else {
-|			mov64 reg, (uintptr_t)Z_PTR_P(zv)
-|			mov qword [base + var], reg
-||		}
-|		.else
-|			mov dword [base + var], zv->value.ww.w1
+|.macro ZVAL_COPY_CONST, dst_base, dst_offset, dst_info, zv, tmp_reg
+||	if (Z_TYPE_P(zv) > IS_TRUE) {
 ||		if (Z_TYPE_P(zv) == IS_DOUBLE) {
-|			mov dword [base + var + 4], zv->value.ww.w2
-||		}
-|		.endif
-||	} else {
-||		/* Z_PTR_P(zv) could be changed, Read from memory */
-|		.if X64
-||		if (IS_32BIT(zv)) {
-|			mov reg, [(uintptr_t)(zv)]
+|.if X64 or SSE
+||			if (Z_DVAL_P(zv) == 0.0) {
+|				xorps xmm0, xmm0
+| .if X64
+||			} else if (!IS_32BIT(zv)) {
+|				mov64 tmp_reg, ((uintptr_t)zv)
+|				movsd xmm0, qword [tmp_reg]
+| .endif
+||			} else {
+|				movsd xmm0, qword [((uint32_t)(uintptr_t)zv)]
+||			}
+|			movsd qword [dst_base + dst_offset], xmm0
+|.else
+||			if (Z_DVAL_P(zv) == 0.0) {
+|				fldz
+||			} else if (Z_DVAL_P(zv) == 1.0) {
+|				fld1
+||			} else  {
+|				fld qword [zv]
+||			}
+|			fstp qword [dst_base + dst_offset]
+|.endif
 ||		} else {
-|			mov64 reg, ((uintptr_t)(zv))
-|			mov reg, [reg]
+|.if X64
+||			if (!IS_32BIT(Z_LVAL_P(zv))) {
+|				mov64 tmp_reg, ((uintptr_t)Z_LVAL_P(zv))
+|				mov qword [dst_base + dst_offset], tmp_reg
+||			} else {
+|				mov qword [dst_base + dst_offset], Z_LVAL_P(zv)
+||			}
+|.else
+|			mov dword [dst_base + dst_offset], Z_LVAL_P(zv)
+|.endif
 ||		}
-|			mov qword [base + var], reg
-|		.else
-|			movsd xmm0, qword [(uintptr_t)(zv)]
-|			movsd qword [base + var], xmm0
-|		.endif
 ||	}
-||}
-||if ((var_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
-|	mov dword [base + var + 8], Z_TYPE_INFO_P(zv)
+||	if ((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
+|		mov dword [dst_base + dst_offset + 8], Z_TYPE_INFO_P(zv);
+||	}
+|.endmacro
+
+|.macro ZVAL_COPY_VALUE, dst_base, dst_offset, src_base, src_offset, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
+||	if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+||		if (!(src_info & MAY_BE_DOUBLE)) {
+|			mov tmp_reg1, aword [src_base + src_offset]
+|			mov aword [dst_base + dst_offset], tmp_reg1
+||		} else if ((src_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+|.if X64 or SSE
+|			movsd xmm0, qword [src_base + src_offset]
+|			movsd qword [dst_base + dst_offset], xmm0
+|.else
+|			fld qword [src_base + src_offset]
+|			fstp qword [dst_base + dst_offset]
+|.endif
+||		} else {
+|.if X64
+|			mov tmp_reg1, aword [src_base + src_offset]
+|			mov aword [dst_base + dst_offset], tmp_reg1
+|.else
+|			mov tmp_reg1, dword [src_base + src_offset]
+|			mov tmp_reg2, dword [src_base + src_offset + 4]
+|			mov dword [dst_base + dst_offset], tmp_reg1
+|			mov dword [dst_base + dst_offset + 4], tmp_reg2
+|.endif
+||		}
+||	}
+||	if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+||	    has_concrete_type(src_info & MAY_BE_ANY)) {
+||		zend_uchar type = concrete_type(src_info);
+|		mov dword [dst_base + dst_offset + 8], type
+||	} else {
+|		mov tmp_reg1d, dword [src_base + src_offset + 8]
+|		mov dword [dst_base + dst_offset + 8], tmp_reg1d
 ||}
 |.endmacro
 
@@ -921,44 +961,12 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 			/* TODO: allow JIT for Z_ADDREF_P() ??? */
 			goto fallback;
 		}
-		|	STORE_CTZV FP, r0, var, var_info, zv
+		|	ZVAL_COPY_CONST FP, var, var_info, zv, r0
 		|	INC_OPLINE
 		return 1;
 	}
 
-	if (val_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
-		if (!(val_info & MAY_BE_DOUBLE)) {
-			|	mov r0, aword [FP + val.var]
-			|	mov aword [FP + var], r0
-		} else if ((val_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-			|.if X64 or SSE
-			|	movsd xmm0, qword [FP + val.var]
-			|	movsd qword [FP + var], xmm0
-			|.else
-			|	fld qword [FP + val.var]
-			|	fstp qword [FP + var]
-			|.endif
-		} else {
-			|.if X64
-			|	mov r0, aword [FP + val.var]
-			|	mov aword [FP + var], r0
-			|.else
-			|	mov r0, dword [FP + val.var]
-			|	mov r1, dword [FP + val.var + 4]
-			|	mov dword [FP + var], r0
-			|	mov dword [FP + var + 4], r1
-			|.endif
-		}
-	}
-
-	if ((val_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-	    has_concrete_type(val_info & MAY_BE_ANY)) {
-		zend_uchar type = concrete_type(val_info);
-		|	mov dword [FP + var + 8], type
-	} else {
-		|	mov eax, dword [FP + val.var + 8]
-		|	mov dword [FP + var + 8], eax
-	}
+	|	ZVAL_COPY_VALUE FP, var, FP, val.var, val_info, r0, eax, r1
 	|	INC_OPLINE
 
 	return 1;
@@ -1008,22 +1016,27 @@ fallback:
 
 static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
-	zval *zv;
-	if (opline->op1_type != IS_CONST) {
-		goto fallback;
+	uint32_t op1_info;
+
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(op_array, opline->op1);
+
+		if (Z_REFCOUNTED_P(zv)) {
+			/* TODO: allow JIT for Z_ADDREF_P() ??? */
+			goto fallback;
+		}
+		|	mov r0, EX->call
+		|	ZVAL_COPY_CONST r0, opline->result.var, -1, zv, r1
+		|	INC_OPLINE
+		return 1;
 	}
 
-	zv = RT_CONSTANT(op_array, opline->op1);
-
-	if (Z_REFCOUNTED_P(zv)) {
-		goto fallback;
-	}	
-
+	op1_info = OP1_INFO();
 	|	mov r0, EX->call
-	|	STORE_CTZV r0, r1, opline->result.var, -1, zv
+	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2
 	|	INC_OPLINE
-
 	return 1;
+
 fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
