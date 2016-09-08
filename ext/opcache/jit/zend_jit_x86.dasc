@@ -613,18 +613,19 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline, uint32_t *opnum, zend
 	}
 	if (opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL) {
 		zend_class_entry *ce = NULL;
-		if (opline->op1_type == IS_CONST) {
-			zval *zv = RT_CONSTANT(op_array, opline->op1);
-			if (Z_TYPE_P(zv) == IS_STRING) {
-				zval *lc = zv + 1;
-				ce = (zend_class_entry*)zend_hash_find_ptr(EG(class_table), Z_STR_P(lc));
-			}
-		}
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
 		if (ssa->ops && ssa->var_info) {
 			zend_ssa_var_info *res_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].result_def];
 			if (res_ssa->ce && !res_ssa->is_instanceof) {
 				ce = res_ssa->ce;
+			}
+		}
+#else
+		if (opline->op1_type == IS_CONST) {
+			zval *zv = RT_CONSTANT(op_array, opline->op1);
+			if (Z_TYPE_P(zv) == IS_STRING) {
+				zval *lc = zv + 1;
+				ce = (zend_class_entry*)zend_hash_find_ptr(EG(class_table), Z_STR_P(lc));
 			}
 		}
 #endif
