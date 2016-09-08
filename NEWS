@@ -15,7 +15,9 @@ PHP                                                                        NEWS
     (cmb)
 
 - Mbstring
- . Fixed bug #66964 (mb_convert_variables() cannot detect recursion) (Yasuo)
+  . Fixed bug #66964 (mb_convert_variables() cannot detect recursion) (Yasuo)
+  . Fixed bug #72992 (mbstring.internal_encoding doesn't inherit default_charset).
+    (Yasuo)
 
 - Opcache:
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
