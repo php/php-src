@@ -1112,13 +1112,14 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 		    (opline+1)->op1_type == IS_TMP_VAR &&
 		    (opline+1)->op1.var == opline->result.var) {
 			(*opnum)++;
-			|	add IP, sizeof(zend_op) * 2
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
+				|   add IP, sizeof(zend_op) * 2
+			}
 		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
                    (opline+1)->op1_type == IS_TMP_VAR &&
                    (opline+1)->op1.var == opline->result.var) {
 			(*opnum)++;
 			target_label = ssa->cfg.blocks[b].successors[0];
-			|	add IP, sizeof(zend_op) * 2
 			| 	jmp =>target_label
 		} else {
 			|	mov dword [FP + opline->result.var + 8], IS_TRUE
@@ -1130,13 +1131,14 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 		    (opline+1)->op1.var == opline->result.var) {
 			(*opnum)++;
 			target_label = ssa->cfg.blocks[b].successors[0];
-			|	add IP, sizeof(zend_op) * 2
 			| 	jmp =>target_label
 		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
                    (opline+1)->op1_type == IS_TMP_VAR &&
                    (opline+1)->op1.var == opline->result.var) {
 			(*opnum)++;
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
 			|	add IP, sizeof(zend_op) * 2
+			}
 		} else {
 			|	mov dword [FP + opline->result.var + 8], IS_FALSE
 			|	INC_OPLINE
