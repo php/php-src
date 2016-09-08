@@ -2,7 +2,7 @@
 Test normal operation of password_verify() with argon2
 --SKIPIF--
 <?php
-if (!defined('PASSWORD_ARGON2I')) die('Skipped: password_verify not built with Argon2');
+if (!defined('PASSWORD_ARGON2I')) die('skip password_verify not built with Argon2');
 ?>
 --FILE--
 <?php
