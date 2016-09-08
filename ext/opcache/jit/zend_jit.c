@@ -928,11 +928,8 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 					}
 					break;
 				case ZEND_NEW:
-					if (!zend_jit_new(&dasm_state, opline)) {
+					if (!zend_jit_new(&dasm_state, opline, &i, op_array, &ssa)) {
 						goto jit_failure;
-					}
-					if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
-						i++;
 					}
 					break;
 				case ZEND_JMPZNZ:
