@@ -336,6 +336,19 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
+|.macro ADDREF_CONST, zv, tmp_reg
+|.if X64
+||		if (!IS_32BIT(Z_LVAL_P(zv))) {
+|			mov64 tmp_reg, ((uintptr_t)Z_LVAL_P(zv))
+|			inc dword [tmp_reg]
+||		} else {
+|			inc dword [Z_LVAL_P(zv)]
+||		}
+|.else
+|		inc dword [Z_LVAL_P(zv)]
+|.endif
+|.endmacro
+
 |.macro TRY_ADDREF, val_info, type_flags_reg, value_ptr_reg
 ||if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 ||	if (val_info & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
@@ -987,23 +1000,23 @@ fallback:
 
 static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info)
 {
-	if (val_type == IS_CV && (val_info & (MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
-		/* TODO: allow JIT for Z_ADDREF_P() ??? */
-		goto fallback;
-	} else if (val_type == IS_VAR && (val_info & MAY_BE_REF)) {
+	if (val_info & (MAY_BE_UNDEF|MAY_BE_REF)) {
+		/* TODO: Support for references ??? */
 		goto fallback;
 	} else if (val_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, val);
-		if (Z_OPT_REFCOUNTED_P(zv)) {
-			/* TODO: allow JIT for Z_ADDREF_P() ??? */
-			goto fallback;
-		}
 		|	ZVAL_COPY_CONST FP, var, var_info, zv, r0
+		||	if (Z_REFCOUNTED_P(zv)) {
+		|		ADDREF_CONST zv, r0
+		||	}
 		|	INC_OPLINE
 		return 1;
 	}
 
 	|	ZVAL_COPY_VALUE FP, var, FP, val.var, val_info, r0, eax, r1
+	||	if (val_type == IS_CV) {
+	|		TRY_ADDREF val_info, ah, r1
+	||	}
 	|	INC_OPLINE
 
 	return 1;
@@ -1058,12 +1071,11 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, opline->op1);
 
-		if (Z_REFCOUNTED_P(zv)) {
-			/* TODO: allow JIT for Z_ADDREF_P() ??? */
-			goto fallback;
-		}
 		|	mov r0, EX->call
 		|	ZVAL_COPY_CONST r0, opline->result.var, -1, zv, r1
+		||	if (Z_REFCOUNTED_P(zv)) {
+		|		ADDREF_CONST zv, r1
+		||	}
 		|	INC_OPLINE
 		return 1;
 	}
