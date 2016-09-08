@@ -21,6 +21,14 @@
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
 
+#define ZEND_JIT_LEVEL_NONE        0     /* no JIT */
+#define ZEND_JIT_LEVEL_MINIMAL     1     /* minimal JIT (subroutine threading) */
+#define ZEND_JIT_LEVEL_INLINE      2     /* selective inline threading */
+#define ZEND_JIT_LEVEL_OPT_FUNC    3     /* optimized JIT based on Type-Inference */
+#define ZEND_JIT_LEVEL_OPT_SCRIPT  4     /* optimized JIT based on Type-Inference and inner-procedute analises */
+
+#define ZEND_JIT_LEVEL  ZEND_JIT_LEVEL_OPT_FUNC
+
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
 
@@ -29,7 +37,8 @@
 #define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
 
 
-ZEND_API int  zend_jit(zend_op_array *op_array, zend_script *script);
+ZEND_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
+ZEND_API int  zend_jit_script(zend_script *script);
 ZEND_API void zend_jit_unprotect(void);
 ZEND_API void zend_jit_protect(void);
 ZEND_API int  zend_jit_startup(size_t size);

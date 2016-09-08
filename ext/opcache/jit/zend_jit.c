@@ -29,14 +29,6 @@
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/zend_dump.h"
 
-
-#define ZEND_JIT_LEVEL_NONE   0     /* no JIT */
-#define ZEND_JIT_LEVEL_MINI   1     /* minimal JIT (subroutine threading) */
-#define ZEND_JIT_LEVEL_INLINE 2     /* selective inline threading */
-#define ZEND_JIT_LEVEL_FULL   3     /* optimized JIT based on Type-Inference */
-
-#define ZEND_JIT_LEVEL  ZEND_JIT_LEVEL_FULL
-
 //#define CONTEXT_THREDED_JIT
 #define PREFER_MAP_32BIT
 //#define ZEND_RUNTIME_JIT
@@ -652,7 +644,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 		goto jit_failure;
 	}
 
-	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL)
+	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa.cfg.blocks
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
@@ -764,7 +756,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 		for (i = ssa.cfg.blocks[b].start; i <= end; i++) {
 			opline = op_array->opcodes + i;
 			switch (opline->opcode) {
-#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
+#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
 					if (!zend_jit_inc_dec(&dasm_state, opline, op_array, &ssa)) {
@@ -1022,7 +1014,7 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 }
 #endif
 
-ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
+ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 #ifdef ZEND_RUNTIME_JIT
 	zend_op *opline = op_array->opcodes;
@@ -1038,6 +1030,11 @@ ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
 #else
 	return zend_real_jit_func(op_array, script);
 #endif
+}
+
+ZEND_API int zend_jit_script(zend_script *script)
+{
+	return FAILURE;
 }
 
 ZEND_API void zend_jit_unprotect(void)
@@ -1170,7 +1167,12 @@ ZEND_API void zend_jit_shutdown(void)
 
 #else /* HAVE_JIT */
 
-ZEND_API int zend_jit(zend_op_array *op_array, zend_script *script)
+ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
+{
+	return FAILURE;
+}
+
+ZEND_API int zend_jit_script(zend_script *script)
 {
 	return FAILURE;
 }

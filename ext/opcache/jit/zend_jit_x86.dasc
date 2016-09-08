@@ -72,7 +72,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 #define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0x7fffffff)
 
-#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
+#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OT_FUNC
 
 |.macro FP_OP, fp_ins, op_type, op
 ||if (op_type == IS_CONST) {
@@ -637,7 +637,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline, uint32_t *opnum, zend
 	}
 	if (opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL) {
 		zend_class_entry *ce = NULL;
-#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
+#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 		if (ssa->ops && ssa->var_info) {
 			zend_ssa_var_info *res_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].result_def];
 			if (res_ssa->ce && !res_ssa->is_instanceof) {
@@ -667,7 +667,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline, uint32_t *opnum, zend
 	return 1;
 }
 
-#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_FULL
+#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 
 static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
