@@ -27,6 +27,7 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_ssa.h"
 #include "Optimizer/zend_inference.h"
+#include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
 //#define CONTEXT_THREDED_JIT
@@ -607,84 +608,85 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 	}
 }
 
-static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
+static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t *flags)
 {
-	uint32_t flags = 0;
-	zend_ssa ssa;
-	void *checkpoint;
+	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa->cfg, flags) != SUCCESS) {
+		return FAILURE;
+	}
+
+	if (zend_cfg_build_predecessors(&CG(arena), &ssa->cfg) != SUCCESS) {
+		return FAILURE;
+	}
+
+	/* Compute Dominators Tree */
+	if (zend_cfg_compute_dominators_tree(op_array, &ssa->cfg) != SUCCESS) {
+		return FAILURE;
+	}
+
+	/* Identify reducible and irreducible loops */
+	if (zend_cfg_identify_loops(op_array, &ssa->cfg, flags) != SUCCESS) {
+		return FAILURE;
+	}
+
+	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC)
+	 && ssa->cfg.blocks
+	 && op_array->last_try_catch == 0
+	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
+	 && !(*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
+		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, ssa, flags) != SUCCESS) {
+			return FAILURE;
+		}
+
+		if (zend_ssa_compute_use_def_chains(&CG(arena), op_array, ssa) != SUCCESS) {
+			return FAILURE;
+		}
+
+		if (zend_ssa_find_false_dependencies(op_array, ssa) != SUCCESS) {
+			return FAILURE;
+		}
+
+		if (zend_ssa_find_sccs(op_array, ssa) != SUCCESS){
+			return FAILURE;
+		}
+	} else {
+		ssa->rt_constants = 1;
+	}
+
+	return SUCCESS;
+}
+
+static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t *flags)
+{
+	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC)
+	 && ssa->cfg.blocks
+	 && op_array->last_try_catch == 0
+	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
+	 && !(*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
+
+		if (zend_ssa_inference(&CG(arena), op_array, script, ssa) != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
+{
 	int b, i, end;
 	zend_op *opline;
 	dasm_State* dasm_state = NULL;
 	void *handler;
 
-	if (dasm_ptr == dasm_end) {
-		return FAILURE;
-	}
-
-	checkpoint = zend_arena_checkpoint(CG(arena));
-
-    /* Build SSA */
-	memset(&ssa, 0, sizeof(zend_ssa));
-
-	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa.cfg, &flags) != SUCCESS) {
-		goto jit_failure;
-	}
-
-	if (zend_cfg_build_predecessors(&CG(arena), &ssa.cfg) != SUCCESS) {
-		goto jit_failure;
-	}
-
-	/* Compute Dominators Tree */
-	if (zend_cfg_compute_dominators_tree(op_array, &ssa.cfg) != SUCCESS) {
-		goto jit_failure;
-	}
-
-	/* Identify reducible and irreducible loops */
-	if (zend_cfg_identify_loops(op_array, &ssa.cfg, &flags) != SUCCESS) {
-		goto jit_failure;
-	}
-
-	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC)
-	 && ssa.cfg.blocks
-	 && op_array->last_try_catch == 0
-	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
-	 && !(flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
-		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa, &flags) != SUCCESS) {
-			goto jit_failure;
-		}
-
-		if (zend_ssa_compute_use_def_chains(&CG(arena), op_array, &ssa) != SUCCESS) {
-			goto jit_failure;
-		}
-
-		if (zend_ssa_find_false_dependencies(op_array, &ssa) != SUCCESS) {
-			goto jit_failure;
-		}
-
-		if (zend_ssa_find_sccs(op_array, &ssa) != SUCCESS){
-			goto jit_failure;
-		}
-
-		if (zend_ssa_inference(&CG(arena), op_array, script, &ssa) != SUCCESS) {
-			goto jit_failure;
-		}
-
-		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
-			zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
-		}
-	} else {
-		ssa.rt_constants = 1;
-	}
-
 	/* mark hidden branch targets */
-	for (b = 0; b < ssa.cfg.blocks_count; b++) {
-		if (ssa.cfg.blocks[b].flags & ZEND_BB_REACHABLE &&
-		    ssa.cfg.blocks[b].len > 1) {
+	for (b = 0; b < ssa->cfg.blocks_count; b++) {
+		if (ssa->cfg.blocks[b].flags & ZEND_BB_REACHABLE &&
+		    ssa->cfg.blocks[b].len > 1) {
 
-			opline = op_array->opcodes + ssa.cfg.blocks[b].start + ssa.cfg.blocks[b].len - 1;
+			opline = op_array->opcodes + ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len - 1;
 			if (opline->opcode == ZEND_DO_FCALL &&
 			    (opline-1)->opcode == ZEND_NEW) {
-				ssa.cfg.blocks[ssa.cfg.blocks[b].successors[0]].flags |= ZEND_BB_TARGET;
+				ssa->cfg.blocks[ssa->cfg.blocks[b].successors[0]].flags |= ZEND_BB_TARGET;
 			}
 		}
 	}
@@ -693,28 +695,28 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 	dasm_setupglobal(&dasm_state, dasm_labels, zend_lb_MAX);
 	dasm_setup(&dasm_state, dasm_actions);
 
-	dasm_growpc(&dasm_state, ssa.cfg.blocks_count * 2);
+	dasm_growpc(&dasm_state, ssa->cfg.blocks_count * 2);
 
 	zend_jit_align_func(&dasm_state);
-	for (b = 0; b < ssa.cfg.blocks_count; b++) {
-		if ((ssa.cfg.blocks[b].flags & ZEND_BB_REACHABLE) == 0) {
+	for (b = 0; b < ssa->cfg.blocks_count; b++) {
+		if ((ssa->cfg.blocks[b].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
 #ifdef CONTEXT_THREDED_JIT
-		if (ssa.cfg.blocks[b].flags & ZEND_BB_START) {
-			zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
+		if (ssa->cfg.blocks[b].flags & ZEND_BB_START) {
+			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
 		}
 #else
-		if (ssa.cfg.blocks[b].flags & ZEND_BB_ENTRY) {
-			if (ssa.cfg.blocks[b].flags & ZEND_BB_TARGET) {
+		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
+			if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 				zend_jit_jmp(&dasm_state, b);
 			}
-			zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
+			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
-		} else if (ssa.cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
-			opline = op_array->opcodes + ssa.cfg.blocks[b].start;
-			if (ssa.cfg.split_at_recv && opline->opcode == ZEND_RECV_INIT) {
+		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
+			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
+			if (ssa->cfg.split_at_recv && opline->opcode == ZEND_RECV_INIT) {
 				if (opline > op_array->opcodes &&
 				    (opline-1)->opcode == ZEND_RECV_INIT) {
 					/* repeatable opcode */
@@ -723,43 +725,43 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 					for (i = 0; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
 					}
 					zend_jit_jmp(&dasm_state, b + i);
-					zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
+					zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 					for (i = 1; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
-						zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b + i);
+						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b + i);
 					}
 					zend_jit_prologue(&dasm_state);
 				}
 			} else {
-				if (ssa.cfg.blocks[b].flags & (ZEND_BB_TARGET|ZEND_BB_RECV_ENTRY)) {
+				if (ssa->cfg.blocks[b].flags & (ZEND_BB_TARGET|ZEND_BB_RECV_ENTRY)) {
 					zend_jit_jmp(&dasm_state, b);
 				}
-				zend_jit_label(&dasm_state, ssa.cfg.blocks_count + b);
+				zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 				zend_jit_prologue(&dasm_state);
 			}
 		}
 #endif
 		zend_jit_label(&dasm_state, b);
-		if (ssa.cfg.blocks[b].flags & ZEND_BB_TARGET) {
-			if (!zend_jit_set_opline(&dasm_state, op_array->opcodes + ssa.cfg.blocks[b].start)) {
+		if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
+			if (!zend_jit_set_opline(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
 				goto jit_failure;
 			}
 		}
-		if (ssa.cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
+		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
 			if (!zend_jit_check_timeout(&dasm_state)) {
 				goto jit_failure;
 			}
 		}
-		if (!ssa.cfg.blocks[b].len) {
+		if (!ssa->cfg.blocks[b].len) {
 			continue;
 		}
-		end = ssa.cfg.blocks[b].start + ssa.cfg.blocks[b].len - 1;
-		for (i = ssa.cfg.blocks[b].start; i <= end; i++) {
+		end = ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len - 1;
+		for (i = ssa->cfg.blocks[b].start; i <= end; i++) {
 			opline = op_array->opcodes + i;
 			switch (opline->opcode) {
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
-					if (!zend_jit_inc_dec(&dasm_state, opline, op_array, &ssa)) {
+					if (!zend_jit_inc_dec(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
@@ -767,27 +769,27 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 				case ZEND_SUB:
 				case ZEND_MUL:
 //				case ZEND_DIV: // TODO: check for division by zero ???
-					if (!zend_jit_math(&dasm_state, opline, op_array, &ssa)) {
+					if (!zend_jit_math(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
 				case ZEND_ASSIGN:
-					if (!zend_jit_assign(&dasm_state, opline, op_array, &ssa)) {
+					if (!zend_jit_assign(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
 				case ZEND_QM_ASSIGN:
-					if (!zend_jit_qm_assign(&dasm_state, opline, op_array, &ssa)) {
+					if (!zend_jit_qm_assign(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
 				case ZEND_SEND_VAL:
-					if (!zend_jit_send_val(&dasm_state, opline, op_array, &ssa)) {
+					if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
 				case ZEND_SEND_VAR:
-					if (!zend_jit_send_var(&dasm_state, opline, op_array, &ssa)) {
+					if (!zend_jit_send_var(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
@@ -795,19 +797,19 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
 				case ZEND_IS_SMALLER_OR_EQUAL:
-					if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, &ssa)) {
+					if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
 				case ZEND_TYPE_CHECK:
-					if (!zend_jit_type_check(&dasm_state, opline, b, &i, op_array, &ssa)) {
+					if (!zend_jit_type_check(&dasm_state, opline, b, &i, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
 #endif
 				case ZEND_RECV_INIT:
-					if (ssa.cfg.split_at_recv) {
-						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa))) {
+					if (ssa->cfg.split_at_recv) {
+						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						break;
@@ -816,7 +818,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 				case ZEND_BIND_GLOBAL:
 					if (opline->opcode != op_array->opcodes[i+1].opcode) {
 						/* repeatable opcodes */
-						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa))) {
+						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 					}
@@ -836,7 +838,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 				case ZEND_OP_DATA:
 					break;
 				case ZEND_JMP:
-					if (!zend_jit_jmp(&dasm_state, ssa.cfg.blocks[b].successors[0])) {
+					if (!zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
@@ -873,19 +875,19 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 						    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
 						    (opline-1)->opcode == ZEND_CASE) {
 
-							uint32_t t1 = _ssa_op1_info(op_array, &ssa, (opline-1));
-							uint32_t t2 = _ssa_op2_info(op_array, &ssa, (opline-1));
+							uint32_t t1 = _ssa_op1_info(op_array, ssa, (opline-1));
+							uint32_t t2 = _ssa_op2_info(op_array, ssa, (opline-1));
 
 							if ((t1 & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
 							    (t2 & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 								/* might be smart branch */
-								if (!zend_jit_smart_branch(&dasm_state, opline, (b + 1), ssa.cfg.blocks[b].successors[0])) {
+								if (!zend_jit_smart_branch(&dasm_state, opline, (b + 1), ssa->cfg.blocks[b].successors[0])) {
 									goto jit_failure;
 								}
 								/* break missing intentionally */
 							} else {
 								/* smart branch */
-								if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
+								if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 									goto jit_failure;
 								}
 								break;
@@ -900,7 +902,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 						           (opline-1)->opcode == ZEND_TYPE_CHECK ||
 						           (opline-1)->opcode == ZEND_DEFINED) {
 						    /* smart branch */
-							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
+							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 								goto jit_failure;
 							}
 							break;
@@ -914,20 +916,20 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa)) ||
-					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
+					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
 				case ZEND_NEW:
-					if (!zend_jit_new(&dasm_state, opline, &i, op_array, &ssa)) {
+					if (!zend_jit_new(&dasm_state, opline, &i, op_array, ssa)) {
 						goto jit_failure;
 					}
 					break;
 				case ZEND_JMPZNZ:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa)) ||
-					    !zend_jit_cond_jmp(&dasm_state, OP_JMP_ADDR(opline, opline->op2), ssa.cfg.blocks[b].successors[1]) ||
-					    !zend_jit_jmp(&dasm_state, ssa.cfg.blocks[b].successors[0])) {
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
+					    !zend_jit_cond_jmp(&dasm_state, OP_JMP_ADDR(opline, opline->op2), ssa->cfg.blocks[b].successors[1]) ||
+					    !zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
@@ -935,32 +937,69 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 				case ZEND_FE_FETCH_RW:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa)) ||
-					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa.cfg.blocks[b].successors[0])) {
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
+					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
 				default:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, &ssa))) {
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 						goto jit_failure;
 					}
 			}
 		}
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, op_array, &ssa.cfg, NULL);
+	handler = dasm_link_and_encode(&dasm_state, op_array, &ssa->cfg, NULL);
 	if (!handler) {
 		goto jit_failure;
 	}
 	dasm_free(&dasm_state);
 
-	zend_arena_release(&CG(arena), checkpoint);
 	return SUCCESS;
 
 jit_failure:
     if (dasm_state) {
 		dasm_free(&dasm_state);
     }
+	return FAILURE;
+}
+
+static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
+{
+	uint32_t flags = 0;
+	zend_ssa ssa;
+	void *checkpoint;
+
+	if (dasm_ptr == dasm_end) {
+		return FAILURE;
+	}
+
+	checkpoint = zend_arena_checkpoint(CG(arena));
+
+    /* Build SSA */
+	memset(&ssa, 0, sizeof(zend_ssa));
+
+	if (zend_jit_op_array_analyze1(op_array, script, &ssa, &flags) != SUCCESS) {
+		goto jit_failure;
+	}
+
+	if (zend_jit_op_array_analyze2(op_array, script, &ssa, &flags) != SUCCESS) {
+		goto jit_failure;
+	}
+
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
+		zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
+	}
+
+	if (zend_jit(op_array, &ssa) != SUCCESS) {
+		goto jit_failure;
+	}
+
+	zend_arena_release(&CG(arena), checkpoint);
+	return SUCCESS;
+
+jit_failure:
 	zend_arena_release(&CG(arena), checkpoint);
 	return FAILURE;
 }
@@ -1034,6 +1073,69 @@ ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 ZEND_API int zend_jit_script(zend_script *script)
 {
+	void *checkpoint;
+	zend_call_graph call_graph;
+	zend_func_info *info;
+	int i;
+
+	if (dasm_ptr == dasm_end) {
+		return FAILURE;
+	}
+
+	checkpoint = zend_arena_checkpoint(CG(arena));
+
+	call_graph.op_arrays_count = 0;
+	if (zend_build_call_graph(&CG(arena), script, ZEND_RT_CONSTANTS, &call_graph) != SUCCESS) {
+		goto jit_failure;
+	}
+
+	for (i = 0; i < call_graph.op_arrays_count; i++) {
+		info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+		if (info) {
+			if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
+				goto jit_failure;
+			}
+		}
+	}
+
+	for (i = 0; i < call_graph.op_arrays_count; i++) {
+		info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+		if (info) {
+			if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
+				goto jit_failure;
+			}
+		}
+	}
+
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (info) {
+				zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &info->ssa);
+			}
+		}
+	}
+
+	for (i = 0; i < call_graph.op_arrays_count; i++) {
+		info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+		if (info) {
+			if (zend_jit(call_graph.op_arrays[i], &info->ssa) != SUCCESS) {
+				goto jit_failure;
+			}
+		}
+	}
+
+	for (i = 0; i < call_graph.op_arrays_count; i++) {
+		ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+	}
+	zend_arena_release(&CG(arena), checkpoint);
+	return SUCCESS;
+
+jit_failure:
+	for (i = 0; i < call_graph.op_arrays_count; i++) {
+		ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+	}
+	zend_arena_release(&CG(arena), checkpoint);
 	return FAILURE;
 }
 

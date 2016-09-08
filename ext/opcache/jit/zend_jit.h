@@ -27,7 +27,7 @@
 #define ZEND_JIT_LEVEL_OPT_FUNC    3     /* optimized JIT based on Type-Inference */
 #define ZEND_JIT_LEVEL_OPT_SCRIPT  4     /* optimized JIT based on Type-Inference and inner-procedute analises */
 
-#define ZEND_JIT_LEVEL  ZEND_JIT_LEVEL_OPT_FUNC
+#define ZEND_JIT_LEVEL  ZEND_JIT_LEVEL_OPT_SCRIPT
 
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
