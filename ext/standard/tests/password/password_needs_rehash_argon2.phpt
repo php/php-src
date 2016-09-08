@@ -7,11 +7,11 @@ if (!defined('PASSWORD_ARGON2I')) die('skip password_needs_rehash not built with
 --FILE--
 <?php
 
-$hash = '$argon2i$v=19$m=65536,t=3,p=1$YkprUktYN0lHQTd2bWRFeA$79aA+6IvgclpDAJVoezProlqzIPy7do/P0sBDXS9Nn0';
+$hash = password_hash('test', PASSWORD_ARGON2I);
 var_dump(password_needs_rehash($hash, PASSWORD_ARGON2I));
 var_dump(password_needs_rehash($hash, PASSWORD_ARGON2I, ['memory_cost' => 1<<17]));
-var_dump(password_needs_rehash($hash, PASSWORD_ARGON2I, ['time_cost' => 2]));
-var_dump(password_needs_rehash($hash, PASSWORD_ARGON2I, ['threads' => 2]));
+var_dump(password_needs_rehash($hash, PASSWORD_ARGON2I, ['time_cost' => 4]));
+var_dump(password_needs_rehash($hash, PASSWORD_ARGON2I, ['threads' => 4]));
 echo "OK!";
 ?>
 --EXPECT--
