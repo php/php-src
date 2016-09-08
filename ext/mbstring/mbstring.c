@@ -1250,7 +1250,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 	const mbfl_encoding **list;
 	size_t size;
 
-	if (!new_value) {
+	if (!new_value || !ZSTR_VAL(new_value)) {
 		if (MBSTRG(http_input_list)) {
 			pefree(MBSTRG(http_input_list), 1);
 		}
@@ -1318,7 +1318,7 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 {
 	const mbfl_encoding *encoding;
 
-	if (!new_value || new_value_length == 0 || !(encoding = mbfl_name2encoding(new_value))) {
+	if (!new_value || !new_value_length || !(encoding = mbfl_name2encoding(new_value))) {
 		/* falls back to UTF-8 if an unknown encoding name is given */
 		encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
 	}
