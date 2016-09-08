@@ -1260,7 +1260,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 	const mbfl_encoding **list;
 	size_t size;
 
-	if (!new_value) {
+	if (!new_value || !new_value_length) {
 		if (MBSTRG(http_input_list)) {
 			pefree(MBSTRG(http_input_list), 1);
 		}
@@ -1328,7 +1328,7 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 {
 	const mbfl_encoding *encoding;
 
-	if (!new_value || new_value_length == 0 || !(encoding = mbfl_name2encoding(new_value))) {
+	if (!new_value || !new_value_length || !(encoding = mbfl_name2encoding(new_value))) {
 		/* falls back to UTF-8 if an unknown encoding name is given */
 		encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
 	}
@@ -1361,7 +1361,7 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 	}
 
 	if (stage & (PHP_INI_STAGE_STARTUP | PHP_INI_STAGE_SHUTDOWN | PHP_INI_STAGE_RUNTIME)) {
-		if (new_value_length) {
+		if (new_value && new_value_length) {
 			return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
 		} else {
 			return _php_mb_ini_mbstring_internal_encoding_set(get_internal_encoding(TSRMLS_C), strlen(get_internal_encoding(TSRMLS_C))+1 TSRMLS_CC);
