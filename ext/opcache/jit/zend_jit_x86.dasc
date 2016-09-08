@@ -304,8 +304,8 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro ZVAL_COPY_VALUE, dst_base, dst_offset, src_base, src_offset, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
 ||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
 ||	if (!(src_info & MAY_BE_DOUBLE)) {
-| 		mov tmp_reg1, aword [src_base + src_offset]
-| 		mov aword [dst_base + dst_offset], tmp_reg1
+| 		mov tmp_reg2, aword [src_base + src_offset]
+| 		mov aword [dst_base + dst_offset], tmp_reg2
 ||	} else if ((src_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 |.if X64 or SSE
 |		movsd xmm0, qword [src_base + src_offset]
@@ -316,13 +316,13 @@ static void* dasm_labels[zend_lb_MAX];
 |.endif
 ||	} else {
 |.if X64
-|		mov tmp_reg1, aword [src_base + src_offset]
-|		mov aword [dst_base + dst_offset], tmp_reg1
+|		mov tmp_reg2, aword [src_base + src_offset]
+|		mov aword [dst_base + dst_offset], tmp_reg2
 |.else
-|		mov tmp_reg1, dword [src_base + src_offset]
-|		mov tmp_reg2, dword [src_base + src_offset + 4]
-|		mov dword [dst_base + dst_offset], tmp_reg1
-|		mov dword [dst_base + dst_offset + 4], tmp_reg2
+|		mov tmp_reg2, dword [src_base + src_offset]
+|		mov tmp_reg1, dword [src_base + src_offset + 4]
+|		mov dword [dst_base + dst_offset], tmp_reg2
+|		mov dword [dst_base + dst_offset + 4], tmp_reg1
 |.endif
 ||	}
 ||}
@@ -333,6 +333,17 @@ static void* dasm_labels[zend_lb_MAX];
 ||} else {
 |	mov tmp_reg1d, dword [src_base + src_offset + 8]
 |	mov dword [dst_base + dst_offset + 8], tmp_reg1d
+||}
+|.endmacro
+
+|.macro TRY_ADDREF, val_info, type_flags_reg, value_ptr_reg
+||if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+||	if (val_info & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+|		and type_flags_reg, IS_TYPE_REFCOUNTED
+|		je >1
+||	}
+|	inc	dword [value_ptr_reg]
+|1:
 ||}
 |.endmacro
 
@@ -1075,18 +1086,22 @@ fallback:
 static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
-	if (opline->op1_type == IS_CV || !ssa->ops || !ssa->var_info) {
+	if (!ssa->ops || !ssa->var_info) {
 		goto fallback;
 	}
 
 	op1_info = OP1_INFO();
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) {
+		// TODO: support for references ???
 		goto fallback;
 	}
 
 	op1_info = OP1_INFO();
 	|	mov r0, EX->call
 	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2
+	||	if (opline->op1_type == IS_CV) {
+	|		TRY_ADDREF op1_info, ch, r2
+	||	}
 	|	INC_OPLINE
 	return 1;
 
