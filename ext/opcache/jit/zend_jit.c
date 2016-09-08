@@ -783,6 +783,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+//				case ZEND_INIT_FCALL:
+//					if (!zend_jit_init_fcall(&dasm_state, opline, op_array)) {
+//						goto jit_failure;
+//					}
+//					break;
 				case ZEND_SEND_VAL:
 					if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;

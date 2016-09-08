@@ -23,33 +23,37 @@
 |.endif
 
 |.if X64
- |.define FP,     r14
- |.define IP,     r15
- |.define IPl,    r15d
- |.define CARG1,  rdi       // x64/POSIX C call arguments.
- |.define CARG2,  rsi
- |.define CARG3,  rdx
- |.define CARG4,  rcx
- |.define CARG5,  r8
- |.define CARG6,  r9
- |.define CARG1d, edi
- |.define CARG2d, esi
- |.define CARG3d, edx
- |.define CARG4d, ecx
- |.define CARG5d, r8d
- |.define CARG6d, r9d
- |.define FCARG1, CARG1d    // Simulate x86 fastcall.
- |.define FCARG2, CARG2d
- |.define SPAD,   8
- |.define SSE,    1
+ |.define FP,      r14
+ |.define IP,      r15
+ |.define IPl,     r15d
+ |.define CARG1,   rdi       // x64/POSIX C call arguments.
+ |.define CARG2,   rsi
+ |.define CARG3,   rdx
+ |.define CARG4,   rcx
+ |.define CARG5,   r8
+ |.define CARG6,   r9
+ |.define CARG1d,  edi
+ |.define CARG2d,  esi
+ |.define CARG3d,  edx
+ |.define CARG4d,  ecx
+ |.define CARG5d,  r8d
+ |.define CARG6d,  r9d
+ |.define FCARG1a, CARG1    // Simulate x86 fastcall.
+ |.define FCARG2a, CARG2
+ |.define FCARG1d, CARG1d
+ |.define FCARG2d, CARG2d
+ |.define SPAD,    8
+ |.define SSE,     1
 |.else
- |.define FP,     esi
- |.define IP,     edi
- |.define IPl,    edi
- |.define FCARG1, ecx       // x86 fastcall arguments.
- |.define FCARG2, edx
- |.define SPAD,   12
- |.define SSE,    1
+ |.define FP,      esi
+ |.define IP,      edi
+ |.define IPl,     edi
+ |.define FCARG1a, ecx       // x86 fastcall arguments.
+ |.define FCARG2a, edx
+ |.define FCARG1d, ecx
+ |.define FCARG2d, edx
+ |.define SPAD,    12
+ |.define SSE,     1
 |.endif
 
 |.type EX, zend_execute_data, FP
@@ -63,11 +67,41 @@ static void* dasm_labels[zend_lb_MAX];
 |.section code, cold_codes
 
 |.macro LOAD_ADDR, reg, addr
+|.if X64
 ||if (((ptrdiff_t)addr) <= 0x7fffffff) {
 |	mov reg, ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
 || } else {
 |	mov64 reg, ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
 ||}
+|.else
+|	mov reg, addr
+|.endif
+|.endmacro
+
+|.macro EXT_CALL, func, tmp_reg
+|.if X64
+||if (IS_32BIT(dasm_end) && IS_32BIT(func)) {
+|	call qword &func
+||} else {
+|	LOAD_ADDR tmp_reg, func
+|	call tmp_reg
+||}
+|.else
+|	call dword &func
+|.endif
+|.endmacro
+
+|.macro EXT_JMP, func, tmp_reg
+|.if X64
+||if (IS_32BIT(dasm_end) && IS_32BIT(func)) {
+|	jmp qword &func
+||} else {
+|	LOAD_ADDR tmp_reg, func
+|	jmp tmp_reg
+||}
+|.else
+|	jmp dword &func
+|.endif
 |.endmacro
 
 #define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0x7fffffff)
@@ -424,16 +458,10 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//zend_timeout(0);
 	|.if X64
 	|	xor CARG1d, CARG1d
-	if (IS_32BIT(dasm_end) && IS_32BIT(zend_timeout)) {
-	|	call qword &zend_timeout
-	} else {
-	|	LOAD_ADDR rax, zend_timeout
-	|	call rax
-	}
 	|.else
 	|	push 0
-	|	call dword &zend_timeout
 	|.endif
+	|	EXT_CALL zend_timeout, r0
 	|1:
 	|	//} else if (zend_interrupt_function) {
 	if (zend_interrupt_function) {
@@ -441,18 +469,11 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	mov EX->opline, IP
 		|	//zend_interrupt_function(execute_data);
 		|.if X64
-		if (IS_32BIT(dasm_end) && IS_32BIT(zend_interrupt_function)) {
 		|	mov CARG1, FP
-		|	call qword &zend_interrupt_function
-		} else {
-		|	LOAD_ADDR rax, zend_interrupt_function
-		|	mov CARG1, FP
-		|	call rax
-		}
 		|.else
 		|	push FP
-		|	call dword &zend_interrupt_function
 		|.endif
+		|	EXT_CALL zend_interrupt_function, r0
 		|	//ZEND_VM_ENTER();
 		|	//execute_data = EG(current_execute_data);
 		|	mov FP, aword [&EG(current_execute_data)]
@@ -471,16 +492,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 {
 	|->exception_handler:
 	|	add r4, SPAD // stack alignment
-	|.if X64
-	if (IS_32BIT(dasm_end) && IS_32BIT(EG(exception_op)->handler)) {
-	|	jmp qword &(EG(exception_op)->handler)
-	} else {
-	|	LOAD_ADDR rax, EG(exception_op)->handler
-	|	jmp rax
-	}
-	|.else
-	|	jmp dword &(EG(exception_op)->handler)
-	|.endif
+	|	EXT_JMP EG(exception_op)->handler, r0
 
 	return 1;
 }
@@ -524,18 +536,7 @@ static int zend_jit_check_exception(dasm_State **Dst)
 
 static int zend_jit_handler(dasm_State **Dst, zend_op *opline, int may_throw)
 {
-	const void *handler = opline->handler;
-
-	|.if X64
-	if (IS_32BIT(dasm_end) && IS_32BIT(handler)) {
-	|	call qword &handler
-	} else {
-	|	LOAD_ADDR rax, handler
-	|	call rax
-	}
-	|.else
-	|	call dword &handler
-	|.endif
+	| EXT_CALL opline->handler, r0
 	if (may_throw) {
 		zend_jit_check_exception(Dst);
 	}
@@ -544,19 +545,8 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline, int may_throw)
 
 static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 {
-	const void *handler = opline->handler;
-
 	|	add r4, SPAD // stack alignment
-	|.if X64
-	if (IS_32BIT(dasm_end) && IS_32BIT(handler)) {
-	|	jmp qword &handler
-	} else {
-	|	LOAD_ADDR rax, handler
-	|	jmp rax
-	}
-	|.else
-	|	jmp dword &handler
-	|.endif
+	|	EXT_JMP opline->handler, r0
 	return 1;
 }
 
@@ -568,11 +558,7 @@ static int zend_jit_skip_handler(dasm_State **Dst, uint32_t skip)
 
 static int zend_jit_set_opline(dasm_State **Dst, zend_op *target_opline)
 {
-	|.if X64
 	|	LOAD_ADDR IP, target_opline
-	|.else
-	|	mov IP, target_opline
-	|.endif
 	return 1;
 }
 
@@ -720,30 +706,12 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 	if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
 		|.cold_codes
 		|2:
-		|.if X64
-		|	lea	CARG1, [FP + opline->op1.var]
-		||	if (IS_32BIT(dasm_end) && IS_32BIT(increment_function)) {
-		||		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-		|			call qword &increment_function
-		||		} else {
-		|			call qword &decrement_function
-		||		}
-		||	} else {
-		||		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-		|			LOAD_ADDR rax, increment_function
-		||		} else {
-		|			LOAD_ADDR rax, decrement_function
-		||		}
-		|		call rax
-		||	}
-		|.else
-		|	lea	FCARG1, [FP + opline->op1.var]
+		|	lea	FCARG1a, [FP + opline->op1.var]
 		||	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-		|		call dword &increment_function
+		|		EXT_CALL increment_function, r0
 		||	} else {
-		|		call dword &decrement_function
+		|		EXT_CALL decrement_function, r0
 		||	}
-		|.endif
 		|	jmp >3
 		|.code
 	}
@@ -1062,6 +1030,101 @@ static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
+static int zend_jit_push_stack_frame(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_function *func)
+{
+	if (!func) {
+		assert(0);
+	}
+
+	uint32_t used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
+
+	|	// if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
+	|	LOAD_ADDR r1, EG(vm_stack_top)
+	|	LOAD_ADDR r2, EG(vm_stack_end)
+	|	sub r2,r1
+	|	cmp r2, used_stack
+	|	jz >1 // TODO proper condition
+		// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+	|	// ???
+	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
+	|	//???
+	|.cold_codes
+	|1:
+	|	//???
+	|	jmp >2
+	|.code
+	|2:
+
+	return 1;
+}
+
+static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *op_array)
+{
+	zend_func_info *info = ZEND_FUNC_INFO(op_array);
+	zend_function *func = NULL;
+
+	if (info) {
+		zend_call_info *call_info = info->callee_info;
+
+		while (call_info && call_info->caller_init_opline != opline) {
+			call_info = call_info->next_callee;
+		}
+		if (call_info && call_info->callee_func) {
+			func = call_info->callee_func;
+		}
+	}
+	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+		|	LOAD_ADDR r0, func
+	} else if (func && op_array == &func->op_array) {
+		/* recursive call */
+		|	mov r0,	EX->func
+	} else {
+		zval *zv = RT_CONSTANT(op_array, opline->op2);
+
+		|	// if (CACHED_PTR(Z_CACHE_SLOT_P(fname))) {
+		|	mov r0,	EX->run_time_cache
+		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
+		|	test r0, r0
+		|	jz >1
+		|.cold_codes
+		|1:
+		|	// if ((func = zend_hash_find(EG(function_table), Z_STR_P(fname))) == NULL) {
+		|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
+		|	EXT_CALL zend_hash_find, r0
+		|	test r0, r0
+		|	jz >2
+		|	mov r0, aword [r0]
+		|	jmp >3
+		|2:
+		|	// SAVE_OPLINE();
+		|	mov EX->opline, IP
+		|	// zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(fname));
+		|.if X64
+		|	xor CARG1, CARG1
+		|	LOAD_ADDR CARG2, "Call to undefined function %s()"
+		|	LOAD_ADDR CARG3, Z_STRVAL_P(zv)
+		|.else
+		|	push 0
+		|	push "Call to undefined function %s()"
+		|	push Z_STRVAL_P(zv)
+		|.endif
+		|	EXT_CALL zend_throw_error, r0
+		|	jmp ->exception_handler
+		|.code
+		|3:
+	}
+	if (!zend_jit_push_stack_frame(Dst, opline, op_array, func)) {
+		return 0;
+	}
+	|	// call->prev_execute_data = EX(call);
+	|	mov	r1, EX->call
+	|	mov EX:r0->prev_execute_data, r1
+	|	// EX(call) = call;
+	|	mov EX->call, r0
+
+	return 1;
 }
 
 static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
