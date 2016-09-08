@@ -41,6 +41,10 @@
 #	include <arpa/inet.h>
 #endif /* }}} */
 
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+# include "openssl/applink.c"
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
 static zend_bool phpdbg_booted = 0;

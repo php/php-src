@@ -92,6 +92,10 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #include "fastcgi.h"
 
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+# include "openssl/applink.c"
+#endif
+
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
