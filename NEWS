@@ -16,7 +16,9 @@ PHP                                                                        NEWS
 
 - Mbstring:
   . Fixed bug #72994 (mbc_to_code() out of bounds read). (Laruence, cmb)
-  . Fixed bug #66964 (mb_convert_variables() cannot detect recursion) (Yasuo)
+  . Fixed bug #66964 (mb_convert_variables() cannot detect recursion). (Yasuo)
+  . Fixed bug #72992 (mbstring.internal_encoding doesn't inherit default_charset).
+    (Yasuo)
 
 - Opcache:
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
