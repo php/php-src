@@ -3709,6 +3709,7 @@ detect_end:
 							stack[stack_level] = var;
 							stack_level++;
 							var = hash_entry;
+							SEPARATE_ZVAL_IF_NOT_REF(hash_entry);
 							target_hash = HASH_OF(*var);
 							if (target_hash != NULL) {
 								zend_hash_internal_pointer_reset(target_hash);
