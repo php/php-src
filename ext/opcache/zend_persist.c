@@ -571,7 +571,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 #ifdef HAVE_JIT
 	if (do_jit && ZCG(accel_directives).jit_buffer_size) {
-		zend_jit(op_array, &main_persistent_script->script);
+		zend_jit(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 	}
 #endif
 }
@@ -860,9 +860,11 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	zend_jit_unprotect();
 #endif
 
+	ZCG(current_persistent_script) = script;
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table, zend_persist_op_array);
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+	ZCG(current_persistent_script) = NULL;
 
 #ifdef HAVE_JIT
 	zend_jit_protect();
