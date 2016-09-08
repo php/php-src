@@ -883,11 +883,11 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					|	add eax, 2
 					break;
 				case ZEND_IS_SMALLER:
-					|	setg al
+					|	setl al
 					|	add eax, 2
 					break;
 				case ZEND_IS_SMALLER_OR_EQUAL:
-					|	setge al
+					|	setle al
 					|	add eax, 2
 					break;
 			}
