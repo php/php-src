@@ -836,6 +836,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_DO_UCALL:
+					if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level)) {
+						goto jit_failure;
+					}
+					break;
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
@@ -906,7 +911,9 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				/* stackless execution */
 				case ZEND_INCLUDE_OR_EVAL:
 				case ZEND_DO_FCALL:
+#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_DO_UCALL:
+#endif
 				case ZEND_DO_FCALL_BY_NAME:
 					if (!zend_jit_call(&dasm_state, opline)) {
 						goto jit_failure;
