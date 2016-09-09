@@ -35,8 +35,12 @@
 #include <sys/time.h>
 #endif
 
-#include "php_lcg.h"
+#include "php_random.h"
 #include "uniqid.h"
+
+#define UNIQID_RAND_CHARS 10
+
+static char convtab[] = "0123456789abcdefghijklmnopqrstuv";
 
 /* {{{ proto string uniqid([string prefix [, bool more_entropy]])
    Generates a unique ID */
@@ -44,15 +48,13 @@
 PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";
-#if defined(__CYGWIN__)
 	zend_bool more_entropy = 1;
-#else
-	zend_bool more_entropy = 0;
-#endif
 	zend_string *uniqid;
 	int sec, usec;
 	size_t prefix_len = 0;
 	struct timeval tv;
+	char bytes[UNIQID_RAND_CHARS*2];
+	int i, mask = (1 << 5) - 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sb", &prefix, &prefix_len,
 							  &more_entropy)) {
@@ -72,12 +74,17 @@ PHP_FUNCTION(uniqid)
 	gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
 	sec = (int) tv.tv_sec;
 	usec = (int) (tv.tv_usec % 0x100000);
+	php_random_bytes(bytes, UNIQID_RAND_CHARS*2, 1);
+	for (i = 0; i < UNIQID_RAND_CHARS; i++) {
+		bytes[i] = convtab[bytes[i] & mask];
+	}
+	bytes[UNIQID_RAND_CHARS] = '\0';
 
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.
 	 */
 	if (more_entropy) {
-		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg() * 10);
+		uniqid = strpprintf(0, "%s%08x%05x%s", prefix, sec, usec, bytes);
 	} else {
 		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
 	}
