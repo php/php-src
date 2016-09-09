@@ -153,9 +153,9 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 				php_error_docref(NULL, E_WARNING, "Header field value (%s) contains invalid chars or format", Z_STRVAL_P(val));
 				return;
 			}
-			smart_str_append(s, key); // Ignore chars after null
+			smart_str_append(s, key); /* Ignore chars after null */
 			smart_str_appendl(s, ": ", 2);
-			smart_str_appends(s, Z_STRVAL_P(val)); // Ignore chars after null.
+			smart_str_appends(s, Z_STRVAL_P(val)); /* Ignore chars after null. */
 			smart_str_appendl(s, "\r\n", 2);
 			break;
 		case IS_ARRAY:
@@ -232,7 +232,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
 				}
 				break;
-			case sizeof("to")-1: // "to", "cc"
+			case sizeof("to")-1: /* "to", "cc" */
 				if (!strncasecmp("to", ZSTR_VAL(key), ZSTR_LEN(key))) {
 					php_error_docref(NULL, E_WARNING, "Extra header cannot contain 'To' header");
 					continue;
@@ -250,7 +250,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
 				}
 				break;
-			case sizeof("message-id")-1: // "references"
+			case sizeof("message-id")-1: /* "references" */
 				if (!strncasecmp("message-id", ZSTR_VAL(key), ZSTR_LEN(key))) {
 					PHP_MAIL_BUILD_HEADER_CHECK("message-id", s, key, val);
 				} else if (!strncasecmp("references", ZSTR_VAL(key), ZSTR_LEN(key))) {
@@ -278,7 +278,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	// Remove the last \r\n
+	/* Remove the last \r\n */
 	if (s.s) s.s->len -= 2;
 	smart_str_0(&s);
 
