@@ -1060,7 +1060,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 			} else {
 				/* BOOL */
-				result = ZEND_OP1_LITERAL(opline);
+				ZVAL_COPY_VALUE(&result, &ZEND_OP1_LITERAL(opline));
 				convert_to_boolean(&result);
 				ZVAL_NULL(&ZEND_OP1_LITERAL(opline));
 			}
@@ -1921,11 +1921,12 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_b
 					case ZEND_QM_ASSIGN:
 					case ZEND_BOOL:
 					case ZEND_BOOL_NOT:
-						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-							literal_dtor(&ZEND_OP1_LITERAL(opline));
-						} else if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
+						if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
 							opline->opcode = ZEND_FREE;
 						} else {
+							if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+								literal_dtor(&ZEND_OP1_LITERAL(opline));
+							}
 							MAKE_NOP(opline);
 						}
 						break;
