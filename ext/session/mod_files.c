@@ -138,6 +138,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		}
 
 		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to create session data file path. Too short session ID, invalid save_path or path lentgth exceeds MAXPATHLEN(%d)", MAXPATHLEN);
 			return;
 		}
 
@@ -147,7 +148,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 #ifdef O_NOFOLLOW
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY | O_NOFOLLOW, data->filemode);
 #else
-		/* Check to make sure that the opened file is not outside of allowable dirs. 
+		/* Check to make sure that the opened file is not outside of allowable dirs.
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
 		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
 			return;
@@ -162,6 +163,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 			if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid())) {
 				close(data->fd);
 				data->fd = -1;
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session data file is not created by your uid");
 				return;
 			}
 #endif
