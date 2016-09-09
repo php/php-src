@@ -27,6 +27,10 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed bug #72996 (phpdbg_prompt.c undefined reference to DL_LOAD). (Nikita)
 
+- Session:
+  . Fixed bug #68015 (Session does not report invalid uid for files save handler).
+    (Yasuo)
+
 - SOAP:
   . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita)
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
