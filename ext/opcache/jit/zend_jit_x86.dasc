@@ -1230,6 +1230,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 			func = call_info->callee_func;
 		}
 	}
+	|	SAVE_IP
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
 		|	LOAD_ADDR r0, func
 	} else if (func && op_array == &func->op_array) {
@@ -1246,7 +1247,6 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 		|.cold_codes
 		|1:
 		|	// SAVE_OPLINE();
-		|	SAVE_IP
 		|	mov EX->opline, IP
 		|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
 		|	EXT_CALL zend_jit_find_func_helper, r0
