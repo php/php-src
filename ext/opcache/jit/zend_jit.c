@@ -874,7 +874,8 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 							i++;
 							skip++;
 						}
-						if (!zend_jit_skip_handler(&dasm_state, skip)) {
+						if (!zend_jit_skip_handler(&dasm_state,
+							skip, zend_need_inc_op(op_array, opline + skip, b, ssa))) {
 							goto jit_failure;
 						}
 					}
@@ -966,7 +967,8 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					}
 					break;
 				case ZEND_NEW:
-					if (!zend_jit_new(&dasm_state, opline, &i, op_array, ssa)) {
+					if (!zend_jit_new(&dasm_state,
+						opline, &i, op_array, ssa, zend_need_inc_op(op_array, opline, b, ssa))) {
 						goto jit_failure;
 					}
 					break;
