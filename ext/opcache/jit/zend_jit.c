@@ -777,6 +777,8 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
+				case ZEND_POST_INC:
+				case ZEND_POST_DEC:
 					if (!zend_jit_inc_dec(&dasm_state,
 						opline, op_array, ssa, zend_need_inc_op(op_array, opline, b, ssa))) {
 						goto jit_failure;

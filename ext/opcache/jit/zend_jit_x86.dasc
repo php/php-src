@@ -370,6 +370,41 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
+|.macro ZVAL_COPY_VALUE_REG, dst_base, dst_offset, src_reg, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
+||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+||	if (!(src_info & MAY_BE_DOUBLE)) {
+| 		mov tmp_reg2, aword [src_reg]
+| 		mov aword [dst_base + dst_offset], tmp_reg2
+||	} else if ((src_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+|.if X64 or SSE
+|		movsd xmm0, qword [src_reg]
+|		movsd qword [dst_base + dst_offset], xmm0
+|.else
+|		fld qword [src_reg]
+|		fstp qword [dst_base + dst_offset]
+|.endif
+||	} else {
+|.if X64
+|		mov tmp_reg2, aword [src_reg]
+|		mov aword [dst_base + dst_offset], tmp_reg2
+|.else
+|		mov tmp_reg2, dword [src_reg]
+|		mov tmp_reg1, dword [src_reg + 4]
+|		mov dword [dst_base + dst_offset], tmp_reg2
+|		mov dword [dst_base + dst_offset + 4], tmp_reg1
+|.endif
+||	}
+||}
+||if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+||    has_concrete_type(src_info & MAY_BE_ANY)) {
+||	zend_uchar type = concrete_type(src_info);
+|	mov dword [dst_base + dst_offset + 8], type
+||} else {
+|	mov tmp_reg1d, dword [src_reg + 8]
+|	mov dword [dst_base + dst_offset + 8], tmp_reg1d
+||}
+|.endmacro
+
 |.macro ADDREF_CONST, zv, tmp_reg
 |.if X64
 ||		if (!IS_32BIT(Z_LVAL_P(zv))) {
@@ -392,6 +427,16 @@ static void* dasm_labels[zend_lb_MAX];
 |	inc	dword [value_ptr_reg]
 |1:
 ||}
+|.endmacro
+
+|.macro ZVAL_DEREF, reg, info
+||	if (info & MAY_BE_REF) {
+|		cmp byte [reg + 8], IS_REFERENCE
+|		jne >1
+|		mov reg, [reg]
+|		add reg, 8
+|1:
+||	}
 |.endmacro
 
 |.macro INC_OPLINE
@@ -659,11 +704,15 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 {
 	uint32_t op1_info, op1_def_info;
 
-	if (!ssa->ops || !ssa->var_info || opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
+	if (!ssa->ops || !ssa->var_info || opline->op1_type != IS_CV) {
 		goto fallback;
 	}
 	op1_info = OP1_INFO();
 
+	if (op1_info & (MAY_BE_UNDEF|MAY_BE_STRING|MAY_BE_ARRAY)) {
+		// TODO: support for IS_STRING and IS_ARRAY ???
+		goto fallback;
+	}
 	if (!(op1_info & MAY_BE_LONG)) {
 		goto fallback;
 	}
@@ -672,6 +721,10 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 		|	cmp	dword [FP + opline->op1.var + 8], IS_LONG
 		|	jne >2
 	}
+	||	if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC) &&
+	||	    opline->result_type != IS_UNUSED) {
+	|		ZVAL_COPY_VALUE FP, opline->result.var, FP, opline->op1.var, MAY_BE_LONG, r0, eax, r1
+	||	}
 	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 		|	inc aword [FP + opline->op1.var]
 	} else {
@@ -680,6 +733,10 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 	op1_def_info = OP1_DEF_INFO();
 	if (op1_def_info & MAY_BE_DOUBLE) {
 		|	jo >1
+		||	if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+		||	    opline->result_type != IS_UNUSED) {
+		|		ZVAL_COPY_VALUE FP, opline->result.var, FP, opline->op1.var, MAY_BE_LONG, r0, eax, r1
+		||	}
 		|.cold_codes
 		|1:
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
@@ -700,17 +757,43 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 			|.endif
 		}
 		|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
+		||	if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+		||	    opline->result_type != IS_UNUSED) {
+		|		ZVAL_COPY_VALUE FP, opline->result.var, FP, opline->op1.var, MAY_BE_DOUBLE, r0, eax, r1
+		||	}
 		|	jmp >3
 		|.code
+	} else {
+		||	if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+		||	    opline->result_type != IS_UNUSED) {
+		|		ZVAL_COPY_VALUE FP, opline->result.var, FP, opline->op1.var, MAY_BE_LONG, r0, eax, r1
+		||	}
 	}
 	if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
 		|.cold_codes
 		|2:
 		|	lea	FCARG1a, [FP + opline->op1.var]
+		|	// ZVAL_DEREF(var_ptr);
+		|	ZVAL_DEREF FCARG1a, op1_info
+		||	if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC)) {
+		||		if (opline->result_type != IS_UNUSED) {
+		|			ZVAL_COPY_VALUE_REG FP, opline->result.var, FCARG1a, op1_info, r0, eax, r2
+		|			// zval_opt_copy_ctor(var_ptr);
+		|			// ???
+		|			TRY_ADDREF op1_info, ah, r2
+		||		}
+		||	} else {
+		|		// SEPARATE_ZVAL_NOREF(var_ptr);
+		|		// ???
+		||	}
 		||	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 		|		EXT_CALL increment_function, r0
 		||	} else {
 		|		EXT_CALL decrement_function, r0
+		||	}
+		||	if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+		||	    opline->result_type != IS_UNUSED) {
+		|		ZVAL_COPY_VALUE FP, opline->result.var, FP, opline->op1.var, op1_def_info, r0, eax, r1
 		||	}
 		|	jmp >3
 		|.code
