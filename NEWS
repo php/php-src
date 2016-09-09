@@ -1443,6 +1443,8 @@ PHP                                                                        NEWS
 
 - Filter:
   . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
+  . Fixed bug #67167 (Wrong return value from FILTER_VALIDATE_BOOLEAN,
+    FILTER_NULL_ON_FAILURE). (levim)
 
 - FPM:
   . Fixed bug #70538 ("php-fpm -i" crashes). (rainer dot jung at
