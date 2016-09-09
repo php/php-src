@@ -175,6 +175,7 @@ static void ps_files_open(ps_files *data, const char *key)
 		}
 
 		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to create session data file path. Too short session ID, invalid save_path or path lentgth exceeds MAXPATHLEN(%d)", MAXPATHLEN);
 			return;
 		}
 
@@ -199,6 +200,7 @@ static void ps_files_open(ps_files *data, const char *key)
 			if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid())) {
 				close(data->fd);
 				data->fd = -1;
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session data file is not created by your uid");
 				return;
 			}
 #endif

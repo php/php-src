@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
     function). (Laruence)
 
+- Session:
+  . Fixed bug #68015 (Session does not report invalid uid for files save handler).
+    (Yasuo)
+
 - SQLite3:
   . Updated to SQLite3 3.14.1. (cmb)
 
