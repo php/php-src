@@ -109,7 +109,7 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 			if (value->len - len > 4
 				&&  *(value->val+len+1) == '\n'
 				&& (*(value->val+len+2) == ' '  || *(value->val+len+2) == '\t')
-				&& (*(value->val+len+3) >= 32   && *(value->val+len+3) <= 126)) {
+				&& (*(value->val+len+3) > 32   && *(value->val+len+3) < 127)) {
 				len += 4;
 				continue;
 			}
