@@ -229,7 +229,7 @@ $ini_overwrites = array(
 
 $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
-function write_information($show_html)
+function write_information()
 {
 	global $cwd, $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
 
@@ -269,7 +269,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	@unlink($info_file);
 
 	// load list of enabled extensions
-	save_text($info_file, '<?php echo str_replace("Zend OPcache", "opcache", join(",", get_loaded_extensions())); ?>');
+	save_text($info_file, '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>');
 	$exts_to_test = explode(',',`$php $pass_options $info_params $no_file_cache "$info_file"`);
 	// check for extensions that need special handling and regenerate
 	$info_params_ex = array(
@@ -311,7 +311,7 @@ define('TRAVIS_CI' , (bool) getenv('TRAVIS'));
 function save_or_mail_results()
 {
 	global $sum_results, $just_save_results, $failed_test_summary,
-		   $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file, $compression;
+		   $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file;
 
 	/* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
 	if (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
@@ -422,7 +422,7 @@ function save_or_mail_results()
 			$failed_tests_data .= $sep . "PHPINFO" . $sep;
 			$failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
 
-			if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status) && !TRAVIS_CI) {
+			if (($just_save_results || !mail_qa_team($failed_tests_data, $status)) && !TRAVIS_CI) {
 				file_put_contents($output_file, $failed_tests_data);
 
 				if (!$just_save_results) {
@@ -450,12 +450,7 @@ $failed_tests_file= false;
 $pass_option_n = false;
 $pass_options = '';
 
-$compression = 0;
 $output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
-
-if ($compression && in_array("compress.zlib", stream_get_filters())) {
-	$output_file = 'compress.zlib://' . $output_file . '.gz';
-}
 
 $just_save_results = false;
 $leak_check = false;
@@ -481,7 +476,7 @@ foreach($cfgtypes as $type) {
 
 if (getenv('TEST_PHP_ARGS')) {
 
-	if (!isset($argc) || !$argc || !isset($argv)) {
+	if (!isset($argc, $argv) || !$argc) {
 		$argv = array(__FILE__);
 	}
 
@@ -789,7 +784,7 @@ HELP;
 	if ($test_cnt) {
 		putenv('NO_INTERACTION=1');
 		verify_config();
-		write_information($html_output);
+		write_information();
 		usort($test_files, "test_sort");
 		$start_time = time();
 
@@ -837,7 +832,7 @@ HELP;
 }
 
 verify_config();
-write_information($html_output);
+write_information();
 
 // Compile a list of all test files (*.phpt).
 $test_files = array();
@@ -869,7 +864,7 @@ foreach ($user_tests as $dir) {
 
 function find_files($dir, $is_ext_dir = false, $ignore = false)
 {
-	global $test_files, $exts_to_test, $ignored_by_ext, $exts_skipped, $exts_tested;
+	global $test_files, $exts_to_test, $ignored_by_ext, $exts_skipped;
 
 	$o = opendir($dir) or error("cannot open directory: $dir");
 
@@ -973,7 +968,7 @@ exit(0);
 // Send Email to QA Team
 //
 
-function mail_qa_team($data, $compression, $status = false)
+function mail_qa_team($data, $status = false)
 {
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 
@@ -1125,13 +1120,13 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		$data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
 	}
 
-	$code = proc_close($proc);
+	proc_close($proc);
 	return $data;
 }
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx;
+	global $test_results, $failed_tests_file, $php, $test_idx;
 
 	foreach($test_files as $name) {
 
@@ -1182,12 +1177,11 @@ function show_file_block($file, $block, $section = null)
 //
 function run_test($php, $file, $env)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
+	global $log_format, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
 	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
 	global $valgrind_version;
-	global $JUNIT;
 	global $SHOW_ONLY_GROUPS;
 	global $no_file_cache;
 	$temp_filenames = null;
@@ -1296,7 +1290,7 @@ TEST $file
 				unset($section_text['FILEEOF']);
 			}
 
-			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {            
+			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {
 				$key = $prefix . '_EXTERNAL';
 
 				if (@count($section_text[$key]) == 1) {
@@ -1507,7 +1501,7 @@ TEST $file
 	if (array_key_exists('EXTENSIONS', $section_text)) {
 		$ext_dir=`$php -r 'echo ini_get("extension_dir");'`;
 		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-		$loaded = explode(",", `$php -n -r 'echo join(",", get_loaded_extensions());'`);
+		$loaded = explode(",", `$php -n -r 'echo implode(",", get_loaded_extensions());'`);
 		foreach ($extensions as $req_ext) {
 			if (!in_array($req_ext, $loaded)) {
 				if ($req_ext == 'opcache') {
@@ -1572,10 +1566,6 @@ TEST $file
 					show_result('SKIP', $tested, $tested_file, '', $temp_filenames);
 				}
 
-				if (isset($old_php)) {
-					$php = $old_php;
-				}
-
 				if (!$cfg['keep']['skip']) {
 					@unlink($test_skipif);
 				}
@@ -1599,9 +1589,9 @@ TEST $file
 			}
 		}
 	}
-	
+
 	if (!extension_loaded("zlib")
-	&& (	array_key_exists("GZIP_POST", $section_text) 
+	&& (	array_key_exists("GZIP_POST", $section_text)
 		||	array_key_exists("DEFLATE_POST", $section_text))
 	) {
 		$message = "ext/zlib required";
@@ -1915,12 +1905,11 @@ COMMAND $cmd
 	$output = preg_replace("/\r\n/", "\n", trim($out));
 
 	/* when using CGI, strip the headers from the output */
-	$headers = "";
+	$headers = array();
 
 	if (!empty($uses_cgi) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
 		$output = trim($match[2]);
 		$rh = preg_split("/[\n\r]+/", $match[1]);
-		$headers = array();
 
 		foreach ($rh as $line) {
 			if (strpos($line, ':') !== false) {
@@ -1945,26 +1934,23 @@ COMMAND $cmd
 			}
 		}
 
-		$org_headers = $headers;
-		$headers = array();
 		$output_headers = array();
 
 		foreach($want as $k => $v) {
 
-			if (isset($org_headers[$k])) {
-				$headers = $org_headers[$k];
-				$output_headers[] = $k . ': ' . $org_headers[$k];
+			if (isset($headers[$k])) {
+				$output_headers[] = $k . ': ' . $headers[$k];
 			}
 
-			if (!isset($org_headers[$k]) || $org_headers[$k] != $v) {
+			if (!isset($headers[$k]) || $headers[$k] != $v) {
 				$failed_headers = true;
 			}
 		}
 
 		ksort($wanted_headers);
-		$wanted_headers = join("\n", $wanted_headers);
+		$wanted_headers = implode("\n", $wanted_headers);
 		ksort($output_headers);
-		$output_headers = join("\n", $output_headers);
+		$output_headers = implode("\n", $output_headers);
 	}
 
 	show_file_block('out', $output);
@@ -2054,9 +2040,6 @@ COMMAND $cmd
 			if (!$cfg['keep']['php']) {
 				@unlink($test_file);
 			}
-			if (isset($old_php)) {
-				$php = $old_php;
-			}
 
 			if (!$leaked && !$failed_headers) {
 				if (isset($section_text['XFAIL'] )) {
@@ -2082,10 +2065,6 @@ COMMAND $cmd
 
 			if (!$cfg['keep']['php']) {
 				@unlink($test_file);
-			}
-
-			if (isset($old_php)) {
-				$php = $old_php;
 			}
 
 			if (!$leaked && !$failed_headers) {
@@ -2187,10 +2166,6 @@ $output
 		);
 	}
 
-	if (isset($old_php)) {
-		$php = $old_php;
-	}
-	
 	$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
 	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
@@ -2251,8 +2226,8 @@ function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2, $
 
 function generate_array_diff($ar1, $ar2, $is_reg, $w)
 {
-	$idx1 = 0; $ofs1 = 0; $cnt1 = @count($ar1);
-	$idx2 = 0; $ofs2 = 0; $cnt2 = @count($ar2);
+	$idx1 = 0; $cnt1 = @count($ar1);
+	$idx2 = 0; $cnt2 = @count($ar2);
 	$diff = array();
 	$old1 = array();
 	$old2 = array();
@@ -2270,10 +2245,8 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w)
 
 			if ($c1 > $c2) {
 				$old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
-				$last = 1;
 			} else if ($c2 > 0) {
 				$old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
-				$last = 2;
 			} else {
 				$old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
 				$old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];

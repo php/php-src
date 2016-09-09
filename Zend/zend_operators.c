@@ -411,19 +411,6 @@ try_again:
 
 ZEND_API void ZEND_FASTCALL convert_to_null(zval *op) /* {{{ */
 {
-	if (Z_TYPE_P(op) == IS_OBJECT) {
-		if (Z_OBJ_HT_P(op)->cast_object) {
-			zval org;
-
-			ZVAL_COPY_VALUE(&org, op);
-			if (Z_OBJ_HT_P(op)->cast_object(&org, op, IS_NULL) == SUCCESS) {
-				zval_dtor(&org);
-				return;
-			}
-			ZVAL_COPY_VALUE(op, &org);
-		}
-	}
-
 	zval_ptr_dtor(op);
 	ZVAL_NULL(op);
 }

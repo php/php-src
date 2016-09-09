@@ -39,10 +39,6 @@
 #include "zend_strtod.h"
 #include "zend_multiply.h"
 
-#if 0&&HAVE_BCMATH
-#include "ext/bcmath/libbcmath/src/bcmath.h"
-#endif
-
 #define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
 
 BEGIN_EXTERN_C()

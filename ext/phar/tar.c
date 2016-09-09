@@ -959,6 +959,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	entry.tar_type = '0';
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
+	entry.fp = NULL;
+	entry.filename = NULL;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -977,6 +979,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
+			efree(entry.filename);
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return -1;
 		}
@@ -984,6 +987,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
 
@@ -993,6 +998,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
 	} else {
@@ -1007,6 +1014,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval *)user_stub))) {
 				if (error) {
 					spprintf(error, 0, "unable to access resource to copy stub to new tar-based phar \"%s\"", phar->fname);
+				}
+				if (entry.fp) {
+					php_stream_close(entry.fp);
+				}
+				if (entry.filename) {
+					efree(entry.filename);
 				}
 				return EOF;
 			}
@@ -1035,6 +1048,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 				if (error) {
 					spprintf(error, 0, "unable to read resource to copy stub to new tar-based phar \"%s\"", phar->fname);
 				}
+				if (entry.fp) {
+					php_stream_close(entry.fp);
+				}
+				if (entry.filename) {
+					efree(entry.filename);
+				}
 				return EOF;
 			}
 			free_user_stub = 1;
@@ -1050,6 +1069,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			}
 			if (free_user_stub) {
 				efree(user_stub);
+			}
+			if (entry.fp) {
+				php_stream_close(entry.fp);
+			}
+			if (entry.filename) {
+				efree(entry.filename);
 			}
 			return EOF;
 		}

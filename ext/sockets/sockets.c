@@ -2516,36 +2516,38 @@ PHP_FUNCTION(socket_export_stream)
    Gets array with contents of getaddrinfo about the given hostname. */
 PHP_FUNCTION(socket_addrinfo_lookup)
 {
+	char *service = NULL;
+	size_t service_len;
 	zend_string *hostname, *key;
-	zval *hint, *service, *zhints = NULL;
+	zval *hint, *zhints = NULL;
 
 	struct addrinfo hints, *result, *rp, *res;
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|za", &hostname, &service, &zhints) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|sa", &hostname, &service, &service_len, &zhints) == FAILURE) {
 		RETURN_NULL();
 	}
 
 	if (zhints) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
-				if (strcmp(ZSTR_VAL(key), "ai_flags") == 0) {
-					hints.ai_flags = Z_LVAL_P(hint);
-				} else if (strcmp(ZSTR_VAL(key), "ai_socktype") == 0) {
-					hints.ai_socktype = Z_LVAL_P(hint);
-				} else if (strcmp(ZSTR_VAL(key), "ai_protocol") == 0) {
-					hints.ai_protocol = Z_LVAL_P(hint);
-				} else if (strcmp(ZSTR_VAL(key), "ai_family") == 0) {
-					hints.ai_family = Z_LVAL_P(hint);
+				if (zend_string_equals_literal(key, "ai_flags")) {
+					hints.ai_flags = zval_get_long(hint);
+				} else if (zend_string_equals_literal(key, "ai_socktype")) {
+					hints.ai_socktype = zval_get_long(hint);
+				} else if (zend_string_equals_literal(key, "ai_protocol")) {
+					hints.ai_protocol = zval_get_long(hint);
+				} else if (zend_string_equals_literal(key, "ai_family")) {
+					hints.ai_family = zval_get_long(hint);
+				} else {
+					php_error_docref(NULL, E_NOTICE, "Unknown hint %s", ZSTR_VAL(key));
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	convert_to_string(service);
-
-	if (getaddrinfo(ZSTR_VAL(hostname), Z_STRVAL_P(service), &hints, &result) != 0) {
+	if (getaddrinfo(ZSTR_VAL(hostname), service, &hints, &result) != 0) {
 		RETURN_FALSE;
 	}
 
@@ -2578,18 +2580,17 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	zval			*arg1;
 	int				retval;
 	struct addrinfo	*ai;
-	php_socket		*php_sock = php_create_socket();
+	php_socket		*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		efree(php_sock);
 		return;
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
-		efree(php_sock);
 		RETURN_FALSE;
 	}
 
+	php_sock = php_create_socket();
 	php_sock->bsd_socket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	php_sock->type = ai->ai_family;
 
@@ -2607,7 +2608,9 @@ PHP_FUNCTION(socket_addrinfo_bind)
 		case AF_UNIX:
 			{
 				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				break;
+				close(php_sock->bsd_socket);
+				efree(php_sock);
+				RETURN_FALSE;
 			}
 
 		case AF_INET:
@@ -2620,12 +2623,14 @@ PHP_FUNCTION(socket_addrinfo_bind)
 			}
 		default:
 			php_error_docref(NULL, E_WARNING, "unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
+			close(php_sock->bsd_socket);
 			efree(php_sock);
 			RETURN_FALSE;
 	}
 
 	if (retval != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to bind address", errno);
+		close(php_sock->bsd_socket);
 		efree(php_sock);
 		RETURN_FALSE;
 	}
@@ -2641,18 +2646,17 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	zval			*arg1;
 	int				retval;
 	struct addrinfo	*ai;
-	php_socket		*php_sock = php_create_socket();
+	php_socket		*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		efree(php_sock);
 		return;
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
-		efree(php_sock);
 		RETURN_FALSE;
 	}
 
+	php_sock = php_create_socket();
 	php_sock->bsd_socket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	php_sock->type = ai->ai_family;
 
@@ -2670,7 +2674,9 @@ PHP_FUNCTION(socket_addrinfo_connect)
 		case AF_UNIX:
 			{
 				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				break;
+				close(php_sock->bsd_socket);
+				efree(php_sock);
+				RETURN_FALSE;
 			}
 
 		case AF_INET:
@@ -2683,12 +2689,14 @@ PHP_FUNCTION(socket_addrinfo_connect)
 			}
 		default:
 			php_error_docref(NULL, E_WARNING, "unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
+			close(php_sock->bsd_socket);
 			efree(php_sock);
 			RETURN_FALSE;
 	}
 
 	if (retval != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to connect address", errno);
+		close(php_sock->bsd_socket);
 		efree(php_sock);
 		RETURN_FALSE;
 	}

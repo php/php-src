@@ -1015,6 +1015,7 @@ static int add_zendext_info(zend_extension *ext) /* {{{ */ {
 }
 /* }}} */
 
+#ifdef HAVE_LIBDL
 PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **name) /* {{{ */ {
 	DL_HANDLE handle;
 	char *extension_dir;
@@ -1155,6 +1156,7 @@ quit:
 	return NULL;
 }
 /* }}} */
+#endif
 
 PHPDBG_COMMAND(dl) /* {{{ */
 {
