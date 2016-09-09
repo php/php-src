@@ -56,6 +56,7 @@ static void *dasm_end = NULL;
 static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 
 #include "dynasm/dasm_x86.h"
+#include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_x86.c"
 #include "jit/zend_jit_disasm_x86.c"
 #include "jit/zend_jit_gdb.c"
@@ -805,11 +806,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
-//				case ZEND_INIT_FCALL:
-//					if (!zend_jit_init_fcall(&dasm_state, opline, op_array)) {
-//						goto jit_failure;
-//					}
-//					break;
+				case ZEND_INIT_FCALL:
+					if (!zend_jit_init_fcall(&dasm_state, opline, op_array)) {
+						goto jit_failure;
+					}
+					break;
 				case ZEND_SEND_VAL:
 					if (!zend_jit_send_val(&dasm_state,
 						opline, op_array, ssa, zend_need_inc_op(op_array, opline, b, ssa))) {

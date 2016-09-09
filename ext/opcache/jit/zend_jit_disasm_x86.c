@@ -368,6 +368,8 @@ static int zend_jit_disasm_init(void)
 	REGISTER_EG(exception_op);
 	REGISTER_EG(timed_out);
 	REGISTER_EG(current_execute_data);
+	REGISTER_EG(vm_stack_top);
+	REGISTER_EG(vm_stack_end);
 #undef  REGISTER_EG
 #define REGISTER_CG(n)  \
 	zend_jit_disasm_add_symbol("CG("#n")", \
@@ -375,6 +377,14 @@ static int zend_jit_disasm_init(void)
 	REGISTER_CG(known_strings);
 #undef  REGISTER_CG
 #endif
+
+    /* Register JIT helper functions */
+#define REGISTER_HELPER(n)  \
+	zend_jit_disasm_add_symbol(#n, \
+		(uint64_t)(uintptr_t)n, sizeof(void*));
+	REGISTER_HELPER(zend_jit_find_func_helper);
+	REGISTER_HELPER(zend_jit_extend_stack_helper);
+#undef  REGISTER_HELPER
 
 	zend_elf_load_symbols();
 

@@ -1127,7 +1127,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_push_stack_frame(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_function *func)
+static int zend_jit_push_call_frame(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_function *func)
 {
 	if (!func) {
 		assert(0);
@@ -1136,21 +1136,35 @@ static int zend_jit_push_stack_frame(dasm_State **Dst, zend_op *opline, zend_op_
 	uint32_t used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
 
 	|	// if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
-	|	LOAD_ADDR r1, EG(vm_stack_top)
-	|	LOAD_ADDR r2, EG(vm_stack_end)
+	|	mov r1, aword [&EG(vm_stack_top)]
+	|	mov r2, aword [&EG(vm_stack_end)]
 	|	sub r2,r1
 	|	cmp r2, used_stack
-	|	jz >1 // TODO proper condition
-		// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
-	|	// ???
+	|	jb >2
+	|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+	|	add aword [&EG(vm_stack_top)], used_stack
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
-	|	//???
-	|.cold_codes
+	|	// call->func = func;
+	|	mov aword EX:r1->func, r0
+	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
+	|	mov dword EX:r1->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
 	|1:
-	|	//???
-	|	jmp >2
-	|.code
+	|	// Z_CE(call->This) = called_scope;
+	|.if X64
+	|	mov64 dword EX:r1->This.value.ptr, 0
+	|.else
+	|	mov dword EX:r1->This.value.ptr, 0
+	|.endif
+	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
+	|	mov dword EX:r1->This.u2.num_args, opline->extended_value
+	|.cold_codes
 	|2:
+	|	mov FCARG1d, used_stack
+	|	mov FCARG2a, r0
+	|	EXT_CALL zend_jit_extend_stack_helper, r0
+	|	mov r1, r0
+	|	jmp <1
+	|.code
 
 	return 1;
 }
@@ -1185,39 +1199,30 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 		|	jz >1
 		|.cold_codes
 		|1:
-		|	// if ((func = zend_hash_find(EG(function_table), Z_STR_P(fname))) == NULL) {
-		|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
-		|	EXT_CALL zend_hash_find, r0
-		|	test r0, r0
-		|	jz >2
-		|	mov r0, aword [r0]
-		|	jmp >3
-		|2:
 		|	// SAVE_OPLINE();
 		|	mov EX->opline, IP
-		|	// zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(fname));
-		|.if X64
-		|	xor CARG1, CARG1
-		|	LOAD_ADDR CARG2, "Call to undefined function %s()"
-		|	LOAD_ADDR CARG3, Z_STRVAL_P(zv)
-		|.else
-		|	push 0
-		|	push "Call to undefined function %s()"
-		|	push Z_STRVAL_P(zv)
-		|.endif
-		|	EXT_CALL zend_throw_error, r0
-		|	jmp ->exception_handler
+		|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
+		|	EXT_CALL zend_jit_find_func_helper, r0
+		|	// This opcode must not throw exception ???
+		|		// test r0, r0
+		|		// jz ->exception_handler */
+		|	// CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
+		|	mov r1,	EX->run_time_cache
+		|	mov aword [r1 + Z_CACHE_SLOT_P(zv)], r0
+		|	jmp >3
 		|.code
 		|3:
 	}
-	if (!zend_jit_push_stack_frame(Dst, opline, op_array, func)) {
+	if (!zend_jit_push_call_frame(Dst, opline, op_array, func)) {
 		return 0;
 	}
 	|	// call->prev_execute_data = EX(call);
-	|	mov	r1, EX->call
-	|	mov EX:r0->prev_execute_data, r1
+	|	// TODO: optimize for first call level ???
+	|	mov	r0, EX->call
+	|	mov EX:r1->prev_execute_data, r0
 	|	// EX(call) = call;
-	|	mov EX->call, r0
+	|	mov EX->call, r1
+	|	INC_OPLINE
 
 	return 1;
 }
