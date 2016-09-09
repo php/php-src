@@ -1230,7 +1230,6 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 			func = call_info->callee_func;
 		}
 	}
-	|	SAVE_IP
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
 		|	LOAD_ADDR r0, func
 	} else if (func && op_array == &func->op_array) {
@@ -1239,7 +1238,8 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 	} else {
 		zval *zv = RT_CONSTANT(op_array, opline->op2);
 
-		|	// if (CACHED_PTR(Z_CACHE_SLOT_P(fname))) {
+		|	SAVE_IP
+		|	// if (CACHED_PTR(Z_CACHE_SLOT_P(fname)))
 		|	mov r0,	EX->run_time_cache
 		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
 		|	test r0, r0
@@ -1264,14 +1264,14 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 		return 0;
 	}
 	|	// call->prev_execute_data = EX(call);
-	||	if (call_level == 1) {
-	|		mov aword EX:r1->prev_execute_data, 0
-	||	} else {
-	|		mov r0, EX->call
-	|		mov EX:r1->prev_execute_data, r0
-	||	}
-	|	// EX(call) = call;
-	|	mov EX->call, r1
+	if (call_level == 1) {
+		|	mov aword EX:r1->prev_execute_data, 0
+	} else {
+		|	mov r0, EX->call
+		|	mov EX:r1->prev_execute_data, r0
+	}
+		|	// EX(call) = call;
+		|	mov EX->call, r1
 	if (inc_op) {
 		|	INC_IP
 	} else {
