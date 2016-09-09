@@ -694,6 +694,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 	zend_op *opline;
 	dasm_State* dasm_state = NULL;
 	void *handler;
+	int call_level = 0;
 
 	/* mark hidden branch targets */
 	for (b = 0; b < ssa->cfg.blocks_count; b++) {
@@ -775,6 +776,17 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 		for (i = ssa->cfg.blocks[b].start; i <= end; i++) {
 			opline = op_array->opcodes + i;
 			switch (opline->opcode) {
+				case ZEND_INIT_FCALL:
+				case ZEND_INIT_FCALL_BY_NAME:
+				case ZEND_INIT_NS_FCALL_BY_NAME:
+				case ZEND_INIT_METHOD_CALL:
+				case ZEND_INIT_DYNAMIC_CALL:
+				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_USER_CALL:
+				case ZEND_NEW:
+					call_level++;
+			}
+			switch (opline->opcode) {
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
@@ -807,7 +819,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					}
 					break;
 				case ZEND_INIT_FCALL:
-					if (!zend_jit_init_fcall(&dasm_state, opline, op_array)) {
+					if (!zend_jit_init_fcall(&dasm_state, opline, op_array, call_level)) {
 						goto jit_failure;
 					}
 					break;
@@ -978,6 +990,13 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 						goto jit_failure;
 					}
+			}
+			switch (opline->opcode) {
+				case ZEND_DO_FCALL:
+				case ZEND_DO_ICALL:
+				case ZEND_DO_UCALL:
+				case ZEND_DO_FCALL_BY_NAME:
+					call_level--;
 			}
 		}
 	}

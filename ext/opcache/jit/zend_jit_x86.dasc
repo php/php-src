@@ -1150,11 +1150,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, zend_op *opline, zend_op_a
 	|	mov dword EX:r1->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
 	|1:
 	|	// Z_CE(call->This) = called_scope;
-	|.if X64
-	|	mov64 dword EX:r1->This.value.ptr, 0
-	|.else
-	|	mov dword EX:r1->This.value.ptr, 0
-	|.endif
+	|	mov aword EX:r1->This.value.ptr, 0
 	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
 	|	mov dword EX:r1->This.u2.num_args, opline->extended_value
 	|.cold_codes
@@ -1169,7 +1165,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, zend_op *opline, zend_op_a
 	return 1;
 }
 
-static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *op_array)
+static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, int call_level)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_function *func = NULL;
@@ -1217,9 +1213,12 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 		return 0;
 	}
 	|	// call->prev_execute_data = EX(call);
-	|	// TODO: optimize for first call level ???
-	|	mov	r0, EX->call
-	|	mov EX:r1->prev_execute_data, r0
+	||	if (call_level == 1) {
+	|		mov aword EX:r1->prev_execute_data, 0
+	||	} else {
+	|		mov r0, EX->call
+	|		mov EX:r1->prev_execute_data, r0
+	||	}
 	|	// EX(call) = call;
 	|	mov EX->call, r1
 	|	INC_OPLINE
