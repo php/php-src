@@ -876,7 +876,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 							skip++;
 						}
 						if (!zend_jit_skip_handler(&dasm_state,
-							skip, zend_need_inc_op(op_array, opline + skip, b, ssa))) {
+							skip, zend_need_inc_op(op_array, opline + skip - 1, b, ssa))) {
 							goto jit_failure;
 						}
 					}
