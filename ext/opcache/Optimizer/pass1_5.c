@@ -109,7 +109,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
 				opline->extended_value != IS_ARRAY &&
 				opline->extended_value != IS_OBJECT &&
-				opline->extended_value != IS_RESOURCE) {
+				opline->extended_value != IS_RESOURCE &&
+				(opline->extended_value != IS_STRING
+					|| Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_ARRAY)) {
 				/* cast of constant operand */
 				zend_uchar type = opline->result_type;
 				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
