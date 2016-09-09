@@ -684,7 +684,7 @@ static int zend_jit_call(dasm_State **Dst, zend_op *opline)
 #endif
 }
 
-static int zend_jit_new(dasm_State **Dst, zend_op *opline, uint32_t *opnum, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_new(dasm_State **Dst, zend_op *opline, int *opnum, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	if (!zend_jit_handler(Dst, opline, 1)) {
 		return 0;
