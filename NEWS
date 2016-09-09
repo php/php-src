@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     FILTER_FLAG_NO_PRIV_RANGE). (julien)
   . Fixed bug #67167 (Wrong return value from FILTER_VALIDATE_BOOLEAN,
     FILTER_NULL_ON_FAILURE). (levim, cmb)
+  . Fixed bug #73054 (default option ignored when object passed to int filter).
+    (cmb)
 
 - GD:
   . Fixed bug #67325 (imagetruecolortopalette: white is duplicated in palette).
