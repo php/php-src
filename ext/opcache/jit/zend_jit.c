@@ -819,7 +819,8 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					}
 					break;
 				case ZEND_INIT_FCALL:
-					if (!zend_jit_init_fcall(&dasm_state, opline, op_array, call_level)) {
+					if (!zend_jit_init_fcall(&dasm_state,
+						opline, op_array, call_level, zend_need_inc_op(op_array, opline, b, ssa))) {
 						goto jit_failure;
 					}
 					break;
@@ -840,7 +841,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_IS_SMALLER:
 				case ZEND_IS_SMALLER_OR_EQUAL:
 					if (!zend_jit_cmp(&dasm_state,
-						opline, b, &i, op_array, ssa, zend_need_inc_op(op_array, opline, b, ssa))) {
+						opline, b, &i, op_array, ssa, zend_need_inc_op(op_array, opline + 1, b, ssa))) {
 						goto jit_failure;
 					}
 					break;

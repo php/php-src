@@ -524,6 +524,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//} else if (zend_interrupt_function) {
 	if (zend_interrupt_function) {
 		|	//SAVE_OPLINE();
+		|	SAVE_IP
 		|	mov EX->opline, IP
 		|	//zend_interrupt_function(execute_data);
 		|.if X64
@@ -932,7 +933,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					| jge => target_label
 					break;
 			}
-			if (inc_op) {
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
 				|	INC_IP
 				|	INC_IP
 			} else {
@@ -957,7 +958,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					| jle => target_label
 					break;
 			}
-			if (inc_op) {
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
 				|	INC_IP
 				|	INC_IP
 			} else {
@@ -1022,7 +1023,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					| jae => target_label
 					break;
 			}
-			if (inc_op) {
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
 				|	INC_IP
 				|	INC_IP
 			} else {
@@ -1051,9 +1052,11 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					| jnae => target_label
 					break;
 			}
-			if (inc_op) {
+			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
 				|	INC_IP
 				|	INC_IP
+			} else {
+				|	RESET_IP
 			}
 		} else {
 			switch (opline->opcode) {
@@ -1212,7 +1215,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, zend_op *opline, zend_op_a
 	return 1;
 }
 
-static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, int call_level)
+static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, int call_level, int inc_op)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_function *func = NULL;
@@ -1243,6 +1246,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 		|.cold_codes
 		|1:
 		|	// SAVE_OPLINE();
+		|	SAVE_IP
 		|	mov EX->opline, IP
 		|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
 		|	EXT_CALL zend_jit_find_func_helper, r0
@@ -1268,7 +1272,11 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 	||	}
 	|	// EX(call) = call;
 	|	mov EX->call, r1
-	|	INC_IP
+	if (inc_op) {
+		|	INC_IP
+	} else {
+		|	RESET_IP
+	}
 
 	return 1;
 }
