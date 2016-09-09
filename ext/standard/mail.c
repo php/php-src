@@ -103,6 +103,7 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 	size_t len = 0;
 	zend_string *value = Z_STR_P(val);
 
+	/* https://tools.ietf.org/html/rfc2822#section-2.2.1 */
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.3 */
 	while (len < value->len) {
 		if (*(value->val+len) == '\r') {
@@ -115,7 +116,7 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 			}
 			return FAILURE;
 		}
-		if (*(value->val+len) < 33 || *(value->val+len) > 126) {
+		if (*(value->val+len) == '\0') {
 			return FAILURE;
 		}
 		len++;
