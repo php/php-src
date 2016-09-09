@@ -107,11 +107,10 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.3 */
 	while (len < value->len) {
 		if (*(value->val+len) == '\r') {
-			if (value->len - len > 4
+			if (value->len - len >= 3
 				&&  *(value->val+len+1) == '\n'
-				&& (*(value->val+len+2) == ' '  || *(value->val+len+2) == '\t')
-				&& (*(value->val+len+3) > 32   && *(value->val+len+3) < 127)) {
-				len += 4;
+				&& (*(value->val+len+2) == ' '  || *(value->val+len+2) == '\t')) {
+				len += 3;
 				continue;
 			}
 			return FAILURE;

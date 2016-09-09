@@ -132,9 +132,6 @@ unlink($outFile);
 
 ************* TEST ******************
 -- All Mail Content Parameters --
-
-Warning: mail(): Header field value (foo => bar
-	 fuga) contains invalid chars or format in %s on line 32
 bool(true)
 To: user@example.com
 Subject: Test Subject
@@ -142,6 +139,8 @@ KHeaders: aaaa
 bcc: foo@bar
 foo: bar
  hoge
+foo: bar
+	 fuga
 
 A Message
 
