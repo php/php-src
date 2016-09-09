@@ -655,7 +655,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline, uint32_t *opnum, zend
 
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 
-static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info, op1_def_info;
 
@@ -716,7 +716,9 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 		|.code
 	}
 	|3:
-	|	INC_OPLINE
+	if (inc_op) {
+		|	INC_OPLINE
+	}
 	return 1;
 
 fallback:
@@ -724,7 +726,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info, op2_info, res_info;
 
@@ -773,7 +775,9 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
     } else {
 		goto fallback;
     }
-	|	INC_OPLINE
+	if (inc_op) {
+		|	INC_OPLINE
+	}
 
 	return 1;
 
@@ -782,7 +786,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info, op2_info;
 	unsigned int target_label;
@@ -816,7 +820,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					| jge => target_label
 					break;
 			}
-			if (!(ssa->cfg.blocks[ssa->cfg.blocks[b].successors[1]].flags & ZEND_BB_TARGET)) {
+			if (inc_op) {
 				|	add IP, sizeof(zend_op) * 2
 			}
 		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
@@ -860,7 +864,9 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					break;
 			}
 			|	mov dword [FP + opline->result.var + 8], eax
-			| INC_OPLINE
+			if (inc_op) {
+				| INC_OPLINE
+			}
 		}
 	} else if (((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) &&
 	    ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE)) {
@@ -953,7 +959,9 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 					break;
 			}
 			|	mov dword [FP + opline->result.var + 8], eax
-			| INC_OPLINE
+			if (inc_op) {
+				| INC_OPLINE
+			}
 		}
     } else {
 		goto fallback;
@@ -966,7 +974,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info)
+static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info, int inc_op)
 {
 	if (val_info & (MAY_BE_UNDEF|MAY_BE_REF)) {
 		/* TODO: Support for references ??? */
@@ -977,7 +985,9 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 		||	if (Z_REFCOUNTED_P(zv)) {
 		|		ADDREF_CONST zv, r0
 		||	}
-		|	INC_OPLINE
+		if (inc_op) {
+			|	INC_OPLINE
+		}
 		return 1;
 	}
 
@@ -985,7 +995,9 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 	||	if (val_type == IS_CV) {
 	|		TRY_ADDREF val_info, ah, r1
 	||	}
-	|	INC_OPLINE
+	if (inc_op) {
+		|	INC_OPLINE
+	}
 
 	return 1;
 
@@ -994,7 +1006,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info;
 
@@ -1004,14 +1016,14 @@ static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *
 
 	op1_info = OP1_INFO();
 
-	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info);
+	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info, inc_op);
 
 fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info, op2_info;
 
@@ -1024,7 +1036,7 @@ static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 	op2_info = OP2_INFO();
 
 	if (!(op1_info & (MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_REF))) {
-		return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info);
+		return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info, inc_op);
 	}
 
 fallback:
@@ -1127,7 +1139,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 	return 1;
 }
 
-static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info;
 
@@ -1139,7 +1151,9 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 		||	if (Z_REFCOUNTED_P(zv)) {
 		|		ADDREF_CONST zv, r1
 		||	}
-		|	INC_OPLINE
+		if (inc_op) {
+			|	INC_OPLINE
+		}
 		return 1;
 	}
 
@@ -1150,7 +1164,9 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	op1_info = OP1_INFO();
 	|	mov r0, EX->call
 	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2
-	|	INC_OPLINE
+	if (inc_op) {
+		|	INC_OPLINE
+	}
 	return 1;
 
 fallback:
@@ -1158,7 +1174,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info;
 	if (!ssa->ops || !ssa->var_info) {
@@ -1177,7 +1193,9 @@ static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	||	if (opline->op1_type == IS_CV) {
 	|		TRY_ADDREF op1_info, ch, r2
 	||	}
-	|	INC_OPLINE
+	if (inc_op) {
+		|	INC_OPLINE
+	}
 	return 1;
 
 fallback:
@@ -1185,7 +1203,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
 {
 	uint32_t op1_info;
 	unsigned int target_label;
@@ -1213,7 +1231,9 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 			| 	jmp =>target_label
 		} else {
 			|	mov dword [FP + opline->result.var + 8], IS_TRUE
-			|	INC_OPLINE
+			if (inc_op) {
+				|	INC_OPLINE
+			}
 		}
     } else if (!(op1_info & (1<<type))) {
 		if ((opline+1)->opcode == ZEND_JMPZ &&
@@ -1231,7 +1251,9 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 			}
 		} else {
 			|	mov dword [FP + opline->result.var + 8], IS_FALSE
-			|	INC_OPLINE
+			if (inc_op) {
+				|	INC_OPLINE
+			}
 		}
 	} else {
 		goto fallback;
