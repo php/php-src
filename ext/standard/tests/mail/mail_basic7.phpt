@@ -10,7 +10,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
+/* Prototype  : int mail(string to, string subject, string message [, mixed additional_headers [, string additional_parameters]])
  * Description: Send an email message
  * Source code: ext/standard/mail.c
  * Alias to functions:
@@ -44,12 +44,6 @@ var_dump( mail($to, $subject, $message, $additional_headers) );
 echo file_get_contents($outFile);
 unlink($outFile);
 
-echo "\n-- Mandatory Parameters --\n";
-// Calling mail() with mandatory arguments
-var_dump( mail($to, $subject, $message) );
-echo file_get_contents($outFile);
-unlink($outFile);
-
 
 echo "\n\n************* TEST ******************\n";
 // Should fail all
@@ -74,12 +68,6 @@ $outFile = "mailBasic.out";
 echo "-- All Mail Content Parameters --\n";
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );
-echo file_get_contents($outFile);
-unlink($outFile);
-
-echo "\n-- Mandatory Parameters --\n";
-// Calling mail() with mandatory arguments
-var_dump( mail($to, $subject, $message) );
 echo file_get_contents($outFile);
 unlink($outFile);
 
@@ -108,9 +96,31 @@ var_dump( mail($to, $subject, $message, $additional_headers) );
 echo file_get_contents($outFile);
 unlink($outFile);
 
-echo "\n-- Mandatory Parameters --\n";
-// Calling mail() with mandatory arguments
-var_dump( mail($to, $subject, $message) );
+
+echo "\n\n************* TEST ******************\n";
+// Should fail most
+// Initialise all required variables
+$to = 'user@example.com';
+$subject = 'Test Subject';
+$message = 'A Message';
+$additional_headers = array(
+	'*:foo1' => array('bar1'),
+	'foo2:::' => array('bar1'),
+	'foo3()' => array('bar1'),
+	'foo4@' => array('bar1'),
+	'foo5|' => array('bar1'),
+	"\0foo6" => array('bar1'),
+	"foo7\0" => array('bar1'),
+	"foo8" => array(),
+	"foo9" => '%&$#!',
+	"foo10" => "abc\0\tdef",
+);
+$outFile = "mailBasic.out";
+@unlink($outFile);
+
+echo "-- All Mail Content Parameters --\n";
+// Calling mail() with all additional headers
+var_dump( mail($to, $subject, $message, $additional_headers) );
 echo file_get_contents($outFile);
 unlink($outFile);
 
@@ -134,7 +144,25 @@ foo: bar
 
 A Message
 
--- Mandatory Parameters --
+
+************* TEST ******************
+-- All Mail Content Parameters --
+
+Warning: mail(): 'orig-date' header must be at most one header. Array is passed for 'orig-date' in %s on line 59
+
+Warning: mail(): 'from' header must be at most one header. Array is passed for 'from' in %s on line 59
+
+Warning: mail(): 'sender' header must be at most one header. Array is passed for 'sender' in %s on line 59
+
+Warning: mail(): 'reply-to' header must be at most one header. Array is passed for 'reply-to' in %s on line 59
+
+Warning: mail(): Extra header cannot contain 'To' header in %s on line 59
+
+Warning: mail(): 'bcc' header must be at most one header. Array is passed for 'bcc' in %s on line 59
+
+Warning: mail(): 'message-id' header must be at most one header. Array is passed for 'message-id' in %s on line 59
+
+Warning: mail(): 'in-reply-to' header must be at most one header. Array is passed for 'in-reply-to' in %s on line 59
 bool(true)
 To: user@example.com
 Subject: Test Subject
@@ -145,51 +173,19 @@ A Message
 ************* TEST ******************
 -- All Mail Content Parameters --
 
-Warning: mail(): 'orig-date' header must be at most one header. Array is passed for 'orig-date' in %s on line 65
+Warning: mail(): Multiple header key must be numeric index (foo1) in %s on line 84
 
-Warning: mail(): 'from' header must be at most one header. Array is passed for 'from' in %s on line 65
+Warning: mail(): Multiple header values must be string (foo2) in %s on line 84
 
-Warning: mail(): 'sender' header must be at most one header. Array is passed for 'sender' in %s on line 65
+Warning: mail(): Multiple header values must be string (foo3) in %s on line 84
 
-Warning: mail(): 'reply-to' header must be at most one header. Array is passed for 'reply-to' in %s on line 65
+Warning: mail(): Multiple header values must be string (foo4) in %s on line 84
 
-Warning: mail(): Extra header cannot contain 'To' header in %s on line 65
+Warning: mail(): Multiple header values must be string (foo5) in %s on line 84
 
-Warning: mail(): 'bcc' header must be at most one header. Array is passed for 'bcc' in %s on line 65
+Warning: mail(): Multiple header values must be string (foo6) in %s on line 84
 
-Warning: mail(): 'message-id' header must be at most one header. Array is passed for 'message-id' in %s on line 65
-
-Warning: mail(): 'in-reply-to' header must be at most one header. Array is passed for 'in-reply-to' in %s on line 65
-bool(true)
-To: user@example.com
-Subject: Test Subject
-
-A Message
-
--- Mandatory Parameters --
-bool(true)
-To: user@example.com
-Subject: Test Subject
-
-A Message
-
-
-************* TEST ******************
--- All Mail Content Parameters --
-
-Warning: mail(): Multiple header key must be numeric index (foo1) in %s on line 96
-
-Warning: mail(): Multiple header values must be string (foo2) in %s on line 96
-
-Warning: mail(): Multiple header values must be string (foo3) in %s on line 96
-
-Warning: mail(): Multiple header values must be string (foo4) in %s on line 96
-
-Warning: mail(): Multiple header values must be string (foo5) in %s on line 96
-
-Warning: mail(): Multiple header values must be string (foo6) in %s on line 96
-
-Warning: mail(): Multiple header values must be string (foo7) in %s on line 96
+Warning: mail(): Multiple header values must be string (foo7) in %s on line 84
 bool(true)
 To: user@example.com
 Subject: Test Subject
@@ -197,10 +193,26 @@ foo2: foo2
 
 A Message
 
--- Mandatory Parameters --
+
+************* TEST ******************
+-- All Mail Content Parameters --
+
+Warning: mail(): Header field name (*:foo1) contains invalid chars in %s on line 112
+
+Warning: mail(): Header field name (foo2:::) contains invalid chars in %s on line 112
+
+Warning: mail(): Header field name () contains invalid chars in %s on line 112
+
+Warning: mail(): Header field name (foo7) contains invalid chars in %s on line 112
+
+Warning: mail(): Header field value (foo10 => abc) contains invalid chars or format in %s on line 112
 bool(true)
 To: user@example.com
 Subject: Test Subject
+foo3(): bar1
+foo4@: bar1
+foo5|: bar1
+foo9: %&$#!
 
 A Message
 ===DONE===

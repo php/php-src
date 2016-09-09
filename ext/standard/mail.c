@@ -145,17 +145,17 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 {
 	switch(Z_TYPE_P(val)) {
 		case IS_STRING:
-			if (php_mail_build_headers_check_field_name(key) == FAILURE) {
+			if (php_mail_build_headers_check_field_name(key) != SUCCESS) {
 				php_error_docref(NULL, E_WARNING, "Header field name (%s) contains invalid chars", ZSTR_VAL(key));
 				return;
 			}
-			if (php_mail_build_headers_check_field_value(val) == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Header field value (%s) contains invalid chars or format", Z_STRVAL_P(val));
+			if (php_mail_build_headers_check_field_value(val) != SUCCESS) {
+				php_error_docref(NULL, E_WARNING, "Header field value (%s => %s) contains invalid chars or format", ZSTR_VAL(key), Z_STRVAL_P(val));
 				return;
 			}
-			smart_str_append(s, key); /* Ignore chars after null */
+			smart_str_append(s, key);
 			smart_str_appendl(s, ": ", 2);
-			smart_str_appends(s, Z_STRVAL_P(val)); /* Ignore chars after null. */
+			smart_str_appends(s, Z_STRVAL_P(val));
 			smart_str_appendl(s, "\r\n", 2);
 			break;
 		case IS_ARRAY:
