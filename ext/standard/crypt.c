@@ -204,14 +204,6 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				salt[1] == '2' &&
 				salt[3] == '$') {
 			char output[PHP_MAX_SALT_LEN + 1];
-			int k = 7;
-
-			while (isalnum(salt[k]) || '.' == salt[k] || '/' == salt[k]) {
-				k++;
-			}
-			if (k != salt_len) {
-				return NULL;
-			}
 
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
 
