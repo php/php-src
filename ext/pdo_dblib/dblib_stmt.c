@@ -120,7 +120,7 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 	dbcancel(H->link);
 
 	pdo_dblib_err_dtor(&H->err);
-	
+
 	return 1;
 }
 
@@ -213,7 +213,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	pdo_dblib_db_handle *H = S->H;
 	struct pdo_column_data *col;
 	char *fname;
-	
+
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
 	}
@@ -376,16 +376,28 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+
 #ifdef SQLUNIQUE
 				case SQLUNIQUE: {
 #else
 				case 36: { /* FreeTDS hack */
 #endif
-					zv = emalloc(sizeof(zval));
-					ZVAL_STRINGL(zv, data, 16); /* uniqueidentifier is a 16-byte binary number */
+					if (H->stringify_uniqueidentifier) { // 36-char hex string representation
+						tmp_data_len = 36;
+						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
+						data_len = (unsigned int) dbconvert(NULL, SQLUNIQUE, (BYTE*)data, data_len, SQLCHAR, (BYTE*)tmp_data, tmp_data_len);
+						php_strtoupper(tmp_data, data_len);
+						zv = emalloc(sizeof(zval));
+						ZVAL_STRINGL(zv, tmp_data, data_len);
+						efree(tmp_data);
 
+					} else { // a 16-byte binary representation
+						zv = emalloc(sizeof(zval));
+						ZVAL_STRINGL(zv, data, 16);
+					}
 					break;
 				}
+
 				default: {
 					if (dbwillconvert(coltype, SQLCHAR)) {
 						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
@@ -479,4 +491,3 @@ struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_next_rowset, /* nextrow */
 	pdo_dblib_stmt_cursor_closer
 };
-

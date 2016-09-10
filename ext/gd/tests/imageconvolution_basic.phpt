@@ -23,11 +23,11 @@ $gaussian = array(
 imageconvolution($image, $gaussian, 16, 0);
 
 ob_start();
-imagepng($image, null, 9);
+imagegd($image);
 $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-594576a2a2a689447ffc07eb5a73f09b
+20979b45f8772cdbd78262af4e332638

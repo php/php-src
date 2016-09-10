@@ -15,11 +15,11 @@ $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
 imagefilledellipse($image, 50, 50, 40, 30, $white);
 
 ob_start();
-imagepng($image);
+imagegd($image);
 $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
 ?>
 --EXPECT--
-9ba540bba1b78c9f08efaa6fa0afd93b
+233beffe003a41d3c9e788039e3191dd

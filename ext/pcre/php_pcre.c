@@ -431,6 +431,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 						coptions |= PCRE_UCP;
 #endif
 				break;
+			case 'J':	coptions |= PCRE_DUPNAMES;		break;
 
 			/* Custom preg options */
 			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
@@ -1176,6 +1177,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	if (UNEXPECTED(pce->name_count > 0)) {
 		subpat_names = make_subpats_table(num_subpats, pce);
 		if (!subpat_names) {
+			if (size_offsets <= 32) {
+				free_alloca(offsets, use_heap);
+			} else {
+				efree(offsets);
+			}
 			return NULL;
 		}
 	}

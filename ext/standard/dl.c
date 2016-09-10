@@ -79,12 +79,6 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if defined(HAVE_LIBDL)
 
-#ifdef ZTS
-#define USING_ZTS 1
-#else
-#define USING_ZTS 0
-#endif
-
 /* {{{ php_load_extension
  */
 PHPAPI int php_load_extension(char *filename, int type, int start_now)

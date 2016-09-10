@@ -1334,7 +1334,7 @@ simple_list:
 				case ZEND_ASSIGN_BW_OR:  BINARY_OP(" |= ",  90, 91, 90);
 				case ZEND_ASSIGN_BW_AND: BINARY_OP(" &= ",  90, 91, 90);
 				case ZEND_ASSIGN_BW_XOR: BINARY_OP(" ^= ",  90, 91, 90);
-				case ZEND_POW:           BINARY_OP(" **= ", 90, 91, 90);
+				case ZEND_ASSIGN_POW:    BINARY_OP(" **= ", 90, 91, 90);
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;

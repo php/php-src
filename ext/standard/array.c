@@ -1841,12 +1841,6 @@ PHP_FUNCTION(extract)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
-#if 0
-	if (!symbol_table) {
-		php_error_docref(NULL, E_WARNING, "failed to build symbol table");
-		return;
-	}
-#endif
 
 	/* The array might be stored in a local variable that will be overwritten. To avoid losing the
 	 * reference in that case we work on a copy. */
@@ -1975,6 +1969,14 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			ZVAL_DEREF(value_ptr);
 			ZVAL_COPY(&data, value_ptr);
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
+		}
+		if (zend_string_equals_literal(Z_STR_P(entry), "this")) {
+			zend_object *object = zend_get_this_object(EG(current_execute_data));
+			if (object) {
+				GC_REFCOUNT(object)++;
+				ZVAL_OBJ(&data, object);
+				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
+			}
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		if ((Z_ARRVAL_P(entry)->u.v.nApplyCount > 1)) {
@@ -2390,7 +2392,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_rand();
 			RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
 			if (rnd_idx != n_left) {
 				temp = hash->arData[n_left];
@@ -2416,7 +2417,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_rand();
 			RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
 			if (rnd_idx != n_left) {
 				temp = hash->arData[n_left];
@@ -3593,7 +3593,7 @@ PHP_FUNCTION(array_column)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(arr_hash));
 	if (!zkey) {
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {

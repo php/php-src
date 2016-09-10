@@ -260,7 +260,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %}
 
 %expect 0
-%pure_parser
+%pure-parser
 
 %token TC_SECTION
 %token TC_RAW

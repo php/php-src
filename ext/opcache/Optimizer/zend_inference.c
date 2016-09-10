@@ -274,7 +274,7 @@ zend_ulong minOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (~a & c & m) {
 			temp = (a | m) & -m;
@@ -298,7 +298,7 @@ zend_ulong maxOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (b & d & m) {
 			temp = (b - m) | (m - 1);
@@ -321,7 +321,7 @@ zend_ulong minAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (~a & ~c & m) {
 			temp = (a | m) & -m;
@@ -344,7 +344,7 @@ zend_ulong maxAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (b & ~d & m) {
 			temp = (b | ~m) | (m - 1);
@@ -2153,6 +2153,7 @@ static void check_type_narrowing(const zend_op_array *op_array, zend_ssa *ssa, z
 	 * type inference)
 	 */
 	if (old_type & ~new_type) {
+		ZEND_ASSERT(0); /* Currently this should never happen */
 		reset_dependent_vars(op_array, ssa, worklist, var);
 	}
 }
@@ -2349,7 +2350,7 @@ static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
 }
 
 static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname) {
-	zend_class_entry *ce = zend_hash_find_ptr(&script->class_table, lcname);
+	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
 	if (ce) {
 		return ce;
 	}
@@ -2591,7 +2592,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				      ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MIN)) ||
 				     (opline->opcode == ZEND_PRE_INC &&
 				      (ssa_var_info[ssa_ops[i].op1_use].range.overflow ||
-				       ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MAX))) {
+				       ssa_var_info[ssa_ops[i].op1_use].range.max == ZEND_LONG_MAX))) {
 					/* may overflow */
 					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
 				} else {
@@ -2649,7 +2650,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				       ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MIN)) ||
 				      (opline->opcode == ZEND_PRE_INC &&
 				       (ssa_var_info[ssa_ops[i].op1_use].range.overflow ||
-				        ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MAX))) {
+				        ssa_var_info[ssa_ops[i].op1_use].range.max == ZEND_LONG_MAX))) {
 					/* may overflow */
 					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
 				} else {
@@ -2942,7 +2943,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
-			if ((ce = zend_hash_find_ptr(&script->class_table, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)))) != NULL) {
+			if (script && (ce = zend_hash_find_ptr(&script->class_table, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_ops[i].result_def);
 			}
 			break;
@@ -3138,9 +3139,6 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					}
 					if (t1 & MAY_BE_ARRAY_KEY_STRING) {
 						tmp |= MAY_BE_STRING;
-					}
-					if (!(tmp & (MAY_BE_LONG|MAY_BE_STRING))) {
-						tmp |= MAY_BE_NULL;
 					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
@@ -3697,12 +3695,14 @@ static zend_bool can_convert_to_double(
 static int zend_type_narrowing(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
 {
 	uint32_t bitset_len = zend_bitset_len(ssa->vars_count);
-	ALLOCA_FLAG(use_heap)
-	zend_bitset visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
-	zend_bitset worklist = visited + bitset_len;
+	zend_bitset visited, worklist;
 	int i, v;
 	zend_op *opline;
 	zend_bool narrowed = 0;
+	ALLOCA_FLAG(use_heap)
+
+	visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
+	worklist = visited + bitset_len;
 
 	zend_bitset_clear(worklist, bitset_len);
 

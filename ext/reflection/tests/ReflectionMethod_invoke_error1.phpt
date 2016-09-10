@@ -59,7 +59,9 @@ try {
 ?>
 --EXPECTF--
 invoke() on a non-object:
-string(29) "Non-object passed to Invoke()"
+
+Warning: ReflectionMethod::invoke() expects parameter 1 to be object, boolean given in %s%eReflectionMethod_invoke_error1.php on line %d
+NULL
 
 invoke() on a non-instance:
 string(72) "Given object is not an instance of the class this method was declared in"

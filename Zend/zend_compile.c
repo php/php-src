@@ -2198,10 +2198,43 @@ static inline uint32_t zend_emit_jump(uint32_t opnum_target) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
+{
+	switch (opline->opcode) {
+		case ZEND_IS_IDENTICAL:
+		case ZEND_IS_NOT_IDENTICAL:
+		case ZEND_IS_EQUAL:
+		case ZEND_IS_NOT_EQUAL:
+		case ZEND_IS_SMALLER:
+		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_CASE:
+		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+		case ZEND_INSTANCEOF:
+		case ZEND_TYPE_CHECK:
+		case ZEND_DEFINED:
+			return 1;
+		default:
+			return 0;
+	}
+}
+/* }}} */
+
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number(CG(active_op_array));
-	zend_op *opline = zend_emit_op(NULL, opcode, cond, NULL);
+	zend_op *opline;
+
+	if ((cond->op_type & (IS_CV|IS_CONST))
+	 && opnum > 0
+	 && zend_is_smart_branch(CG(active_op_array)->opcodes + opnum - 1)) {
+		/* emit extra NOP to avoid incorrect SMART_BRANCH in very rare cases */
+		zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
+		opnum = get_next_op_number(CG(active_op_array));
+	}
+	opline = zend_emit_op(NULL, opcode, cond, NULL);
 	opline->op2.opline_num = opnum_target;
 	return opnum;
 }
@@ -3379,6 +3412,22 @@ int zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t typ
 }
 /* }}} */
 
+int zend_compile_func_cast(znode *result, zend_ast_list *args, uint32_t type) /* {{{ */
+{
+	znode arg_node;
+	zend_op *opline;
+
+	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	opline = zend_emit_op_tmp(result, ZEND_CAST, &arg_node, NULL);
+	opline->extended_value = type;
+	return SUCCESS;
+}
+/* }}} */
+
 int zend_compile_func_defined(znode *result, zend_ast_list *args) /* {{{ */
 {
 	zend_string *name;
@@ -3644,6 +3693,16 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_typecheck(result, args, IS_OBJECT);
 	} else if (zend_string_equals_literal(lcname, "is_resource")) {
 		return zend_compile_func_typecheck(result, args, IS_RESOURCE);
+	} else if (zend_string_equals_literal(lcname, "boolval")) {
+		return zend_compile_func_cast(result, args, _IS_BOOL);
+	} else if (zend_string_equals_literal(lcname, "intval")) {
+		return zend_compile_func_cast(result, args, IS_LONG);
+	} else if (zend_string_equals_literal(lcname, "floatval")
+		|| zend_string_equals_literal(lcname, "doubleval")
+	) {
+		return zend_compile_func_cast(result, args, IS_DOUBLE);
+	} else if (zend_string_equals_literal(lcname, "strval")) {
+		return zend_compile_func_cast(result, args, IS_STRING);
 	} else if (zend_string_equals_literal(lcname, "defined")) {
 		return zend_compile_func_defined(result, args);
 	} else if (zend_string_equals_literal(lcname, "chr") && type == BP_VAR_R) {
@@ -5140,6 +5199,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->allow_null = has_null_default || is_explicitly_nullable;
 
+			type_ast->attr &= ~ZEND_TYPE_NULLABLE;
 			zend_compile_typename(type_ast, arg_info);
 
 			if (arg_info->type_hint == IS_VOID) {

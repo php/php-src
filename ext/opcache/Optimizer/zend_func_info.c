@@ -22,6 +22,7 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 #include "zend_ssa.h"
+#include "zend_optimizer_internal.h"
 #include "zend_inference.h"
 #include "zend_call_graph.h"
 #include "zend_func_info.h"
@@ -1212,7 +1213,9 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 		func_info_t *info;
 
 		if ((info = zend_hash_find_ptr(&func_info, Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline->op2, ssa->rt_constants)))) != NULL) {
-			if (info->info_func) {
+			if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
+				ret = MAY_BE_NULL;
+			} else if (info->info_func) {
 				ret = info->info_func(call_info, ssa);
 			} else {
 				ret = info->info;

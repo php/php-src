@@ -142,23 +142,23 @@ Warning: exif_imagetype(0.5): failed to open stream: No such file or directory i
 bool(false)
 -- Iteration 10 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+Warning: exif_imagetype() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+Warning: exif_imagetype() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+Warning: exif_imagetype() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+Warning: exif_imagetype() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+Warning: exif_imagetype() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 -- Iteration 15 --
 
@@ -198,7 +198,7 @@ Warning: exif_imagetype(obj'ct): failed to open stream: No such file or director
 bool(false)
 -- Iteration 24 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, resource given in %s on line %d
+Warning: exif_imagetype() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 -- Iteration 25 --
 

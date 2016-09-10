@@ -2,13 +2,34 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.2.0alpha1
 
+- Core:
+  . Removed the sql.safe_mode directive. (Kalle)
+  . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
+
 - EXIF:
-  . Fixed bug #72682 (exif_read_data() fails to read all data for some 
+  . Added support for vendor specific tags for the following formats:
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
+  . Fixed bug #72682 (exif_read_data() fails to read all data for some
     images). (Kalle)
-  . Fixed Redhat bug #1362571 (PHP not returning full results for 
+  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
+    overflow in debug mode). (hlt99 at blinkenshell dot org, Kalle)
+  . Fixed bug #68547 (Exif Header component value check error).
+    (sjh21a at gmail dot com, Kalle)
+  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level
+    reached for some cameras). (Kalle)
+  . Fixed Redhat bug #1362571 (PHP not returning full results for
     exif_read_data function). (Kalle)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
+- Mbstring:
+  . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
+  . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
+  . Implemented request #69086 (enhancement for mb_convert_encoding() that
+    handles multibyte replacement char nicely). (Masakielastic, Yasuo)
+  . Added array input support to mb_convert_encoding(). (Yasuo)
+  . Added array input support to mb_check_encoding(). (Yasuo)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
+
