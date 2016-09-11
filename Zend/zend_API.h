@@ -665,6 +665,11 @@ END_EXTERN_C()
 
 /* Fast parameter parsing API */
 
+/* Fast ZPP is always enabled now; this define is left in for compatibility
+ * with any existing conditional compilation blocks.
+ */
+#define FAST_ZPP 1
+
 #define Z_EXPECTED_TYPES(_) \
 	_(Z_EXPECTED_LONG,		"integer") \
 	_(Z_EXPECTED_BOOL,		"boolean") \
