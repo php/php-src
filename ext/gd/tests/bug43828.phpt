@@ -17,10 +17,10 @@ imagefilledrectangle($im, 0,0, 99,99, $transparent);
 $color = imagecolorallocatealpha($im, 0, 255, 0, 100);
 imagefilledarc($im, 49, 49, 99,99, 0 , 360, $color, IMG_ARC_PIE);
 
-ob_start();
-imagegd($im);
-echo md5(ob_get_clean());
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/bug43828.png', $im);
+
 imagedestroy($im);
 ?>
 --EXPECT--
-2400a58cd7570b5472c25264715321cd
+The images are equal.

@@ -22,13 +22,9 @@ $half2 =  imagefilledarc ( $image, 75, 55, 80, 70, 0, -180, $b, IMG_ARC_PIE );
 
 var_dump(imagetruecolortopalette($image, true, 2));
 
-ob_start();
-imagegd($image);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagetruecolortopalette_basic.png', $image);
 ?>
 --EXPECT--
 bool(true)
-17c901cb2217eb7647deed1c79d445de
+The images are equal.

@@ -21,15 +21,11 @@ $half =  imagefilledarc ( $image, 75, 75, 70, 70, 0, 180, $grey, IMG_ARC_PIE );
 $half2 =  imagefilledarc ( $image, 75, 75, 70, 70, 0, -180, $gray, IMG_ARC_PIE );
 
 $gamma = imagegammacorrect($image, 1, 5);
+var_dump((bool) $gamma);
 
-if ($gamma){
-	ob_start();
-	imagegd($image);
-	$img = ob_get_contents();
-	ob_end_clean();
-}
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagegammacorrect_basic.png', $image);
 ?>
 --EXPECT--
-1f625723f9d27251a1f15b83a6a4bf55
+bool(true)
+The images are equal.
