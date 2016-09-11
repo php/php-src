@@ -1555,17 +1555,11 @@ ZEND_METHOD(reflection, export)
 	int result;
 	zend_bool return_output = 0;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &object, reflector_ptr, &return_output) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJECT_OF_CLASS(object, reflector_ptr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(return_output)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);

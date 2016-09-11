@@ -676,12 +676,10 @@ END_EXTERN_C()
 
 /* Fast parameter parsing API */
 
-/* This API should be used only for really often used functions.
- * (Keep the original parsing code and wrap usage with #ifndef FAST_ZPP)
+/* Fast ZPP is always enabled now; this define is left in for compatibility
+ * with any existing conditional compilation blocks.
  */
 #define FAST_ZPP 1
-
-#ifdef FAST_ZPP
 
 #define Z_EXPECTED_TYPES(_) \
 	_(Z_EXPECTED_LONG,		"integer") \
@@ -1044,8 +1042,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 
 #define Z_PARAM_VARIADIC(spec, dest, dest_num) \
 	Z_PARAM_VARIADIC_EX(spec, dest, dest_num, 0)
-
-#endif /* FAST_ZPP */
 
 /* End of new parameter parsing API */
 

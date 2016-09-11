@@ -551,15 +551,9 @@ PHP_FUNCTION(urlencode)
 {
 	zend_string *in_str;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
@@ -571,15 +565,9 @@ PHP_FUNCTION(urldecode)
 {
 	zend_string *in_str, *out_str;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
@@ -658,15 +646,9 @@ PHP_FUNCTION(rawurlencode)
 {
 	zend_string *in_str;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
@@ -678,15 +660,9 @@ PHP_FUNCTION(rawurldecode)
 {
 	zend_string *in_str, *out_str;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));

@@ -1001,20 +1001,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 /* another quickie macro to make defining similar functions easier */
 /* {{{ FileFunction(name, funcnum) */
-#ifndef FAST_ZPP
-# define FileFunction(name, funcnum) \
-void name(INTERNAL_FUNCTION_PARAMETERS) { \
-	char *filename; \
-	size_t filename_len; \
-	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) { \
-		return; \
-	} \
-	\
-	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value); \
-}
-#else
-# define FileFunction(name, funcnum) \
+#define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
 	size_t filename_len; \
@@ -1025,7 +1012,6 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	\
 	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value); \
 }
-#endif
 /* }}} */
 
 /* {{{ proto int fileperms(string filename)
