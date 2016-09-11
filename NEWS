@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #73025 (Heap Buffer Overflow in virtual_popen of
     zend_virtual_cwd.c). (cmb)
+  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
+    password_verify). (Anatol)
   . Fixed bug #73058 (crypt broken when salt is 'too' long). (Anatol)
 
 - Filter:
@@ -39,10 +41,6 @@ PHP                                                                        NEWS
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
 
-- Standard:
-  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
-    (cmb)
-
 - Zip:
   . Fixed bug #70752 (Depacking with wrong password leaves 0 length files).
     (cmb)
@@ -58,8 +56,6 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #72854 (PHP Crashes on duplicate destructor call). (Nikita)
   . Fixed bug #72857 (stream_socket_recvfrom read access violation). (Anatol)
-  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
-    password_verify). (Anatol)
 
 - COM:
   . Fixed bug #72922 (COM called from PHP does not return out parameters).
@@ -133,6 +129,8 @@ PHP                                                                        NEWS
     Kenttä)
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
   . Fixed bug #65550 (get_browser() incorrectly parses entries with "+" sign).
+    (cmb)
+  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
 
 - Streams:
