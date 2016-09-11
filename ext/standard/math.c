@@ -302,15 +302,9 @@ PHP_FUNCTION(abs)
 {
 	zval *value;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	convert_scalar_to_number_ex(value);
 
@@ -333,15 +327,9 @@ PHP_FUNCTION(ceil)
 {
 	zval *value;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	convert_scalar_to_number_ex(value);
 
@@ -360,15 +348,9 @@ PHP_FUNCTION(floor)
 {
 	zval *value;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	convert_scalar_to_number_ex(value);
 
@@ -435,15 +417,9 @@ PHP_FUNCTION(sin)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(sin(num));
 }
 /* }}} */
@@ -454,15 +430,9 @@ PHP_FUNCTION(cos)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(cos(num));
 }
 /* }}} */
@@ -473,15 +443,9 @@ PHP_FUNCTION(tan)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(tan(num));
 }
 /* }}} */
@@ -492,15 +456,9 @@ PHP_FUNCTION(asin)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(asin(num));
 }
 /* }}} */
@@ -511,15 +469,9 @@ PHP_FUNCTION(acos)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(acos(num));
 }
 /* }}} */
@@ -530,15 +482,9 @@ PHP_FUNCTION(atan)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(atan(num));
 }
 /* }}} */
@@ -549,16 +495,10 @@ PHP_FUNCTION(atan2)
 {
 	double num1, num2;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd", &num1, &num2) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_DOUBLE(num1)
 		Z_PARAM_DOUBLE(num2)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(atan2(num1, num2));
 }
 /* }}} */
@@ -569,15 +509,9 @@ PHP_FUNCTION(sinh)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(sinh(num));
 }
 /* }}} */
@@ -588,15 +522,9 @@ PHP_FUNCTION(cosh)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(cosh(num));
 }
 /* }}} */
@@ -607,15 +535,9 @@ PHP_FUNCTION(tanh)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(tanh(num));
 }
 /* }}} */
@@ -626,15 +548,9 @@ PHP_FUNCTION(asinh)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(php_asinh(num));
 }
 /* }}} */
@@ -645,15 +561,9 @@ PHP_FUNCTION(acosh)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(php_acosh(num));
 }
 /* }}} */
@@ -664,15 +574,9 @@ PHP_FUNCTION(atanh)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE(php_atanh(num));
 }
 /* }}} */
@@ -691,15 +595,9 @@ PHP_FUNCTION(is_finite)
 {
 	double dval;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &dval) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(dval)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_BOOL(zend_finite(dval));
 }
 /* }}} */
@@ -710,15 +608,9 @@ PHP_FUNCTION(is_infinite)
 {
 	double dval;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &dval) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(dval)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_BOOL(zend_isinf(dval));
 }
 /* }}} */
@@ -729,15 +621,9 @@ PHP_FUNCTION(is_nan)
 {
 	double dval;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &dval) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(dval)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_BOOL(zend_isnan(dval));
 }
 /* }}} */
@@ -762,15 +648,9 @@ PHP_FUNCTION(exp)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_DOUBLE(exp(num));
 }
@@ -786,15 +666,9 @@ PHP_FUNCTION(expm1)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_DOUBLE(php_expm1(num));
 }
@@ -810,15 +684,9 @@ PHP_FUNCTION(log1p)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_DOUBLE(php_log1p(num));
 }
@@ -830,17 +698,11 @@ PHP_FUNCTION(log)
 {
 	double num, base = 0;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d|d", &num, &base) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_DOUBLE(num)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_DOUBLE(base)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (ZEND_NUM_ARGS() == 1) {
 		RETURN_DOUBLE(log(num));
@@ -875,15 +737,9 @@ PHP_FUNCTION(log10)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_DOUBLE(log10(num));
 }
@@ -895,15 +751,9 @@ PHP_FUNCTION(sqrt)
 {
 	double num;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_DOUBLE(sqrt(num));
 }
@@ -915,16 +765,10 @@ PHP_FUNCTION(hypot)
 {
 	double num1, num2;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd", &num1, &num2) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_DOUBLE(num1)
 		Z_PARAM_DOUBLE(num2)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 #if HAVE_HYPOT
 	RETURN_DOUBLE(hypot(num1, num2));
@@ -942,15 +786,9 @@ PHP_FUNCTION(deg2rad)
 {
 	double deg;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &deg) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(deg)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	RETURN_DOUBLE((deg / 180.0) * M_PI);
 }
 /* }}} */
@@ -961,15 +799,9 @@ PHP_FUNCTION(rad2deg)
 {
 	double rad;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &rad) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(rad)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_DOUBLE((rad / M_PI) * 180);
 }
@@ -1407,11 +1239,6 @@ PHP_FUNCTION(number_format)
 	char thousand_sep_chr = ',', dec_point_chr = '.';
 	size_t thousand_sep_len = 0, dec_point_len = 0;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_DOUBLE(num)
 		Z_PARAM_OPTIONAL
@@ -1419,7 +1246,6 @@ PHP_FUNCTION(number_format)
 		Z_PARAM_STRING_EX(dec_point, dec_point_len, 1, 0)
 		Z_PARAM_STRING_EX(thousand_sep, thousand_sep_len, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	switch(ZEND_NUM_ARGS()) {
 	case 1:
@@ -1455,16 +1281,10 @@ PHP_FUNCTION(fmod)
 {
 	double num1, num2;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd",  &num1, &num2) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_DOUBLE(num1)
 		Z_PARAM_DOUBLE(num2)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_DOUBLE(fmod(num1, num2));
 }
