@@ -23,13 +23,9 @@ $bg = imagecolorat($im, 0, 0);
 // Set the backgrund to be blue
 imagecolorset($im, $bg, 0, 0, 255);
 
-// Get output and generate md5 hash
-ob_start();
-imagegd($im);
-$result_image = ob_get_contents();
-ob_end_clean();
-echo md5(base64_encode($result_image));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagecolorset_basic.png', $im);
 imagedestroy($im);
 ?>
 --EXPECT--
-85e406abd0a975c97b3403cad5d078c9
+The images are equal.
