@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-01 Sep 2016 PHP 7.0.11RC1
+15 Sep 2016 PHP 7.0.11
 
 - Core:
   . Fixed bug #72944 (Null pointer deref in zval_delref_p). (Dmitry)
@@ -11,8 +11,6 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #72854 (PHP Crashes on duplicate destructor call). (Nikita)
   . Fixed bug #72857 (stream_socket_recvfrom read access violation). (Anatol)
-  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
-    password_verify). (Anatol)
 
 - COM:
   . Fixed bug #72922 (COM called from PHP does not return out parameters).
@@ -92,6 +90,8 @@ PHP                                                                        NEWS
   . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
   . Fixed bug #72764 (ftps:// opendir wrapper data channel encryption fails
     with IIS FTP 7.5, 8.5). (vhuk)
+  . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
+    (cmb)
 
 - Sysvshm:
   . Fixed bug #72858 (shm_attach null dereference). (Anatol)
