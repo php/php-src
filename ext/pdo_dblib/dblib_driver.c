@@ -146,55 +146,29 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
 
-	int useBinaryEncoding = 0;
-	const char * hex = "0123456789abcdef";
 	size_t i;
 	char * q;
 	*quotedlen = 0;
 
-	/*
-	 * Detect quoted length and if we should use binary encoding
-	 */
+	/* Detect quoted length, adding extra char for doubled single quotes */
 	for(i=0;i<unquotedlen;i++) {
-		if( 32 > unquoted[i] || 127 < unquoted[i] ) {
-			useBinaryEncoding = 1;
-			break;
-		}
 		if(unquoted[i] == '\'') ++*quotedlen;
 		++*quotedlen;
 	}
 
-	if(useBinaryEncoding) {
-		/*
-		 * Binary safe quoting
-		 * Will implicitly convert for all data types except Text, DateTime & SmallDateTime
-		 *
-		 */
-		*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
-		q = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
+	*quotedlen += 2; /* +2 for opening, closing quotes */
+	q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
+	*q++ = '\'';
 
-		*q++ = '0';
-		*q++ = 'x';
-		for (i=0;i<unquotedlen;i++) {
-			*q++ = hex[ (*unquoted>>4)&0xF];
-			*q++ = hex[ (*unquoted++)&0xF];
+	for (i=0;i<unquotedlen;i++) {
+		if (unquoted[i] == '\'') {
+			*q++ = '\'';
+			*q++ = '\'';
+		} else {
+			*q++ = unquoted[i];
 		}
-	} else {
-		/* Alpha/Numeric Quoting */
-		*quotedlen += 2; /* +2 for opening, closing quotes */
-		q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
-		*q++ = '\'';
-
-		for (i=0;i<unquotedlen;i++) {
-			if (unquoted[i] == '\'') {
-				*q++ = '\'';
-				*q++ = '\'';
-			} else {
-				*q++ = unquoted[i];
-			}
-		}
-		*q++ = '\'';
 	}
+	*q++ = '\'';
 
 	*q = 0;
 
