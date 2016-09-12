@@ -1268,18 +1268,22 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, zend_op *opline, int b, zend
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
 				|	sete al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_NOT_EQUAL:
 				|	setne al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_SMALLER:
 				|	setl al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				|	setle al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 		}
@@ -1357,10 +1361,12 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, zend_op *opline, int b, 
 				break;
 			case ZEND_IS_SMALLER:
 				|	seta al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				|	setae al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 		}
@@ -1461,18 +1467,22 @@ static int zend_jit_cmp_slow(dasm_State **Dst, zend_op *opline, int b, zend_op_a
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
 				|	sete al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_NOT_EQUAL:
 				|	setne al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_SMALLER:
 				|	setl al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				|	setle al
+				|	movzx eax, al
 				|	add eax, 2
 				break;
 		}
