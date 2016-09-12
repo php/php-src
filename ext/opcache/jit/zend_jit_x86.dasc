@@ -1928,9 +1928,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	}
 
 	|	// call = EX(call);
-	|	mov r0, EX->call
+	|	mov r1, EX->call
 	|	// fbc = call->func;
-	|	// mov r1, EX:r0->func ???
+	|	// mov r2, EX:r1->func ???
 	|	// SAVE_OPLINE();
 	if (!zend_jit_set_valid_ip(Dst)) {
 		return 0;
@@ -1940,50 +1940,50 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|		mov aword EX->call, 0
 	||	} else {
 	|		//EX(call) = call->prev_execute_data;
-	|		mov r1, EX:r0->prev_execute_data
-	|		mov EX->call, r1
+	|		mov r0, EX:r1->prev_execute_data
+	|		mov EX->call, r0
 	||	}
 	|	//call->prev_execute_data = execute_data;
-	|	mov EX:r0->prev_execute_data, EX
+	|	mov EX:r1->prev_execute_data, EX
 	|
 	|	// EX(call) = NULL;
-	|	mov aword EX:r0->call, 0
+	|	mov aword EX:r1->call, 0
 	||	if (RETURN_VALUE_USED(opline)) {
 	|		// ZVAL_NULL(EX_VAR(opline->result.var));
 	|		mov dword [FP + opline->result.var + 8], IS_NULL
 	|		// EX(return_value) = EX_VAR(opline->result.var);
-	|		lea r1, aword [FP + opline->result.var]
-	|		mov aword EX:r0->return_value, r1
+	|		lea r0, aword [FP + opline->result.var]
+	|		mov aword EX:r1->return_value, r0
 	||	} else {
 	|		// EX(return_value) = 0;
-	|		mov aword EX:r0->return_value, 0
+	|		mov aword EX:r1->return_value, 0
 	||	}
 	|
 	||	for (i = call_info->num_args; i < func->op_array.last_var; i++) {
 	||		uint32_t n = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-	|		mov dword [r0 + n + 8], IS_UNDEF
+	|		mov dword [r1 + n + 8], IS_UNDEF
 	||	}
 	|
 	|	//EX_LOAD_RUN_TIME_CACHE(op_array);
 	||	if (func && op_array == &func->op_array) {
 	||		/* recursive call */
-	|		mov r2, EX->run_time_cache
+	|		mov r0, EX->run_time_cache
 	||	} else {
-	|		mov r1, EX:r0->func
-	|		mov r2, aword [r1 + offsetof(zend_op_array, run_time_cache)]
+	|		mov r2, EX:r1->func
+	|		mov r0, aword [r2 + offsetof(zend_op_array, run_time_cache)]
 	||	}
-	|	mov EX:r0->run_time_cache, r2
+	|	mov EX:r1->run_time_cache, r0
 	|	//EX_LOAD_LITERALS(op_array);
 	|.if X64
-	|	LOAD_ADDR r2, func->op_array.literals
-	|	mov EX:r0->literals, r2
+	|	LOAD_ADDR r0, func->op_array.literals
+	|	mov EX:r1->literals, r0
 	|.endif
 	|	// EG(current_execute_data) = execute_data;
-	|	mov aword [&EG(current_execute_data)], r0
-	|	mov FP, r0
+	|	mov aword [&EG(current_execute_data)], r1
+	|	mov FP, r1
 	|	// EX(opline) = op_array->opcodes;
 	|	LOAD_ADDR IP, (func->op_array.opcodes + call_info->num_args)
-	|	mov EX:r0->opline, IP
+	|	mov EX:r1->opline, IP
 	||	if (func && op_array == &func->op_array) {
 	||		/* recursive call */
 	|		jmp =>call_info->num_args
@@ -2012,10 +2012,10 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, opline->op1);
 
-		|	mov r0, EX->call
-		|	ZVAL_COPY_CONST r0, opline->result.var, -1, zv, r1
+		|	mov r1, EX->call
+		|	ZVAL_COPY_CONST r1, opline->result.var, -1, zv, r0
 		||	if (Z_REFCOUNTED_P(zv)) {
-		|		ADDREF_CONST zv, r1
+		|		ADDREF_CONST zv, r0
 		||	}
 		valid_opline_offset++;
 		return 1;
@@ -2026,8 +2026,8 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	}
 
 	op1_info = OP1_INFO();
-	|	mov r0, EX->call
-	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2
+	|	mov r1, EX->call
+	|	ZVAL_COPY_VALUE r1, opline->result.var, FP, opline->op1.var, op1_info, r0, eax, r2
 	valid_opline_offset++;
 	return 1;
 
@@ -2050,10 +2050,10 @@ static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	}
 
 	op1_info = OP1_INFO();
-	|	mov r0, EX->call
-	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2
+	|	mov r1, EX->call
+	|	ZVAL_COPY_VALUE r1, opline->result.var, FP, opline->op1.var, op1_info, r0, eax, r2
 	||	if (opline->op1_type == IS_CV) {
-	|		TRY_ADDREF op1_info, ch, r2
+	|		TRY_ADDREF op1_info, ah, r2
 	||	}
 	valid_opline_offset++;
 	return 1;
