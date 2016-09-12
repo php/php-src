@@ -499,28 +499,12 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro RESET_IP
-||ip_count = 0;
-|.endmacro
-
-|.macro INC_IP
-||ip_count++;
-|.endmacro
-
-|.macro SAVE_IP
-||if (ip_count) {
-|	add IP, sizeof(zend_op) * ip_count
-|	RESET_IP
-||}
-|.endmacro
-
-
 |.macro JNE_SLOW
 |	jne >9
 ||	has_slow = 1;
 |.endmacro
 
-static uint32_t ip_count = 0;
+static uint32_t valid_opline_offset;
 #endif
 
 /* bit helpers */
@@ -589,7 +573,6 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//} else if (zend_interrupt_function) {
 	if (zend_interrupt_function) {
 		|	//SAVE_OPLINE();
-		|	SAVE_IP
 		|	mov EX->opline, IP
 		|	//zend_interrupt_function(execute_data);
 		|.if X64
@@ -628,7 +611,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 
 static int zend_jit_align_func(dasm_State **Dst)
 {
-	| RESET_IP
+	valid_opline_offset = 0;
 	|.align 16
 	return 1;
 }
@@ -659,9 +642,20 @@ static int zend_jit_check_exception(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_set_valid_ip(dasm_State **Dst)
+{
+	if (valid_opline_offset) {
+		|	add IP, sizeof(zend_op) * valid_opline_offset
+		valid_opline_offset = 0;
+	}
+	return 1;
+}
+
 static int zend_jit_handler(dasm_State **Dst, zend_op *opline, int may_throw)
 {
-	|	SAVE_IP
+	if (!zend_jit_set_valid_ip(Dst)) {
+		return 0;
+	}
 	|	EXT_CALL opline->handler, r0
 	if (may_throw) {
 		zend_jit_check_exception(Dst);
@@ -671,38 +665,36 @@ static int zend_jit_handler(dasm_State **Dst, zend_op *opline, int may_throw)
 
 static int zend_jit_tail_handler(dasm_State **Dst, zend_op *opline)
 {
-	|	SAVE_IP
+	if (!zend_jit_set_valid_ip(Dst)) {
+		return 0;
+	}
 	|	add r4, SPAD // stack alignment
 	|	EXT_JMP opline->handler, r0
 	return 1;
 }
 
-static int zend_jit_skip_handler(dasm_State **Dst, uint32_t skip, int inc_op)
+static int zend_jit_skip_handler(dasm_State **Dst)
 {
-	if (inc_op) {
-		while (skip--) {
-		|	INC_IP
-		}
-	}
+	valid_opline_offset++;
 	return 1;
 }
 
 static int zend_jit_set_opline(dasm_State **Dst, zend_op *target_opline)
 {
+	valid_opline_offset = 0;
 	|	LOAD_ADDR IP, target_opline
 	return 1;
 }
 
 static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
 {
-	|	RESET_IP
+	valid_opline_offset = 0;
 	|	jmp =>target_label
 	return 1;
 }
 
 static int zend_jit_cond_jmp(dasm_State **Dst, zend_op *next_opline, unsigned int target_label)
 {
-	|	SAVE_IP
 	|	cmp IPl, next_opline
 	|	jnz =>target_label
 
@@ -714,7 +706,6 @@ static int zend_jit_smart_branch(dasm_State **Dst, zend_op *opline, unsigned int
 	zend_op *next_opline = opline + 1;
 	zend_op *target_opline = OP_JMP_ADDR(opline, opline->op2);
 
-	|	SAVE_IP
 	|	cmp IPl, next_opline
 	|	jz =>next_label
 	|	cmp IPl, target_opline
@@ -752,7 +743,7 @@ static int zend_jit_call(dasm_State **Dst, zend_op *opline)
 #endif
 }
 
-static int zend_jit_new(dasm_State **Dst, zend_op *opline, int *opnum, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_new(dasm_State **Dst, zend_op *opline, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
 {
 	if (!zend_jit_handler(Dst, opline, 1)) {
 		return 0;
@@ -782,10 +773,8 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline, int *opnum, zend_op_a
 			|	jnz >1
 			zend_jit_call(Dst, next_opline);
 			|1:
-		} else if (inc_op) {
-			| INC_IP
 		} else {
-			| RESET_IP
+			valid_opline_offset++;
 		}
 	}
 	return 1;
@@ -793,7 +782,7 @@ static int zend_jit_new(dasm_State **Dst, zend_op *opline, int *opnum, zend_op_a
 
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
 
-static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op1_def_info;
 
@@ -892,11 +881,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 		|.code
 	}
 	|3:
-	if (inc_op) {
-		|	INC_IP
-	} else {
-		|	RESET_IP
-	}
+	valid_opline_offset++;
 	return 1;
 
 fallback:
@@ -1004,7 +989,7 @@ static int zend_jit_math_double_double(dasm_State **Dst, zend_op *opline)
 	return 1;
 }
 
-static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info;
 	zend_bool same_ops = (opline->op1_type == opline->op2_type) && (opline->op1.var == opline->op2.var);
@@ -1168,11 +1153,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 	}
 
 	|6:
-	if (inc_op) {
-		|	INC_IP
-	} else {
-		|	RESET_IP
-	}
+	valid_opline_offset++;
 
 	if (has_slow) {
 		|.cold_code
@@ -1501,7 +1482,7 @@ static int zend_jit_cmp_slow(dasm_State **Dst, zend_op *opline, int b, zend_op_a
 	return 1;
 }
 
-static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info;
 	zend_bool same_ops = (opline->op1_type == opline->op2_type) && (opline->op1.var == opline->op2.var);
@@ -1669,18 +1650,9 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 	    (opline+1)->op1_type == IS_TMP_VAR &&
 	    (opline+1)->op1.var == opline->result.var) {
 		(*opnum)++;
-		if (inc_op) {
-			|	INC_IP
-			|	INC_IP
-		} else {
-			|	RESET_IP
-		}
+		valid_opline_offset += 2;
 	} else {
-		if (inc_op) {
-			|	INC_IP
-		} else {
-			|	RESET_IP
-		}
+		valid_opline_offset++;
 	}
 
 	if (has_slow) {
@@ -1743,7 +1715,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info, int inc_op)
+static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info)
 {
 	if (val_info & (MAY_BE_UNDEF|MAY_BE_REF)) {
 		/* TODO: Support for references ??? */
@@ -1754,11 +1726,7 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 		||	if (Z_REFCOUNTED_P(zv)) {
 		|		ADDREF_CONST zv, r0
 		||	}
-		if (inc_op) {
-			|	INC_IP
-		} else {
-			|	RESET_IP
-		}
+		valid_opline_offset++;
 		return 1;
 	}
 
@@ -1766,11 +1734,7 @@ static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_arr
 	||	if (val_type == IS_CV) {
 	|		TRY_ADDREF val_info, ah, r1
 	||	}
-	if (inc_op) {
-		|	INC_IP
-	} else {
-		|	RESET_IP
-	}
+	valid_opline_offset++;
 
 	return 1;
 
@@ -1779,7 +1743,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
 
@@ -1789,14 +1753,14 @@ static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *
 
 	op1_info = OP1_INFO();
 
-	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info, inc_op);
+	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info);
 
 fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info;
 
@@ -1809,7 +1773,7 @@ static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 	op2_info = OP2_INFO();
 
 	if (!(op1_info & (MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_REF))) {
-		return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info, inc_op);
+		return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info);
 	}
 
 fallback:
@@ -1855,7 +1819,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, zend_op *opline, zend_op_a
 	return 1;
 }
 
-static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, int call_level, int inc_op)
+static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, int call_level)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_function *func = NULL;
@@ -1878,7 +1842,6 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 	} else {
 		zval *zv = RT_CONSTANT(op_array, opline->op2);
 
-		|	SAVE_IP
 		|	// if (CACHED_PTR(Z_CACHE_SLOT_P(fname)))
 		|	mov r0,	EX->run_time_cache
 		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
@@ -1910,13 +1873,9 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 		|	mov r0, EX->call
 		|	mov EX:r1->prev_execute_data, r0
 	}
-		|	// EX(call) = call;
-		|	mov EX->call, r1
-	if (inc_op) {
-		|	INC_IP
-	} else {
-		|	RESET_IP
-	}
+	|	// EX(call) = call;
+	|	mov EX->call, r1
+	valid_opline_offset++;
 
 	return 1;
 }
@@ -1950,7 +1909,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|	// fbc = call->func;
 	|	// mov r1, EX:r0->func ???
 	|	// SAVE_OPLINE();
-	|	SAVE_IP
+	if (!zend_jit_set_valid_ip(Dst)) {
+		return 0;
+	}
 	|	mov EX->opline, IP
 	||	if (call_level == 1) {
 	|		mov aword EX->call, 0
@@ -2016,7 +1977,7 @@ fallback:
 	}
 }
 
-static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
 
@@ -2028,11 +1989,7 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 		||	if (Z_REFCOUNTED_P(zv)) {
 		|		ADDREF_CONST zv, r1
 		||	}
-		if (inc_op) {
-			|	INC_IP
-		} else {
-			|	RESET_IP
-		}
+		valid_opline_offset++;
 		return 1;
 	}
 
@@ -2043,11 +2000,7 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	op1_info = OP1_INFO();
 	|	mov r0, EX->call
 	|	ZVAL_COPY_VALUE r0, opline->result.var, FP, opline->op1.var, op1_info, r1, ecx, r2
-	if (inc_op) {
-		|	INC_IP
-	} else {
-		|	RESET_IP
-	}
+	valid_opline_offset++;
 	return 1;
 
 fallback:
@@ -2055,7 +2008,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
 	if (!ssa->ops || !ssa->var_info) {
@@ -2074,11 +2027,7 @@ static int zend_jit_send_var(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	||	if (opline->op1_type == IS_CV) {
 	|		TRY_ADDREF op1_info, ch, r2
 	||	}
-	if (inc_op) {
-		|	INC_IP
-	} else {
-		|	RESET_IP
-	}
+	valid_opline_offset++;
 	return 1;
 
 fallback:
@@ -2086,7 +2035,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa, int inc_op)
+static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
 	unsigned int target_label;
@@ -2103,11 +2052,7 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 		    (opline+1)->op1_type == IS_TMP_VAR &&
 		    (opline+1)->op1.var == opline->result.var) {
 			(*opnum)++;
-			if (inc_op) {
-				|	INC_IP
-			} else {
-				|	RESET_IP
-			}
+			valid_opline_offset++;
 		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
                    (opline+1)->op1_type == IS_TMP_VAR &&
                    (opline+1)->op1.var == opline->result.var) {
@@ -2116,11 +2061,7 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 			| 	jmp =>target_label
 		} else {
 			|	mov dword [FP + opline->result.var + 8], IS_TRUE
-			if (inc_op) {
-				|	INC_IP
-			} else {
-				|	RESET_IP
-			}
+			valid_opline_offset++;
 		}
     } else if (!(op1_info & (1<<type))) {
 		if ((opline+1)->opcode == ZEND_JMPZ &&
@@ -2133,15 +2074,10 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
                    (opline+1)->op1_type == IS_TMP_VAR &&
                    (opline+1)->op1.var == opline->result.var) {
 			(*opnum)++;
-			if (inc_op) {
-				|	INC_IP
-				|	INC_IP
-			}
+			valid_opline_offset += 2;
 		} else {
 			|	mov dword [FP + opline->result.var + 8], IS_FALSE
-			if (inc_op) {
-				|	INC_IP
-			}
+			valid_opline_offset++;
 		}
 	} else {
 		goto fallback;
