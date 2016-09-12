@@ -563,6 +563,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 
 static int zend_jit_align_func(dasm_State **Dst)
 {
+	| RESET_IP
 	|.align 16
 	return 1;
 }
