@@ -1995,8 +1995,13 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|	// EX(opline) = op_array->opcodes;
 	|	LOAD_ADDR IP, (func->op_array.opcodes + call_info->num_args)
 	|	mov EX:r0->opline, IP
-	|	add r4, SPAD // stack alignment
-	|	jmp aword [IP]
+	||	if (func && op_array == &func->op_array) {
+	||		/* recursive call */
+	|		jmp =>call_info->num_args
+	||	} else {
+	|		add r4, SPAD // stack alignment
+	|		jmp aword [IP]
+	||	}
 
 	return 1;
 
