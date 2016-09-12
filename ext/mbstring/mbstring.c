@@ -451,6 +451,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_at, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_codepoint_at, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
@@ -580,6 +586,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_chr,					arginfo_mb_chr)
 	PHP_FE(mb_scrub,				arginfo_mb_scrub)
 	PHP_FE(mb_at,				arginfo_mb_at)
+	PHP_FE(mb_codepoint_at,				arginfo_mb_codepoint_at)
 #if HAVE_MBREGEX
 	PHP_MBREGEX_FUNCTION_ENTRIES
 #endif
@@ -5404,6 +5411,31 @@ PHP_FUNCTION(mb_at)
 		RETURN_EMPTY_STRING();
 	}
 
+}
+/* }}} */
+
+/* {{{ proto string mb_codepoint_at([string str, int index[, string encoding]]) */
+PHP_FUNCTION(mb_codepoint_at)
+{
+	char *str, *ret, *enc = NULL;
+	size_t str_len, enc_len, ret_len;
+	zend_long index, cp;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_LONG(index)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(enc, enc_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ret = php_mb_substr(str, str_len, index, 1, (char*) enc, &ret_len);
+	cp = php_mb_ord(ret, ret_len, enc);
+
+	if (ret != NULL) {
+		efree(ret);
+	}
+
+	RETURN_LONG(cp);
 }
 /* }}} */
 
