@@ -295,7 +295,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 	zend_string *offset_key;
 	HashTable *ht = spl_array_get_hash_table(intern);
 
-	if (!offset || Z_ISUNDEF_P(offset)) {
+	if (!offset || Z_ISUNDEF_P(offset) || !ht) {
 		return &EG(uninitialized_zval);
 	}
 
@@ -1796,7 +1796,8 @@ SPL_METHOD(Array, unserialize)
 		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
 		zval_ptr_dtor(&intern->array);
 		ZVAL_UNDEF(&intern->array);
-		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)) {
+		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)
+				|| (Z_TYPE(intern->array) != IS_ARRAY && Z_TYPE(intern->array) != IS_OBJECT)) {
 			goto outexcept;
 		}
 		var_push_dtor(&var_hash, &intern->array);
