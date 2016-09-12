@@ -3,7 +3,10 @@ Bug #67325 (imagetruecolortopalette: white is duplicated in palette)
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
-if (!(imagetypes() & IMG_JPG)) die('skip JPEG support not available');
+if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.3', '<=')) {
+    die("skip test requires newer than GD 2.2.3");
+}
+ if (!(imagetypes() & IMG_JPG)) die('skip JPEG support not available');
 ?>
 --FILE--
 <?php
