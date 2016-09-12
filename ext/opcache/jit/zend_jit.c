@@ -326,6 +326,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 				case ZEND_ASSIGN:
+				case ZEND_ASSIGN_DIM:
 				case ZEND_ASSIGN_REF:
 				case ZEND_BIND_GLOBAL:
 				case ZEND_FETCH_DIM_IS:
@@ -555,6 +556,9 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_ASSIGN:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
+		case ZEND_ASSIGN_DIM:
+			return (t1 & (MAY_BE_OBJECT|MAY_BE_LONG|MAY_BE_DOUBLE)) || opline->op2_type == IS_UNUSED ||
+				(t2 & (MAY_BE_UNDEF| MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
