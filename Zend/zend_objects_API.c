@@ -215,7 +215,7 @@ ZEND_API void zend_objects_store_del_ref_by_handle_ex(zend_object_handle handle,
 					} zend_end_try();
 				}
 			}
-			
+
 			/* re-read the object from the object store as the store might have been reallocated in the dtor */
 			obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 
@@ -306,8 +306,8 @@ ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	zend_object_store_bucket *obj_bucket = &EG(objects_store).object_buckets[handle];
-	
-	obj_bucket->bucket.obj.handlers = Z_OBJ_HT_P(zobject);;
+
+	obj_bucket->bucket.obj.handlers = Z_OBJ_HT_P(zobject);
 	obj_bucket->destructor_called = 1;
 }
 
