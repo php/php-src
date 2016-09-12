@@ -631,12 +631,6 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	zend_long		  flags = 0;		/* Match control flags */
 	zend_long		  start_offset = 0;	/* Where the new search starts */
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|z/ll", &regex,
-							  &subject, &subpats, &flags, &start_offset) == FAILURE) {
-		RETURN_FALSE;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STR(regex)
 		Z_PARAM_STR(subject)
@@ -645,7 +639,6 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		Z_PARAM_LONG(flags)
 		Z_PARAM_LONG(start_offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-#endif
 
 	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
 			php_error_docref(NULL, E_WARNING, "Subject is too long");
@@ -1542,12 +1535,7 @@ static PHP_FUNCTION(preg_replace)
 	zend_long limit = -1;
 	int replace_count;
 
-#ifndef FAST_ZPP
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_ZVAL(regex)
 		Z_PARAM_ZVAL(replace)
@@ -1556,7 +1544,6 @@ static PHP_FUNCTION(preg_replace)
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (Z_TYPE_P(replace) == IS_ARRAY && Z_TYPE_P(regex) != IS_ARRAY) {
 		php_error_docref(NULL, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
@@ -1580,12 +1567,7 @@ static PHP_FUNCTION(preg_replace_callback)
 	zend_string	*callback_name;
 	int replace_count;
 
-#ifndef FAST_ZPP
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
-		return;
-	}    
-#else
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_ZVAL(regex)
 		Z_PARAM_ZVAL(replace)
@@ -1594,7 +1576,6 @@ static PHP_FUNCTION(preg_replace_callback)
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (!zend_is_callable(replace, 0, &callback_name)) {
 		php_error_docref(NULL, E_WARNING, "Requires argument 2, '%s', to be a valid callback", ZSTR_VAL(callback_name));
@@ -1622,12 +1603,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 	zend_string *callback_name;
 	int replace_count = 0;
 
-#ifndef FAST_ZPP
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "az|lz/", &pattern, &subject, &limit, &zcount) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY(pattern)
 		Z_PARAM_ZVAL(subject)
@@ -1635,7 +1611,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 	
 	ZVAL_UNDEF(&zv);
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pattern), str_idx, replace) {
@@ -1693,12 +1668,7 @@ static PHP_FUNCTION(preg_filter)
 	zend_long limit = -1;
 	int replace_count;
 
-#ifndef FAST_ZPP
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
-		return;
-	}    
-#else
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_ZVAL(regex)
 		Z_PARAM_ZVAL(replace)
@@ -1707,7 +1677,6 @@ static PHP_FUNCTION(preg_filter)
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (Z_TYPE_P(replace) == IS_ARRAY && Z_TYPE_P(regex) != IS_ARRAY) {
 		php_error_docref(NULL, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
@@ -1733,12 +1702,6 @@ static PHP_FUNCTION(preg_split)
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get function parameters and do error checking */
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ll", &regex,
-							  &subject, &limit_val, &flags) == FAILURE) {
-		RETURN_FALSE;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(regex)
 		Z_PARAM_STR(subject)
@@ -1746,7 +1709,6 @@ static PHP_FUNCTION(preg_split)
 		Z_PARAM_LONG(limit_val)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-#endif
 
 	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
 			php_error_docref(NULL, E_WARNING, "Subject is too long");
@@ -1939,18 +1901,11 @@ static PHP_FUNCTION(preg_quote)
 	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
 
 	/* Get the arguments and check for errors */
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &in_str, &in_str_len,
-							  &delim, &delim_len) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(in_str, in_str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(delim, delim_len)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	in_str_end = in_str + in_str_len;
 
@@ -2028,19 +1983,12 @@ static PHP_FUNCTION(preg_grep)
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get arguments and do error checking */
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sa|l", &regex,
-							  &input, &flags) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(regex)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
@@ -2141,14 +2089,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
    Returns the error code of the last regexp execution. */
 static PHP_FUNCTION(preg_last_error)
 {
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	RETURN_LONG(PCRE_G(error_code));
 }

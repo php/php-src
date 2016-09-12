@@ -1449,11 +1449,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	zend_string *replaced;
 	zend_bool double_encode = 1;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lS!b", &str, &flags, &hint_charset, &double_encode) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
@@ -1461,7 +1456,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		Z_PARAM_STR_EX(hint_charset, 1, 0)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (!hint_charset) {
 		default_charset = get_default_charset();
@@ -1531,19 +1525,12 @@ PHP_FUNCTION(html_entity_decode)
 	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lS", &str,
-							  &quote_style, &hint_charset) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(quote_style)
 		Z_PARAM_STR(hint_charset)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (!hint_charset) {
 		default_charset = get_default_charset();

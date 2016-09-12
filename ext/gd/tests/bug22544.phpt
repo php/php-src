@@ -8,16 +8,13 @@ Bug #22544 (TrueColor transparency in PNG images).
 ?>
 --FILE--
 <?php
-	$dest = dirname(realpath(__FILE__)) . '/bug22544.png';
-	@unlink($dest);
 	$image = imageCreateTruecolor(640, 100);
 	$transparent = imageColorAllocate($image, 0, 0, 0);
 	$red = imageColorAllocate($image, 255, 50, 50);
 	imageColorTransparent($image, $transparent);
 	imageFilledRectangle($image, 0, 0, 640-1, 100-1, $transparent);
-	imagegd($image, $dest);
-	echo md5_file($dest) . "\n";
-	@unlink($dest);
+	include_once __DIR__ . '/func.inc';
+	test_image_equals_file(__DIR__ . '/bug22544.png', $image);
 ?>
 --EXPECT--
-7643ef115f642a79c2de6e411f485ddd
+The images are equal.

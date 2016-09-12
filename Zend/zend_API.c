@@ -202,7 +202,6 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
-#ifdef FAST_ZPP
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
 {
 	zend_function *active_function = EG(current_execute_data)->func;
@@ -298,7 +297,6 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 	return 1;
 }
 /* }}} */
-#endif
 
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest) /* {{{ */
 {

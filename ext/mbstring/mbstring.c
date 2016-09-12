@@ -1268,7 +1268,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 	const mbfl_encoding **list;
 	size_t size;
 
-	if (!new_value) {
+	if (!new_value || !ZSTR_VAL(new_value)) {
 		if (MBSTRG(http_input_list)) {
 			pefree(MBSTRG(http_input_list), 1);
 		}
@@ -1336,7 +1336,7 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 {
 	const mbfl_encoding *encoding;
 
-	if (!new_value || new_value_length == 0 || !(encoding = mbfl_name2encoding(new_value))) {
+	if (!new_value || !new_value_length || !(encoding = mbfl_name2encoding(new_value))) {
 		/* falls back to UTF-8 if an unknown encoding name is given */
 		encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
 	}
@@ -5121,17 +5121,11 @@ PHP_FUNCTION(mb_ord)
 	size_t enc_len;
 	zend_long cp;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(enc, enc_len)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	cp = php_mb_ord(str, str_len, enc);
 
@@ -5302,17 +5296,11 @@ PHP_FUNCTION(mb_chr)
 	char* ret;
 	size_t ret_len;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s", &cp, &enc, &enc_len) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(cp)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(enc, enc_len)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	ret = php_mb_chr(cp, enc, &ret_len);
 
@@ -5343,17 +5331,11 @@ PHP_FUNCTION(mb_scrub)
 	size_t enc_len;
 	char *ret;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(enc, enc_len)
-ZEND_PARSE_PARAMETERS_END();
-#endif
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (enc == NULL) {
 		enc = (char *) MBSTRG(current_internal_encoding)->name;
