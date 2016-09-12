@@ -504,6 +504,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	has_slow = 1;
 |.endmacro
 
+const zend_op *valid_opline;
 static uint32_t valid_opline_offset;
 #endif
 
@@ -611,6 +612,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 
 static int zend_jit_align_func(dasm_State **Dst)
 {
+	valid_opline = NULL;
 	valid_opline_offset = 0;
 	|.align 16
 	return 1;
@@ -628,8 +630,29 @@ static int zend_jit_label(dasm_State **Dst, unsigned int label)
 	return 1;
 }
 
+static int zend_jit_set_valid_ip(dasm_State **Dst)
+{
+	if (valid_opline || valid_opline_offset) {
+		if (!valid_opline) {
+			|	add IP, sizeof(zend_op) * valid_opline_offset
+		} else {
+			const zend_op *target_opline = valid_opline + valid_opline_offset;
+
+			valid_opline = NULL;
+			|	LOAD_ADDR IP, target_opline
+		}
+		valid_opline_offset = 0;
+	}
+	return 1;
+}
+
 static int zend_jit_check_timeout(dasm_State **Dst)
 {
+	if (zend_interrupt_function) {
+		if (!zend_jit_set_valid_ip(Dst)) {
+			return 0;
+		}
+	}
 	|	cmp byte [&EG(vm_interrupt)], 0
 	|	jne ->interrupt_handler
 	return 1;
@@ -639,15 +662,6 @@ static int zend_jit_check_exception(dasm_State **Dst)
 {
 	|	cmp aword [&EG(exception)], 0
 	|	jne ->exception_handler
-	return 1;
-}
-
-static int zend_jit_set_valid_ip(dasm_State **Dst)
-{
-	if (valid_opline_offset) {
-		|	add IP, sizeof(zend_op) * valid_opline_offset
-		valid_opline_offset = 0;
-	}
 	return 1;
 }
 
@@ -681,14 +695,13 @@ static int zend_jit_skip_handler(dasm_State **Dst)
 
 static int zend_jit_set_opline(dasm_State **Dst, zend_op *target_opline)
 {
+	valid_opline = target_opline;
 	valid_opline_offset = 0;
-	|	LOAD_ADDR IP, target_opline
 	return 1;
 }
 
 static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
 {
-	valid_opline_offset = 0;
 	|	jmp =>target_label
 	return 1;
 }
