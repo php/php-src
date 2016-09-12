@@ -2963,9 +2963,13 @@ PHP_FUNCTION(mb_substr)
 	size_t str_len, ret_len, encoding_len;
 	zend_bool len_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!s", &str, &str_len, &from, &len, &len_is_null, &encoding, &encoding_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_LONG(from)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_EX(len, len_is_null, 1, 0)
+		Z_PARAM_STRING(encoding, encoding_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (len_is_null) {
 		len = str_len;
