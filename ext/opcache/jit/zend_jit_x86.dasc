@@ -1965,8 +1965,13 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	||	}
 	|
 	|	//EX_LOAD_RUN_TIME_CACHE(op_array);
-	|	mov r1, EX:r0->func
-	|	mov r2, aword [r1 + offsetof(zend_op_array, run_time_cache)]
+	||	if (func && op_array == &func->op_array) {
+	||		/* recursive call */
+	|		mov r2, EX->run_time_cache
+	||	} else {
+	|		mov r1, EX:r0->func
+	|		mov r2, aword [r1 + offsetof(zend_op_array, run_time_cache)]
+	||	}
 	|	mov EX:r0->run_time_cache, r2
 	|	//EX_LOAD_LITERALS(op_array);
 	|.if X64
