@@ -65,7 +65,7 @@
 |.globals zend_lb
 static void* dasm_labels[zend_lb_MAX];
 
-|.section code, cold_codes
+|.section code, cold_code
 
 |.macro LOAD_ADDR, reg, addr
 |.if X64
@@ -830,7 +830,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 		||	    opline->result_type != IS_UNUSED) {
 		|		ZVAL_COPY_VALUE FP, opline->result.var, FP, opline->op1.var, MAY_BE_LONG, r0, eax, r1
 		||	}
-		|.cold_codes
+		|.cold_code
 		|1:
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 			|.if X64
@@ -863,7 +863,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 		||	}
 	}
 	if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
-		|.cold_codes
+		|.cold_code
 		|2:
 		|	lea	FCARG1a, [FP + opline->op1.var]
 		|	// ZVAL_DEREF(var_ptr);
@@ -919,7 +919,7 @@ static int zend_jit_math_long_long(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|	LONG_STORE opline->result, r0
 	} else {
 		|	jo >1
-		|.cold_codes
+		|.cold_code
 		|1:
 		|.if X64 or SSE
 		|	SSE_LOAD_LONG opline->op1_type, opline->op1, xmm0
@@ -1039,7 +1039,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 			|	cmp	dword [FP + opline->op2.var + 8], IS_LONG
 			if (op2_info & MAY_BE_DOUBLE) {
 				|	jne >3
-				|.cold_codes
+				|.cold_code
 				|3:
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					|	cmp	dword [FP + opline->op2.var + 8], IS_DOUBLE
@@ -1058,7 +1058,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 			return 0;
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
-			|.cold_codes
+			|.cold_code
 			|4:
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 				|	cmp	dword [FP + opline->op1.var + 8], IS_DOUBLE
@@ -1113,7 +1113,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		}
 		if (!same_ops && (op2_info & MAY_BE_LONG)) {
 			if (op2_info & MAY_BE_DOUBLE) {
-				|.cold_codes
+				|.cold_code
 			}
 		    |3:
 			if (op2_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
@@ -1150,7 +1150,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		}
 		if (!same_ops && (op1_info & MAY_BE_LONG)) {
 			if (op1_info & MAY_BE_DOUBLE) {
-				|.cold_codes
+				|.cold_code
 			}
 			|3:
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
@@ -1175,7 +1175,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 	}
 
 	if (has_slow) {
-		|.cold_codes
+		|.cold_code
 		|9:
 		|	mov EX->opline, IP
 		|	lea	FCARG1a, [FP + opline->result.var]
@@ -1536,7 +1536,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 			|	cmp	dword [FP + opline->op2.var + 8], IS_LONG
 			if (op2_info & MAY_BE_DOUBLE) {
 				|	jne >3
-				|.cold_codes
+				|.cold_code
 				|3:
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					|	cmp	dword [FP + opline->op2.var + 8], IS_DOUBLE
@@ -1555,7 +1555,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 			return 0;
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
-			|.cold_codes
+			|.cold_code
 			|4:
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 				|	cmp	dword [FP + opline->op1.var + 8], IS_DOUBLE
@@ -1610,7 +1610,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		}
 		if (!same_ops && (op2_info & MAY_BE_LONG)) {
 			if (op2_info & MAY_BE_DOUBLE) {
-				|.cold_codes
+				|.cold_code
 			}
 		    |3:
 			if (op2_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
@@ -1647,7 +1647,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		}
 		if (!same_ops && (op1_info & MAY_BE_LONG)) {
 			if (op1_info & MAY_BE_DOUBLE) {
-				|.cold_codes
+				|.cold_code
 			}
 			|3:
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
@@ -1684,7 +1684,7 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 	}
 
 	if (has_slow) {
-		|.cold_codes
+		|.cold_code
 		|9:
 		|	mov EX->opline, IP
 		|	lea	FCARG1a, [FP + opline->result.var]
@@ -1843,7 +1843,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, zend_op *opline, zend_op_a
 	|	mov aword EX:r1->This.value.ptr, 0
 	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
 	|	mov dword EX:r1->This.u2.num_args, opline->extended_value
-	|.cold_codes
+	|.cold_code
 	|2:
 	|	mov FCARG1d, used_stack
 	|	mov FCARG2a, r0
@@ -1884,7 +1884,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, zend_op *opline, zend_op_array 
 		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
 		|	test r0, r0
 		|	jz >1
-		|.cold_codes
+		|.cold_code
 		|1:
 		|	// SAVE_OPLINE();
 		|	mov EX->opline, IP
