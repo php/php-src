@@ -5386,11 +5386,14 @@ PHP_FUNCTION(mb_at)
 	char* ret;
 	char* enc = NULL;
 	size_t str_len, enc_len, ret_len;
-	long index;
+	zend_long index;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s", &str, &str_len, &index, &enc, &enc_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_LONG(index)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(enc, enc_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ret = php_mb_substr(str, str_len, index, 1, (char*) enc, &ret_len);
 
