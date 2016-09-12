@@ -678,8 +678,22 @@ static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *scri
 
 static int zend_need_inc_op(zend_op_array *op_array, zend_op *opline, int b, zend_ssa *ssa) {
 	zend_op *next_opline = opline + 1;
-	if (next_opline->opcode == ZEND_JMP ||
-		next_opline->opcode == ZEND_JMPZNZ) {
+
+	switch (opline->opcode) {
+		case ZEND_IS_EQUAL:
+		case ZEND_IS_NOT_EQUAL:
+		case ZEND_IS_SMALLER:
+		case ZEND_IS_SMALLER_OR_EQUAL:
+			if ((next_opline->opcode == ZEND_JMPZ ||
+			     next_opline->opcode == ZEND_JMPNZ) &&
+			    next_opline->op1_type == IS_TMP_VAR &&
+			    next_opline->op1.var == opline->result.var) {
+				opline++;
+			}
+	}
+	next_opline = opline + 1;
+	if (next_opline->opcode == ZEND_JMP /*||
+		next_opline->opcode == ZEND_JMPZNZ*/) {
 		return 0;
 	} else if (opline == (op_array->opcodes + ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len - 1)) {
 		if ((ssa->cfg.blocks[b].successors[0] >= 0 &&
@@ -850,7 +864,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_IS_SMALLER:
 				case ZEND_IS_SMALLER_OR_EQUAL:
 					if (!zend_jit_cmp(&dasm_state,
-						opline, b, &i, op_array, ssa, zend_need_inc_op(op_array, opline + 1, b, ssa))) {
+						opline, b, &i, op_array, ssa, zend_need_inc_op(op_array, opline, b, ssa))) {
 						goto jit_failure;
 					}
 					break;
