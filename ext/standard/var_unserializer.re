@@ -441,6 +441,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 	    /* We've got partially constructed object on our hands here. Wipe it. */
 	    if(Z_TYPE_PP(rval) == IS_OBJECT) {
 	       zend_hash_clean(Z_OBJPROP_PP(rval));
+	       zend_object_store_ctor_failed(*rval TSRMLS_CC);
 	    }
 	    ZVAL_NULL(*rval);
 		return 0;
