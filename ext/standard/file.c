@@ -2301,6 +2301,10 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 		/* 3. Now pass our field back to php */
 		*comp_end = '\0';
+		if (UNEXPECTED((comp_end - temp) > INT_MAX)) {
+			zend_error_noreturn(E_WARNING, "String overflow, max size is %d", INT_MAX);
+			break;
+		}
 		add_next_index_stringl(return_value, temp, comp_end - temp, 1);
 	} while (inc_len > 0);
 
