@@ -108,6 +108,8 @@ typedef struct {
 	char *lastmsg;
 } pdo_dblib_err;
 
+void pdo_dblib_err_dtor(pdo_dblib_err *err);
+
 typedef struct {
 	LOGINREC	*login;
 	DBPROCESS	*link;

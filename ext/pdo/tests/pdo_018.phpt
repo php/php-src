@@ -129,9 +129,20 @@ unset($stmt);
 echo "===DATA===\n";
 $res = $db->query('SELECT test.val FROM test')->fetchAll(PDO::FETCH_COLUMN);
 
-// For Oracle map NULL to empty string so the test doesn't diff
-if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci' && $res[0] === null) {
-    $res[0] = "";
+switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+	case 'dblib':
+		// map whitespace (from early TDS versions) to empty string so the test doesn't diff
+		if ($res[0] === ' ') {
+			$res[0] = '';
+		}
+		break;
+
+	case 'oci':
+		// map NULL to empty string so the test doesn't diff
+		if ($res[0] === null) {
+			$res[0] = '';
+		}
+		break;
 }
 var_dump($res);
 

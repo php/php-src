@@ -95,22 +95,6 @@ static char *pdo_dblib_get_field_name(int type)
 }
 /* }}} */
 
-static void pdo_dblib_err_dtor(pdo_dblib_err *err)
-{
-	if (err->dberrstr) {
-		efree(err->dberrstr);
-		err->dberrstr = NULL;
-	}
-	if (err->lastmsg) {
-		efree(err->lastmsg);
-		err->lastmsg = NULL;
-	}
-	if (err->oserrstr) {
-		efree(err->oserrstr);
-		err->oserrstr = NULL;
-	}
-}
-
 static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
