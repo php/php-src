@@ -57,6 +57,11 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 		msg = einfo->dberrstr;
 	}
 
+	/* don't return anything if there's nothing to return */
+	if (msg == NULL && einfo->dberr == 0 && einfo->oserr == 0 && einfo->severity == 0) {
+		return 0;
+	}
+
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
 		msg, einfo->dberr, einfo->severity, stmt ? stmt->active_query_string : "");
 
