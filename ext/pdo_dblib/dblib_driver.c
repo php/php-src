@@ -88,6 +88,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
+		pdo_dblib_err_dtor(&H->err);
 	}
 	return 0;
 }
