@@ -1434,12 +1434,12 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, zend_op *opline, int b, 
 				|2:
 				break;
 			case ZEND_IS_SMALLER:
-				|	seta al
+				|	setnae al
 				|	movzx eax, al
 				|	add eax, 2
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
-				|	setae al
+				|	setna al
 				|	movzx eax, al
 				|	add eax, 2
 				break;
