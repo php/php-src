@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
     (Keyur) (julien backport)
 
+- OpenSSL:
+  . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
+    (Jakub Zelenka)
+
 - Session:
   . Fixed bug #68015 (Session does not report invalid uid for files save handler).
     (Yasuo)
