@@ -1787,8 +1787,7 @@ static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 {
 	uint32_t op1_info, op2_info;
 
-	if (opline->op1_type != IS_CV || opline->result_type != IS_UNDEF ||
-	    !ssa->ops || !ssa->var_info) {
+	if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED || !ssa->ops || !ssa->var_info) {
 		goto fallback;
 	}
 
