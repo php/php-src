@@ -43,6 +43,9 @@ PHP                                                                        NEWS
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
 
+- SQLite3:
+  . Updated bundled SQLite3 to 3.14.2. (cmb)
+
 - Zip:
   . Fixed bug #70752 (Depacking with wrong password leaves 0 length files).
     (cmb)
