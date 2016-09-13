@@ -1991,27 +1991,61 @@ fallback:
 static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
+	uint32_t arg_num = opline->op2.num;
 
-	if (opline->op1_type == IS_CONST) {
-		zval *zv = RT_CONSTANT(op_array, opline->op1);
-
-		|	mov r1, EX->call
-		|	ZVAL_COPY_CONST r1, opline->result.var, -1, zv, r0
-		||	if (Z_REFCOUNTED_P(zv)) {
-		|		ADDREF_CONST zv, r0
-		||	}
-		valid_opline_offset++;
-		return 1;
-	}
-
-	if (!ssa->ops || !ssa->var_info) {
+	if (opline->opcode == ZEND_SEND_VAL_EX && arg_num > MAX_ARG_FLAG_NUM) {
 		goto fallback;
 	}
 
 	op1_info = OP1_INFO();
+
 	|	mov r1, EX->call
-	|	ZVAL_COPY_VALUE r1, opline->result.var, FP, opline->op1.var, op1_info, r0, eax, r2
+
+	if (opline->opcode == ZEND_SEND_VAL_EX) {
+		uint32_t mask = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
+
+		|	mov r0, EX:r1->func
+		if (arg_num <= MAX_ARG_FLAG_NUM) {
+			|	mov eax, dword [r0 + offsetof(zend_function, quick_arg_flags)]
+			|	and	eax, mask
+			|	jnz	>1
+		} else {
+			ZEND_ASSERT(0);
+		}
+		|.cold_code
+		|1:
+		|	mov dword [r1 + opline->result.var + 8], IS_UNDEF
+		|	mov EX->opline, IP
+		|.if X64
+		|	mov CARG1, 0
+		|	LOAD_ADDR CARG2, "Cannot pass parameter %d by reference"
+		|	mov CARG3d, arg_num
+		|	EXT_CALL zend_throw_error, r0
+		|.else
+		|	sub r4, 4
+		|	push arg_num
+		|	push "Cannot pass parameter %d by reference"
+		|	push 0
+		|	EXT_CALL zend_throw_error, r0
+		|	add r4, 16
+		|.endif
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+		|	jmp ->exception_handler
+		|.code
+	}
+
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(op_array, opline->op1);
+
+		|	ZVAL_COPY_CONST r1, opline->result.var, -1, zv, r0
+		||	if (Z_REFCOUNTED_P(zv)) {
+		|		ADDREF_CONST zv, r0
+		||	}
+	} else {
+		|	ZVAL_COPY_VALUE r1, opline->result.var, FP, opline->op1.var, op1_info, r0, eax, r2
+	}
 	valid_opline_offset++;
+
 	return 1;
 
 fallback:

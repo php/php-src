@@ -19,6 +19,7 @@
 #include <ZendAccelerator.h>
 #include "Zend/zend_execute.h"
 #include "Zend/zend_vm.h"
+#include "Zend/zend_exceptions.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
 
@@ -808,6 +809,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					}
 					break;
 				case ZEND_SEND_VAL:
+				case ZEND_SEND_VAL_EX:
 					if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;
 					}
