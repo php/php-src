@@ -1203,7 +1203,11 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		||		if (ZEND_DEBUG) {
 		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
 		|			LOAD_ADDR FCARG2a, filename
+		|.if X64
+		|			mov CARG3d, opline->lineno
+		|.else
 		|			push opline->lineno
+		|.endif
 		||		}
 		|		EXT_CALL _zval_dtor_func, r0
 		|1:
@@ -1219,7 +1223,11 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		||		if (ZEND_DEBUG) {
 		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
 		|			LOAD_ADDR FCARG2a, filename
+		|.if X64
+		|			mov CARG3d, opline->lineno
+		|.else
 		|			push opline->lineno
+		|.endif
 		||		}
 		|		EXT_CALL _zval_dtor_func, r0
 		|1:
@@ -1709,7 +1717,11 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		||		if (ZEND_DEBUG) {
 		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
 		|			LOAD_ADDR FCARG2a, filename
+		|.if X64
+		|			mov CARG3d, opline->lineno
+		|.else
 		|			push opline->lineno
+		|.endif
 		||		}
 		|		EXT_CALL _zval_dtor_func, r0
 		|1:
@@ -1725,7 +1737,11 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		||		if (ZEND_DEBUG) {
 		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
 		|			LOAD_ADDR FCARG2a, filename
+		|.if X64
+		|			mov CARG3d, opline->lineno
+		|.else
 		|			push opline->lineno
+		|.endif
 		||		}
 		|		EXT_CALL _zval_dtor_func, r0
 		|1:
