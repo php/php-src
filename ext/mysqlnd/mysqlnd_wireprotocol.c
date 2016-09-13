@@ -1608,6 +1608,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 	zend_uchar * p = row_buffer->ptr;
 	size_t data_size = row_buffer->app;
 	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
+	const zend_uchar * const packet_end = (zend_uchar*) row_buffer->ptr + data_size;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
 
@@ -1619,11 +1620,15 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 
 	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
-		zend_ulong len = php_mysqlnd_net_field_length(&p);
+		const zend_ulong len = php_mysqlnd_net_field_length(&p);
 
 		/* NULL or NOT NULL, this is the question! */
 		if (len == MYSQLND_NULL_LENGTH) {
 			ZVAL_NULL(current_field);
+		} else if ((p + len) > packet_end) {
+			php_error_docref(NULL, E_WARNING, "Malformed server packet. Field length pointing "MYSQLND_SZ_T_SPEC
+											  " bytes after end of packet", (p + len) - packet_end - 1);
+			DBG_RETURN(FAIL);
 		} else {
 #if defined(MYSQLND_STRING_TO_INT_CONVERSION)
 			struct st_mysqlnd_perm_bind perm_bind =
