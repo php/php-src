@@ -616,7 +616,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 
 static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t *flags)
 {
-	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, &ssa->cfg, flags) != SUCCESS) {
+	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE, &ssa->cfg, flags) != SUCCESS) {
 		return FAILURE;
 	}
 
