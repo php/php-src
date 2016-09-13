@@ -826,6 +826,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
 				case ZEND_IS_SMALLER_OR_EQUAL:
+				case ZEND_CASE:
 					if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa)) {
 						goto jit_failure;
 					}
