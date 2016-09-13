@@ -504,6 +504,27 @@ static void* dasm_labels[zend_lb_MAX];
 ||	has_slow = 1;
 |.endmacro
 
+|.macro FREE_OP, op_type, op, op_info, op_array, lineno
+||if ((op_type & (IS_VAR|IS_TMP_VAR)) &&
+||   (op_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+|		and byte [FP + op.var + 9], IS_TYPE_REFCOUNTED
+|		je >1
+|		mov FCARG1a, aword [FP + op.var]
+|		dec dword [FCARG1a]
+|		jnz >1
+||	if (ZEND_DEBUG) {
+||		const char *filename = op_array->filename ? op_array->filename->val : NULL;
+|		LOAD_ADDR FCARG2a, filename
+|		push lineno
+||	}
+|	EXT_CALL _zval_dtor_func, r0
+||	if (ZEND_DEBUG) {
+|		add r4, sizeof(ptrdiff_t)
+||	}
+|	1:
+||}
+|.endmacro
+
 const zend_op *valid_opline;
 static uint32_t valid_opline_offset;
 #endif
@@ -1190,37 +1211,8 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, zend_op_array *op_ar
 		||	} else {
 		||		ZEND_ASSERT(0);
 		||	}
-		||	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
-		||      (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-		|		and byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
-		|		je >1
-		|		mov FCARG1a, aword [FP + opline->op1.var]
-		|		dec dword [FCARG1a]
-		|		jnz >1
-		||		if (ZEND_DEBUG) {
-		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
-		|			LOAD_ADDR FCARG2a, filename
-		|			push opline->lineno
-		||		}
-		|		EXT_CALL _zval_dtor_func, r0
-		|1:
-		||	}
-		||	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
-		||	    (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-		|		and byte [FP + opline->op2.var + 9], IS_TYPE_REFCOUNTED
-		|		je >1
-		|		mov FCARG1a, aword [FP + opline->op2.var]
-		|		dec dword [FCARG1a]
-		|		dec dword [FP + opline->op2.var]
-		|		jnz >1
-		||		if (ZEND_DEBUG) {
-		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
-		|			LOAD_ADDR FCARG2a, filename
-		|			push opline->lineno
-		||		}
-		|		EXT_CALL _zval_dtor_func, r0
-		|1:
-		||	}
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, op_array, opline->lineno
 		||	if (zend_may_throw(opline, op_array, ssa)) {
 		||		zend_jit_check_exception(Dst);
 		||	}
@@ -1690,37 +1682,8 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		|	PUSH_ZVAL_ADDR opline->op2_type, opline->op2, r0
 		|.endif
 		|	EXT_CALL compare_function, r0
-		||	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
-		||      (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-		|		and byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
-		|		je >1
-		|		mov FCARG1a, aword [FP + opline->op1.var]
-		|		dec dword [FCARG1a]
-		|		jnz >1
-		||		if (ZEND_DEBUG) {
-		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
-		|			LOAD_ADDR FCARG2a, filename
-		|			push opline->lineno
-		||		}
-		|		EXT_CALL _zval_dtor_func, r0
-		|1:
-		||	}
-		||	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
-		||	    (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-		|		and byte [FP + opline->op2.var + 9], IS_TYPE_REFCOUNTED
-		|		je >1
-		|		mov FCARG1a, aword [FP + opline->op2.var]
-		|		dec dword [FCARG1a]
-		|		dec dword [FP + opline->op2.var]
-		|		jnz >1
-		||		if (ZEND_DEBUG) {
-		||			const char *filename = op_array->filename ? op_array->filename->val : NULL;
-		|			LOAD_ADDR FCARG2a, filename
-		|			push opline->lineno
-		||		}
-		|		EXT_CALL _zval_dtor_func, r0
-		|1:
-		||	}
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, op_array, opline->lineno
 		||	if (zend_may_throw(opline, op_array, ssa)) {
 		||		zend_jit_check_exception(Dst);
 		||	}
@@ -2115,6 +2078,96 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 fallback:
 	/* fallback to subroutine threading */
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
+static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info;
+
+	if (op_array->type == ZEND_EVAL_CODE || !op_array->function_name || !ssa->ops || !ssa->var_info) {
+		return zend_jit_tail_handler(Dst, opline);
+	}
+
+	op1_info = OP1_INFO();
+	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
+		return zend_jit_tail_handler(Dst, opline);
+	}
+
+	// if (!EX(return_value))
+	|	mov r1, EX->return_value
+	|	test r1, r1
+	|	jnz >2
+	|	FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+	|	jmp >9
+	|2:
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(op_array, opline->op1);
+		|	ZVAL_COPY_CONST r1, 0, -1, zv, r0
+		if (Z_REFCOUNTED_P(zv)) {
+		|	ADDREF_CONST zv, r0
+		}
+	} else if (opline->op1_type == IS_TMP_VAR) {
+		|	ZVAL_COPY_VALUE r1, 0, FP, opline->op1.var, op1_info, r0, eax, r2
+	} else if (opline->op1_type == IS_CV) {
+		if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+			|	lea	r0, [FP + opline->op1.var]
+			|	ZVAL_DEREF r0, op1_info
+			|	ZVAL_COPY_VALUE_REG r1, 0, r0, op1_info, r0, eax, r2
+		} else {
+			|	ZVAL_COPY_VALUE r1, 0, FP, opline->op1.var, op1_info, r0, eax, r2
+		}
+		|	TRY_ADDREF op1_info, ah, r2
+	} else {
+		if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+			if (op1_info & MAY_BE_REF) {
+			|	lea	FCARG1a, [FP + opline->op1.var]
+			|	cmp byte [FCARG1a + 8], IS_REFERENCE
+			|	jne >4
+			|	mov FCARG1a, [FCARG1a]
+			|	add FCARG1a, 8
+			|	ZVAL_COPY_VALUE_REG r1, 0, FCARG1a, op1_info, r1, ebx, r2
+			|	sub FCARG1a, 8
+			|	dec dword [r0]
+			|	jne >3
+			if (ZEND_DEBUG) {
+				const char *filename = op_array->filename ? op_array->filename->val : NULL;
+			|	LOAD_ADDR FCARG1a, filename
+			|	push opline->lineno
+			}
+			|	EXT_CALL _efree, r0
+			if (ZEND_DEBUG) {
+			|	add r4, sizeof(ptrdiff_t)
+			}
+			|	jmp >9
+			|3:
+			|	TRY_ADDREF op1_info, bh, r2
+			|	jmp >9
+			|4:
+			|	ZVAL_COPY_VALUE r1, 0, FP, opline->op1.var, op1_info, r0, eax, r2
+			} else {
+			|	ZVAL_COPY_VALUE r1, 0, FP, opline->op1.var, op1_info, r0, eax, r2
+			}
+		} else {
+			|	ZVAL_COPY_VALUE r1, 0, FP, opline->op1.var, op1_info, r0, eax, r2
+		}
+	}
+	|9:
+	|	mov FCARG1a, FP
+	if (!zend_jit_set_valid_ip(Dst)) {
+		return 0;
+	}
+	|	mov [FP], IP
+	|	EXT_CALL zend_jit_leave_helper, r0
+	zend_jit_check_exception(Dst);
+	|	cmp al, 0
+	|	jg >1
+	|	LOAD_ADDR FP, &EG(current_execute_data)
+	|	mov FP, [FP]
+	|	mov IP, EX->opline
+	|1:
+	|	add r4, SPAD
+	|	ret
+	return 1;
 }
 
 #endif
