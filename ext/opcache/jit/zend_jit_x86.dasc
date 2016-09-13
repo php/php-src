@@ -525,11 +525,6 @@ static void* dasm_labels[zend_lb_MAX];
 |.endif
 ||	}
 |	EXT_CALL _zval_dtor_func, r0
-||	if (ZEND_DEBUG) {
-|.if not X64
-|		add r4, sizeof(ptrdiff_t)
-|.endif
-||	}
 |	1:
 ||}
 |.endmacro
@@ -1686,8 +1681,6 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 			|	jnz >1
 			|1:
 		}
-		if (opline->op2_type == IS_CV && (op2_info & MAY_BE_UNDEF)) {
-		}
 		|	lea	FCARG1a, [FP + opline->result.var]
 		|	LOAD_ZVAL_ADDR FCARG2a, opline->op1_type, opline->op1
 		|.if X64
@@ -1696,7 +1689,9 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		|	PUSH_ZVAL_ADDR opline->op2_type, opline->op2, r0
 		|.endif
 		|	EXT_CALL compare_function, r0
-		|	FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+		||	if (opline->opcode != ZEND_CASE) {
+		|		FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+		||	}
 		|	FREE_OP opline->op2_type, opline->op2, op2_info, op_array, opline->lineno
 		||	if (zend_may_throw(opline, op_array, ssa)) {
 		||		zend_jit_check_exception(Dst);
