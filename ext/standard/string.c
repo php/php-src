@@ -2500,7 +2500,7 @@ PHP_FUNCTION(substr_replace)
 				repl_str = Z_STR_P(repl);
 			}
 
-			result = zend_string_alloc(Z_STRLEN_P(str) - l + ZSTR_LEN(repl_str), 0);
+			result = zend_string_safe_alloc(1, Z_STRLEN_P(str) - l + ZSTR_LEN(repl_str), 0, 0);
 
 			memcpy(ZSTR_VAL(result), Z_STRVAL_P(str), f);
 			if (ZSTR_LEN(repl_str)) {
@@ -2609,14 +2609,14 @@ PHP_FUNCTION(substr_replace)
 
 					result_len += ZSTR_LEN(repl_str);
 					repl_idx++;
-					result = zend_string_alloc(result_len, 0);
+					result = zend_string_safe_alloc(1, result_len, 0, 0);
 
 					memcpy(ZSTR_VAL(result), ZSTR_VAL(orig_str), f);
 					memcpy((ZSTR_VAL(result) + f), ZSTR_VAL(repl_str), ZSTR_LEN(repl_str));
 					memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), ZSTR_VAL(orig_str) + f + l, ZSTR_LEN(orig_str) - f - l);
 					zend_string_release(repl_str);
 				} else {
-					result = zend_string_alloc(result_len, 0);
+					result = zend_string_safe_alloc(1, result_len, 0, 0);
 
 					memcpy(ZSTR_VAL(result), ZSTR_VAL(orig_str), f);
 					memcpy((ZSTR_VAL(result) + f), ZSTR_VAL(orig_str) + f + l, ZSTR_LEN(orig_str) - f - l);
@@ -2624,7 +2624,7 @@ PHP_FUNCTION(substr_replace)
 			} else {
 				result_len += Z_STRLEN_P(repl);
 
-				result = zend_string_alloc(result_len, 0);
+				result = zend_string_safe_alloc(1, result_len, 0, 0);
 
 				memcpy(ZSTR_VAL(result), ZSTR_VAL(orig_str), f);
 				memcpy((ZSTR_VAL(result) + f), Z_STRVAL_P(repl), Z_STRLEN_P(repl));
