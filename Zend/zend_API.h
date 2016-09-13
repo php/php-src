@@ -655,7 +655,7 @@ END_EXTERN_C()
 #define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 
 /* Check that returned string length fits int */
-#define RETVAL_STRINGL_CHECK(s, len, dup)	\
+#define RETVAL_STRINGL_CHECK(s, len, dup) do {	\
 	size_t __len = (len);					\
 	if (UNEXPECTED(__len > INT_MAX)) { 		\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long, max is %d", INT_MAX); \
@@ -664,8 +664,8 @@ END_EXTERN_C()
 		}									\
 		RETURN_FALSE;						\
 	}										\
-	RETVAL_STRINGL((s), __len, (dup))
-
+	RETVAL_STRINGL((s), __len, (dup)) \
+} while (0)
 
 
 #define SET_VAR_STRING(n, v) {																				\
