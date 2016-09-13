@@ -294,7 +294,7 @@ static void* dasm_labels[zend_lb_MAX];
 |         LONG_OP imul, op_type, op, reg
 ||        break;
 ||    case ZEND_DIV:
-|         idiv aword [FP + op.var]
+|         idiv aword [FP + op.var] // (reg == r0)
 ||        break;
 ||}
 |.endmacro
@@ -309,6 +309,9 @@ static void* dasm_labels[zend_lb_MAX];
 ||        break;
 ||    case ZEND_MUL:
 |         imul reg2, reg1
+||        break;
+||    case ZEND_DIV:
+|         idiv reg2 // (reg1 == r0)
 ||        break;
 ||}
 |.endmacro
@@ -1247,6 +1250,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, zend_op *opline, int b, zend
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				| jne => target_label
 				break;
 			case ZEND_IS_NOT_EQUAL:
@@ -1265,6 +1269,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, zend_op *opline, int b, zend
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				| je => target_label
 				break;
 			case ZEND_IS_NOT_EQUAL:
@@ -1280,6 +1285,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, zend_op *opline, int b, zend
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				|	sete al
 				|	movzx eax, al
 				|	add eax, 2
@@ -1316,6 +1322,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, zend_op *opline, int b, 
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				| jp >1
 				| jne => target_label
 				|1:
@@ -1338,6 +1345,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, zend_op *opline, int b, 
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				| jp >1
 				| je => target_label
 				|1:
@@ -1357,6 +1365,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, zend_op *opline, int b, 
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				|	jp >1
 				|	mov eax, IS_TRUE
 				|	je >2
@@ -1446,6 +1455,7 @@ static int zend_jit_cmp_slow(dasm_State **Dst, zend_op *opline, int b, zend_op_a
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				| jne => target_label
 				break;
 			case ZEND_IS_NOT_EQUAL:
@@ -1464,6 +1474,7 @@ static int zend_jit_cmp_slow(dasm_State **Dst, zend_op *opline, int b, zend_op_a
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				| je => target_label
 				break;
 			case ZEND_IS_NOT_EQUAL:
@@ -1479,6 +1490,7 @@ static int zend_jit_cmp_slow(dasm_State **Dst, zend_op *opline, int b, zend_op_a
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
 				|	sete al
 				|	movzx eax, al
 				|	add eax, 2
@@ -1690,7 +1702,8 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 		|	PUSH_ZVAL_ADDR opline->op2_type, opline->op2, r0
 		|.endif
 		|	EXT_CALL compare_function, r0
-		||	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+		||	if (opline->opcode != ZEND_CASE &&
+		||	    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
 		||      (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 		|		and byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
 		|		je >1
