@@ -88,6 +88,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
+  . Fixed bug #73007 (add locale length check). (Stas)
+
+- Mysqlnd:
+  . Fixed bug #72293 (Heap overflow in mysqlnd related to BIT fields). (Stas)
 
 - OCI8
   . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
@@ -112,6 +116,12 @@ PHP                                                                        NEWS
     specifying a sequence). (Pablo Santiago Sánchez, Matteo)
   . Fixed bug #72759 (Regression in pgo_pgsql). (Anatol)
 
+- Phar:
+  . Fixed bug #72928 (Out of bound when verify signature of zip phar in
+    phar_parse_zipfile). (Stas)
+  . Fixed bug #73035 (Out of bound when verify signature of tar phar in
+    phar_parse_tarfile). (Stas)
+
 - Reflection:
   . Fixed bug #72846 (getConstant for a array constant with constant values
     returns NULL/NFC/UKNOWN). (Laruence)
@@ -125,6 +135,9 @@ PHP                                                                        NEWS
   . Fixed bug #72971 (SimpleXML isset/unset do not respect namespace). (Nikita)
   . Fixed bug #72957 (Null coalescing operator doesn't behave as expected with
     SimpleXMLElement). (Nikita)
+
+- SPL:
+  . Fixed bug #73029 (Missing type check when unserializing SplArray). (Stas)
 
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
@@ -146,6 +159,10 @@ PHP                                                                        NEWS
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
   . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
+
+- Wddx:
+  . Fixed bug #72860 (wddx_deserialize use-after-free). (Stas)
+  . Fixed bug #73065 (Out-Of-Bounds Read in php_wddx_push_element). (Stas)
 
 - ZIP:
   . Fixed bug #68302 (impossible to compile php with zip support). (cmb)
