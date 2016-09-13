@@ -156,6 +156,9 @@ PHP                                                                        NEWS
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
 
+- SQLite3:
+  . Downgraded bundled SQLite to 3.8.10.2. (Anatol);
+
 - Sysvshm:
   . Fixed bug #72858 (shm_attach null dereference). (Anatol)
 
