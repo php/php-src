@@ -266,6 +266,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	if (data_len != 0 || data != NULL) {
 		if (stmt->dbh->stringify) {
 			switch (coltype) {
+				case SQLDECIMAL:
+				case SQLNUMERIC:
+				case SQLMONEY:
+				case SQLMONEY4:
+				case SQLMONEYN:
 				case SQLFLT4:
 				case SQLFLT8:
 				case SQLINT4:
@@ -361,18 +366,16 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+				case SQLDECIMAL:
+				case SQLNUMERIC:
 				case SQLMONEY:
 				case SQLMONEY4:
 				case SQLMONEYN: {
-					DBFLT8 money_value;
-					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&money_value, -1);
+					DBFLT8 float_value;
+					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&float_value, -1);
 
 					zv = emalloc(sizeof(zval));
-					ZVAL_DOUBLE(zv, money_value);
-
-					if (stmt->dbh->stringify) {
-						convert_to_string(zv);
-					}
+					ZVAL_DOUBLE(zv, float_value);
 
 					break;
 				}
