@@ -137,6 +137,10 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
+|.macro SET_TYPE_INFO, dst_base, dst_offset, type
+|	mov dword [dst_base + dst_offset + 8], type
+|.endmacro
+
 |.macro FP_OP, fp_ins, op_type, op
 ||if (op_type == IS_CONST) {
 |   .if X64
@@ -172,8 +176,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro FP_STORE, op
-|    fstp qword [FP + op.var]
-|    mov dword [FP + op.var + 8], IS_DOUBLE
+|	fstp qword [FP + op.var]
 |.endmacro
 
 |.macro SSE_OP, sse_ins, op_type, op, reg
@@ -245,8 +248,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SSE_STORE, op, reg
-|    movsd qword [FP + op.var], reg
-|    mov dword [FP + op.var + 8], IS_DOUBLE
+|	movsd qword [FP + op.var], reg
 |.endmacro
 
 |.macro LONG_OP, long_ins, op_type, op, reg
@@ -351,8 +353,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro LONG_STORE, op, reg
-|    mov aword [FP + op.var], reg
-|    mov dword [FP + op.var + 8], IS_LONG
+|	mov aword [FP + op.var], reg
 |.endmacro
 
 |.macro ZVAL_COPY_CONST, dst_base, dst_offset, dst_info, zv, tmp_reg
@@ -394,7 +395,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 ||}
 ||if ((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
-|	mov dword [dst_base + dst_offset + 8], Z_TYPE_INFO_P(zv);
+|	SET_TYPE_INFO dst_base, dst_offset, Z_TYPE_INFO_P(zv)
 ||}
 |.endmacro
 
@@ -426,10 +427,10 @@ static void* dasm_labels[zend_lb_MAX];
 ||if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
 ||    has_concrete_type(src_info & MAY_BE_ANY)) {
 ||	zend_uchar type = concrete_type(src_info);
-|	mov dword [dst_base + dst_offset + 8], type
+|	SET_TYPE_INFO dst_base, dst_offset, type
 ||} else {
 |	mov tmp_reg1d, dword [src_base + src_offset + 8]
-|	mov dword [dst_base + dst_offset + 8], tmp_reg1d
+|	SET_TYPE_INFO dst_base, dst_offset, tmp_reg1d
 ||}
 |.endmacro
 
@@ -461,10 +462,10 @@ static void* dasm_labels[zend_lb_MAX];
 ||if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
 ||    has_concrete_type(src_info & MAY_BE_ANY)) {
 ||	zend_uchar type = concrete_type(src_info);
-|	mov dword [dst_base + dst_offset + 8], type
+|	SET_TYPE_INFO dst_base, dst_offset, type
 ||} else {
 |	mov tmp_reg1d, dword [src_reg + 8]
-|	mov dword [dst_base + dst_offset + 8], tmp_reg1d
+|	SET_TYPE_INFO dst_base, dst_offset, tmp_reg1d
 ||}
 |.endmacro
 
@@ -876,7 +877,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 			|	mov dword [FP + opline->op1.var + 4], 0xc1e00000
 			|.endif
 		}
-		|	mov dword [FP + opline->op1.var + 8], IS_DOUBLE
+		|	SET_TYPE_INFO FP, opline->op1.var, IS_DOUBLE
 		||	if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		||	    opline->result_type != IS_UNUSED) {
 		|		ZVAL_COPY_VALUE FP, opline->result.var, FP, opline->op1.var, MAY_BE_DOUBLE, r0, eax, r1
@@ -940,6 +941,7 @@ static int zend_jit_math_long_long(dasm_State **Dst, zend_op *opline, zend_op_ar
 	||	}
 	if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 		|	LONG_STORE opline->result, r0
+		|	SET_TYPE_INFO FP, opline->result.var, IS_LONG
 	} else {
 		|	jo >1
 		|.cold_code
@@ -955,9 +957,11 @@ static int zend_jit_math_long_long(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|	LONGF_MATH opline->opcode
 		|	FP_STORE opline->result
 		|.endif
+		|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 		|	jmp >2
 		|.code
 		|	LONG_STORE opline->result, r0
+		|	SET_TYPE_INFO FP, opline->result.var, IS_LONG
 		|2:
 	}
 
@@ -975,6 +979,7 @@ static int zend_jit_math_long_double(dasm_State **Dst, zend_op *opline)
 	|	FP_MATH opline->opcode, opline->op2_type, opline->op2
 	|	FP_STORE opline->result
 	|.endif
+	|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 
 	return 1;
 }
@@ -985,13 +990,12 @@ static int zend_jit_math_double_long(dasm_State **Dst, zend_op *opline)
 	||	if (opline->opcode == ZEND_ADD || opline->opcode == ZEND_MUL) {
 	|		SSE_LOAD_LONG opline->op2_type, opline->op2, xmm0
 	|		SSE_MATH opline->opcode, opline->op1_type, opline->op1, xmm0
-	|		SSE_STORE opline->result,  xmm0
 	||	} else {
 	|		SSE_LOAD opline->op1_type, opline->op1, xmm0
 	|		SSE_LOAD_LONG opline->op2_type, opline->op2, xmm1
 	|		SSE_MATH2 opline->opcode, xmm1, xmm0
-	|		SSE_STORE opline->result,  xmm0
 	||	}
+	|	SSE_STORE opline->result,  xmm0
 	|.else
 	|	LONGF_LOAD opline->op2_type, opline->op2
 	||	if (opline->opcode == ZEND_ADD || opline->opcode == ZEND_MUL) {
@@ -1002,6 +1006,7 @@ static int zend_jit_math_double_long(dasm_State **Dst, zend_op *opline)
 	||	}
 	|	FP_STORE opline->result
 	|.endif
+	|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 
 	return 1;
 }
@@ -1023,6 +1028,7 @@ static int zend_jit_math_double_double(dasm_State **Dst, zend_op *opline)
 	|	FP_MATH opline->opcode, opline->op2_type, opline->op2
 	|	FP_STORE opline->result
 	|.endif
+	|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 
 	return 1;
 }
@@ -1299,7 +1305,7 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, zend_op *opline, int b, zend
 				|	add eax, 2
 				break;
 		}
-		|	mov dword [FP + opline->result.var + 8], eax
+		|	SET_TYPE_INFO FP, opline->result.var, eax
 	}
 
 	return 1;
@@ -1385,7 +1391,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, zend_op *opline, int b, 
 				|	add eax, 2
 				break;
 		}
-		|	mov dword [FP + opline->result.var + 8], eax
+		|	SET_TYPE_INFO FP, opline->result.var, eax
 	}
 
 	return 1;
@@ -1504,7 +1510,7 @@ static int zend_jit_cmp_slow(dasm_State **Dst, zend_op *opline, int b, zend_op_a
 				|	add eax, 2
 				break;
 		}
-		|	mov dword [FP + opline->result.var + 8], eax
+		|	SET_TYPE_INFO FP, opline->result.var, eax
 	}
 
 	return 1;
@@ -1933,7 +1939,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|	mov aword EX:r1->call, 0
 	||	if (RETURN_VALUE_USED(opline)) {
 	|		// ZVAL_NULL(EX_VAR(opline->result.var));
-	|		mov dword [FP + opline->result.var + 8], IS_NULL
+	|		SET_TYPE_INFO FP, opline->result.var, IS_NULL
 	|		// EX(return_value) = EX_VAR(opline->result.var);
 	|		lea r0, aword [FP + opline->result.var]
 	|		mov aword EX:r1->return_value, r0
@@ -1944,7 +1950,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|
 	||	for (i = call_info->num_args; i < func->op_array.last_var; i++) {
 	||		uint32_t n = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-	|		mov dword [r1 + n + 8], IS_UNDEF
+	|		SET_TYPE_INFO r1, n, IS_UNDEF
 	||	}
 	|
 	|	//EX_LOAD_RUN_TIME_CACHE(op_array);
@@ -2014,7 +2020,7 @@ static int zend_jit_send_val(dasm_State **Dst, zend_op *opline, zend_op_array *o
 		}
 		|.cold_code
 		|1:
-		|	mov dword [r1 + opline->result.var + 8], IS_UNDEF
+		|	SET_TYPE_INFO r1, opline->result.var, IS_UNDEF
 		|	mov EX->opline, IP
 		|.if X64
 		|	mov CARG1, 0
@@ -2105,7 +2111,7 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 			target_label = ssa->cfg.blocks[b].successors[0];
 			| 	jmp =>target_label
 		} else {
-			|	mov dword [FP + opline->result.var + 8], IS_TRUE
+			|	SET_TYPE_INFO FP, opline->result.var, IS_TRUE
 			valid_opline_offset++;
 		}
     } else if (!(op1_info & (1<<type))) {
@@ -2121,7 +2127,7 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 			(*opnum)++;
 			valid_opline_offset += 2;
 		} else {
-			|	mov dword [FP + opline->result.var + 8], IS_FALSE
+			|	SET_TYPE_INFO FP, opline->result.var, IS_FALSE
 			valid_opline_offset++;
 		}
 	} else {
