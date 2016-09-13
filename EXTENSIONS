@@ -108,8 +108,8 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_dblib
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Odd fixes
+PRIMARY MAINTAINER:  Adam Baratz <adambaratz@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
