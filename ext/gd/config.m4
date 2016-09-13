@@ -35,9 +35,6 @@ PHP_ARG_WITH(xpm-dir, for the location of libXpm,
 PHP_ARG_WITH(freetype-dir, for FreeType 2,
 [  --with-freetype-dir[=DIR] GD: Set the path to FreeType 2 install prefix], no, no)
 
-PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
-[  --enable-gd-native-ttf  GD: Enable TrueType string function], no, no)
-
 PHP_ARG_ENABLE(gd-jis-conv, whether to enable JIS-mapped Japanese font support in GD,
 [  --enable-gd-jis-conv    GD: Enable JIS-mapped Japanese font support], no, no)
 
@@ -206,17 +203,10 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
 
     PHP_EVAL_INCLINE($FREETYPE2_CFLAGS)
     PHP_EVAL_LIBLINE($FREETYPE2_LIBS, GD_SHARED_LIBADD)
-    AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
     AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
     AC_DEFINE(ENABLE_GD_TTF,1,[ ])
   else
     AC_MSG_RESULT([If configure fails try --with-freetype-dir=<DIR>])
-  fi
-])
-
-AC_DEFUN([PHP_GD_TTSTR],[
-  if test "$PHP_GD_NATIVE_TTF" = "yes"; then
-    AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
   fi
 ])
 

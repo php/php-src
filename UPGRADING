@@ -84,6 +84,10 @@ PHP 7.2 UPGRADE NOTES
    . Added extended exif tag support for the following formats: 
      Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
 
+- GD:
+    . Removed --enable-gd-native-ttf configuration option which was unused as
+      of PHP 5.5.0 anyway.
+
 - Mbstring
   . mb_check_encoding() accepts array parameter. Both key and value
     ecodings are checked recursively.
