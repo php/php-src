@@ -3632,7 +3632,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	ZEND_ASSERT(!Z_ISREF_P(ret));
 #endif
 
-	EG(current_execute_data) = call->prev_execute_data;
+	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 	zend_vm_stack_free_call_frame(call);
 
@@ -3733,7 +3733,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		}
 #endif
 
-		EG(current_execute_data) = call->prev_execute_data;
+		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
@@ -3830,7 +3830,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		}
 #endif
 
-		EG(current_execute_data) = call->prev_execute_data;
+		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
 
 		if (!RETURN_VALUE_USED(opline)) {

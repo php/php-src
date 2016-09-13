@@ -635,7 +635,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETVAL_UNUSED_HA
 	ZEND_ASSERT(!Z_ISREF_P(ret));
 #endif
 
-	EG(current_execute_data) = call->prev_execute_data;
+	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 	zend_vm_stack_free_call_frame(call);
 
@@ -682,7 +682,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETVAL_USED_HAND
 	ZEND_ASSERT(!Z_ISREF_P(ret));
 #endif
 
-	EG(current_execute_data) = call->prev_execute_data;
+	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 	zend_vm_stack_free_call_frame(call);
 
@@ -805,7 +805,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_U
 		}
 #endif
 
-		EG(current_execute_data) = call->prev_execute_data;
+		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
@@ -884,7 +884,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_U
 		}
 #endif
 
-		EG(current_execute_data) = call->prev_execute_data;
+		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
@@ -981,7 +981,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HA
 		}
 #endif
 
-		EG(current_execute_data) = call->prev_execute_data;
+		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
 
 		if (!0) {
@@ -1108,7 +1108,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_USED_HAND
 		}
 #endif
 
-		EG(current_execute_data) = call->prev_execute_data;
+		EG(current_execute_data) = execute_data;
 		zend_vm_stack_free_args(call);
 
 		if (!1) {
