@@ -141,7 +141,7 @@ static void* dasm_labels[zend_lb_MAX];
 |	mov dword [dst_base + dst_offset + 8], type
 |.endmacro
 
-|.macro FP_OP, fp_ins, op_type, op
+|.macro FPU_OP, fp_ins, op_type, op
 ||if (op_type == IS_CONST) {
 |   .if X64
 |   mov r0, aword EX->literals
@@ -154,29 +154,29 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
-|.macro FP_LOAD, op_type, op
-|	FP_OP fld, op_type, op
+|.macro FPU_LOAD, op_type, op
+|	FPU_OP fld, op_type, op
 |.endmacro
 
-|.macro FP_MATH, opcode, op_type, op
+|.macro FPU_MATH, opcode, op_type, op
 ||switch (opcode) {
 ||    case ZEND_ADD:
-|         FP_OP fadd, op_type, op
+|         FPU_OP fadd, op_type, op
 ||        break;
 ||    case ZEND_SUB:
-|         FP_OP fsub, op_type, op
+|         FPU_OP fsub, op_type, op
 ||        break;
 ||    case ZEND_MUL:
-|         FP_OP fmul, op_type, op
+|         FPU_OP fmul, op_type, op
 ||        break;
 ||    case ZEND_DIV:
-|         FP_OP fdiv, op_type, op
+|         FPU_OP fdiv, op_type, op
 ||        break;
 ||}
 |.endmacro
 
-|.macro FP_STORE, op
-|	fstp qword [FP + op.var]
+|.macro FPU_STORE, dst_base, dst_offset
+|	fstp qword [dst_base + dst_offset]
 |.endmacro
 
 |.macro SSE_OP, sse_ins, op_type, op, reg
@@ -247,8 +247,16 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
-|.macro SSE_STORE, op, reg
-|	movsd qword [FP + op.var], reg
+|.macro SSE_STORE, dst_base, dst_offset, reg
+|	movsd qword [dst_base + dst_offset], reg
+|.endmacro
+
+|.macro DOUBLE_STORE, dst_base, dst_offset, reg
+|.if X64 or SSE
+|	SSE_STORE dst_base, dst_offset, reg
+|.else
+|	FPU_STORE dst_base, dst_offset
+|.endif
 |.endmacro
 
 |.macro LONG_OP, long_ins, op_type, op, reg
@@ -318,7 +326,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
-|.macro LONGF_OP, fp_ins, op_type, op
+|.macro FPU_LONG_OP, fp_ins, op_type, op
 ||if (op_type == IS_CONST) {
 |   .if X64
 |   mov r0, aword EX->literals
@@ -331,11 +339,11 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
-|.macro LONGF_LOAD, op_type, op
-|	LONGF_OP fild, op_type, op
+|.macro FPU_LONG_LOAD, op_type, op
+|	FPU_LONG_OP fild, op_type, op
 |.endmacro
 
-|.macro LONGF_MATH, opcode
+|.macro FPU_MATH2, opcode
 ||switch (opcode) {
 ||    case ZEND_ADD:
 |         fadd st1
@@ -950,13 +958,12 @@ static int zend_jit_math_long_long(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|	SSE_LOAD_LONG opline->op1_type, opline->op1, xmm0
 		|	SSE_LOAD_LONG opline->op2_type, opline->op2, xmm1
 		|	SSE_MATH2 opline->opcode, xmm1, xmm0
-		|	SSE_STORE opline->result, xmm0
 		|.else
-		|	LONGF_LOAD opline->op2_type, opline->op2
-		|	LONGF_LOAD opline->op1_type, opline->op1
-		|	LONGF_MATH opline->opcode
-		|	FP_STORE opline->result
+		|	FPU_LONG_LOAD opline->op2_type, opline->op2
+		|	FPU_LONG_LOAD opline->op1_type, opline->op1
+		|	FPU_MATH2 opline->opcode
 		|.endif
+		|	DOUBLE_STORE FP, opline->result.var, xmm0
 		|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 		|	jmp >2
 		|.code
@@ -973,12 +980,11 @@ static int zend_jit_math_long_double(dasm_State **Dst, zend_op *opline)
 	|.if X64 or SSE
 	|	SSE_LOAD_LONG opline->op1_type, opline->op1, xmm0
 	|	SSE_MATH opline->opcode, opline->op2_type, opline->op2, xmm0
-	|	SSE_STORE opline->result, xmm0
 	|.else
-	|	LONGF_LOAD opline->op1_type, opline->op1
-	|	FP_MATH opline->opcode, opline->op2_type, opline->op2
-	|	FP_STORE opline->result
+	|	FPU_LONG_LOAD opline->op1_type, opline->op1
+	|	FPU_MATH opline->opcode, opline->op2_type, opline->op2
 	|.endif
+	|	DOUBLE_STORE FP, opline->result.var, xmm0
 	|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 
 	return 1;
@@ -995,17 +1001,16 @@ static int zend_jit_math_double_long(dasm_State **Dst, zend_op *opline)
 	|		SSE_LOAD_LONG opline->op2_type, opline->op2, xmm1
 	|		SSE_MATH2 opline->opcode, xmm1, xmm0
 	||	}
-	|	SSE_STORE opline->result,  xmm0
 	|.else
-	|	LONGF_LOAD opline->op2_type, opline->op2
+	|	FPU_LONG_LOAD opline->op2_type, opline->op2
 	||	if (opline->opcode == ZEND_ADD || opline->opcode == ZEND_MUL) {
-	|		FP_MATH opline->opcode, opline->op1_type, opline->op1
+	|		FPU_MATH opline->opcode, opline->op1_type, opline->op1
 	||	} else {
-	|		FP_LOAD opline->op1_type, opline->op1
-	|		LONGF_MATH opline->opcode
+	|		FPU_LOAD opline->op1_type, opline->op1
+	|		FPU_MATH2 opline->opcode
 	||	}
-	|	FP_STORE opline->result
 	|.endif
+	|	DOUBLE_STORE FP, opline->result.var, xmm0
 	|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 
 	return 1;
@@ -1022,12 +1027,11 @@ static int zend_jit_math_double_double(dasm_State **Dst, zend_op *opline)
 	} else {
 		|	SSE_MATH opline->opcode, opline->op2_type, opline->op2, xmm0
 	}
-	|	SSE_STORE opline->result, xmm0
 	|.else
-	|	FP_LOAD opline->op1_type, opline->op1
-	|	FP_MATH opline->opcode, opline->op2_type, opline->op2
-	|	FP_STORE opline->result
+	|	FPU_LOAD opline->op1_type, opline->op1
+	|	FPU_MATH opline->opcode, opline->op2_type, opline->op2
 	|.endif
+	|	DOUBLE_STORE FP, opline->result.var, xmm0
 	|	SET_TYPE_INFO FP, opline->result.var, IS_DOUBLE
 
 	return 1;
@@ -1403,8 +1407,8 @@ static int zend_jit_cmp_long_double(dasm_State **Dst, zend_op *opline, int b, ze
 	|	SSE_LOAD_LONG opline->op1_type, opline->op1, xmm0
 	|	SSE_OP ucomisd, opline->op2_type, opline->op2, xmm0
 	|.else
-	|	FP_LOAD opline->op2_type, opline->op2
-	|	LONGF_LOAD opline->op1_type, opline->op1
+	|	FPU_LOAD opline->op2_type, opline->op2
+	|	FPU_LONG_LOAD opline->op1_type, opline->op1
 	|	fucomip st1
 	|	fstp st0
 	|.endif
@@ -1419,8 +1423,8 @@ static int zend_jit_cmp_double_long(dasm_State **Dst, zend_op *opline, int b, ze
 	|	SSE_LOAD_LONG opline->op2_type, opline->op2, xmm1
 	|	ucomisd xmm0, xmm1
 	|.else
-	|	LONGF_LOAD opline->op2_type, opline->op2
-	|	FP_LOAD opline->op1_type, opline->op1
+	|	FPU_LONG_LOAD opline->op2_type, opline->op2
+	|	FPU_LOAD opline->op1_type, opline->op1
 	|	fucomip st1
 	|	fstp st0
 	|.endif
@@ -1434,8 +1438,8 @@ static int zend_jit_cmp_double_double(dasm_State **Dst, zend_op *opline, int b, 
 	|	SSE_LOAD opline->op1_type, opline->op1, xmm0
 	|	SSE_OP ucomisd, opline->op2_type, opline->op2, xmm0
 	|.else
-	|	FP_LOAD opline->op2_type, opline->op2
-	|	FP_LOAD opline->op1_type, opline->op1
+	|	FPU_LOAD opline->op2_type, opline->op2
+	|	FPU_LOAD opline->op1_type, opline->op1
 	|	fucomip st1
 	|	fstp st0
 	|.endif
