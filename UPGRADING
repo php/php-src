@@ -78,6 +78,8 @@ PHP 7.1 UPGRADE NOTES
     (RFC https://wiki.php.net/rfc/too_few_args).
   . The error message for E_RECOVERABLE errors has been changed from "Catchable
     fatal error" to "Recoverable fatal error".
+  . The empty index operator (e.g. $str[] = $x) is not supported for strings
+    anymore, and throws a fatal error instead of silently converting to array.
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
