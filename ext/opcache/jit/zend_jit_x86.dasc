@@ -67,6 +67,8 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.section code, cold_code
 
+#define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0x7fffffff)
+
 |.macro LOAD_ADDR, reg, addr
 |.if X64
 ||if (((ptrdiff_t)addr) <= 0x7fffffff) {
@@ -105,8 +107,6 @@ static void* dasm_labels[zend_lb_MAX];
 |.endif
 |.endmacro
 
-#define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0x7fffffff)
-
 #if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OT_FUNC
 
 |.macro LOAD_ZVAL_ADDR, reg, op_type, op
@@ -125,9 +125,9 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro PUSH_ZVAL_ADDR, op_type, op, tmp_reg
 ||if (op_type == IS_CONST) {
 |   .if X64
-|   mov reg, aword EX->literals
-|   add reg, op.constant
-|	push reg
+|   mov tmp_reg, aword EX->literals
+|   add tmp_reg, op.constant
+|	push tmp_reg
 |   .else
 |   push op.zv
 |   .endif
