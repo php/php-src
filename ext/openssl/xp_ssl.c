@@ -1340,6 +1340,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 	sslsock->sni_certs = (php_openssl_sni_cert_t*)safe_pemalloc(sslsock->sni_cert_count,
 		sizeof(php_openssl_sni_cert_t), 0, php_stream_is_persistent(stream)
 	);
+	memset(sslsock->sni_certs, 0, sslsock->sni_cert_count * sizeof(php_openssl_sni_cert_t));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(val), key_index, key, current) {
 		(void) key_index;
@@ -2130,9 +2131,11 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 	}
 
 	if (sslsock->sni_certs) {
-		for (i=0; i<sslsock->sni_cert_count; i++) {
-			SSL_CTX_free(sslsock->sni_certs[i].ctx);
-			pefree(sslsock->sni_certs[i].name, php_stream_is_persistent(stream));
+		for (i = 0; i < sslsock->sni_cert_count; i++) {
+			if (sslsock->sni_certs[i].ctx) {
+				SSL_CTX_free(sslsock->sni_certs[i].ctx);
+				pefree(sslsock->sni_certs[i].name, php_stream_is_persistent(stream));
+			}
 		}
 		pefree(sslsock->sni_certs, php_stream_is_persistent(stream));
 		sslsock->sni_certs = NULL;

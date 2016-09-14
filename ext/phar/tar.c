@@ -1002,6 +1002,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			efree(entry.filename);
 			return EOF;
 		}
+		/* At this point the entry is saved into the manifest. The manifest destroy
+			routine will care about any resources to be freed. */
 	} else {
 		zend_hash_str_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 	}
@@ -1014,12 +1016,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval *)user_stub))) {
 				if (error) {
 					spprintf(error, 0, "unable to access resource to copy stub to new tar-based phar \"%s\"", phar->fname);
-				}
-				if (entry.fp) {
-					php_stream_close(entry.fp);
-				}
-				if (entry.filename) {
-					efree(entry.filename);
 				}
 				return EOF;
 			}
@@ -1048,12 +1044,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 				if (error) {
 					spprintf(error, 0, "unable to read resource to copy stub to new tar-based phar \"%s\"", phar->fname);
 				}
-				if (entry.fp) {
-					php_stream_close(entry.fp);
-				}
-				if (entry.filename) {
-					efree(entry.filename);
-				}
 				return EOF;
 			}
 			free_user_stub = 1;
@@ -1069,12 +1059,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			}
 			if (free_user_stub) {
 				efree(user_stub);
-			}
-			if (entry.fp) {
-				php_stream_close(entry.fp);
-			}
-			if (entry.filename) {
-				efree(entry.filename);
 			}
 			return EOF;
 		}
