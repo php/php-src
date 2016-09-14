@@ -64,6 +64,7 @@
 
 /* For str_getcsv() support */
 #include "ext/standard/file.h"
+#include "ext/standard/html.h"
 
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
@@ -167,7 +168,7 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		int is_letter = ((unsigned int) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(unsigned int) - 1);
 		unsigned char d;
 
-		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */ 
+		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
 			d = (l - 0x10 - 0x27 * is_letter) << 4;
 		} else {
@@ -2856,7 +2857,7 @@ PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size
 		for (i = 0; i < trlen; i++) {
 			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
 		}
-		
+
 		for (i = 0; i < len; i++) {
 			str[i] = xlat[(size_t)(unsigned char) str[i]];
 		}
@@ -3249,7 +3250,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, char *lc_haystack
 				zend_string_release(lc_needle);
 				goto nothing_todo;
 			}
-			
+
 			if (str_len > ZSTR_LEN(lc_needle)) {
 				new_str = zend_string_safe_alloc(count, str_len - ZSTR_LEN(lc_needle), ZSTR_LEN(haystack), 0);
 			} else {
@@ -3412,7 +3413,7 @@ PHP_FUNCTION(strtr)
 					ZVAL_LONG(&tmp, num_key);
 					convert_to_string(&tmp);
 					str_key = Z_STR(tmp);
-				}		
+				}
 				replace = zval_get_string(entry);
 				if (ZSTR_LEN(str_key) < 1) {
 					RETVAL_STR_COPY(str);
@@ -3975,7 +3976,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 						zend_string_release(lc_subject_str);
 						lc_subject_str = NULL;
 					}
-				}				
+				}
 			}
 
 			zend_string_release(search_str);
@@ -5650,6 +5651,41 @@ PHP_FUNCTION(substr_compare)
 	} else {
 		RETURN_LONG(zend_binary_strncasecmp_l(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	}
+}
+/* }}} */
+
+/* {{{ proto bool str_check_encoding([string str[, string encoding]]) */
+PHP_FUNCTION(str_check_encoding)
+{
+  zend_string *str, *enc = NULL;
+  enum entity_charset charset;
+  unsigned int cp;
+  size_t current = 0;
+  int status = 0;
+
+  ZEND_PARSE_PARAMETERS_START(1, 2)
+    Z_PARAM_STR(str)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_STR(enc)
+  ZEND_PARSE_PARAMETERS_END();
+
+  if (enc == NULL) {
+    charset = determine_charset(NULL);
+  } else {
+    charset = determine_charset(enc->val);
+  }
+
+  while (current < str->len) {
+    cp = get_next_char(
+      charset, (const unsigned char*) str->val, str->len, &current, &status
+    );
+
+    if (status == FAILURE) {
+      RETURN_FALSE;
+    }
+  }
+
+  RETURN_TRUE;
 }
 /* }}} */
 
