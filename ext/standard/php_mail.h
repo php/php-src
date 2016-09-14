@@ -40,7 +40,7 @@ do { \
 		} \
 		php_mail_build_headers_elems(&s, key, val); \
 	} else { \
-		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than stirng or array.", ZSTR_VAL(key)); \
+		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than string or array.", ZSTR_VAL(key)); \
 	} \
 } while(0)
 
@@ -52,7 +52,7 @@ do { \
 	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
 		php_mail_build_headers_elems(&s, key, val); \
 	} else { \
-		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than stirng or array.", ZSTR_VAL(key)); \
+		php_error_docref(NULL, E_WARNING, "Extra header element '%s' cannot be other than string or array.", ZSTR_VAL(key)); \
 	} \
 } while(0)
 
