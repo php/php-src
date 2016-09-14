@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #67325 (imagetruecolortopalette: white is duplicated in palette).
     (cmb)
+  . Fixed bug #50194 (imagettftext broken on transparent background w/o
+    alphablending). (cmb)
 
 - Mbstring:
   . Fixed bug #72994 (mbc_to_code() out of bounds read). (Laruence, cmb)
