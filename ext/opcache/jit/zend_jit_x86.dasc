@@ -481,12 +481,10 @@ static void* dasm_labels[zend_lb_MAX];
 ||	has_slow = 1;
 |.endmacro
 
-|.macro FREE_OP, op_type, op, op_info, op_array, lineno
-||if ((op_type & (IS_VAR|IS_TMP_VAR)) &&
-||   (op_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-|		and byte [FP + op.var + 9], IS_TYPE_REFCOUNTED
+|.macro ZVAL_PTR_DTOR, base, offset, op_array, lineno
+|		and byte [base + offset + 9], IS_TYPE_REFCOUNTED
 |		je >1
-|		mov FCARG1a, aword [FP + op.var]
+|		mov FCARG1a, aword [base + offset]
 |		dec dword [FCARG1a]
 |		jnz >1
 ||	if (ZEND_DEBUG) {
@@ -498,8 +496,14 @@ static void* dasm_labels[zend_lb_MAX];
 |		push lineno
 |.endif
 ||	}
-|	EXT_CALL _zval_dtor_func, r0
-|	1:
+|		EXT_CALL _zval_dtor_func, r0
+|1:
+|.endmacro
+
+|.macro FREE_OP, op_type, op, op_info, op_array, lineno
+||if ((op_type & (IS_VAR|IS_TMP_VAR)) &&
+||   (op_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+|	ZVAL_PTR_DTOR FP, op.var, op_array, lineno
 ||}
 |.endmacro
 
