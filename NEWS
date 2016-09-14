@@ -5,8 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Removed the sql.safe_mode directive. (Kalle)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
-  . Implemented bug #68776 (mail() does not have mail header injection prevention
-    for additional headers) (Yasuo)
+  . Implemented bug #69791 (Disallow mail header injections by extra headers)
+    (Yasuo)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
