@@ -66,6 +66,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
+  . Fixed bug #73007 (add locale length check). (Stas)
 
 - JSON:
   . Implemented earlier return when json_encode fails, fixes bugs #68992
@@ -81,6 +82,12 @@ PHP                                                                        NEWS
 - PDO_DBlib:
   . Implemented stringify 'uniqueidentifier' fields.
     (Alexander Zhuravlev, Adam Baratz)
+
+- Phar:
+  . Fixed bug #72928 (Out of bound when verify signature of zip phar in
+    phar_parse_zipfile). (Stas)
+  . Fixed bug #73035 (Out of bound when verify signature of tar phar in
+    phar_parse_tarfile). (Stas)
 
 - Reflection:
   . Reverted prepending \ for class names. (Trowski)
@@ -182,6 +189,7 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #72888 (Segfault on clone on splFileObject). (Laruence)
+  . Fixed bug #73029 (Missing type check when unserializing SplArray). (Stas)
 
 - SQLite3:
   . Updated to SQLite3 3.14.0. (cmb)
@@ -305,6 +313,8 @@ PHP                                                                        NEWS
     (Stas)
   . Fixed bug #72799 (wddx_deserialize null dereference in
     php_wddx_pop_element). (Stas)
+  . Fixed bug #72860 (wddx_deserialize use-after-free). (Stas)
+  . Fixed bug #73065 (Out-Of-Bounds Read in php_wddx_push_element). (Stas)
 
 - XMLRPC:
   . Fixed bug #72647 (xmlrpc_encode() unexpected output after referencing
