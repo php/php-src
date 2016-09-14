@@ -25,6 +25,7 @@
 #include "php.h"
 
 #include "url.h"
+#include "url_parser_ex.h"
 #include "file.h"
 #ifdef _OSD_POSIX
 #ifndef APACHE
@@ -37,352 +38,37 @@
 #endif /*APACHE*/
 #endif /*_OSD_POSIX*/
 
-/* {{{ free_url
- */
-PHPAPI void php_url_free(php_url *theurl)
+ZEND_DECLARE_MODULE_GLOBALS(url)
+
+PHPAPI php_url *php_url_parse_ex (const char *str, int length)
 {
-	if (theurl->scheme)
-		efree(theurl->scheme);
-	if (theurl->user)
-		efree(theurl->user);
-	if (theurl->pass)
-		efree(theurl->pass);
-	if (theurl->host)
-		efree(theurl->host);
-	if (theurl->path)
-		efree(theurl->path);
-	if (theurl->query)
-		efree(theurl->query);
-	if (theurl->fragment)
-		efree(theurl->fragment);
-	efree(theurl);
-}
-/* }}} */
-
-/* {{{ php_replace_controlchars
- */
-PHPAPI char *php_replace_controlchars_ex(char *str, size_t len)
-{
-	unsigned char *s = (unsigned char *)str;
-	unsigned char *e = (unsigned char *)str + len;
-
-	if (!str) {
-		return (NULL);
-	}
-
-	while (s < e) {
-
-		if (iscntrl(*s)) {
-			*s='_';
-		}
-		s++;
-	}
-
-	return (str);
-}
-/* }}} */
-
-PHPAPI char *php_replace_controlchars(char *str)
-{
-	return php_replace_controlchars_ex(str, strlen(str));
+	return php_url_parse(str);
 }
 
-PHPAPI php_url *php_url_parse(char const *str)
+PHPAPI php_url *php_url_parse (const char *str)
 {
-	return php_url_parse_ex(str, strlen(str));
+	php_url *url = (php_url*) ecalloc (1, sizeof(php_url));
+	URLG(url_str) = str;
+
+	url_parse_scheme(url);
+	url_parse_authority(url);
+	url_parse_path(url);
+	url_parse_query_frag(url);
+
+	return url;
 }
 
-/* {{{ php_url_parse_ex
- */
-PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
+PHPAPI void php_url_free (php_url *url)
 {
-	char port_buf[6];
-	php_url *ret = ecalloc(1, sizeof(php_url));
-	char const *s, *e = NULL, *p, *pp, *ue;
-
-	s = str;
-	ue = s + length;
-
-	/* parse scheme */
-	if (*s != '[' && (e = memchr(s, ':', length)) && (e - s)) {
-		/* validate scheme */
-		p = s;
-		while (p < e) {
-			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
-			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-				if (e + 1 < ue && e < s + strcspn(s, "?#")) {
-					goto parse_port;
-				} else {
-					goto just_path;
-				}
-			}
-			p++;
-		}
-
-		if (*(e + 1) == '\0') { /* only scheme is available */
-			ret->scheme = estrndup(s, (e - s));
-			php_replace_controlchars_ex(ret->scheme, (e - s));
-			goto end;
-		}
-
-		/*
-		 * certain schemas like mailto: and zlib: may not have any / after them
-		 * this check ensures we support those.
-		 */
-		if (*(e+1) != '/') {
-			/* check if the data we get is a port this allows us to
-			 * correctly parse things like a.com:80
-			 */
-			p = e + 1;
-			while (isdigit(*p)) {
-				p++;
-			}
-
-			if ((*p == '\0' || *p == '/') && (p - e) < 7) {
-				goto parse_port;
-			}
-
-			ret->scheme = estrndup(s, (e-s));
-			php_replace_controlchars_ex(ret->scheme, (e - s));
-
-			length -= ++e - s;
-			s = e;
-			goto just_path;
-		} else {
-			ret->scheme = estrndup(s, (e-s));
-			php_replace_controlchars_ex(ret->scheme, (e - s));
-
-			if (*(e+2) == '/') {
-				s = e + 3;
-				if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
-					if (*(e + 3) == '/') {
-						/* support windows drive letters as in:
-						   file:///c:/somedir/file.txt
-						*/
-						if (*(e + 5) == ':') {
-							s = e + 4;
-						}
-						goto nohost;
-					}
-				}
-			} else {
-				if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
-					s = e + 1;
-					goto nohost;
-				} else {
-					length -= ++e - s;
-					s = e;
-					goto just_path;
-				}
-			}
-		}
-	} else if (e) { /* no scheme; starts with colon: look for port */
-		parse_port:
-		p = e + 1;
-		pp = p;
-
-		while (pp-p < 6 && isdigit(*pp)) {
-			pp++;
-		}
-
-		if (pp - p > 0 && pp - p < 6 && (*pp == '/' || *pp == '\0')) {
-			zend_long port;
-			memcpy(port_buf, p, (pp - p));
-			port_buf[pp - p] = '\0';
-			port = ZEND_STRTOL(port_buf, NULL, 10);
-			if (port > 0 && port <= 65535) {
-				ret->port = (unsigned short) port;
-				if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
-				    s += 2;
-				}
-			} else {
-				if (ret->scheme) efree(ret->scheme);
-				efree(ret);
-				return NULL;
-			}
-		} else if (p == pp && *pp == '\0') {
-			if (ret->scheme) efree(ret->scheme);
-			efree(ret);
-			return NULL;
-		} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
-			s += 2;
-		} else {
-			goto just_path;
-		}
-	} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
-		s += 2;
-	} else if (!(*s == '[' && (isdigit(*(s + 1)) || isalpha(*(s + 1)) || *(s + 1) == ':'))) { /* Not IPv6 Format Host */
-		just_path:
-		ue = s + length;
-		goto nohost;
-	}
-
-	e = ue;
-
-	if (!(p = memchr(s, '/', (ue - s)))) {
-		char *query, *fragment;
-
-		query = memchr(s, '?', (ue - s));
-		fragment = memchr(s, '#', (ue - s));
-
-		if (query && fragment) {
-			if (query > fragment) {
-				e = fragment;
-			} else {
-				e = query;
-			}
-		} else if (query) {
-			e = query;
-		} else if (fragment) {
-			e = fragment;
-		}
-	} else {
-		e = p;
-	}
-
-	/* check for login and password */
-	if ((p = zend_memrchr(s, '@', (e-s)))) {
-		/* check for invalid chars inside login/pass */
-		pp = s;
-		while (pp < p) {
-			/* http://www.rfc-editor.org/rfc/rfc3986.txt §3.2.1 */
-			const char search_rfc3986[] = ":;=!$%_-.~&'()*+,";
-			if (!isalnum(*pp) && !strchr(search_rfc3986, *pp)) {
-				if (ret->scheme) {
-					efree(ret->scheme);
-				}
-				efree(ret);
-				return NULL;
-			}
-			pp++;
-		}
-
-		if ((pp = memchr(s, ':', (p-s)))) {
-			ret->user = estrndup(s, (pp-s));
-			php_replace_controlchars_ex(ret->user, (pp - s));
-
-			pp++;
-			ret->pass = estrndup(pp, (p-pp));
-			php_replace_controlchars_ex(ret->pass, (p-pp));
-		} else {
-			ret->user = estrndup(s, (p-s));
-			php_replace_controlchars_ex(ret->user, (p-s));
-		}
-
-		s = p + 1;
-	}
-
-	/* check for port */
-	if (*s == '[' && *(e-1) == ']') {
-		/* Short circuit portscan,
-		   we're dealing with an
-		   IPv6 embedded address */
-		p = s;
-	} else {
-		/* memrchr is a GNU specific extension
-		   Emulate for wide compatibility */
-		for(p = e; p >= s && *p != ':'; p--);
-	}
-
-	if (p >= s && *p == ':') {
-		if (!ret->port) {
-			p++;
-			if (e-p > 5) { /* port cannot be longer then 5 characters */
-				if (ret->scheme) efree(ret->scheme);
-				if (ret->user) efree(ret->user);
-				if (ret->pass) efree(ret->pass);
-				efree(ret);
-				return NULL;
-			} else if (e - p > 0) {
-				zend_long port;
-				memcpy(port_buf, p, (e - p));
-				port_buf[e - p] = '\0';
-				port = ZEND_STRTOL(port_buf, NULL, 10);
-				if (port > 0 && port <= 65535) {
-					ret->port = (unsigned short)port;
-				} else {
-					if (ret->scheme) efree(ret->scheme);
-					if (ret->user) efree(ret->user);
-					if (ret->pass) efree(ret->pass);
-					efree(ret);
-					return NULL;
-				}
-			}
-			p--;
-		}
-	} else {
-		p = e;
-	}
-
-	/* check if we have a valid host, if we don't reject the string as url */
-	if ((p-s) < 1) {
-		if (ret->scheme) efree(ret->scheme);
-		if (ret->user) efree(ret->user);
-		if (ret->pass) efree(ret->pass);
-		efree(ret);
-		return NULL;
-	}
-
-	ret->host = estrndup(s, (p-s));
-	php_replace_controlchars_ex(ret->host, (p - s));
-
-	if (e == ue) {
-		return ret;
-	}
-
-	s = e;
-
-	nohost:
-
-	if ((p = memchr(s, '?', (ue - s)))) {
-		pp = memchr(s, '#', (ue - s));
-
-		if (pp && pp < p) {
-			if (pp - s) {
-				ret->path = estrndup(s, (pp-s));
-				php_replace_controlchars_ex(ret->path, (pp - s));
-			}
-			p = pp;
-			goto label_parse;
-		}
-
-		if (p - s) {
-			ret->path = estrndup(s, (p-s));
-			php_replace_controlchars_ex(ret->path, (p - s));
-		}
-
-		if (pp) {
-			if (pp - ++p) {
-				ret->query = estrndup(p, (pp-p));
-				php_replace_controlchars_ex(ret->query, (pp - p));
-			}
-			p = pp;
-			goto label_parse;
-		} else if (++p - ue) {
-			ret->query = estrndup(p, (ue-p));
-			php_replace_controlchars_ex(ret->query, (ue - p));
-		}
-	} else if ((p = memchr(s, '#', (ue - s)))) {
-		if (p - s) {
-			ret->path = estrndup(s, (p-s));
-			php_replace_controlchars_ex(ret->path, (p - s));
-		}
-
-		label_parse:
-		p++;
-
-		if (ue - p) {
-			ret->fragment = estrndup(p, (ue-p));
-			php_replace_controlchars_ex(ret->fragment, (ue - p));
-		}
-	} else {
-		ret->path = estrndup(s, (ue-s));
-		php_replace_controlchars_ex(ret->path, (ue - s));
-	}
-end:
-	return ret;
+	if (url->scheme) efree(url->scheme);
+	if (url->user) efree(url->user);
+	if (url->pass) efree(url->pass);
+	if (url->host) efree(url->host);
+	if (url->path) efree(url->path);
+	if (url->query) efree(url->query);
+	if (url->fragment) efree(url->fragment);
+	efree(url);
 }
-/* }}} */
 
 /* {{{ proto mixed parse_url(string url, [int url_component])
    Parse a URL and return its components */
@@ -397,11 +83,7 @@ PHP_FUNCTION(parse_url)
 		return;
 	}
 
-	resource = php_url_parse_ex(str, str_len);
-	if (resource == NULL) {
-		/* @todo Find a method to determine why php_url_parse_ex() failed */
-		RETURN_FALSE;
-	}
+	resource = php_url_parse(str);
 
 	if (key > -1) {
 		switch (key) {
@@ -439,7 +121,7 @@ PHP_FUNCTION(parse_url)
 	/* allocate an array for return */
 	array_init(return_value);
 
-    /* add the various elements to the array */
+	/* add the various elements to the array */
 	if (resource->scheme != NULL)
 		add_assoc_string(return_value, "scheme", resource->scheme);
 	if (resource->host != NULL)
@@ -456,6 +138,11 @@ PHP_FUNCTION(parse_url)
 		add_assoc_string(return_value, "query", resource->query);
 	if (resource->fragment != NULL)
 		add_assoc_string(return_value, "fragment", resource->fragment);
+
+	if (UNEXPECTED(!zend_array_count(HASH_OF(return_value)))) {
+		efree(Z_ARRVAL_P(return_value));
+		RETVAL_FALSE;
+	}
 done:
 	php_url_free(resource);
 }
@@ -807,6 +494,6 @@ no_name_header:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
+ * vim600: sw=4 ts=4 fdm=marker noet
+ * vim<600: sw=4 ts=4 noet
  */

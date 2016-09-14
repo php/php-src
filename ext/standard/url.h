@@ -19,26 +19,27 @@
 
 #ifndef URL_H
 #define URL_H
+#include "zend_globals.h"
 
-typedef struct php_url {
-	char *scheme;
-	char *user;
-	char *pass;
-	char *host;
-	unsigned short port;
-	char *path;
-	char *query;
-	char *fragment;
+typedef struct _php_url {
+  char *scheme;
+  char *user;
+  char *pass;
+  char *host;
+  unsigned int port;
+  char *path;
+  char *query;
+  char *fragment;
 } php_url;
 
-PHPAPI void php_url_free(php_url *theurl);
+PHPAPI void php_url_free(php_url *url);
 PHPAPI php_url *php_url_parse(char const *str);
-PHPAPI php_url *php_url_parse_ex(char const *str, size_t length);
+PHPAPI php_url *php_url_parse_ex(char const *str, int length);
+
 PHPAPI size_t php_url_decode(char *str, size_t len); /* return value: length of decoded string */
 PHPAPI size_t php_raw_url_decode(char *str, size_t len); /* return value: length of decoded string */
 PHPAPI zend_string *php_url_encode(char const *s, size_t len);
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len);
-PHPAPI char *php_replace_controlchars_ex(char *str, size_t len);
 
 PHP_FUNCTION(parse_url);
 PHP_FUNCTION(urlencode);
@@ -58,6 +59,11 @@ PHP_FUNCTION(get_headers);
 
 #define PHP_QUERY_RFC1738 1
 #define PHP_QUERY_RFC3986 2
+
+ZEND_BEGIN_MODULE_GLOBALS(url)
+	const char* url_str;
+ZEND_END_MODULE_GLOBALS(url)
+#define URLG(v) ZEND_MODULE_GLOBALS_ACCESSOR(url, v)
 
 #endif /* URL_H */
 
