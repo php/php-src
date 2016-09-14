@@ -595,8 +595,9 @@ static void* dasm_labels[zend_lb_MAX];
 |	EXT_CALL gc_possible_root, r0
 |.endmacro
 
-const zend_op *valid_opline;
+static const zend_op *valid_opline;
 static uint32_t valid_opline_offset;
+static int jit_return_label;
 #endif
 
 /* bit helpers */
@@ -763,6 +764,7 @@ static int zend_jit_align_func(dasm_State **Dst)
 {
 	valid_opline = NULL;
 	valid_opline_offset = 0;
+	jit_return_label = -1;
 	|.align 16
 	return 1;
 }
@@ -2336,7 +2338,15 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, zend_op *opline, z
 
 static int zend_jit_leave_func(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
-	// TODO: avoid multiple leave sequnces ???
+	// Avoid multiple leave sequnces
+	if (jit_return_label >= 0) {
+		| jmp =>jit_return_label
+		return 1;
+	}
+
+	jit_return_label = ssa->cfg.blocks_count * 2;
+
+	|=>jit_return_label:
 
 	// i_free_compiled_variables(execute_data);
 	if (!zend_jit_free_compiled_variables(Dst, opline, op_array, ssa)) {
@@ -2448,21 +2458,37 @@ static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 		|	jnz >2
 		|	test byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
 		|	jnz >1
-		|	jmp >9
+		||	if (jit_return_label >= 0) {
+		|		jmp =>jit_return_label
+		||	} else {
+		|		jmp >9
+		||	}
 		|.cold_code
 		|1:
 		|	mov FCARG1a, aword [FP + opline->op1.var]
 		|	dec dword [FCARG1a]
-		|	jnz >9
+		||	if (jit_return_label >= 0) {
+		|		jnz =>jit_return_label
+		||	} else {
+		|		jnz >9
+		||	}
 		|	//SAVE_OPLINE()
 		|	mov EX->opline, IP
 		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
 		|	mov r1, EX->return_value // reload ???
-		|	jmp >9
+		||	if (jit_return_label >= 0) {
+		|		jmp =>jit_return_label
+		||	} else {
+		|		jmp >9
+		||	}
 		|.code
 		|2:
 	} else {
-		|	jz >9
+		||	if (jit_return_label >= 0) {
+		|		jz =>jit_return_label
+		||	} else {
+		|		jz >9
+		||	}
 	}
 
 	if (opline->op1_type == IS_CONST) {
@@ -2536,14 +2562,26 @@ static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 			|	je >2
 			|	// if (IS_REFCOUNTED())
 			|	test dh, IS_TYPE_REFCOUNTED
-			|	je >9
+			||	if (jit_return_label >= 0) {
+			|		je =>jit_return_label
+			||	} else {
+			|		je >9
+			||	}
 			|	// ADDREF
 			|	mov r2,	aword [r1]
 			|	inc dword [r2]
-			|	jmp >9
+			||	if (jit_return_label >= 0) {
+			|		jmp =>jit_return_label
+			||	} else {
+			|		jmp >9
+			||	}
 			|2:
 			|	EFREE_SIZE r0, sizeof(zend_reference), op_array, opline
-			|	jmp >9
+			||	if (jit_return_label >= 0) {
+			|		jmp =>jit_return_label
+			||	} else {
+			|		jmp >9
+			||	}
 			|.code
 		}
 		|	ZVAL_COPY_VALUE r1, 0, FP, opline->op1.var, op1_info, r0, eax, r2

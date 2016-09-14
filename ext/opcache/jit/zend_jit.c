@@ -702,7 +702,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 	dasm_setupglobal(&dasm_state, dasm_labels, zend_lb_MAX);
 	dasm_setup(&dasm_state, dasm_actions);
 
-	dasm_growpc(&dasm_state, ssa->cfg.blocks_count * 2);
+	dasm_growpc(&dasm_state, ssa->cfg.blocks_count * 2 + 1);
 
 	zend_jit_align_func(&dasm_state);
 	for (b = 0; b < ssa->cfg.blocks_count; b++) {
