@@ -2258,7 +2258,7 @@ fallback:
 
 static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
 {
-	uint32_t op1_info;
+	uint32_t op1_info, mask;
 	unsigned int target_label;
 	zend_uchar type;
 
@@ -2268,7 +2268,14 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 
 	op1_info = OP1_INFO();
 	type = opline->extended_value;
-	if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == (1<<type)) {
+	if (type == IS_RESOURCE) {
+		goto fallback;
+	} else if (type == _IS_BOOL) {
+		mask = MAY_BE_FALSE | MAY_BE_TRUE;
+	} else {
+		mask = (1 << type);
+	}
+	if (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - mask))) {
 		if ((opline+1)->opcode == ZEND_JMPZ &&
 		    (opline+1)->op1_type == IS_TMP_VAR &&
 		    (opline+1)->op1.var == opline->result.var) {
@@ -2284,7 +2291,7 @@ static int zend_jit_type_check(dasm_State **Dst, zend_op *opline, int b, int *op
 			|	SET_TYPE_INFO FP, opline->result.var, IS_TRUE
 			valid_opline_offset++;
 		}
-    } else if (!(op1_info & (1<<type))) {
+    } else if (!(op1_info & mask)) {
 		if ((opline+1)->opcode == ZEND_JMPZ &&
 		    (opline+1)->op1_type == IS_TMP_VAR &&
 		    (opline+1)->op1.var == opline->result.var) {
