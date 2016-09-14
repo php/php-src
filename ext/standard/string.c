@@ -5689,6 +5689,63 @@ PHP_FUNCTION(str_check_encoding)
 }
 /* }}} */
 
+/* {{{ proto bool str_scrub([string str[, string encoding]]) */
+PHP_FUNCTION(str_scrub)
+{
+  zend_string *str, *enc = NULL;
+  smart_str ret = {0};
+  enum entity_charset charset;
+  char *substitute;
+  int substitute_size;
+  unsigned int cp;
+  size_t previous = 0;
+  size_t current = 0;
+  int status = 0;
+
+  ZEND_PARSE_PARAMETERS_START(1, 2)
+    Z_PARAM_STR(str)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_STR(enc)
+  ZEND_PARSE_PARAMETERS_END();
+
+  if (enc == NULL) {
+    charset = determine_charset(NULL);
+  } else {
+    charset = determine_charset(enc->val);
+  }
+
+  if (charset == cs_utf_8) {
+      substitute = "\xEF\xBF\xBD";
+      substitute_size = 3;
+  } else {
+      substitute = "\x3F";
+      substitute_size = 1;
+  }
+
+  while (current < str->len) {
+    previous = current;
+    cp = get_next_char(
+      charset, (const unsigned char*) str->val, str->len, &current, &status
+    );
+
+    if (status == SUCCESS) {
+      smart_str_appendl(&ret, str->val + previous, current - previous);
+    } else {
+      smart_str_appendl(&ret, substitute, substitute_size);
+
+    }
+  }
+
+  smart_str_0(&ret);
+
+  if (ret.s) {
+    RETURN_STR(ret.s);
+  } else {
+    RETURN_EMPTY_STRING();
+  }
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

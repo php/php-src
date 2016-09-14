@@ -94,6 +94,7 @@ PHP_FUNCTION(str_split);
 PHP_FUNCTION(strpbrk);
 PHP_FUNCTION(substr_compare);
 PHP_FUNCTION(str_check_encoding);
+PHP_FUNCTION(str_scrub);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
