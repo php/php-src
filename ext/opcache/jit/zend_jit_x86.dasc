@@ -442,41 +442,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
-|.macro ZVAL_COPY_VALUE_REG, dst_base, dst_offset, src_reg, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
-||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
-||	if (!(src_info & MAY_BE_DOUBLE)) {
-| 		mov tmp_reg2, aword [src_reg]
-| 		mov aword [dst_base + dst_offset], tmp_reg2
-||	} else if ((src_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-|.if X64 or SSE
-|		movsd xmm0, qword [src_reg]
-|		movsd qword [dst_base + dst_offset], xmm0
-|.else
-|		fld qword [src_reg]
-|		fstp qword [dst_base + dst_offset]
-|.endif
-||	} else {
-|.if X64
-|		mov tmp_reg2, aword [src_reg]
-|		mov aword [dst_base + dst_offset], tmp_reg2
-|.else
-|		mov tmp_reg2, dword [src_reg]
-|		mov tmp_reg1, dword [src_reg + 4]
-|		mov dword [dst_base + dst_offset], tmp_reg2
-|		mov dword [dst_base + dst_offset + 4], tmp_reg1
-|.endif
-||	}
-||}
-||if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-||    has_concrete_type(src_info & MAY_BE_ANY)) {
-||	zend_uchar type = concrete_type(src_info);
-|	SET_TYPE_INFO dst_base, dst_offset, type
-||} else {
-|	mov tmp_reg1d, dword [src_reg + 8]
-|	SET_TYPE_INFO dst_base, dst_offset, tmp_reg1d
-||}
-|.endmacro
-
 |.macro ADDREF_CONST, zv, tmp_reg
 |.if X64
 ||		if (!IS_32BIT(Z_LVAL_P(zv))) {
@@ -906,7 +871,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 		|	ZVAL_DEREF FCARG1a, op1_info
 		||	if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC)) {
 		||		if (opline->result_type != IS_UNUSED) {
-		|			ZVAL_COPY_VALUE_REG FP, opline->result.var, FCARG1a, op1_info, r0, eax, r2
+		|			ZVAL_COPY_VALUE FP, opline->result.var, FCARG1a, 0, op1_info, r0, eax, r2
 		|			// zval_opt_copy_ctor(var_ptr);
 		|			// ???
 		|			TRY_ADDREF op1_info, ah, r2
@@ -2226,7 +2191,7 @@ static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 		if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 			|	lea	r0, [FP + opline->op1.var]
 			|	ZVAL_DEREF r0, op1_info
-			|	ZVAL_COPY_VALUE_REG r1, 0, r0, op1_info, r0, eax, r2
+			|	ZVAL_COPY_VALUE r1, 0, r0, 0, op1_info, r0, eax, r2
 		} else {
 			|	ZVAL_COPY_VALUE r1, 0, FP, opline->op1.var, op1_info, r0, eax, r2
 		}
@@ -2239,7 +2204,7 @@ static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 			|	jne >4
 			|	mov FCARG1a, [FCARG1a]
 			|	add FCARG1a, 8
-			|	ZVAL_COPY_VALUE_REG r1, 0, FCARG1a, op1_info, r1, ebx, r2
+			|	ZVAL_COPY_VALUE r1, 0, FCARG1a, 0, op1_info, r1, ebx, r2
 			|	sub FCARG1a, 8
 			|	dec dword [r0]
 			|	jne >3
