@@ -733,7 +733,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 	|	mov aword [&EG(opline_before_exception)], IP
 	|	// if (RETURN_VALUE_USED(old_opline)) {
 	|	cmp byte OP:IP->result_type, IS_UNUSED
-	|	je >1
+	|	je >5
 	|	// zval_ptr_dtor(EX_VAR(old_opline->result.var));
 	|.if X64
 	|	movsxd r0, dword OP:IP->result.var
@@ -2361,11 +2361,33 @@ static int zend_jit_leave_func(dasm_State **Dst, zend_op *opline, zend_op_array 
 		}
 		|	// zend_object *object = Z_OBJ(execute_data->This);
 		|	mov r0, EX->This.value.obj
-		|	// TODO: JIT ????
-		|	// if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-		|	// GC_REFCOUNT(object)--;
-		|	// zend_object_store_ctor_failed(object);
-		|	// ????
+		if (op_array->scope && op_array->scope->constructor == (zend_function*)op_array) {
+			|	// if (UNEXPECTED(EG(exception) != NULL)
+			|	cmp aword [&EG(exception)], 0
+			|	jne >6
+			|.cold_code
+			|6:
+			|	// if (call_info & ZEND_CALL_CTOR)
+			|	test FCARG1d, ZEND_CALL_CTOR
+			|	je >5
+			|	// GC_REFCOUNT(object)--;
+			|	dec dword [r0]
+			|	// zend_object_store_ctor_failed(object);
+			|.if X64
+			|	mov CARG1, r0
+			|	EXT_CALL zend_object_store_ctor_failed, r0
+			|.else
+			|	sub r4, 12
+			|	push r0
+			|	EXT_CALL zend_object_store_ctor_failed, r0
+			|	add r4, 16
+			|.endif
+			|	// reload registers
+			|	mov r0, EX->This.value.obj
+			|	jmp >5
+			|.code
+			|5:
+		}
 		|	// OBJ_RELEASE(object);
 		|	OBJ_RELEASE r0, 4
 		|	jmp >4
