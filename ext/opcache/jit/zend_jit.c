@@ -838,6 +838,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_RETURN:
+					if (!zend_jit_return(&dasm_state, opline, op_array, ssa)) {
+						goto jit_failure;
+					}
+					break;
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa->cfg.split_at_recv) {
@@ -873,7 +878,9 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_GENERATOR_CREATE:
 				case ZEND_GENERATOR_RETURN:
 				case ZEND_RETURN_BY_REF:
+#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_RETURN:
+#endif
 				case ZEND_EXIT:
 				/* switch through trampoline */
 				case ZEND_YIELD:
