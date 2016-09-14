@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0RC2
+?? ??? 2016, PHP 7.1.0RC3
+
+
+
+15 Sep 2016, PHP 7.1.0RC2
 
 - Core:
   . Fixed bug #73067 (__debugInfo crashes when throwing an exception).
