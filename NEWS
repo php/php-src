@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
     function). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
+    (Jakub Zelenka)
+
 - Session:
   . Fixed bug #68015 (Session does not report invalid uid for files save handler).
     (Yasuo)
