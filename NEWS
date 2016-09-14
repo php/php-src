@@ -37,6 +37,15 @@ PHP                                                                        NEWS
   . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
     (Jakub Zelenka)
 
+- PDO_DBlib:
+  . Never quote values as raw binary data. (Adam Baratz)
+  . Allow \PDO::setAttribute() to set query timeouts. (Adam Baratz)
+  . Handle SQLDECIMAL/SQLNUMERIC types, which are used by later TDS versions.
+    (Adam Baratz)
+  . Add common PDO test suite. (Adam Baratz)
+  . Free error and message strings when cleaning up PDO instances.
+    (Adam Baratz)
+
 - phpdbg:
   . Fixed bug #72996 (phpdbg_prompt.c undefined reference to DL_LOAD). (Nikita)
 
