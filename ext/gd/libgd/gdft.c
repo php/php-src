@@ -658,6 +658,8 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 				} else {
 					return "Unsupported ft_pixel_mode";
 				}
+				if (level == 0)  /* if background */
+					continue;
 				if ((fg >= 0) && (im->trueColor)) {
 					/* Consider alpha in the foreground color itself to be an
 					 * upper bound on how opaque things get, when truecolor is
