@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
     function). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
+    (Jakub Zelenka)
+
 - phpdbg:
   . Fixed bug #72996 (phpdbg_prompt.c undefined reference to DL_LOAD). (Nikita)
 
