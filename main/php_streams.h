@@ -197,22 +197,26 @@ struct _php_stream  {
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
 	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
-	int fgetss_state;		/* for fgetss to handle multiline tags */
-	int is_persistent;
-	char mode[16];			/* "rwb" etc. ala stdio */
-	zend_resource *res;		/* used for auto-cleanup */
-	int in_free;			/* to prevent recursion during free */
+	uint8_t is_persistent:1;
+	uint8_t in_free:1;			/* to prevent recursion during free */
+	uint8_t eof:1;
+	uint8_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
+
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
-	int fclose_stdiocast;
+	uint8_t fclose_stdiocast:2;
+
+	uint8_t fgetss_state;		/* for fgetss to handle multiline tags */
+
+	char mode[16];			/* "rwb" etc. ala stdio */
+
+	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
+
+	zend_resource *res;		/* used for auto-cleanup */
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
-	int __exposed;	/* non-zero if exposed as a zval somewhere */
 	char *orig_path;
 
 	zend_resource *ctx;
-	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
-
-	int eof;
 
 	/* buffer */
 	zend_off_t position; /* of underlying stream */
