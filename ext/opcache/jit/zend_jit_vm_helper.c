@@ -18,6 +18,7 @@
 */
 
 #include "Zend/zend_execute.h"
+#include "Zend/zend_exceptions.h"
 #include "zend_jit_vm_helper.h"
 
 #pragma GCC diagnostic ignored "-Wvolatile-register-var"
@@ -57,7 +58,7 @@ void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info)
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		const zend_op *old_opline = EX(opline);
 		zend_throw_exception_internal(NULL);
-		if (RETURN_VALUE_USED(old_opline)) {
+		if (old_opline->result_type != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR(old_opline->result.var));
 		}
 	} else {
