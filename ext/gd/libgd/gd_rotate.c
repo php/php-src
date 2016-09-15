@@ -366,11 +366,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
 	if (dst1 == NULL) {
 		return NULL;
 	}
-#ifdef HAVE_GD_BUNDLED
-	dst1->alphaBlendingFlag = gdEffectReplace;
-#else
 	gdImageAlphaBlending(dst1, 0);
-#endif
 	if (dAngle == 0.0) {
 		/* Returns copy of src */
 		gdImageCopy (dst1, src,0,0,0,0,src->sx,src->sy);
@@ -427,11 +423,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
 		return NULL;
 	}
 
-#ifdef HAVE_GD_BUNDLED
-	dst2->alphaBlendingFlag = gdEffectReplace;
-#else
 	gdImageAlphaBlending(dst2, 0);
-#endif
 
 	if (ignoretransparent) {
 		dst2->transparent = dst1->transparent;
@@ -454,11 +446,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
 		return NULL;
 	}
 
-#ifdef HAVE_GD_BUNDLED
-	dst3->alphaBlendingFlag = gdEffectReplace;
-#else
 	gdImageAlphaBlending(dst3, 0);
-#endif
 
 	if (ignoretransparent) {
 		dst3->transparent = dst2->transparent;

@@ -55,6 +55,14 @@ PHP 7.2 UPGRADE NOTES
     'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
   . password_verify() can verify Argon2i hashes.
   . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
+  . mail()/mb_send_mail() accept array $extra_header. Array paramter is checked against RFC 2822.
+    Array format is 
+    $extra_headers = [
+      'Header-Name' => 'Header value',
+      'Multiple' => ['One header', 'Another header'],
+      'Multiline' = "FirstLine\r\n SecondLine",
+    ];
+
 
 ========================================
 6. New Functions

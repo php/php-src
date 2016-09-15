@@ -4392,11 +4392,11 @@ PHP_FUNCTION(mb_send_mail)
 	size_t to_len;
 	char *message = NULL;
 	size_t message_len;
-	char *headers = NULL;
-	size_t headers_len;
 	char *subject = NULL;
-	zend_string *extra_cmd = NULL;
 	size_t subject_len;
+	zval *headers = NULL;
+	zend_string *extra_cmd = NULL;
+	zend_string *str_headers=NULL, *tmp_headers;
 	int i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
@@ -4436,7 +4436,7 @@ PHP_FUNCTION(mb_send_mail)
 		body_enc = lang->mail_body_encoding;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|sS", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|zS", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &extra_cmd) == FAILURE) {
 		return;
 	}
 
@@ -4445,7 +4445,20 @@ PHP_FUNCTION(mb_send_mail)
 	MAIL_ASCIIZ_CHECK_MBSTRING(subject, subject_len);
 	MAIL_ASCIIZ_CHECK_MBSTRING(message, message_len);
 	if (headers) {
-		MAIL_ASCIIZ_CHECK_MBSTRING(headers, headers_len);
+		switch(Z_TYPE_P(headers)) {
+			case IS_STRING:
+				tmp_headers = zend_string_init(Z_STRVAL_P(headers), Z_STRLEN_P(headers), 0);
+				MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
+				str_headers = php_trim(tmp_headers, NULL, 0, 2);
+				zend_string_release(tmp_headers);
+				break;
+			case IS_ARRAY:
+				str_headers = php_mail_build_headers(headers);
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "headers parameter must be string or array");
+				RETURN_FALSE;
+		}
 	}
 	if (extra_cmd) {
 		MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
@@ -4453,8 +4466,8 @@ PHP_FUNCTION(mb_send_mail)
 
 	zend_hash_init(&ht_headers, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	if (headers != NULL) {
-		_php_mbstr_parse_mail_headers(&ht_headers, headers, headers_len);
+	if (str_headers != NULL) {
+		_php_mbstr_parse_mail_headers(&ht_headers, ZSTR_VAL(str_headers), ZSTR_LEN(str_headers));
 	}
 
 	if ((s = zend_hash_str_find(&ht_headers, "CONTENT-TYPE", sizeof("CONTENT-TYPE") - 1))) {
@@ -4597,10 +4610,11 @@ PHP_FUNCTION(mb_send_mail)
 #define PHP_MBSTR_MAIL_MIME_HEADER2 "Content-Type: text/plain"
 #define PHP_MBSTR_MAIL_MIME_HEADER3 "; charset="
 #define PHP_MBSTR_MAIL_MIME_HEADER4 "Content-Transfer-Encoding: "
-	if (headers != NULL) {
-		p = headers;
-		n = headers_len;
+	if (str_headers != NULL) {
+		p = ZSTR_VAL(str_headers);
+		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
+		zend_string_release(str_headers);
 		if (n > 0 && p[n - 1] != '\n') {
 			mbfl_memory_device_strncat(&device, "\n", 1);
 		}
@@ -4633,7 +4647,7 @@ PHP_FUNCTION(mb_send_mail)
 
 	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_output('\0', &device);
-	headers = (char *)device.buffer;
+	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);
 
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
@@ -4641,7 +4655,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
 
-	if (!err && php_mail(to_r, subject, message, headers, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
+	if (!err && php_mail(to_r, subject, message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -4662,6 +4676,9 @@ PHP_FUNCTION(mb_send_mail)
 	}
 	mbfl_memory_device_clear(&device);
 	zend_hash_destroy(&ht_headers);
+	if (str_headers) {
+		zend_string_release(str_headers);
+	}
 }
 
 #undef SKIP_LONG_HEADER_SEP_MBSTRING
