@@ -22,6 +22,7 @@
 #include "Zend/zend_exceptions.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
+#include "jit/zend_jit_vm_helper.h"
 
 #ifdef HAVE_JIT
 

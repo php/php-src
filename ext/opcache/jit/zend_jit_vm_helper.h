@@ -13,35 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   |          Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
 */
 
-#include "Zend/zend_API.h"
+#ifndef ZEND_JIT_VM_HELPER
+#define ZEND_JIT_VM_HELPER
 
-static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
-{
-	zval *func = zend_hash_find(EG(function_table), name);
-	zend_function *fbc;
+void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info);
+void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info);
 
-	if (UNEXPECTED(func == NULL)) {
-		zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(name));
-		return NULL;
-	}
-	fbc = Z_FUNC_P(func);
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
-		memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
-	}
-	return fbc;
-}
-
-static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t used_stack, zend_function *fbc)
-{
-	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
-	call->func = fbc;
-	ZEND_SET_CALL_INFO(call, 0, ZEND_CALL_NESTED_FUNCTION|ZEND_CALL_ALLOCATED);
-	return call;
-}
+#endif
 
 /*
  * Local variables:

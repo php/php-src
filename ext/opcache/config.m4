@@ -30,7 +30,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-    ZEND_JIT_SRC=jit/zend_jit.c
+    ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helper.c"
 
     dnl Find out which ABI we are using.
     echo 'int i;' > conftest.$ac_ext
