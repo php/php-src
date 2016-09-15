@@ -210,7 +210,7 @@ struct _php_stream  {
 	char *orig_path;
 
 	zend_resource *ctx;
-	int flags;	/* PHP_STREAM_FLAG_XXX */
+	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
 
 	int eof;
 
