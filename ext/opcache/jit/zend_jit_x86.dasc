@@ -503,47 +503,64 @@ static void* dasm_labels[zend_lb_MAX];
 |1:
 |.endmacro
 
-|.macro ZVAL_PTR_DTOR, base, offset, info, filename, lineno
-||	if (info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-|		// if (Z_REFCOUNTED_P(cv)) {
-|		test byte [base + offset + 9], IS_TYPE_REFCOUNTED
-|		je >3
-||	}
-|	// if (!Z_DELREF_P(cv)) {
-|	mov FCARG1a, aword [base + offset]
-|	dec dword [FCARG1a]
-|	jnz >1
-|	// ZVAL_NULL(cv);
-|	mov dword [base + offset + 8], IS_NULL
-|	// zval_dtor_func(r);
-|	ZVAL_DTOR_FUNC filename, lineno
-|	jmp >3
+|.macro ZVAL_PTR_DTOR, base, offset, info, cold, filename, lineno
+||	if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+||		if (info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+|			// if (Z_REFCOUNTED_P(cv)) {
+|			test byte [base + offset + 9], IS_TYPE_REFCOUNTED
+||			if (cold) {
+|				jne >1
+|.cold_code
 |1:
-||	if (info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-||		if (info & MAY_BE_REF) {
-|			lea r1, [base + offset]
-|			// ZVAL_DEREF(z);
-|			ZVAL_DEREF r1, info
-|			// if (Z_COLLECTABLE_P(z))
-|			test byte [r1 + 9], IS_TYPE_COLLECTABLE
-|			je >3
-|			// if (UNEXPECTED(!Z_GC_INFO_P(z)))
-|			mov FCARG1a, aword [r1]
-|			cmp word [FCARG1a + 6], 0
-|			jne >3
-||		} else {
-|			// if (Z_COLLECTABLE_P(z))
-|			test byte [base + offset + 9], IS_TYPE_COLLECTABLE
-|			je >3
-|			// if (UNEXPECTED(!Z_GC_INFO_P(z)))
-|			mov FCARG1a, aword [base + offset]
-|			cmp word [FCARG1a + 6], 0
-|			jne >3
+||			} else {
+|				je >3
+||			}
 ||		}
-|		// gc_possible_root(Z_COUNTED_P(z))
-|		EXT_CALL gc_possible_root, r0
-||	}
+|		// if (!Z_DELREF_P(cv)) {
+|		mov FCARG1a, aword [base + offset]
+|		dec dword [FCARG1a]
+|		jnz >1
+|		// ZVAL_NULL(cv);
+|		mov dword [base + offset + 8], IS_NULL
+|		// zval_dtor_func(r);
+|		ZVAL_DTOR_FUNC filename, lineno
+||		if (info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+|			jmp >3
+||		}
+|1:
+||		if (info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+||			if (info & MAY_BE_REF) {
+|				lea r1, [base + offset]
+|				// ZVAL_DEREF(z);
+|				ZVAL_DEREF r1, info
+|				// if (Z_COLLECTABLE_P(z))
+|				test byte [r1 + 9], IS_TYPE_COLLECTABLE
+|				je >3
+|				// if (UNEXPECTED(!Z_GC_INFO_P(z)))
+|				mov FCARG1a, aword [r1]
+|				cmp word [FCARG1a + 6], 0
+|				jne >3
+||			} else {
+|				// if (Z_COLLECTABLE_P(z))
+|				test byte [base + offset + 9], IS_TYPE_COLLECTABLE
+|				je >3
+|				// if (UNEXPECTED(!Z_GC_INFO_P(z)))
+|				mov FCARG1a, aword [base + offset]
+|				cmp word [FCARG1a + 6], 0
+|				jne >3
+||			}
+|			// gc_possible_root(Z_COUNTED_P(z))
+|			EXT_CALL gc_possible_root, r0
+||			if (cold && (info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE)))) {
+|				jmp >3
+|.code
+||			}
+||		} else if (cold && (info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE)))) {
+|			jmp >3
+|.code
+||		}
 |3:
+||	}
 |.endmacro
 
 |.macro FREE_OP, op_type, op, op_info, op_array, lineno
@@ -728,7 +745,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 	|	mov r0, OP:IP->result.var
 	|.endif
 	|	add r0, FP
-	|	ZVAL_PTR_DTOR r0, 0, MAY_BE_ANY, NULL, 0
+	|	ZVAL_PTR_DTOR r0, 0, MAY_BE_ANY, 0, NULL, 0
 	|5:
 	|	// EX(opline) = EG(exception_op);
 	|	LOAD_ADDR IP, &EG(exception_op)
@@ -2328,7 +2345,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, zend_op *opline, z
 
 		if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			| ZVAL_PTR_DTOR FP, offset, info, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			| ZVAL_PTR_DTOR FP, offset, info, 1, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
 		}
 	}
 	return 1;
