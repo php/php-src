@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #73025 (Heap Buffer Overflow in virtual_popen of
     zend_virtual_cwd.c). (cmb)
   . Fixed bug #73058 (crypt broken when salt is 'too' long). (Anatol)
+  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
+    password_verify). (Anatol)
 
 - Filter:
   . Fixed bug #72972 (Bad filter for the flags FILTER_FLAG_NO_RES_RANGE and
@@ -48,14 +50,16 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #72907 (null pointer deref, segfault in gc_remove_zval_from_buffer
     (zend_gc.c:260)). (Laruence)
-  . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
-    password_verify). (Anatol)
 
 - Dba:
   . Fixed bug #71514 (Bad dba_replace condition because of wrong API usage).
     (cmb)
   . Fixed bug #70825 (Cannot fetch multiple values with group in ini file).
     (cmb)
+
+- EXIF:
+  . Fixed bug #72926 (Uninitialized Thumbail Data Leads To Memory Leakage in
+    exif_process_IFD_in_TIFF). (Stas)
 
 - FTP:
   . Fixed bug #70195 (Cannot upload file using ftp_put to FTPES with
@@ -68,14 +72,28 @@ PHP                                                                        NEWS
     images). (cmb)
   . Fixed bug #68716 (possible resource leaks in _php_image_convert()). (cmb)
 
+- Intl:
+  . Fixed bug #73007 (add locale length check). (Stas)
+
 - JSON:
   . Fixed bug #72787 (json_decode reads out of bounds). (Jakub Zelenka)
 
 - mbstring:
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
+  . Fixed bug #72910 (Out of bounds heap read in mbc_to_code() / triggered by
+    mb_ereg_match()). (Stas)
 
 - MSSQL:
   . Fixed bug #72039 (Use of uninitialised value on mssql_guid_string). (Kalle)
+
+- Mysqlnd:
+  . Fixed bug #72293 (Heap overflow in mysqlnd related to BIT fields). (Stas)
+
+- Phar:
+  . Fixed bug #72928 (Out of bound when verify signature of zip phar in
+    phar_parse_zipfile). (Stas)
+  . Fixed bug #73035 (Out of bound when verify signature of tar phar in
+    phar_parse_tarfile). (Stas)
 
 - PDO:
   . Fixed bug #60665 (call to empty() on NULL result using PDO::FETCH_LAZY
@@ -86,6 +104,9 @@ PHP                                                                        NEWS
     specifying a sequence). (Pablo Santiago Sánchez, Matteo)
   . Fixed bug #72759 (Regression in pgo_pgsql). (Anatol)
 
+- SPL:
+  . Fixed bug #73029 (Missing type check when unserializing SplArray). (Stas)
+
 - Standard:
   . Fixed bug #72823 (strtr out-of-bound access). (cmb)
   . Fixed bug #72278 (getimagesize returning FALSE on valid jpg). (cmb)
@@ -93,12 +114,22 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
+  . Fixed bug #73011 (integer overflow in fgets cause heap corruption). (Stas)
+  . Fixed bug #73017 (memory corruption in wordwrap function). (Stas)
+  . Fixed bug #73045 (integer overflow in fgetcsv caused heap corruption). (Stas)
+  . Fixed bug #73052 (Memory Corruption in During Deserialized-object Destruction)
+    (Stas)
 
 - Streams:
   . Fixed bug #72853 (stream_set_blocking doesn't work). (Laruence)
 
+- Wddx:
+  . Fixed bug #72860 (wddx_deserialize use-after-free). (Stas)
+  . Fixed bug #73065 (Out-Of-Bounds Read in php_wddx_push_element). (Stas)
+
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
+  . Fixed bug #72927 (integer overflow in xml_utf8_encode). (Stas)
 
 - ZIP:
   . Fixed bug #68302 (impossible to compile php with zip support). (cmb)
