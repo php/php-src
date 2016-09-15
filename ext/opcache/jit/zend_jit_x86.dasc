@@ -700,26 +700,12 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 static int zend_jit_leave_function_stub(dasm_State **Dst)
 {
 	|->leave_function_handler:
+	|	add r4, SPAD
 	|	test FCARG1d, ZEND_CALL_TOP
-	|	mov FCARG2a, FP
 	|	jne >1
-	|	// TODO: Use tail call ???
-	|	EXT_CALL zend_jit_leave_nested_func_helper, r0
-	|	//execute_data = EG(current_execute_data);
-	|	mov FP, aword [&EG(current_execute_data)]
-	|	// LOAD_OPLINE();
-	|	mov IP, EX->opline
-	|	//ZEND_VM_CONTINUE()
-	|	add r4, SPAD // stack alignment
-	|	jmp aword [IP]
+	|	EXT_JMP zend_jit_leave_nested_func_helper, r0
 	|1:
-	|	// TODO: Use tail call ???
-	|	EXT_CALL zend_jit_leave_top_func_helper, r0
-	|	//execute_data = EG(current_execute_data);
-	|	mov FP, aword [&EG(current_execute_data)]
-	|	xor IP, IP
-	|	add r4, SPAD // stack alignment
-	|	ret
+	|	EXT_JMP zend_jit_leave_top_func_helper, r0
 
 	return 1;
 }
