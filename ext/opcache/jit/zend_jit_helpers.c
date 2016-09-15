@@ -43,25 +43,17 @@ static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t us
 	return call;
 }
 
-static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data)
-{
-	zval *cv = EX_VAR_NUM(0);
-	zval *end = cv + EX(func)->op_array.last_var;
-	while (EXPECTED(cv != end)) {
-		if (Z_REFCOUNTED_P(cv)) {
-			if (!Z_DELREF_P(cv)) {
-				zend_refcounted *r = Z_COUNTED_P(cv);
-				ZVAL_NULL(cv);
-				zval_dtor_func(r);
-			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(cv);
-			}
-		}
-		cv++;
-	}
-}
+#pragma GCC diagnostic ignored "-Wvolatile-register-var"
+#if defined(__x86_64__)
+register zend_execute_data* volatile execute_data __asm__("%r14");
+register const zend_op* volatile opline __asm__("%r15");
+#else
+register zend_execute_data* volatile execute_data __asm__("%esi");
+register const zend_op* volatile opline __asm__("%edi");
+#endif
+#pragma GCC diagnostic warning "-Wvolatile-register-var"
 
-static void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info, zend_execute_data *execute_data)
+static void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info)
 {
 	zend_execute_data *old_execute_data;
 
@@ -93,10 +85,11 @@ static void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info, 
 		}
 	} else {
 		EX(opline)++;
+		opline = EX(opline);
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info, zend_execute_data *execute_data)
+static void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info)
 {
 	if (UNEXPECTED(call_info & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
@@ -108,6 +101,8 @@ static void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info, zen
 	if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 		OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
 	}
+	execute_data = EG(current_execute_data);
+	opline = NULL;
 }
 
 /*
