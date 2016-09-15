@@ -626,6 +626,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 {
 	unsigned char *pixel = NULL;
 	int *tpixel = NULL;
+	int opixel;
 	int x, y, row, col, pc, pcr;
 
 	tweencolor_t *tc_elem;
@@ -683,7 +684,13 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 					}
 				} else {
 					if (im->alphaBlendingFlag) {
-						*tpixel = gdAlphaBlend(*tpixel, (level << 24) + (fg & 0xFFFFFF));
+						opixel = *tpixel;
+						if (gdTrueColorGetAlpha(opixel) != gdAlphaTransparent) {
+							*tpixel = gdAlphaBlend (opixel,
+							                        (level << 24) + (fg & 0xFFFFFF));
+						} else {
+							*tpixel = (level << 24) + (fg & 0xFFFFFF);
+						}
 					} else {
 						*tpixel = (level << 24) + (fg & 0xFFFFFF);
 					}
