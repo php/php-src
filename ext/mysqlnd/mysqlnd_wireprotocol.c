@@ -1610,7 +1610,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 		const unsigned long len = php_mysqlnd_net_field_length(&p);
 
 		if (len != MYSQLND_NULL_LENGTH && ((p + len) > packet_end)) {
-			php_error_docref(NULL, E_WARNING, "Malformed server packet. Field length pointing "MYSQLND_SZ_T_SPEC
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Malformed server packet. Field length pointing "MYSQLND_SZ_T_SPEC
 											  " bytes after end of packet", (p + len) - packet_end - 1);
 			DBG_RETURN(FAIL);
 		}
