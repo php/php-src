@@ -2453,16 +2453,15 @@ static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 	|	test r1, r1
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
 	    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-		|	jnz >2
-		|	test byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
-		|	jnz >1
-		||	if (jit_return_label >= 0) {
-		|		jmp =>jit_return_label
-		||	} else {
-		|		jmp >9
-		||	}
+		|	jz >1
 		|.cold_code
 		|1:
+		|	test byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
+		||	if (jit_return_label >= 0) {
+		|		jz =>jit_return_label
+		||	} else {
+		|		jz >9
+		||	}
 		|	mov FCARG1a, aword [FP + opline->op1.var]
 		|	dec dword [FCARG1a]
 		||	if (jit_return_label >= 0) {
@@ -2480,7 +2479,6 @@ static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 		|		jmp >9
 		||	}
 		|.code
-		|2:
 	} else {
 		||	if (jit_return_label >= 0) {
 		|		jz =>jit_return_label
