@@ -48,8 +48,8 @@ struct _php_stream_bucket {
 	char *buf;
 	size_t buflen;
 	/* if non-zero, buf should be pefreed when the bucket is destroyed */
-	int own_buf;
-	int is_persistent;
+	uint8_t own_buf;
+	uint8_t is_persistent;
 
 	/* destroy this struct when refcount falls to zero */
 	int refcount;
@@ -67,7 +67,7 @@ typedef enum {
 
 /* Buckets API. */
 BEGIN_EXTERN_C()
-PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, int own_buf, int buf_persistent);
+PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent);
 PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **left, php_stream_bucket **right, size_t length);
 PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket);
 #define php_stream_bucket_addref(bucket)	(bucket)->refcount++
