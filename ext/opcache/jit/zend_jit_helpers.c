@@ -43,6 +43,31 @@ static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t us
 	return call;
 }
 
+static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *str)
+{
+	zend_ulong idx;
+	register const char *tmp = str->val;
+
+	do {
+		if (*tmp > '9') {
+			break;
+		} else if (*tmp < '0') {
+			if (*tmp != '-') {
+				break;
+			}
+			tmp++;
+			if (*tmp > '9' || *tmp < '0') {
+				break;
+			}
+		}
+		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
+			return zend_hash_index_find(ht, idx);
+		}
+	} while (0);
+
+	return zend_hash_find(ht, str);
+}
+
 /*
  * Local variables:
  * tab-width: 4

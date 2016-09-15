@@ -386,6 +386,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_leave_nested_func_helper);
 	REGISTER_HELPER(zend_jit_leave_top_func_helper);
+	REGISTER_HELPER(zend_jit_symtable_find);
 #undef  REGISTER_HELPER
 
 	zend_elf_load_symbols();

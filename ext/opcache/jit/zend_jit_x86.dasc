@@ -2605,6 +2605,217 @@ static int zend_jit_return(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 	return zend_jit_leave_func(Dst, opline, op_array, ssa);
 }
 
+static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info, op2_info, res_info;
+
+	if (!ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+	op2_info = OP2_INFO();
+	res_info = RES_INFO();
+	if ((op1_info & (/*MAY_BE_UNDEF|*/MAY_BE_REF)) ||
+	    (op2_info & (/*MAY_BE_UNDEF|*/MAY_BE_REF)) ||
+	    !(op1_info & MAY_BE_ARRAY) ||
+	    !(op2_info & (MAY_BE_LONG|MAY_BE_STRING))) {
+		// TODO: support for references ???
+		goto fallback;
+	}
+
+	if (op1_info & MAY_BE_ARRAY) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
+			|	// if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+			|	cmp byte [FP + opline->op1.var + 8], IS_ARRAY
+			|	jnz >7 // NOT_ARRAY
+		}
+		|	LONG_LOAD opline->op1_type, opline->op1, FCARG1a
+		if (op2_info & MAY_BE_LONG) {
+			if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_LONG)) {
+				|	// if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
+				|	cmp byte [FP + opline->op2.var + 8], IS_LONG
+				|	jnz >3 // NOT_LONG
+			}
+			|	// hval = Z_LVAL_P(dim);
+			|	LONG_LOAD opline->op2_type, opline->op2, FCARG2a
+
+			if (opline->op2_type == IS_CONST) {
+				zend_long val = Z_LVAL_P(RT_CONSTANT(op_array, opline->op2));
+				if (val >= 0 && val < HT_MAX_SIZE) {
+					|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+					|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
+					|	jz >1 // HASH_FIND
+					|	// if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed)) {
+					|.if X64
+					|	movsxd r0, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
+					|	cmp r0, val
+					|.else
+					|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], val
+					|.endif
+					|	jle >2 // NOT_FOUND
+					|	// _ret = &_ht->arData[_h].val;
+					|	mov r0, aword [FCARG1a + offsetof(zend_array, arData)]
+					|	add r0, val * sizeof(Bucket)
+					|	cmp dword [r0 + 8], IS_UNDEF
+					|	jne >8 // FOUND
+					|	jmp >2 // NOT_FOUND
+				}
+			} else {
+				|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+				|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
+				|	jz >1 // HASH_FIND
+				|	// if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed)) {
+				|.if X64
+				|	movsxd r0, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
+				|	cmp r0, FCARG2a
+				|.else
+				|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], FCARG2a
+				|.endif
+				|	jle >2 // NOT_FOUND
+				|	// _ret = &_ht->arData[_h].val;
+				|	imul FCARG2a, sizeof(Bucket)
+				|	mov r0, aword [FCARG1a + offsetof(zend_array, arData)]
+				|	add r0, FCARG2a
+				|	cmp dword [r0 + 8], IS_UNDEF
+				|	jne >8 // FOUND
+				|	jmp >2 // NOT_FOUND
+			}
+			|1:
+			|	EXT_CALL zend_hash_index_find, r0
+			|	test r0, r0
+			|	je >2 // NOT_FOUND
+			|.cold_code
+			|2:
+			if (opline->opcode == ZEND_FETCH_DIM_R) {
+				|	// zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				|.if X64
+				|	mov CARG1, E_NOTICE
+				|	LOAD_ADDR CARG2, "Undefined offset: " ZEND_LONG_FMT
+				|	LONG_LOAD opline->op2_type, opline->op2, CARG3
+				|	EXT_CALL zend_error, r0
+				|.else
+				|	sub r4, 4
+				|	LONG_LOAD opline->op2_type, opline->op2, r0
+				|	push r0
+				|	push "Undefined offset: " ZEND_LONG_FMT
+				|	push E_NOTICE
+				|	EXT_CALL zend_error, r0
+				|	add r4, 16
+				|.endif
+			}
+			|	// retval = &EG(uninitialized_zval);
+			|	mov dword [FP + opline->result.var + 8], IS_NULL
+			|	jmp >9 // END
+			|.code
+			if (op2_info & (MAY_BE_ANY - MAY_BE_STRING)) {
+				|	jmp >8 // FOUND
+			}
+			if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_LONG)) {
+				|3:
+			}
+		}
+		if (op2_info & MAY_BE_STRING) {
+			if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) {
+				|	// if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
+				|	cmp byte [FP + opline->op2.var + 8], IS_STRING
+				|	jnz >3 // NOT_STRING
+			}
+			|	// offset_key = Z_STR_P(dim);
+			|	LONG_LOAD opline->op2_type, opline->op2, FCARG2a
+			|	// retval = zend_hash_find(ht, offset_key);
+			if (opline->op2_type != IS_CONST) {
+				|	EXT_CALL zend_jit_symtable_find, r0
+			} else {
+				|	EXT_CALL zend_hash_find, r0
+			}
+			|	test r0, r0
+			|	je >2 // NOT_FOUND
+			|	// if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			|	cmp dword [r0 + 8], IS_INDIRECT
+			|	jz >1 // SLOW
+			|.cold_code
+			|1:
+			|	//	retval = Z_INDIRECT_P(retval);
+			|	mov r0, aword [r0]
+			|	cmp dword [r0 + 8], IS_UNDEF
+			|	jnz >8 // COPY
+			|2:
+			if (opline->opcode == ZEND_FETCH_DIM_R) {
+				//	zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+				|.if X64
+				|	mov CARG1, E_NOTICE
+				|	LOAD_ADDR CARG2, "Undefined index: %s"
+				|	LONG_LOAD opline->op2_type, opline->op2, CARG3
+				|	add CARG3, offsetof(zend_string, val)
+				|	EXT_CALL zend_error, r0
+				|.else
+				|	sub r4, 4
+				|	LONG_LOAD opline->op2_type, opline->op2, r0
+				|	add r0, offsetof(zend_string, val)
+				|	push r0
+				|	push "Undefined index: %s"
+				|	push E_NOTICE
+				|	EXT_CALL zend_error, r0
+				|	add r4, 16
+				|.endif
+			}
+			|	mov dword [FP +opline->result.var + 8], IS_NULL
+			|	jmp >9 // END
+			|.code
+			if (op2_info & (MAY_BE_ANY - (MAY_BE_LONG|MAY_BE_STRING))) {
+				|	jmp >8 // FOUND
+			}
+		}
+		if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) {
+			if (op2_info & (MAY_BE_LONG|MAY_BE_STRING)) {
+				|.cold_code
+				|3:
+			}
+			|	// ????
+			|	int3
+			if (op2_info & (MAY_BE_LONG|MAY_BE_STRING)) {
+				|.code
+			}
+		}
+	}
+
+	if (op1_info & (MAY_BE_ANY-MAY_BE_ARRAY)) {
+		if (op1_info & MAY_BE_ARRAY) {
+			|.cold_code
+			|7:
+		}
+		|	// ????
+		|	int3
+		if (op1_info & MAY_BE_ARRAY) {
+			|.code
+		}
+	}
+
+	|8: // COPY
+	|	// UNREF ????
+	|	ZVAL_COPY_VALUE FP, opline->result.var, r0, 0, MAY_BE_ANY, r1, ecx, r2
+	|	TRY_ADDREF res_info, ch, r2
+	|9: // END
+
+	|	FREE_OP opline->op2_type, opline->op2, op2_info, op_array, opline->lineno
+	|	FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+
+	if (zend_may_throw(opline, op_array, ssa)) {
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+	}
+
+	valid_opline_offset++;
+
+	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
 #endif
 
 /*
