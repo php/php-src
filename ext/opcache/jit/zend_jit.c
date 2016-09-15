@@ -844,6 +844,14 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+#ifdef INCOMPLETE_JIT
+				case ZEND_FETCH_DIM_R:
+				case ZEND_FETCH_DIM_IS:
+					if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa)) {
+						goto jit_failure;
+					}
+					break;
+#endif
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa->cfg.split_at_recv) {
