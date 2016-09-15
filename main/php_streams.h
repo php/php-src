@@ -230,7 +230,7 @@ struct _php_stream  {
 
 #if ZEND_DEBUG
 	const char *open_filename;
-	uint open_lineno;
+	uint32_t open_lineno;
 #endif
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
