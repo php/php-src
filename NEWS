@@ -54,6 +54,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #68015 (Session does not report invalid uid for files save handler).
     (Yasuo)
+  . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
+    (cmb)
 
 - SOAP:
   . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita)

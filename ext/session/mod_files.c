@@ -114,7 +114,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	size_t n;
 
 	key_len = strlen(key);
-	if (key_len <= data->dirdepth ||
+	if (!data || key_len <= data->dirdepth ||
 		buflen < (strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
 	}
