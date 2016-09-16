@@ -529,6 +529,8 @@ PHP_FUNCTION(password_hash)
 				size_t out_len = 32;
 				size_t encoded_len;
 				int status = 0;
+				char *out;
+				zend_string *encoded;
 
 				encoded_len = argon2_encodedlen(
 					time_cost,
@@ -538,8 +540,8 @@ PHP_FUNCTION(password_hash)
 					out_len
 				);
 
-				zend_string *out = zend_string_alloc(out_len, 0);
-				zend_string *encoded = zend_string_alloc(encoded_len, 0);
+				out = emalloc(out_len + 1);
+				encoded = zend_string_alloc(encoded_len, 0);
 
 				status = argon2_hash(
 					time_cost,
@@ -549,9 +551,9 @@ PHP_FUNCTION(password_hash)
 					password_len,
 					salt,
 					salt_len,
-					out->val,
+					out,
 					out_len,
-					encoded->val,
+					ZSTR_VAL(encoded),
 					encoded_len,
 					type,
 					ARGON2_VERSION_NUMBER
@@ -561,7 +563,7 @@ PHP_FUNCTION(password_hash)
 				efree(salt);
 
 				if (status != ARGON2_OK) {
-					efree(encoded);
+					zend_string_free(encoded);
 					php_error_docref(NULL, E_WARNING, argon2_error_message(status));
 					RETURN_FALSE;
 				}
