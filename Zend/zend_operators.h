@@ -563,7 +563,10 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 	} else {
 		ZVAL_LONG(result, llresult);
 	}
-#elif defined(__GNUC__) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#elif defined(__GNUC__) && defined(__i386__) \
+	&& !(4 == __GNUC__ && 8 == __GNUC_MINOR__) \
+	&& !(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
+	/* Position-independent builds fail with gcc-4.9.x */
 	__asm__(
 		"movl	(%1), %%eax\n\t"
 		"addl   (%2), %%eax\n\t"
@@ -663,7 +666,10 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 	} else {
 		ZVAL_LONG(result, llresult);
 	}
-#elif defined(__GNUC__) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#elif defined(__GNUC__) && defined(__i386__) && \
+	!(4 == __GNUC__ && 8 == __GNUC_MINOR__) && \
+	!(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
+	/* Position-independent builds fail with gcc-4.9.x */
 	__asm__(
 		"movl	(%1), %%eax\n\t"
 		"subl   (%2), %%eax\n\t"
