@@ -180,6 +180,15 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
 	/* Conversion to Y,U,V buffer */
     yuv_width = (width + 1) >> 1;
     yuv_height = (height + 1) >> 1;
+
+	if (overflow2(width, height)) {
+		return;
+	}
+	/* simplification possible, because WebP must not be larger than 16384**2 */
+	if (overflow2(width * height, 2 * sizeof(unsigned char))) {
+		return;
+	}
+
     yuv_nbytes = width * height + 2 * yuv_width * yuv_height;
 
     if ((Y = (unsigned char *)gdCalloc(yuv_nbytes, sizeof(unsigned char))) == NULL) {
