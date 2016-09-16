@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #50194 (imagettftext broken on transparent background w/o
     alphablending). (cmb)
+  . Fixed bug #73003 (Integer Overflow in gdImageWebpCtx of gd_webp.c). (trylab,
+    cmb)
 
 
 15 Sep 2016, PHP 7.1.0RC2
