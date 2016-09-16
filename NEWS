@@ -43,6 +43,9 @@ PHP                                                                        NEWS
   . Fixed bug #68015 (Session does not report invalid uid for files save handler).
     (Yasuo)
 
+- Stream:
+  . Fixed bug #73069 (readfile() mangles files larger than 2G). (Laruence)
+
 - Zip:
   . Fixed bug #70752 (Depacking with wrong password leaves 0 length files).
     (cmb)
