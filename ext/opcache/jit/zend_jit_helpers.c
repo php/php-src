@@ -68,6 +68,297 @@ static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *st
 	return zend_hash_find(ht, str);
 }
 
+static void ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
+{
+	const zend_execute_data *execute_data = EG(current_execute_data);
+	zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(var)];
+
+	zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(cv));
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim, zval *result)
+{
+	zend_long hval;
+	zend_string *offset_key;
+	zval *retval;
+
+	if (Z_TYPE_P(dim) == IS_REFERENCE) {
+		dim = Z_REFVAL_P(dim);
+	}
+
+	switch (Z_TYPE_P(dim)) {
+		case IS_UNDEF:
+			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			/* break missing intentionally */
+		case IS_NULL:
+			offset_key = ZSTR_EMPTY_ALLOC();
+			goto str_index;
+		case IS_DOUBLE:
+			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			goto num_index;
+		case IS_RESOURCE:
+			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			hval = Z_RES_HANDLE_P(dim);
+			goto num_index;
+		case IS_FALSE:
+			hval = 0;
+			goto num_index;
+		case IS_TRUE:
+			hval = 1;
+			goto num_index;
+		default:
+			zend_error(E_WARNING, "Illegal offset type");
+			ZVAL_NULL(result);
+			return;
+	}
+
+str_index:
+	retval = zend_hash_find(ht, offset_key);
+	if (retval) {
+		/* support for $GLOBALS[...] */
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+				ZVAL_NULL(result);
+				return;
+			}
+		}
+	} else {
+		zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+		ZVAL_NULL(result);
+		return;
+	}
+	ZVAL_COPY_UNREF(result, retval);
+	return;
+
+num_index:
+	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+	ZVAL_COPY_UNREF(result, retval);
+	return;
+
+num_undef:
+	zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+	ZVAL_NULL(result);
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim, zval *result)
+{
+	zend_long hval;
+	zend_string *offset_key;
+	zval *retval;
+
+	if (Z_TYPE_P(dim) == IS_REFERENCE) {
+		dim = Z_REFVAL_P(dim);
+	}
+
+	switch (Z_TYPE_P(dim)) {
+		case IS_UNDEF:
+			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			/* break missing intentionally */
+		case IS_NULL:
+			offset_key = ZSTR_EMPTY_ALLOC();
+			goto str_index;
+		case IS_DOUBLE:
+			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			goto num_index;
+		case IS_RESOURCE:
+			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			hval = Z_RES_HANDLE_P(dim);
+			goto num_index;
+		case IS_FALSE:
+			hval = 0;
+			goto num_index;
+		case IS_TRUE:
+			hval = 1;
+			goto num_index;
+		default:
+			zend_error(E_WARNING, "Illegal offset type");
+			ZVAL_NULL(result);
+			return;
+	}
+
+str_index:
+	retval = zend_hash_find(ht, offset_key);
+	if (retval) {
+		/* support for $GLOBALS[...] */
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				ZVAL_NULL(result);
+				return;
+			}
+		}
+	} else {
+		ZVAL_NULL(result);
+		return;
+	}
+	ZVAL_COPY_UNREF(result, retval);
+	return;
+
+num_index:
+	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+	ZVAL_COPY_UNREF(result, retval);
+	return;
+
+num_undef:
+	ZVAL_NULL(result);
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval *dim, zval *result)
+{
+	zend_long offset;
+
+try_string_offset:
+	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		switch (Z_TYPE_P(dim)) {
+			/* case IS_LONG: */
+			case IS_STRING:
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					break;
+				}
+				zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+				break;
+			case IS_UNDEF:
+				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			case IS_DOUBLE:
+			case IS_NULL:
+			case IS_FALSE:
+			case IS_TRUE:
+				zend_error(E_NOTICE, "String offset cast occurred");
+				break;
+			case IS_REFERENCE:
+				dim = Z_REFVAL_P(dim);
+				goto try_string_offset;
+			default:
+				zend_error(E_WARNING, "Illegal offset type");
+				break;
+		}
+
+		offset = _zval_get_long_func(dim);
+	} else {
+		offset = Z_LVAL_P(dim);
+	}
+
+	if (UNEXPECTED(Z_STRLEN_P(container) < (size_t)((offset < 0) ? -offset : (offset + 1)))) {
+		zend_error(E_NOTICE, "Uninitialized string offset: " ZEND_LONG_FMT, offset);
+		ZVAL_EMPTY_STRING(result);
+	} else {
+		zend_uchar c;
+		zend_long real_offset;
+
+		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
+			? (zend_long)Z_STRLEN_P(container) + offset : offset;
+		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
+			if (CG(one_char_string)[c]) {
+			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
+		} else {
+			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + real_offset, 1, 0));
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_dim_str_is_helper(zval *container, zval *dim, zval *result)
+{
+	zend_long offset;
+
+try_string_offset:
+	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		switch (Z_TYPE_P(dim)) {
+			/* case IS_LONG: */
+			case IS_STRING:
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					break;
+				}
+				ZVAL_NULL(result);
+				return;
+			case IS_UNDEF:
+				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			case IS_DOUBLE:
+			case IS_NULL:
+			case IS_FALSE:
+			case IS_TRUE:
+				break;
+			case IS_REFERENCE:
+				dim = Z_REFVAL_P(dim);
+				goto try_string_offset;
+			default:
+				zend_error(E_WARNING, "Illegal offset type");
+				break;
+		}
+
+		offset = _zval_get_long_func(dim);
+	} else {
+		offset = Z_LVAL_P(dim);
+	}
+
+	if (UNEXPECTED(Z_STRLEN_P(container) < (size_t)((offset < 0) ? -offset : (offset + 1)))) {
+		ZVAL_NULL(result);
+	} else {
+		zend_uchar c;
+		zend_long real_offset;
+
+		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
+			? (zend_long)Z_STRLEN_P(container) + offset : offset;
+		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
+			if (CG(one_char_string)[c]) {
+			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
+		} else {
+			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + real_offset, 1, 0));
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_dim_obj_r_helper(zval *container, zval *dim, zval *result)
+{
+	if (UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+		zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+		dim = &EG(uninitialized_zval);
+	}
+	if (!Z_OBJ_HT_P(container)->read_dimension) {
+		zend_throw_error(NULL, "Cannot use object as array");
+		ZVAL_NULL(result);
+	} else {
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, BP_VAR_R, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval *dim, zval *result)
+{
+	if (UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+		zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+		dim = &EG(uninitialized_zval);
+	}
+	if (!Z_OBJ_HT_P(container)->read_dimension) {
+		zend_throw_error(NULL, "Cannot use object as array");
+		ZVAL_NULL(result);
+	} else {
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, BP_VAR_IS, result);
+
+		if (retval) {
+			if (result != retval) {
+				ZVAL_COPY(result, retval);
+			}
+		} else {
+			ZVAL_NULL(result);
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
+{
+	ZVAL_UNREF(src);
+	ZVAL_COPY(dst, src);
+}
+
 /*
  * Local variables:
  * tab-width: 4

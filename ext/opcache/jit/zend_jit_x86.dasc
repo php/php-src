@@ -612,6 +612,20 @@ static void* dasm_labels[zend_lb_MAX];
 |	EXT_CALL gc_possible_root, r0
 |.endmacro
 
+|.macro SAVE_VALID_OPLINE
+||	if (valid_opline || valid_opline_offset) {
+||		if (!valid_opline) {
+|			lea r0, [IP + sizeof(zend_op) * valid_opline_offset]
+||		} else {
+||			const zend_op *target_opline = valid_opline + valid_opline_offset;
+|			LOAD_ADDR r0, target_opline
+||		}
+|		mov EX->opline, r0
+||	} else {
+|		mov EX->opline, IP
+||	}
+|.endmacro
+
 static const zend_op *valid_opline;
 static uint32_t valid_opline_offset;
 static int jit_return_label;
@@ -2616,12 +2630,6 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 	res_info = RES_INFO();
-	if ((op2_info & (MAY_BE_UNDEF|MAY_BE_REF)) ||
-	    !(op1_info & MAY_BE_ARRAY) ||
-	    !(op2_info & (MAY_BE_LONG|MAY_BE_STRING))) {
-		// TODO: support for references ???
-		goto fallback;
-	}
 
 	if (op1_info & MAY_BE_REF) {
 		|	lea FCARG1a, [FP + opline->op1.var]
@@ -2676,7 +2684,6 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 					|	jmp >2 // NOT_FOUND
 				}
 			} else {
-				|4:
 				|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
 				|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
 				|	jz >1 // HASH_FIND
@@ -2740,7 +2747,6 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 			|	LONG_LOAD opline->op2_type, opline->op2, FCARG2a
 			|	// retval = zend_hash_find(ht, offset_key);
 			if (opline->op2_type != IS_CONST) {
-				|5:
 				|	EXT_CALL zend_jit_symtable_find, r0
 			} else {
 				|	EXT_CALL zend_hash_find, r0
@@ -2788,103 +2794,22 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 				|.cold_code
 				|3:
 			}
-			if (op2_info & MAY_BE_REF) {
-				|	cmp byte [FP + opline->op2.var + 8], IS_REFERENCE
-				|	jnz >1
-				|	// ????
-				|	int3
-				|1:
+			|	SAVE_VALID_OPLINE
+			|	LOAD_ZVAL_ADDR FCARG2a, opline->op2_type, opline->op2
+			|.if X64
+			|   lea CARG3, [FP + opline->result.var]
+			|.else
+			|   lea r0, [FP + opline->result.var]
+			|	push r0
+			|.endif
+			if (opline->opcode == ZEND_FETCH_DIM_R) {
+				|	EXT_CALL zend_jit_fetch_dim_r_helper, r0
+			} else if (opline->opcode == ZEND_FETCH_DIM_IS) {
+				|	EXT_CALL zend_jit_fetch_dim_is_helper, r0
+			} else {
+				ZEND_ASSERT(0);
 			}
-			if (op2_info & MAY_BE_DOUBLE) {
-				|	cmp byte [FP + opline->op2.var + 8], IS_DOUBLE
-				|	jnz >1
-				|	// hval = zend_dval_to_lval(Z_DVAL_P(dim));
-				|	// ????
-				|	int3
-				|	// goto num_index;
-				|	jmp <4
-				|1:
-			}
-			if (op2_info & MAY_BE_NULL) {
-				|	cmp byte [FP + opline->op2.var + 8], IS_NULL
-				|	jnz >1
-				|	// offset_key = ZSTR_EMPTY_ALLOC();
-				|	LOAD_ADDR FCARG2a, CG(empty_string)
-				|	// goto str_index;
-				|	jmp <5
-				|1:
-			}
-			if (op2_info & MAY_BE_FALSE) {
-				|	cmp byte [FP + opline->op2.var + 8], IS_FALSE
-				|	jnz >1
-				|	// hval = 0;
-				|	xor FCARG2a, FCARG2a
-				|	// goto num_index;
-				|	jmp <4
-				|1:
-			}
-			if (op2_info & MAY_BE_TRUE) {
-				|	cmp byte [FP + opline->op2.var + 8], IS_TRUE
-				|	jnz >1
-				|	// hval = 1;
-				|	mov FCARG2a, 1
-				|	// goto num_index;
-				|	jmp <4
-				|1:
-			}
-			if (op2_info & MAY_BE_UNDEF) {
-				const char *name = ZSTR_VAL(op_array->vars[EX_VAR_TO_NUM(opline->op2.var)]);
-
-				|	cmp byte [FP + opline->op2.var + 8], IS_UNDEF
-				|	jnz >1
-				|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var))));
-				|.if X64
-				|	mov CARG1, E_NOTICE
-				|	LOAD_ADDR CARG2, "Undefined variable: %s"
-				|	LOAD_ADDR CARG3, name
-				|	EXT_CALL zend_error, r0
-				|.else
-				|	sub r4, 4
-				|	push name
-				|	push "Undefined variable: %s"
-				|	push E_NOTICE
-				|	EXT_CALL zend_error, r0
-				|	add r4, 16
-				|.endif
-				|	// offset_key = ZSTR_EMPTY_ALLOC();
-				|	LOAD_ADDR FCARG2a, CG(empty_string)
-				|	// goto str_index;
-				|	jmp <5
-				|1:
-			}
-			if (op2_info & MAY_BE_RESOURCE) {
-				|	cmp byte [FP + opline->op2.var + 8], IS_RESOURCE
-				|	jnz >1
-				|	// zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
-				|	// hval = Z_RES_HANDLE_P(dim);
-				|	// ????
-				|	int3
-				|	// goto num_index;
-				|	jmp <4
-				|1:
-			}
-			if (op2_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-				|	// zend_error(E_WARNING, "Illegal offset type");
-				|.if X64
-				|	mov CARG1, E_WARNING
-				|	LOAD_ADDR CARG2, "Illegal offset type"
-				|	EXT_CALL zend_error, r0
-				|.else
-				|	sub r4, 8
-				|	push "Undefined variable: %s"
-				|	push E_WARNING
-				|	EXT_CALL zend_error, r0
-				|	add r4, 16
-				|.endif
-				|	mov dword [FP +opline->result.var + 8], IS_NULL
-				|	jmp >9 // END
-			}
-
+			|	jmp >9 // END
 			if (op2_info & (MAY_BE_LONG|MAY_BE_STRING)) {
 				|.code
 			}
@@ -2906,8 +2831,25 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 			    }
 				|	jnz >6
 			}
-			|	// ????
-			|	int3
+			|	SAVE_VALID_OPLINE
+		    if (!(op1_info & MAY_BE_REF)) {
+				|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
+		    }
+			|	LOAD_ZVAL_ADDR FCARG2a, opline->op2_type, opline->op2
+			|.if X64
+			|   lea CARG3, [FP + opline->result.var]
+			|.else
+			|   lea r0, [FP + opline->result.var]
+			|	push r0
+			|.endif
+			if (opline->opcode == ZEND_FETCH_DIM_R) {
+				|	EXT_CALL zend_jit_fetch_dim_str_r_helper, r0
+			} else if (opline->opcode == ZEND_FETCH_DIM_IS) {
+				|	EXT_CALL zend_jit_fetch_dim_str_is_helper, r0
+			} else {
+				ZEND_ASSERT(0);
+			}
+			|	jmp >9 // END
 			|6:
 		}
 
@@ -2920,14 +2862,29 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 			    }
 				|	jnz >6
 			}
-			|	// ????
-			|	int3
+			|	SAVE_VALID_OPLINE
+		    if (!(op1_info & MAY_BE_REF)) {
+				|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
+		    }
+			|	LOAD_ZVAL_ADDR FCARG2a, opline->op2_type, opline->op2
+			|.if X64
+			|   lea CARG3, [FP + opline->result.var]
+			|.else
+			|   lea r0, [FP + opline->result.var]
+			|	push r0
+			|.endif
+			if (opline->opcode == ZEND_FETCH_DIM_R) {
+				|	EXT_CALL zend_jit_fetch_dim_obj_r_helper, r0
+			} else if (opline->opcode == ZEND_FETCH_DIM_IS) {
+				|	EXT_CALL zend_jit_fetch_dim_obj_is_helper, r0
+			} else {
+				ZEND_ASSERT(0);
+			}
+			|	jmp >9 // END
 			|6:
 		}
 
 		if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
-			const char *name = ZSTR_VAL(op_array->vars[EX_VAR_TO_NUM(opline->op1.var)]);
-
 		    if (op1_info & MAY_BE_REF) {
 				|	cmp byte [FCARG1a + 8], IS_UNDEF
 			} else {
@@ -2935,53 +2892,47 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		    }
 			|	jnz >1
 			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
-			|.if X64
-			|	mov CARG1, E_NOTICE
-			|	LOAD_ADDR CARG2, "Undefined variable: %s"
-			|	LOAD_ADDR CARG3, name
-			|	EXT_CALL zend_error, r0
-			|.else
-			|	sub r4, 4
-			|	push name
-			|	push "Undefined variable: %s"
-			|	push E_NOTICE
-			|	EXT_CALL zend_error, r0
-			|	add r4, 16
-			|.endif
+			|	mov FCARG1d, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
 			|1:
 		}
 		if (op2_info & MAY_BE_UNDEF) {
-			const char *name = ZSTR_VAL(op_array->vars[EX_VAR_TO_NUM(opline->op2.var)]);
-
 			|	cmp byte [FP + opline->op2.var + 8], IS_UNDEF
 			|	jnz >1
-			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var))));
-			|.if X64
-			|	mov CARG1, E_NOTICE
-			|	LOAD_ADDR CARG2, "Undefined variable: %s"
-			|	LOAD_ADDR CARG3, name
-			|	EXT_CALL zend_error, r0
-			|.else
-			|	sub r4, 4
-			|	push name
-			|	push "Undefined variable: %s"
-			|	push E_NOTICE
-			|	EXT_CALL zend_error, r0
-			|	add r4, 16
-			|.endif
+			|	mov FCARG1d, opline->op2.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
 			|1:
 		}
-		|	mov dword [FP +opline->result.var + 8], IS_NULL
+		|	mov dword [FP + opline->result.var + 8], IS_NULL
 		|	jmp >9 // END
 		if (op1_info & MAY_BE_ARRAY) {
 			|.code
 		}
 	}
 
-	|8: // COPY
-	|	// UNREF ????
+	|8:
+	if (res_info & MAY_BE_REF) {
+	|	// ZVAL_COPY_UNREF
+	|	test byte [r0 + 9], IS_TYPE_REFCOUNTED
+	|	jz >2
+	|	mov r1, aword [r0]
+	|	cmp byte [r0 + 8], IS_REFERENCE
+	|	jnz >1
+	|	cmp dword [r1], 1
+	|	jnz >1
+	|	lea FCARG1a, [FP + opline->result.var]
+	|	mov FCARG2a, r0
+	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
+	|	jmp >9
+	|1:
+	|	inc dword [r1]
+	|2:
+	|	ZVAL_COPY_VALUE FP, opline->result.var, r0, 0, MAY_BE_ANY, r1, ecx, r2
+	} else  {
+	|	// ZVAL_COPY
 	|	ZVAL_COPY_VALUE FP, opline->result.var, r0, 0, MAY_BE_ANY, r1, ecx, r2
 	|	TRY_ADDREF res_info, ch, r2
+	}
 	|9: // END
 
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, op_array, opline->lineno
