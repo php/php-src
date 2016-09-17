@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #72992 (mbstring.internal_encoding doesn't inherit default_charset).
     (Yasuo)
 
+- Mysqlnd:
+  . Fixed bug #72489 (PHP Crashes When Modifying Array Containing MySQLi Result
+    Data). (Nikita)
+
 - Opcache:
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
     function). (Laruence)
