@@ -241,13 +241,10 @@ void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 		return;
 	}
 
-	for (i = 0; i < scoreboard->nprocs; i++) {
-		if (!scoreboard->procs[i]) {
-			continue;
-		}
-		fpm_shm_free(scoreboard->procs[i], sizeof(struct fpm_scoreboard_proc_s));
-	}
-	fpm_shm_free(scoreboard, sizeof(struct fpm_scoreboard_s));
+	int scoreboard_size = sizeof(struct fpm_scoreboard_s) + (scoreboard->nprocs) * sizeof(struct fpm_scoreboard_proc_s *);
+	int scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * scoreboard->nprocs;
+	
+	fpm_shm_free(scoreboard, scoreboard_size + scoreboard_nprocs_size);
 }
 /* }}} */
 
