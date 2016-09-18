@@ -359,7 +359,7 @@ static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
 	ZVAL_COPY(dst, src);
 }
 
-static ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
+static void ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
 {
 	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
 	GC_REFCOUNT(ref) = 1;
