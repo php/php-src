@@ -1075,12 +1075,33 @@ static int zend_jit_math_long_long(dasm_State **Dst, zend_op *opline, zend_op_ar
 	uint32_t res_info = RES_INFO();
 	zend_bool same_ops = (opline->op1_type == opline->op2_type) && (opline->op1.var == opline->op2.var);
 
-	|	LONG_LOAD opline->op1_type, opline->op1, r0
-	||	if (same_ops && opline->opcode != ZEND_DIV) {
-	|		LONG_MATH2 opline->opcode, r0, r0
-	||	} else {
-	|		LONG_MATH opline->opcode, opline->op2_type, opline->op2, r0
-	||	}
+	if (opline->opcode == ZEND_MUL &&
+		((opline->op2_type == IS_CONST &&
+		IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, opline->op2))) &&
+		is_power_of_two(Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)))) ||
+		(opline->op1_type == IS_CONST &&
+		IS_32BIT(Z_LVAL_P(RT_CONSTANT(op_array, opline->op1))) &&
+		is_power_of_two(Z_LVAL_P(RT_CONSTANT(op_array, opline->op1)))))) {
+		if (opline->op2_type == IS_CONST) {
+		|   LONG_LOAD opline->op1_type, opline->op1, r0
+		|	shl r0, floor_log2(Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)))
+		} else {
+		|   LONG_LOAD opline->op2_type, opline->op2, r0
+		|	shl r0, floor_log2(Z_LVAL_P(RT_CONSTANT(op_array, opline->op1)))
+		}
+	} else if (opline->opcode == ZEND_DIV &&
+			(opline->op2_type == IS_CONST &&
+            is_power_of_two(Z_LVAL_P(RT_CONSTANT(op_array, opline->op2))))) {
+		|   LONG_LOAD opline->op1_type, opline->op1, r0
+		| 	shr r0, floor_log2(Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)))
+	} else {
+		|	LONG_LOAD opline->op1_type, opline->op1, r0
+		if (same_ops && opline->opcode != ZEND_DIV) {
+		|		LONG_MATH2 opline->opcode, r0, r0
+		} else {
+		|		LONG_MATH opline->opcode, opline->op2_type, opline->op2, r0
+		}
+	}
 	if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 		if (res_forward) {
 			|	LONG_STORE r1, res_forward, r0
