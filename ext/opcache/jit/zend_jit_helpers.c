@@ -359,6 +359,48 @@ static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
 	ZVAL_COPY(dst, src);
 }
 
+static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
+{
+	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
+	GC_REFCOUNT(ref) = 1;
+	GC_TYPE_INFO(ref) = IS_REFERENCE;
+	ZVAL_COPY_VALUE(&ref->val, value);
+	Z_REF_P(value) = ref;
+	Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
+
+	return value;
+}
+
+static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execute_data, zval *varname)
+{
+	uint32_t idx;
+	zval *value = zend_hash_find(&EG(symbol_table), Z_STR_P(varname));
+
+	if (UNEXPECTED(value == NULL)) {
+		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
+		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
+		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
+	} else {
+		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
+		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
+		/* GLOBAL variable may be an INDIRECT pointer to CV */
+		if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT)) {
+			value = Z_INDIRECT_P(value);
+			if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				ZVAL_NULL(value);
+			}
+		}
+	}
+
+	if (UNEXPECTED(!Z_ISREF_P(value))) {
+		value = zend_jit_new_ref_helper(value);
+	}
+
+	return value;
+}
+
 /*
  * Local variables:
  * tab-width: 4

@@ -850,6 +850,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_BIND_GLOBAL:
+					if (!zend_jit_bind_global(&dasm_state, opline, op_array, ssa)) {
+						goto jit_failure;
+					}
+					break;
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa->cfg.split_at_recv) {
@@ -858,9 +863,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						}
 						break;
 					}
-					/* break missing intentionally */
-				case ZEND_BIND_GLOBAL:
-					if (opline->opcode != op_array->opcodes[i+1].opcode) {
+					if (op_array->opcodes[i+1].opcode != ZEND_RECV_INIT) {
 						/* repeatable opcodes */
 						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;

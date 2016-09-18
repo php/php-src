@@ -395,6 +395,8 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_is_helper);
 	REGISTER_HELPER(zend_jit_zval_copy_unref_helper);
+	REGISTER_HELPER(zend_jit_new_ref_helper);
+	REGISTER_HELPER(zend_jit_fetch_global_helper);
 #undef  REGISTER_HELPER
 
 	zend_elf_load_symbols();
