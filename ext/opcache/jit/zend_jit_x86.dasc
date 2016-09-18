@@ -1222,6 +1222,75 @@ static int zend_jit_math_double_double(dasm_State **Dst, zend_op *opline, uint32
 	return 1;
 }
 
+
+static int zend_jit_shift(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	zval *op2;
+	uint32_t op1_info;
+	zend_bool has_slow = 0;
+
+	if (!ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+
+	if ((op1_info & MAY_BE_UNDEF) ||
+		opline->op2_type != IS_CONST ||
+		Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) != IS_LONG ||
+		Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)) >= SIZEOF_ZEND_LONG * 8) {
+		goto fallback;
+	}
+
+	op2 = RT_CONSTANT(op_array, opline->op2);
+
+	if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
+	|	cmp	dword [FP + opline->op1.var + 8], IS_LONG
+	|	JNE_SLOW
+	}
+	|	LONG_LOAD opline->op1_type, opline->op1, r0
+	if (opline->opcode == ZEND_SR) {
+	|	shr, r0, Z_LVAL_P(op2)
+	} else {
+	|	shl, r0, Z_LVAL_P(op2)
+	}
+	|	LONG_STORE FP, opline->result.var, r0
+	|	SET_TYPE_INFO FP, opline->result.var, IS_LONG
+	if (has_slow) {
+	|2:
+	}
+	|	FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
+	//END
+
+	if (has_slow) {
+		|.cold_code
+		|9:
+		|	lea FCARG1a, aword [FP + opline->result.var]
+		|.if X64
+		|	mov FCARG2a, r0
+		|	mov CARG3, Z_LVAL_P(op2)
+		|.else
+		|	push r0
+		|	push dword Z_LVAL_P(op2)
+		|.endif
+		if (opline->opcode == ZEND_SR) {
+		|	EXT_CALL shift_right_function, r0
+		} else {
+		|	EXT_CALL shift_left_function, r0
+		}
+		|	jmp <2
+		|.code
+	}
+
+	valid_opline_offset++;
+
+	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
 static int zend_jit_math(dasm_State **Dst, zend_op *opline, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info;
