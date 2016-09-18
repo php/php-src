@@ -170,7 +170,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 		return NULL;
 	}
 
-	if (EXPECTED(off_s < 1024 || needle_len < 3)) {
+	if (EXPECTED(off_s < 1024 || needle_len < 9)) {	/* glibc memchr is faster when needle is too short */
 		end -= needle_len;
 
 		while (p <= end) {
