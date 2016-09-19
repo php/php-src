@@ -856,11 +856,12 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
-				case ZEND_BIND_GLOBAL:
-					if (!zend_jit_bind_global(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
+// TODO: Doesn't work on 32-bit beacause of %ebx clobbering
+//				case ZEND_BIND_GLOBAL:
+//					if (!zend_jit_bind_global(&dasm_state, opline, op_array, ssa)) {
+//						goto jit_failure;
+//					}
+//					break;
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa->cfg.split_at_recv) {
@@ -870,7 +871,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						break;
 					}
 					/* break missing intentionally */
-#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
+#if 1 || ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_BIND_GLOBAL:
 #endif
 					if (opline->opcode != op_array->opcodes[i+1].opcode) {
