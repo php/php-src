@@ -3064,7 +3064,7 @@ static int zend_jit_bind_global(dasm_State **Dst, zend_op *opline, zend_op_array
 	|	dec r3
 	//if (EXPECTED(idx < EG(symbol_table).nNumUsed))
 	|	cmp r3, [&EG(symbol_table).nNumUsed]
-	|	jbe >9
+	|	jae >9
 	//Bucket *p = EG(symbol_table).arData + idx;
 	|.if X64
 	|	shl r3, 5
@@ -3109,11 +3109,12 @@ static int zend_jit_bind_global(dasm_State **Dst, zend_op *opline, zend_op_array
 	|	mov CARG3, Z_STRLEN_P(varname)
 	|	call &memcmp
 	|.else
+	|	sub r4, 4
 	|	push r2
 	|	push Z_STRVAL_P(varname)
 	|	push Z_STRLEN_P(varname)
 	|	call &memcmp
-	|	sub r4, 12
+	|	add r4, 16
 	|.endif
 	|	test al, al
 	|	jnz >9

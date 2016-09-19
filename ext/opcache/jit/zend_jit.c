@@ -869,7 +869,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						}
 						break;
 					}
-					if (op_array->opcodes[i+1].opcode != ZEND_RECV_INIT) {
+					/* break missing intentionally */
+#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
+				case ZEND_BIND_GLOBAL:
+#endif
+					if (opline->opcode != op_array->opcodes[i+1].opcode) {
 						/* repeatable opcodes */
 						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
