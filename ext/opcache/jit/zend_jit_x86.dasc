@@ -2071,47 +2071,70 @@ fallback:
 
 static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info)
 {
-	if (val_info & (MAY_BE_UNDEF|MAY_BE_REF)) {
-		/* TODO: Support for references ??? */
-		goto fallback;
-	} else if (val_type == IS_CONST) {
+	if (val_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, val);
 		|	ZVAL_COPY_CONST FP, var, var_info, zv, r0
 		||	if (Z_REFCOUNTED_P(zv)) {
 		|		ADDREF_CONST zv, r0
 		||	}
-		valid_opline_offset++;
-		return 1;
+	} else {
+		if (val_info & MAY_BE_UNDEF) {
+			|	cmp byte [FP + val.var + 8], IS_UNDEF
+			|	jz >1
+			|.cold_code
+			|1:
+			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			|	mov FCARG1d, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|	mov dword[FP + var + 8], IS_NULL
+			|	jmp	>3
+			|.code
+		}
+		if (val_info & MAY_BE_REF) {
+			|	lea r2, [FP + val.var]
+			if (val_type == IS_CV) {
+				|	ZVAL_DEREF r2, val_info
+				|	ZVAL_COPY_VALUE FP, var, r2, 0, val_info, r0, eax, r1
+			} else {
+				|	cmp byte [FP + val.var + 8], IS_REFERENCE
+				|	je >1
+				|.cold_code
+				|1:
+				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
+				|	mov r0, aword [FP + opline->op1.var]
+				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
+				|	ZVAL_COPY_VALUE FP, var, r0, 8, val_info, r2, edx, r1
+				|	dec dword [r0]
+				|	je >2
+				|	// if (IS_REFCOUNTED())
+				|	test dh, IS_TYPE_REFCOUNTED
+				|	jz >3
+				|	// ADDREF
+				|	inc dword [r1]
+				|	jmp >3
+				|2:
+				|	EFREE_SIZE r0, sizeof(zend_reference), op_array, opline
+				|	jmp >3
+				|.code
+				|	ZVAL_COPY_VALUE FP, var, FP, val.var, val_info, r0, eax, r1
+			}
+		} else {
+			|	ZVAL_COPY_VALUE FP, var, FP, val.var, val_info, r0, eax, r1
+		}
+		||	if (val_type == IS_CV) {
+		|		TRY_ADDREF val_info, ah, r1
+		||	}
+		|3:
 	}
-
-	|	ZVAL_COPY_VALUE FP, var, FP, val.var, val_info, r0, eax, r1
-	||	if (val_type == IS_CV) {
-	|		TRY_ADDREF val_info, ah, r1
-	||	}
-	valid_opline_offset++;
-
 	return 1;
-
-fallback:
-	/* fallback to subroutine threading */
-	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
 static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
-	uint32_t op1_info;
+	uint32_t op1_info = OP1_INFO();
 
-	if (!ssa->ops || !ssa->var_info) {
-		goto fallback;
-	}
-
-	op1_info = OP1_INFO();
-
+	valid_opline_offset++;
 	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info);
-
-fallback:
-	/* fallback to subroutine threading */
-	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
 static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
@@ -2126,6 +2149,7 @@ static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 	op2_info = OP2_INFO();
 
 	if (!(op1_info & (MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_REF))) {
+		valid_opline_offset++;
 		return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info);
 	}
 
