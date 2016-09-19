@@ -3059,90 +3059,94 @@ static int zend_jit_bind_global(dasm_State **Dst, zend_op *opline, zend_op_array
 	}
 
 	//idx = (uint32_t)(uintptr_t)CACHED_PTR(Z_CACHE_SLOT_P(varname)) - 1;
-	|	mov	r3, EX->run_time_cache
-	|	mov r3, aword [r3 + Z_CACHE_SLOT_P(varname)]
-	|	dec r3
+	|	mov	r0, EX->run_time_cache
+	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(varname)]
+	|	dec r0
 	//if (EXPECTED(idx < EG(symbol_table).nNumUsed))
-	|	cmp r3, [&EG(symbol_table).nNumUsed]
+	|	cmp r0, [&EG(symbol_table).nNumUsed]
 	|	jae >9
 	//Bucket *p = EG(symbol_table).arData + idx;
 	|.if X64
-	|	shl r3, 5
+	|	shl r0, 5
 	|.else
-	|	imul r3, sizeof(Bucket)
+	|	imul r0, sizeof(Bucket)
 	|.endif
 	|.if X64
-	|	LOAD_ADDR r0, &EG(symbol_table.arData)
-	|	add r3, [r0]
+	|	LOAD_ADDR r1, &EG(symbol_table.arData)
+	|	add r0, [r1]
 	|.else
-	|	add r3, [&EG(symbol_table).arData]
+	|	add r0, [&EG(symbol_table).arData]
 	|.endif
 	//if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)
-	|	cmp byte [r3 + 8], IS_UNDEF
+	|	cmp byte [r0 + 8], IS_UNDEF
 	|	je >9
 	//	(EXPECTED(p->key == Z_STR_P(varname))
-	|	LOAD_ADDR r0, Z_PTR_P(varname)
-	|	cmp [r3 + offsetof(Bucket, key)], r0
+	|	LOAD_ADDR r1, Z_PTR_P(varname)
+	|	cmp [r0 + offsetof(Bucket, key)], r1
 	|	jne >1
 	|.cold_code
 	|1:
 	//(EXPECTED(p->h == ZSTR_H(Z_STR_P(varname)))
 	|.if X64
 	|	mov64 r1, ZSTR_H(Z_STR_P(varname))
-	|	cmp qword [r3 + offsetof(Bucket, h)], r1
+	|	cmp qword [r0 + offsetof(Bucket, h)], r1
 	|.else
-	|	cmp dword [r3 + offsetof(Bucket, h)], ZSTR_H(Z_STR_P(varname))
+	|	cmp dword [r0 + offsetof(Bucket, h)], ZSTR_H(Z_STR_P(varname))
 	|.endif
 	|	jne >9
 	//EXPECTED(p->key != NULL)
-	|	mov r2, [r3 + offsetof(Bucket, key)]
-	|	test r2, r2
+	|	mov r1, [r0 + offsetof(Bucket, key)]
+	|	test r1, r1
 	|	jz >9
 	//EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(varname))
-	|	cmp dword [r2 + offsetof(zend_string, len)], Z_STRLEN_P(varname)
+	|	cmp dword [r1 + offsetof(zend_string, len)], Z_STRLEN_P(varname)
 	|	jne >9
 	//EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)
-	|	add r2, offsetof(zend_string, val)
+	|	add r1, offsetof(zend_string, val)
+	|	mov [r4], r0
 	|.if X64
-	|	mov CARG1, r2
+	|	mov CARG1, r1
 	|	LOAD_ADDR CARG2, Z_STRVAL_P(varname)
 	|	mov CARG3, Z_STRLEN_P(varname)
 	|	call &memcmp
 	|.else
 	|	sub r4, 4
-	|	push r2
+	|	push r1
 	|	push Z_STRVAL_P(varname)
 	|	push Z_STRLEN_P(varname)
 	|	call &memcmp
 	|	add r4, 16
 	|.endif
 	|	test al, al
+	|	mov r0, aword [r4]
 	|	jnz >9
 	|	jmp >2
 	|.code
 	|2:
 	// if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT))
-	|	mov al, byte [r3 + 8]
-	|	cmp al, IS_INDIRECT
+	|	mov cl, byte [r0 + 8]
+	|	cmp cl, IS_INDIRECT
 	|	je >1
 	|.cold_code
 	|1:
 	//value = Z_INDIRECT_P(value)
-	|	mov r3, [r3]
-	|	cmp byte [r3 + 8], IS_UNDEF
+	|	mov r0, [r0]
+	|	mov cl, byte [r0 + 8]
+	|	cmp cl, IS_UNDEF
 	|	jne >2
-	|	SET_TYPE_INFO r3, 0, IS_NULL
+	|	SET_TYPE_INFO r0, 0, IS_NULL
 	|	jmp >8
 	|.code
 	|2:
-	|	cmp al, IS_REFERENCE
+	|	cmp cl, IS_REFERENCE
 	|	jne >8
 	|1:
 	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-	|	mov r0, r3
+		//stash this for later use
+	|	mov r2, r0
 	}
-	|	mov r3, [r3]
-	|	inc dword [r3]
+	|	mov r0, [r0]
+	|	inc dword [r0]
 	//if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)))
 	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 		if (op1_info & (MAY_BE_ANY - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
@@ -3154,21 +3158,29 @@ static int zend_jit_bind_global(dasm_State **Dst, zend_op *opline, zend_op_array
 		|2:
 		//if (EXPECTED(variable_ptr != value))
 		|	lea FCARG1a, aword [FP + opline->op1.var]
-		|	cmp FCARG1a, r0
+		|	cmp FCARG1a, r2
 		|	je >4
 		|	mov FCARG1a, [FCARG1a]
 		|	dec dword [FCARG1a]
+		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 		|	jnz >3
+		} 
+		|	mov [r4], r0
 		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|	mov r0, aword [r4]
 		|	jmp >5
+		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 		|3:
 		// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
 		|	test byte [FP + opline->op1.var + 9], IS_TYPE_COLLECTABLE
 		|	jz >5
 		|	cmp word [FCARG1a + 6], 0
 		|	jne >5
+		|	mov [r4], r0
 		|	EXT_CALL gc_possible_root, r1
+		|	mov r0, aword [r4]
 		|	jmp >5
+		}
 		|4:
 		|	mov FCARG1a, [FCARG1a]
 		|	dec dword [FCARG1a]
@@ -3177,20 +3189,19 @@ static int zend_jit_bind_global(dasm_State **Dst, zend_op *opline, zend_op_array
 	}
 	|5:
 	//ZVAL_REF(variable_ptr, ref)
-	|	mov aword [FP + opline->op1.var], r3
+	|	mov aword [FP + opline->op1.var], r0
 	|	mov dword [FP + opline->op1.var + 8], IS_REFERENCE_EX
 	//END of handler
 
 	|.cold_code
 	|8:
-	|	mov FCARG1a, r3
+	|	mov FCARG1a, r0
 	|	EXT_CALL zend_jit_new_ref_helper, r0
 	|	jmp <1
 	|9:
 	|	mov FCARG1a, FP
 	|	LOAD_ADDR FCARG2a, (ptrdiff_t)varname
 	|	EXT_CALL zend_jit_fetch_global_helper, r0
-	|	mov r3, r0
 	|	jmp <1
 	|.code
 

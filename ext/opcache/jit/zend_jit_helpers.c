@@ -359,7 +359,7 @@ static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
 	ZVAL_COPY(dst, src);
 }
 
-static void ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
+static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
 {
 	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
 	GC_REFCOUNT(ref) = 1;
@@ -367,6 +367,8 @@ static void ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
 	ZVAL_COPY_VALUE(&ref->val, value);
 	Z_REF_P(value) = ref;
 	Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
+
+	return value;
 }
 
 static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execute_data, zval *varname)
@@ -393,7 +395,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	}
 
 	if (UNEXPECTED(!Z_ISREF_P(value))) {
-		zend_jit_new_ref_helper(value);
+		return zend_jit_new_ref_helper(value);
 	}
 
 	return value;
