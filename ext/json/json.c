@@ -230,7 +230,10 @@ static PHP_FUNCTION(json_encode)
 		ZVAL_FALSE(return_value);
 	} else {
 		smart_str_0(&buf); /* copy? */
-		ZVAL_NEW_STR(return_value, buf.s);
+		if (buf.s) {
+			RETURN_NEW_STR(buf.s);
+		}
+		RETURN_EMPTY_STRING();
 	}
 }
 /* }}} */
