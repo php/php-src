@@ -821,6 +821,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagesetinterpolation, 0)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imageresolution, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, res_x)
+	ZEND_ARG_INFO(0, res_y)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ gd_functions[]
@@ -964,6 +970,8 @@ const zend_function_entry gd_functions[] = {
 /* gd filters */
 	PHP_FE(imagefilter,     						arginfo_imagefilter)
 	PHP_FE(imageconvolution,						arginfo_imageconvolution)
+
+	PHP_FE(imageresolution,							arginfo_imageresolution)
 
 	PHP_FE_END
 };
@@ -4988,6 +4996,37 @@ PHP_FUNCTION(imagesetinterpolation)
 		 method = GD_BILINEAR_FIXED;
 	}
 	RETURN_BOOL(gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method));
+}
+/* }}} */
+
+/* {{{ proto array imageresolution(resource im [, res_x, [res_y]])
+   Get or set the resolution of the image in DPI. */
+PHP_FUNCTION(imageresolution)
+{
+	zval *IM;
+	gdImagePtr im;
+	zend_long res_x = GD_RESOLUTION, res_y = GD_RESOLUTION;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ll", &IM, &res_x, &res_y) == FAILURE)  {
+		return;
+	}
+
+	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	switch (ZEND_NUM_ARGS()) {
+		case 3:
+			gdImageSetResolution(im, res_x, res_y);
+			RETURN_TRUE;
+		case 2:
+			gdImageSetResolution(im, res_x, res_x);
+			RETURN_TRUE;
+		default:
+			array_init(return_value);
+			add_next_index_long(return_value, gdImageResolutionX(im));
+			add_next_index_long(return_value, gdImageResolutionY(im));
+	}
 }
 /* }}} */
 
