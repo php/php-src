@@ -170,6 +170,8 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	im->cy1 = 0;
 	im->cx2 = im->sx - 1;
 	im->cy2 = im->sy - 1;
+	im->res_x = GD_RESOLUTION;
+	im->res_y = GD_RESOLUTION;
 	im->interpolation = NULL;
 	im->interpolation_id = GD_BILINEAR_FIXED;
 	return im;
@@ -225,6 +227,8 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	im->cy1 = 0;
 	im->cx2 = im->sx - 1;
 	im->cy2 = im->sy - 1;
+	im->res_x = GD_RESOLUTION;
+	im->res_y = GD_RESOLUTION;
 	im->interpolation = NULL;
 	im->interpolation_id = GD_BILINEAR_FIXED;
 	return im;
@@ -3054,6 +3058,12 @@ void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
 	*y1P = im->cy1;
 	*x2P = im->cx2;
 	*y2P = im->cy2;
+}
+
+void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y)
+{
+	if (res_x > 0) im->res_x = res_x;
+	if (res_y > 0) im->res_y = res_y;
 }
 
 /* convert a palette image to true color */

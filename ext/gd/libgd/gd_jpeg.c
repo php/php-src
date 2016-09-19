@@ -195,6 +195,11 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	cinfo.input_components = 3;	/* # of color components per pixel */
 	cinfo.in_color_space = JCS_RGB;	/* colorspace of input image */
 	jpeg_set_defaults (&cinfo);
+
+	cinfo.density_unit = 1;
+	cinfo.X_density = im->res_x;
+	cinfo.Y_density = im->res_y;
+
 	if (quality >= 0) {
 		jpeg_set_quality (&cinfo, quality, TRUE);
 	}
@@ -379,6 +384,18 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 	if (im == 0) {
 		php_gd_error("gd-jpeg error: cannot allocate gdImage struct");
 		goto error;
+	}
+
+	/* check if the resolution is specified */
+	switch (cinfo.density_unit) {
+	case 1:
+		im->res_x = cinfo.X_density;
+		im->res_y = cinfo.Y_density;
+		break;
+	case 2:
+		im->res_x = DPCM2DPI(cinfo.X_density);
+		im->res_y = DPCM2DPI(cinfo.Y_density);
+		break;
 	}
 
 	/* 2.0.22: very basic support for reading CMYK colorspace files. Nice for
