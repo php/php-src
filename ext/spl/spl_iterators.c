@@ -2053,13 +2053,14 @@ SPL_METHOD(RegexIterator, accept)
 	
 	if (intern->current.data == NULL) {
 		RETURN_FALSE;
-	} else if (Z_TYPE_P(intern->current.data) == IS_ARRAY) {
-		RETURN_FALSE;
 	}
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		subject_ptr = intern->current.key;
 	} else {
+		if (Z_TYPE_P(intern->current.data) == IS_ARRAY) {
+			RETURN_FALSE;
+		}
 		subject_ptr = intern->current.data;
 	}
 
