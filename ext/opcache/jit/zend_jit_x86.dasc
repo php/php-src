@@ -2239,7 +2239,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info, int in_cold, uint32_t var2)
+static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info, uint32_t var2, int in_cold)
 {
 	if (val_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, val);
@@ -2353,7 +2353,50 @@ static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *
 	uint32_t op1_info = OP1_INFO();
 
 	valid_opline_offset++;
-	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info, 0, -1);
+	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info, -1, 0);
+}
+
+static int zend_jit_assign_to_variable(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info, uint32_t var2)
+{
+	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+		int in_cold = 0;
+
+		if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	IF_Z_REFCOUNTED FP + var, >1
+			|.cold_code
+			|1:
+			in_cold = 1;
+		}
+		|	// TODO: support for object->set
+		|	// TODO: support for assignment to itself
+		|	GET_Z_PTR r0, FP + var
+		|	GC_DELREF r0
+		|	jnz >4
+		|	mov aword [r4], r0 // save
+		if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, var, var_info, val_type, val, val_info, var2, in_cold)) {
+			return 0;
+		}
+		|	mov FCARG1a, aword [r4] // restore
+		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|	jmp >6
+		|4:
+		|	IF_NOT_Z_FLAGS FP + var, IS_TYPE_COLLECTABLE, >5
+		|	GET_Z_PTR FCARG1a, FP + var
+		|	IF_GC_INFO FCARG1a, >5
+		|	EXT_CALL gc_possible_root, r0
+		if (in_cold) {
+			|	jmp >5
+			|.code
+		}
+		|5:
+	}
+
+	if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, var, var_info, val_type, val, val_info, var2, 0)) {
+		return 0;
+	}
+	|6:
+
+	return 1;
 }
 
 static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
@@ -2371,43 +2414,10 @@ static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_
 		goto fallback;
 	}
 
-	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-			|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
-			|.cold_code
-			|1:
-		}
-		|	// TODO: support for object->set
-		|	// TODO: support for assignment to itself
-		|	GET_Z_PTR r0, FP + opline->op1.var
-		|	GC_DELREF r0
-		|	jnz >4
-		|	mov aword [r4], r0 // save
-		if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info,
-				(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0,
-				opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
-			return 0;
-		}
-		|	mov FCARG1a, aword [r4] // restore
-		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
-		|	jmp >6
-		|4:
-		|	IF_NOT_Z_FLAGS FP + opline->op1.var, IS_TYPE_COLLECTABLE, >5
-		|	GET_Z_PTR FCARG1a, FP + opline->op1.var
-		|	IF_GC_INFO FCARG1a, >5
-		|	EXT_CALL gc_possible_root, r0
-		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-			|	jmp >5
-			|.code
-		}
-		|5:
-	}
-
-	if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info, 0,
+	if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info,
 			opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
 		return 0;
 	}
-	|6:
 
 	valid_opline_offset++;
 	return 1;
