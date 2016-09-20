@@ -432,6 +432,62 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
+|.macro ZVAL_COPY_CONST_2, dst, dst2, dst_info, zv, tmp_reg
+||if (Z_TYPE_P(zv) > IS_TRUE) {
+||	if (Z_TYPE_P(zv) == IS_DOUBLE) {
+|.if X64 or SSE
+||		if (Z_DVAL_P(zv) == 0.0 && !is_signed(Z_DVAL_P(zv))) {
+|			xorps xmm0, xmm0
+| .if X64
+||		} else if (!IS_32BIT(zv)) {
+|			mov64 tmp_reg, ((uintptr_t)zv)
+|			movsd xmm0, qword [tmp_reg]
+| .endif
+||		} else {
+|			movsd xmm0, qword [((uint32_t)(uintptr_t)zv)]
+||		}
+|		movsd qword [dst], xmm0
+|		movsd qword [dst2], xmm0
+|.else
+||		if (Z_DVAL_P(zv) == 0.0 && !is_signed(Z_DVAL_P(zv))) {
+|			fldz
+||		} else if (Z_DVAL_P(zv) == 1.0) {
+|			fld1
+||		} else  {
+|			fld qword [zv]
+||		}
+|		fstp qword [dst]
+||		if (Z_DVAL_P(zv) == 0.0 && !is_signed(Z_DVAL_P(zv))) {
+|			fldz
+||		} else if (Z_DVAL_P(zv) == 1.0) {
+|			fld1
+||		} else  {
+|			fld qword [zv]
+||		}
+|		fstp qword [dst2]
+|.endif
+||	} else {
+|.if X64
+||		if (!IS_32BIT(Z_LVAL_P(zv))) {
+|			mov64 tmp_reg, ((uintptr_t)Z_LVAL_P(zv))
+|			SET_Z_LVAL dst, tmp_reg
+|			SET_Z_LVAL dst2, tmp_reg
+||		} else {
+|			SET_Z_LVAL dst, Z_LVAL_P(zv)
+|			SET_Z_LVAL dst2, Z_LVAL_P(zv)
+||		}
+|.else
+|		SET_Z_LVAL dst, Z_LVAL_P(zv)
+|		SET_Z_LVAL dst2, Z_LVAL_P(zv)
+|.endif
+||	}
+||}
+||if ((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
+|	SET_Z_TYPE_INFO dst, Z_TYPE_INFO_P(zv)
+||}
+|	SET_Z_TYPE_INFO dst2, Z_TYPE_INFO_P(zv)
+|.endmacro
+
 |.macro ZVAL_COPY_VALUE, dst, src, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
 ||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
 ||	if (!(src_info & MAY_BE_DOUBLE)) {
@@ -464,6 +520,50 @@ static void* dasm_labels[zend_lb_MAX];
 ||} else {
 |	GET_Z_TYPE_INFO tmp_reg1d, src
 |	SET_Z_TYPE_INFO dst, tmp_reg1d
+||}
+|.endmacro
+
+|.macro ZVAL_COPY_VALUE_2, dst, dst2, src, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
+||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+||	if (!(src_info & MAY_BE_DOUBLE)) {
+| 		GET_Z_PTR tmp_reg2, src
+| 		SET_Z_PTR dst, tmp_reg2
+| 		SET_Z_PTR dst2, tmp_reg2
+||	} else if ((src_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+|.if X64 or SSE
+|		movsd xmm0, qword [src]
+|		movsd qword [dst], xmm0
+|		movsd qword [dst2], xmm0
+|.else
+|		fld qword [src]
+|		fstp qword [dst]
+|		fld qword [src]
+|		fstp qword [dst2]
+|.endif
+||	} else {
+|.if X64
+|		GET_Z_PTR tmp_reg2, src
+|		SET_Z_PTR dst, tmp_reg2
+|		SET_Z_PTR dst2, tmp_reg2
+|.else
+|		GET_Z_PTR tmp_reg2, src
+|		GET_Z_W2 tmp_reg1, src
+|		SET_Z_PTR dst, tmp_reg2
+|		SET_Z_PTR dst2, tmp_reg2
+|		SET_Z_W2 dst, tmp_reg1
+|		SET_Z_W2 dst2, tmp_reg1
+|.endif
+||	}
+||}
+||if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+||    has_concrete_type(src_info & MAY_BE_ANY)) {
+||	zend_uchar type = concrete_type(src_info);
+|	SET_Z_TYPE_INFO dst, type
+|	SET_Z_TYPE_INFO dst2, type
+||} else {
+|	GET_Z_TYPE_INFO tmp_reg1d, src
+|	SET_Z_TYPE_INFO dst, tmp_reg1d
+|	SET_Z_TYPE_INFO dst2, tmp_reg1d
 ||}
 |.endmacro
 
@@ -556,6 +656,16 @@ static void* dasm_labels[zend_lb_MAX];
 |		IF_NOT_REFCOUNTED type_flags_reg, >1
 ||	}
 |	GC_ADDREF value_ptr_reg
+|1:
+||}
+|.endmacro
+
+|.macro TRY_ADDREF_2, val_info, type_flags_reg, value_ptr_reg
+||if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+||	if (val_info & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+|		IF_NOT_REFCOUNTED type_flags_reg, >1
+||	}
+|	add dword [value_ptr_reg], 2
 |1:
 ||}
 |.endmacro
@@ -2129,56 +2239,110 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info)
+static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info, int in_cold, uint32_t var2)
 {
 	if (val_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, val);
-		|	ZVAL_COPY_CONST FP + var, var_info, zv, r0
+		if (var2 == (uint32_t)-1) {
+			|	ZVAL_COPY_CONST FP + var, var_info, zv, r0
+		} else {
+			|	ZVAL_COPY_CONST_2 FP + var, FP + var2, var_info, zv, r0
+		}
 		||	if (Z_REFCOUNTED_P(zv)) {
+// TODO: += 2
 		|		ADDREF_CONST zv, r0
 		||	}
 	} else {
 		if (val_info & MAY_BE_UNDEF) {
-			|	IF_Z_TYPE FP + val.var, IS_UNDEF, >1
-			|.cold_code
-			|1:
+			if (in_cold) {
+				|	IF_NOT_Z_TYPE FP + val.var, IS_UNDEF, >2
+			} else {
+				|	IF_Z_TYPE FP + val.var, IS_UNDEF, >1
+				|.cold_code
+				|1:
+			}
 			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
-			|	mov FCARG1d, opline->op1.var
+			|	mov FCARG1d, val.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			|	SET_Z_TYPE_INFO FP + var, IS_NULL
+			|	SET_Z_TYPE_INFO FP + val.var, IS_NULL
 			|	jmp	>3
-			|.code
+			if (in_cold) {
+				|2:
+			} else {
+				|.code
+			}
 		}
 		if (val_info & MAY_BE_REF) {
 			if (val_type == IS_CV) {
 				|	lea r2, [FP + val.var]
 				|	ZVAL_DEREF r2, val_info
-				|	ZVAL_COPY_VALUE FP + var, r2, val_info, r0, eax, r1
+				if (var2 == (uint32_t)-1) {
+					|	ZVAL_COPY_VALUE FP + var, r2, val_info, r0, eax, r1
+				} else {
+					|	ZVAL_COPY_VALUE_2 FP + var, FP + var2, r2, val_info, r0, eax, r1
+				}
 			} else {
-				|	IF_Z_TYPE FP + val.var, IS_REFERENCE, >1
-				|.cold_code
-				|1:
+				if (in_cold) {
+					|	IF_NOT_Z_TYPE FP + val.var, IS_REFERENCE, >1
+				} else {
+					|	IF_Z_TYPE FP + val.var, IS_REFERENCE, >1
+					|.cold_code
+					|1:
+				}
 				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
-				|	GET_Z_PTR r0, FP + opline->op1.var
+				|	GET_Z_PTR r0, FP + val.var
 				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
-				|	ZVAL_COPY_VALUE FP + var, r0 + 8, val_info, r2, edx, r1
+				if (var2 == (uint32_t)-1) {
+					|	ZVAL_COPY_VALUE FP + var, r0 + 8, val_info, r2, edx, r1
+				} else {
+					|	ZVAL_COPY_VALUE_2 FP + var, FP + var2, r0 + 8, val_info, r2, edx, r1
+				}
 				|	GC_DELREF r0
 				|	je >2
 				|	IF_NOT_REFCOUNTED dh, >3
-				|	GC_ADDREF r1
+				if (var2 == (uint32_t)-1) {
+					|	GC_ADDREF r1
+				} else {
+					|	add dword [r1], 2
+				}
 				|	jmp >3
 				|2:
+				if (var2 != (uint32_t)-1) {
+					|	IF_NOT_REFCOUNTED dh, >2
+					|	GC_ADDREF r1
+					|2:
+				}
 				|	EFREE_SIZE r0, sizeof(zend_reference), op_array, opline
 				|	jmp >3
-				|.code
-				|	ZVAL_COPY_VALUE FP + var, FP + val.var, val_info, r0, eax, r1
+				if (in_cold) {
+					|1:
+				} else {
+					|.code
+				}
+				if (var2 == (uint32_t)-1) {
+					|	ZVAL_COPY_VALUE FP + var, FP + val.var, val_info, r0, eax, r1
+				} else {
+					|	ZVAL_COPY_VALUE_2 FP + var, FP + var2, FP + val.var, val_info, r0, eax, r1
+				}
 			}
 		} else {
-			|	ZVAL_COPY_VALUE FP + var, FP + val.var, val_info, r0, eax, r1
+			if (var2 == (uint32_t)-1) {
+				|	ZVAL_COPY_VALUE FP + var, FP + val.var, val_info, r0, eax, r1
+			} else {
+				|	ZVAL_COPY_VALUE_2 FP + var, FP + var2, FP + val.var, val_info, r0, eax, r1
+			}
 		}
-		||	if (val_type == IS_CV) {
-		|		TRY_ADDREF val_info, ah, r1
-		||	}
+		if (val_type == IS_CV) {
+			if (var2 == (uint32_t)-1) {
+				|	TRY_ADDREF val_info, ah, r1
+			} else {
+				|	TRY_ADDREF_2 val_info, ah, r1
+			}
+		} else {
+			if (var2 != (uint32_t)-1) {
+				|	TRY_ADDREF val_info, ah, r1
+			}
+		}
 		|3:
 	}
 	return 1;
@@ -2189,24 +2353,64 @@ static int zend_jit_qm_assign(dasm_State **Dst, zend_op *opline, zend_op_array *
 	uint32_t op1_info = OP1_INFO();
 
 	valid_opline_offset++;
-	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info);
+	return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->result.var, -1, opline->op1_type, opline->op1, op1_info, 0, -1);
 }
 
 static int zend_jit_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info;
 
-	if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED || !ssa->ops || !ssa->var_info) {
+	if (opline->op1_type != IS_CV || !ssa->ops || !ssa->var_info) {
 		goto fallback;
 	}
 
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 
-	if (!(op1_info & (MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_REF))) {
-		valid_opline_offset++;
-		return zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info);
+	if (op1_info & MAY_BE_REF) {
+		goto fallback;
 	}
+
+	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
+			|.cold_code
+			|1:
+		}
+		|	// TODO: support for object->set
+		|	// TODO: support for assignment to itself
+		|	GET_Z_PTR r0, FP + opline->op1.var
+		|	GC_DELREF r0
+		|	jnz >4
+		|	mov aword [r4], r0 // save
+		if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info,
+				(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0,
+				opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
+			return 0;
+		}
+		|	mov FCARG1a, aword [r4] // restore
+		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|	jmp >6
+		|4:
+		|	IF_NOT_Z_FLAGS FP + opline->op1.var, IS_TYPE_COLLECTABLE, >5
+		|	GET_Z_PTR FCARG1a, FP + opline->op1.var
+		|	IF_GC_INFO FCARG1a, >5
+		|	EXT_CALL gc_possible_root, r0
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	jmp >5
+			|.code
+		}
+		|5:
+	}
+
+	if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info, 0,
+			opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
+		return 0;
+	}
+	|6:
+
+	valid_opline_offset++;
+	return 1;
 
 fallback:
 	/* fallback to subroutine threading */
