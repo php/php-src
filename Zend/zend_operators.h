@@ -167,7 +167,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 		return NULL;
 	}
 
-	if (EXPECTED(off_s < 1024 || needle_len < 3)) {
+	if (EXPECTED(off_s < 1024 || needle_len < 9)) {	/* glibc memchr is faster when needle is too short */
 		end -= needle_len;
 
 		while (p <= end) {
@@ -563,7 +563,10 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 	} else {
 		ZVAL_LONG(result, llresult);
 	}
-#elif defined(__GNUC__) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#elif defined(__GNUC__) && defined(__i386__) \
+	&& !(4 == __GNUC__ && 8 == __GNUC_MINOR__) \
+	&& !(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
+	/* Position-independent builds fail with gcc-4.9.x */
 	__asm__(
 		"movl	(%1), %%eax\n\t"
 		"addl   (%2), %%eax\n\t"
@@ -663,7 +666,10 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 	} else {
 		ZVAL_LONG(result, llresult);
 	}
-#elif defined(__GNUC__) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#elif defined(__GNUC__) && defined(__i386__) && \
+	!(4 == __GNUC__ && 8 == __GNUC_MINOR__) && \
+	!(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
+	/* Position-independent builds fail with gcc-4.9.x */
 	__asm__(
 		"movl	(%1), %%eax\n\t"
 		"subl   (%2), %%eax\n\t"

@@ -253,6 +253,8 @@ typedef struct gdImageStruct {
 	int cy1;
 	int cx2;
 	int cy2;
+	unsigned int res_x;
+	unsigned int res_y;
 	gdInterpolationMethod interpolation_id;
 	interpolation_method interpolation;
 } gdImage;
@@ -433,6 +435,7 @@ void gdImageRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 void gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 void gdImageSetClip(gdImagePtr im, int x1, int y1, int x2, int y2);
 void gdImageGetClip(gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P);
+void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y);
 void gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
@@ -746,6 +749,8 @@ int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
 	of image is also your responsibility. */
 #define gdImagePalettePixel(im, x, y) (im)->pixels[(y)][(x)]
 #define gdImageTrueColorPixel(im, x, y) (im)->tpixels[(y)][(x)]
+#define gdImageResolutionX(im) (im)->res_x
+#define gdImageResolutionY(im) (im)->res_y
 
 /* I/O Support routines. */
 
