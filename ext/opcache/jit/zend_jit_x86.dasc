@@ -78,7 +78,20 @@ static void* dasm_labels[zend_lb_MAX];
 |	mov64 reg, ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
 ||}
 |.else
-|	mov reg, addr
+|	mov reg, ((ptrdiff_t)addr)
+|.endif
+|.endmacro
+
+|.macro PUSH_ADDR, addr, tmp_reg
+|.if X64
+||if (((ptrdiff_t)addr) <= 0x7fffffff) {
+|	push ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
+|| } else {
+|	mov64 tmp_reg, ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
+|	push tmp_reg
+||}
+|.else
+|	push ((ptrdiff_t)addr)
 |.endif
 |.endmacro
 
@@ -1564,7 +1577,7 @@ static int zend_jit_math(dasm_State **Dst, zend_op *opline, int *opnum, zend_op_
 	has_slow =
 		(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
 		(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-		((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) || 
+		((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
 		 (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))));
 
 	if (opline->result_type == IS_TMP_VAR &&
@@ -1799,6 +1812,27 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, zend_op *opline, int b, zend
 				| jle => target_label
 				break;
 		}
+	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var) {
+		target_label = ssa->cfg.blocks[b].successors[0];
+		switch (opline->opcode) {
+			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
+				| jne => target_label
+				break;
+			case ZEND_IS_NOT_EQUAL:
+				| je => target_label
+				break;
+			case ZEND_IS_SMALLER:
+				| jge => target_label
+				break;
+			case ZEND_IS_SMALLER_OR_EQUAL:
+				| jg => target_label
+				break;
+		}
+		target_label = ssa->cfg.blocks[b].successors[1];
+		| jmp => target_label
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -1879,6 +1913,31 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, zend_op *opline, int b, 
 				| jna => target_label
 				break;
 		}
+	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
+	           (opline+1)->op1_type == IS_TMP_VAR &&
+	           (opline+1)->op1.var == opline->result.var) {
+		target_label = ssa->cfg.blocks[b].successors[0];
+		switch (opline->opcode) {
+			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
+				| jp >1
+				| jne => target_label
+				|1:
+				break;
+			case ZEND_IS_NOT_EQUAL:
+				| jp >1
+				| je => target_label
+				|1:
+				break;
+			case ZEND_IS_SMALLER:
+				| jae => target_label
+				break;
+			case ZEND_IS_SMALLER_OR_EQUAL:
+				| ja => target_label
+				break;
+		}
+		target_label = ssa->cfg.blocks[b].successors[1];
+		| jmp => target_label
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -2004,6 +2063,27 @@ static int zend_jit_cmp_slow(dasm_State **Dst, zend_op *opline, int b, zend_op_a
 				| jle => target_label
 				break;
 		}
+	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
+	           (opline+1)->op1_type == IS_TMP_VAR &&
+	           (opline+1)->op1.var == opline->result.var) {
+		target_label = ssa->cfg.blocks[b].successors[0];
+		switch (opline->opcode) {
+			case ZEND_IS_EQUAL:
+			case ZEND_CASE:
+				| jne => target_label
+				break;
+			case ZEND_IS_NOT_EQUAL:
+				| je => target_label
+				break;
+			case ZEND_IS_SMALLER:
+				| jge => target_label
+				break;
+			case ZEND_IS_SMALLER_OR_EQUAL:
+				| jg => target_label
+				break;
+		}
+		target_label = ssa->cfg.blocks[b].successors[1];
+		| jmp => target_label
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -2040,21 +2120,13 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 	zend_bool same_ops = (opline->op1_type == opline->op2_type) && (opline->op1.var == opline->op2.var);
 	zend_bool has_slow;
 
-	if (!ssa->ops || !ssa->var_info) {
-		goto fallback;
-	}
-
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
-
-	if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
-		goto fallback;
-	}
 
 	has_slow =
 		(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
 		(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-		((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) || 
+		((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
 		 (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))));
 
 	if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG)) {
@@ -2194,17 +2266,41 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 			|9:
 		}
 		|	mov EX->opline, IP
-		if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
-			|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
-			|1:
-		}
 		|	lea	FCARG1a, [FP + opline->result.var]
 		|	LOAD_ZVAL_ADDR FCARG2a, opline->op1_type, opline->op1
-		|.if X64
-		|	LOAD_ZVAL_ADDR CARG3, opline->op2_type, opline->op2
-		|.else
-		|	PUSH_ZVAL_ADDR opline->op2_type, opline->op2, r0
-		|.endif
+		if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
+			|	IF_NOT_Z_TYPE FCARG2a, IS_UNDEF, >1
+			|	mov FCARG1a, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|	LOAD_ADDR FCARG2a, &EG(uninitialized_zval)
+			|1:
+		}
+		if (opline->op2_type == IS_CV && (op2_info & MAY_BE_UNDEF)) {
+			|	IF_NOT_Z_TYPE FP + opline->op2.var, IS_UNDEF, >1
+			|	mov [r4], FCARG2a // save
+			|	mov FCARG1a, opline->op2.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|	mov FCARG2a, [r4] // restore
+			|.if X64
+			|	LOAD_ADDR CARG3, &EG(uninitialized_zval)
+			|.else
+			|	PUSH_ADDR &EG(uninitialized_zval), r0
+			|.endif
+			|	jmp >2
+			|1:
+			|.if X64
+			|	LOAD_ZVAL_ADDR CARG3, opline->op2_type, opline->op2
+			|.else
+			|	PUSH_ZVAL_ADDR opline->op2_type, opline->op2, r0
+			|.endif
+			|2:
+		} else {
+			|.if X64
+			|	LOAD_ZVAL_ADDR CARG3, opline->op2_type, opline->op2
+			|.else
+			|	PUSH_ZVAL_ADDR opline->op2_type, opline->op2, r0
+			|.endif
+		}
 		|	EXT_CALL compare_function, r0
 		||	if (opline->opcode != ZEND_CASE) {
 		|		FREE_OP opline->op1_type, opline->op1, op1_info, op_array, opline->lineno
@@ -2223,7 +2319,9 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 	}
 
 	|6:
-	if (((opline+1)->opcode == ZEND_JMPZ || (opline+1)->opcode == ZEND_JMPNZ) &&
+	if (((opline+1)->opcode == ZEND_JMPZ ||
+	     (opline+1)->opcode == ZEND_JMPNZ ||
+	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
 	    (opline+1)->op1.var == opline->result.var) {
 		(*opnum)++;
@@ -2233,10 +2331,175 @@ static int zend_jit_cmp(dasm_State **Dst, zend_op *opline, int b, int *opnum, ze
 	}
 
 	return 1;
+}
 
-fallback:
-	/* fallback to subroutine threading */
-	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+static int zend_jit_jmpznz(dasm_State **Dst, zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info = OP1_INFO();
+	uint32_t true_label, false_label;
+
+	if (opline->opcode == ZEND_JMPZ) {
+		true_label = (uint32_t)-1;
+		false_label = ssa->cfg.blocks[b].successors[0];
+	} else if (opline->opcode == ZEND_JMPNZ) {
+		true_label = ssa->cfg.blocks[b].successors[0];
+		false_label = (uint32_t)-1;
+	} else if (opline->opcode == ZEND_JMPZNZ) {
+		true_label = ssa->cfg.blocks[b].successors[1];
+		false_label = ssa->cfg.blocks[b].successors[0];
+	} else {
+		ZEND_ASSERT(0);
+	}
+
+	if ((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY)) == MAY_BE_TRUE) {
+		if (true_label != (uint32_t)-1) {
+			|	jmp =>true_label;
+		}
+	} else if (!(op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE)))) {
+		if (op1_info & MAY_BE_UNDEF) {
+			if (op1_info & MAY_BE_ANY) {
+				|	IF_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+				|.cold_code
+				|1:
+			}
+			|	mov FCARG1d, opline->op1.var
+			|	SAVE_VALID_OPLINE
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			if (zend_may_throw(opline, op_array, ssa)) {
+				if (!zend_jit_check_exception(Dst)) {
+					return 0;
+				}
+			}
+			if (op1_info & MAY_BE_ANY) {
+				if (false_label != (uint32_t)-1) {
+					|	jmp =>false_label;
+				} else {
+					|	jmp >9
+				}
+				|.code
+			}
+		}
+		if (false_label != (uint32_t)-1) {
+			|	jmp =>false_label;
+		}
+	} else {
+		|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
+		|	ZVAL_DEREF FCARG1a, op1_info
+
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE)) {
+			if (true_label != (uint32_t)-1) {
+				|	IF_Z_TYPE FCARG1a, IS_TRUE, =>true_label
+			} else {
+				|	IF_Z_TYPE FCARG1a, IS_TRUE, >9
+			}
+
+			if (op1_info & MAY_BE_UNDEF) {
+				if (op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+					|	jg >2
+				}
+				|	IF_Z_TYPE FCARG1a, IS_UNDEF, >1
+				if (false_label != (uint32_t)-1) {
+					|	jmp =>false_label
+				} else if (op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+					|	jmp >9
+				}
+				|.cold_code
+				|1:
+				|	mov FCARG1d, opline->op1.var
+				|	SAVE_VALID_OPLINE
+				|	EXT_CALL zend_jit_undefined_op_helper, r0
+				if (zend_may_throw(opline, op_array, ssa)) {
+					if (!zend_jit_check_exception(Dst)) {
+						return 0;
+					}
+				}
+				if (false_label != (uint32_t)-1) {
+					|	jmp =>false_label
+				} else {
+					|	jmp >9
+				}
+				|.code
+			} else {
+				if (false_label != (uint32_t)-1) {
+					|	jl =>false_label
+				} else if (op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+					if (op1_info & MAY_BE_LONG) {
+						|	jl >9
+					} else {
+						|	jg >2
+					}
+				}
+			}
+		}
+
+		if (op1_info & MAY_BE_LONG) {
+			|2:
+			if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) {
+				|	IF_NOT_Z_TYPE FCARG1a, IS_LONG, >2
+			}
+			|	cmp	aword [FCARG1a], 0
+			if (true_label != (uint32_t)-1) {
+				|	jne =>true_label
+				if (false_label != (uint32_t)-1) {
+					|	jmp =>false_label
+				}
+			} else {
+				|	je =>false_label
+			}
+		}
+
+		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) {
+			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+				|.cold_code
+				|2:
+			}
+			|	SAVE_VALID_OPLINE
+			|	EXT_CALL zend_is_true, r0
+
+			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+			    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	test byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
+				|	je >1
+				|	mov FCARG1a, aword [FP + opline->op1.var]
+				|	dec dword [FCARG1a]
+				|	jnz >1
+				|	mov aword [r4], r0 // save
+				|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+				|	mov r0, aword [r4] // restore
+				|1:
+			}
+			if (zend_may_throw(opline, op_array, ssa)) {
+				if (!zend_jit_check_exception(Dst)) {
+					return 0;
+				}
+			}
+
+			|	test r0, r0
+			if (true_label != (uint32_t)-1) {
+				|	jne =>true_label
+				if (false_label != (uint32_t)-1) {
+					|	jmp =>false_label
+				} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+					|	jmp >9
+				}
+			} else {
+				|	je =>false_label
+				if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+					|	jmp >9
+				}
+			}
+
+			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+				|.code
+			}
+		}
+
+		|9:
+	}
+
+	valid_opline_offset++;
+
+	return 1;
 }
 
 static int zend_jit_simple_assign(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, uint32_t var, uint32_t var_info, zend_uchar val_type, znode_op val, uint32_t val_info, uint32_t var2, int in_cold)
@@ -3489,7 +3752,7 @@ static int zend_jit_bind_global(dasm_State **Dst, zend_op *opline, zend_op_array
 		|	GC_DELREF FCARG1a
 		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 		|	jnz >3
-		} 
+		}
 		|	mov aword [r4], r0 // save
 		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
 		|	mov r0, aword [r4] // restore

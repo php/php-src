@@ -850,6 +850,32 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_JMPZ:
+				case ZEND_JMPNZ:
+				case ZEND_JMPZNZ:
+					if ((opline-1)->opcode == ZEND_IS_EQUAL ||
+					    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
+					    (opline-1)->opcode == ZEND_IS_SMALLER ||
+					    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
+					    (opline-1)->opcode == ZEND_CASE) {
+						/* skip */
+					} else if ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
+					    (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
+					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
+					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
+					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
+					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
+					    (opline-1)->opcode == ZEND_INSTANCEOF ||
+					    (opline-1)->opcode == ZEND_TYPE_CHECK ||
+					    (opline-1)->opcode == ZEND_DEFINED) {
+					    /* smart branch */
+						if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
+							goto jit_failure;
+						}
+					} else if (!zend_jit_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
+						goto jit_failure;
+					}
+					break;
 				case ZEND_FETCH_DIM_R:
 				case ZEND_FETCH_DIM_IS:
 					if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa)) {
@@ -920,6 +946,14 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
+				case ZEND_JMPZNZ:
+					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
+					    !zend_jit_cond_jmp(&dasm_state, OP_JMP_ADDR(opline, opline->op2), ssa->cfg.blocks[b].successors[1]) ||
+					    !zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
+						goto jit_failure;
+					}
+					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 					if (i != 0) {
@@ -963,6 +997,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						}
 					}
 					/* break missing intentionally */
+#endif
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
@@ -977,13 +1012,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					break;
 				case ZEND_NEW:
 					if (!zend_jit_new(&dasm_state, opline, &i, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_JMPZNZ:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
-					    !zend_jit_cond_jmp(&dasm_state, OP_JMP_ADDR(opline, opline->op2), ssa->cfg.blocks[b].successors[1]) ||
-					    !zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
