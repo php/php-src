@@ -440,7 +440,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endif
 ||	}
 ||}
-||if (((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) ||  (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY))) {
+||if ((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
 |	SET_Z_TYPE_INFO dst, Z_TYPE_INFO_P(zv)
 ||}
 |.endmacro
@@ -495,7 +495,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endif
 ||	}
 ||}
-||if (((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) ||  (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY))) {
+||if ((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) {
 |	SET_Z_TYPE_INFO dst, Z_TYPE_INFO_P(zv)
 ||}
 |	SET_Z_TYPE_INFO dst2, Z_TYPE_INFO_P(zv)
