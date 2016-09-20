@@ -1805,6 +1805,12 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
+static int zend_startup_module_int(zend_module_entry *module TSRMLS_DC) /* {{{ */
+{
+	return (zend_startup_module_ex(module TSRMLS_CC) == SUCCESS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
+}
+/* }}} */
+
 static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare TSRMLS_DC) /* {{{ */
 {
 	Bucket **b1 = base;
@@ -1921,7 +1927,7 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 ZEND_API int zend_startup_modules(TSRMLS_D) /* {{{ */
 {
 	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0 TSRMLS_CC);
-	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module_ex TSRMLS_CC);
+	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module_int TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
