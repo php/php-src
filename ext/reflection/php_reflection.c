@@ -3031,7 +3031,7 @@ ZEND_METHOD(reflection_type, __toString)
 	
 	str = reflection_type_name(param);
 	
-	if (param->arg_info->allow_null) {
+	if (param->arg_info->allow_null & 2) {
 		size_t orig_len = ZSTR_LEN(str);
 		str = zend_string_extend(str, orig_len + 1, 0);
 		memmove(ZSTR_VAL(str) + 1, ZSTR_VAL(str), orig_len + 1);

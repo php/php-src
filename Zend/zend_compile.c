@@ -5102,7 +5102,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_infos->class_name = NULL;
 
 		if (return_type_ast->attr & ZEND_TYPE_NULLABLE) {
-			arg_infos->allow_null = 1;
+			arg_infos->allow_null = 2;
 			return_type_ast->attr &= ~ZEND_TYPE_NULLABLE;
 		}
 
@@ -5194,10 +5194,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 				&& (Z_TYPE(default_node.u.constant) == IS_NULL
 					|| (Z_TYPE(default_node.u.constant) == IS_CONSTANT
 						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL") == 0));
-			zend_bool is_explicitly_nullable = (type_ast->attr & ZEND_TYPE_NULLABLE) == ZEND_TYPE_NULLABLE;
+			zend_bool is_explicitly_nullable = ((type_ast->attr & ZEND_TYPE_NULLABLE) == ZEND_TYPE_NULLABLE) << 1;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->allow_null = has_null_default || is_explicitly_nullable;
+			arg_info->allow_null = has_null_default | is_explicitly_nullable;
 
 			type_ast->attr &= ~ZEND_TYPE_NULLABLE;
 			zend_compile_typename(type_ast, arg_info);
