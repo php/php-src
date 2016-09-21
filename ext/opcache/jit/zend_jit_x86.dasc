@@ -1525,20 +1525,19 @@ static int zend_jit_shift(dasm_State **Dst, zend_op *opline, zend_op_array *op_a
 	if (has_slow) {
 		|.cold_code
 		|9:
-		|	lea FCARG1a, aword [FP + opline->result.var]
+		|   lea FCARG1a, aword [FP + opline->result.var]
+		|   lea FCARG2a, aword [FP + opline->op1.var]
 		|.if X64
-		|	mov FCARG2a, r0
-		|	mov CARG3, Z_LVAL_P(op2)
+		|   LOAD_ADDR CARG3, op2
 		|.else
-		|	push r0
-		|	push dword Z_LVAL_P(op2)
+		|   push dword op2
 		|.endif
 		if (opline->opcode == ZEND_SR) {
-		|	EXT_CALL shift_right_function, r0
+		|   EXT_CALL shift_right_function, r0
 		} else {
-		|	EXT_CALL shift_left_function, r0
+		|   EXT_CALL shift_left_function, r0
 		}
-		|	jmp <2
+		|   jmp <2
 		|.code
 	}
 
