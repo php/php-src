@@ -725,7 +725,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 			if (ssa->cfg.split_at_recv && opline->opcode == ZEND_RECV_INIT) {
-				if (opline == op_array->opcodes || (opline-1)->opcode != ZEND_RECV_INIT) {
+				if (opline > op_array->opcodes &&
+				    (opline-1)->opcode == ZEND_RECV_INIT) {
+					/* repeatable opcode */
+					continue;
+				} else {
 					for (i = 0; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
 					}
 					zend_jit_jmp(&dasm_state, b + i);
@@ -886,7 +890,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 #endif
 				case ZEND_RECV_INIT:
 					if (ssa->cfg.split_at_recv) {
-						if (!zend_jit_recv_init(&dasm_state, opline, op_array, (opline + 1)->opcode != ZEND_RECV_INIT)) {
+						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						break;
