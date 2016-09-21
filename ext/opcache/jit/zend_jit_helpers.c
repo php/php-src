@@ -401,6 +401,84 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	return value;
 }
 
+static int is_null_constant(zend_class_entry *scope, zval *default_value)
+{
+	if (Z_CONSTANT_P(default_value)) {
+		zval constant;
+
+		ZVAL_COPY(&constant, default_value);
+		if (UNEXPECTED(zval_update_constant_ex(&constant, scope) != SUCCESS)) {
+			return 0;
+		}
+		if (Z_TYPE(constant) == IS_NULL) {
+			return 1;
+		}
+		zval_ptr_dtor(&constant);
+	}
+	return 0;
+}
+
+static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg)
+{
+    switch (type_hint) {
+        case _IS_BOOL: {
+            zend_bool dest;
+
+            if (!zend_parse_arg_bool_weak(arg, &dest)) {
+                return 0;
+            }
+            zval_ptr_dtor(arg);
+            ZVAL_BOOL(arg, dest);
+            return 1;
+        }
+        case IS_LONG: {
+            zend_long dest;
+
+            if (!zend_parse_arg_long_weak(arg, &dest)) {
+                return 0;
+            }
+            zval_ptr_dtor(arg);
+            ZVAL_LONG(arg, dest);
+            return 1;
+        }
+        case IS_DOUBLE: {
+            double dest;
+
+            if (!zend_parse_arg_double_weak(arg, &dest)) {
+                return 0;
+            }
+            zval_ptr_dtor(arg);
+            ZVAL_DOUBLE(arg, dest);
+            return 1;
+        }
+        case IS_STRING: {
+            zend_string *dest;
+
+            /* on success "arg" is converted to IS_STRING */
+            if (!zend_parse_arg_str_weak(arg, &dest)) {
+                return 0;
+			}
+            return 1;
+        }
+        default:
+            return 0;
+    }
+}
+
+static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict)
+{
+	if (UNEXPECTED(strict)) {
+		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
+		if (type_hint != IS_DOUBLE || Z_TYPE_P(arg) != IS_LONG) {
+			return 0;
+		}
+	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		/* NULL may be accepted only by nullable hints (this is already checked) */
+		return 0;
+	}
+	return zend_verify_weak_scalar_type_hint(type_hint, arg);
+}
+
 static ZEND_COLD void zend_verify_type_error_common(
 		const zend_function *zf, const zend_arg_info *arg_info,
 		const zend_class_entry *ce, zval *value,
