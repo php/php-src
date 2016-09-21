@@ -401,6 +401,66 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	return value;
 }
 
+static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+{
+	zend_class_entry *ce;
+	if (EXPECTED(*cache_slot)) {
+		ce = (zend_class_entry *)*cache_slot;
+	} else {
+		ce = zend_fetch_class(arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+		if (UNEXPECTED(!ce)) {
+			zend_verify_arg_error(op_array, arg_info, arg_num, NULL, arg);
+			return;
+		}
+		*cache_slot = (void *)ce;
+	}
+	if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), ce))) {
+		zend_verify_arg_error(op_array, arg_info, arg_num, ce, arg);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot, zval *default_value)
+{
+	zend_class_entry *ce = NULL;
+
+	if (Z_TYPE_P(arg) == IS_NULL &&
+		(arg_info->allow_null || (default_value && is_null_constant(op_array->scope, default_value)))) {
+		/* Null passed to nullable type */
+		return;
+	}
+
+	if (UNEXPECTED(arg_info->class_name)) {
+		/* This is always an error - we fetch the class name for the error message here */
+		if (EXPECTED(*cache_slot)) {
+			ce = (zend_class_entry *) *cache_slot;
+		} else {
+			ce = zend_fetch_class(arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+			if (ce) {
+				*cache_slot = (void *)ce;
+			}
+		}
+		goto err;
+	} else if (arg_info->type_hint == IS_CALLABLE) {
+		if (zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) == 0) {
+			goto err;
+		}
+	} else if (arg_info->type_hint == IS_ITERABLE) {
+		if (zend_is_iterable(arg) == 0) {
+			goto err;
+		}
+	} else if (arg_info->type_hint == _IS_BOOL &&
+			EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
+		return;
+	} else {
+		if (zend_verify_scalar_type_hint(arg_info->type_hint, arg, ZEND_RET_USES_STRICT_TYPES()) == 0) {
+			goto err;
+		}
+	}
+	return;
+err:
+	zend_verify_arg_error(op_array, arg_info, arg_num, ce, arg);
+}
+
 /*
  * Local variables:
  * tab-width: 4
