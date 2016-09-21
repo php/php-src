@@ -816,9 +816,9 @@ static void* dasm_labels[zend_lb_MAX];
 |		xor CARG4, CARG4
 |		xor CARG5, CARG5
 |.else
+|		push 0
+|		push 0
 |		push opline->lineno
-|		push 0
-|		push 0
 |.endif
 ||	}
 |	EXT_CALL _efree, r0
