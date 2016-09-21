@@ -32,7 +32,7 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
-//#define CONTEXT_THREDED_JIT
+//#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
 //#define ZEND_RUNTIME_JIT
 
@@ -143,8 +143,8 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 		int b;
 
 		for (b = 0; b < cfg->blocks_count; b++) {
-#ifdef CONTEXT_THREDED_JIT
-			if (cfg->blocks[b].flags & ZEND_BB_START) {
+#ifdef CONTEXT_THREADED_JIT
+			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 #else
 			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 #endif
@@ -710,19 +710,16 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 		if ((ssa->cfg.blocks[b].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
-#ifdef CONTEXT_THREDED_JIT
-		if (ssa->cfg.blocks[b].flags & ZEND_BB_START) {
-			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
-			zend_jit_prologue(&dasm_state);
-		}
-#else
+#ifndef CONTEXT_THREADED_JIT
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
 			if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 				zend_jit_jmp(&dasm_state, b);
 			}
 			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
-		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
+		} else
+#endif
+		if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 			if (ssa->cfg.split_at_recv && opline->opcode == ZEND_RECV_INIT) {
 				if (opline > op_array->opcodes &&
@@ -750,7 +747,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				zend_jit_prologue(&dasm_state);
 			}
 		}
-#endif
+
 		zend_jit_label(&dasm_state, b);
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 			if (!zend_jit_set_opline(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {

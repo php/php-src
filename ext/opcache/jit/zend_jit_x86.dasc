@@ -1129,7 +1129,7 @@ static int zend_jit_smart_branch(dasm_State **Dst, zend_op *opline, unsigned int
 	return 1;
 }
 
-#ifdef CONTEXT_THREDED_JIT
+#ifdef CONTEXT_THREADED_JIT
 static int zend_jit_context_threaded_call(dasm_State **Dst, zend_op *opline)
 {
 	if (!zend_jit_handler(Dst, opline, 1)) return 0;
@@ -1151,7 +1151,7 @@ static int zend_jit_context_threaded_call(dasm_State **Dst, zend_op *opline)
 
 static int zend_jit_call(dasm_State **Dst, zend_op *opline)
 {
-#ifdef CONTEXT_THREDED_JIT
+#ifdef CONTEXT_THREADED_JIT
 	return zend_jit_context_threaded_call(Dst, opline);
 #else
 	return zend_jit_tail_handler(Dst, opline);
@@ -2880,10 +2880,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|	mov EX:r1->opline, IP
 	||	if (func && op_array == &func->op_array) {
 	||		/* recursive call */
+#ifdef CONTEXT_THREADED_JIT
+	|		call =>(call_info->num_args+ssa->cfg.blocks_count)
+#else
 	|		jmp =>call_info->num_args
+#endif
 	||	} else {
+#ifdef CONTEXT_THREADED_JIT
+	|		call aword [IP]
+#else
 	|		add r4, SPAD // stack alignment
 	|		jmp aword [IP]
+#endif
 	||	}
 
 	return 1;
@@ -3172,7 +3180,11 @@ static int zend_jit_leave_func(dasm_State **Dst, zend_op *opline, zend_op_array 
 	|	add IP, sizeof(zend_op)
 	|	mov EX->opline, IP
 	|	add r4, SPAD // stack alignment
+#ifdef CONTEXT_THREADED_JIT
+	|	ret
+#else
 	|	jmp aword [IP]
+#endif
 
 	return 1;
 }
