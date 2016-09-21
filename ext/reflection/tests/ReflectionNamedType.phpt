@@ -32,10 +32,18 @@ var_dump((string) $return);
 ?>
 --EXPECTF--
 string(11) "Traversable"
-string(12) "?Traversable"
+
+Deprecated: Function ReflectionType::__toString() is deprecated in %s on line %d
+string(11) "Traversable"
 string(6) "string"
-string(7) "?string"
+
+Deprecated: Function ReflectionType::__toString() is deprecated in %s on line %d
+string(6) "string"
 string(4) "Test"
-string(5) "?Test"
+
+Deprecated: Function ReflectionType::__toString() is deprecated in %s on line %d
 string(4) "Test"
-string(5) "?Test"
+string(4) "Test"
+
+Deprecated: Function ReflectionType::__toString() is deprecated in %s on line %d
+string(4) "Test"
