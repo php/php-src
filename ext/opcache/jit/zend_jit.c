@@ -862,15 +862,16 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
 					    (opline-1)->opcode == ZEND_CASE) {
 						/* skip */
-					} else if ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
-					    (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
-					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
-					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
-					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
-					    (opline-1)->opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
-					    (opline-1)->opcode == ZEND_INSTANCEOF ||
-					    (opline-1)->opcode == ZEND_TYPE_CHECK ||
-					    (opline-1)->opcode == ZEND_DEFINED) {
+					} else if ((opline->opcode != ZEND_JMPZNZ) &&
+					    ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
+					     (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
+					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
+					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
+					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
+					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
+					     (opline-1)->opcode == ZEND_INSTANCEOF ||
+					     (opline-1)->opcode == ZEND_TYPE_CHECK ||
+					     (opline-1)->opcode == ZEND_DEFINED)) {
 					    /* smart branch */
 						if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 							goto jit_failure;
