@@ -401,105 +401,6 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	return value;
 }
 
-static ZEND_COLD void zend_verify_type_error_common(
-		const zend_function *zf, const zend_arg_info *arg_info,
-		const zend_class_entry *ce, zval *value,
-		const char **fname, const char **fsep, const char **fclass,
-		const char **need_msg, const char **need_kind, const char **need_or_null,
-		const char **given_msg, const char **given_kind)
-{
-	zend_bool is_interface = 0;
-	*fname = ZSTR_VAL(zf->common.function_name);
-
-	if (zf->common.scope) {
-		*fsep =  "::";
-		*fclass = ZSTR_VAL(zf->common.scope->name);
-	} else {
-		*fsep =  "";
-		*fclass = "";
-	}
-
-	switch (arg_info->type_hint) {
-		case IS_OBJECT:
-			if (ce) {
-				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-					*need_msg = "implement interface ";
-					is_interface = 1;
-				} else {
-					*need_msg = "be an instance of ";
-				}
-				*need_kind = ZSTR_VAL(ce->name);
-			} else {
-				/* We don't know whether it's a class or interface, assume it's a class */
-				*need_msg = "be an instance of ";
-				*need_kind = zf->common.type == ZEND_INTERNAL_FUNCTION
-					? ((zend_internal_arg_info *) arg_info)->class_name
-					: ZSTR_VAL(arg_info->class_name);
-			}
-			break;
-		case IS_CALLABLE:
-			*need_msg = "be callable";
-			*need_kind = "";
-			break;
-		case IS_ITERABLE:
-			*need_msg = "be iterable";
-			*need_kind = "";
-			break;
-		default:
-			*need_msg = "be of the type ";
-			*need_kind = zend_get_type_by_const(arg_info->type_hint);
-			break;
-	}
-
-	if (arg_info->allow_null) {
-		*need_or_null = is_interface ? " or be null" : " or null";
-	} else {
-		*need_or_null = "";
-	}
-
-	if (value) {
-		if (arg_info->type_hint == IS_OBJECT && Z_TYPE_P(value) == IS_OBJECT) {
-			*given_msg = "instance of ";
-			*given_kind = ZSTR_VAL(Z_OBJCE_P(value)->name);
-		} else {
-			*given_msg = zend_zval_type_name(value);
-			*given_kind = "";
-		}
-	} else {
-		*given_msg = "none";
-		*given_kind = "";
-	}
-}
-
-static ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info,
-		int arg_num, const zend_class_entry *ce, zval *value)
-{
-	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
-	const char *fname, *fsep, *fclass;
-	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
-
-	if (value) {
-		zend_verify_type_error_common(
-				zf, arg_info, ce, value,
-				&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
-
-		if (zf->common.type == ZEND_USER_FUNCTION) {
-			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given, called in %s on line %d",
-						arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind,
-						ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
-			} else {
-				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
-			}
-		} else {
-			zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
-		}
-	} else {
-		zend_missing_arg_error(ptr);
-	}
-}
-
 static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
 {
 	zend_class_entry *ce;
@@ -508,13 +409,13 @@ static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, zend_op_array *o
 	} else {
 		ce = zend_fetch_class(arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 		if (UNEXPECTED(!ce)) {
-			zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, NULL, arg);
+			zend_verify_arg_error(op_array, arg_info, arg_num, NULL, arg);
 			return;
 		}
 		*cache_slot = (void *)ce;
 	}
 	if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), ce))) {
-		zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, ce, arg);
+		zend_verify_arg_error(op_array, arg_info, arg_num, ce, arg);
 	}
 }
 
@@ -557,7 +458,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_
 	}
 	return;
 err:
-	zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, ce, arg);
+	zend_verify_arg_error(op_array, arg_info, arg_num, ce, arg);
 }
 
 /*
