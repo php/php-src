@@ -119,7 +119,7 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 	return 1;
 }
 
-static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
+static int pdo_dblib_stmt_next_rowset_no_cancel(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -142,6 +142,27 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
 	return 1;
 }
 
+static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_db_handle *H = S->H;
+	RETCODE ret = SUCCESS;
+
+	/* Ideally use dbcanquery here, but there is a bug in FreeTDS's implementation of dbcanquery
+	 * It has been resolved but is currently only available in nightly builds
+	 */
+	while (NO_MORE_ROWS != ret) {
+		ret = dbnextrow(H->link);
+
+		if (FAIL == ret) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbnextrow() returned FAIL");
+			return 0;
+		}
+	}
+
+	return pdo_dblib_stmt_next_rowset_no_cancel(stmt);
+}
+
 static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -160,7 +181,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 		return 0;
 	}
 
-	ret = pdo_dblib_stmt_next_rowset(stmt);
+	ret = pdo_dblib_stmt_next_rowset_no_cancel(stmt);
 
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
