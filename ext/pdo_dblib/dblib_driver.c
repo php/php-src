@@ -83,6 +83,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (H) {
+		pdo_dblib_err_dtor(&H->err);
 		if (H->link) {
 			dbclose(H->link);
 			H->link = NULL;
@@ -93,7 +94,6 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
-		pdo_dblib_err_dtor(&H->err);
 	}
 	return 0;
 }
