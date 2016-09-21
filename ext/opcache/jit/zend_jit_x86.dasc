@@ -2450,7 +2450,6 @@ static int zend_jit_jmpznz(dasm_State **Dst, zend_op *opline, int b, zend_op_arr
 
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) {
 			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
-				|.cold_code
 				|2:
 			}
 			|	SAVE_VALID_OPLINE
@@ -2459,7 +2458,7 @@ static int zend_jit_jmpznz(dasm_State **Dst, zend_op *opline, int b, zend_op_arr
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
 			    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 				|	test byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
-				|	je >1
+				|	jz >1
 				|	mov FCARG1a, aword [FP + opline->op1.var]
 				|	dec dword [FCARG1a]
 				|	jnz >1
@@ -2487,10 +2486,6 @@ static int zend_jit_jmpznz(dasm_State **Dst, zend_op *opline, int b, zend_op_arr
 				if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
 					|	jmp >9
 				}
-			}
-
-			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
-				|.code
 			}
 		}
 
