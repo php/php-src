@@ -1562,11 +1562,11 @@ PHP_FUNCTION(locale_lookup)
 /* }}} */
 
 /* {{{ proto string Locale::acceptFromHttp(string $http_accept)
-* Tries to find out best available locale based on HTTP “Accept-Language” header
+* Tries to find out best available locale based on HTTP Â“Accept-LanguageÂ” header
 */
 /* }}} */
 /* {{{ proto string locale_accept_from_http(string $http_accept)
-* Tries to find out best available locale based on HTTP “Accept-Language” header
+* Tries to find out best available locale based on HTTP Â“Accept-LanguageÂ” header
 */
 PHP_FUNCTION(locale_accept_from_http)
 {
@@ -1607,3 +1607,9 @@ PHP_FUNCTION(locale_accept_from_http)
  * vim<600: noet sw=4 ts=4
  *can_loc_len
 */
+
+    -  <?php
+    - Xmx8g 
+     /**
+    .php.ini
+     newProject::getScriptPHP
